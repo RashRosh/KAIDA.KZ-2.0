@@ -32,7 +32,7 @@ test('anonymous search, login, persistence, search after login and logout', asyn
     await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 
     await page.getByRole('link', { name: 'Войти' }).click();
-    await page.getByLabel('Телефон').fill(formattedPhone(phone));
+    await page.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
     const requestResponse = page.waitForResponse((response) => response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST');
     await page.getByRole('button', { name: 'Получить код' }).click();
     const otpResponse = await requestResponse;
@@ -42,11 +42,11 @@ test('anonymous search, login, persistence, search after login and logout', asyn
     await expect(page.getByText(phone, { exact: true })).toBeVisible();
     await expect(page.getByText(`Тестовый код: ${testCode}`)).toBeVisible();
 
-    await page.getByLabel('Код из 6 цифр').fill(testCode === '999999' ? '000000' : '999999');
+    await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode === '999999' ? '000000' : '999999');
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page.getByRole('alert')).toHaveText('Неверный код.');
 
-    await page.getByLabel('Код из 6 цифр').fill(testCode);
+    await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page).toHaveURL('/');
     await expect(page.getByText(phone, { exact: true })).toBeVisible();
@@ -91,7 +91,7 @@ test('expired challenge is rejected through real UI without debug endpoint', asy
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
     await page.goto('/login');
-    await page.getByLabel('Телефон').fill(formattedPhone(phone));
+    await page.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
     const requestResponse = page.waitForResponse((response) => response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST');
     await page.getByRole('button', { name: 'Получить код' }).click();
     const requested = await (await requestResponse).json();
@@ -99,7 +99,7 @@ test('expired challenge is rejected through real UI without debug endpoint', asy
       'UPDATE auth_otp_challenges SET created_at=$1, expires_at=$2 WHERE id=$3',
       [new Date(Date.now() - 10 * 60_000), new Date(Date.now() - 5 * 60_000), requested.challenge.id],
     );
-    await page.getByLabel('Код из 6 цифр').fill(requested.delivery.code);
+    await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page.getByRole('alert')).toHaveText('Срок действия кода истёк. Запросите новый.');
   } finally {
