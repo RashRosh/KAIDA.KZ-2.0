@@ -6,23 +6,25 @@
 
 ## Status
 
-Implementation automated verification has passed on implementation head `3ab0174d7194ef744222490dd35f1e88e9775966`.
+Implementation automated verification has passed.
 
-A final docs-only commit is intentionally followed by another branch CI run so the branch's final head is itself verified.
+Manual acceptance has also passed in GitHub Codespaces on the final verified S3 implementation state.
 
-Until that final-head CI succeeds:
+A final docs-only commit records this manual acceptance. That new branch head must itself pass GitHub Actions before the slice may be considered ready for merge.
 
-**NOT READY: automated verification pending**
+Until that post-manual-acceptance branch CI succeeds:
 
-After final-head CI succeeds:
+**NOT READY: automated verification pending on final docs-only head**
 
-**NOT READY: manual acceptance pending**
+After that CI succeeds, and only then:
 
-Manual acceptance is not yet recorded in this document.
+**READY FOR MERGE — awaiting explicit authorization**
+
+No merge or tag is authorized by this document.
 
 ## GitHub Actions implementation-head evidence
 
-Run:
+Implementation/test head run:
 
 `34649399309`
 
@@ -35,6 +37,20 @@ Conclusion:
 `SUCCESS`
 
 The workflow's full `pnpm verify` step completed successfully.
+
+Final pre-manual-acceptance branch-head run:
+
+`34649727855`
+
+Head SHA:
+
+`aa0ba83f83394b9c57bb414576bee4dc42221dc1`
+
+Conclusion:
+
+`SUCCESS`
+
+That run also completed the full `pnpm verify` step successfully.
 
 ## Environment verified in CI
 
@@ -172,37 +188,61 @@ Explicitly untouched:
 - CI workflow;
 - S2 documentation.
 
-## Manual acceptance — PENDING
+## Manual acceptance — PASS
 
-The approved human acceptance path remains:
+Manual acceptance was performed by the product owner in GitHub Codespaces on branch `slice/s3-seller-location`, using the final verified S3 implementation state and a clean disposable PostgreSQL 18 database.
 
-1. open KAIDA.KZ anonymously;
-2. search `баранина` and see existing result;
-3. open `/seller` and see login-required state;
-4. login with existing S2 phone flow;
-5. open `/seller`;
-6. enter Seller display name;
-7. enter Location name;
-8. select Location type;
-9. enter address;
-10. submit;
-11. confirm read-only Seller + Location;
-12. reload and confirm persistence;
-13. search `баранина` again;
-14. logout;
-15. confirm anonymous Search still works.
+Environment/procedure note:
 
-Manual acceptance must be recorded separately before merge.
+- the first attempted dev command used an extra `--`, causing Next.js to treat `--hostname` as a project directory;
+- this was classified as an environment/procedure issue, not a product defect;
+- application startup then succeeded with the correct existing Next.js command;
+- no product code, migration, test or configuration change was made because of this issue.
+
+Human acceptance results:
+
+1. KAIDA.KZ opened anonymously — PASS.
+2. Search `баранина` returned the existing S0 result — PASS.
+3. `/seller` anonymously showed login-required state — PASS.
+4. Transition to the existing `/login` worked — PASS.
+5. Existing S2 test OTP login flow worked — PASS.
+6. Returning to `/seller` as authenticated User showed the Seller + first Location setup form — PASS.
+7. Seller `Тестовый продавец S3` accepted — PASS.
+8. Location `Тестовая точка S3` accepted — PASS.
+9. Location type `pavilion` accepted — PASS.
+10. Address `Алматы, тестовый адрес S3` accepted — PASS.
+11. Submit replaced the setup form with read-only Seller + Location data — PASS.
+12. Page reload preserved Seller + Location — PASS.
+13. Reopening `/seller` did not offer initial setup again — PASS.
+14. Search `баранина` after Seller setup still worked — PASS.
+15. Existing Search result remained unchanged — PASS.
+16. Logout worked — PASS.
+17. Anonymous Search after logout still worked — PASS.
+18. Mobile viewport approximately `390 × 844` had no horizontal scroll and form/summary remained readable — PASS.
+19. Desktop viewport approximately `1440 × 900` rendered the primary `/seller` layout correctly — PASS.
+20. Keyboard navigation through the form, including labels, Tab order, visible focus, select interaction and keyboard submit, worked — PASS.
+
+No manual checks were required for concurrency, spoofing, cross-user isolation, DB constraints, transaction rollback or migration rollback because those are covered by automated integration verification.
+
+No real product defect was found during manual acceptance.
 
 ## Merge / tag gate
 
 Not performed.
 
-After manual acceptance only:
+After the final docs-only branch head receives an actual green GitHub Actions run, the permitted status is:
 
-- compare branch with actual `main` and whitelist;
-- merge to `main`;
-- wait for actual green merged-main CI;
+**READY FOR MERGE — awaiting explicit authorization**
+
+Only after separate explicit authorization may the following happen:
+
+- compare branch with actual `main` and re-check whitelist;
+- merge S3 to `main`;
+- wait for actual green CI on merged `main`;
 - only then create annotated `v0.0.4-s3` pointing exactly to the verified merged commit.
 
-No `v0.0.4-s3` tag exists as part of this verification stage.
+At this stage:
+
+- do not merge;
+- do not create `v0.0.4-s3`;
+- do not start S4.
