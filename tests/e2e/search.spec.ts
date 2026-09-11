@@ -50,10 +50,11 @@ test('empty query is validated without sending an API request', async ({ page })
   let requests = 0;
   page.on('request', (request) => { if (request.url().includes('/api/search')) requests++; });
   await page.goto('/');
+  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill('   ');
   await input.press('Enter');
-  await expect(page.getByRole('alert')).toHaveText('Введите название товара.');
+  await expect(searchRegion.getByRole('alert')).toHaveText('Введите название товара.');
   await expect(input).toHaveAttribute('aria-invalid', 'true');
   await expect(input).toBeFocused();
   expect(requests).toBe(0);
@@ -81,6 +82,7 @@ test('loading blocks a second submit while the real request is pending', async (
 
 test('network failure clears old results and permits a real retry', async ({ page }) => {
   await page.goto('/');
+  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill('баранина');
   await input.press('Enter');
@@ -88,7 +90,7 @@ test('network failure clears old results and permits a real retry', async ({ pag
   await page.route('**/api/search?*', (route) => route.abort('failed'));
   await input.fill('говядина');
   await input.press('Enter');
-  await expect(page.getByRole('alert')).toHaveText('Не удалось выполнить поиск. Попробуйте ещё раз.');
+  await expect(searchRegion.getByRole('alert')).toHaveText('Не удалось выполнить поиск. Попробуйте ещё раз.');
   await expect(page.getByRole('article')).toHaveCount(0);
   await expect(input).toHaveValue('говядина');
   await page.unroute('**/api/search?*');
