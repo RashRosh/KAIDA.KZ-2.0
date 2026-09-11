@@ -2,7 +2,7 @@
 
 Рабочая ветка: `slice/s1-offer-lifecycle`.
 
-Статус реализации: код и автоматическая проверка реализованы. **NOT READY: manual acceptance pending**.
+Статус реализации: **READY — automated verification and manual acceptance PASS**.
 
 ## Реализованная модель
 
@@ -152,10 +152,30 @@ S1 E2E создаёт scoped unique fixture отдельно для mobile/deskt
 
 Dependencies не добавлялись.
 
-## Первый фактический CI feedback
+## Фактический CI
 
 Run `34613957998` на commit `d5c2848...` поднял PostgreSQL 18.6 и дошёл до `pnpm verify`, но остановился на TypeScript error в env input type до migrations/tests.
 
 После минимального fix commit `6433304f...` run `34614267031` прошёл полный `pnpm verify` успешно на PostgreSQL 18.6.
 
+Финальный implementation head до manual acceptance: `30e7a05ed8528a26d68190062731cd10cf9c7a0b`. GitHub Actions run `34614711926` также прошёл полный `pnpm verify` успешно на PostgreSQL 18.6.
+
+## Manual acceptance
+
+Ручная приёмка выполнена 2026-09-11 в GitHub Codespaces через существующий Search UI и реальный PostgreSQL 18.
+
+Подтверждено вручную:
+
+- S0 baseline searches работают;
+- fresh active lamb виден;
+- active lamb с `last_confirmed_at = NOW() - 169 hours` скрывается;
+- после fresh restore lamb снова появляется;
+- fresh `inactive` lamb скрывается;
+- seed восстанавливает нормальное состояние;
+- mobile/desktop layout и keyboard focus regression проходят.
+
+Результат: **PASS**.
+
 Финальная verification документация хранится в `VERIFICATION.md`.
+
+Approved checkpoint после завершения S1: `v0.0.2-s1`.
