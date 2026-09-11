@@ -2,7 +2,7 @@
 
 Slice S0: анонимный покупатель вводит точное название товара и получает тестовое предложение из PostgreSQL. Код написан с нуля. Следующие slices не реализованы.
 
-Статус: **NOT READY: manual acceptance pending**. Фактические проверки фиксируются в [VERIFICATION.md](docs/slices/S0-search/VERIFICATION.md).
+Статус: **READY — S0 verified and manually accepted**. Фактические проверки зафиксированы в [VERIFICATION.md](docs/slices/S0-search/VERIFICATION.md).
 
 ## Что потребуется
 
@@ -18,7 +18,6 @@ Next.js 16, TypeScript strict, Drizzle, Zod, Vitest и Playwright устанав
 ```bash
 git clone https://github.com/RashRosh/KAIDA.KZ-2.0.git
 cd KAIDA.KZ-2.0
-git switch slice/s0-search
 corepack enable
 corepack prepare pnpm@11.19.0 --activate
 pnpm install --frozen-lockfile
@@ -95,20 +94,23 @@ pnpm test:e2e
 
 Integration tests требуют подготовленную `kaida_test`, E2E также требуют build и Chromium. Mock-базы нет. Один E2E намеренно обрывает браузерный запрос для проверки ошибки; успешные поиски идут в реальный PostgreSQL.
 
-GitHub Actions запускает PostgreSQL 18 с двумя БД, затем тот же `pnpm verify`. HTML-отчёт Playwright, скриншоты найденного предложения и диагностика ошибок сохраняются на 7 дней.
+GitHub Actions запускает PostgreSQL 18 с двумя БД, затем тот же `pnpm verify`. Последний полный run S0 прошёл успешно: PostgreSQL 18.6, unit 18/18, integration 21/21, E2E 14/14, build и полный `verify` — PASS.
 
 ## Ручная приёмка
 
-После зелёного `verify` запустите `pnpm dev`. На ширине 390 px:
+Ручная приёмка S0 выполнена 2026-09-11 в GitHub Codespaces с реальным PostgreSQL 18.
 
-1. Найдите баранину кнопкой. Проверьте цену, продавца, точку, адрес и комментарий.
-2. Найдите говядину через Enter. Проверьте отсутствие цены.
-3. Найдите единорога. Предыдущая карточка должна исчезнуть.
-4. Отправьте пустой запрос. Должна появиться понятная ошибка.
-5. Проверьте Tab, видимый фокус, доступность кнопки и отсутствие горизонтальной прокрутки.
-6. На ширине 1440 px повторите поиск баранины, обновите страницу и найдите её снова.
+Проверены desktop и mobile сценарии:
 
-Для текущего рабочего окружения согласовано исключение: проверки с БД выполняются в GitHub Actions, ручная приёмка остаётся NOT VERIFIED. До отдельной фактической приёмки запрещены READY, merge в `main`, tag `v0.0.1-s0` и начало S1.
+1. `баранина` — цена, продавец, точка, адрес и комментарий отображаются.
+2. `говядина` — отображается `Цена не указана`.
+3. `единорог` — предыдущая карточка исчезает, показывается empty state.
+4. Пустой запрос — показывается понятная validation error.
+5. Tab-navigation и видимый focus state работают.
+6. После reload повторный поиск работает.
+7. Mobile около 400 px читаем и не развален.
+
+Результат: **PASS**.
 
 ## Границы реализации
 
