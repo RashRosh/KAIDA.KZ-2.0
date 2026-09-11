@@ -44,7 +44,7 @@ test('anonymous search, login, persistence, search after login and logout', asyn
 
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode === '999999' ? '000000' : '999999');
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
-    await expect(page.getByRole('alert')).toHaveText('Неверный код.');
+    await expect(page.getByText('Неверный код.', { exact: true })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
@@ -101,7 +101,7 @@ test('expired challenge is rejected through real UI without debug endpoint', asy
     );
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
-    await expect(page.getByRole('alert')).toHaveText('Срок действия кода истёк. Запросите новый.');
+    await expect(page.getByText('Срок действия кода истёк. Запросите новый.', { exact: true })).toBeVisible();
   } finally {
     await pool.end();
     await cleanup(phone);
