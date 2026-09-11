@@ -1,0 +1,12 @@
+.group { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; min-width: 0; }
+.testLabel, .authMuted { color: var(--muted); font-size: .8125rem; white-space: nowrap; }
+.authRow { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+.phone { color: var(--text); font-size: .875rem; white-space: nowrap; }
+.loginLink, .authRow button { min-height: 2.5rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .7rem; padding: 0 .85rem; font: inherit; font-weight: 600; font-size: .875rem; }
+.loginLink { background: var(--primary); color: #fff; text-decoration: none; }
+.authRow button { border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+.authRow button:disabled { cursor: wait; opacity: .65; }
+@media (max-width: 36rem) {
+  .testLabel { display: none; }
+  .phone { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; }
+}

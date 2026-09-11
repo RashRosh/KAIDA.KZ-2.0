@@ -1,6 +1,8 @@
 import { defineConfig } from '@playwright/test';
 import { testDatabaseUrl } from './tests/integration/database';
 
+const identityTestSecret = '1111111111111111111111111111111111111111111111111111111111111111';
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -22,6 +24,13 @@ export default defineConfig({
     url: 'http://127.0.0.1:3100',
     reuseExistingServer: false,
     timeout: 120000,
-    env: { DATABASE_URL: testDatabaseUrl(), NEXT_TELEMETRY_DISABLED: '1' },
+    env: {
+      DATABASE_URL: testDatabaseUrl(),
+      IDENTITY_OTP_TTL_SECONDS: '300',
+      IDENTITY_SESSION_TTL_SECONDS: '2592000',
+      IDENTITY_OTP_HMAC_SECRET_HEX: identityTestSecret,
+      IDENTITY_COOKIE_SECURE: 'false',
+      NEXT_TELEMETRY_DISABLED: '1',
+    },
   },
 });

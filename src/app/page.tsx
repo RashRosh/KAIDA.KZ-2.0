@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SearchForm } from './_components/SearchForm';
+import { AuthStatus } from './_components/AuthStatus';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -7,7 +8,7 @@ export default function Home() {
     <div className={styles.shell}>
       <header className={styles.header}>
         <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">KAIDA.KZ</Link>
-        <span className={styles.testLabel}>Тестовая версия</span>
+        <AuthStatus />
       </header>
       <main className={styles.main}>
         <div className={styles.intro}>
