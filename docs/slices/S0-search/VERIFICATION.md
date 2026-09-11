@@ -1,38 +1,62 @@
 # S0 verification
 
-Статус: **NOT READY: manual acceptance pending**.
-
-## Локальная проверка
-
-| Проверка | Фактический результат |
-| --- | --- |
-| Node / package manager | Node 24.19.0, pnpm 11.19.0 |
-| Установка из lockfile | PASS |
-| lint | PASS |
-| typecheck | PASS |
-| unit | PASS: 18 тестов, 3 файла |
-| drizzle-kit generate | Сгенерирована 0000_s0_first_search.sql, SQL просмотрен |
-| drizzle-kit check | PASS |
-| production build | PASS: / и /api/search |
-| E2E discovery | Найдены 14 сценариев, по 7 mobile и desktop; это не запуск E2E |
-| YAML Compose / workflow | Разбираются без ошибок; локальный Docker не запускался |
-| PostgreSQL, migrations, seed, integration, полный verify | Здесь не запускались: Docker недоступен; согласован запуск в CI |
-| Manual mobile / desktop | NOT VERIFIED: нет PostgreSQL; Cloud Browser также блокирует localhost (ERR_BLOCKED_BY_CLIENT) |
+Статус: **READY**.
 
 ## GitHub Actions
 
-Ожидается фактический запуск workflow `S0 verify` после push. Наличие workflow не является свидетельством прохождения тестов. Результат и ссылка будут зафиксированы после завершения run.
+Последний полный проверенный run для рабочей реализации S0:
 
-Workflow использует реальный `postgres:18`, создаёт отдельную `kaida_test` штатным SQL, проверяет пустую `kaida` и запускает полный `pnpm verify`.
+- workflow: `S0 verify`
+- run id: `34602433017`
+- commit: `8f9b51d747a451275f6ba6bb0265e597a896c3d7`
+- conclusion: **success**
+- PostgreSQL: **18.6**
 
-## Незавершённая ручная приёмка
+Фактически прошли:
 
-- Mobile около 390 px: баранина, говядина без цены, единорог, пустой query, отсутствие старой карточки, читаемость и touch.
-- Desktop около 1440 px: основной поиск, повтор после reload, клавиатура/фокус, отсутствие горизонтального scroll.
-- Реальное пользовательское прохождение с подключённым PostgreSQL.
+| Проверка | Фактический результат |
+| --- | --- |
+| install from lockfile | PASS |
+| lint | PASS |
+| typecheck | PASS |
+| migrations | PASS |
+| seed | PASS: 2 products, 1 seller, 1 location, 2 offers |
+| clean test DB migration | PASS |
+| repeat migration / seed | PASS |
+| unit | PASS: 18/18 |
+| integration | PASS: 21/21 |
+| production build | PASS |
+| E2E mobile + desktop | PASS: 14/14 |
+| full `pnpm verify` | PASS |
 
-E2E и его скриншоты не помечаются как выполненная ручная приёмка. До неё запрещены merge в main, tag v0.0.1-s0 и начало S1.
+Workflow использовал реальный `postgres:18`, создавал отдельные `kaida` и `kaida_test` и не использовал mock DB.
+
+## Manual acceptance
+
+Ручная приёмка выполнена пользователем 2026-09-11 в GitHub Codespaces с реальным PostgreSQL 18 и рабочим браузером.
+
+Проверено:
+
+- Desktop: поиск `баранина` показывает товар, цену `4 200 ₸ / кг`, продавца, Location, адрес и комментарий.
+- Desktop: поиск `говядина` показывает Offer и состояние `Цена не указана`.
+- Desktop: поиск `единорог` удаляет предыдущую карточку и показывает empty state.
+- Desktop: пустой query показывает `Введите название товара.`.
+- Desktop: после reload повторный поиск `баранина` работает.
+- Keyboard: Tab-navigation и видимый focus state проверены.
+- Mobile около 400 px: поиск `баранина` работает, карточка читаема, layout не развален, горизонтального scroll визуально нет.
+
+Результат manual acceptance: **PASS**.
 
 ## Отклонения
 
-Только согласованный перенос проверок с PostgreSQL из текущего окружения в GitHub Actions и отложенная manual acceptance. Стек и scope S0 сохранены. Дополнительные служебные файлы описаны в IMPLEMENTATION_NOTES.md.
+Единственное согласованное отклонение во время реализации: локальное окружение первого coding-agent не позволяло поднять Docker/PostgreSQL, поэтому полная DB verification была перенесена в GitHub Actions. Это не изменило стек, scope или требования S0.
+
+Manual acceptance после этого была отдельно фактически выполнена в GitHub Codespaces с PostgreSQL 18.
+
+## Итог
+
+S0 выполняет утверждённую пользовательскую задачу end-to-end:
+
+`Browser → UI → API → Search application → PostgreSQL → Offer → UI`
+
+S0 готов к фиксации в `main` и tag `v0.0.1-s0`.
