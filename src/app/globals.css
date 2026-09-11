@@ -1,0 +1,32 @@
+:root {
+  color-scheme: light;
+  --background: #faf9fc;
+  --surface: #ffffff;
+  --text: #251d33;
+  --muted: #696171;
+  --border: #ddd7e4;
+  --input-border: #81768c;
+  --primary: #6736bd;
+  --primary-hover: #51299a;
+  --error: #9c253d;
+  --radius: 0.75rem;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans Variable', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+input, button { font: inherit; }
+button, input, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+a { color: inherit; }
+h1, h2, p, dl, dd { margin: 0; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+}
