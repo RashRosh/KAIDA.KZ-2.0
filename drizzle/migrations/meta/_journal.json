@@ -2,19 +2,8 @@
   "version": "7",
   "dialect": "postgresql",
   "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1789127762751,
-      "tag": "0000_s0_first_search",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1789138921743,
-      "tag": "0001_s1_offer_lifecycle",
-      "breakpoints": true
-    }
+    { "idx": 0, "version": "7", "when": 1789127762751, "tag": "0000_s0_first_search", "breakpoints": true },
+    { "idx": 1, "version": "7", "when": 1789138921743, "tag": "0001_s1_offer_lifecycle", "breakpoints": true },
+    { "idx": 2, "version": "7", "when": 1789150000000, "tag": "0002_s2_auth", "breakpoints": true }
   ]
 }
