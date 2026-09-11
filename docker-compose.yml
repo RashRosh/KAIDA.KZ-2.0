@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: kaida
+      POSTGRES_PASSWORD: kaida_local
+      POSTGRES_DB: kaida
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./docker/init/01-create-test-db.sql:/docker-entrypoint-initdb.d/01-create-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaida -d kaida"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgres_data:

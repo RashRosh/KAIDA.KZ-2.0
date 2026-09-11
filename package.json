@@ -1,0 +1,48 @@
+{
+  "name": "kaida-kz-2",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:e2e": "playwright test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:test:prepare": "tsx tests/integration/prepare-database.ts",
+    "verify": "pnpm lint && pnpm typecheck && pnpm db:migrate && pnpm db:seed && pnpm db:test:prepare && pnpm test:unit && pnpm test:integration && pnpm build && pnpm test:e2e"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "0.45.2",
+    "next": "16.3.4",
+    "pg": "8.23.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.13.4",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "drizzle-kit": "0.31.10",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.4",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
