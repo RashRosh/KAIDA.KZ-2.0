@@ -11,13 +11,14 @@ async function prepare() {
     if (clean.rowCount !== 0) throw new Error('Test database is not clean');
     await migrate(db, { migrationsFolder: './drizzle/migrations' });
     await migrate(db, { migrationsFolder: './drizzle/migrations' });
-    await seedDatabase(db);
-    await seedDatabase(db);
+    const seedNow = new Date();
+    await seedDatabase(db, seedNow);
+    await seedDatabase(db, seedNow);
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
     if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(['locations', 'offers', 'products', 'sellers'])) {
-      throw new Error('S0 must have exactly four product tables');
+      throw new Error('S1 must still have exactly four product tables');
     }
-    console.log('PostgreSQL 18 kaida_test: clean migration, repeat migration and repeat seed completed.');
+    console.log('PostgreSQL 18 kaida_test: clean S0→S1 migration chain, repeat migration and deterministic repeat seed completed.');
   } finally {
     await pool.end();
   }

@@ -13,7 +13,7 @@ export const seedIds = {
 } as const;
 
 // Only these deterministic fictional records are upserted; no table is cleared.
-export async function seedDatabase(db: Database) {
+export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
   await db.transaction(async (tx) => {
     for (const product of [
       { id: seedIds.lambProduct, name: 'Баранина' },
@@ -34,7 +34,14 @@ export async function seedDatabase(db: Database) {
       { id: seedIds.lambOffer, productId: seedIds.lambProduct, priceAmount: '4200.00', priceCurrency: 'KZT', priceUnit: 'кг', sellerComment: 'Свежий привоз.' },
       { id: seedIds.beefOffer, productId: seedIds.beefProduct, priceAmount: null, priceCurrency: null, priceUnit: null, sellerComment: 'Есть мякоть и мясо на кости.' },
     ]) {
-      const row = { ...offer, sellerId: seedIds.seller, locationId: seedIds.location, ...timestamps };
+      const row = {
+        ...offer,
+        sellerId: seedIds.seller,
+        locationId: seedIds.location,
+        status: 'active' as const,
+        lastConfirmedAt: seedNow,
+        ...timestamps,
+      };
       await tx.insert(offers).values(row).onConflictDoUpdate({ target: offers.id, set: row });
     }
   });
@@ -46,7 +53,7 @@ async function main() {
   const { db, pool } = createDatabase(url);
   try {
     await seedDatabase(db);
-    console.log('S0 seed complete: 2 products, 1 seller, 1 location, 2 offers.');
+    console.log('S1 seed complete: 2 products, 1 seller, 1 location, 2 fresh active offers.');
   } finally {
     await pool.end();
   }
@@ -54,7 +61,7 @@ async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(() => {
-    console.error('S0 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
+    console.error('S1 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
     process.exitCode = 1;
   });
 }

@@ -4,7 +4,7 @@ import { searchOffers } from '../../src/modules/search/application/search-offers
 import { searchResponseSchema } from '../../src/modules/search/contracts/search.contract';
 import { connectTestDatabase } from './database';
 
-describe('S0 Search against PostgreSQL 18', () => {
+describe('S0 Search regression against PostgreSQL 18 after S1', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
   beforeAll(async () => { connection = await connectTestDatabase(); });
   afterAll(async () => { await connection?.pool.end(); });
@@ -41,9 +41,14 @@ describe('S0 Search against PostgreSQL 18', () => {
     expect(offers[0]).toMatchObject({ id: seedIds.beefOffer, product: { name: 'Говядина' }, price: null });
   });
 
-  it('keeps seed values and record counts stable on repeat', async () => {
+  it('keeps seed values and record counts stable on repeat with the same controlled seed time', async () => {
+    const seeded = await connection.pool.query<{ last_confirmed_at: Date }>(
+      'SELECT last_confirmed_at FROM offers WHERE id = $1',
+      [seedIds.lambOffer],
+    );
+    const seedNow = seeded.rows[0]!.last_confirmed_at;
     const before = await connection.pool.query('SELECT * FROM offers ORDER BY id');
-    await seedDatabase(connection.db);
+    await seedDatabase(connection.db, seedNow);
     const after = await connection.pool.query('SELECT * FROM offers ORDER BY id');
     expect(after.rows).toEqual(before.rows);
     const counts = await connection.pool.query('SELECT (SELECT count(*)::int FROM products) AS products, (SELECT count(*)::int FROM sellers) AS sellers, (SELECT count(*)::int FROM locations) AS locations, (SELECT count(*)::int FROM offers) AS offers');
@@ -56,8 +61,12 @@ describe('S0 Search against PostgreSQL 18', () => {
     const client = await connection.pool.connect();
     try {
       await client.query('BEGIN');
-      await expect(client.query('INSERT INTO offers (product_id, seller_id, location_id, price_amount, price_currency) VALUES ($1,$2,$3,$4,$5)',
-        [seedIds.lambProduct, seedIds.seller, seedIds.location, amount, currency])).rejects.toMatchObject({ code: '23514' });
+      await expect(client.query(
+        `INSERT INTO offers (
+          product_id, seller_id, location_id, price_amount, price_currency, status, last_confirmed_at
+        ) VALUES ($1,$2,$3,$4,$5,'active',$6)`,
+        [seedIds.lambProduct, seedIds.seller, seedIds.location, amount, currency, new Date('2026-09-11T12:00:00.000Z')],
+      )).rejects.toMatchObject({ code: '23514' });
     } finally {
       await client.query('ROLLBACK');
       client.release();
@@ -65,8 +74,11 @@ describe('S0 Search against PostgreSQL 18', () => {
   });
 
   it('rejects an offer pointing at a nonexistent product', async () => {
-    await expect(connection.pool.query('INSERT INTO offers (product_id, seller_id, location_id) VALUES ($1,$2,$3)',
-      ['10000000-0000-4000-8000-000000000099', seedIds.seller, seedIds.location])).rejects.toMatchObject({ code: '23503' });
+    await expect(connection.pool.query(
+      `INSERT INTO offers (product_id, seller_id, location_id, status, last_confirmed_at)
+       VALUES ($1,$2,$3,'active',$4)`,
+      ['10000000-0000-4000-8000-000000000099', seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
+    )).rejects.toMatchObject({ code: '23503' });
   });
 
   it.each([['Баранина', '23505'], ['   ', '23514']])('enforces the product name constraint: %s', async (name, code) => {
@@ -77,8 +89,12 @@ describe('S0 Search against PostgreSQL 18', () => {
     const client = await connection.pool.connect();
     try {
       await client.query('BEGIN');
-      const result = await client.query('INSERT INTO offers (product_id, seller_id, location_id, price_amount, price_currency, seller_comment) VALUES ($1,$2,$3,0,\'KZT\',NULL) RETURNING price_amount, seller_comment',
-        [seedIds.lambProduct, seedIds.seller, seedIds.location]);
+      const result = await client.query(
+        `INSERT INTO offers (
+          product_id, seller_id, location_id, price_amount, price_currency, seller_comment, status, last_confirmed_at
+        ) VALUES ($1,$2,$3,0,'KZT',NULL,'active',$4) RETURNING price_amount, seller_comment`,
+        [seedIds.lambProduct, seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
+      );
       expect(result.rows[0]).toEqual({ price_amount: '0', seller_comment: null });
     } finally {
       await client.query('ROLLBACK');
