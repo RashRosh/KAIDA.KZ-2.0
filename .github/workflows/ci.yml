@@ -1,0 +1,65 @@
+name: S0 verify
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s0-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida
+      TEST_DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida_test
+      NEXT_TELEMETRY_DISABLED: '1'
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: kaida
+          POSTGRES_PASSWORD: kaida_ci_local
+          POSTGRES_DB: kaida
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kaida -d kaida"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Create separate test database and assert clean development database
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i "$POSTGRES_CONTAINER" psql -U kaida -d kaida -v ON_ERROR_STOP=1 < docker/init/01-create-test-db.sql
+          test "$(docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -tAc "SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")" = "0"
+          docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -c 'SHOW server_version;'
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Full verify (migrations, seed, lint, types, unit, integration, build, E2E)
+        run: pnpm verify
+      - name: Save browser reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s0-browser-report-${{ github.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
