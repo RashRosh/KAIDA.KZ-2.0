@@ -4,7 +4,6 @@ import { requestOtp } from '../../src/modules/identity/application/request-otp';
 import { verifyOtp } from '../../src/modules/identity/application/verify-otp';
 import { resolveCurrentUser } from '../../src/modules/identity/application/resolve-current-user';
 import { logout } from '../../src/modules/identity/application/logout';
-import { AuthError } from '../../src/modules/identity/contracts/auth.contract';
 import type { IdentityConfig } from '../../src/modules/identity/config/identity.config';
 import { testOtpDelivery } from '../../src/modules/identity/delivery/otp-delivery';
 import { connectTestDatabase } from './database';
@@ -65,7 +64,7 @@ describe('S2 Identity auth on PostgreSQL 18', () => {
     await cleanupPhone(phone);
     const requested = await requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => NOW, config: CONFIG });
     await expect(verifyOtp({ challengeId: requested.challenge.id, code: '999999' }, { database: db, clock: () => NOW, config: CONFIG }))
-      .rejects.toMatchObject<AuthError>({ code: 'INVALID_OTP', status: 401 });
+      .rejects.toMatchObject({ code: 'INVALID_OTP', status: 401 });
     const row = (await pool.query('SELECT consumed_at FROM auth_otp_challenges WHERE id = $1', [requested.challenge.id])).rows[0];
     expect(row.consumed_at).toBeNull();
     expect(Number((await pool.query('SELECT count(*) FROM users WHERE phone_e164 = $1', [phone])).rows[0].count)).toBe(0);
@@ -82,7 +81,7 @@ describe('S2 Identity auth on PostgreSQL 18', () => {
         database: db,
         clock: () => new Date(NOW.getTime() + offset),
         config: CONFIG,
-      })).rejects.toMatchObject<AuthError>({ code: 'OTP_EXPIRED', status: 410 });
+      })).rejects.toMatchObject({ code: 'OTP_EXPIRED', status: 410 });
       await cleanupPhone(phone);
     }
   });
@@ -94,7 +93,7 @@ describe('S2 Identity auth on PostgreSQL 18', () => {
     const secondNow = new Date(NOW.getTime() + 1000);
     const second = await requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => secondNow, config: CONFIG, generateCode: () => '222222' });
     await expect(verifyOtp({ challengeId: first.challenge.id, code: '111111' }, { database: db, clock: () => secondNow, config: CONFIG }))
-      .rejects.toMatchObject<AuthError>({ code: 'OTP_NOT_ACTIVE', status: 409 });
+      .rejects.toMatchObject({ code: 'OTP_NOT_ACTIVE', status: 409 });
     const login = await verifyOtp({ challengeId: second.challenge.id, code: '222222' }, { database: db, clock: () => secondNow, config: CONFIG });
     expect(login.user.phoneE164).toBe(phone);
     expect(Number((await pool.query('SELECT count(*) FROM users WHERE phone_e164 = $1', [phone])).rows[0].count)).toBe(1);
