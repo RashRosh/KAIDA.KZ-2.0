@@ -2,9 +2,9 @@
 
 ## Current status
 
-**NOT READY: manual acceptance pending**
+**READY — automated verification and manual acceptance PASS**
 
-Implementation и automated regression выполнены. Ручная приёмка S1 ещё не выполнена, поэтому slice нельзя merge в `main`, нельзя создавать `v0.0.2-s1` и нельзя начинать S2.
+S1 implementation, full automated regression on real PostgreSQL 18 and separate manual acceptance through the existing Search UI are complete. Slice is eligible for the checkpoint `v0.0.2-s1` and merge into `main`. S2 has not started.
 
 ## Environment
 
@@ -56,6 +56,12 @@ Head: `6433304ffb407aafd17b515dff5ef1c434dfab13`.
 - production build: PASS;
 - E2E: **16/16 PASS**, mobile + desktop;
 - browser artifact uploaded successfully.
+
+### Run 34614711926 — PASS, final implementation head before manual acceptance
+
+Head: `30e7a05ed8528a26d68190062731cd10cf9c7a0b`.
+
+Full `pnpm verify` again passed on PostgreSQL 18.6 after final implementation/verification documentation was present. This is the automated evidence used for manual acceptance.
 
 ## Migration verification
 
@@ -171,13 +177,13 @@ Lifecycle/debug/test/admin API или временный UI для E2E не со
 
 Next.js production build прошёл. Единственный продуктовый API route остаётся `/api/search`.
 
-## Scope verification
+## Scope verification — PASS
 
-Перед финальным автоматическим run требуется ещё раз сравнить branch с `main`.
+Перед ручной приёмкой branch был повторно сравнен с `main`: ahead 26 / behind 0.
 
-Ожидаемый invariant:
+Подтверждено:
 
-- только whitelist S1;
+- изменения только в whitelist S1;
 - no package dependency changes;
 - no API/UI changes;
 - no Search contract change;
@@ -185,23 +191,33 @@ Next.js production build прошёл. Единственный продукто
 - no `0000` change;
 - no S2+.
 
-## Manual acceptance — PENDING
+## Manual acceptance — PASS
 
-Отдельно через существующий UI ещё требуется фактически пройти:
+Ручная приёмка выполнена **2026-09-11** в GitHub Codespaces на ветке `slice/s1-offer-lifecycle` с реальным PostgreSQL 18 и существующим Search UI.
 
-1. normal seed;
-2. `баранина` visible;
-3. `говядина` visible + `Цена не указана`;
-4. direct DB setup: lamb expired → empty;
-5. restore fresh → visible;
-6. direct DB setup: inactive → empty;
-7. restore `active` + fresh;
-8. `единорог`;
-9. empty query validation;
-10. mobile ~390–400 px;
-11. desktop ~1440 px;
-12. keyboard/focus regression.
+Фактически пройден один полный сценарий:
 
-До выполнения этого списка статус остаётся:
+1. normal S1 seed;
+2. `баранина` → visible, цена 4 200 ₸ / кг;
+3. `говядина` → visible + `Цена не указана`;
+4. `единорог` → existing empty state;
+5. empty query → existing validation message;
+6. direct DB technical setup: lamb `active` + `last_confirmed_at = NOW() - 169 hours` → `баранина` hidden;
+7. restore lamb `active` + fresh `last_confirmed_at` → visible again;
+8. direct DB technical setup: lamb `inactive` + fresh `last_confirmed_at` → hidden;
+9. S1 seed restored normal fixture state;
+10. Search regression repeated after restore;
+11. mobile ~390–400 px checked;
+12. desktop and keyboard/focus regression checked.
 
-**NOT READY: manual acceptance pending**
+No temporary lifecycle endpoint, debug API, test API, admin route or temporary UI was used.
+
+Результат: **PASS**.
+
+## Final result
+
+**READY**
+
+S1 acceptance criteria are satisfied by automated PostgreSQL 18 verification plus separate manual acceptance. The approved working checkpoint name is:
+
+`v0.0.2-s1`
