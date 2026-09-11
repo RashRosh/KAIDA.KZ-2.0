@@ -1,8 +1,6 @@
 export const OFFER_VALIDITY_PERIOD_HOURS_DEFAULT = 168;
 
-export type OfferLifecycleEnvironment = {
-  OFFER_VALIDITY_PERIOD_HOURS?: string;
-};
+export type OfferLifecycleEnvironment = Readonly<Record<string, string | undefined>>;
 
 export function validateOfferValidityPeriodHours(value: unknown): number {
   if (typeof value === 'number') {
