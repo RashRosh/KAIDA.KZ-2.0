@@ -1,4 +1,4 @@
-name: S1 verify
+name: S2 verify
 
 on:
   push:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: s1-${{ github.workflow }}-${{ github.ref }}
+  group: s2-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -19,6 +19,10 @@ jobs:
       DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida
       TEST_DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida_test
       OFFER_VALIDITY_PERIOD_HOURS: '168'
+      IDENTITY_OTP_TTL_SECONDS: '300'
+      IDENTITY_SESSION_TTL_SECONDS: '2592000'
+      IDENTITY_OTP_HMAC_SECRET_HEX: '1111111111111111111111111111111111111111111111111111111111111111'
+      IDENTITY_COOKIE_SECURE: 'false'
       NEXT_TELEMETRY_DISABLED: '1'
     services:
       postgres:
@@ -60,7 +64,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s1-browser-report-${{ github.sha }}
+          name: s2-browser-report-${{ github.sha }}
           path: |
             playwright-report/
             test-results/

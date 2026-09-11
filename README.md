@@ -1,19 +1,24 @@
 # KAIDA.KZ 2.0
 
-Текущий завершённый slice: S1 Offer Lifecycle. S0 First Search сохранён: анонимный покупатель вводит точное название товара и получает предложения из PostgreSQL. S1 добавляет фильтрацию неактуальных Offers без изменения публичного Search API или UI.
+Проверенная база проекта перед S2: `v0.0.2-s1`. В ветке `slice/s2-auth` реализуется S2 Auth: тестовый вход по телефону через динамический OTP, database-backed session и logout. Search S0/S1 остаётся анонимным.
 
-Статус ветки S1: **READY — automated verification and manual acceptance PASS**. Контрольная версия после завершения S1: `v0.0.2-s1`.
+До отдельной ручной приёмки S2 не считается READY, не merge в `main` и не получает tag `v0.0.3-s2`.
 
-## Что потребуется
+## Stack
 
-- Node.js 24 LTS (версия в `.node-version`).
-- pnpm 11.19.0 (версия в `package.json`).
-- Docker с Compose v2 для PostgreSQL 18.
-- Chromium Playwright и системные зависимости для E2E.
+- Node.js 24 LTS;
+- pnpm 11.19.0;
+- Next.js 16 App Router / Route Handlers;
+- TypeScript strict;
+- PostgreSQL 18;
+- Drizzle ORM;
+- Zod;
+- Vitest;
+- Playwright Chromium.
 
-Next.js 16, TypeScript strict, Drizzle, Zod, Vitest и Playwright устанавливаются из lockfile. Docker запускает только БД. Приложение работает отдельным Node-процессом.
+Docker используется только для PostgreSQL. Mock/SQLite вместо integration database не используются.
 
-## Чистая установка
+## Локальный запуск
 
 ```bash
 git clone https://github.com/RashRosh/KAIDA.KZ-2.0.git
@@ -22,143 +27,197 @@ corepack enable
 corepack prepare pnpm@11.19.0 --activate
 pnpm install --frozen-lockfile
 cp .env.example .env
+```
+
+S2 требует локальный OTP HMAC secret. Сгенерируйте 32 random bytes / 64 hex characters стандартным `node:crypto`:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+```
+
+Скопируйте результат в `.env`:
+
+```text
+IDENTITY_OTP_HMAC_SECRET_HEX=<64 hex characters>
+```
+
+Insecure fallback отсутствует. Настоящий secret в Git не коммитится. Для S2 не требуется внешний secret manager.
+
+Далее:
+
+```bash
 docker compose up -d --wait
 pnpm db:migrate
 pnpm db:seed
 pnpm dev
 ```
 
-В PowerShell вместо `cp` можно использовать `Copy-Item .env.example .env`. Если Corepack не установлен, установите pnpm 11.19.0 штатным способом для вашей системы.
+Откройте `http://localhost:3000`.
 
-Откройте [localhost:3000](http://localhost:3000).
+## Environment
 
-При первом запуске контейнер создаёт `kaida` и через `docker/init/01-create-test-db.sql` отдельную `kaida_test`. Данные PostgreSQL 18 сохраняются в Docker volume, смонтированном в `/var/lib/postgresql`. Остановка: `docker compose stop`.
-
-`.env.example` содержит только локальные тестовые учётные данные. Используются `DATABASE_URL`, `TEST_DATABASE_URL` и `OFFER_VALIDITY_PERIOD_HOURS`. `.env` не коммитится. Next.js, Drizzle и тестовые команды читают `.env` в корне. При недоступной БД API возвращает безопасную ошибку 503.
-
-## Offer Lifecycle S1
-
-Offer видим покупателю только если:
+Минимум:
 
 ```text
-status = active AND last_confirmed_at > cutoff
-cutoff = now - OFFER_VALIDITY_PERIOD_HOURS
+DATABASE_URL=postgresql://kaida:kaida_local@127.0.0.1:5432/kaida
+TEST_DATABASE_URL=postgresql://kaida:kaida_local@127.0.0.1:5432/kaida_test
+OFFER_VALIDITY_PERIOD_HOURS=168
+IDENTITY_OTP_TTL_SECONDS=300
+IDENTITY_SESSION_TTL_SECONDS=2592000
+IDENTITY_OTP_HMAC_SECRET_HEX=<required 64 hex chars>
+IDENTITY_COOKIE_SECURE=false
 ```
 
-`status` допускает только `active | inactive`. `expired` как status не хранится, `expires_at` отсутствует.
+`OFFER_VALIDITY_PERIOD_HOURS=168`, OTP TTL 300 seconds и Session TTL 30 days являются technical defaults, не финальной продуктовой политикой.
 
-`OFFER_VALIDITY_PERIOD_HOURS=168` является только техническим default S1, а не утверждённой продуктовой политикой. Значение валидируется как positive integer в одном Offers config layer. Internal/test override проходит ту же validation.
+`IDENTITY_COOKIE_SECURE=false` допустим для локального HTTP. Public HTTPS deployment обязан использовать Secure cookie.
 
-Один Search operation захватывает текущее время один раз и передаёт вычисленный cutoff в read-path. Runtime lifecycle filtering не использует PostgreSQL `now()`/`CURRENT_TIMESTAMP`. PostgreSQL `CURRENT_TIMESTAMP` используется только для backfill существующих S0 Offers во время migration S1.
+## S2 Auth
 
-Публичный endpoint остаётся прежним:
+Пользовательский flow:
 
-`GET /api/search?q=...`
-
-Lifecycle-поля в response не выходят. Product с expired/inactive Offer возвращает обычный успешный empty result.
-
-## Сценарии Search
-
-| Запрос | Результат |
-| --- | --- |
-| `баранина` | Баранина, 4 200 ₸ / кг, Асыл Ет, точка, адрес, Свежий привоз. |
-| `БАРАНИНА` или `  баранина  ` | То же предложение |
-| `говядина` | Предложение и Цена не указана |
-| `единорог` | По вашему запросу ничего не найдено. |
-| Пустая строка | Введите название товара. |
-| Product с expired/inactive Offer | По вашему запросу ничего не найдено. |
-
-Поиск точный, без учёта регистра и крайних пробелов. Части слов, категории, синонимы, опечатки и AI не поддерживаются.
-
-## База, миграции и seed
-
-Четыре продуктовые таблицы остаются неизменными по количеству: `products`, `sellers`, `locations`, `offers`. История миграций хранится в служебной схеме `drizzle`.
-
-```bash
-pnpm db:generate --name=change_name
-# Изучите сгенерированный SQL перед применением.
-pnpm db:migrate
+```text
+anonymous
+→ phone
+→ test OTP
+→ verify
+→ User
+→ PostgreSQL session
+→ authenticated
+→ reload/browser reopen
+→ logout
+→ anonymous
 ```
 
-Schema push не используется. Migration chain:
+Phone input S2 принимает KZ-oriented `+7` формы и нормализует к `+7XXXXXXXXXX`. Реального SMS в S2 нет.
 
-- `0000_s0_first_search.sql` — исходная S0 schema, не изменена S1;
-- `0001_s1_offer_lifecycle.sql` — добавляет `status` и `last_confirmed_at`, backfill existing Offers, CHECK и NOT NULL без permanent lifecycle defaults.
+Каждый OTP request создаёт новый случайный six-digit code. Test delivery показывает code в UI. Plaintext OTP в PostgreSQL не хранится: verification material = HMAC-SHA-256 с отдельным 32-byte server secret.
 
-`pnpm db:seed` загружает два товара, продавца, точку и два предложения. UUID и старые business values фиксированы. Каждый запуск освежает `last_confirmed_at` только у двух собственных fictional seed Offers и оставляет их `active`. Произвольные Offers seed не обновляет.
+Session token создаётся как 32 random bytes, кодируется base64url и выдаётся только HttpOnly cookie `kaida_session`. В PostgreSQL хранится SHA-256 digest token.
 
-## Тесты и verify
+Cookie successful login:
 
-Один раз установите браузер:
+- HttpOnly;
+- SameSite=Lax;
+- Path=/;
+- configured Secure;
+- Expires = server session expires_at;
+- Max-Age = configured Session TTL.
+
+Logout удаляет DB session и ту же cookie с `Max-Age=0` и expired `Expires`.
+
+PostgreSQL `auth_sessions.expires_at` остаётся server-side source of truth.
+
+### Auth API
+
+- `POST /api/auth/otp/request`;
+- `POST /api/auth/otp/verify`;
+- `GET /api/auth/me`;
+- `POST /api/auth/logout`.
+
+Anonymous `/api/auth/me` возвращает HTTP 200:
+
+```json
+{ "user": null }
+```
+
+`GET /api/search?q=...` остаётся полностью anonymous.
+
+## Concurrency guarantees
+
+OTP replacement сериализуется per canonical phone через PostgreSQL transaction advisory lock. Lock key детерминированно вычисляется как SHA-256 от domain-separated phone, первые 8 bytes читаются как signed int64. Key не хранится в business data.
+
+Дополнительно PostgreSQL partial unique index запрещает два unfinished challenges одного phone.
+
+OTP consume выполняется conditional `UPDATE ... RETURNING` внутри той же transaction, где выполняются User get-or-create и session insert. Поэтому два concurrent verify одного challenge не могут дать два successful login.
+
+`users.phone_e164` имеет PostgreSQL UNIQUE. User creation использует `INSERT ... ON CONFLICT DO NOTHING`, затем lookup existing User.
+
+## Database / migrations
+
+Migration chain:
+
+- `0000_s0_first_search.sql`;
+- `0001_s1_offer_lifecycle.sql`;
+- `0002_s2_auth.sql`.
+
+S2 добавляет ровно три Identity tables:
+
+- `users`;
+- `auth_otp_challenges`;
+- `auth_sessions`.
+
+`0000` и `0001` не изменяются. Products/Sellers/Locations/Offers schema не меняется.
+
+S2 verification проверяет и clean chain, и real S1 → S2 upgrade на отдельной temporary PostgreSQL 18 database `kaida_s2_upgrade_test`.
+
+## Search / Offer lifecycle regression
+
+S0/S1 contracts сохраняются:
+
+- `баранина` → актуальный Offer;
+- `говядина` → nullable price;
+- `единорог` → empty;
+- exact case-insensitive Product search + trim;
+- Offer visible только если `status = active AND last_confirmed_at > cutoff`;
+- boundary `+1 ms / == cutoff / -1 ms` остаётся прежним.
+
+Identity не подключается к Search в S2. Global auth middleware отсутствует.
+
+## Verification
+
+Установить Chromium один раз:
 
 ```bash
 pnpm exec playwright install --with-deps chromium
 ```
 
-Полная проверка при работающем PostgreSQL:
+Полный regression:
 
 ```bash
 pnpm verify
 ```
 
-Последовательность остаётся единой: lint, typecheck, migrations/seed в `kaida`, пересоздание схем `kaida_test`, clean migration chain, repeat migration/seed, unit, integration, production build, E2E. Команда останавливается при первой ошибке.
+Он включает lint, typecheck, migrations, seed, clean test DB, unit, integration, production build и mobile+desktop E2E.
 
-S1 дополнительно проверяет:
+GitHub Actions поднимает реальный `postgres:18` и выполняет тот же `pnpm verify` с explicit synthetic Identity test secret.
 
-- config validation и fixed clock без `sleep`;
-- lifecycle boundary `cutoff + 1 ms / == cutoff / cutoff - 1 ms`;
-- inactive Offer;
-- реальный S0 → S1 upgrade на отдельной временной PostgreSQL 18 database `kaida_s1_upgrade_test`;
-- сохранность S0 Offer IDs/business fields;
-- реальный PostgreSQL CHECK;
-- отсутствие lifecycle DB defaults;
-- lifecycle E2E через существующий Search UI на mobile и desktop без test/debug API.
+S2 дополнительно проверяет:
 
-Перед сбросом тестовой БД проверяются URL, фактическое имя `kaida_test` и PostgreSQL 18. Integration и E2E используют `TEST_DATABASE_URL`. Playwright запускает отдельный production-сервер на порту 3100 с этой БД; существующий сервер не переиспользуется.
+- phone/config/crypto/cookie unit tests;
+- OTP request/verify/session integration;
+- concurrent OTP requests;
+- exactly-one-success concurrent OTP consume;
+- concurrent User uniqueness;
+- S1 → S2 migration upgrade;
+- anonymous Search до/после login/logout;
+- persistent cookie/auth state;
+- expired OTP через direct DB test setup без debug API.
 
-Отдельные команды:
+## Public-launch security gate
 
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test:unit
-pnpm db:test:prepare
-pnpm test:integration
-pnpm build
-pnpm test:e2e
-```
+S2 предназначен только для закрытого теста и **не готов для публичного запуска**.
 
-Mock/SQLite замены PostgreSQL нет. GitHub Actions поднимает реальный PostgreSQL 18 и запускает тот же `pnpm verify`.
+До public launch обязательны:
 
-## Ручная приёмка S1
+- убрать test OTP из API/UI;
+- подключить real SMS provider;
+- rate limiting request/verify;
+- brute-force protection;
+- anti-abuse controls;
+- resend policy;
+- delivery failure/retry policy;
+- production secret-management review;
+- Secure=true на публичном HTTPS deployment.
 
-Ручная приёмка выполнена **2026-09-11** в GitHub Codespaces через существующий Search UI и реальный PostgreSQL 18.
+Это launch blockers, а не необязательные улучшения. Основной переход предусмотрен S22.
 
-Проверено вручную:
+## Документы
 
-- normal seed;
-- `баранина` visible;
-- `говядина` visible + `Цена не указана`;
-- `единорог` empty;
-- empty query validation;
-- active lamb, искусственно состаренный на 169 часов → hidden;
-- fresh restore → visible;
-- fresh `inactive` lamb → hidden;
-- seed restore;
-- mobile ~390–400 px;
-- desktop layout;
-- keyboard/focus regression.
-
-Результат: **PASS**.
-
-Никаких lifecycle/debug/test endpoints, временных UI-кнопок или admin route для этого не добавлялось.
-
-## Границы реализации
-
-`UI → /api/search → Search application → read repository → PostgreSQL`. HTTP и UI не обращаются к таблицам. Владельцы таблиц: Catalog, Sellers, Locations, Offers. Offers владеет lifecycle semantics; Search только использует готовые cutoff/visibility rules.
-
-Единственный продуктовый endpoint по-прежнему `GET /api/search?q=...`. Цена передаётся decimal string или `null`. Ошибки: `INVALID_QUERY` (400) или `SEARCH_UNAVAILABLE` (503), без внутренних деталей.
-
-Plus Jakarta Sans поставляется локально из npm-пакета; кириллица использует системный Arial/sans-serif fallback. Внешних запросов к шрифтовым сервисам нет. Данные вымышлены.
-
-Требования S1: [Feature Spec](docs/slices/S1-offer-lifecycle/FEATURE_SPEC.md), [Migration / Model Contract](docs/slices/S1-offer-lifecycle/MIGRATION_MODEL_CONTRACT.md), [Implementation Contract](docs/slices/S1-offer-lifecycle/IMPLEMENTATION_CONTRACT.md). Фактическая проверка: [Verification](docs/slices/S1-offer-lifecycle/VERIFICATION.md). Общие правила: [Project Rules](docs/PROJECT_RULES.md).
+- `docs/PROJECT_RULES.md`;
+- `docs/architecture/TECHNICAL_FOUNDATION_V0.md`;
+- `docs/product/FEATURE_MAP.md`;
+- `docs/slices/S2-auth/FEATURE_SPEC.md`;
+- `docs/slices/S2-auth/IMPLEMENTATION_CONTRACT.md`;
+- `docs/slices/S2-auth/IMPLEMENTATION_NOTES.md`;
+- `docs/slices/S2-auth/VERIFICATION.md`.

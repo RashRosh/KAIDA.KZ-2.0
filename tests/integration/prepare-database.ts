@@ -5,7 +5,6 @@ import { connectTestDatabase } from './database';
 async function prepare() {
   const { db, pool } = await connectTestDatabase();
   try {
-    // Destructive reset is guarded by URL AND actual server/database checks above.
     await pool.query('DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; CREATE SCHEMA public');
     const clean = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
     if (clean.rowCount !== 0) throw new Error('Test database is not clean');
@@ -15,10 +14,13 @@ async function prepare() {
     await seedDatabase(db, seedNow);
     await seedDatabase(db, seedNow);
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-    if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(['locations', 'offers', 'products', 'sellers'])) {
-      throw new Error('S1 must still have exactly four product tables');
+    const expected = ['auth_otp_challenges', 'auth_sessions', 'locations', 'offers', 'products', 'sellers', 'users'];
+    if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(expected)) {
+      throw new Error('S2 clean database must have four existing product tables and exactly three Identity tables');
     }
-    console.log('PostgreSQL 18 kaida_test: clean S0→S1 migration chain, repeat migration and deterministic repeat seed completed.');
+    const users = await pool.query('SELECT count(*)::int AS count FROM users');
+    if (users.rows[0]?.count !== 0) throw new Error('S2 seed must not create a User');
+    console.log('PostgreSQL 18 kaida_test: clean S0→S1→S2 migration chain, repeat migration and deterministic repeat seed completed.');
   } finally {
     await pool.end();
   }
