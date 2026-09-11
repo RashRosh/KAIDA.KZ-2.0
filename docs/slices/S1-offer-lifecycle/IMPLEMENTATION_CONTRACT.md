@@ -219,7 +219,17 @@ Search repository импортирует этот predicate из Offers, а не
 
 Business/read code получает уже validated number.
 
-### 7.3 Документация config
+### 7.3 Internal/test override проходит ту же validation
+
+Если внутренний/test-only `lifecycleOptions.validityPeriodHours` передан явно, он не является доверенным значением и не может обходить configuration contract.
+
+Любой explicit validity period обязан пройти ту же маленькую positive-integer validation function, что используется для `OFFER_VALIDITY_PERIOD_HOURS`.
+
+Business/application logic никогда не получает непроверенный validity period.
+
+Не вводить ради этого branded types, generic config framework или новую abstraction. Достаточно переиспользовать validation/parser из Offers config layer.
+
+### 7.4 Документация config
 
 `.env.example` получает:
 
@@ -255,7 +265,7 @@ searchOffers(input, database?, lifecycleOptions?)
 1. query normalisation S0 выполняется как раньше;
 2. clock выбирается `injected clock ?? systemClock`;
 3. clock вызывается ровно один раз;
-4. validity period берётся из explicit test override либо Offers config;
+4. validity period берётся из explicit test override либо Offers config, после чего в обоих случаях проходит одну и ту же Offers-owned positive-integer validation;
 5. Offers module вычисляет cutoff;
 6. Search repository получает cutoff;
 7. response shape остаётся S0.
@@ -491,7 +501,8 @@ Boundary видимости проверяется прежде всего integ
 - negative invalid;
 - decimal invalid;
 - text invalid;
-- unsafe/non-finite value invalid.
+- unsafe/non-finite value invalid;
+- explicit/internal `validityPeriodHours` проходит ту же validation и не может принять невалидное значение.
 
 Tests вызывают parser напрямую и не мутируют global environment без необходимости.
 
@@ -871,6 +882,7 @@ S1 получает статус `READY` только если одноврем�
 - env parser один;
 - missing → 168;
 - invalid values rejected;
+- explicit/internal validity period проходит ту же validation;
 - direct `process.env` lifecycle reads отсутствуют вне config layer.
 
 ### Seed
