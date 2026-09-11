@@ -1,8 +1,8 @@
 # KAIDA.KZ 2.0
 
-Текущий рабочий slice: S1 Offer Lifecycle. S0 First Search сохранён: анонимный покупатель вводит точное название товара и получает предложения из PostgreSQL. S1 добавляет фильтрацию неактуальных Offers без изменения публичного Search API или UI.
+Текущий завершённый slice: S1 Offer Lifecycle. S0 First Search сохранён: анонимный покупатель вводит точное название товара и получает предложения из PostgreSQL. S1 добавляет фильтрацию неактуальных Offers без изменения публичного Search API или UI.
 
-Статус ветки S1: **NOT READY: manual acceptance pending**. Автоматический `pnpm verify` на реальном PostgreSQL 18 проходит; ручная приёмка S1 должна быть выполнена отдельно до merge/tag.
+Статус ветки S1: **READY — automated verification and manual acceptance PASS**. Контрольная версия после завершения S1: `v0.0.2-s1`.
 
 ## Что потребуется
 
@@ -132,11 +132,26 @@ Mock/SQLite замены PostgreSQL нет. GitHub Actions поднимает р
 
 ## Ручная приёмка S1
 
-Ручная приёмка выполняется отдельно после зелёного CI. До неё S1 остаётся `NOT READY: manual acceptance pending`.
+Ручная приёмка выполнена **2026-09-11** в GitHub Codespaces через существующий Search UI и реальный PostgreSQL 18.
 
-Через существующий UI нужно проверить fresh → visible, затем техническим DB setup сделать тот же Offer expired → empty, вернуть fresh → visible, поставить `inactive` → empty, восстановить seeded state и повторить S0 regression на mobile/desktop.
+Проверено вручную:
 
-Никаких lifecycle/debug/test endpoints, временных UI-кнопок или admin route для этого не добавляется.
+- normal seed;
+- `баранина` visible;
+- `говядина` visible + `Цена не указана`;
+- `единорог` empty;
+- empty query validation;
+- active lamb, искусственно состаренный на 169 часов → hidden;
+- fresh restore → visible;
+- fresh `inactive` lamb → hidden;
+- seed restore;
+- mobile ~390–400 px;
+- desktop layout;
+- keyboard/focus regression.
+
+Результат: **PASS**.
+
+Никаких lifecycle/debug/test endpoints, временных UI-кнопок или admin route для этого не добавлялось.
 
 ## Границы реализации
 
@@ -146,4 +161,4 @@ Mock/SQLite замены PostgreSQL нет. GitHub Actions поднимает р
 
 Plus Jakarta Sans поставляется локально из npm-пакета; кириллица использует системный Arial/sans-serif fallback. Внешних запросов к шрифтовым сервисам нет. Данные вымышлены.
 
-Требования S1: [Feature Spec](docs/slices/S1-offer-lifecycle/FEATURE_SPEC.md), [Migration / Model Contract](docs/slices/S1-offer-lifecycle/MIGRATION_MODEL_CONTRACT.md), [Implementation Contract](docs/slices/S1-offer-lifecycle/IMPLEMENTATION_CONTRACT.md). Общие правила: [Project Rules](docs/PROJECT_RULES.md).
+Требования S1: [Feature Spec](docs/slices/S1-offer-lifecycle/FEATURE_SPEC.md), [Migration / Model Contract](docs/slices/S1-offer-lifecycle/MIGRATION_MODEL_CONTRACT.md), [Implementation Contract](docs/slices/S1-offer-lifecycle/IMPLEMENTATION_CONTRACT.md). Фактическая проверка: [Verification](docs/slices/S1-offer-lifecycle/VERIFICATION.md). Общие правила: [Project Rules](docs/PROJECT_RULES.md).
