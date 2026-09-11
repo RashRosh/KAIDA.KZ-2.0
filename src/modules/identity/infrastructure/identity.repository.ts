@@ -6,8 +6,6 @@ import { authSessions } from '../db/auth-sessions.table';
 import { users } from '../db/users.table';
 import type { CurrentUser } from '../contracts/auth.contract';
 
-type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
-
 export interface NewOtpChallenge {
   id: string;
   phoneE164: string;
@@ -28,22 +26,6 @@ function phoneAdvisoryLockKey(phoneE164: string): bigint {
     .update(`kaida-identity-phone-lock-v1\0${phoneE164}`, 'utf8')
     .digest();
   return digest.readBigInt64BE(0);
-}
-
-async function getOrCreateUserInTransaction(tx: Transaction, phoneE164: string, createdAt: Date): Promise<CurrentUser> {
-  const [created] = await tx.insert(users)
-    .values({ id: randomUUID(), phoneE164, createdAt })
-    .onConflictDoNothing({ target: users.phoneE164 })
-    .returning({ id: users.id, phoneE164: users.phoneE164 });
-
-  if (created) return created;
-
-  const [existing] = await tx.select({ id: users.id, phoneE164: users.phoneE164 })
-    .from(users)
-    .where(eq(users.phoneE164, phoneE164))
-    .limit(1);
-  if (!existing) throw new Error('User conflict resolved without visible user');
-  return existing;
 }
 
 export async function replaceOtpChallenge(db: Database, challenge: NewOtpChallenge): Promise<void> {
@@ -85,14 +67,36 @@ export async function consumeChallengeCreateSession(
 
     if (!consumed) return null;
 
-    const user = await getOrCreateUserInTransaction(tx, consumed.phoneE164, verifyNow);
+    const [created] = await tx.insert(users)
+      .values({ id: randomUUID(), phoneE164: consumed.phoneE164, createdAt: verifyNow })
+      .onConflictDoNothing({ target: users.phoneE164 })
+      .returning({ id: users.id, phoneE164: users.phoneE164 });
+
+    const user = created ?? (await tx.select({ id: users.id, phoneE164: users.phoneE164 })
+      .from(users)
+      .where(eq(users.phoneE164, consumed.phoneE164))
+      .limit(1))[0];
+    if (!user) throw new Error('User conflict resolved without visible user');
+
     await tx.insert(authSessions).values({ ...session, userId: user.id });
     return user;
   });
 }
 
 export async function getOrCreateUserForPhone(db: Database, phoneE164: string, createdAt: Date): Promise<CurrentUser> {
-  return db.transaction((tx) => getOrCreateUserInTransaction(tx, phoneE164, createdAt));
+  return db.transaction(async (tx) => {
+    const [created] = await tx.insert(users)
+      .values({ id: randomUUID(), phoneE164, createdAt })
+      .onConflictDoNothing({ target: users.phoneE164 })
+      .returning({ id: users.id, phoneE164: users.phoneE164 });
+    if (created) return created;
+    const [existing] = await tx.select({ id: users.id, phoneE164: users.phoneE164 })
+      .from(users)
+      .where(eq(users.phoneE164, phoneE164))
+      .limit(1);
+    if (!existing) throw new Error('User conflict resolved without visible user');
+    return existing;
+  });
 }
 
 export async function findCurrentUserBySessionDigest(db: Database, tokenDigest: string, now: Date): Promise<CurrentUser | null> {
