@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { authOtpChallenges } from '../db/auth-otp-challenges.table';
@@ -32,7 +32,7 @@ function phoneAdvisoryLockKey(phoneE164: string): bigint {
 
 async function getOrCreateUserInTransaction(tx: Transaction, phoneE164: string, createdAt: Date): Promise<CurrentUser> {
   const [created] = await tx.insert(users)
-    .values({ id: crypto.randomUUID(), phoneE164, createdAt })
+    .values({ id: randomUUID(), phoneE164, createdAt })
     .onConflictDoNothing({ target: users.phoneE164 })
     .returning({ id: users.id, phoneE164: users.phoneE164 });
 
