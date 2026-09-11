@@ -21,12 +21,14 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
     ]) {
       await tx.insert(products).values(product).onConflictDoUpdate({ target: products.id, set: product });
     }
-    const seller = { id: seedIds.seller, displayName: 'Асыл Ет, тестовый продавец' };
+    const seller = { id: seedIds.seller, displayName: 'Асыл Ет, тестовый продавец', ownerUserId: null };
     await tx.insert(sellers).values(seller).onConflictDoUpdate({ target: sellers.id, set: seller });
     const location = {
       id: seedIds.location,
+      sellerId: seedIds.seller,
       name: 'Тестовая мясная точка',
       addressText: 'Алматы, Зелёный базар, тестовый павильон 12',
+      type: 'pavilion',
     };
     await tx.insert(locations).values(location).onConflictDoUpdate({ target: locations.id, set: location });
     const timestamps = { createdAt: new Date('2026-09-11T00:00:00Z'), updatedAt: new Date('2026-09-11T00:00:00Z') };
@@ -53,7 +55,7 @@ async function main() {
   const { db, pool } = createDatabase(url);
   try {
     await seedDatabase(db);
-    console.log('S1 seed complete: 2 products, 1 seller, 1 location, 2 fresh active offers.');
+    console.log('S3 seed complete: 2 products, 1 ownerless seller, 1 linked pavilion location, 2 fresh active offers.');
   } finally {
     await pool.end();
   }
@@ -61,7 +63,7 @@ async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(() => {
-    console.error('S1 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
+    console.error('S3 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
     process.exitCode = 1;
   });
 }
