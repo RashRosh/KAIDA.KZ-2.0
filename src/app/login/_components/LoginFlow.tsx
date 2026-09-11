@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
 import styles from '../page.module.css';
 
@@ -12,6 +13,7 @@ type RequestSuccess = {
 };
 
 export function LoginFlow() {
+  const router = useRouter();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [canonicalPhone, setCanonicalPhone] = useState('');
@@ -63,7 +65,7 @@ export function LoginFlow() {
         setError(data.error?.message ?? 'Не удалось войти.');
         return;
       }
-      window.location.assign('/');
+      router.replace('/');
     } catch {
       setError('Не удалось войти. Попробуйте ещё раз.');
     } finally {
