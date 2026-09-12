@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
-import styles from '../../../../page.module.css';
+import styles from '../../../page.module.css';
 
 type ApiResponse = { changeSet?: SellerChangeSetView; error?: { code?: string; message?: string } };
 

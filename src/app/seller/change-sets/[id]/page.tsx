@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { SellerChangeSetReview } from './_components/SellerChangeSetReview';
-import styles from '../../../page.module.css';
+import styles from '../../page.module.css';
 
 export default async function SellerChangeSetPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
