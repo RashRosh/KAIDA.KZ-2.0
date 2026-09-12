@@ -58,10 +58,7 @@ export function SellerChangeSetCreate({ seller }: { seller: SellerView }) {
       <p className={styles.eyebrow}>Seller Input</p>
       <h2 id="seller-change-set-create-heading">Добавить товар</h2>
       <p className={styles.muted}>Сначала создадим изменение. Offer появится только после отдельного подтверждения.</p>
-      <div className={styles.locationCard}>
-        <strong>{location.name}</strong>
-        <p>{location.addressText}</p>
-      </div>
+      <p className={styles.muted}>Точка: <strong>{location.name}</strong></p>
       <form className={styles.form} onSubmit={submit} noValidate>
         <label htmlFor="seller-product-name">Товар</label>
         <input id="seller-product-name" value={productName} onChange={(event) => setProductName(event.target.value)} disabled={submitting} autoComplete="off" />
