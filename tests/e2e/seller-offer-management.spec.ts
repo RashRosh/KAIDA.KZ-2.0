@@ -50,6 +50,7 @@ async function search(page: import('@playwright/test').Page) {
 test('Seller manages an existing Offer only after explicit confirmation and buyer Search follows committed state', async ({ page }, testInfo) => {
   const phone = phoneFor(testInfo.project.name);
   const sellerName = `S5 E2E ${testInfo.project.name}`;
+  const sellerOfferCard = page.getByRole('article').filter({ has: page.getByText(sellerName, { exact: true }) });
   await cleanup(phone);
   try {
     await login(page, phone);
@@ -73,7 +74,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
     await expect(page.getByText('S5 старая партия', { exact: true })).toBeVisible();
-    await expect(page.getByText(/4 200 ₸/)).toBeVisible();
+    await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
 
     await page.goto('/seller');
     await expect(page.getByRole('heading', { name: 'Мои предложения' })).toBeVisible();
@@ -97,7 +98,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
     await expect(page.getByText('S5 старая партия', { exact: true })).toBeVisible();
     await expect(page.getByText('S5 новая партия', { exact: true })).toHaveCount(0);
-    await expect(page.getByText(/4 200 ₸/)).toBeVisible();
+    await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
 
     await page.goto(updateReviewUrl);
     await page.getByRole('button', { name: 'Подтвердить изменение' }).click();
@@ -106,7 +107,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
     await expect(page.getByText('S5 новая партия', { exact: true })).toBeVisible();
-    await expect(page.getByText(/4 500 ₸/)).toBeVisible();
+    await expect(sellerOfferCard.getByText(/4 500 ₸/)).toBeVisible();
     await expect(page.getByText('S5 старая партия', { exact: true })).toHaveCount(0);
 
     await page.goto('/seller');
