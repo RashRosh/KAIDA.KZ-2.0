@@ -1,6 +1,6 @@
 # S5 Feature Spec — Offer management through ChangeSet
 
-**Status:** DRAFT, NOT APPROVED  
+**Status:** APPROVED  
 **Implementation Contract:** APPROVED  
 **Base checkpoint:** `v0.0.5-s4`  
 **Base main:** `773ff9225c865d4721494fef74bdfce01569f174`
@@ -675,84 +675,85 @@ S5 принимается только если одновременно вып�
 26. Partial patch отсутствует.
 27. No-op proposal не создаётся.
 28. No-op возвращает `409 OFFER_UPDATE_NO_CHANGES`.
-29. No-op не обновляет freshness.
-30. Product не меняется.
-31. Location не меняется.
-32. Seller не меняется.
-33. Offer ID не меняется.
-34. Update inactive Offer не активирует его.
-35. Successful update обновляет freshness.
-36. Successful update увеличивает revision ровно на 1.
+29. Product не меняется.
+30. Location не меняется.
+31. Seller не меняется.
+32. Offer ID не меняется.
+33. Update inactive Offer не активирует его.
+34. Successful update обновляет freshness.
+35. Successful update увеличивает revision ровно на 1.
 
 ### Deactivate
 
-37. Active Offer можно выключить.
-38. Inactive Offer нельзя повторно deactivate.
-39. Такой запрос даёт `409 OFFER_ALREADY_INACTIVE`.
-40. Для already inactive ChangeSet не создаётся.
-41. До confirmation active Offer остаётся видимым по обычным Search rules.
-42. После confirmation status становится inactive.
-43. Price/comment не меняются.
-44. Offer ID не меняется.
-45. Revision увеличивается ровно на 1.
+36. Active Offer можно выключить.
+37. Inactive Offer нельзя повторно deactivate.
+38. Такой запрос даёт `409 OFFER_ALREADY_INACTIVE`.
+39. До confirmation active Offer остаётся видимым по обычным Search rules.
+40. После confirmation status становится inactive.
+41. Price/comment не меняются.
+42. Offer ID не меняется.
+43. Revision увеличивается ровно на 1.
 
 ### Activate
 
-46. Inactive Offer можно activate.
-47. Active expired Offer можно activate.
-48. Active fresh Offer можно activate.
-49. Во всех трёх случаях используется тот же Offer ID.
-50. Status после confirmation active.
-51. `last_confirmed_at` получает confirmation time.
-52. Revision увеличивается ровно на 1.
+44. Inactive Offer можно activate.
+45. Active expired Offer можно activate.
+46. Active fresh Offer можно activate.
+47. Во всех трёх случаях используется тот же Offer ID.
+48. Status после confirmation active.
+49. `last_confirmed_at` получает confirmation time.
+50. Revision увеличивается ровно на 1.
 
 ### Revision conflicts
 
-53. Два последовательных proposals могут быть созданы от revision N.
-54. Первый successful confirm меняет revision N → N+1.
-55. Второй получает `409 OFFER_CHANGED`.
-56. Второй не изменяет Offer.
-57. Второй остаётся proposed.
-58. Два concurrent different ChangeSets одной revision дают ровно одного winner.
-59. Winner увеличивает revision ровно один раз.
-60. Loser получает `OFFER_CHANGED`.
+51. Два последовательных proposals могут быть созданы от revision N.
+52. Первый successful confirm меняет revision N → N+1.
+53. Второй получает `409 OFFER_CHANGED`.
+54. Второй не изменяет Offer.
+55. Второй остаётся proposed.
+56. Два concurrent different ChangeSets одной revision дают ровно одного winner.
+57. Winner увеличивает revision ровно один раз.
+58. Loser получает `OFFER_CHANGED`.
 
 ### Same ChangeSet
 
-61. Два concurrent confirm одного ChangeSet сходятся к одному результату.
-62. Repeated confirm возвращает тот же Offer.
-63. Repeated confirm не увеличивает revision второй раз.
+59. Два concurrent confirm одного ChangeSet сходятся к одному результату.
+60. Repeated confirm возвращает тот же Offer.
+61. Repeated confirm не увеличивает revision второй раз.
 
 ### S4 regression
 
-64. `create_offer` продолжает работать.
-65. Его request contract не меняется.
-66. Его confirmation semantics не меняются.
-67. Его idempotency не меняется.
-68. Его concurrency guarantee не меняется.
-69. Новый S4 Offer получает revision 1 автоматически.
+62. `create_offer` продолжает работать.
+63. Его request contract не меняется.
+64. Его confirmation semantics не меняются.
+65. Его idempotency не меняется.
+66. Его concurrency guarantee не меняется.
+67. Новый S4 Offer получает revision 1 автоматически.
 
 ### Search regression
 
-70. Search code не меняется.
-71. Search API не меняется.
-72. Active fresh managed Offer показывается.
-73. Inactive managed Offer не показывается.
-74. Expired Offer не показывается.
-75. Activation возвращает Offer в выдачу при соблюдении S1 rules.
-76. S0 seed Search остаётся рабочим.
+68. Search code не меняется.
+69. Search API не меняется.
+70. Active fresh managed Offer показывается.
+71. Inactive managed Offer не показывается.
+72. Expired Offer не показывается.
+73. Activation возвращает Offer в выдачу при соблюдении S1 rules.
+74. S0 seed Search остаётся рабочим.
 
 ## 15. Manual Acceptance
 
-Один законченный пользовательский проход:
+Человеческая проверка должна быть одним небольшим законченным пакетом действий:
 
-1. Открыть KAIDA.KZ на телефоне или в узком окне браузера, войти как продавец и создать предложение товара существующим способом.
-2. Изменить у него цену и комментарий. На экране проверки убедиться, что новые данные указаны правильно, затем открыть обычный поиск и убедиться, что до подтверждения там всё ещё видны старые данные.
-3. Вернуться к изменению, подтвердить его и убедиться, что в обычном поиске теперь отображаются новая цена и новый комментарий.
-4. Перезагрузить страницу и убедиться, что подтверждённые данные сохранились.
-5. Выключить это предложение. До подтверждения оно ещё должно находиться в поиске, после подтверждения должно исчезнуть.
-6. Снова включить то же предложение и убедиться, что после подтверждения оно снова появилось в поиске.
-7. Повторить быстрый просмотр ключевых экранов на desktop-размере и убедиться, что сценарий остаётся рабочим.
-8. Выйти из аккаунта и убедиться, что обычный поиск продолжает работать.
+1. Открыть приложение на мобильном или десктопе и войти как продавец.
+2. Создать обычное предложение существующим способом и убедиться, что оно находится через обычный поиск.
+3. Открыть это предложение в разделе продавца, изменить цену и комментарий и перейти к экрану проверки изменений.
+4. До подтверждения открыть обычный поиск и убедиться, что покупателю всё ещё видны прежние цена и комментарий.
+5. Вернуться к экрану проверки, перезагрузить страницу и убедиться, что подготовленные изменения сохранились. Подтвердить их и проверить в обычном поиске новую цену и новый комментарий.
+6. Выключить это же предложение: до подтверждения оно ещё должно находиться, после подтверждения должно исчезнуть из обычного поиска.
+7. Снова включить то же предложение и убедиться, что после подтверждения оно снова находится в поиске.
+8. Перезагрузить страницу продавца и убедиться, что текущее состояние предложения сохранилось.
+9. Выйти из аккаунта и убедиться, что обычный поиск продолжает работать.
 
-Concurrency, stale conflicts, ownership protection, rollback и migration correctness проверяются автоматически и не входят в ручной пользовательский проход.
+Тот же пакет должен быть пройден на mobile и desktop.
+
+Concurrency, stale protection, atomic rollback, ownership spoofing и migration correctness проверяются автоматическими тестами.

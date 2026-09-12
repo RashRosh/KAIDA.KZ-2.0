@@ -1,7 +1,7 @@
 # S5 Implementation Contract — Offer management through ChangeSet
 
 **Status:** APPROVED  
-**Feature Spec:** DRAFT  
+**Feature Spec:** APPROVED  
 **Base checkpoint:** `v0.0.5-s4`  
 **Base main:** `773ff9225c865d4721494fef74bdfce01569f174`
 
@@ -1341,8 +1341,9 @@ implementation
 → manual acceptance
 ```
 
-Until explicit authorization to begin implementation:
+Until that happens:
 
 ```text
-S5 IMPLEMENTATION BLOCKED
+S5 NOT APPROVED
+IMPLEMENTATION BLOCKED
 ```
