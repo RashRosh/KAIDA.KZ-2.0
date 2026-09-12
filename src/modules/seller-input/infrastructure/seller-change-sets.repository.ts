@@ -7,7 +7,7 @@ import { offers } from '../../offers/db/offers.table';
 import type { OfferStatus } from '../../offers/db/offers.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SellerChangeSetView } from '../contracts/seller-change-set.contract';
-import { sellerChangeItems } from '../db/seller-change-items.table';
+import { sellerChangeItems, type SellerOfferManagementAction } from '../db/seller-change-items.table';
 import { sellerChangeSets } from '../db/seller-change-sets.table';
 
 export type SellerInputDb = Pick<Database, 'insert' | 'select' | 'update'>;
@@ -54,9 +54,40 @@ export async function createChangeItem(database: SellerInputDb, values: {
     priceCurrency: values.priceCurrency,
     priceUnit: values.priceUnit,
     sellerComment: values.sellerComment,
+    targetOfferId: null,
+    expectedOfferRevision: null,
   }).returning({ id: sellerChangeItems.id });
   const item = rows[0];
   if (!item) throw new Error('SellerChangeItem insert did not return a row');
+  return item;
+}
+
+export async function createOfferManagementChangeItem(database: SellerInputDb, values: {
+  changeSetId: string;
+  action: SellerOfferManagementAction;
+  productId: string;
+  locationId: string;
+  priceAmount: string | null;
+  priceCurrency: 'KZT' | null;
+  priceUnit: string | null;
+  sellerComment: string | null;
+  targetOfferId: string;
+  expectedOfferRevision: number;
+}) {
+  const rows = await database.insert(sellerChangeItems).values({
+    changeSetId: values.changeSetId,
+    action: values.action,
+    productId: values.productId,
+    locationId: values.locationId,
+    priceAmount: values.priceAmount,
+    priceCurrency: values.priceCurrency,
+    priceUnit: values.priceUnit,
+    sellerComment: values.sellerComment,
+    targetOfferId: values.targetOfferId,
+    expectedOfferRevision: values.expectedOfferRevision,
+  }).returning({ id: sellerChangeItems.id });
+  const item = rows[0];
+  if (!item) throw new Error('Seller offer management item insert did not return a row');
   return item;
 }
 
@@ -147,6 +178,8 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     priceCurrency: sellerChangeItems.priceCurrency,
     priceUnit: sellerChangeItems.priceUnit,
     sellerComment: sellerChangeItems.sellerComment,
+    targetOfferId: sellerChangeItems.targetOfferId,
+    expectedOfferRevision: sellerChangeItems.expectedOfferRevision,
     resultOfferId: sellerChangeItems.resultOfferId,
   }).from(sellerChangeItems)
     .where(eq(sellerChangeItems.changeSetId, changeSetId))

@@ -71,11 +71,15 @@
 .card h2 { margin: 6px 0 20px; font-size: 26px; letter-spacing: -0.03em; }
 .card h3 { letter-spacing: -0.02em; }
 
-.form { display: grid; gap: 10px; margin-top: 20px; }
-.form label { margin-top: 8px; font-size: 14px; font-weight: 700; }
+.form,
+.inlineForm { display: grid; gap: 10px; margin-top: 20px; }
+.form label,
+.inlineForm label { margin-top: 8px; font-size: 14px; font-weight: 700; }
 .form input,
 .form select,
-.form textarea {
+.form textarea,
+.inlineForm input,
+.inlineForm textarea {
   width: 100%;
   min-width: 0;
   padding: 13px 14px;
@@ -85,9 +89,11 @@
   color: inherit;
   font: inherit;
 }
-.form textarea { resize: vertical; }
+.form textarea,
+.inlineForm textarea { resize: vertical; }
 
 .form button,
+.inlineForm button,
 .actions button,
 .primaryLink {
   margin-top: 12px;
@@ -107,21 +113,56 @@
 }
 
 .form button:disabled,
+.inlineForm button:disabled,
 .actions button:disabled { cursor: progress; opacity: 0.65; }
+
+.secondaryButton {
+  margin-top: 0 !important;
+  border: 1px solid rgba(108, 67, 217, 0.28) !important;
+  background: #fff !important;
+  color: #6c43d9 !important;
+}
 
 .error { margin: 8px 0 0; color: #9d2449; font-size: 14px; line-height: 1.45; }
 .status { padding: 14px 16px; border-radius: 14px; background: #f7f4ff; line-height: 1.5; }
 
-.locations { display: grid; gap: 12px; }
+.locations,
+.offerList { display: grid; gap: 12px; }
+.offerList { margin-top: 20px; }
 .locationCard,
-.itemCard {
+.itemCard,
+.offerCard {
   padding: 18px;
   border-radius: 16px;
   background: #f7f4ff;
 }
 .locationCard h3,
-.itemCard h3 { margin: 0 0 8px; }
+.itemCard h3,
+.offerCard h3 { margin: 0 0 8px; }
 .locationCard p { margin: 4px 0; color: #625a72; line-height: 1.45; }
+
+.offerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.offerStatus {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: #625a72;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.inlineForm {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(68, 45, 112, 0.14);
+}
 
 .summaryGrid {
   display: grid;
@@ -156,4 +197,6 @@
   .summaryGrid dd { margin-bottom: 8px; }
   .actions { align-items: stretch; flex-direction: column; }
   .actions button, .actions .secondaryLink { width: 100%; text-align: center; }
+  .offerHeader { align-items: stretch; flex-direction: column; }
+  .offerStatus { align-self: flex-start; }
 }

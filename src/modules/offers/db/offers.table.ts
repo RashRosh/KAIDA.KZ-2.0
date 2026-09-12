@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { char, check, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { char, check, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import { locations } from '../../locations/db/locations.table';
@@ -17,6 +17,7 @@ export const offers = pgTable('offers', {
   sellerComment: text('seller_comment'),
   status: text('status').$type<OfferStatus>().notNull(),
   lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true }).notNull(),
+  revision: integer('revision').notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
