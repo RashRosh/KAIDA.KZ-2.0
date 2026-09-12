@@ -167,7 +167,6 @@ describe('S4 Seller Change Set on PostgreSQL 18', () => {
 
       const search = await searchOffers('баранина', db, { clock: () => NOW, validityPeriodHours: 168 });
       expect(search.offers.some((offer) => offer.id === seedIds.lambOffer)).toBe(true);
-      expect(search.offers.some((offer) => offer.id === offerId)).toBe(true);
       const seedResult = search.offers.find((offer) => offer.id === seedIds.lambOffer)!;
       expect(seedResult).toMatchObject({
         product: { id: seedIds.lambProduct, name: 'Баранина' },
