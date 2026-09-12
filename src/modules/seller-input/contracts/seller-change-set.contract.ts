@@ -18,6 +18,10 @@ const optionalCommentSchema = z.string().trim().max(500)
   .optional()
   .transform((value) => value ?? null);
 
+const requiredCommentSchema = z.string().trim().max(500)
+  .transform((value) => value === '' ? null : value)
+  .nullable();
+
 const priceSchema = z.object({
   amount: z.string().trim().regex(SELLER_INPUT_PRICE_AMOUNT_PATTERN),
   unit: optionalUnitSchema,
@@ -30,9 +34,21 @@ export const sellerChangeSetCreateBodySchema = z.object({
   sellerComment: optionalCommentSchema,
 }).strict();
 
+export const sellerOfferChangeBodySchema = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal('update_offer'),
+    price: priceSchema.nullable(),
+    sellerComment: requiredCommentSchema,
+  }).strict(),
+  z.object({ action: z.literal('deactivate_offer') }).strict(),
+  z.object({ action: z.literal('activate_offer') }).strict(),
+]);
+
 export const sellerChangeSetIdSchema = z.string().uuid();
+export const sellerOfferIdSchema = z.string().uuid();
 
 export type SellerChangeSetCreateInput = z.infer<typeof sellerChangeSetCreateBodySchema>;
+export type SellerOfferChangeInput = z.infer<typeof sellerOfferChangeBodySchema>;
 
 export type SellerChangeSetItemView = {
   id: string;
@@ -82,6 +98,38 @@ export class LocationNotFoundError extends Error {
   constructor() {
     super('Точка продавца не найдена.');
     this.name = 'LocationNotFoundError';
+  }
+}
+
+export class OfferNotFoundError extends Error {
+  readonly code = 'OFFER_NOT_FOUND' as const;
+  constructor() {
+    super('Предложение не найдено.');
+    this.name = 'OfferNotFoundError';
+  }
+}
+
+export class OfferUpdateNoChangesError extends Error {
+  readonly code = 'OFFER_UPDATE_NO_CHANGES' as const;
+  constructor() {
+    super('Изменения совпадают с текущим предложением.');
+    this.name = 'OfferUpdateNoChangesError';
+  }
+}
+
+export class OfferAlreadyInactiveError extends Error {
+  readonly code = 'OFFER_ALREADY_INACTIVE' as const;
+  constructor() {
+    super('Предложение уже выключено.');
+    this.name = 'OfferAlreadyInactiveError';
+  }
+}
+
+export class OfferChangedError extends Error {
+  readonly code = 'OFFER_CHANGED' as const;
+  constructor() {
+    super('Предложение изменилось после создания этого изменения. Создайте новое изменение из актуальных данных.');
+    this.name = 'OfferChangedError';
   }
 }
 

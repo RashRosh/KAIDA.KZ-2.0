@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import type { LocationType } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { SellerChangeSetCreate } from './SellerChangeSetCreate';
+import { SellerOfferManagement } from './SellerOfferManagement';
 import styles from '../page.module.css';
 
 type ApiError = { error?: { code?: string; message?: string } };
@@ -114,6 +115,7 @@ export function SellerSetup() {
           </div>
         </section>
         <SellerChangeSetCreate seller={seller} />
+        <SellerOfferManagement />
       </div>
     );
   }
