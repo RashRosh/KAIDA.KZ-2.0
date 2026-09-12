@@ -1,0 +1,102 @@
+import { z } from 'zod';
+import type { LocationType } from '../../locations/contracts/location.contract';
+import type { OfferStatus } from '../../offers/db/offers.table';
+import type { SellerChangeAction } from '../db/seller-change-items.table';
+import type { SellerChangeSetStatus } from '../db/seller-change-sets.table';
+
+export const SELLER_INPUT_PRICE_AMOUNT_PATTERN = /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/;
+
+const optionalUnitSchema = z.string().trim().max(32)
+  .transform((value) => value === '' ? null : value)
+  .nullable()
+  .optional()
+  .transform((value) => value ?? null);
+
+const optionalCommentSchema = z.string().trim().max(500)
+  .transform((value) => value === '' ? null : value)
+  .nullable()
+  .optional()
+  .transform((value) => value ?? null);
+
+const priceSchema = z.object({
+  amount: z.string().trim().regex(SELLER_INPUT_PRICE_AMOUNT_PATTERN),
+  unit: optionalUnitSchema,
+}).strict();
+
+export const sellerChangeSetCreateBodySchema = z.object({
+  productName: z.string().trim().min(1),
+  locationId: z.string().uuid(),
+  price: priceSchema.nullable().optional().transform((value) => value ?? null),
+  sellerComment: optionalCommentSchema,
+}).strict();
+
+export const sellerChangeSetIdSchema = z.string().uuid();
+
+export type SellerChangeSetCreateInput = z.infer<typeof sellerChangeSetCreateBodySchema>;
+
+export type SellerChangeSetItemView = {
+  id: string;
+  action: SellerChangeAction;
+  product: { id: string; name: string };
+  location: { id: string; name: string; addressText: string; type: LocationType };
+  price: { amount: string; currency: 'KZT'; unit: string | null } | null;
+  sellerComment: string | null;
+  resultOffer: { id: string; status: OfferStatus; lastConfirmedAt: string } | null;
+};
+
+export type SellerChangeSetView = {
+  id: string;
+  status: SellerChangeSetStatus;
+  createdAt: string;
+  confirmedAt: string | null;
+  seller: { id: string; displayName: string };
+  items: SellerChangeSetItemView[];
+};
+
+export class SellerRequiredError extends Error {
+  readonly code = 'SELLER_REQUIRED' as const;
+  constructor() {
+    super('Сначала создайте продавца и точку.');
+    this.name = 'SellerRequiredError';
+  }
+}
+
+export class ProductNotFoundError extends Error {
+  readonly code = 'PRODUCT_NOT_FOUND' as const;
+  constructor() {
+    super('Такого товара пока нет в каталоге.');
+    this.name = 'ProductNotFoundError';
+  }
+}
+
+export class ProductAmbiguousError extends Error {
+  readonly code = 'PRODUCT_AMBIGUOUS' as const;
+  constructor() {
+    super('Товар в каталоге определён неоднозначно.');
+    this.name = 'ProductAmbiguousError';
+  }
+}
+
+export class LocationNotFoundError extends Error {
+  readonly code = 'LOCATION_NOT_FOUND' as const;
+  constructor() {
+    super('Точка продавца не найдена.');
+    this.name = 'LocationNotFoundError';
+  }
+}
+
+export class ChangeSetNotFoundError extends Error {
+  readonly code = 'CHANGE_SET_NOT_FOUND' as const;
+  constructor() {
+    super('Изменение не найдено.');
+    this.name = 'ChangeSetNotFoundError';
+  }
+}
+
+export class SellerInputInvariantError extends Error {
+  readonly code = 'SELLER_INPUT_INVARIANT' as const;
+  constructor(message = 'Нарушена целостность изменения продавца.') {
+    super(message);
+    this.name = 'SellerInputInvariantError';
+  }
+}
