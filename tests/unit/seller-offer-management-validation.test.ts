@@ -17,7 +17,7 @@ describe('S5 seller offer management validation', () => {
       sellerComment: '  Новая партия  ',
     });
     expect(result.success).toBe(true);
-    if (result.success) {
+    if (result.success && result.data.action === 'update_offer') {
       expect(result.data).toEqual({
         action: 'update_offer',
         price: { amount: '4500.00', unit: 'кг' },
@@ -50,7 +50,7 @@ describe('S5 seller offer management validation', () => {
   it('normalizes blank update unit/comment to null', () => {
     const result = parse({ action: 'update_offer', price: { amount: '12.50', unit: '   ' }, sellerComment: '   ' });
     expect(result.success).toBe(true);
-    if (result.success) {
+    if (result.success && result.data.action === 'update_offer') {
       expect(result.data.price).toEqual({ amount: '12.50', unit: null });
       expect(result.data.sellerComment).toBeNull();
     }
@@ -93,12 +93,14 @@ describe('S5 seller offer management validation', () => {
       sellerComment: 'Свежая партия',
     }, parsed)).toBe(true);
 
+    const clear = sellerOfferChangeBodySchema.parse({ action: 'update_offer', price: null, sellerComment: null });
+    if (clear.action !== 'update_offer') throw new Error('unexpected action');
     expect(offerUpdateIsNoOp({
       priceAmount: null,
       priceCurrency: null,
       priceUnit: null,
       sellerComment: null,
-    }, sellerOfferChangeBodySchema.parse({ action: 'update_offer', price: null, sellerComment: null }) as Extract<typeof parsed, { action: 'update_offer' }>)).toBe(true);
+    }, clear)).toBe(true);
 
     expect(offerUpdateIsNoOp({
       priceAmount: '4501.00',
