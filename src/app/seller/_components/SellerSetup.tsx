@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import type { LocationType } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
+import { SellerChangeSetCreate } from './SellerChangeSetCreate';
 import styles from '../page.module.css';
 
 type ApiError = { error?: { code?: string; message?: string } };
@@ -84,9 +85,7 @@ export function SellerSetup() {
     }
   }
 
-  if (state === 'loading') {
-    return <section className={styles.card}><p>Загружаем…</p></section>;
-  }
+  if (state === 'loading') return <section className={styles.card}><p>Загружаем…</p></section>;
 
   if (state === 'anonymous') {
     return (
@@ -100,19 +99,22 @@ export function SellerSetup() {
 
   if (seller) {
     return (
-      <section className={styles.card} aria-labelledby="seller-summary-heading">
-        <p className={styles.eyebrow}>Продавец создан</p>
-        <h2 id="seller-summary-heading">{seller.displayName}</h2>
-        <div className={styles.locations}>
-          {seller.locations.map((location) => (
-            <article key={location.id} className={styles.locationCard}>
-              <h3>{location.name}</h3>
-              <p>{typeLabels[location.type]}</p>
-              <p>{location.addressText}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <div className={styles.stack}>
+        <section className={styles.card} aria-labelledby="seller-summary-heading">
+          <p className={styles.eyebrow}>Продавец создан</p>
+          <h2 id="seller-summary-heading">{seller.displayName}</h2>
+          <div className={styles.locations}>
+            {seller.locations.map((location) => (
+              <article key={location.id} className={styles.locationCard}>
+                <h3>{location.name}</h3>
+                <p>{typeLabels[location.type]}</p>
+                <p>{location.addressText}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+        <SellerChangeSetCreate seller={seller} />
+      </div>
     );
   }
 

@@ -26,16 +26,27 @@ async function cleanup(phone: string) {
   }
 }
 
+async function ownedSellerOfferCount(pool: Pool, phone: string) {
+  return Number((await pool.query(`
+    SELECT count(*)
+    FROM offers o
+    JOIN sellers s ON s.id = o.seller_id
+    JOIN users u ON u.id = s.owner_user_id
+    WHERE u.phone_e164 = $1
+  `, [phone])).rows[0].count);
+}
+
 test('authenticated User creates Seller + first Location and persists after reload', async ({ page }, testInfo) => {
   const phone = phoneFor(testInfo.project.name);
   await cleanup(phone);
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
-  const offersBefore = Number((await pool.query('SELECT count(*) FROM offers')).rows[0].count);
   try {
+    expect(await ownedSellerOfferCount(pool, phone)).toBe(0);
+
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
 
     await page.goto('/seller');
     await expect(page.getByRole('heading', { name: 'Нужно войти' })).toBeVisible();
@@ -61,6 +72,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     await expect(page.getByRole('heading', { name: 'S3 тестовая точка' })).toBeVisible();
     await expect(page.getByText('Павильон', { exact: true })).toBeVisible();
     await expect(page.getByText('Алматы, тестовый адрес S3', { exact: true })).toBeVisible();
+    expect(await ownedSellerOfferCount(pool, phone)).toBe(0);
 
     const me = await page.context().request.get('/api/seller/me');
     expect(me.status()).toBe(200);
@@ -72,6 +84,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.reload();
     await expect(page.getByRole('heading', { name: 'S3 тестовый продавец' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'S3 тестовая точка' })).toBeVisible();
+    expect(await ownedSellerOfferCount(pool, phone)).toBe(0);
 
     const duplicate = await page.context().request.post('/api/seller/setup', {
       data: {
@@ -81,19 +94,18 @@ test('authenticated User creates Seller + first Location and persists after relo
     });
     expect(duplicate.status()).toBe(409);
     expect((await duplicate.json()).error.code).toBe('SELLER_ALREADY_EXISTS');
-
-    expect(Number((await pool.query('SELECT count(*) FROM offers')).rows[0].count)).toBe(offersBefore);
+    expect(await ownedSellerOfferCount(pool, phone)).toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Выйти' }).click();
     await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
   } finally {
     await pool.end();
     await cleanup(phone);
