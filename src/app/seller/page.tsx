@@ -11,9 +11,9 @@ export default function SellerPage() {
       </header>
       <main className={styles.main}>
         <div className={styles.intro}>
-          <p className={styles.eyebrow}>Seller setup</p>
-          <h1>Ваша точка в KAIDA.KZ</h1>
-          <p>Создайте продавца и первую физическую точку. Ассортимент появится на следующем этапе.</p>
+          <p className={styles.eyebrow}>Seller Input</p>
+          <h1>Ваши товары в KAIDA.KZ</h1>
+          <p>Сначала настройте продавца и точку. Затем создавайте изменения ассортимента и подтверждайте их перед появлением Offer.</p>
         </div>
         <SellerSetup />
       </main>
