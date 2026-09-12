@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import styles from '../../../page.module.css';
 
@@ -13,29 +13,34 @@ export function SellerChangeSetReview({ changeSetId }: { changeSetId: string }) 
   const [error, setError] = useState('');
   const [confirming, setConfirming] = useState(false);
 
-  const load = useCallback(async () => {
-    setError('');
-    try {
-      const response = await fetch(`/api/seller/change-sets/${changeSetId}`, { cache: 'no-store' });
-      if (response.status === 401) {
-        setState('anonymous');
-        return;
-      }
-      const data = await response.json() as ApiResponse;
-      if (!response.ok || !data.changeSet) {
-        setError(data.error?.message ?? 'Не удалось загрузить изменение.');
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        const response = await fetch(`/api/seller/change-sets/${changeSetId}`, { cache: 'no-store' });
+        if (!active) return;
+        if (response.status === 401) {
+          setState('anonymous');
+          return;
+        }
+        const data = await response.json() as ApiResponse;
+        if (!active) return;
+        if (!response.ok || !data.changeSet) {
+          setError(data.error?.message ?? 'Не удалось загрузить изменение.');
+          setState('ready');
+          return;
+        }
+        setError('');
+        setChangeSet(data.changeSet);
         setState('ready');
-        return;
+      } catch {
+        if (!active) return;
+        setError('Не удалось загрузить изменение.');
+        setState('ready');
       }
-      setChangeSet(data.changeSet);
-      setState('ready');
-    } catch {
-      setError('Не удалось загрузить изменение.');
-      setState('ready');
-    }
+    })();
+    return () => { active = false; };
   }, [changeSetId]);
-
-  useEffect(() => { void load(); }, [load]);
 
   async function confirm() {
     setError('');
