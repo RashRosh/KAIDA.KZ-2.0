@@ -60,10 +60,10 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await page.getByRole('button', { name: 'Создать продавца' }).click();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
-    await page.getByLabel('Товар').fill('Баранина');
-    await page.getByLabel('Цена, ₸').fill('4321.50');
-    await page.getByLabel('Единица').fill('кг');
-    await page.getByLabel('Комментарий продавца').fill('S4 E2E свежий привоз');
+    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
+    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4321.50');
+    await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+    await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S4 E2E свежий привоз');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
     await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
