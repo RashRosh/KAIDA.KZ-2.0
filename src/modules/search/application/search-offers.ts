@@ -9,12 +9,15 @@ import {
   systemClock,
   type Clock,
 } from '../../offers/lifecycle/offer-lifecycle';
+import type { BuyerLocation } from '../contracts/buyer-location.contract';
 import { searchQuerySchema, type SearchResponse } from '../contracts/search.contract';
 import { findOffersByProductId } from '../infrastructure/search.repository';
+import { rankSearchOfferCandidates } from '../ranking/search-ranking';
 
 type SearchLifecycleOptions = {
   clock?: Clock;
   validityPeriodHours?: number;
+  buyerLocation?: BuyerLocation;
 };
 
 export async function searchOffers(
@@ -31,6 +34,9 @@ export async function searchOffers(
   const db = database ?? getDatabase();
   const resolution = await resolveProduct(db, query);
   if (resolution.status !== 'resolved') return { query, offers: [] };
-  const offers = await findOffersByProductId(db, resolution.product.id, cutoff);
+
+  const candidates = await findOffersByProductId(db, resolution.product.id, cutoff);
+  const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation)
+    .map(({ offer }) => offer);
   return { query, offers };
 }
