@@ -8,21 +8,40 @@ test('lamb: search by button, full offer, responsive layout and refresh', async 
   await page.getByRole('button', { name: 'Найти', exact: true }).click();
   const response = await responsePromise;
   expect(response.status()).toBe(200);
-  expect((await response.json()).offers[0].price.amount).toBe('4200.00');
-  const card = page.getByRole('article');
-  await expect(card).toHaveCount(1);
-  await expect(card.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
-  await expect(card).toContainText(/4\s200\s₸\s\/\sкг/);
-  await expect(card).toContainText('Асыл Ет, тестовый продавец');
-  await expect(card).toContainText('Тестовая мясная точка');
-  await expect(card).toContainText('Алматы, Зелёный базар, тестовый павильон 12');
-  await expect(card).toContainText('Свежий привоз.');
+  const body = await response.json();
+  const seedOffer = body.offers.find((offer: {
+    seller: { displayName: string };
+    location: { name: string };
+    sellerComment: string | null;
+  }) => offer.seller.displayName === 'Асыл Ет, тестовый продавец'
+    && offer.location.name === 'Тестовая мясная точка'
+    && offer.sellerComment === 'Свежий привоз.');
+  expect(seedOffer).toMatchObject({
+    product: { name: 'Баранина' },
+    price: { amount: '4200.00', currency: 'KZT', unit: 'кг' },
+    seller: { displayName: 'Асыл Ет, тестовый продавец' },
+    location: {
+      name: 'Тестовая мясная точка',
+      addressText: 'Алматы, Зелёный базар, тестовый павильон 12',
+    },
+    sellerComment: 'Свежий привоз.',
+  });
+  const seedCard = page.getByRole('article')
+    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
+    .filter({ hasText: 'Тестовая мясная точка' });
+  await expect(seedCard).toHaveCount(1);
+  await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+  await expect(seedCard).toContainText(/4\s200\s₸\s\/\sкг/);
+  await expect(seedCard).toContainText('Асыл Ет, тестовый продавец');
+  await expect(seedCard).toContainText('Тестовая мясная точка');
+  await expect(seedCard).toContainText('Алматы, Зелёный базар, тестовый павильон 12');
+  await expect(seedCard).toContainText('Свежий привоз.');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await testInfo.attach('lamb-offer', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
   await page.reload();
   await page.getByLabel('Какой товар ищете?').fill('БАРАНИНА');
   await page.getByLabel('Какой товар ищете?').press('Enter');
-  await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+  await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 });
 
 test('unknown product clears the previous result', async ({ page }) => {
