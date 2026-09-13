@@ -1,11 +1,12 @@
 import 'dotenv/config';
 import { pathToFileURL } from 'node:url';
 import { createDatabase, type Database } from './client';
-import { products, sellers, locations, offers } from './schema';
+import { productAliases, products, sellers, locations, offers } from './schema';
 
 export const seedIds = {
   lambProduct: '10000000-0000-4000-8000-000000000001',
   beefProduct: '10000000-0000-4000-8000-000000000002',
+  lambAlias: '11000000-0000-4000-8000-000000000001',
   seller: '20000000-0000-4000-8000-000000000001',
   location: '30000000-0000-4000-8000-000000000001',
   lambOffer: '40000000-0000-4000-8000-000000000001',
@@ -21,6 +22,9 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
     ]) {
       await tx.insert(products).values(product).onConflictDoUpdate({ target: products.id, set: product });
     }
+    const lambAlias = { id: seedIds.lambAlias, productId: seedIds.lambProduct, name: 'мясо барана' };
+    await tx.insert(productAliases).values(lambAlias).onConflictDoUpdate({ target: productAliases.id, set: lambAlias });
+
     const seller = { id: seedIds.seller, displayName: 'Асыл Ет, тестовый продавец', ownerUserId: null };
     await tx.insert(sellers).values(seller).onConflictDoUpdate({ target: sellers.id, set: seller });
     const location = {
@@ -55,7 +59,7 @@ async function main() {
   const { db, pool } = createDatabase(url);
   try {
     await seedDatabase(db);
-    console.log('S3 seed complete: 2 products, 1 ownerless seller, 1 linked pavilion location, 2 fresh active offers.');
+    console.log('S6 seed complete: 2 products, 1 product alias, 1 ownerless seller, 1 linked pavilion location, 2 fresh active offers.');
   } finally {
     await pool.end();
   }
@@ -63,7 +67,7 @@ async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(() => {
-    console.error('S3 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
+    console.error('S6 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
     process.exitCode = 1;
   });
 }

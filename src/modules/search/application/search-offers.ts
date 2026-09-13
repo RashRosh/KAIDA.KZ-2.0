@@ -1,4 +1,5 @@
 import { getDatabase, type Database } from '../../../db/client';
+import { resolveProduct } from '../../catalog/application/resolve-product';
 import {
   readOfferValidityPeriodHours,
   validateOfferValidityPeriodHours,
@@ -9,7 +10,7 @@ import {
   type Clock,
 } from '../../offers/lifecycle/offer-lifecycle';
 import { searchQuerySchema, type SearchResponse } from '../contracts/search.contract';
-import { findOffersByProductName } from '../infrastructure/search.repository';
+import { findOffersByProductId } from '../infrastructure/search.repository';
 
 type SearchLifecycleOptions = {
   clock?: Clock;
@@ -27,6 +28,9 @@ export async function searchOffers(
     ? readOfferValidityPeriodHours()
     : validateOfferValidityPeriodHours(lifecycleOptions.validityPeriodHours);
   const cutoff = calculateOfferCutoff(now, validityPeriodHours);
-  const offers = await findOffersByProductName(database ?? getDatabase(), query, cutoff);
+  const db = database ?? getDatabase();
+  const resolution = await resolveProduct(db, query);
+  if (resolution.status !== 'resolved') return { query, offers: [] };
+  const offers = await findOffersByProductId(db, resolution.product.id, cutoff);
   return { query, offers };
 }
