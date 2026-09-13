@@ -17,31 +17,37 @@ async function prepare() {
     await seedDatabase(db, seedNow);
 
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-    const expected = ['auth_otp_challenges', 'auth_sessions', 'locations', 'offers', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
+    const expected = ['auth_otp_challenges', 'auth_sessions', 'locations', 'offers', 'product_aliases', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
     if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(expected)) {
-      throw new Error('S4 clean database must contain exactly the existing seven tables plus Seller Change Set and Item');
+      throw new Error('S6 clean database must contain exactly the S0-S5 tables plus ProductAlias');
     }
 
     const users = await pool.query('SELECT count(*)::int AS count FROM users');
-    if (users.rows[0]?.count !== 0) throw new Error('S4 seed must not create a User');
+    if (users.rows[0]?.count !== 0) throw new Error('S6 seed must not create a User');
 
     const seller = (await pool.query('SELECT id, owner_user_id FROM sellers WHERE id=$1', [seedIds.seller])).rows[0];
-    if (!seller || seller.owner_user_id !== null) throw new Error('S4 seed Seller must remain ownerless');
+    if (!seller || seller.owner_user_id !== null) throw new Error('S6 seed Seller must remain ownerless');
 
     const location = (await pool.query('SELECT id, seller_id, type FROM locations WHERE id=$1', [seedIds.location])).rows[0];
     if (!location || location.seller_id !== seedIds.seller || location.type !== 'pavilion') {
-      throw new Error('S4 seed Location must still point to seed Seller and be pavilion');
+      throw new Error('S6 seed Location must still point to seed Seller and be pavilion');
+    }
+
+    const alias = (await pool.query('SELECT id, product_id, name FROM product_aliases WHERE id=$1', [seedIds.lambAlias])).rows[0];
+    if (!alias || alias.product_id !== seedIds.lambProduct || alias.name !== 'мясо барана') {
+      throw new Error('S6 seed must contain exactly the deterministic lamb acceptance alias');
     }
 
     const sellerCount = Number((await pool.query('SELECT count(*) FROM sellers WHERE id=$1', [seedIds.seller])).rows[0].count);
     const locationCount = Number((await pool.query('SELECT count(*) FROM locations WHERE id=$1', [seedIds.location])).rows[0].count);
     const offerCount = Number((await pool.query('SELECT count(*) FROM offers WHERE id IN ($1,$2)', [seedIds.lambOffer, seedIds.beefOffer])).rows[0].count);
+    const aliasCount = Number((await pool.query('SELECT count(*) FROM product_aliases')).rows[0].count);
     const changeSetCount = Number((await pool.query('SELECT count(*) FROM seller_change_sets')).rows[0].count);
     const changeItemCount = Number((await pool.query('SELECT count(*) FROM seller_change_items')).rows[0].count);
-    if (sellerCount !== 1 || locationCount !== 1 || offerCount !== 2) throw new Error('S4 repeat seed must keep S0/S3 fixtures deterministic');
-    if (changeSetCount !== 0 || changeItemCount !== 0) throw new Error('S4 seed must not create Seller Change Sets or Items');
+    if (sellerCount !== 1 || locationCount !== 1 || offerCount !== 2 || aliasCount !== 1) throw new Error('S6 repeat seed must keep accepted fixtures deterministic');
+    if (changeSetCount !== 0 || changeItemCount !== 0) throw new Error('S6 seed must not create Seller Change Sets or Items');
 
-    console.log('PostgreSQL 18 kaida_test: clean S0→S1→S2→S3→S4 migration chain, repeat migration and deterministic repeat seed completed.');
+    console.log('PostgreSQL 18 kaida_test: clean S0→S1→S2→S3→S4→S5→S6 migration chain, repeat migration and deterministic repeat seed completed.');
   } finally {
     await pool.end();
   }
