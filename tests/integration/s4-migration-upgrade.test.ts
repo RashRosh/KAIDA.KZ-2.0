@@ -78,7 +78,8 @@ describe('S4 migration upgrade path on PostgreSQL 18', () => {
       expect((await pool.query('SELECT * FROM products WHERE id=$1', [productId])).rows[0]).toEqual(before.product);
       expect((await pool.query('SELECT * FROM users WHERE id=$1', [userId])).rows[0]).toEqual(before.user);
       expect((await pool.query('SELECT * FROM sellers WHERE id=$1', [sellerId])).rows[0]).toEqual(before.seller);
-      expect((await pool.query('SELECT * FROM locations WHERE id=$1', [locationId])).rows[0]).toEqual(before.location);
+      expect((await pool.query('SELECT id,seller_id,name,address_text,type FROM locations WHERE id=$1', [locationId])).rows[0]).toEqual(before.location);
+      expect((await pool.query('SELECT latitude,longitude FROM locations WHERE id=$1', [locationId])).rows[0]).toEqual({ latitude: null, longitude: null });
       const afterOffer = (await pool.query('SELECT * FROM offers WHERE id=$1', [offerId])).rows[0];
       const { revision, ...preservedAfterOffer } = afterOffer;
       expect(preservedAfterOffer).toEqual(before.offer);
