@@ -26,6 +26,40 @@ async function applyMigrationFile(pool: Pool, relativePath: string) {
   }
 }
 
+async function closeTargetPool(pool: Pool, admin: Pool, name: string) {
+  const expectedRemovals = pool.totalCount;
+  let removed = 0;
+  let resolveRemoved: (() => void) | undefined;
+  const removedPromise = expectedRemovals === 0
+    ? Promise.resolve()
+    : new Promise<void>((resolve) => {
+        resolveRemoved = resolve;
+      });
+
+  const onRemove = () => {
+    removed += 1;
+    if (removed === expectedRemovals) resolveRemoved?.();
+  };
+
+  if (expectedRemovals > 0) pool.on('remove', onRemove);
+  try {
+    await pool.end();
+    await removedPromise;
+  } finally {
+    if (expectedRemovals > 0) pool.off('remove', onRemove);
+  }
+
+  const remaining = await admin.query<{ count: string }>(
+    'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = $1',
+    [name],
+  );
+  if (remaining.rows[0]?.count !== '0') {
+    throw new Error(
+      `S2 migration test target still has active connections after pool shutdown: ${remaining.rows[0]?.count ?? 'unknown'}`,
+    );
+  }
+}
+
 describe('S2 migration upgrade path on PostgreSQL 18', () => {
   it('upgrades a real S1 database through 0002 without touching S0/S1 business data', async () => {
     const guardedTestUrl = testDatabaseUrl();
@@ -84,9 +118,9 @@ describe('S2 migration upgrade path on PostgreSQL 18', () => {
       await expect(target.query('INSERT INTO auth_sessions (id, user_id, token_digest, created_at, expires_at) VALUES ($1,$2,$3,$4,$5)', ['70000000-0000-4000-8000-000000000301', '99999999-9999-4999-8999-999999999999', 'c'.repeat(64), created, expires]))
         .rejects.toMatchObject({ code: '23503' });
     } finally {
-      await target?.end();
+      if (target) await closeTargetPool(target, admin, UPGRADE_DB);
       try {
-        await admin.query(`DROP DATABASE IF EXISTS "${UPGRADE_DB}" WITH (FORCE)`);
+        await admin.query(`DROP DATABASE IF EXISTS "${UPGRADE_DB}"`);
       } finally {
         await admin.end();
       }
