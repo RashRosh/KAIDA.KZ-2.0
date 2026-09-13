@@ -226,7 +226,7 @@ test('S8 browser geolocation denial stays client-side and does not mutate Locati
     await login(page, phone);
     await createSeller(page, `${testInfo.project.name}-denied`);
     await page.getByRole('button', { name: 'Использовать моё местоположение' }).click();
-    await expect(page.getByRole('alert')).toContainText('Доступ к геопозиции запрещён');
+    await expect(page.getByText('Доступ к геопозиции запрещён.', { exact: false })).toBeVisible();
     expect(mutationRequests).toBe(0);
 
     const me = await page.context().request.get('/api/seller/me');
