@@ -1,3 +1,4 @@
+import { DrizzleQueryError } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from '../../src/db/client';
 import { SellerAlreadyExistsError, setupSeller } from '../../src/modules/sellers/application/setup-seller';
@@ -5,6 +6,12 @@ import { connectTestDatabase } from './database';
 
 let db: Database;
 let pool: Awaited<ReturnType<typeof connectTestDatabase>>['pool'];
+
+function databaseThatRejects(error: unknown): Database {
+  return {
+    transaction: () => Promise.reject(error),
+  } as unknown as Database;
+}
 
 beforeAll(async () => {
   const connection = await connectTestDatabase();
@@ -17,6 +24,58 @@ afterAll(async () => {
 });
 
 describe('S3 seller setup concurrency', () => {
+  it('maps a Drizzle-wrapped owned-Seller unique violation to SELLER_ALREADY_EXISTS', async () => {
+    const cause = Object.assign(
+      new Error('duplicate key value violates unique constraint "sellers_owner_user_id_owned_unique"'),
+      {
+        code: '23505',
+        constraint: 'sellers_owner_user_id_owned_unique',
+      },
+    );
+    const wrapped = new DrizzleQueryError(
+      'insert into "sellers" ("display_name","owner_user_id") values ($1,$2)',
+      ['Wrapped seller', '50000000-0000-4000-8000-000000000452'],
+      cause,
+    );
+
+    await expect(
+      setupSeller(
+        '50000000-0000-4000-8000-000000000452',
+        {
+          seller: { displayName: 'Wrapped seller' },
+          location: { name: 'Wrapped point', type: 'shop', addressText: 'Wrapped address' },
+        },
+        { database: databaseThatRejects(wrapped) },
+      ),
+    ).rejects.toBeInstanceOf(SellerAlreadyExistsError);
+  });
+
+  it('does not map a Drizzle-wrapped unrelated unique violation to SELLER_ALREADY_EXISTS', async () => {
+    const cause = Object.assign(
+      new Error('duplicate key value violates unrelated unique constraint'),
+      {
+        code: '23505',
+        constraint: 'users_phone_e164_unique',
+      },
+    );
+    const wrapped = new DrizzleQueryError(
+      'insert into "users" ("phone_e164") values ($1)',
+      ['+77000000453'],
+      cause,
+    );
+
+    await expect(
+      setupSeller(
+        '50000000-0000-4000-8000-000000000453',
+        {
+          seller: { displayName: 'Unrelated violation seller' },
+          location: { name: 'Unrelated point', type: 'shop', addressText: 'Unrelated address' },
+        },
+        { database: databaseThatRejects(wrapped) },
+      ),
+    ).rejects.toBe(wrapped);
+  });
+
   it('allows one success and maps the concurrent loser to SELLER_ALREADY_EXISTS', async () => {
     const userId = '50000000-0000-4000-8000-000000000451';
     const phone = '+77000000451';

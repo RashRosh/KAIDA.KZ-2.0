@@ -13,10 +13,16 @@ export class SellerAlreadyExistsError extends Error {
   }
 }
 
-function isOwnedSellerUniqueViolation(error: unknown): boolean {
+function hasOwnedSellerUniqueViolationFields(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
   const candidate = error as { code?: unknown; constraint?: unknown };
   return candidate.code === '23505' && candidate.constraint === 'sellers_owner_user_id_owned_unique';
+}
+
+function isOwnedSellerUniqueViolation(error: unknown): boolean {
+  if (hasOwnedSellerUniqueViolationFields(error)) return true;
+  if (!error || typeof error !== 'object') return false;
+  return hasOwnedSellerUniqueViolationFields((error as { cause?: unknown }).cause);
 }
 
 export async function setupSeller(
