@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
-import type { LocationType } from '@/modules/locations/contracts/location.contract';
+import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { SellerChangeSetCreate } from './SellerChangeSetCreate';
 import { SellerOfferManagement } from './SellerOfferManagement';
@@ -10,6 +10,7 @@ import styles from '../page.module.css';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type SellerResponse = { seller: SellerView | null };
+type LocationGeoResponse = { location: LocationView };
 
 const typeLabels: Record<LocationType, string> = {
   market: 'Рынок',
@@ -18,6 +19,13 @@ const typeLabels: Record<LocationType, string> = {
   home: 'Домашняя точка',
   other: 'Другое',
 };
+
+function browserGeoErrorMessage(error: GeolocationPositionError): string {
+  if (error.code === 1) return 'Доступ к геопозиции запрещён. Разрешите его в настройках браузера и попробуйте снова.';
+  if (error.code === 2) return 'Не удалось определить местоположение. Проверьте службы геолокации и попробуйте снова.';
+  if (error.code === 3) return 'Не удалось определить местоположение за 15 секунд. Попробуйте снова.';
+  return 'Не удалось определить местоположение. Попробуйте снова.';
+}
 
 export function SellerSetup() {
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready'>('loading');
@@ -28,6 +36,8 @@ export function SellerSetup() {
   const [addressText, setAddressText] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [geoBusyLocationId, setGeoBusyLocationId] = useState<string | null>(null);
+  const [geoError, setGeoError] = useState<{ locationId: string; message: string } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +96,56 @@ export function SellerSetup() {
     }
   }
 
+  function requestLocationGeo(locationId: string) {
+    setGeoError(null);
+
+    if (!navigator.geolocation) {
+      setGeoError({ locationId, message: 'Браузер не поддерживает определение местоположения.' });
+      return;
+    }
+
+    setGeoBusyLocationId(locationId);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        void (async () => {
+          try {
+            const response = await fetch(`/api/seller/locations/${locationId}/geo`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              }),
+            });
+            const data = await response.json() as LocationGeoResponse & ApiError;
+            if (!response.ok) {
+              setGeoError({ locationId, message: data.error?.message ?? 'Не удалось сохранить местоположение.' });
+              return;
+            }
+
+            setSeller((current) => current ? {
+              ...current,
+              locations: current.locations.map((location) => location.id === locationId ? data.location : location),
+            } : current);
+          } catch {
+            setGeoError({ locationId, message: 'Не удалось сохранить местоположение.' });
+          } finally {
+            setGeoBusyLocationId(null);
+          }
+        })();
+      },
+      (geoPositionError) => {
+        setGeoBusyLocationId(null);
+        setGeoError({ locationId, message: browserGeoErrorMessage(geoPositionError) });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      },
+    );
+  }
+
   if (state === 'loading') return <section className={styles.card}><p>Загружаем…</p></section>;
 
   if (state === 'anonymous') {
@@ -105,13 +165,24 @@ export function SellerSetup() {
           <p className={styles.eyebrow}>Продавец создан</p>
           <h2 id="seller-summary-heading">{seller.displayName}</h2>
           <div className={styles.locations}>
-            {seller.locations.map((location) => (
-              <article key={location.id} className={styles.locationCard}>
-                <h3>{location.name}</h3>
-                <p>{typeLabels[location.type]}</p>
-                <p>{location.addressText}</p>
-              </article>
-            ))}
+            {seller.locations.map((location) => {
+              const geoBusy = geoBusyLocationId === location.id;
+              return (
+                <article key={location.id} className={styles.locationCard}>
+                  <h3>{location.name}</h3>
+                  <p>{typeLabels[location.type]}</p>
+                  <p>{location.addressText}</p>
+                  <p>{location.geo ? 'Местоположение сохранено' : 'Местоположение не задано'}</p>
+                  <p>Нажимайте, находясь в точке продажи.</p>
+                  {geoError?.locationId === location.id && <p className={styles.error} role="alert">{geoError.message}</p>}
+                  <div className={styles.actions}>
+                    <button type="button" disabled={geoBusy} onClick={() => requestLocationGeo(location.id)}>
+                      {geoBusy ? 'Определяем…' : location.geo ? 'Обновить местоположение' : 'Использовать моё местоположение'}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
         <SellerChangeSetCreate seller={seller} />
