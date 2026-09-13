@@ -49,7 +49,10 @@ test('unknown product clears the previous result', async ({ page }) => {
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill('баранина');
   await input.press('Enter');
-  await expect(page.getByRole('article')).toHaveCount(1);
+  const seedCard = page.getByRole('article')
+    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
+    .filter({ hasText: 'Тестовая мясная точка' });
+  await expect(seedCard).toHaveCount(1);
   await input.fill('единорог');
   await input.press('Enter');
   await expect(page.getByRole('status')).toHaveText('По вашему запросу ничего не найдено.');
@@ -95,7 +98,10 @@ test('loading blocks a second submit while the real request is pending', async (
   await expect(page.getByRole('status')).toHaveText('Ищем предложения…');
   await page.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
   releaseRequest();
-  await expect(page.getByRole('article')).toHaveCount(1);
+  const seedCard = page.getByRole('article')
+    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
+    .filter({ hasText: 'Тестовая мясная точка' });
+  await expect(seedCard).toHaveCount(1);
   expect(requests).toBe(1);
 });
 
@@ -105,7 +111,10 @@ test('network failure clears old results and permits a real retry', async ({ pag
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill('баранина');
   await input.press('Enter');
-  await expect(page.getByRole('article')).toHaveCount(1);
+  const seedCard = page.getByRole('article')
+    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
+    .filter({ hasText: 'Тестовая мясная точка' });
+  await expect(seedCard).toHaveCount(1);
   await page.route('**/api/search?*', (route) => route.abort('failed'));
   await input.fill('говядина');
   await input.press('Enter');
@@ -127,8 +136,14 @@ test('HTTP boundary handles missing/empty query and parameterized exact search',
   expect(found.status()).toBe(200);
   const body = await found.json();
   expect(body.query).toBe('БАРАНИНА');
-  expect(body.offers).toHaveLength(1);
-  expect(body.offers[0].price).toEqual({ amount: '4200.00', currency: 'KZT', unit: 'кг' });
+  const seedOffer = body.offers.find((offer: {
+    seller: { displayName: string };
+    location: { name: string };
+    sellerComment: string | null;
+  }) => offer.seller.displayName === 'Асыл Ет, тестовый продавец'
+    && offer.location.name === 'Тестовая мясная точка'
+    && offer.sellerComment === 'Свежий привоз.');
+  expect(seedOffer?.price).toEqual({ amount: '4200.00', currency: 'KZT', unit: 'кг' });
   const empty = await request.get('/api/search', { params: { q: '%' } });
   expect(empty.status()).toBe(200);
   expect((await empty.json()).offers).toEqual([]);
