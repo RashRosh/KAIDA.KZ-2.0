@@ -1,17 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Database } from '../../src/db/client';
+import { resolveProduct } from '../../src/modules/catalog/application/resolve-product';
 import { calculateOfferCutoff } from '../../src/modules/offers/lifecycle/offer-lifecycle';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
-import { findOffersByProductName } from '../../src/modules/search/infrastructure/search.repository';
+import { findOffersByProductId } from '../../src/modules/search/infrastructure/search.repository';
 
-vi.mock('../../src/modules/search/infrastructure/search.repository', () => ({
-  findOffersByProductName: vi.fn().mockResolvedValue([]),
+const PRODUCT = {
+  id: '10000000-0000-4000-8000-000000000001',
+  name: 'Баранина',
+};
+
+vi.mock('../../src/modules/catalog/application/resolve-product', () => ({
+  resolveProduct: vi.fn().mockResolvedValue({ status: 'resolved', product: PRODUCT }),
 }));
 
-const mockedFindOffers = vi.mocked(findOffersByProductName);
+vi.mock('../../src/modules/search/infrastructure/search.repository', () => ({
+  findOffersByProductId: vi.fn().mockResolvedValue([]),
+}));
+
+const mockedResolveProduct = vi.mocked(resolveProduct);
+const mockedFindOffers = vi.mocked(findOffersByProductId);
 
 describe('S1 offer lifecycle', () => {
   beforeEach(() => {
+    mockedResolveProduct.mockClear();
+    mockedResolveProduct.mockResolvedValue({ status: 'resolved', product: PRODUCT });
     mockedFindOffers.mockClear();
     mockedFindOffers.mockResolvedValue([]);
   });
@@ -30,10 +43,12 @@ describe('S1 offer lifecycle', () => {
 
     expect(result).toEqual({ query: 'Баранина', offers: [] });
     expect(clock).toHaveBeenCalledTimes(1);
+    expect(mockedResolveProduct).toHaveBeenCalledTimes(1);
+    expect(mockedResolveProduct).toHaveBeenCalledWith(database, 'Баранина');
     expect(mockedFindOffers).toHaveBeenCalledTimes(1);
     expect(mockedFindOffers).toHaveBeenCalledWith(
       database,
-      'Баранина',
+      PRODUCT.id,
       new Date('2026-09-04T12:00:00.000Z'),
     );
   });
