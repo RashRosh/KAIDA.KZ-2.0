@@ -11,7 +11,13 @@ const PRODUCT = {
 };
 
 vi.mock('../../src/modules/catalog/application/resolve-product', () => ({
-  resolveProduct: vi.fn().mockResolvedValue({ status: 'resolved', product: PRODUCT }),
+  resolveProduct: vi.fn().mockResolvedValue({
+    status: 'resolved',
+    product: {
+      id: '10000000-0000-4000-8000-000000000001',
+      name: 'Баранина',
+    },
+  }),
 }));
 
 vi.mock('../../src/modules/search/infrastructure/search.repository', () => ({
