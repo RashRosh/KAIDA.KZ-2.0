@@ -1,6 +1,6 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
-import { findProductsByCaseInsensitiveExactName } from '../../catalog/infrastructure/products.repository';
+import { resolveProduct } from '../../catalog/application/resolve-product';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   LocationNotFoundError,
@@ -25,10 +25,10 @@ export async function createSellerChangeSet(
     const location = await findOwnedLocation(tx, input.locationId, seller.id);
     if (!location) throw new LocationNotFoundError();
 
-    const productMatches = await findProductsByCaseInsensitiveExactName(tx, input.productName);
-    if (productMatches.length === 0) throw new ProductNotFoundError();
-    if (productMatches.length > 1) throw new ProductAmbiguousError();
-    const product = productMatches[0]!;
+    const productResolution = await resolveProduct(tx, input.productName);
+    if (productResolution.status === 'not_found') throw new ProductNotFoundError();
+    if (productResolution.status === 'ambiguous') throw new ProductAmbiguousError();
+    const product = productResolution.product;
 
     const priceAmount = input.price?.amount ?? null;
     const priceUnit = input.price?.unit ?? null;

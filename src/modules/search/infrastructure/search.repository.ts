@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
@@ -8,7 +8,7 @@ import { visibleOffersPredicate } from '../../offers/lifecycle/offer-lifecycle';
 import type { SearchOffer } from '../contracts/search.contract';
 
 // A read projection across the four owning modules; lifecycle semantics stay owned by Offers.
-export async function findOffersByProductName(db: Database, query: string, cutoff: Date): Promise<SearchOffer[]> {
+export async function findOffersByProductId(db: Database, productId: string, cutoff: Date): Promise<SearchOffer[]> {
   const rows = await db.select({
     id: offers.id,
     product: { id: products.id, name: products.name },
@@ -23,7 +23,7 @@ export async function findOffersByProductName(db: Database, query: string, cutof
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .where(and(
-      sql`lower(${products.name}) = lower(${query})`,
+      eq(products.id, productId),
       visibleOffersPredicate(cutoff),
     ))
     .orderBy(asc(offers.id));
