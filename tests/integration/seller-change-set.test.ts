@@ -87,6 +87,8 @@ describe('S4 Seller Change Set on PostgreSQL 18', () => {
     const phone = '+77000000602';
     const otherUserId = '50000000-0000-4000-8000-000000000603';
     const otherPhone = '+77000000603';
+    const ambiguousProductId = '10000000-0000-4000-8000-000000000699';
+    const ambiguousAliasId = '11000000-0000-4000-8000-000000000699';
     await cleanupUser(userId, phone);
     await pool.query('INSERT INTO users (id, phone_e164, created_at) VALUES ($1,$2,$3)', [userId, phone, NOW]);
     await expect(createSellerChangeSet(userId, input(seedIds.location), { database: db })).rejects.toBeInstanceOf(SellerRequiredError);
@@ -100,12 +102,13 @@ describe('S4 Seller Change Set on PostgreSQL 18', () => {
       await expect(createSellerChangeSet(userId, input(other.locations[0]!.id), { database: db })).rejects.toBeInstanceOf(LocationNotFoundError);
       expect(await sellerS4Counts(seller.id)).toEqual({ changeSets: 0, items: 0, offers: 0 });
 
-      await pool.query('DELETE FROM products WHERE name=$1', ['баранина']);
-      await pool.query('INSERT INTO products (name) VALUES ($1)', ['баранина']);
+      await pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [ambiguousProductId, 'S4 ambiguity fixture']);
+      await pool.query('INSERT INTO product_aliases (id,product_id,name) VALUES ($1,$2,$3)', [ambiguousAliasId, ambiguousProductId, 'Баранина']);
       await expect(createSellerChangeSet(userId, input(seller.locations[0]!.id), { database: db })).rejects.toBeInstanceOf(ProductAmbiguousError);
       expect(await sellerS4Counts(seller.id)).toEqual({ changeSets: 0, items: 0, offers: 0 });
     } finally {
-      await pool.query('DELETE FROM products WHERE name=$1', ['баранина']);
+      await pool.query('DELETE FROM product_aliases WHERE id=$1', [ambiguousAliasId]);
+      await pool.query('DELETE FROM products WHERE id=$1', [ambiguousProductId]);
       await cleanupUser(userId, phone);
       await cleanupUser(otherUserId, otherPhone);
     }
