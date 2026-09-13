@@ -23,13 +23,16 @@ async function cleanup(phone: string) {
 
 test('anonymous search, login, persistence, search after login and logout', async ({ page, browser }, testInfo) => {
   const phone = phoneFor(testInfo.project.name, '1');
+  const seedCard = () => page.getByRole('article')
+    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
+    .filter({ hasText: 'Тестовая мясная точка' });
   await cleanup(phone);
   try {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 
     await page.getByRole('link', { name: 'Войти' }).click();
     await page.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
@@ -53,7 +56,7 @@ test('anonymous search, login, persistence, search after login and logout', asyn
 
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 
     await page.reload();
     await expect(page.getByText(phone, { exact: true })).toBeVisible();
@@ -78,7 +81,7 @@ test('anonymous search, login, persistence, search after login and logout', asyn
     expect(await me.json()).toEqual({ user: null });
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(phone);
