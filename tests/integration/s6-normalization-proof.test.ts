@@ -121,9 +121,10 @@ describe.sequential('S6 normalization contract against PostgreSQL 18', () => {
     );
 
     expect(index.rows).toHaveLength(1);
-    expect(index.rows[0]?.indexdef).toContain('pg_unicode_fast');
-    expect(index.rows[0]?.indexdef).toContain('casefold');
-    expect(index.rows[0]?.indexdef).toContain('normalize');
+    const indexDefinition = index.rows[0]?.indexdef.toLowerCase();
+    expect(indexDefinition).toContain('pg_unicode_fast');
+    expect(indexDefinition).toContain('casefold');
+    expect(indexDefinition).toContain('normalize');
 
     await client.query(
       'INSERT INTO s6_normalization_proof_products (name) VALUES ($1)',
