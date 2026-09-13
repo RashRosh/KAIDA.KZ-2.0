@@ -17,6 +17,11 @@
 .searchControls button:hover:not(:disabled) { background: var(--primary-hover); }
 .searchControls button:disabled { cursor: wait; background: #76618f; }
 .help { color: var(--muted); font-size: 0.875rem; margin-top: 0.75rem; }
+.locationControls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.625rem 0.875rem; margin-top: 1rem; }
+.locationButton { min-height: 2.75rem; padding: 0 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-weight: 600; }
+.locationButton:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.locationButton:disabled { cursor: wait; color: var(--muted); }
+.locationStatus { flex-basis: 100%; color: var(--muted); font-size: 0.875rem; }
 .error { color: var(--error); margin-top: 1rem; }
 .results { margin-top: 2rem; }
 .feedback { color: var(--muted); font-size: 0.875rem; }

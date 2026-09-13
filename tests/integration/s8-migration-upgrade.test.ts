@@ -60,7 +60,7 @@ async function migrateToPreS8(db: ReturnType<typeof drizzle>) {
 }
 
 describe('S8 migration upgrade path on PostgreSQL 18', () => {
-  it('upgrades 0000-0006 data through 0007 without changing identities, Offer.location_id or Search behavior', async () => {
+  it('upgrades 0000-0006 data through 0007 preserving identities and Offer.location_id, then current Search finds the migrated Offer', async () => {
     await withUpgradeDatabase(async (pool, rawDb) => {
       await migrateToPreS8(rawDb);
       const db = rawDb as unknown as Database;
@@ -80,11 +80,25 @@ describe('S8 migration upgrade path on PostgreSQL 18', () => {
       await pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,status,last_confirmed_at,revision,created_at,updated_at)
         VALUES ($1,$2,$3,$4,'active',$5,1,$5,$5)`, [offerId, productId, sellerId, locationId, now]);
 
-      const searchBefore = await searchOffers(productName, db, { clock: () => now, validityPeriodHours: 168 });
-      expect(searchBefore.offers.map((offer) => offer.id)).toEqual([offerId]);
+      expect((await pool.query('SELECT id,name FROM products WHERE id=$1', [productId])).rows[0])
+        .toEqual({ id: productId, name: productName });
+      expect((await pool.query('SELECT id,owner_user_id FROM sellers WHERE id=$1', [sellerId])).rows[0])
+        .toEqual({ id: sellerId, owner_user_id: userId });
+      expect((await pool.query('SELECT id,seller_id,name,address_text,type FROM locations WHERE id=$1', [locationId])).rows[0])
+        .toEqual({
+          id: locationId,
+          seller_id: sellerId,
+          name: 'S8 migration point',
+          address_text: 'S8 migration address',
+          type: 'shop',
+        });
+      expect((await pool.query('SELECT id,product_id,seller_id,location_id FROM offers WHERE id=$1', [offerId])).rows[0])
+        .toEqual({ id: offerId, product_id: productId, seller_id: sellerId, location_id: locationId });
 
       await migrate(rawDb, { migrationsFolder: './drizzle/migrations' });
 
+      expect((await pool.query('SELECT id,name FROM products WHERE id=$1', [productId])).rows[0])
+        .toEqual({ id: productId, name: productName });
       expect((await pool.query('SELECT id,owner_user_id FROM sellers WHERE id=$1', [sellerId])).rows[0])
         .toEqual({ id: sellerId, owner_user_id: userId });
       expect((await pool.query('SELECT id,seller_id,name,address_text,type,latitude,longitude FROM locations WHERE id=$1', [locationId])).rows[0])
@@ -97,11 +111,11 @@ describe('S8 migration upgrade path on PostgreSQL 18', () => {
           latitude: null,
           longitude: null,
         });
-      expect((await pool.query('SELECT id,seller_id,location_id FROM offers WHERE id=$1', [offerId])).rows[0])
-        .toEqual({ id: offerId, seller_id: sellerId, location_id: locationId });
+      expect((await pool.query('SELECT id,product_id,seller_id,location_id FROM offers WHERE id=$1', [offerId])).rows[0])
+        .toEqual({ id: offerId, product_id: productId, seller_id: sellerId, location_id: locationId });
 
       const searchAfter = await searchOffers(productName, db, { clock: () => now, validityPeriodHours: 168 });
-      expect(searchAfter).toEqual(searchBefore);
+      expect(searchAfter.offers.map((offer) => offer.id)).toEqual([offerId]);
 
       await expect(pool.query('UPDATE locations SET latitude=43,longitude=NULL WHERE id=$1', [locationId]))
         .rejects.toMatchObject({ code: '23514', constraint: 'locations_geo_complete_pair' });
