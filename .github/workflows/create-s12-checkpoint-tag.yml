@@ -1,0 +1,27 @@
+name: Create S12 checkpoint tag
+
+on:
+  push:
+    branches:
+      - checkpoint/s12-tag
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: dbb3f105010818f3650a301f1749743ae632dc29
+          fetch-depth: 0
+      - name: Assert exact checkpoint SHA
+        run: test "$(git rev-parse HEAD)" = "dbb3f105010818f3650a301f1749743ae632dc29"
+      - name: Create annotated checkpoint tag
+        run: |
+          test -z "$(git ls-remote --tags origin refs/tags/v0.0.13-s12)"
+          git config user.name "RoboRash"
+          git config user.email "31235977+RashRosh@users.noreply.github.com"
+          git tag -a v0.0.13-s12 dbb3f105010818f3650a301f1749743ae632dc29 -m "S12 verified checkpoint"
+          git push origin refs/tags/v0.0.13-s12
