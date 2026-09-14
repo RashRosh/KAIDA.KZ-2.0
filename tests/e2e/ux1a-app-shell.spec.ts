@@ -53,9 +53,14 @@ test('current main areas share the design-system shell without horizontal overfl
 
   const radii = await page.evaluate(() => {
     const root = getComputedStyle(document.documentElement);
-    return [root.getPropertyValue('--radius-sm').trim(), root.getPropertyValue('--radius').trim(), root.getPropertyValue('--radius-lg').trim(), root.getPropertyValue('--radius-xl').trim()];
+    return [
+      '--radius-sm',
+      '--radius',
+      '--radius-lg',
+      '--radius-xl',
+    ].map((property) => Number.parseFloat(root.getPropertyValue(property)));
   });
-  expect(radii).toEqual(['0.5rem', '0.75rem', '1rem', '1.25rem']);
+  expect(radii).toEqual([0.5, 0.75, 1, 1.25]);
 });
 
 test('desktop shell navigation remains centered through real route clicks', async ({ page }, testInfo) => {
