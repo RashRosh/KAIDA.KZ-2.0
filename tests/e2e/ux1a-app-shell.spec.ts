@@ -35,6 +35,7 @@ test('current main areas share one compact navigation shell without horizontal o
   const searchInput = page.getByLabel('Какой товар ищете?');
   await expect(searchInput).toBeVisible();
   expect(await searchInput.evaluate((element) => getComputedStyle(element).borderRadius)).toBe('3px');
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarGutter)).toContain('stable');
 });
 
 test('seller entry opens the existing seller flow', async ({ page }) => {
