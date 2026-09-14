@@ -1,9 +1,9 @@
 # UX1A — App shell / navigation — Slice Contract
 
-**Status:** `DRAFT — PRODUCT OWNER APPROVAL REQUIRED`  
+**Status:** `APPROVED — IMPLEMENTATION AUTHORIZED`  
 **Verified checkpoint:** `v0.0.14-s13`  
 **Verified main SHA:** `ff8bd7eed8406d35e469c8a0a4bc2f6332068361`  
-**Planned implementation branch:** `slice/ux1a-app-shell`
+**Implementation branch:** `slice/ux1a-app-shell`
 
 UX1A is the first corrective UX slice inserted before UX1B, UX1C, UX2, M1 and S14. It does not reopen or renumber S0-S13.
 
@@ -154,10 +154,6 @@ UX1A обязан сохранить:
 
 ## Gate
 
-Production implementation пока не авторизована. После Product Owner approval этого контракта:
+Product Owner approved implementation on 2026-09-14. Backlog items UX-001, UX-005 and UX-006 are `IN_SLICE`.
 
-1. относящиеся backlog items переводятся в `IN_SLICE`;
-2. создаётся/используется отдельная branch `slice/ux1a-app-shell`;
-3. реализуется минимальный diff;
-4. targeted E2E → full branch CI → manual acceptance → diff audit → merge → merged-main CI → annotated UX1A checkpoint;
-5. только после закрытия UX1A начинается UX1B.
+Implementation must still pass: targeted E2E → full branch CI → manual acceptance → diff audit → merge → merged-main CI → annotated UX1A checkpoint. UX1B starts only after UX1A is closed.
