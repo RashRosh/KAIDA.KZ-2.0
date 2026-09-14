@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   interestResponseSchema,
   interestsResponseSchema,
@@ -27,8 +27,12 @@ type InterestsState =
   | { kind: 'loading' | 'anonymous' | 'error' }
   | { kind: 'ready'; productIds: Set<string> };
 
-export function SearchForm() {
-  const [query, setQuery] = useState('');
+type SearchFormProps = {
+  initialQuery?: string;
+};
+
+export function SearchForm({ initialQuery = '' }: SearchFormProps) {
+  const [query, setQuery] = useState(initialQuery);
   const [state, setState] = useState<SearchState>({ kind: 'initial' });
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
   const [interestsState, setInterestsState] = useState<InterestsState>({ kind: 'loading' });
@@ -51,6 +55,49 @@ export function SearchForm() {
       .catch(() => { if (active) setInterestsState({ kind: 'error' }); });
     return () => { active = false; };
   }, []);
+
+  const executeSearch = useCallback(async (rawQuery: string, buyerLocation?: BuyerLocation) => {
+    if (pending.current) return;
+    const parsed = searchQuerySchema.safeParse(rawQuery);
+    if (!parsed.success) {
+      setState({ kind: 'validation' });
+      input.current?.focus();
+      return;
+    }
+
+    pending.current = true;
+    setState({ kind: 'loading' });
+    try {
+      const response = buyerLocation
+        ? await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ q: parsed.data, buyerLocation }),
+          cache: 'no-store',
+          signal: AbortSignal.timeout(15000),
+        })
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data })}`, {
+          cache: 'no-store',
+          signal: AbortSignal.timeout(15000),
+        });
+      if (response.status === 400) {
+        setState({ kind: 'validation' });
+        return;
+      }
+      if (!response.ok) throw new Error('Search unavailable');
+      const result = searchResponseSchema.parse(await response.json());
+      setState({ kind: 'success', result });
+    } catch {
+      setState({ kind: 'error' });
+    } finally {
+      pending.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialQuery) return;
+    void executeSearch(initialQuery);
+  }, [executeSearch, initialQuery]);
 
   function requestBuyerLocation() {
     if (locationState.kind === 'requesting') return;
@@ -115,42 +162,8 @@ export function SearchForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending.current) return;
-    const parsed = searchQuerySchema.safeParse(query);
-    if (!parsed.success) {
-      setState({ kind: 'validation' });
-      input.current?.focus();
-      return;
-    }
-
     const buyerLocation = locationState.kind === 'enabled' ? locationState.point : undefined;
-    pending.current = true;
-    setState({ kind: 'loading' });
-    try {
-      const response = buyerLocation
-        ? await fetch('/api/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, buyerLocation }),
-          cache: 'no-store',
-          signal: AbortSignal.timeout(15000),
-        })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data })}`, {
-          cache: 'no-store',
-          signal: AbortSignal.timeout(15000),
-        });
-      if (response.status === 400) {
-        setState({ kind: 'validation' });
-        return;
-      }
-      if (!response.ok) throw new Error('Search unavailable');
-      const result = searchResponseSchema.parse(await response.json());
-      setState({ kind: 'success', result });
-    } catch {
-      setState({ kind: 'error' });
-    } finally {
-      pending.current = false;
-    }
+    await executeSearch(query, buyerLocation);
   }
 
   const feedback = loading
