@@ -1,11 +1,16 @@
 import { z } from 'zod';
+import { sellerPublicContactsSchema } from '../../sellers/contracts/seller-contact.contract';
 
 export const searchQuerySchema = z.string().trim().min(1, 'Введите название товара.');
 
 export const searchOfferSchema = z.object({
   id: z.uuid(),
   product: z.object({ id: z.uuid(), name: z.string() }),
-  seller: z.object({ id: z.uuid(), displayName: z.string() }),
+  seller: z.object({
+    id: z.uuid(),
+    displayName: z.string(),
+    contacts: sellerPublicContactsSchema.optional(),
+  }),
   location: z.object({ id: z.uuid(), name: z.string(), addressText: z.string() }),
   price: z.object({
     amount: z.string().regex(/^\d+(?:\.\d+)?$/),

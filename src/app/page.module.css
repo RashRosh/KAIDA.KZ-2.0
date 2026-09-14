@@ -38,6 +38,9 @@
 .offerDetails dd { font-size: 1rem; }
 .address { display: block; margin-top: 0.375rem; color: var(--muted); font-size: 0.875rem; }
 .comment { padding-top: 1rem; border-top: 1px solid var(--border); margin-top: 1.5rem; }
+.contactActions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.25rem; }
+.contactAction { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); color: var(--primary); background: var(--surface); font-weight: 600; text-decoration: none; overflow-wrap: normal; }
+.contactAction:hover { border-color: var(--primary); }
 .footer { color: var(--muted); font-size: 0.875rem; padding: 1.5rem 0 2rem; border-top: 1px solid var(--border); }
 @media (min-width: 48rem) {
   .shell { padding: 0 3rem; }

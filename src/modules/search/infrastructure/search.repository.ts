@@ -2,6 +2,7 @@ import { and, asc, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
+import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { visibleOffersPredicate } from '../../offers/lifecycle/offer-lifecycle';
@@ -19,6 +20,10 @@ export async function findOffersByProductId(
     id: offers.id,
     product: { id: products.id, name: products.name },
     seller: { id: sellers.id, displayName: sellers.displayName },
+    sellerContactPhoneE164: sellers.contactPhoneE164,
+    sellerWhatsappPhoneE164: sellers.whatsappPhoneE164,
+    sellerTelegramUsername: sellers.telegramUsername,
+    sellerInstagramUsername: sellers.instagramUsername,
     location: { id: locations.id, name: locations.name, addressText: locations.addressText },
     priceAmount: offers.priceAmount,
     priceCurrency: offers.priceCurrency,
@@ -41,6 +46,10 @@ export async function findOffersByProductId(
     priceAmount,
     priceCurrency,
     priceUnit,
+    sellerContactPhoneE164,
+    sellerWhatsappPhoneE164,
+    sellerTelegramUsername,
+    sellerInstagramUsername,
     lastConfirmedAt,
     locationLatitude,
     locationLongitude,
@@ -50,6 +59,15 @@ export async function findOffersByProductId(
 
     const offer: SearchOffer = {
       ...row,
+      seller: {
+        ...row.seller,
+        ...projectSellerPublicContactProperty({
+          phoneE164: sellerContactPhoneE164,
+          whatsappPhoneE164: sellerWhatsappPhoneE164,
+          telegramUsername: sellerTelegramUsername,
+          instagramUsername: sellerInstagramUsername,
+        }),
+      },
       price: priceAmount !== null && priceCurrency !== null
         ? { amount: priceAmount, currency: priceCurrency, unit: priceUnit }
         : null,
