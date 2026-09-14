@@ -92,11 +92,13 @@ test('loading blocks a second submit while the real request is pending', async (
     await route.continue();
   });
   await page.goto('/');
-  await page.getByLabel('Какой товар ищете?').fill('баранина');
+  const input = page.getByLabel('Какой товар ищете?');
+  const searchForm = input.locator('xpath=ancestor::form');
+  await input.fill('баранина');
   await page.getByRole('button', { name: 'Найти', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Ищем…', exact: true })).toBeDisabled();
   await expect(page.getByRole('status')).toHaveText('Ищем предложения…');
-  await page.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
+  await searchForm.evaluate((form: HTMLFormElement) => form.requestSubmit());
   releaseRequest();
   const seedCard = page.getByRole('article')
     .filter({ hasText: 'Асыл Ет, тестовый продавец' })
