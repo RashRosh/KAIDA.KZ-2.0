@@ -30,7 +30,9 @@ async function expectSharedShell(page: Page, projectName: string) {
 
   if (projectName === 'mobile') {
     await expect(header.getByRole('button', { name: 'Открыть меню', exact: true })).toBeVisible();
+    await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toBeHidden();
   } else {
+    await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toBeVisible();
     const nav = page.getByRole('navigation', { name: NAV_NAME });
     await expect(nav).toBeVisible();
     await expectNavEntries(nav);
@@ -39,23 +41,17 @@ async function expectSharedShell(page: Page, projectName: string) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 }
 
-async function navCenter(page: Page) {
-  const navBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
-  expect(navBox).not.toBeNull();
-  return navBox!.x + navBox!.width / 2;
-}
-
-test('current main areas share the design-system shell without horizontal overflow', async ({ page }, testInfo) => {
+test('current main areas share the composed shell without horizontal overflow', async ({ page }, testInfo) => {
   const navGeometry: Array<{ x: number; width: number }> = [];
-  const expectedHeaderHeight = testInfo.project.name === 'mobile' ? 84 : 104;
+  const expectedPrimaryRowHeight = testInfo.project.name === 'mobile' ? 84 : 104;
 
   for (const path of ['/', '/nearby', '/login', '/seller']) {
     await page.goto(path);
     await expectSharedShell(page, testInfo.project.name);
 
-    const headerBox = await page.getByRole('banner').boundingBox();
-    expect(headerBox).not.toBeNull();
-    expect(Math.abs(headerBox!.height - expectedHeaderHeight)).toBeLessThanOrEqual(1);
+    const primaryRowBox = await page.getByTestId('primary-header-row').boundingBox();
+    expect(primaryRowBox).not.toBeNull();
+    expect(Math.abs(primaryRowBox!.height - expectedPrimaryRowHeight)).toBeLessThanOrEqual(1);
 
     if (testInfo.project.name === 'mobile') {
       const nav = await openPrimaryNav(page);
@@ -63,6 +59,10 @@ test('current main areas share the design-system shell without horizontal overfl
       await page.getByRole('button', { name: 'Закрыть меню', exact: true }).click();
       await expect(page.getByRole('button', { name: 'Открыть меню', exact: true })).toBeVisible();
     } else {
+      const headerBox = await page.getByRole('banner').boundingBox();
+      expect(headerBox).not.toBeNull();
+      expect(headerBox!.height).toBeGreaterThan(expectedPrimaryRowHeight);
+
       const navBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
       expect(navBox).not.toBeNull();
       navGeometry.push({ x: navBox!.x, width: navBox!.width });
@@ -110,22 +110,46 @@ test('active navigation state follows the current product area', async ({ page }
   }
 });
 
-test('desktop shell navigation remains centered through real route clicks', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'Desktop geometry proof');
+test('desktop shell uses logo-search-auth top row and stable left navigation row', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop composition proof');
 
   await page.goto('/');
-  const expectedCenter = await page.evaluate(() => window.innerWidth / 2);
+  await expect(page.getByRole('link', { name: 'Войти', exact: true })).toBeVisible();
 
+  const wordmarkBox = await page.getByRole('link', { name: 'KAIDA.KZ, главная', exact: true }).boundingBox();
+  const searchBox = await page.getByRole('search', { name: 'Поиск из шапки' }).boundingBox();
+  const loginBox = await page.getByRole('link', { name: 'Войти', exact: true }).boundingBox();
+  const navBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
+
+  expect(wordmarkBox).not.toBeNull();
+  expect(searchBox).not.toBeNull();
+  expect(loginBox).not.toBeNull();
+  expect(navBox).not.toBeNull();
+  expect(wordmarkBox!.x).toBeLessThan(searchBox!.x);
+  expect(searchBox!.x + searchBox!.width).toBeLessThan(loginBox!.x + loginBox!.width);
+  expect(Math.abs(navBox!.x - wordmarkBox!.x)).toBeLessThanOrEqual(1);
+
+  const firstNavX = navBox!.x;
   for (const linkName of ['Рядом', 'Продавцу', 'Поиск']) {
-    const before = await navCenter(page);
-    expect(Math.abs(before - expectedCenter)).toBeLessThanOrEqual(1);
-
     await page.getByRole('navigation', { name: NAV_NAME }).getByRole('link', { name: linkName, exact: true }).click();
     await expectSharedShell(page, testInfo.project.name);
-
-    const after = await navCenter(page);
-    expect(Math.abs(after - expectedCenter)).toBeLessThanOrEqual(1);
+    const currentNavBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
+    expect(currentNavBox).not.toBeNull();
+    expect(Math.abs(currentNavBox!.x - firstNavX)).toBeLessThanOrEqual(1);
   }
+});
+
+test('desktop header search enters the real buyer search flow', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop header search proof');
+
+  await page.goto('/nearby');
+  const headerSearch = page.getByRole('search', { name: 'Поиск из шапки' });
+  await headerSearch.getByRole('searchbox', { name: 'Поиск товара', exact: true }).fill('баранина');
+  await headerSearch.getByRole('button', { name: 'Искать', exact: true }).click();
+
+  await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('баранина');
+  await expect(page.getByLabel('Какой товар ищете?')).toHaveValue('баранина');
+  await expect(page.getByRole('status')).toContainText('Найдено предложений:');
 });
 
 test('mobile navigation is compact, dismissible and closes after route selection', async ({ page }, testInfo) => {
