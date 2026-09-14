@@ -15,16 +15,18 @@ async function resolveOwner(request: NextRequest) {
     const user = await resolveCurrentUser(token);
     if (!user) {
       return {
+        ok: false,
         response: NextResponse.json(
           { error: { code: 'AUTH_REQUIRED', message: 'Войдите, чтобы настроить контакты продавца.' } },
           { status: 401, headers: noStore },
         ),
       } as const;
     }
-    return { user } as const;
+    return { ok: true, user } as const;
   } catch {
     console.error('Seller contacts current user resolution failed');
     return {
+      ok: false,
       response: NextResponse.json(
         { error: { code: 'AUTH_UNAVAILABLE', message: 'Не удалось проверить вход.' } },
         { status: 503, headers: noStore },
@@ -35,7 +37,7 @@ async function resolveOwner(request: NextRequest) {
 
 export async function GET(request: NextRequest): Promise<Response> {
   const owner = await resolveOwner(request);
-  if ('response' in owner) return owner.response;
+  if (!owner.ok) return owner.response;
 
   try {
     const contacts = await getOwnedSellerContacts(owner.user.id);
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
 export async function PUT(request: NextRequest): Promise<Response> {
   const owner = await resolveOwner(request);
-  if ('response' in owner) return owner.response;
+  if (!owner.ok) return owner.response;
 
   let body: unknown;
   try {
