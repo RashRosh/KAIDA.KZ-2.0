@@ -3,9 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
-import { testDatabaseUrl } from './database';
+import { withMigrationTestDatabase } from './migration-test-database';
 
 async function createS5MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s5-migrations-'));
@@ -25,61 +24,6 @@ async function createS5MigrationsFolder() {
   return folder;
 }
 
-async function closeTargetPool(pool: Pool, admin: Pool, name: string) {
-  const expectedRemovals = pool.totalCount;
-  let removed = 0;
-  let resolveRemoved: (() => void) | undefined;
-  const removedPromise = expectedRemovals === 0
-    ? Promise.resolve()
-    : new Promise<void>((resolve) => {
-        resolveRemoved = resolve;
-      });
-
-  const onRemove = () => {
-    removed += 1;
-    if (removed === expectedRemovals) resolveRemoved?.();
-  };
-
-  if (expectedRemovals > 0) pool.on('remove', onRemove);
-  try {
-    await pool.end();
-    await removedPromise;
-  } finally {
-    if (expectedRemovals > 0) pool.off('remove', onRemove);
-  }
-
-  const remaining = await admin.query<{ count: string }>(
-    'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = $1',
-    [name],
-  );
-  if (remaining.rows[0]?.count !== '0') {
-    throw new Error(
-      `S6 migration test target still has active connections after pool shutdown: ${remaining.rows[0]?.count ?? 'unknown'}`,
-    );
-  }
-}
-
-async function withDatabase<T>(name: string, run: (pool: Pool, db: ReturnType<typeof drizzle>) => Promise<T>): Promise<T> {
-  const guardedUrl = testDatabaseUrl();
-  const developmentUrl = new URL(process.env.DATABASE_URL!);
-  if (decodeURIComponent(developmentUrl.pathname) === `/${name}`) throw new Error('Development database must never be S6 migration test target');
-  const admin = new Pool({ connectionString: guardedUrl, max: 1 });
-  let pool: Pool | undefined;
-  try {
-    const version = Number((await admin.query("SELECT current_setting('server_version_num')::int AS version")).rows[0].version);
-    if (version < 180000 || version >= 190000) throw new Error('S6 migration test requires PostgreSQL 18');
-    await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-    await admin.query(`CREATE DATABASE "${name}"`);
-    const url = new URL(guardedUrl);
-    url.pathname = `/${name}`;
-    pool = new Pool({ connectionString: url.toString(), max: 4 });
-    return await run(pool, drizzle({ client: pool }));
-  } finally {
-    if (pool) await closeTargetPool(pool, admin, name);
-    try { await admin.query(`DROP DATABASE IF EXISTS "${name}"`); } finally { await admin.end(); }
-  }
-}
-
 async function migrateToS5(db: ReturnType<typeof drizzle>) {
   const folder = await createS5MigrationsFolder();
   try { await migrate(db, { migrationsFolder: folder }); } finally { await rm(folder, { recursive: true, force: true }); }
@@ -89,7 +33,7 @@ const NOW = new Date('2026-09-13T08:00:00.000Z');
 
 describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
   it('upgrades valid real S5 data without rewriting Product, Offer or SellerChangeItem identities', async () => {
-    await withDatabase('kaida_s6_upgrade_test', async (pool, db) => {
+    await withMigrationTestDatabase({ name: 'kaida_s6_upgrade_test' }, async (pool, db) => {
       await migrateToS5(db);
 
       const productId = '10000000-0000-4000-8000-000000000861';
@@ -138,7 +82,7 @@ describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
   });
 
   it('rolls back all of 0006 when legacy canonical Products collide after normalization', async () => {
-    await withDatabase('kaida_s6_collision_test', async (pool, db) => {
+    await withMigrationTestDatabase({ name: 'kaida_s6_collision_test' }, async (pool, db) => {
       await migrateToS5(db);
 
       const productA = '10000000-0000-4000-8000-000000000871';
@@ -177,7 +121,7 @@ describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
   });
 
   it('applies the clean current migration chain and installs ProductAlias constraints', async () => {
-    await withDatabase('kaida_s6_clean_chain_test', async (pool, db) => {
+    await withMigrationTestDatabase({ name: 'kaida_s6_clean_chain_test' }, async (pool, db) => {
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
 
       const table = await pool.query(`SELECT column_name,is_nullable FROM information_schema.columns

@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
-import { testDatabaseUrl } from './database';
+import { withMigrationTestDatabase } from './migration-test-database';
 
 async function createS2MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s2-migrations-'));
@@ -16,32 +16,6 @@ async function createS2MigrationsFolder() {
   const journal = JSON.parse(await readFile(join(process.cwd(), 'drizzle/migrations/meta/_journal.json'), 'utf8')) as { version: string; dialect: string; entries: unknown[] };
   await writeFile(join(folder, 'meta/_journal.json'), JSON.stringify({ ...journal, entries: journal.entries.slice(0, 3) }, null, 2));
   return folder;
-}
-
-async function withUpgradeDatabase<T>(name: string, run: (pool: Pool, db: ReturnType<typeof drizzle>) => Promise<T>): Promise<T> {
-  const guardedUrl = testDatabaseUrl();
-  const developmentUrl = new URL(process.env.DATABASE_URL!);
-  if (decodeURIComponent(developmentUrl.pathname) === `/${name}`) throw new Error('Development database must never be S3 upgrade target');
-  const admin = new Pool({ connectionString: guardedUrl, max: 1 });
-  let pool: Pool | undefined;
-  try {
-    const version = Number((await admin.query("SELECT current_setting('server_version_num')::int AS version")).rows[0].version);
-    if (version < 180000 || version >= 190000) throw new Error('S3 migration test requires PostgreSQL 18');
-    await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-    await admin.query(`CREATE DATABASE "${name}"`);
-    const url = new URL(guardedUrl);
-    url.pathname = `/${name}`;
-    pool = new Pool({ connectionString: url.toString(), max: 4 });
-    const db = drizzle({ client: pool });
-    return await run(pool, db);
-  } finally {
-    await pool?.end();
-    try {
-      await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-    } finally {
-      await admin.end();
-    }
-  }
 }
 
 async function migrateToS2(db: ReturnType<typeof drizzle>) {
@@ -65,7 +39,7 @@ async function insertOffer(pool: Pool, values: { id: string; productId: string; 
 
 describe('S3 migration upgrade path on PostgreSQL 18', () => {
   it('upgrades real S2 data, derives ownership and preserves Offer rows', async () => {
-    await withUpgradeDatabase('kaida_s3_upgrade_test', async (pool, db) => {
+    await withMigrationTestDatabase({ name: 'kaida_s3_upgrade_test' }, async (pool, db) => {
       await migrateToS2(db);
 
       const productId = '10000000-0000-4000-8000-000000000501';
@@ -107,7 +81,7 @@ describe('S3 migration upgrade path on PostgreSQL 18', () => {
   });
 
   it('fails atomically for ambiguous/unowned legacy Location and leaves S2 schema + journal intact', async () => {
-    await withUpgradeDatabase('kaida_s3_ambiguous_test', async (pool, db) => {
+    await withMigrationTestDatabase({ name: 'kaida_s3_ambiguous_test' }, async (pool, db) => {
       await migrateToS2(db);
       const productId = '10000000-0000-4000-8000-000000000551';
       const sellerA = '20000000-0000-4000-8000-000000000551';
