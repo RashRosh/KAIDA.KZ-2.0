@@ -156,6 +156,15 @@ async function mockGeolocation(page: import('@playwright/test').Page, point: typ
   }, { mockedPoint: point });
 }
 
+async function openNearbyFromShell(page: import('@playwright/test').Page) {
+  const nav = page.getByRole('navigation', { name: 'Основная навигация' });
+  if (!await nav.isVisible().catch(() => false)) {
+    await page.getByRole('button', { name: 'Открыть меню', exact: true }).click();
+    await expect(nav).toBeVisible();
+  }
+  await nav.getByRole('link', { name: 'Рядом', exact: true }).click();
+}
+
 function assertDiscoveryPrivacy(body: unknown) {
   const serialized = JSON.stringify(body);
   expect(serialized).toContain('"distanceMeters"');
@@ -188,9 +197,7 @@ test('Buyer explicitly opens Nearby, gets only nearby Offers, keeps contacts, an
   });
 
   await page.goto('/');
-  const nearbyLink = page.getByRole('link', { name: 'Что есть рядом', exact: true });
-  await expect(nearbyLink).toBeVisible();
-  await nearbyLink.click();
+  await openNearbyFromShell(page);
   await expect(page).toHaveURL(/\/nearby$/);
   await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(0);
