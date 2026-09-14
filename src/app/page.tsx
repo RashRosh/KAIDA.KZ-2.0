@@ -1,25 +1,24 @@
 import Link from 'next/link';
+import { AppHeader } from './_components/AppHeader';
 import { SearchForm } from './_components/SearchForm';
-import { AuthStatus } from './_components/AuthStatus';
 import styles from './page.module.css';
 
 export default function Home() {
   return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
-        <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">KAIDA.KZ</Link>
-        <AuthStatus />
-      </header>
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <p className={styles.eyebrow}>Поиск товаров</p>
-          <h1>Где купить?</h1>
-          <p className={styles.description}>Найдите товар и узнайте,<br className={styles.desktopBreak} /> где он продаётся.</p>
-          <Link href="/nearby" className={styles.secondaryLink}>Что есть рядом</Link>
-        </div>
-        <SearchForm />
-      </main>
-      <footer className={styles.footer}>Предложения и цены в этой версии вымышлены.</footer>
-    </div>
+    <>
+      <AppHeader />
+      <div className={styles.shell}>
+        <main className={styles.main}>
+          <div className={styles.intro}>
+            <p className={styles.eyebrow}>Поиск товаров</p>
+            <h1>Где купить?</h1>
+            <p className={styles.description}>Найдите товар и узнайте,<br className={styles.desktopBreak} /> где он продаётся.</p>
+            <Link href="/nearby" className={styles.secondaryLink}>Что есть рядом</Link>
+          </div>
+          <SearchForm />
+        </main>
+        <footer className={styles.footer}>Предложения и цены в этой версии вымышлены.</footer>
+      </div>
+    </>
   );
 }
