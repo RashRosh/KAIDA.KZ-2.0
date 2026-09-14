@@ -31,6 +31,35 @@ type SearchFormProps = {
   initialQuery?: string;
 };
 
+const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс', 'Яблоки'] as const;
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4.2-4.2" />
+    </svg>
+  );
+}
+
+function LocationPinIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.5" className={active ? styles.locationPinActiveDot : undefined} />
+    </svg>
+  );
+}
+
+function TrendingIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m4 16 6-6 4 4 6-7" />
+      <path d="M15 7h5v5" />
+    </svg>
+  );
+}
+
 export function SearchForm({ initialQuery = '' }: SearchFormProps) {
   const [query, setQuery] = useState(initialQuery);
   const [state, setState] = useState<SearchState>({ kind: 'initial' });
@@ -169,6 +198,13 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
     await executeSearch(query, buyerLocation);
   }
 
+  function quickSearch(term: string) {
+    if (loading) return;
+    setQuery(term);
+    const buyerLocation = locationState.kind === 'enabled' ? locationState.point : undefined;
+    void executeSearch(term, buyerLocation);
+  }
+
   const feedback = loading
     ? 'Ищем предложения…'
     : state.kind === 'success'
@@ -183,55 +219,83 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
       ? 'Не удалось определить местоположение. Поиск работает без учёта расстояния.'
       : '';
 
+  const locationActionLabel = locationState.kind === 'enabled'
+    ? 'Не учитывать местоположение'
+    : locationState.kind === 'requesting'
+      ? 'Определяем местоположение…'
+      : locationState.kind === 'error'
+        ? 'Попробовать снова'
+        : 'Учитывать моё местоположение';
+
+  const locationEnabled = locationState.kind === 'enabled';
+
   return (
     <section className={styles.searchArea} aria-label="Поиск предложений">
       <form onSubmit={submit} noValidate>
-        <label htmlFor="product-query" className={styles.label}>Какой товар ищете?</label>
+        <label htmlFor="product-query" className={styles.srOnly}>Какой товар ищете?</label>
         <div className={styles.searchControls}>
-          <input
-            ref={input}
-            id="product-query"
-            name="q"
-            type="search"
-            placeholder="Например, баранина"
-            value={query}
-            readOnly={loading}
-            onChange={(event) => setQuery(event.target.value)}
-            aria-invalid={state.kind === 'validation'}
-            aria-describedby={state.kind === 'validation' ? 'search-help search-validation' : 'search-help'}
-            autoComplete="off"
-            enterKeyHint="search"
-          />
-          <button type="submit" disabled={loading}>{loading ? 'Ищем…' : 'Найти'}</button>
+          <div className={styles.queryField}>
+            <span className={styles.queryIcon}><SearchIcon /></span>
+            <input
+              ref={input}
+              id="product-query"
+              name="q"
+              type="search"
+              placeholder="Баранина, мёд, картофель…"
+              value={query}
+              readOnly={loading}
+              onChange={(event) => setQuery(event.target.value)}
+              aria-invalid={state.kind === 'validation'}
+              aria-describedby={state.kind === 'validation' ? 'search-validation' : undefined}
+              autoComplete="off"
+              enterKeyHint="search"
+            />
+          </div>
+          <button type="submit" className={styles.searchSubmit} disabled={loading}>
+            <SearchIcon />
+            <span>{loading ? 'Ищем…' : 'Искать'}</span>
+          </button>
+          <button
+            type="button"
+            className={styles.locationToggle}
+            disabled={locationState.kind === 'requesting'}
+            aria-label={locationActionLabel}
+            aria-pressed={locationEnabled}
+            title={locationActionLabel}
+            onClick={() => {
+              if (locationEnabled) setLocationState({ kind: 'not_enabled' });
+              else requestBuyerLocation();
+            }}
+          >
+            <LocationPinIcon active={locationEnabled} />
+          </button>
         </div>
-        <p id="search-help" className={styles.help}>Введите точное название товара.</p>
+
         {state.kind === 'validation' && <p id="search-validation" className={styles.error} role="alert">Введите название товара.</p>}
 
-        <div className={styles.locationControls}>
-          {locationState.kind === 'enabled' ? (
+        <div className={styles.popularSearches} aria-label="Популярные запросы">
+          <span className={styles.popularLabel}>
+            <TrendingIcon />
+            Популярное:
+          </span>
+          {popularSearches.map((term) => (
             <button
+              key={term}
               type="button"
-              className={styles.locationButton}
-              onClick={() => setLocationState({ kind: 'not_enabled' })}
+              className={styles.popularChip}
+              disabled={loading}
+              onClick={() => quickSearch(term)}
             >
-              Не учитывать местоположение
+              {term}
             </button>
-          ) : (
-            <button
-              type="button"
-              className={styles.locationButton}
-              disabled={locationState.kind === 'requesting'}
-              onClick={requestBuyerLocation}
-            >
-              {locationState.kind === 'requesting'
-                ? 'Определяем местоположение…'
-                : locationState.kind === 'error'
-                  ? 'Попробовать снова'
-                  : 'Учитывать моё местоположение'}
-            </button>
-          )}
-          {locationStatus && <p className={styles.locationStatus}>{locationStatus}</p>}
+          ))}
         </div>
+
+        {locationStatus && (
+          <p className={styles.locationStatus} role={locationState.kind === 'error' ? 'alert' : 'status'}>
+            {locationStatus}
+          </p>
+        )}
       </form>
       <div className={styles.results} aria-busy={loading}>
         <p className={styles.feedback} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
