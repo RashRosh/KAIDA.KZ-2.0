@@ -9,7 +9,7 @@
   --primary: #6736bd;
   --primary-hover: #51299a;
   --error: #9c253d;
-  --radius: 0.75rem;
+  --radius: 3px;
 }
 
 * { box-sizing: border-box; }
