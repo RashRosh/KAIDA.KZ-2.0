@@ -44,11 +44,41 @@ export const sellerOfferChangeBodySchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('activate_offer') }).strict(),
 ]);
 
+const sellerBatchChangeItemSchema = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal('create_offer'),
+    productName: z.string().trim().min(1),
+    locationId: z.string().uuid(),
+    price: priceSchema.nullable().optional().transform((value) => value ?? null),
+    sellerComment: optionalCommentSchema,
+  }).strict(),
+  z.object({
+    action: z.literal('update_offer'),
+    offerId: z.string().uuid(),
+    price: priceSchema.nullable(),
+    sellerComment: requiredCommentSchema,
+  }).strict(),
+  z.object({
+    action: z.literal('deactivate_offer'),
+    offerId: z.string().uuid(),
+  }).strict(),
+  z.object({
+    action: z.literal('activate_offer'),
+    offerId: z.string().uuid(),
+  }).strict(),
+]);
+
+export const sellerBatchChangeSetCreateBodySchema = z.object({
+  items: z.array(sellerBatchChangeItemSchema).min(2),
+}).strict();
+
 export const sellerChangeSetIdSchema = z.string().uuid();
 export const sellerOfferIdSchema = z.string().uuid();
 
 export type SellerChangeSetCreateInput = z.infer<typeof sellerChangeSetCreateBodySchema>;
 export type SellerOfferChangeInput = z.infer<typeof sellerOfferChangeBodySchema>;
+export type SellerBatchChangeSetCreateInput = z.infer<typeof sellerBatchChangeSetCreateBodySchema>;
+export type SellerBatchChangeItemInput = SellerBatchChangeSetCreateInput['items'][number];
 
 export type SellerChangeSetItemView = {
   id: string;
@@ -122,6 +152,14 @@ export class OfferAlreadyInactiveError extends Error {
   constructor() {
     super('Предложение уже выключено.');
     this.name = 'OfferAlreadyInactiveError';
+  }
+}
+
+export class BatchOfferConflictError extends Error {
+  readonly code = 'BATCH_OFFER_CONFLICT' as const;
+  constructor() {
+    super('В одном пакете нельзя изменять одно предложение несколько раз.');
+    this.name = 'BatchOfferConflictError';
   }
 }
 

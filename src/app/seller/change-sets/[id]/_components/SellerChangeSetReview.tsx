@@ -97,12 +97,16 @@ export function SellerChangeSetReview({ changeSetId }: { changeSetId: string }) 
 
   const firstItem = changeSet.items[0];
   const copy = firstItem ? actionCopy(firstItem, changeSet.status) : null;
+  const isBatch = changeSet.items.length > 1;
+  const batchStatus = changeSet.status === 'proposed'
+    ? `Пакет содержит ${changeSet.items.length} изменений. До подтверждения ни одно из них не применяется.`
+    : `Пакет из ${changeSet.items.length} изменений применён целиком.`;
 
   return (
     <section className={styles.card} aria-labelledby="change-set-heading">
       <p className={styles.eyebrow}>{changeSet.status === 'proposed' ? 'Ожидает подтверждения' : 'Подтверждено'}</p>
       <h2 id="change-set-heading">{changeSet.seller.displayName}</h2>
-      {copy && <p className={styles.status}>{copy.statusText}</p>}
+      {isBatch ? <p className={styles.status}>{batchStatus}</p> : copy && <p className={styles.status}>{copy.statusText}</p>}
 
       <div className={styles.stack}>
         {changeSet.items.map((item) => {
@@ -110,6 +114,7 @@ export function SellerChangeSetReview({ changeSetId }: { changeSetId: string }) 
           return (
             <article key={item.id} className={styles.itemCard}>
               <h3>{item.product.name}</h3>
+              {isBatch && <p className={styles.muted}>{itemCopy.statusText}</p>}
               <dl className={styles.summaryGrid}>
                 <dt>Точка</dt><dd>{item.location.name}</dd>
                 <dt>Адрес</dt><dd>{item.location.addressText}</dd>
@@ -130,7 +135,7 @@ export function SellerChangeSetReview({ changeSetId }: { changeSetId: string }) 
 
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.actions}>
-        {changeSet.status === 'proposed' && copy && <button type="button" onClick={confirm} disabled={confirming}>{confirming ? 'Подтверждаем…' : copy.button}</button>}
+        {changeSet.status === 'proposed' && copy && <button type="button" onClick={confirm} disabled={confirming}>{confirming ? 'Подтверждаем…' : isBatch ? 'Подтвердить весь пакет' : copy.button}</button>}
         <Link className={styles.secondaryLink} href="/seller">Вернуться к продавцу</Link>
       </div>
     </section>
