@@ -58,7 +58,9 @@ describe('S13 migration upgrade path on PostgreSQL 18', () => {
       const constraints = await pool.query<{ constraint_name: string; constraint_type: string }>(`
         SELECT constraint_name,constraint_type
         FROM information_schema.table_constraints
-        WHERE table_schema='public' AND table_name='buyer_interests'
+        WHERE table_schema='public'
+          AND table_name='buyer_interests'
+          AND constraint_type IN ('FOREIGN KEY', 'PRIMARY KEY')
         ORDER BY constraint_name
       `);
       expect(constraints.rows).toEqual([

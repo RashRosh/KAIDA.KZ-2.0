@@ -3,8 +3,8 @@ import {
   ProductNotFoundError,
   putBuyerInterest,
   removeBuyerInterest,
-} from '@/modules/interests/application/manage-interests';
-import { interestProductIdSchema } from '@/modules/interests/contracts/interests.contract';
+} from '../../../../modules/interests/application/manage-interests';
+import { interestProductIdSchema } from '../../../../modules/interests/contracts/interests.contract';
 import { hasNonEmptyBody, interestsNoStore, resolveInterestUser } from '../_auth';
 
 export const runtime = 'nodejs';

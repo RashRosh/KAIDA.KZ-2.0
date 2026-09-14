@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
-import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
+import { resolveCurrentUser } from '../../../modules/identity/application/resolve-current-user';
+import { SESSION_COOKIE_NAME } from '../../../modules/identity/session/session-cookie';
 
 export const interestsNoStore = { 'Cache-Control': 'no-store' };
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { listBuyerInterests } from '@/modules/interests/application/manage-interests';
+import { listBuyerInterests } from '../../../modules/interests/application/manage-interests';
 import { interestsNoStore, resolveInterestUser } from './_auth';
 
 export const runtime = 'nodejs';
