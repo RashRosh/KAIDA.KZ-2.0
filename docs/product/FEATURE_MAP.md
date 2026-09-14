@@ -14,9 +14,9 @@ KAIDA.KZ растёт вокруг одного цикла:
 
 Фактически закрыты и считаются checkpoint contracts:
 
-`S0 → S1 → S2 → S3 → S4 → S5 → S6 → S7 → S8 → S9`
+`S0 → S1 → S2 → S3 → S4 → S5 → S6 → S7 → S8 → S9 → S10`
 
-Текущий verified checkpoint: **S9**.
+Текущий verified checkpoint: **S10**.
 
 Важно: фактическая граница между S8 и S9 уточнена по реализованному поведению:
 
@@ -54,7 +54,7 @@ KAIDA.KZ растёт вокруг одного цикла:
 | S7 | Search | Покупатель находит реальные Offers, созданные продавцами | S4, S6 | MVP | CLOSED |
 | S8 | Geo / Location | Продавец сохраняет координаты своей Location; координаты валидируются и не публикуются как raw geo в Search | S3, S7 | MVP | CLOSED |
 | S9 | Search ranking | Опциональная transient buyer location меняет только порядок Search: distance → freshness; без geo — freshness; ordering детерминирован | S1, S8 | MVP | CLOSED |
-| S10 | Buyer action | Из Offer можно позвонить или перейти в WhatsApp / Telegram / Instagram | S7 | MVP | PLANNED |
+| S10 | Buyer action | Из Offer можно позвонить или перейти в WhatsApp / Telegram / Instagram | S7 | MVP | CLOSED |
 | S11 | Discovery | Покупатель открывает «Рядом» и видит актуальные товары поблизости | S8, S9 | MVP | PLANNED |
 | S12 | Seller Input | Продавец массово меняет несколько товаров одним Change Set | S5 | MVP | PLANNED |
 | S13 | Interests | Покупатель отмечает конкретный Product как интересующий | S2, S6 | MVP | PLANNED |

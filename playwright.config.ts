@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { NEARBY_RADIUS_METERS_DEFAULT } from './src/modules/discovery/config/discovery.config';
 import { testDatabaseUrl } from './tests/integration/database';
 
 const identityTestSecret = '1111111111111111111111111111111111111111111111111111111111111111';
@@ -26,6 +27,7 @@ export default defineConfig({
     timeout: 120000,
     env: {
       DATABASE_URL: testDatabaseUrl(),
+      NEARBY_RADIUS_METERS: String(NEARBY_RADIUS_METERS_DEFAULT),
       IDENTITY_OTP_TTL_SECONDS: '300',
       IDENTITY_SESSION_TTL_SECONDS: '2592000',
       IDENTITY_OTP_HMAC_SECRET_HEX: identityTestSecret,

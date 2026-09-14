@@ -9,7 +9,13 @@ export function formatAmount(amount: string): string {
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + (decimals ? `,${decimals}` : '');
 }
 
-export function OfferCard({ offer }: { offer: SearchOffer }) {
+export function OfferCard({
+  offer,
+  distanceMeters,
+}: {
+  offer: SearchOffer;
+  distanceMeters?: number;
+}) {
   const contactActions = offer.seller.contacts ? buildContactActions(offer.seller.contacts) : [];
 
   return (
@@ -25,6 +31,7 @@ export function OfferCard({ offer }: { offer: SearchOffer }) {
       <dl className={styles.offerDetails}>
         <div><dt>Продавец</dt><dd>{offer.seller.displayName}</dd></div>
         <div><dt>Где купить</dt><dd>{offer.location.name}<span className={styles.address}>{offer.location.addressText}</span></dd></div>
+        {distanceMeters !== undefined && <div><dt>Расстояние</dt><dd>{distanceMeters} м</dd></div>}
       </dl>
       {offer.sellerComment && <p className={styles.comment}>{offer.sellerComment}</p>}
       {contactActions.length > 0 && (
