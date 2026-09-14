@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
-import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
-import { getOwnedSellerContacts } from '@/modules/sellers/application/get-owned-seller-contacts';
-import { updateOwnedSellerContacts } from '@/modules/sellers/application/update-owned-seller-contacts';
+import { resolveCurrentUser } from '../../../../modules/identity/application/resolve-current-user';
+import { SESSION_COOKIE_NAME } from '../../../../modules/identity/session/session-cookie';
+import { getOwnedSellerContacts } from '../../../../modules/sellers/application/get-owned-seller-contacts';
+import { updateOwnedSellerContacts } from '../../../../modules/sellers/application/update-owned-seller-contacts';
 
 export const runtime = 'nodejs';
 
