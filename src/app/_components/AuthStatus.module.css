@@ -3,10 +3,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-3);
 }
 
-.testLabel,
 .authMuted {
   color: var(--muted);
   font-size: 0.8125rem;
@@ -33,12 +31,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
-  padding: 0 var(--space-3);
+  gap: var(--space-2);
+  border-radius: var(--radius);
+  padding: 0 var(--space-4);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .loginLink {
@@ -62,6 +75,7 @@
 
 .authRow button:hover:not(:disabled) {
   border-color: var(--primary);
+  background: var(--primary-soft);
   color: var(--primary);
 }
 
@@ -71,13 +85,26 @@
 }
 
 @media (max-width: 47.99rem) {
-  .testLabel {
+  .authMuted {
     display: none;
   }
 
   .phone {
-    max-width: 7.5rem;
+    max-width: 4.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .loginLink {
+    padding: 0 var(--space-3);
+  }
+
+  .authRow button {
+    width: 2.75rem;
+    padding: 0;
+  }
+
+  .authRow button span {
+    display: none;
   }
 }
