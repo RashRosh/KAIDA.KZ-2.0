@@ -56,6 +56,10 @@ async function search(page: import('@playwright/test').Page, query: string) {
   await page.getByLabel('Какой товар ищете?').press('Enter');
 }
 
+function sellerOfferCard(page: import('@playwright/test').Page, sellerName: string) {
+  return page.locator('article').filter({ hasText: sellerName });
+}
+
 test('Seller reviews and confirms several Offer changes as one persisted batch', async ({ page }, testInfo) => {
   const auth = await authenticate(page, testInfo.project.name);
   const sellerName = `S12 E2E ${testInfo.project.name}`;
@@ -90,20 +94,28 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await expect(page.getByText('S12 новая баранина', { exact: true })).toBeVisible();
 
     await search(page, 'баранина');
-    await expect(page.getByText('S12 старая баранина', { exact: true })).toBeVisible();
-    await expect(page.getByText('S12 новая баранина', { exact: true })).toHaveCount(0);
+    const oldLambCard = sellerOfferCard(page, sellerName);
+    await expect(oldLambCard).toHaveCount(1);
+    await expect(oldLambCard.getByText('S12 старая баранина', { exact: true })).toBeVisible();
+    await expect(oldLambCard.getByText('S12 новая баранина', { exact: true })).toHaveCount(0);
+
     await search(page, 'говядина');
-    await expect(page.getByText('S12 старая говядина', { exact: true })).toBeVisible();
+    const oldBeefCard = sellerOfferCard(page, sellerName);
+    await expect(oldBeefCard).toHaveCount(1);
+    await expect(oldBeefCard.getByText('S12 старая говядина', { exact: true })).toBeVisible();
 
     await page.goto(reviewUrl);
     await page.getByRole('button', { name: 'Подтвердить весь пакет' }).click();
     await expect(page.getByText(/Пакет из 2 изменений применён целиком/)).toBeVisible();
 
     await search(page, 'баранина');
-    await expect(page.getByText('S12 новая баранина', { exact: true })).toBeVisible();
-    await expect(page.getByText('S12 старая баранина', { exact: true })).toHaveCount(0);
+    const newLambCard = sellerOfferCard(page, sellerName);
+    await expect(newLambCard).toHaveCount(1);
+    await expect(newLambCard.getByText('S12 новая баранина', { exact: true })).toBeVisible();
+    await expect(newLambCard.getByText('S12 старая баранина', { exact: true })).toHaveCount(0);
+
     await search(page, 'говядина');
-    await expect(page.getByText(sellerName, { exact: true })).toHaveCount(0);
+    await expect(sellerOfferCard(page, sellerName)).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(auth.pool, auth.userId, auth.phone);
