@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { SellerChangeSetCreate } from './SellerChangeSetCreate';
+import { SellerContactSettings } from './SellerContactSettings';
 import { SellerOfferManagement } from './SellerOfferManagement';
 import styles from '../page.module.css';
 
@@ -185,6 +186,7 @@ export function SellerSetup() {
             })}
           </div>
         </section>
+        <SellerContactSettings />
         <SellerChangeSetCreate seller={seller} />
         <SellerOfferManagement />
       </div>
