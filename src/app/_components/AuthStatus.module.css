@@ -1,12 +1,83 @@
-.group { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; min-width: 0; }
-.testLabel, .authMuted { color: var(--muted); font-size: .8125rem; white-space: nowrap; }
-.authRow { display: flex; align-items: center; gap: .65rem; min-width: 0; }
-.phone { color: var(--text); font-size: .875rem; white-space: nowrap; }
-.loginLink, .authRow button { min-height: 2.5rem; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius); padding: 0 .85rem; font: inherit; font-weight: 600; font-size: .875rem; }
-.loginLink { background: var(--primary); color: #fff; text-decoration: none; }
-.authRow button { border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
-.authRow button:disabled { cursor: wait; opacity: .65; }
-@media (max-width: 36rem) {
-  .testLabel { display: none; }
-  .phone { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; }
+.group {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.testLabel,
+.authMuted {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.authRow {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.phone {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.loginLink,
+.authRow button {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.loginLink {
+  border: var(--border-width) solid var(--primary);
+  background: var(--primary);
+  color: var(--surface);
+  text-decoration: none;
+}
+
+.loginLink:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.authRow button {
+  border: var(--border-width) solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.authRow button:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.authRow button:disabled {
+  cursor: wait;
+  color: var(--muted);
+}
+
+@media (max-width: 47.99rem) {
+  .testLabel {
+    display: none;
+  }
+
+  .phone {
+    max-width: 7.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

@@ -7,23 +7,28 @@
 
 UX1A is the first corrective UX slice inserted before UX1B, UX1C, UX2, M1 and S14. It does not reopen or renumber S0-S13.
 
+Product Owner updated the visual baseline during UX1A manual acceptance. The approved KAIDA.KZ Design System is authoritative for visual language below behavioral slice contracts and `PROJECT_RULES.md`. Historical visual implementation details such as Plus Jakarta Sans or the temporary `3px` radius are superseded by UX1A; closed product/API/business behavior is not reopened.
+
 ## 1. User task
 
-Пользователь открывает любую текущую основную область KAIDA.KZ и сразу понимает, как вернуться к Buyer home/Search, открыть `Рядом`, перейти в seller flow и войти/выйти, потому что верхняя часть приложения имеет одну компактную и предсказуемую навигационную систему.
+Пользователь открывает любую текущую основную область KAIDA.KZ и сразу понимает, как вернуться к Buyer home/Search, открыть `Рядом`, перейти в seller flow и войти/выйти, потому что верхняя часть приложения имеет одну предсказуемую навигационную систему без визуальных скачков между маршрутами.
 
 ## 2. Scope
 
 UX1A включает только app-shell/navigation cleanup поверх закрытого поведения S0-S13:
 
-- один общий визуальный и структурный header/app shell для текущих основных экранов;
+- один общий визуальный и структурный app shell для текущих основных экранов;
 - единый wordmark KAIDA.KZ как переход на главную;
-- заметные navigation entry points в Buyer home, `Рядом` и существующий `/seller` flow;
-- существующий auth status/login/logout остаётся доступным в shell без изменения Identity semantics;
-- seller-specific страницы могут иметь контекстный label/secondary navigation, но не отдельную несогласованную верхнюю систему;
-- header становится компактнее по высоте и отступам на mobile и desktop;
+- понятные navigation entry points в Buyer home/Search, `Рядом` и существующий `/seller` flow;
+- существующий auth status/login/logout остаётся доступным без изменения Identity semantics;
+- seller-specific страницы могут иметь context label, но не отдельную несогласованную верхнюю систему;
+- desktop navigation имеет стабильный геометрический центр независимо от route content, auth/context content и наличия вертикального scrollbar;
+- на mobile primary header имеет design-system height `84px`, на desktop от `768px` — `104px`; mobile navigation может быть отдельной shell-строкой под primary header, чтобы сохранить 44px tap targets;
+- основной UI-шрифт — Roboto; browser runtime не должен выполнять отдельный запрос к внешнему font-service;
+- вводится утверждённая design-system radius scale: `8 / 12 / 16 / 20px` (`--radius-sm`, `--radius`, `--radius-lg`, `--radius-xl`); прежний временный `3px` отменён до закрытия UX1A;
+- вводятся только те design tokens, которые нужны текущему UI и последующим изменениям уже существующих компонентов; новые product components «на будущее» не создаются;
 - навигация не создаёт horizontal overflow на поддерживаемых representative viewport widths;
-- базовый design token радиуса для стандартных кнопок, input/select и аналогичных controls устанавливается в `3px`;
-- только необходимые presentation components/styles и E2E proof.
+- только необходимые presentation components/styles, design-system documentation и E2E proof.
 
 UX1A не меняет внутреннюю структуру seller forms или Buyer Offer cards.
 
@@ -31,12 +36,14 @@ UX1A не меняет внутреннюю структуру seller forms ил
 
 Не входят:
 
-- UX1B marketplace Offer cards, grid/list density и media slot;
+- UX1B marketplace Offer cards, grid/list density и card redesign;
+- фиктивные media slots/placeholders в UX1B;
 - UX1C изменение Nearby geo-intent flow и удаление второго подтверждения;
 - UX2 объединение seller setup + contacts и другие seller form improvements;
 - address autocomplete, controlled unit lists или системная замена inputs;
 - Product image/icon data;
-- Offer photo/video, Media module, upload/storage/lifecycle;
+- Offer photo/video, Media module, upload/storage/lifecycle и media layout — это M1/M2;
+- reviews/rating implementation — они остаются продуктово запланированы, но требуют отдельного slice;
 - S14 `Для вас`;
 - новые product capabilities;
 - изменения DB/schema/migrations;
@@ -46,7 +53,7 @@ UX1A не меняет внутреннюю структуру seller forms ил
 - изменения Seller ownership/setup/contact business semantics;
 - изменения Interests semantics;
 - новый auth flow;
-- внешний UI framework/design-system dependency;
+- новый UI framework/Tailwind;
 - копирование конкретного marketplace UI один в один.
 
 ## 4. Closed contracts used
@@ -65,7 +72,7 @@ UX1A сохраняет существующую Buyer home/Search capability. S
 
 ### S11 — Discovery / Nearby
 
-Навигация может вести на существующий `/nearby`, но UX1A не меняет его geolocation behavior. Прямой переход в раздел сам по себе не должен становиться автоматическим browser geo request.
+Навигация может вести на существующий `/nearby`, но UX1A не меняет его geolocation behavior. Переход в раздел сам по себе не должен запускать browser geolocation request.
 
 ### S13 — Interests
 
@@ -89,21 +96,22 @@ UX1A обязан сохранить:
 
 - **DB migration:** NO.
 - **Public API:** NO.
-- **Auth/security/privacy:** YES, ограниченно — shell отображает существующий auth state и даёт navigation entry в seller/nearby, поэтому необходимо доказать, что auth и geo privacy behavior не изменились.
+- **Auth/security/privacy:** YES, ограниченно — shell отображает существующий auth state и даёт navigation entry в seller/nearby, поэтому необходимо доказать сохранность auth и geo privacy behavior.
 - **Concurrency/atomicity:** NO.
 - **Data loss:** NO.
-- **External service:** NO.
+- **External service:** NO для runtime product behavior. Font loading не должен добавлять browser runtime dependency на внешний font-service.
 
 ## 7. Expected modules / boundaries of change
 
-Ожидаются только presentation-level изменения:
+Ожидаются только presentation/documentation изменения:
 
 - shared app header/shell/navigation component(s);
-- current route pages, которые дублируют header markup;
-- global/shared styles и минимальные page styles;
+- current route pages, которые дублировали header markup;
+- global/shared styles и необходимые design tokens;
+- root typography wiring;
 - existing auth status placement/styling без изменения его API contract;
 - targeted E2E tests;
-- UX1A documentation/backlog status.
+- Design System / UX backlog / UX1A documentation.
 
 Не ожидаются изменения в `src/db`, migrations, repositories/services, domain modules или API route contracts.
 
@@ -114,46 +122,51 @@ UX1A обязан сохранить:
 3. Из общего shell доступны понятные переходы как минимум в Buyer home/Search, `Рядом` и seller flow.
 4. Seller entry ведёт в существующий `/seller` и не создаёт новую seller/auth semantics.
 5. Existing auth status/login/logout остаётся функциональным; UX1A не меняет S2 API/session behavior.
-6. Навигация и header не имеют horizontal overflow на representative mobile и desktop viewport.
-7. Header занимает существенно меньше декоративного вертикального пространства, чем текущие разрозненные варианты, не ухудшая tap targets и читаемость.
-8. Стандартные кнопки и поля, использующие базовый radius token, получают `3px`; UX1A не требует полного redesign всех card surfaces.
-9. Переход в `/nearby` через shell не запускает browser geolocation автоматически; существующий S11 flow до UX1C остаётся прежним.
-10. Search, Nearby, seller setup/contacts, interests и Offer data продолжают работать без изменения публичных/business contracts.
+6. Навигация и shell не имеют horizontal overflow на representative mobile и desktop viewport.
+7. Primary header имеет `84px` на mobile и `104px` на desktop `>=768px`; эта геометрия едина на основных routes.
+8. Desktop navigation остаётся визуально по центру viewport при реальных переходах `Поиск ↔ Рядом ↔ Продавцу`, включая переход на длинную seller page; ширина правого auth/context блока и scrollbar не сдвигают menu.
+9. Основной UI использует Roboto с кириллицей; layout не зависит от наличия Roboto в ОС пользователя.
+10. Design-system radius tokens равны `8 / 12 / 16 / 20px`; стандартные fields/buttons, использующие `--radius`, получают `12px`, small controls используют `8px` по назначению.
+11. Переход в `/nearby` через shell не запускает browser geolocation автоматически; существующий S11 flow до UX1C остаётся прежним.
+12. Search, Nearby, seller setup/contacts, interests и Offer data продолжают работать без изменения публичных/business contracts.
 
 ## 9. Automated test plan
 
 ### Unit
 
-Новые unit tests не требуются по умолчанию: UX1A не добавляет новую чистую business logic.
+Новые unit tests не требуются: UX1A не добавляет business logic.
 
 ### Integration / DB
 
-Новые integration/migration tests не требуются. Существующие suites остаются regression proof. Появление необходимости менять API/DB означает scope violation.
+Новые integration/migration tests не требуются. Существующие suites остаются regression proof. Необходимость менять API/DB означает scope violation.
 
 ### E2E — targeted proof
 
-Проверить только изменённые границы:
+Проверить изменённые границы:
 
-- anonymous mobile/desktop: общий header виден без overflow, Buyer home / `Рядом` / seller entry доступны;
-- login navigation остаётся рабочей;
-- authenticated state и logout остаются рабочими через существующий S2 flow;
-- seller entry действительно открывает существующий `/seller`;
-- переход на `/nearby` не вызывает geolocation request автоматически до существующего явного действия внутри страницы;
-- основные страницы рендерятся с единой shell-геометрией на representative mobile/desktop widths.
+- anonymous mobile/desktop: единый shell виден без overflow, Buyer home / `Рядом` / seller entry доступны;
+- primary header height `84/104px` по breakpoint;
+- Roboto и radius tokens реально применены;
+- desktop nav имеет один и тот же center относительно viewport на `/`, `/nearby`, `/login`, `/seller` и после реальных click navigations;
+- scrollbar space стабилизирован, длинная seller page не сдвигает nav;
+- login/authenticated/logout остаются рабочими через existing S2 E2E;
+- seller entry открывает existing `/seller`;
+- переход на `/nearby` не вызывает geolocation request автоматически.
 
-После targeted proof — один полный branch CI на финальном executable head. Повторный exact-SHA full run не нужен без сигнала flaky/nondeterminism.
+После targeted proof — один full branch CI на финальном executable head. Повторный exact-SHA run не нужен без flaky/nondeterminism signal.
 
 ## 10. Manual acceptance scenario
 
-1. На mobile открыть главную и визуально проверить компактный единый header с понятными entry points `Рядом`, seller и login/auth.
-2. Перейти последовательно на `Рядом`, login и seller pages: верхняя система остаётся узнаваемой и не прыгает между несвязанными вариантами.
-3. Войти существующим тестовым способом, вернуться на главную и убедиться, что auth state отображается и logout работает как раньше.
-4. Нажать seller entry и убедиться, что открылся существующий seller flow без изменения его содержимого/бизнес-поведения.
-5. Открыть `Рядом` и убедиться, что geolocation prompt не появляется только из-за перехода.
-6. Повторить визуальную проверку на desktop: header компактный, навигация не ломается, горизонтального overflow нет.
+1. На mobile открыть главную: primary header визуально един, Roboto применён, ниже доступна понятная navigation row; горизонтального overflow нет.
+2. Перейти `Поиск → Рядом → Продавцу → Поиск`: shell не прыгает влево/вправо и остаётся узнаваемым.
+3. На desktop повторить переходы и специально сравнить положение `Поиск / Рядом / Продавцу` на главной и длинной seller page — menu не меняет горизонтальную позицию.
+4. Войти существующим тестовым способом, вернуться на главную и убедиться, что auth state отображается и logout работает как раньше.
+5. Нажать seller entry и убедиться, что открылся существующий seller flow без изменения его содержимого/бизнес-поведения.
+6. Открыть `Рядом` и убедиться, что geolocation prompt не появляется только из-за перехода.
+7. Визуально подтвердить новую radius scale вместо прежнего `3px`.
 
 ## Gate
 
-Product Owner approved implementation on 2026-09-14. Backlog items UX-001, UX-005 and UX-006 are `IN_SLICE`.
+Product Owner approved implementation on 2026-09-14 and approved the Design System corrections during UX1A manual acceptance. Backlog items UX-001, UX-005 and UX-006 remain `IN_SLICE` until manual acceptance PASS.
 
 Implementation must still pass: targeted E2E → full branch CI → manual acceptance → diff audit → merge → merged-main CI → annotated UX1A checkpoint. UX1B starts only after UX1A is closed.
