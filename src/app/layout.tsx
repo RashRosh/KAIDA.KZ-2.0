@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
-import '@fontsource-variable/plus-jakarta-sans';
+import { Roboto } from 'next/font/google';
 import './globals.css';
+
+const roboto = Roboto({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: 'KAIDA.KZ | Поиск товаров',
@@ -9,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ru"><body>{children}</body></html>;
+  return <html lang="ru" className={roboto.variable}><body>{children}</body></html>;
 }

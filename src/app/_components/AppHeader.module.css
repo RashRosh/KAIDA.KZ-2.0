@@ -1,0 +1,114 @@
+.header {
+  width: 100%;
+  height: 5.25rem;
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.inner {
+  width: 100%;
+  max-width: 80rem;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-width: 0;
+  min-height: 2.75rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.desktopNav {
+  display: none;
+}
+
+.mobileNav {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--space-1);
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.navLink {
+  min-width: 0;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.trailing {
+  min-width: 0;
+  display: flex;
+  justify-self: end;
+  justify-content: flex-end;
+}
+
+.context {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (min-width: 48rem) {
+  .header {
+    height: 6.5rem;
+  }
+
+  .inner {
+    padding: 0 var(--space-12);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .wordmark {
+    font-size: 1.5rem;
+  }
+
+  .desktopNav {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+  }
+
+  .mobileNav {
+    display: none;
+  }
+
+  .navLink {
+    padding: 0 var(--space-3);
+  }
+}

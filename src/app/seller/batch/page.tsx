@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
+import { AppHeader } from '../../_components/AppHeader';
 import { SellerBatchChangeSetCreate } from '../_components/SellerBatchChangeSetCreate';
 import styles from '../page.module.css';
 
@@ -43,24 +44,23 @@ export default function SellerBatchPage() {
   }, []);
 
   return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
-        <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">KAIDA.KZ</Link>
-        <Link href="/seller" className={styles.secondaryLink}>Продавец</Link>
-      </header>
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <p className={styles.eyebrow}>Seller Input · Batch</p>
-          <h1>Пакетное изменение ассортимента</h1>
-          <p>Соберите несколько изменений, проверьте их вместе и подтвердите одним действием.</p>
-        </div>
+    <>
+      <AppHeader showAuth={false} contextLabel="Продавец" />
+      <div className={styles.shell}>
+        <main className={styles.main}>
+          <div className={styles.intro}>
+            <p className={styles.eyebrow}>Seller Input · Batch</p>
+            <h1>Пакетное изменение ассортимента</h1>
+            <p>Соберите несколько изменений, проверьте их вместе и подтвердите одним действием.</p>
+          </div>
 
-        {state === 'loading' && <section className={styles.card}><p>Загружаем…</p></section>}
-        {state === 'anonymous' && <section className={styles.card}><h2>Нужно войти</h2><Link className={styles.primaryLink} href="/login">Войти</Link></section>}
-        {state === 'ready' && error && <section className={styles.card}><p className={styles.error} role="alert">{error}</p></section>}
-        {state === 'ready' && !error && !seller && <section className={styles.card}><p>Сначала создайте продавца и точку.</p><Link className={styles.secondaryLink} href="/seller">Настроить продавца</Link></section>}
-        {state === 'ready' && seller && <SellerBatchChangeSetCreate seller={seller} />}
-      </main>
-    </div>
+          {state === 'loading' && <section className={styles.card}><p>Загружаем…</p></section>}
+          {state === 'anonymous' && <section className={styles.card}><h2>Нужно войти</h2><Link className={styles.primaryLink} href="/login">Войти</Link></section>}
+          {state === 'ready' && error && <section className={styles.card}><p className={styles.error} role="alert">{error}</p></section>}
+          {state === 'ready' && !error && !seller && <section className={styles.card}><p>Сначала создайте продавца и точку.</p><Link className={styles.secondaryLink} href="/seller">Настроить продавца</Link></section>}
+          {state === 'ready' && seller && <SellerBatchChangeSetCreate seller={seller} />}
+        </main>
+      </div>
+    </>
   );
 }
