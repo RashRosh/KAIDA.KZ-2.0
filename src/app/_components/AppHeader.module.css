@@ -1,0 +1,102 @@
+.header {
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.inner {
+  width: 100%;
+  max-width: 80rem;
+  min-height: 4rem;
+  margin: 0 auto;
+  padding: 0.5rem 1.25rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+
+.nav {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.navLink {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.navLink:hover {
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  color: var(--primary);
+}
+
+.trailing {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.context {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 47.99rem) {
+  .inner {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0.25rem;
+    padding-top: 0.45rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .nav {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+    gap: 0.2rem;
+  }
+
+  .navLink {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .inner {
+    min-height: 4.25rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+
+  .wordmark {
+    font-size: 1.6rem;
+  }
+}
