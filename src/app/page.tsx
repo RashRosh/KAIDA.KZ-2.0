@@ -21,7 +21,8 @@ export default async function Home({ searchParams }: HomeProps) {
               Найди где товар есть <span className={styles.headingAccent}>сейчас</span>
             </h1>
             <p className={styles.description}>
-              KAIDA.KZ — не магазин. Найдите актуальное предложение продавца и свяжитесь напрямую без посредников.
+              KAIDA.KZ — не магазин. Найди свежее предложение от продавца рядом и свяжись напрямую.
+              Звонок, WhatsApp, Telegram — без посредников.
             </p>
           </div>
           <SearchForm key={initialQuery} initialQuery={initialQuery} />
