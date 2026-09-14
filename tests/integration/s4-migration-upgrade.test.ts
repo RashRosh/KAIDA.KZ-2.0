@@ -18,6 +18,40 @@ async function createS3MigrationsFolder() {
   return folder;
 }
 
+async function closeTargetPool(pool: Pool, admin: Pool, name: string) {
+  const expectedRemovals = pool.totalCount;
+  let removed = 0;
+  let resolveRemoved: (() => void) | undefined;
+  const removedPromise = expectedRemovals === 0
+    ? Promise.resolve()
+    : new Promise<void>((resolve) => {
+        resolveRemoved = resolve;
+      });
+
+  const onRemove = () => {
+    removed += 1;
+    if (removed === expectedRemovals) resolveRemoved?.();
+  };
+
+  if (expectedRemovals > 0) pool.on('remove', onRemove);
+  try {
+    await pool.end();
+    await removedPromise;
+  } finally {
+    if (expectedRemovals > 0) pool.off('remove', onRemove);
+  }
+
+  const remaining = await admin.query<{ count: string }>(
+    'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = $1',
+    [name],
+  );
+  if (remaining.rows[0]?.count !== '0') {
+    throw new Error(
+      `S4 migration test target still has active connections after pool shutdown: ${remaining.rows[0]?.count ?? 'unknown'}`,
+    );
+  }
+}
+
 async function withUpgradeDatabase<T>(run: (pool: Pool, db: ReturnType<typeof drizzle>) => Promise<T>): Promise<T> {
   const guardedUrl = testDatabaseUrl();
   const developmentUrl = new URL(process.env.DATABASE_URL!);
@@ -35,8 +69,8 @@ async function withUpgradeDatabase<T>(run: (pool: Pool, db: ReturnType<typeof dr
     pool = new Pool({ connectionString: url.toString(), max: 4 });
     return await run(pool, drizzle({ client: pool }));
   } finally {
-    await pool?.end();
-    try { await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`); } finally { await admin.end(); }
+    if (pool) await closeTargetPool(pool, admin, name);
+    try { await admin.query(`DROP DATABASE IF EXISTS "${name}"`); } finally { await admin.end(); }
   }
 }
 
