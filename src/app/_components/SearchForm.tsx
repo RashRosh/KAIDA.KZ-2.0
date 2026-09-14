@@ -96,7 +96,10 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
 
   useEffect(() => {
     if (!initialQuery) return;
-    void executeSearch(initialQuery);
+    const timer = window.setTimeout(() => {
+      void executeSearch(initialQuery);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [executeSearch, initialQuery]);
 
   function requestBuyerLocation() {
