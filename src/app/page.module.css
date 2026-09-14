@@ -6,6 +6,7 @@
 .eyebrow { color: var(--primary); font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; }
 .intro h1 { font-size: clamp(2.25rem, 4vw, 3.5rem); line-height: 1.12; letter-spacing: -0.045em; font-weight: 700; }
 .description { color: var(--muted); margin-top: 1rem; max-width: 25rem; }
+.secondaryLink { display: inline-flex; margin-top: 1.25rem; color: var(--primary); font-weight: 600; text-underline-offset: 0.2em; }
 .desktopBreak { display: none; }
 .searchArea { min-width: 0; margin-top: 2rem; }
 .label { display: block; font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
@@ -16,6 +17,9 @@
 .searchControls button { flex-shrink: 0; min-height: 3.5rem; padding: 0 1.125rem; border: 0; border-radius: var(--radius); background: var(--primary); color: #ffffff; font-weight: 600; transition: background 160ms ease; }
 .searchControls button:hover:not(:disabled) { background: var(--primary-hover); }
 .searchControls button:disabled { cursor: wait; background: #76618f; }
+.nearbyButton { min-height: 3.5rem; padding: 0 1.125rem; border: 0; border-radius: var(--radius); background: var(--primary); color: #ffffff; font-weight: 600; transition: background 160ms ease; }
+.nearbyButton:hover:not(:disabled) { background: var(--primary-hover); }
+.nearbyButton:disabled { cursor: wait; background: #76618f; }
 .help { color: var(--muted); font-size: 0.875rem; margin-top: 0.75rem; }
 .locationControls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.625rem 0.875rem; margin-top: 1rem; }
 .locationButton { min-height: 2.75rem; padding: 0 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-weight: 600; }
@@ -52,5 +56,6 @@
   .searchControls { gap: 0.75rem; }
   .searchControls input { padding: 0 1rem; }
   .searchControls button { padding: 0 1.75rem; }
+  .nearbyButton { padding: 0 1.75rem; }
   .offer { padding: 1.75rem; }
 }
