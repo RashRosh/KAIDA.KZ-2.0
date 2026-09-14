@@ -10,10 +10,25 @@ async function expectSharedShell(page: import('@playwright/test').Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 }
 
-test('current main areas share one compact navigation shell without horizontal overflow', async ({ page }) => {
+test('current main areas share one compact navigation shell without horizontal overflow', async ({ page }, testInfo) => {
+  const desktopNavCenters: number[] = [];
+
   for (const path of ['/', '/nearby', '/login', '/seller']) {
     await page.goto(path);
     await expectSharedShell(page);
+
+    if (testInfo.project.name === 'desktop') {
+      const navBox = await page.getByRole('navigation', { name: 'Основная навигация' }).boundingBox();
+      expect(navBox).not.toBeNull();
+      desktopNavCenters.push(navBox!.x + navBox!.width / 2);
+    }
+  }
+
+  if (desktopNavCenters.length > 0) {
+    const firstCenter = desktopNavCenters[0];
+    for (const center of desktopNavCenters) {
+      expect(Math.abs(center - firstCenter)).toBeLessThanOrEqual(1);
+    }
   }
 
   await page.goto('/');
