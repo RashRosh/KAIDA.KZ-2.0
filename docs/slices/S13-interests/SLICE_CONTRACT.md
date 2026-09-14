@@ -1,6 +1,6 @@
 # S13 — Interests / Slice Contract
 
-Status: `S13 DESIGN APPROVED CONDITIONALLY` / `IMPLEMENTATION BLOCKED`
+Status: `S13 CONTRACT APPROVED` / `IMPLEMENTATION AUTHORIZED`
 
 Verified product checkpoint:
 
@@ -12,7 +12,7 @@ Docs-synced implementation base:
 - `main`: `42a89532edb74f85dcbd4821faa61916bdd50673`
 - branch: `slice/s13-interests`
 
-S13 branch is based exactly on the docs-synced `main` above. This document authorizes no production implementation.
+S13 branch is based exactly on the docs-synced `main` above. Production implementation is authorized within this contract only.
 
 ## 1. User task
 
@@ -318,22 +318,18 @@ Existing Identity, Catalog and Search implementations should be consumed, not re
 
 ## 12. Acceptance criteria
 
-1. Authenticated User lists only own Interests.
-2. Authenticated User adds Interest for existing canonical Product ID.
-3. Interest stores canonical `Product.id`, not alias/search term/Offer.
-4. Repeated PUT succeeds and leaves exactly one `(User, Product)` Interest.
-5. Two concurrent duplicate PUTs complete safely and leave exactly one Interest.
-6. Unknown Product on PUT returns `404 PRODUCT_NOT_FOUND` with zero Product/alias/Offer/Interest mutation.
-7. Malformed `{productId}` returns `400 INVALID_PRODUCT_ID` without Interest writes.
-8. Unsupported query/body input follows the exact `400` contracts above.
-9. DELETE is idempotent and returns `204` for valid UUID whether Interest exists or is already absent.
-10. Anonymous GET/PUT/DELETE return `401 AUTH_REQUIRED` with no Interest access/mutation.
-11. User A cannot read/mutate/infer User B's Interests through S13 API.
-12. Buyer UI loads Interest state through Interests API and matches existing Search `product.id`; Search API/DTO/matching/ranking stay unchanged.
-13. Reload and later login as same User preserve Interest until DELETE.
-14. Interests do not enter public Search/Discovery DTOs or affect Search/Nearby composition/ranking.
-15. Forward migration succeeds from docs-synced S12 base without changing existing data; clean PostgreSQL 18 chain succeeds; historical migrations remain unchanged.
-16. Targeted S13 proof and full branch CI pass on final executable branch head before manual acceptance.
+1. Authenticated User receives only their own Interests.
+2. Interest can be added only for an existing canonical Product; canonical `Product.id` is stored; unknown Product returns `404 PRODUCT_NOT_FOUND` with zero writes.
+3. Repeated PUT is idempotent; two concurrent PUTs for the same pair complete safely and leave exactly one Interest.
+4. Malformed Product ID and unsupported query/body return the fixed `400` responses without writes.
+5. DELETE is idempotent and for a valid UUID leaves Interest absent with `204`.
+6. Anonymous requests return `401`; User A cannot read, mutate or determine existence of User B Interests; Sellers receive no access.
+7. Buyer UI obtains state only through Interests API and matches it by existing Search `product.id`; Search DTO/API remain unchanged.
+8. Interest persists after reload and subsequent login as the same User until DELETE.
+9. Interests do not enter public Search/Discovery DTOs and do not change Search/Nearby composition or ranking.
+10. S13 migration is additive, preserves existing data, passes S12→S13 upgrade and clean PostgreSQL 18 chain; historical migrations remain unchanged.
+11. Targeted migration/API/auth/concurrency/E2E proof and one full branch CI pass on final executable SHA.
+12. Before manual acceptance that exact SHA is made available to the user in a real browser without repository code changes after successful CI.
 
 ## 13. Automated test plan
 
@@ -419,10 +415,8 @@ Search/Nearby regression is covered by automated full CI, not manual acceptance.
 
 Current gate:
 
-`S13 DESIGN APPROVED CONDITIONALLY`
+`S13 CONTRACT APPROVED`
 
-`IMPLEMENTATION BLOCKED`
+`IMPLEMENTATION AUTHORIZED`
 
-Expected next gate after controller approval:
-
-`S13 CONTRACT APPROVED → IMPLEMENTATION AUTHORIZED`
+All implementation must remain within this contract. If a closed S0-S12 contract must change, STOP before that change and return with the blocker.
