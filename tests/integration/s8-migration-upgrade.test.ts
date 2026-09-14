@@ -3,11 +3,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
 import type { Database } from '../../src/db/client';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
-import { testDatabaseUrl } from './database';
+import { withMigrationTestDatabase } from './migration-test-database';
 
 async function createPreS8MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s8-pre-migrations-'));
@@ -32,28 +31,6 @@ async function createPreS8MigrationsFolder() {
   return folder;
 }
 
-async function withUpgradeDatabase<T>(run: (pool: Pool, db: ReturnType<typeof drizzle>) => Promise<T>): Promise<T> {
-  const guardedUrl = testDatabaseUrl();
-  const developmentUrl = new URL(process.env.DATABASE_URL!);
-  const name = 'kaida_s8_upgrade_test';
-  if (decodeURIComponent(developmentUrl.pathname) === `/${name}`) throw new Error('Development database must never be S8 upgrade target');
-  const admin = new Pool({ connectionString: guardedUrl, max: 1 });
-  let pool: Pool | undefined;
-  try {
-    const version = Number((await admin.query("SELECT current_setting('server_version_num')::int AS version")).rows[0].version);
-    if (version < 180000 || version >= 190000) throw new Error('S8 migration test requires PostgreSQL 18');
-    await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-    await admin.query(`CREATE DATABASE "${name}"`);
-    const url = new URL(guardedUrl);
-    url.pathname = `/${name}`;
-    pool = new Pool({ connectionString: url.toString(), max: 4 });
-    return await run(pool, drizzle({ client: pool }));
-  } finally {
-    await pool?.end();
-    try { await admin.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`); } finally { await admin.end(); }
-  }
-}
-
 async function migrateToPreS8(db: ReturnType<typeof drizzle>) {
   const folder = await createPreS8MigrationsFolder();
   try { await migrate(db, { migrationsFolder: folder }); } finally { await rm(folder, { recursive: true, force: true }); }
@@ -61,7 +38,7 @@ async function migrateToPreS8(db: ReturnType<typeof drizzle>) {
 
 describe('S8 migration upgrade path on PostgreSQL 18', () => {
   it('upgrades 0000-0006 data through 0007 preserving identities and Offer.location_id, then current Search finds the migrated Offer', async () => {
-    await withUpgradeDatabase(async (pool, rawDb) => {
+    await withMigrationTestDatabase({ name: 'kaida_s8_upgrade_test' }, async (pool, rawDb) => {
       await migrateToPreS8(rawDb);
       const db = rawDb as unknown as Database;
 
