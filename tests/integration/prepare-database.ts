@@ -17,9 +17,9 @@ async function prepare() {
     await seedDatabase(db, seedNow);
 
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-    const expected = ['auth_otp_challenges', 'auth_sessions', 'locations', 'offers', 'product_aliases', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
+    const expected = ['auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'locations', 'offers', 'product_aliases', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
     if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(expected)) {
-      throw new Error('S6 clean database must contain exactly the S0-S5 tables plus ProductAlias');
+      throw new Error('Current clean migration chain must contain exactly the expected application tables');
     }
 
     const users = await pool.query('SELECT count(*)::int AS count FROM users');
@@ -44,10 +44,12 @@ async function prepare() {
     const aliasCount = Number((await pool.query('SELECT count(*) FROM product_aliases')).rows[0].count);
     const changeSetCount = Number((await pool.query('SELECT count(*) FROM seller_change_sets')).rows[0].count);
     const changeItemCount = Number((await pool.query('SELECT count(*) FROM seller_change_items')).rows[0].count);
+    const interestCount = Number((await pool.query('SELECT count(*) FROM buyer_interests')).rows[0].count);
     if (sellerCount !== 1 || locationCount !== 1 || offerCount !== 2 || aliasCount !== 1) throw new Error('S6 repeat seed must keep accepted fixtures deterministic');
     if (changeSetCount !== 0 || changeItemCount !== 0) throw new Error('S6 seed must not create Seller Change Sets or Items');
+    if (interestCount !== 0) throw new Error('S13 seed must not create Buyer Interests');
 
-    console.log('PostgreSQL 18 kaida_test: clean S0→S1→S2→S3→S4→S5→S6 migration chain, repeat migration and deterministic repeat seed completed.');
+    console.log('PostgreSQL 18 kaida_test: current clean migration chain, repeat migration and deterministic repeat seed completed.');
   } finally {
     await pool.end();
   }
