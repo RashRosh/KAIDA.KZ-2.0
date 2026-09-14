@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthStatus } from './AuthStatus';
+import { HeaderSearch } from './HeaderSearch';
 import styles from './AppHeader.module.css';
 
 type AppHeaderProps = {
@@ -115,12 +116,12 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
 
   return (
     <header className={styles.header}>
-      <div className={styles.inner}>
+      <div className={styles.topRow} data-testid="primary-header-row">
         <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">
           <span>KAIDA</span><span className={styles.wordmarkAccent}>.KZ</span>
         </Link>
 
-        <PrimaryNav className={styles.desktopNav} pathname={pathname} />
+        <HeaderSearch />
 
         <div className={styles.trailing}>
           {showAuth ? <AuthStatus /> : <span className={styles.context}>{contextLabel}</span>}
@@ -135,6 +136,10 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
             <MenuIcon open={mobileOpen} />
           </button>
         </div>
+      </div>
+
+      <div className={styles.desktopNavRow}>
+        <PrimaryNav className={styles.desktopNav} pathname={pathname} />
       </div>
 
       {mobileOpen ? (
