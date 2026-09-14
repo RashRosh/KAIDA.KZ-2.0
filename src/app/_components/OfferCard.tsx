@@ -1,5 +1,5 @@
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
-import { buildContactActions } from '@/modules/sellers/contact/build-contact-actions';
+import { buildContactActions } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';
 
 // Keep the decimal as a string throughout formatting, including large amounts.
