@@ -19,7 +19,7 @@ jobs:
       IDENTITY_OTP_HMAC_SECRET_HEX: '1111111111111111111111111111111111111111111111111111111111111111'
       IDENTITY_COOKIE_SECURE: 'false'
       NEXT_TELEMETRY_DISABLED: '1'
-      S12_EXECUTABLE_SHA: aa95ec5fde57aeee1382879da2e511978877ea8c
+      S12_EXECUTABLE_SHA: 001914c16128b4c5721e4fd8692ae10a434ead6b
     services:
       postgres:
         image: postgres:18
@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: aa95ec5fde57aeee1382879da2e511978877ea8c
+          ref: 001914c16128b4c5721e4fd8692ae10a434ead6b
       - name: Assert exact executable SHA
         run: test "$(git rev-parse HEAD)" = "$S12_EXECUTABLE_SHA"
       - uses: actions/setup-node@v5
