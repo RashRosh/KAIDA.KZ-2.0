@@ -8,3 +8,4 @@ export { authOtpChallenges } from '../modules/identity/db/auth-otp-challenges.ta
 export { authSessions } from '../modules/identity/db/auth-sessions.table';
 export { sellerChangeSets } from '../modules/seller-input/db/seller-change-sets.table';
 export { sellerChangeItems } from '../modules/seller-input/db/seller-change-items.table';
+export { buyerInterests } from '../modules/interests/db/buyer-interests.table';
