@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
 import { calculateOfferCutoff } from '../../src/modules/offers/lifecycle/offer-lifecycle';
-import { testDatabaseUrl } from './database';
+import { withMigrationTestDatabase } from './migration-test-database';
 
 const UPGRADE_DB = 'kaida_s1_upgrade_test';
 const PRODUCT_ID = '10000000-0000-4000-8000-000000000201';
@@ -33,28 +33,7 @@ async function applyMigrationFile(pool: Pool, relativePath: string) {
 
 describe('S1 migration upgrade path on PostgreSQL 18', () => {
   it('upgrades real S0-format data through 0001 without losing old fields', async () => {
-    const guardedTestUrl = testDatabaseUrl();
-    const testUrl = new URL(guardedTestUrl);
-    const developmentUrl = new URL(process.env.DATABASE_URL!);
-    if (decodeURIComponent(testUrl.pathname) !== '/kaida_test') throw new Error('Upgrade test must start from guarded kaida_test');
-    if (decodeURIComponent(developmentUrl.pathname) === `/${UPGRADE_DB}`) throw new Error('Development database must never be the upgrade-test target');
-
-    const admin = new Pool({ connectionString: guardedTestUrl, max: 1 });
-    let target: Pool | undefined;
-
-    try {
-      const server = await admin.query<{ version: number }>("SELECT current_setting('server_version_num')::int AS version");
-      const version = server.rows[0]?.version ?? 0;
-      if (version < 180000 || version >= 190000) throw new Error('Upgrade migration test requires PostgreSQL 18');
-
-      await admin.query(`DROP DATABASE IF EXISTS "${UPGRADE_DB}" WITH (FORCE)`);
-      await admin.query(`CREATE DATABASE "${UPGRADE_DB}"`);
-
-      const targetUrl = new URL(guardedTestUrl);
-      targetUrl.pathname = `/${UPGRADE_DB}`;
-      if (decodeURIComponent(targetUrl.pathname) !== `/${UPGRADE_DB}`) throw new Error('Unsafe upgrade database target');
-      target = new Pool({ connectionString: targetUrl.toString(), max: 1 });
-
+    await withMigrationTestDatabase({ name: UPGRADE_DB, maxConnections: 1 }, async (target) => {
       await applyMigrationFile(target, 'drizzle/migrations/0000_s0_first_search.sql');
 
       await target.query('INSERT INTO products (id, name) VALUES ($1, $2)', [PRODUCT_ID, 'S0 migration fixture']);
@@ -120,13 +99,6 @@ describe('S1 migration upgrade path on PostgreSQL 18', () => {
 
       const cutoff = calculateOfferCutoff(upperBound, 168);
       expect(after.last_confirmed_at.getTime()).toBeGreaterThan(cutoff.getTime());
-    } finally {
-      await target?.end();
-      try {
-        await admin.query(`DROP DATABASE IF EXISTS "${UPGRADE_DB}" WITH (FORCE)`);
-      } finally {
-        await admin.end();
-      }
-    }
+    });
   });
 });
