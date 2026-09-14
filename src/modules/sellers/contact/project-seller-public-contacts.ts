@@ -12,7 +12,9 @@ export type RawPersistedSellerContacts = {
   instagramUsername: unknown;
 };
 
-export type SellerPublicContactProperty = {} | { contacts: SellerPublicContacts };
+export type SellerPublicContactProperty =
+  | { contacts?: never }
+  | { contacts: SellerPublicContacts };
 
 export function projectSellerPublicContactProperty(
   input: RawPersistedSellerContacts,
