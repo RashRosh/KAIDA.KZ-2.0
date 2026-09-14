@@ -10,7 +10,9 @@ type ContactsRoute = {
 
 const now = new Date();
 const expires = new Date(now.getTime() + 86_400_000);
+const originalDatabaseUrl = process.env.DATABASE_URL;
 let pool: Awaited<ReturnType<typeof connectTestDatabase>>['pool'];
+let poolInitialized = false;
 
 async function loadRoute(): Promise<ContactsRoute> {
   const modulePath = '../../src/app/api/seller/contacts/route';
@@ -48,21 +50,32 @@ async function createOwnerFixture(suffix: string, withSeller: boolean) {
 }
 
 async function cleanup() {
+  if (!poolInitialized) return;
   await pool.query("DELETE FROM auth_sessions WHERE user_id::text LIKE '50000000-0000-4000-8000-00000001%'");
   await pool.query("DELETE FROM sellers WHERE owner_user_id::text LIKE '50000000-0000-4000-8000-00000001%'");
   await pool.query("DELETE FROM users WHERE id::text LIKE '50000000-0000-4000-8000-00000001%'");
 }
 
 beforeAll(async () => {
-  process.env.DATABASE_URL = testDatabaseUrl();
+  const guardedTestUrl = testDatabaseUrl();
   const connection = await connectTestDatabase();
   pool = connection.pool;
+  poolInitialized = true;
+  process.env.DATABASE_URL = guardedTestUrl;
   await cleanup();
 });
 
 afterAll(async () => {
-  await cleanup();
-  await pool.end();
+  try {
+    await cleanup();
+  } finally {
+    try {
+      if (poolInitialized) await pool.end();
+    } finally {
+      if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = originalDatabaseUrl;
+    }
+  }
 });
 
 describe('S10 owner-only Seller contacts API on PostgreSQL 18', () => {
