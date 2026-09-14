@@ -1,0 +1,64 @@
+name: S12 targeted proof
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  targeted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida
+      TEST_DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida_test
+      OFFER_VALIDITY_PERIOD_HOURS: '168'
+      IDENTITY_OTP_TTL_SECONDS: '300'
+      IDENTITY_SESSION_TTL_SECONDS: '2592000'
+      IDENTITY_OTP_HMAC_SECRET_HEX: '1111111111111111111111111111111111111111111111111111111111111111'
+      IDENTITY_COOKIE_SECURE: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: kaida
+          POSTGRES_PASSWORD: kaida_ci_local
+          POSTGRES_DB: kaida
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kaida -d kaida"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Create test database
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i "$POSTGRES_CONTAINER" psql -U kaida -d kaida -v ON_ERROR_STOP=1 < docker/init/01-create-test-db.sql
+          docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -c 'SHOW server_version;'
+      - name: Prepare existing schema and seed
+        run: pnpm db:test:prepare
+      - name: S12 unit proof
+        run: pnpm exec vitest run --project unit tests/unit/s12-batch-seller-input.test.ts
+      - name: S12 integration and concurrency proof
+        run: pnpm exec vitest run --project integration tests/integration/s12-batch-seller-input.test.ts tests/integration/s12-batch-concurrency.test.ts tests/integration/s12-batch-ownership.test.ts
+      - name: Build application
+        run: pnpm build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: S12 browser proof
+        run: pnpm exec playwright test tests/e2e/s12-batch-seller-input.spec.ts
