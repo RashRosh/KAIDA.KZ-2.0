@@ -1,6 +1,10 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import {
+  interestResponseSchema,
+  interestsResponseSchema,
+} from '@/modules/interests/contracts/interests.contract';
 import {
   buyerLocationSchema,
   type BuyerLocation,
@@ -19,13 +23,34 @@ type BuyerLocationState =
   | { kind: 'enabled'; point: BuyerLocation }
   | { kind: 'error' };
 
+type InterestsState =
+  | { kind: 'loading' | 'anonymous' | 'error' }
+  | { kind: 'ready'; productIds: Set<string> };
+
 export function SearchForm() {
   const [query, setQuery] = useState('');
   const [state, setState] = useState<SearchState>({ kind: 'initial' });
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
+  const [interestsState, setInterestsState] = useState<InterestsState>({ kind: 'loading' });
+  const [pendingInterestIds, setPendingInterestIds] = useState<Set<string>>(() => new Set());
+  const [interestError, setInterestError] = useState(false);
   const pending = useRef(false);
   const input = useRef<HTMLInputElement>(null);
   const loading = state.kind === 'loading';
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/interests', { cache: 'no-store' })
+      .then(async (response) => {
+        if (response.status === 401) return { kind: 'anonymous' } as const;
+        if (!response.ok) return { kind: 'error' } as const;
+        const parsed = interestsResponseSchema.parse(await response.json());
+        return { kind: 'ready', productIds: new Set(parsed.interests.map((interest) => interest.product.id)) } as const;
+      })
+      .then((nextState) => { if (active) setInterestsState(nextState); })
+      .catch(() => { if (active) setInterestsState({ kind: 'error' }); });
+    return () => { active = false; };
+  }, []);
 
   function requestBuyerLocation() {
     if (locationState.kind === 'requesting') return;
@@ -48,6 +73,44 @@ export function SearchForm() {
       () => setLocationState({ kind: 'error' }),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 },
     );
+  }
+
+  async function toggleInterest(productId: string) {
+    if (interestsState.kind !== 'ready' || pendingInterestIds.has(productId)) return;
+    const active = interestsState.productIds.has(productId);
+    setInterestError(false);
+    setPendingInterestIds((current) => new Set(current).add(productId));
+
+    try {
+      const response = await fetch(`/api/interests/${productId}`, {
+        method: active ? 'DELETE' : 'PUT',
+        cache: 'no-store',
+      });
+      if (response.status === 401) {
+        setInterestsState({ kind: 'anonymous' });
+        return;
+      }
+      if (!response.ok) throw new Error('Interest unavailable');
+      if (!active) {
+        const saved = interestResponseSchema.parse(await response.json());
+        if (saved.interest.product.id !== productId) throw new Error('Unexpected interest');
+      }
+      setInterestsState((current) => {
+        if (current.kind !== 'ready') return current;
+        const next = new Set(current.productIds);
+        if (active) next.delete(productId);
+        else next.add(productId);
+        return { kind: 'ready', productIds: next };
+      });
+    } catch {
+      setInterestError(true);
+    } finally {
+      setPendingInterestIds((current) => {
+        const next = new Set(current);
+        next.delete(productId);
+        return next;
+      });
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -157,9 +220,19 @@ export function SearchForm() {
       <div className={styles.results} aria-busy={loading}>
         <p className={styles.feedback} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
         {state.kind === 'error' && <p className={styles.error} role="alert">Не удалось выполнить поиск. Попробуйте ещё раз.</p>}
+        {interestError && <p className={styles.error} role="alert">Не удалось изменить интерес. Попробуйте ещё раз.</p>}
         {state.kind === 'success' && state.result.offers.length > 0 && (
           <ul className={styles.offerList} aria-label="Предложения">
-            {state.result.offers.map((offer) => <li key={offer.id}><OfferCard offer={offer} /></li>)}
+            {state.result.offers.map((offer) => {
+              const interest = interestsState.kind === 'ready'
+                ? {
+                  active: interestsState.productIds.has(offer.product.id),
+                  pending: pendingInterestIds.has(offer.product.id),
+                  onToggle: () => toggleInterest(offer.product.id),
+                }
+                : undefined;
+              return <li key={offer.id}><OfferCard offer={offer} interest={interest} /></li>;
+            })}
           </ul>
         )}
       </div>

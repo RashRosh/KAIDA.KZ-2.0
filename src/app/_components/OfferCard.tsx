@@ -9,19 +9,40 @@ export function formatAmount(amount: string): string {
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + (decimals ? `,${decimals}` : '');
 }
 
+type InterestControl = {
+  active: boolean;
+  pending: boolean;
+  onToggle: () => void;
+};
+
 export function OfferCard({
   offer,
   distanceMeters,
+  interest,
 }: {
   offer: SearchOffer;
   distanceMeters?: number;
+  interest?: InterestControl;
 }) {
   const contactActions = offer.seller.contacts ? buildContactActions(offer.seller.contacts) : [];
 
   return (
     <article className={styles.offer} aria-labelledby={`offer-${offer.id}`}>
       <div className={styles.offerHeading}>
-        <h2 id={`offer-${offer.id}`}>{offer.product.name}</h2>
+        <div className={styles.productHeading}>
+          <h2 id={`offer-${offer.id}`}>{offer.product.name}</h2>
+          {interest && (
+            <button
+              type="button"
+              className={styles.interestAction}
+              aria-pressed={interest.active}
+              disabled={interest.pending}
+              onClick={interest.onToggle}
+            >
+              {interest.pending ? 'Сохраняем…' : interest.active ? 'В интересах' : 'Добавить в интересы'}
+            </button>
+          )}
+        </div>
         <p className={styles.price}>
           {offer.price
             ? <>{formatAmount(offer.price.amount)} {offer.price.currency === 'KZT' ? '₸' : offer.price.currency}{offer.price.unit && <span className={styles.priceUnit}> / {offer.price.unit}</span>}</>
