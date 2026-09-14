@@ -14,6 +14,7 @@ export default function SellerPage() {
           <p className={styles.eyebrow}>Seller Input</p>
           <h1>Ваши товары в KAIDA.KZ</h1>
           <p>Сначала настройте продавца и точку. Затем создавайте изменения ассортимента и подтверждайте их перед появлением Offer.</p>
+          <Link className={styles.primaryLink} href="/seller/batch">Изменить несколько товаров</Link>
         </div>
         <SellerSetup />
       </main>
