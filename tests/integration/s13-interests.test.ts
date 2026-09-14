@@ -40,13 +40,17 @@ async function createUser(userId: string, phone: string, sessions: Array<{ id: s
   }
 }
 
-async function resetFixture() {
+async function cleanupFixture() {
   await pool.query('DELETE FROM buyer_interests WHERE user_id IN ($1,$2) OR product_id IN ($3,$4)', [userA, userB, productA, productB]);
   await pool.query('DELETE FROM auth_sessions WHERE user_id IN ($1,$2)', [userA, userB]);
   await pool.query('DELETE FROM users WHERE id IN ($1,$2) OR phone_e164 IN ($3,$4)', [userA, userB, '+77000001301', '+77000001302']);
   await pool.query('DELETE FROM product_aliases WHERE product_id IN ($1,$2)', [productA, productB]);
   await pool.query('DELETE FROM offers WHERE product_id IN ($1,$2)', [productA, productB]);
   await pool.query('DELETE FROM products WHERE id IN ($1,$2) OR name IN ($3,$4)', [productA, productB, 'S13 Product A', 'S13 Product B']);
+}
+
+async function resetFixture() {
+  await cleanupFixture();
   await pool.query('INSERT INTO products (id,name) VALUES ($1,$2),($3,$4)', [productA, 'S13 Product A', productB, 'S13 Product B']);
   await createUser(userA, '+77000001301', [
     { id: '60000000-0000-4000-8000-000000001301', token: tokenA },
@@ -65,7 +69,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await resetFixture().catch(() => undefined);
+  await cleanupFixture().catch(() => undefined);
   if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
   else process.env.DATABASE_URL = originalDatabaseUrl;
   await pool.end();
