@@ -77,7 +77,7 @@ export function NearbyFeed() {
       autoStart = false;
     }
 
-    if (autoStart) requestNearby();
+    if (autoStart) queueMicrotask(requestNearby);
   }, [requestNearby]);
 
   const busy = state.kind === 'locating' || state.kind === 'loading';
