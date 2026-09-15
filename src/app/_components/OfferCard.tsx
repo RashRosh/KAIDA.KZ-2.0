@@ -196,7 +196,6 @@ export function OfferCard({
                   aria-label={action.label}
                 >
                   <SocialIcon label={action.label} />
-                  <span className={styles.socialActionText}>{action.label}</span>
                 </a>
               ))}
             </div>
