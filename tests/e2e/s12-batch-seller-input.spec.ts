@@ -80,8 +80,8 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
   try {
     await page.goto('/seller');
     await page.getByLabel('Название продавца').fill(sellerName);
-    await page.getByLabel('Название точки').fill('S12 E2E точка');
-    await page.getByLabel('Тип точки').selectOption('shop');
+    await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByLabel('Телефон', { exact: true }).fill(testInfo.project.name === 'mobile' ? '+77000001263' : '+77000001264');
     await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
