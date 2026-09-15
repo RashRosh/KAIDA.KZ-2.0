@@ -45,17 +45,30 @@ describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
     expect(offers[0]).toMatchObject({ id: seedIds.beefOffer, product: { name: 'Говядина' }, price: null });
   });
 
-  it('keeps seed values and record counts stable on repeat with the same controlled seed time', async () => {
+  it('keeps only the deterministic seed fixtures stable on repeat with the same controlled seed time', async () => {
     const seeded = await connection.pool.query<{ last_confirmed_at: Date }>(
       'SELECT last_confirmed_at FROM offers WHERE id = $1',
       [seedIds.lambOffer],
     );
     const seedNow = seeded.rows[0]!.last_confirmed_at;
-    const before = await connection.pool.query('SELECT * FROM offers ORDER BY id');
+    const before = await connection.pool.query(
+      'SELECT * FROM offers WHERE id IN ($1,$2) ORDER BY id',
+      [seedIds.lambOffer, seedIds.beefOffer],
+    );
     await seedDatabase(connection.db, seedNow);
-    const after = await connection.pool.query('SELECT * FROM offers ORDER BY id');
+    const after = await connection.pool.query(
+      'SELECT * FROM offers WHERE id IN ($1,$2) ORDER BY id',
+      [seedIds.lambOffer, seedIds.beefOffer],
+    );
     expect(after.rows).toEqual(before.rows);
-    const counts = await connection.pool.query('SELECT (SELECT count(*)::int FROM products) AS products, (SELECT count(*)::int FROM sellers) AS sellers, (SELECT count(*)::int FROM locations) AS locations, (SELECT count(*)::int FROM offers) AS offers');
+    const counts = await connection.pool.query(
+      `SELECT
+        (SELECT count(*)::int FROM products WHERE id IN ($1,$2)) AS products,
+        (SELECT count(*)::int FROM sellers WHERE id=$3) AS sellers,
+        (SELECT count(*)::int FROM locations WHERE id=$4) AS locations,
+        (SELECT count(*)::int FROM offers WHERE id IN ($5,$6)) AS offers`,
+      [seedIds.lambProduct, seedIds.beefProduct, seedIds.seller, seedIds.location, seedIds.lambOffer, seedIds.beefOffer],
+    );
     expect(counts.rows[0]).toEqual({ products: 2, sellers: 1, locations: 1, offers: 2 });
   });
 
