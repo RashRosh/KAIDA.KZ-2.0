@@ -72,7 +72,12 @@ describe.sequential('S7 real Seller-created Offer through UX1D buyer-eligible Se
     }, { database: db });
     const locationId = seller.locations[0]!.id;
     const identity = { sellerId: seller.id, locationId, sellerComment };
-    await updateOwnedSellerContacts(userId, { phoneE164: '+77000000772' }, { database: db });
+    await updateOwnedSellerContacts(userId, {
+      phoneE164: '+77000000772',
+      whatsappPhoneE164: null,
+      telegramUsername: null,
+      instagramUsername: null,
+    }, { database: db });
     await setOwnedLocationGeo(
       userId,
       locationId,
