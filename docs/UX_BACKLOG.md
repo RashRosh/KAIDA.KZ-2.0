@@ -187,6 +187,28 @@ Buyer-facing Offer должен давать два обязательных п�
 
 ---
 
+### UX-011 — Search использует геолокацию, но не показывает расстояние
+
+**Статус:** OPEN — requires separate Search distance-presentation slice  
+**Область:** Buyer Search / Geo / Offer card  
+**Тип:** UX-проблема + изменение public Search contract
+
+В текущем S9 Search пользователь может явно передать своё местоположение, после чего результаты ранжируются по расстоянию. При этом Search DTO намеренно не публикует `distanceMeters`, поэтому карточка не может объяснить пользователю эффект включённой геолокации и не показывает, насколько далеко находится предложение.
+
+**Согласованное направление будущего slice:**
+
+- если конкретный Search выполнен с явным `buyerLocation`, каждая карточка Offer с полной Location geo должна показывать расстояние до покупателя;
+- расстояние должно вычисляться по уже закрытой S9 Haversine/whole-meter semantics, без новой параллельной формулы;
+- Search без buyer geo не показывает distance и сохраняет обычное freshness ordering;
+- raw Seller coordinates и Buyer coordinates по-прежнему не публикуются и не сохраняются;
+- способ отображения расстояния должен быть компактным и встроенным в существующую Bolt-aligned карточку, без отдельного декоративного блока;
+- изменение требует явного review закрытого S9 public Search DTO, потому что `distanceMeters` сейчас специально не входит в Search response contract;
+- не реализовывать это попутно в UX1C: UX1C меняет только intent/запуск Nearby и не должен расширять Search API.
+
+**До будущего slice:** текущая геокнопка Search остаётся функционально полезной только для distance-first ranking; отсутствие видимого расстояния признаётся UX-gap, а не основанием удалять геолокацию из Search.
+
+---
+
 ## Product capability note — Reviews / Rating
 
 Отзывы и рейтинг продавца **не являются вечным UX-запретом**. Они остаются запланированной capability KAIDA.KZ и должны появиться отдельными slices с собственными contracts, включая уже принятые требования к media review и moderation. До такого slice нельзя рисовать фиктивный рейтинг или звёзды без данных.
@@ -201,6 +223,7 @@ Buyer-facing Offer должен давать два обязательных п�
 - `UX1B` — marketplace Offer cards без fake media slots — CLOSED (`v0.0.18-ux1b`);
 - `UX1C` — Nearby geo-intent cleanup — CURRENT;
 - отдельный buyer-actionability slice — publishability + `Позвонить`/`Маршрут` + secondary social row по UX-010;
+- отдельный Search distance-presentation slice — видимое расстояние при Search с buyer geo по UX-011;
 - `UX2` — seller onboarding cleanup;
 - `M1` — Offer photos end-to-end + реальный media layout;
 - `M2` — video/media extension при необходимости;
