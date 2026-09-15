@@ -79,7 +79,7 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     await expect(page).toHaveURL('/');
 
     await page.goto('/seller');
-    await page.getByLabel('Название продавца').fill('S6 E2E продавец');
+    await page.getByLabel('Имя', { exact: true }).fill('S6 E2E продавец');
     await page.getByLabel('Название торговой точки').fill('S6 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S6 E2E адрес');
