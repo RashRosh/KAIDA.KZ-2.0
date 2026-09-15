@@ -95,13 +95,11 @@
 .routeAction:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, var(--surface)); }
 .contactActionSecondary { border: 1px solid var(--border); background: var(--surface-sunken); color: var(--text); }
 .contactActionSecondary:hover { border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); background: var(--primary-soft); color: var(--primary); }
-.socialActionText { display: none; }
 .footer { color: var(--muted); font-size: 0.875rem; padding: 1.5rem 0 2rem; border-top: 1px solid var(--border); }
 
 @media (min-width: 40rem) {
   .searchControls { grid-template-columns: minmax(0, 1fr) auto 56px; }
   .queryField { grid-column: auto; }
-  .socialActionText { display: inline; }
 }
 
 @media (min-width: 48rem) {
