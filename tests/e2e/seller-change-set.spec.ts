@@ -69,7 +69,7 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await expect(page).toHaveURL('/');
 
     await page.goto('/seller');
-    await page.getByLabel('Название продавца').fill('S4 E2E продавец');
+    await page.getByLabel('Имя', { exact: true }).fill('S4 E2E продавец');
     await page.getByLabel('Название торговой точки').fill('S4 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
