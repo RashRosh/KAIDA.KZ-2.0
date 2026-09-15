@@ -130,12 +130,17 @@ test('desktop shell uses logo-search-auth top row and stable left navigation row
   expect(Math.abs(navBox!.x - wordmarkBox!.x)).toBeLessThanOrEqual(1);
 
   const firstNavX = navBox!.x;
+  const firstSearchGeometry = { x: searchBox!.x, width: searchBox!.width };
   for (const linkName of ['Рядом', 'Продавцу', 'Поиск']) {
     await page.getByRole('navigation', { name: NAV_NAME }).getByRole('link', { name: linkName, exact: true }).click();
     await expectSharedShell(page, testInfo.project.name);
     const currentNavBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
+    const currentSearchBox = await page.getByRole('search', { name: 'Поиск из шапки' }).boundingBox();
     expect(currentNavBox).not.toBeNull();
+    expect(currentSearchBox).not.toBeNull();
     expect(Math.abs(currentNavBox!.x - firstNavX)).toBeLessThanOrEqual(1);
+    expect(Math.abs(currentSearchBox!.x - firstSearchGeometry.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(currentSearchBox!.width - firstSearchGeometry.width)).toBeLessThanOrEqual(1);
   }
 });
 
