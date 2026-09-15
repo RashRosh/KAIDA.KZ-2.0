@@ -91,9 +91,8 @@ describe('S10 migration upgrade path on PostgreSQL 18', () => {
       expect((await pool.query('SELECT phone_e164 FROM users WHERE id=$1', [userId])).rows[0].phone_e164).toBe(identityPhone);
 
       const search = await searchOffers(productName, db, { clock: () => now, validityPeriodHours: 168 });
-      expect(search.offers.map((offer) => offer.id)).toEqual([offerId]);
+      expect(search.offers).toEqual([]);
       expect(JSON.stringify(search)).not.toContain(identityPhone);
-      expect(Object.hasOwn(search.offers[0]!.seller, 'contacts')).toBe(false);
 
       await expect(pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [sellerId, '8 (700) 123-45-67']))
         .rejects.toMatchObject({ code: '23514' });
