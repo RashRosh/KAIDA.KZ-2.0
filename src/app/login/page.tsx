@@ -1,21 +1,22 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { AppHeader } from '../_components/AppHeader';
-import { LoginFlow } from './_components/LoginFlow';
+import { AuthModal } from '../_components/AuthModal';
 import styles from './page.module.css';
 
 export default function LoginPage() {
+  const router = useRouter();
+
   return (
     <>
       <AppHeader showAuth={false} contextLabel="Вход" />
-      <div className={styles.shell}>
-        <main className={styles.main}>
-          <div className={styles.intro}>
-            <p className={styles.eyebrow}>Авторизация</p>
-            <h1>Войти по телефону</h1>
-            <p>SMS пока не отправляется. В закрытой тестовой версии код появится прямо на экране.</p>
-          </div>
-          <LoginFlow />
-        </main>
-      </div>
+      <main className={styles.background} aria-hidden="true" />
+      <AuthModal
+        open
+        onClose={() => router.replace('/')}
+        onAuthenticated={() => router.replace('/')}
+      />
     </>
   );
 }

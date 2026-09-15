@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AuthModal } from './AuthModal';
 import styles from './AuthStatus.module.css';
 
 type User = { id: string; phone: string };
@@ -25,6 +25,8 @@ function AuthIcon({ type }: { type: 'login' | 'logout' }) {
 export function AuthStatus() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const loginTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -45,6 +47,16 @@ export function AuthStatus() {
     }
   }
 
+  function closeLogin() {
+    setLoginOpen(false);
+    requestAnimationFrame(() => loginTriggerRef.current?.focus());
+  }
+
+  function handleAuthenticated(nextUser: User) {
+    setUser(nextUser);
+    setLoginOpen(false);
+  }
+
   return (
     <div className={styles.group}>
       {user === undefined ? <span className={styles.authMuted}>Проверяем вход…</span> : user ? (
@@ -61,11 +73,20 @@ export function AuthStatus() {
           </button>
         </div>
       ) : (
-        <Link href="/login" className={styles.loginLink}>
+        <button
+          ref={loginTriggerRef}
+          type="button"
+          className={styles.loginLink}
+          onClick={() => setLoginOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={loginOpen}
+        >
           <AuthIcon type="login" />
           <span>Войти</span>
-        </Link>
+        </button>
       )}
+
+      {loginOpen ? <AuthModal open onClose={closeLogin} onAuthenticated={handleAuthenticated} /> : null}
     </div>
   );
 }
