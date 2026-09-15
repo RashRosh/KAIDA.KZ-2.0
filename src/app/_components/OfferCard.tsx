@@ -1,5 +1,5 @@
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
-import { buildContactActions } from '../../modules/sellers/contact/build-contact-actions';
+import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';
 
 // Keep the decimal as a string throughout formatting, including large amounts.
@@ -54,6 +54,51 @@ function PhoneIcon() {
   );
 }
 
+function RouteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="6" cy="18" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <path d="M8 18h2a4 4 0 0 0 4-4v-4a4 4 0 0 1 4-4" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="9" />
+      <path d="m6.6 19.4.9-3.1A7 7 0 0 1 6 12a6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6 7 7 0 0 1-3.5-.9l-1.9.3Z" />
+      <path d="M9.3 9.2c.3 2.6 2.7 5 5.3 5.3" />
+    </svg>
+  );
+}
+
+function TelegramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m3 11 17-7-4 16-5-5-3 3 1-5 7-6-9 5-4-1Z" />
+    </svg>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.4" cy="6.6" r="1" className={styles.serviceIconDot} />
+    </svg>
+  );
+}
+
+function SocialIcon({ label }: { label: ContactAction['label'] }) {
+  if (label === 'WhatsApp') return <WhatsAppIcon />;
+  if (label === 'Telegram') return <TelegramIcon />;
+  if (label === 'Instagram') return <InstagramIcon />;
+  return null;
+}
+
 export function OfferCard({
   offer,
   distanceMeters,
@@ -64,6 +109,8 @@ export function OfferCard({
   interest?: InterestControl;
 }) {
   const contactActions = offer.seller.contacts ? buildContactActions(offer.seller.contacts) : [];
+  const phoneAction = contactActions.find((action) => action.label === 'Позвонить');
+  const socialActions = contactActions.filter((action) => action.label !== 'Позвонить');
 
   return (
     <article className={styles.offer} aria-labelledby={`offer-${offer.id}`}>
@@ -109,24 +156,45 @@ export function OfferCard({
         <span>{offer.seller.displayName}</span>
       </div>
 
-      {contactActions.length > 0 && (
-        <div className={styles.contactActions} aria-label="Связаться с продавцом">
-          {contactActions.map((action) => {
-            const external = action.href.startsWith('https://');
-            const primary = action.label === 'Позвонить';
-            return (
-              <a
-                className={`${styles.contactAction} ${primary ? styles.contactActionPrimary : styles.contactActionSecondary}`}
-                href={action.href}
-                key={action.label}
-                target={external ? '_blank' : undefined}
-                rel={external ? 'noopener noreferrer' : undefined}
-              >
-                {primary && <PhoneIcon />}
-                <span>{action.label}</span>
-              </a>
-            );
-          })}
+      {phoneAction && (
+        <div className={styles.offerActions}>
+          <div className={styles.primaryActions} aria-label="Основные действия">
+            <a className={`${styles.contactAction} ${styles.contactActionPrimary}`} href={phoneAction.href}>
+              <PhoneIcon />
+              <span>Позвонить</span>
+            </a>
+            <a
+              className={`${styles.contactAction} ${styles.routeAction}`}
+              href={`/api/offers/${offer.id}/route`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <RouteIcon />
+              <span>Маршрут</span>
+            </a>
+          </div>
+
+          {socialActions.length > 0 && (
+            <div
+              className={styles.secondaryActions}
+              data-count={socialActions.length}
+              aria-label="Дополнительные контакты"
+            >
+              {socialActions.map((action) => (
+                <a
+                  className={`${styles.contactAction} ${styles.contactActionSecondary}`}
+                  href={action.href}
+                  key={action.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={action.label}
+                >
+                  <SocialIcon label={action.label} />
+                  <span className={styles.socialActionText}>{action.label}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </article>
