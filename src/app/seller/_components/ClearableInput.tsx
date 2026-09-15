@@ -1,7 +1,7 @@
 'use client';
 
 import type { InputHTMLAttributes } from 'react';
-import styles from '../page.module.css';
+import styles from './ClearableInput.module.css';
 
 type ClearableInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> & {
   value: string;
@@ -11,7 +11,7 @@ type ClearableInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' |
 
 export function ClearableInput({ value, onValueChange, clearLabel, disabled, ...props }: ClearableInputProps) {
   return (
-    <div className={styles.clearableControl}>
+    <div className={styles.control}>
       <input
         {...props}
         value={value}
@@ -20,7 +20,7 @@ export function ClearableInput({ value, onValueChange, clearLabel, disabled, ...
       />
       {value.length > 0 && (
         <button
-          className={styles.clearFieldButton}
+          className={styles.clearButton}
           type="button"
           aria-label={`Очистить поле «${clearLabel}»`}
           title="Очистить"
