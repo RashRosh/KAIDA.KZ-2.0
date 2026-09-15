@@ -15,38 +15,41 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.5rem;
 }
 
 .phone {
   min-width: 0;
-  color: var(--text);
+  color: var(--muted);
   font-size: 0.875rem;
+  line-height: 1.45;
   white-space: nowrap;
 }
 
 .loginLink,
 .authRow button {
-  min-height: 2.75rem;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  border-radius: var(--radius);
-  padding: 0 var(--space-4);
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0 1.25rem;
   font: inherit;
   font-size: 0.875rem;
+  line-height: 1.2;
   font-weight: 600;
   white-space: nowrap;
   transition:
     background-color var(--dur) var(--ease),
     border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
+    color var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
 }
 
 .icon {
-  width: 1rem;
-  height: 1rem;
+  width: 16px;
+  height: 16px;
   flex: 0 0 auto;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -55,56 +58,28 @@
 }
 
 .loginLink {
-  border: var(--border-width) solid var(--primary);
+  border: 1px solid var(--primary);
   background: var(--primary);
-  color: var(--surface);
+  color: #fff;
   text-decoration: none;
 }
 
-.loginLink:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-}
+.loginLink:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
 
 .authRow button {
-  border: var(--border-width) solid var(--border-strong);
-  background: var(--surface);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--text);
   cursor: pointer;
 }
 
-.authRow button:hover:not(:disabled) {
-  border-color: var(--primary);
-  background: var(--primary-soft);
-  color: var(--primary);
-}
-
-.authRow button:disabled {
-  cursor: wait;
-  color: var(--muted);
-}
+.authRow button:hover:not(:disabled) { background: var(--surface-sunken); }
+.authRow button:disabled { cursor: wait; color: var(--muted); }
 
 @media (max-width: 47.99rem) {
-  .authMuted {
-    display: none;
-  }
-
-  .phone {
-    max-width: 4.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .loginLink {
-    padding: 0 var(--space-3);
-  }
-
-  .authRow button {
-    width: 2.75rem;
-    padding: 0;
-  }
-
-  .authRow button span {
-    display: none;
-  }
+  .authMuted { display: none; }
+  .phone { display: none; }
+  .loginLink { padding: 0 1.25rem; }
+  .authRow button { width: 44px; padding: 0; }
+  .authRow button span { display: none; }
 }
