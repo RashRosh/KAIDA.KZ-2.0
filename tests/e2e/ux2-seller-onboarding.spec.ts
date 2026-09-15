@@ -40,43 +40,64 @@ async function authenticate(page: import('@playwright/test').Page, projectName: 
   return { ...identity, pool };
 }
 
-test('UX2 is one resumable Bolt-like onboarding flow and completion unlocks Seller Input', async ({ page }, testInfo) => {
+test('UX2 is one resumable Bolt-like trading point onboarding flow and completion unlocks Seller Input', async ({ page }, testInfo) => {
   const auth = await authenticate(page, testInfo.project.name);
   const sellerName = `UX2 ${testInfo.project.name} seller`;
   try {
     await page.goto('/seller');
 
+    await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
+    await expect(page.getByText('Seller Input', { exact: true })).toHaveCount(0);
+
     const onboarding = page.locator('section[aria-labelledby="seller-onboarding-heading"]');
-    await expect(onboarding.getByRole('heading', { name: 'Подготовим точку к публикации' })).toBeVisible();
+    await expect(onboarding.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
+    await expect(onboarding.locator('aside')).toHaveCount(0);
+    await expect(onboarding.locator('header svg')).toHaveCount(1);
     await expect(onboarding.getByLabel('Название продавца')).toBeVisible();
-    await expect(onboarding.getByLabel('Название точки')).toBeVisible();
-    await expect(onboarding.getByLabel('Тип точки')).toBeVisible();
-    await expect(onboarding.getByLabel('Адрес')).toBeVisible();
+    await expect(onboarding.getByLabel('Название торговой точки')).toBeVisible();
+    await expect(onboarding.getByLabel('Тип торговой точки')).toBeVisible();
+    const address = onboarding.getByLabel('Адрес');
+    await expect(address).toBeVisible();
+    await expect(address).toHaveAttribute('autocomplete', 'street-address');
+    await expect(onboarding.getByText('Например: Алматы, Абая 150, вход со двора', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('Телефон', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('WhatsApp', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('Telegram', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('Instagram', { exact: true })).toBeVisible();
+    await expect(onboarding.getByText('автоматическое определение адреса потребует отдельного geocoding API.', { exact: false })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toHaveCount(0);
-
-    const guideBox = await onboarding.locator('aside').boundingBox();
-    const panelBox = await onboarding.locator(':scope > div').boundingBox();
-    expect(guideBox).not.toBeNull();
-    expect(panelBox).not.toBeNull();
-    if (testInfo.project.name === 'mobile') {
-      expect(panelBox!.y).toBeGreaterThan(guideBox!.y + guideBox!.height - 2);
-    } else {
-      expect(panelBox!.x).toBeGreaterThan(guideBox!.x + guideBox!.width - 2);
-      expect(Math.abs(panelBox!.y - guideBox!.y)).toBeLessThanOrEqual(2);
-    }
 
     for (const width of [320, 360, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     }
 
+    await page.setViewportSize({ width: 1024, height: 900 });
+    const panel = onboarding.locator(':scope > div');
+    const panelBox = await panel.boundingBox();
+    const onboardingBox = await onboarding.boundingBox();
+    const desktopSave = page.getByRole('button', { name: 'Сохранить и продолжить' });
+    const desktopSaveBox = await desktopSave.boundingBox();
+    expect(panelBox).not.toBeNull();
+    expect(onboardingBox).not.toBeNull();
+    expect(desktopSaveBox).not.toBeNull();
+    expect(Math.abs(panelBox!.x - onboardingBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(panelBox!.width - onboardingBox!.width)).toBeLessThanOrEqual(2);
+    expect(desktopSaveBox!.x - panelBox!.x).toBeGreaterThanOrEqual(20);
+    expect(desktopSaveBox!.x - panelBox!.x).toBeLessThanOrEqual(32);
+    expect(desktopSaveBox!.height).toBeGreaterThanOrEqual(44);
+
+    await page.setViewportSize({ width: 390, height: 900 });
+    const mobilePanelBox = await panel.boundingBox();
+    const mobileSaveBox = await desktopSave.boundingBox();
+    expect(mobilePanelBox).not.toBeNull();
+    expect(mobileSaveBox).not.toBeNull();
+    expect(mobileSaveBox!.width).toBeGreaterThanOrEqual(mobilePanelBox!.width - 44);
+    expect(mobileSaveBox!.height).toBeGreaterThanOrEqual(44);
+
     await onboarding.getByLabel('Название продавца').fill(sellerName);
-    await onboarding.getByLabel('Название точки').fill(`UX2 ${testInfo.project.name} point`);
-    await onboarding.getByLabel('Тип точки').selectOption('shop');
+    await onboarding.getByLabel('Название торговой точки').fill(`UX2 ${testInfo.project.name} point`);
+    await onboarding.getByLabel('Тип торговой точки').selectOption('shop');
     await onboarding.getByLabel('Адрес').fill(`Алматы, UX2 ${testInfo.project.name} address`);
     await onboarding.getByLabel('Телефон', { exact: true }).fill(auth.publicPhone);
     await onboarding.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
@@ -113,7 +134,7 @@ test('UX2 is one resumable Bolt-like onboarding flow and completion unlocks Sell
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toHaveCount(0);
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Подготовим точку к публикации' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(auth.publicPhone);
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
@@ -124,6 +145,7 @@ test('UX2 is one resumable Bolt-like onboarding flow and completion unlocks Sell
     expect((await geoMutation).status()).toBe(200);
 
     await expect(page.getByText('Настройка завершена', { exact: true })).toBeVisible();
+    await expect(page.getByText('Точка готова. Теперь можно добавлять и обновлять товары.', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
     const createButton = page.getByRole('button', { name: 'Создать изменение' });
     await expect(createButton).toBeVisible();
