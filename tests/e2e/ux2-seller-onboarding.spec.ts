@@ -42,7 +42,7 @@ async function authenticate(page: import('@playwright/test').Page, projectName: 
 
 test('UX2 is one resumable Bolt-like trading point onboarding flow and completion unlocks Seller Input', async ({ page }, testInfo) => {
   const auth = await authenticate(page, testInfo.project.name);
-  const sellerName = `UX2 ${testInfo.project.name} seller`;
+  const pointName = `UX2 ${testInfo.project.name} point`;
   try {
     await page.goto('/seller');
 
@@ -53,17 +53,31 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     await expect(onboarding.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
     await expect(onboarding.locator('aside')).toHaveCount(0);
     await expect(onboarding.locator('header svg')).toHaveCount(1);
-    await expect(onboarding.getByLabel('Название продавца')).toBeVisible();
-    await expect(onboarding.getByLabel('Название торговой точки')).toBeVisible();
-    await expect(onboarding.getByLabel('Тип торговой точки')).toBeVisible();
+    const optionalName = onboarding.getByLabel('Имя', { exact: true });
+    await expect(optionalName).toBeVisible();
+    await expect(optionalName).toHaveValue('');
+    await expect(onboarding.getByText('Как к вам будут обращаться покупатели. Можно оставить пустым.', { exact: true })).toBeVisible();
+
+    const locationName = onboarding.getByLabel('Название торговой точки');
+    const locationType = onboarding.getByLabel('Тип торговой точки');
     const address = onboarding.getByLabel('Адрес');
+    const phone = onboarding.getByLabel('Телефон', { exact: true });
+    await expect(locationName).toBeVisible();
+    await expect(locationType).toBeVisible();
     await expect(address).toBeVisible();
+    await expect(phone).toBeVisible();
+    await expect(locationName).toHaveAttribute('required', '');
+    await expect(locationType).toHaveAttribute('required', '');
+    await expect(address).toHaveAttribute('required', '');
+    await expect(phone).toHaveAttribute('required', '');
     await expect(address).toHaveAttribute('autocomplete', 'street-address');
     await expect(onboarding.getByText('Например: Алматы, Абая 150, вход со двора', { exact: true })).toBeVisible();
-    await expect(onboarding.getByLabel('Телефон', { exact: true })).toBeVisible();
+    await expect(phone).toHaveValue(auth.phone);
+    await expect(onboarding.getByText('Номер входа подставляется автоматически', { exact: false })).toBeVisible();
     await expect(onboarding.getByLabel('WhatsApp', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('Telegram', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('Instagram', { exact: true })).toBeVisible();
+    await expect(onboarding.getByText('Обязательно для поиска по расстоянию.', { exact: false })).toBeVisible();
     await expect(onboarding.getByText('автоматическое определение адреса потребует отдельного geocoding API.', { exact: false })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toHaveCount(0);
 
@@ -95,11 +109,10 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     expect(mobileSaveBox!.width).toBeGreaterThanOrEqual(mobilePanelBox!.width - 44);
     expect(mobileSaveBox!.height).toBeGreaterThanOrEqual(44);
 
-    await onboarding.getByLabel('Название продавца').fill(sellerName);
-    await onboarding.getByLabel('Название торговой точки').fill(`UX2 ${testInfo.project.name} point`);
-    await onboarding.getByLabel('Тип торговой точки').selectOption('shop');
-    await onboarding.getByLabel('Адрес').fill(`Алматы, UX2 ${testInfo.project.name} address`);
-    await onboarding.getByLabel('Телефон', { exact: true }).fill(auth.publicPhone);
+    await locationName.fill(pointName);
+    await locationType.selectOption('shop');
+    await address.fill(`Алматы, UX2 ${testInfo.project.name} address`);
+    await phone.fill(auth.publicPhone);
     await onboarding.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
     await onboarding.getByLabel('Telegram', { exact: true }).fill(`ux2_${testInfo.project.name}`);
     await onboarding.getByLabel('Instagram', { exact: true }).fill(`ux2.${testInfo.project.name}`);
@@ -120,13 +133,13 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
 
     await onboarding.getByRole('button', { name: 'Сохранить и продолжить' }).click();
     await expect(page.getByText('Точка сохранена, но контакты не сохранились.', { exact: false })).toBeVisible();
-    await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
+    await expect(page.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toHaveCount(0);
 
     const meAfterPartial = await page.context().request.get('/api/seller/me');
     expect(meAfterPartial.status()).toBe(200);
-    expect((await meAfterPartial.json()).seller.displayName).toBe(sellerName);
+    expect((await meAfterPartial.json()).seller.displayName).toBe(pointName);
 
     await page.unroute('**/api/seller/contacts');
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
