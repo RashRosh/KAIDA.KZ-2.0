@@ -62,6 +62,7 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     const locationType = onboarding.getByLabel('Тип торговой точки');
     const address = onboarding.getByLabel('Адрес');
     const phone = onboarding.getByLabel('Телефон', { exact: true });
+    const whatsapp = onboarding.getByLabel('WhatsApp', { exact: true });
     await expect(locationName).toBeVisible();
     await expect(locationType).toBeVisible();
     await expect(address).toBeVisible();
@@ -73,8 +74,10 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     await expect(address).toHaveAttribute('autocomplete', 'street-address');
     await expect(onboarding.getByText('Например: Алматы, Абая 150, вход со двора', { exact: true })).toBeVisible();
     await expect(phone).toHaveValue(auth.phone);
-    await expect(onboarding.getByText('Номер входа подставляется автоматически', { exact: false })).toBeVisible();
-    await expect(onboarding.getByLabel('WhatsApp', { exact: true })).toBeVisible();
+    await expect(whatsapp).toHaveValue(auth.phone);
+    await expect(onboarding.getByText('Телефон и WhatsApp по умолчанию заполняются номером входа', { exact: false })).toBeVisible();
+    await expect(onboarding.getByRole('button', { name: 'Очистить поле «Телефон»' })).toBeVisible();
+    await expect(onboarding.getByRole('button', { name: 'Очистить поле «WhatsApp»' })).toBeVisible();
     await expect(onboarding.getByLabel('Telegram', { exact: true })).toBeVisible();
     await expect(onboarding.getByLabel('Instagram', { exact: true })).toBeVisible();
     await expect(onboarding.getByText('Обязательно для поиска по расстоянию.', { exact: false })).toBeVisible();
@@ -110,10 +113,13 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     expect(mobileSaveBox!.height).toBeGreaterThanOrEqual(44);
 
     await locationName.fill(pointName);
+    await expect(onboarding.getByRole('button', { name: 'Очистить поле «Название торговой точки»' })).toBeVisible();
     await locationType.selectOption('shop');
     await address.fill(`Алматы, UX2 ${testInfo.project.name} address`);
     await phone.fill(auth.publicPhone);
-    await onboarding.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
+    await onboarding.getByRole('button', { name: 'Очистить поле «WhatsApp»' }).click();
+    await expect(whatsapp).toHaveValue('');
+    await whatsapp.fill('+447911123456');
     await onboarding.getByLabel('Telegram', { exact: true }).fill(`ux2_${testInfo.project.name}`);
     await onboarding.getByLabel('Instagram', { exact: true }).fill(`ux2.${testInfo.project.name}`);
 
@@ -149,6 +155,7 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(auth.publicPhone);
+    await expect(page.getByLabel('WhatsApp', { exact: true })).toHaveValue('+447911123456');
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
     await page.context().grantPermissions(['geolocation'], { origin: baseURL });
