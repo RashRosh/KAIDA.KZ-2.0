@@ -22,6 +22,19 @@ const typeLabels: Record<LocationType, string> = {
   other: 'Другое',
 };
 
+function StorePointIcon() {
+  return (
+    <span className={styles.storePointIcon} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 10v9h16v-9" />
+        <path d="M3 10 5.2 5h13.6L21 10" />
+        <path d="M3 10c0 1.3 1 2.3 2.3 2.3S7.7 11.3 7.7 10c0 1.3 1 2.3 2.3 2.3s2.3-1 2.3-2.3c0 1.3 1 2.3 2.3 2.3s2.4-1 2.4-2.3c0 1.3 1 2.3 2.3 2.3S21 11.3 21 10" />
+        <path d="M9 19v-4h6v4" />
+      </svg>
+    </span>
+  );
+}
+
 function browserGeoErrorMessage(error: GeolocationPositionError): string {
   if (error.code === 1) return 'Доступ к геопозиции запрещён. Разрешите его в настройках браузера и попробуйте снова.';
   if (error.code === 2) return 'Не удалось определить местоположение. Проверьте службы геолокации и попробуйте снова.';
@@ -122,11 +135,6 @@ export function SellerSetup() {
   const phoneReady = savedContacts?.phoneE164 !== null && savedContacts?.phoneE164 !== undefined;
   const geoReady = Boolean(firstLocation?.geo);
   const onboardingComplete = Boolean(seller && firstLocation && contactsLoaded && phoneReady && geoReady);
-  const progress = [
-    { label: 'Точка продажи', done: Boolean(seller && firstLocation) },
-    { label: 'Контакты', done: Boolean(contactsLoaded && phoneReady) },
-    { label: 'Местоположение', done: geoReady },
-  ];
 
   async function saveContacts(payload: OwnerContacts): Promise<boolean> {
     const response = await fetch('/api/seller/contacts', {
@@ -299,7 +307,7 @@ export function SellerSetup() {
           <div className={styles.completedHeader}>
             <div>
               <h2 id="seller-summary-heading">{seller.displayName}</h2>
-              <p className={styles.muted}>Точка готова к buyer-facing предложениям.</p>
+              <p className={styles.muted}>Точка готова. Теперь можно добавлять и обновлять товары.</p>
             </div>
             <Link className={styles.secondaryLinkButton} href="/seller/batch">Изменить несколько товаров</Link>
           </div>
@@ -333,37 +341,29 @@ export function SellerSetup() {
 
   return (
     <section className={styles.onboardingLayout} aria-labelledby="seller-onboarding-heading">
-      <aside className={styles.onboardingGuide}>
-        <p className={styles.eyebrow}>Первичная настройка</p>
-        <h2 id="seller-onboarding-heading">Подготовим точку к публикации</h2>
-        <p className={styles.muted}>Один раз укажите данные точки, контакты и её местоположение. После этого можно переходить к товарам.</p>
-        <ol className={styles.progressList} aria-label="Шаги настройки продавца">
-          {progress.map((item, index) => (
-            <li key={item.label} data-done={item.done ? 'true' : 'false'}>
-              <span className={styles.progressNumber} aria-hidden="true">{item.done ? '✓' : index + 1}</span>
-              <span>{item.label}</span>
-            </li>
-          ))}
-        </ol>
-      </aside>
-
       <div className={styles.onboardingPanel}>
+        <header className={styles.onboardingPanelHeader}>
+          <StorePointIcon />
+          <div>
+            <h2 id="seller-onboarding-heading">Ваша торговая точка</h2>
+            <p className={styles.muted}>Укажите, как покупатель увидит продавца и где находится первая торговая точка.</p>
+          </div>
+        </header>
+
         {!seller ? (
           <form className={styles.onboardingForm} onSubmit={submitInitial} noValidate>
-            <fieldset className={styles.formSection}>
-              <legend>Точка продажи</legend>
-              <p className={styles.sectionHint}>Как покупатель увидит продавца и где находится первая точка.</p>
+            <div className={styles.formSection}>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
                   <label htmlFor="seller-display-name">Название продавца</label>
                   <input id="seller-display-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={120} disabled={submitting} />
                 </div>
                 <div className={styles.field}>
-                  <label htmlFor="location-name">Название точки</label>
+                  <label htmlFor="location-name">Название торговой точки</label>
                   <input id="location-name" value={locationName} onChange={(event) => setLocationName(event.target.value)} maxLength={120} disabled={submitting} />
                 </div>
                 <div className={styles.field}>
-                  <label htmlFor="location-type">Тип точки</label>
+                  <label htmlFor="location-type">Тип торговой точки</label>
                   <select id="location-type" value={locationType} onChange={(event) => setLocationType(event.target.value as LocationType)} disabled={submitting}>
                     <option value="market">Рынок</option>
                     <option value="shop">Магазин</option>
@@ -374,10 +374,11 @@ export function SellerSetup() {
                 </div>
                 <div className={`${styles.field} ${styles.fieldWide}`}>
                   <label htmlFor="location-address">Адрес</label>
-                  <textarea id="location-address" value={addressText} onChange={(event) => setAddressText(event.target.value)} maxLength={500} rows={3} disabled={submitting} />
+                  <input id="location-address" value={addressText} onChange={(event) => setAddressText(event.target.value)} maxLength={500} disabled={submitting} autoComplete="street-address" />
+                  <span className={styles.fieldHelp}>Например: Алматы, Абая 150, вход со двора</span>
                 </div>
               </div>
-            </fieldset>
+            </div>
 
             <fieldset className={styles.formSection}>
               <legend>Контакты для покупателей</legend>
@@ -402,24 +403,24 @@ export function SellerSetup() {
               </div>
             </fieldset>
 
-            <div className={styles.pendingGeo}>
-              <strong>Местоположение</strong>
-              <span>После сохранения точки вы сможете определить её геопозицию одним нажатием.</span>
-            </div>
+            <section className={styles.formSection} aria-labelledby="pending-geo-heading">
+              <h3 id="pending-geo-heading">Местоположение</h3>
+              <p className={styles.sectionHint}>После сохранения точки подтвердите геопозицию, находясь на месте. Адрес и геопозиция пока сохраняются отдельно: автоматическое определение адреса потребует отдельного geocoding API.</p>
+            </section>
 
             {error && <p className={styles.error} role="alert">{error}</p>}
             {success && <p className={styles.status} role="status">{success}</p>}
-            <div className={styles.onboardingActions}>
+            <div className={styles.onboardingFooter}>
               <button type="submit" disabled={submitting}>{submitting ? 'Сохраняем…' : 'Сохранить и продолжить'}</button>
             </div>
           </form>
         ) : firstLocation ? (
           <div className={styles.onboardingForm}>
             <section className={styles.formSection} aria-labelledby="saved-location-heading">
-              <h3 id="saved-location-heading">Точка продажи</h3>
+              <h3 id="saved-location-heading">Данные торговой точки</h3>
               <div className={styles.savedSummary}>
                 <div><span>Продавец</span><strong>{seller.displayName}</strong></div>
-                <div><span>Точка</span><strong>{firstLocation.name}</strong></div>
+                <div><span>Торговая точка</span><strong>{firstLocation.name}</strong></div>
                 <div><span>Тип</span><strong>{typeLabels[firstLocation.type]}</strong></div>
                 <div className={styles.savedSummaryWide}><span>Адрес</span><strong>{firstLocation.addressText}</strong></div>
               </div>
@@ -453,7 +454,7 @@ export function SellerSetup() {
 
             <section className={styles.formSection} aria-labelledby="onboarding-geo-heading">
               <h3 id="onboarding-geo-heading">Местоположение</h3>
-              <p className={styles.sectionHint}>Нажмите кнопку, находясь в точке продажи. Браузер спросит разрешение только после вашего нажатия.</p>
+              <p className={styles.sectionHint}>Нажмите кнопку, находясь в торговой точке. Браузер спросит разрешение только после вашего нажатия.</p>
               <p className={styles.geoState}>{firstLocation.geo ? 'Местоположение сохранено' : 'Местоположение не задано'}</p>
               {geoError?.locationId === firstLocation.id && <p className={styles.error} role="alert">{geoError.message}</p>}
               <div className={styles.onboardingActions}>
