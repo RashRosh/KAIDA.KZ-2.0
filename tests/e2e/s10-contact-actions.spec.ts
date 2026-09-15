@@ -66,8 +66,8 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
 
     await page.goto('/seller');
     await page.getByLabel('Название продавца').fill(sellerName);
-    await page.getByLabel('Название точки').fill(`S10 ${project} point`);
-    await page.getByLabel('Тип точки').selectOption('shop');
+    await page.getByLabel('Название торговой точки').fill(`S10 ${project} point`);
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill(`Алматы, S10 ${project} address`);
     await page.getByLabel('Телефон', { exact: true }).fill('+12025550123');
     await page.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
