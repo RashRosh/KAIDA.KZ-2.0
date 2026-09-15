@@ -4,7 +4,8 @@
 .intro h1 { max-width: 68rem; font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; letter-spacing: 0; font-weight: 800; text-wrap: balance; }
 .headingAccent { color: var(--primary); }
 .description { color: var(--muted); margin-top: 12px; max-width: 42rem; font-size: 1rem; line-height: 1.5; }
-.searchArea { min-width: 0; max-width: 42rem; margin-top: 24px; }
+.searchArea { min-width: 0; width: 100%; margin-top: 24px; }
+.searchForm { max-width: 42rem; }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .searchControls { display: grid; grid-template-columns: minmax(0, 1fr) 1fr 56px; gap: 8px; align-items: stretch; }
 .queryField { position: relative; min-width: 0; grid-column: 1 / -1; }
@@ -12,7 +13,10 @@
 .queryIcon svg,
 .searchSubmit svg,
 .locationToggle svg,
-.popularLabel svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.popularLabel svg,
+.interestAction svg,
+.offerMetaIcon svg,
+.contactAction svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .queryField input { min-width: 0; width: 100%; min-height: 56px; background: var(--surface); border: 1px solid var(--input-border); border-radius: 0.75rem; padding: 0 16px 0 48px; color: var(--text); font-size: 1rem; transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
 .queryField input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(103, 54, 189, 0.12); }
 .queryField input::placeholder { color: var(--muted); opacity: 1; }
@@ -37,31 +41,49 @@
 .nearbyButton { min-height: 44px; padding: 0 20px; border: 1px solid var(--primary); border-radius: 0.75rem; background: var(--primary); color: #ffffff; font-size: 0.875rem; font-weight: 600; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
 .nearbyButton:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
 .nearbyButton:disabled { cursor: wait; background: var(--primary-disabled); border-color: var(--primary-disabled); }
+.help { color: var(--muted); font-size: 0.875rem; margin-top: 8px; }
 .locationStatus { color: var(--muted); font-size: 0.875rem; margin-top: 12px; }
 .error { color: var(--error); margin-top: 1rem; }
-.results { margin-top: 2rem; }
+.results { margin-top: 32px; min-width: 0; }
 .feedback { color: var(--muted); font-size: 0.875rem; }
 .feedback:empty { display: none; }
-.offerList { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 1rem; }
-.offer { border: 1px solid var(--border); border-radius: 1rem; padding: 1.25rem; background: var(--surface); overflow-wrap: anywhere; }
-.offerHeading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0.75rem 1rem; }
-.productHeading { display: flex; flex-wrap: wrap; align-items: center; gap: 0.625rem 0.75rem; min-width: 0; }
-.offerHeading h2 { font-size: 1.5rem; line-height: 1.25; letter-spacing: -0.025em; }
-.interestAction { min-height: 2.5rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--primary); font-weight: 600; }
-.interestAction:hover:not(:disabled) { border-color: var(--primary); }
-.interestAction[aria-pressed='true'] { border-color: var(--primary); background: var(--primary); color: #ffffff; }
-.interestAction:disabled { cursor: wait; opacity: 0.7; }
-.price { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.feedbackVisuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.resultsHeader { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+.resultsHeader h2 { font-size: 1.375rem; line-height: 1.3; font-weight: 700; color: var(--text); }
+.resultsCount { color: var(--muted); font-size: 1rem; line-height: 1.5; }
+.offerList { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.offerList > li { min-width: 0; display: flex; }
+.offer { width: 100%; min-width: 0; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; background: var(--surface); box-shadow: var(--shadow-card); overflow-wrap: anywhere; transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.offer:hover { border-color: var(--border-strong); box-shadow: var(--shadow-pop); transform: translateY(-1px); }
+.offerTop { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 12px; }
+.offerTitleBlock { min-width: 0; flex: 1 1 11rem; }
+.offerTitleBlock h2 { font-size: 1.125rem; line-height: 1.35; font-weight: 700; color: var(--text); }
+.price { margin-top: 8px; font-size: 1.375rem; line-height: 1.2; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
 .priceUnit { font-size: 1rem; font-weight: 400; color: var(--muted); white-space: nowrap; }
-.noPrice { font-size: 1rem; color: var(--muted); font-weight: 400; }
-.offerDetails { display: grid; gap: 1.125rem; margin-top: 1.5rem; }
-.offerDetails dt { color: var(--muted); font-size: 0.875rem; margin-bottom: 0.25rem; }
-.offerDetails dd { font-size: 1rem; }
-.address { display: block; margin-top: 0.375rem; color: var(--muted); font-size: 0.875rem; }
-.comment { padding-top: 1rem; border-top: 1px solid var(--border); margin-top: 1.5rem; }
-.contactActions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.25rem; }
-.contactAction { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); color: var(--primary); background: var(--surface); font-weight: 600; text-decoration: none; overflow-wrap: normal; }
-.contactAction:hover { border-color: var(--primary); }
+.noPrice { font-size: 1rem; color: var(--muted); font-weight: 400; font-style: italic; }
+.interestAction { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 7px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text); font-size: 0.8125rem; line-height: 1.2; font-weight: 600; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.interestAction svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.interestAction:hover:not(:disabled) { background: var(--surface-sunken); }
+.interestAction[aria-pressed='true'] { border-color: color-mix(in srgb, var(--primary) 20%, transparent); background: var(--primary-soft); color: var(--primary); }
+.interestAction:disabled { cursor: wait; opacity: 0.7; }
+.interestIconFilled { fill: currentColor; }
+.locationBlock { display: flex; align-items: flex-start; gap: 8px; margin-top: 16px; color: var(--muted); }
+.offerMetaIcon { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; color: var(--primary); }
+.locationCopy { min-width: 0; flex: 1; }
+.locationLine { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; }
+.locationLine strong { min-width: 0; color: var(--text); font-size: 0.875rem; line-height: 1.45; font-weight: 600; }
+.distance { color: var(--primary); font-size: 0.8125rem; line-height: 1.4; font-weight: 600; white-space: nowrap; }
+.address { display: block; margin-top: 2px; color: var(--muted); font-size: 0.8125rem; line-height: 1.4; }
+.comment { margin-top: 14px; padding-left: 12px; border-left: 2px solid var(--border); color: var(--text); font-size: 0.875rem; line-height: 1.45; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sellerLine { display: flex; align-items: center; gap: 8px; margin-top: 16px; color: var(--muted); font-size: 0.875rem; line-height: 1.45; }
+.sellerLine .offerMetaIcon { color: var(--muted); margin-top: 0; }
+.contactActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: auto; padding-top: 16px; }
+.contactAction { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: var(--radius); font-size: 0.875rem; line-height: 1.2; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.contactAction svg { width: 16px; height: 16px; }
+.contactActionPrimary { flex: 1 1 8rem; border: 1px solid var(--primary); background: var(--primary); color: #ffffff; }
+.contactActionPrimary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.contactActionSecondary { border: 1px solid transparent; background: transparent; color: var(--text); }
+.contactActionSecondary:hover { background: var(--surface-sunken); }
 .footer { color: var(--muted); font-size: 0.875rem; padding: 1.5rem 0 2rem; border-top: 1px solid var(--border); }
 
 @media (min-width: 40rem) {
@@ -72,5 +94,9 @@
 @media (min-width: 48rem) {
   .shell { padding: 0 48px; }
   .main { padding: 32px 0; }
-  .offer { padding: 1.75rem; }
+  .offerList { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 64rem) {
+  .offerList { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

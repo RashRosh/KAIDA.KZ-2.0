@@ -228,10 +228,11 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
         : 'Учитывать моё местоположение';
 
   const locationEnabled = locationState.kind === 'enabled';
+  const hasResults = state.kind === 'success' && state.result.offers.length > 0;
 
   return (
     <section className={styles.searchArea} aria-label="Поиск предложений">
-      <form onSubmit={submit} noValidate>
+      <form onSubmit={submit} noValidate className={styles.searchForm}>
         <label htmlFor="product-query" className={styles.srOnly}>Какой товар ищете?</label>
         <div className={styles.searchControls}>
           <div className={styles.queryField}>
@@ -297,23 +298,37 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
           </p>
         )}
       </form>
+
       <div className={styles.results} aria-busy={loading}>
-        <p className={styles.feedback} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
+        <p
+          className={`${styles.feedback} ${hasResults ? styles.feedbackVisuallyHidden : ''}`}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {feedback}
+        </p>
         {state.kind === 'error' && <p className={styles.error} role="alert">Не удалось выполнить поиск. Попробуйте ещё раз.</p>}
         {interestError && <p className={styles.error} role="alert">Не удалось изменить интерес. Попробуйте ещё раз.</p>}
-        {state.kind === 'success' && state.result.offers.length > 0 && (
-          <ul className={styles.offerList} aria-label="Предложения">
-            {state.result.offers.map((offer) => {
-              const interest = interestsState.kind === 'ready'
-                ? {
-                  active: interestsState.productIds.has(offer.product.id),
-                  pending: pendingInterestIds.has(offer.product.id),
-                  onToggle: () => toggleInterest(offer.product.id),
-                }
-                : undefined;
-              return <li key={offer.id}><OfferCard offer={offer} interest={interest} /></li>;
-            })}
-          </ul>
+        {hasResults && (
+          <>
+            <div className={styles.resultsHeader}>
+              <h2>Результаты поиска</h2>
+              <span className={styles.resultsCount}>({state.result.offers.length})</span>
+            </div>
+            <ul className={styles.offerList} aria-label="Предложения">
+              {state.result.offers.map((offer) => {
+                const interest = interestsState.kind === 'ready'
+                  ? {
+                    active: interestsState.productIds.has(offer.product.id),
+                    pending: pendingInterestIds.has(offer.product.id),
+                    onToggle: () => toggleInterest(offer.product.id),
+                  }
+                  : undefined;
+                return <li key={offer.id}><OfferCard offer={offer} interest={interest} /></li>;
+              })}
+            </ul>
+          </>
         )}
       </div>
     </section>
