@@ -27,6 +27,10 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000781' : '+77000000782';
 }
 
+function publicPhoneFor(projectName: string) {
+  return projectName === 'mobile' ? '+77000000783' : '+77000000784';
+}
+
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
 }
@@ -77,8 +81,7 @@ async function sellerIdentity(phone: string) {
 async function makeBuyerEligible(ids: { sellerId: string; locationId: string }, projectName: string) {
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
-    const contactPhone = projectName === 'mobile' ? '+77000000783' : '+77000000784';
-    await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [ids.sellerId, contactPhone]);
+    await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [ids.sellerId, publicPhoneFor(projectName)]);
     await pool.query('UPDATE locations SET latitude=$2,longitude=$3 WHERE id=$1', [ids.locationId, 43.238949, 76.889709]);
   } finally {
     await pool.end();
@@ -140,11 +143,14 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     await sellerPage.getByLabel('Название точки').fill(locationName);
     await sellerPage.getByLabel('Тип точки').selectOption('shop');
     await sellerPage.getByLabel('Адрес').fill(`Алматы, S7 E2E адрес ${suffix}`);
-    await sellerPage.getByRole('button', { name: 'Создать продавца' }).click();
-    await expect(sellerPage.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
+    await sellerPage.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
+    await sellerPage.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await expect(sellerPage.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
     const ids = await sellerIdentity(phone);
     await makeBuyerEligible(ids, testInfo.project.name);
+    await sellerPage.reload();
+    await expect(sellerPage.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
     const identity = { ...ids, sellerComment };
 
     await sellerPage.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');
