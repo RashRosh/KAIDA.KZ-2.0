@@ -25,7 +25,12 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
     const lambAlias = { id: seedIds.lambAlias, productId: seedIds.lambProduct, name: 'мясо барана' };
     await tx.insert(productAliases).values(lambAlias).onConflictDoUpdate({ target: productAliases.id, set: lambAlias });
 
-    const seller = { id: seedIds.seller, displayName: 'Асыл Ет, тестовый продавец', ownerUserId: null };
+    const seller = {
+      id: seedIds.seller,
+      displayName: 'Асыл Ет, тестовый продавец',
+      ownerUserId: null,
+      contactPhoneE164: '+77000000001',
+    };
     await tx.insert(sellers).values(seller).onConflictDoUpdate({ target: sellers.id, set: seller });
     const location = {
       id: seedIds.location,
@@ -33,6 +38,8 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
       name: 'Тестовая мясная точка',
       addressText: 'Алматы, Зелёный базар, тестовый павильон 12',
       type: 'pavilion',
+      latitude: 43.2636,
+      longitude: 76.9568,
     };
     await tx.insert(locations).values(location).onConflictDoUpdate({ target: locations.id, set: location });
     const timestamps = { createdAt: new Date('2026-09-11T00:00:00Z'), updatedAt: new Date('2026-09-11T00:00:00Z') };
@@ -59,7 +66,7 @@ async function main() {
   const { db, pool } = createDatabase(url);
   try {
     await seedDatabase(db);
-    console.log('S6 seed complete: 2 products, 1 product alias, 1 ownerless seller, 1 linked pavilion location, 2 fresh active offers.');
+    console.log('UX1D seed complete: 2 products, 1 alias, 1 buyer-eligible seller/location, 2 fresh active offers.');
   } finally {
     await pool.end();
   }
@@ -67,7 +74,7 @@ async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(() => {
-    console.error('S6 seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
+    console.error('UX1D seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
     process.exitCode = 1;
   });
 }

@@ -3,13 +3,13 @@ import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
-import { visibleOffersPredicate } from '../../offers/lifecycle/offer-lifecycle';
+import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SearchOffer } from '../../search/contracts/search.contract';
 import type { NearbyDiscoveryCandidate } from '../ranking/nearby-discovery';
 
-// Read-only Discovery projection. Owning modules keep lifecycle, geo and contact semantics.
+// Read-only Discovery projection. Owning modules keep lifecycle, buyer-visibility, geo and contact semantics.
 export async function findVisibleDiscoveryCandidates(
   db: Database,
   cutoff: Date,
@@ -34,7 +34,7 @@ export async function findVisibleDiscoveryCandidates(
     .innerJoin(products, eq(products.id, offers.productId))
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
-    .where(visibleOffersPredicate(cutoff))
+    .where(buyerVisibleOffersPredicate(cutoff))
     .orderBy(asc(offers.id));
 
   return rows.map(({
