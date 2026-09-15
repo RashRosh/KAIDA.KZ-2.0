@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, MouseEvent, useEffect, useState } from 'react';
+import { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
 import styles from './AuthModal.module.css';
@@ -62,6 +62,18 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const resetAndClose = useCallback(() => {
+    setStep('phone');
+    setPhone('');
+    setCanonicalPhone('');
+    setChallengeId('');
+    setTestCode('');
+    setCode('');
+    setError('');
+    setLoading(false);
+    onClose();
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
@@ -76,19 +88,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [open]);
-
-  function resetAndClose() {
-    setStep('phone');
-    setPhone('');
-    setCanonicalPhone('');
-    setChallengeId('');
-    setTestCode('');
-    setCode('');
-    setError('');
-    setLoading(false);
-    onClose();
-  }
+  }, [open, resetAndClose]);
 
   function handleBackdrop(event: MouseEvent<HTMLDivElement>) {
     if (event.target === event.currentTarget) resetAndClose();
