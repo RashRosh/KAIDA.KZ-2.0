@@ -144,7 +144,7 @@ async function persistentSnapshot() {
   return { counts: counts.rows, seller: seller.rows, locations: locations.rows, offers: offers.rows };
 }
 
-describe('S11 Nearby Discovery on PostgreSQL 18', () => {
+describe('S11 Nearby Discovery on PostgreSQL 18 after UX1D eligibility', () => {
   it('applies S1 visibility, inclusive rounded radius and deterministic distance/freshness/id ordering', async () => {
     const result = await findNearbyOffers(buyerLocation, db, nearbyOptions);
 
@@ -193,7 +193,7 @@ describe('S11 Nearby Discovery on PostgreSQL 18', () => {
     expect(after).toEqual(before);
   });
 
-  it('does not change closed Search eligibility or public response semantics', async () => {
+  it('keeps Search unfiltered by Nearby radius while applying UX1D phone+geo eligibility', async () => {
     const search = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     expect(search.offers.map(({ id }) => id)).toEqual([
       offerIds.insideFreshA,
@@ -201,10 +201,9 @@ describe('S11 Nearby Discovery on PostgreSQL 18', () => {
       offerIds.insideOld,
       offerIds.boundary,
       offerIds.outside,
-      offerIds.geoless,
     ]);
     expect(search.offers.map(({ id }) => id)).toContain(offerIds.outside);
-    expect(search.offers.map(({ id }) => id)).toContain(offerIds.geoless);
+    expect(search.offers.map(({ id }) => id)).not.toContain(offerIds.geoless);
     expect(JSON.stringify(search)).not.toContain('"distanceMeters"');
   });
 

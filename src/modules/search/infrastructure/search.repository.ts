@@ -5,12 +5,12 @@ import { sellers } from '../../sellers/db/sellers.table';
 import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
-import { visibleOffersPredicate } from '../../offers/lifecycle/offer-lifecycle';
+import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import type { SearchOffer } from '../contracts/search.contract';
 import type { SearchRankingCandidate } from '../ranking/search-ranking';
 
-// A read projection across the four owning modules; lifecycle semantics stay owned by Offers.
-// S9 adds private ranking metadata beside, never inside, the public SearchOffer payload.
+// A read projection across the four owning modules; lifecycle and buyer-visibility semantics stay outside Search.
+// S9 private ranking metadata remains beside, never inside, the public SearchOffer payload.
 export async function findOffersByProductId(
   db: Database,
   productId: string,
@@ -38,7 +38,7 @@ export async function findOffersByProductId(
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .where(and(
       eq(products.id, productId),
-      visibleOffersPredicate(cutoff),
+      buyerVisibleOffersPredicate(cutoff),
     ))
     .orderBy(asc(offers.id));
 

@@ -74,6 +74,17 @@ async function sellerIdentity(phone: string) {
   }
 }
 
+async function makeBuyerEligible(ids: { sellerId: string; locationId: string }, projectName: string) {
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    const contactPhone = projectName === 'mobile' ? '+77000000783' : '+77000000784';
+    await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [ids.sellerId, contactPhone]);
+    await pool.query('UPDATE locations SET latitude=$2,longitude=$3 WHERE id=$1', [ids.locationId, 43.238949, 76.889709]);
+  } finally {
+    await pool.end();
+  }
+}
+
 async function login(page: Page, phone: string) {
   await page.goto('/seller');
   await page.getByRole('link', { name: 'Войти' }).click();
@@ -108,7 +119,7 @@ function containsIdentity(
   ));
 }
 
-test('S7 buyer finds the exact Seller-created Offer through canonical and alias Search only after confirmation', async ({ browser }, testInfo) => {
+test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canonical and alias Search only after confirmation', async ({ browser }, testInfo) => {
   const phone = phoneFor(testInfo.project.name);
   const suffix = testInfo.project.name;
   const sellerName = `S7 E2E Seller ${suffix}`;
@@ -133,6 +144,7 @@ test('S7 buyer finds the exact Seller-created Offer through canonical and alias 
     await expect(sellerPage.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     const ids = await sellerIdentity(phone);
+    await makeBuyerEligible(ids, testInfo.project.name);
     const identity = { ...ids, sellerComment };
 
     await sellerPage.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');

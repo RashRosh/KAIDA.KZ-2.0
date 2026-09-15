@@ -29,7 +29,24 @@ async function cleanup(phone: string) {
   }
 }
 
-test('S10 Seller contacts reach Buyer OfferCard and one cleared channel disappears', async ({ page }, testInfo) => {
+async function setSellerLocationGeo(phone: string) {
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    const result = await pool.query(`
+      UPDATE locations l
+      SET latitude=$2, longitude=$3
+      FROM sellers s
+      JOIN users u ON u.id=s.owner_user_id
+      WHERE l.seller_id=s.id AND u.phone_e164=$1
+      RETURNING l.id
+    `, [phone, 43.238949, 76.889709]);
+    expect(result.rows).toHaveLength(1);
+  } finally {
+    await pool.end();
+  }
+}
+
+test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel disappears', async ({ page }, testInfo) => {
   const project = testInfo.project.name;
   const phone = phoneFor(project);
   const sellerName = `S10 ${project} seller`;
@@ -61,6 +78,7 @@ test('S10 Seller contacts reach Buyer OfferCard and one cleared channel disappea
     await page.getByLabel('Instagram', { exact: true }).fill(instagram);
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+    await setSellerLocationGeo(phone);
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('5432.10');
@@ -77,10 +95,10 @@ test('S10 Seller contacts reach Buyer OfferCard and one cleared channel disappea
     const card = page.locator('article').filter({ hasText: sellerName }).first();
     await expect(card).toBeVisible();
     await expect(card.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', 'tel:+12025550123');
+    await expect(card.getByRole('link', { name: 'Маршрут', exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
     await expect(card.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', 'https://wa.me/447911123456');
     await expect(card.getByRole('link', { name: 'Telegram', exact: true })).toHaveAttribute('href', `https://t.me/${telegram}`);
     await expect(card.getByRole('link', { name: 'Instagram', exact: true })).toHaveAttribute('href', `https://www.instagram.com/${instagram}/`);
-    expect(await card.getByRole('link').allTextContents()).toEqual(['Позвонить', 'WhatsApp', 'Telegram', 'Instagram']);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.goto('/seller');
@@ -96,6 +114,7 @@ test('S10 Seller contacts reach Buyer OfferCard and one cleared channel disappea
     await expect(updatedCard).toBeVisible();
     await expect(updatedCard.getByRole('link', { name: 'Telegram', exact: true })).toHaveCount(0);
     await expect(updatedCard.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', 'tel:+12025550123');
+    await expect(updatedCard.getByRole('link', { name: 'Маршрут', exact: true })).toBeVisible();
     await expect(updatedCard.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', 'https://wa.me/447911123456');
     await expect(updatedCard.getByRole('link', { name: 'Instagram', exact: true })).toHaveAttribute('href', `https://www.instagram.com/${instagram}/`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

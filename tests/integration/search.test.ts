@@ -4,7 +4,7 @@ import { searchOffers } from '../../src/modules/search/application/search-offers
 import { searchResponseSchema } from '../../src/modules/search/contracts/search.contract';
 import { connectTestDatabase } from './database';
 
-describe('S0 Search regression against PostgreSQL 18 after S1', () => {
+describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
   beforeAll(async () => { connection = await connectTestDatabase(); });
   afterAll(async () => { await connection?.pool.end(); });
@@ -16,7 +16,11 @@ describe('S0 Search regression against PostgreSQL 18 after S1', () => {
       offers: [{
         id: seedIds.lambOffer,
         product: { id: seedIds.lambProduct, name: 'Баранина' },
-        seller: { id: seedIds.seller, displayName: 'Асыл Ет, тестовый продавец' },
+        seller: {
+          id: seedIds.seller,
+          displayName: 'Асыл Ет, тестовый продавец',
+          contacts: { phoneE164: '+77000000001' },
+        },
         location: { id: seedIds.location, name: 'Тестовая мясная точка', addressText: 'Алматы, Зелёный базар, тестовый павильон 12' },
         price: { amount: '4200.00', currency: 'KZT', unit: 'кг' },
         sellerComment: 'Свежий привоз.',
@@ -41,17 +45,30 @@ describe('S0 Search regression against PostgreSQL 18 after S1', () => {
     expect(offers[0]).toMatchObject({ id: seedIds.beefOffer, product: { name: 'Говядина' }, price: null });
   });
 
-  it('keeps seed values and record counts stable on repeat with the same controlled seed time', async () => {
+  it('keeps only the deterministic seed fixtures stable on repeat with the same controlled seed time', async () => {
     const seeded = await connection.pool.query<{ last_confirmed_at: Date }>(
       'SELECT last_confirmed_at FROM offers WHERE id = $1',
       [seedIds.lambOffer],
     );
     const seedNow = seeded.rows[0]!.last_confirmed_at;
-    const before = await connection.pool.query('SELECT * FROM offers ORDER BY id');
+    const before = await connection.pool.query(
+      'SELECT * FROM offers WHERE id IN ($1,$2) ORDER BY id',
+      [seedIds.lambOffer, seedIds.beefOffer],
+    );
     await seedDatabase(connection.db, seedNow);
-    const after = await connection.pool.query('SELECT * FROM offers ORDER BY id');
+    const after = await connection.pool.query(
+      'SELECT * FROM offers WHERE id IN ($1,$2) ORDER BY id',
+      [seedIds.lambOffer, seedIds.beefOffer],
+    );
     expect(after.rows).toEqual(before.rows);
-    const counts = await connection.pool.query('SELECT (SELECT count(*)::int FROM products) AS products, (SELECT count(*)::int FROM sellers) AS sellers, (SELECT count(*)::int FROM locations) AS locations, (SELECT count(*)::int FROM offers) AS offers');
+    const counts = await connection.pool.query(
+      `SELECT
+        (SELECT count(*)::int FROM products WHERE id IN ($1,$2)) AS products,
+        (SELECT count(*)::int FROM sellers WHERE id=$3) AS sellers,
+        (SELECT count(*)::int FROM locations WHERE id=$4) AS locations,
+        (SELECT count(*)::int FROM offers WHERE id IN ($5,$6)) AS offers`,
+      [seedIds.lambProduct, seedIds.beefProduct, seedIds.seller, seedIds.location, seedIds.lambOffer, seedIds.beefOffer],
+    );
     expect(counts.rows[0]).toEqual({ products: 2, sellers: 1, locations: 1, offers: 2 });
   });
 

@@ -38,6 +38,20 @@ async function authenticate(page: import('@playwright/test').Page, projectName: 
   return { ...identity, pool };
 }
 
+async function makeBuyerEligible(pool: Pool, userId: string, projectName: string) {
+  const contactPhone = projectName === 'mobile' ? '+77000001263' : '+77000001264';
+  const seller = await pool.query(
+    'UPDATE sellers SET contact_phone_e164=$2 WHERE owner_user_id=$1 RETURNING id',
+    [userId, contactPhone],
+  );
+  expect(seller.rows).toHaveLength(1);
+  const location = await pool.query(
+    'UPDATE locations SET latitude=$2,longitude=$3 WHERE seller_id=$1 RETURNING id',
+    [seller.rows[0].id, 43.238949, 76.889709],
+  );
+  expect(location.rows).toHaveLength(1);
+}
+
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
   await page.goto('/seller');
   const create = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Добавить товар' }) });
@@ -71,6 +85,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByRole('button', { name: 'Создать продавца' }).click();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
+    await makeBuyerEligible(auth.pool, auth.userId, testInfo.project.name);
 
     await createOffer(page, 'Баранина', '4200.00', 'S12 старая баранина');
     await createOffer(page, 'Говядина', '3500.00', 'S12 старая говядина');
