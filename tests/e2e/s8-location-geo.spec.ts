@@ -51,7 +51,7 @@ async function login(page: Page, phone: string) {
 
 async function createSeller(page: Page, projectName: string, scenario: 'success' | 'failure') {
   await page.goto('/seller');
-  await page.getByLabel('Название продавца').fill(`S8 E2E seller ${projectName}-${scenario}`);
+  await page.getByLabel('Имя', { exact: true }).fill(`S8 E2E seller ${projectName}-${scenario}`);
   await page.getByLabel('Название торговой точки').fill(`S8 E2E point ${projectName}-${scenario}`);
   await page.getByLabel('Тип торговой точки').selectOption('shop');
   await page.getByLabel('Адрес').fill(`Алматы, S8 E2E address ${projectName}-${scenario}`);
