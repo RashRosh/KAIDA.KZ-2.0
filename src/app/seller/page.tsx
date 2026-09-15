@@ -9,9 +9,8 @@ export default function SellerPage() {
       <div className={styles.shell}>
         <main className={styles.main}>
           <div className={styles.intro}>
-            <p className={styles.eyebrow}>Seller Input</p>
-            <h1>Ваши товары в KAIDA.KZ</h1>
-            <p>Настройте точку один раз, а затем обновляйте ассортимент через подтверждаемые изменения.</p>
+            <h1>Настройка торговой точки</h1>
+            <p>Укажите данные торговой точки и контакты. После сохранения подтвердите местоположение — и можно добавлять товары.</p>
           </div>
           <SellerSetup />
         </main>
