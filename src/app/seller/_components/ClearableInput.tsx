@@ -14,6 +14,7 @@ export function ClearableInput({ value, onValueChange, clearLabel, disabled, ...
     <div className={styles.control}>
       <input
         {...props}
+        aria-label={props['aria-label'] ?? clearLabel}
         value={value}
         disabled={disabled}
         onChange={(event) => onValueChange(event.target.value)}
