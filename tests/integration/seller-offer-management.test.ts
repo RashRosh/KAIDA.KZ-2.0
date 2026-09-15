@@ -41,10 +41,13 @@ async function cleanupUser(userId: string, phone: string) {
 async function createFixture(userId: string, phone: string, label: string) {
   await cleanupUser(userId, phone);
   await pool.query('INSERT INTO users (id, phone_e164, created_at) VALUES ($1,$2,$3)', [userId, phone, T0]);
-  return setupSeller(userId, {
+  const seller = await setupSeller(userId, {
     seller: { displayName: `S5 Seller ${label}` },
     location: { name: `S5 Point ${label}`, type: 'shop', addressText: `Almaty S5 ${label}` },
   }, { database: db });
+  await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [seller.id, phone]);
+  await pool.query('UPDATE locations SET latitude=$2,longitude=$3 WHERE id=$1', [seller.locations[0]!.id, 43.2, 76.9]);
+  return seller;
 }
 
 async function createS4Offer(userId: string, locationId: string, values: { amount?: string; unit?: string | null; comment?: string | null } = {}) {
