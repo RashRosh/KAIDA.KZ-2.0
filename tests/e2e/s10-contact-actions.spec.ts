@@ -65,7 +65,7 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
     await expect(page).toHaveURL('/');
 
     await page.goto('/seller');
-    await page.getByLabel('Название продавца').fill(sellerName);
+    await page.getByLabel('Имя', { exact: true }).fill(sellerName);
     await page.getByLabel('Название торговой точки').fill(`S10 ${project} point`);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill(`Алматы, S10 ${project} address`);
