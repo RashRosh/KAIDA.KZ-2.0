@@ -45,7 +45,7 @@ beforeAll(async () => {
 
   await pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, productName]);
   await pool.query('INSERT INTO product_aliases (product_id,name) VALUES ($1,$2)', [productId, aliasName]);
-  await pool.query('INSERT INTO sellers (id,display_name) VALUES ($1,$2)', [sellerId, 'S9 ranking seller']);
+  await pool.query('INSERT INTO sellers (id,display_name,contact_phone_e164) VALUES ($1,$2,$3)', [sellerId, 'S9 ranking seller', '+77000009100']);
   await pool.query(`INSERT INTO locations (id,seller_id,name,address_text,type,latitude,longitude) VALUES
     ($1,$4,'S9 near','S9 near address','shop',$5,$6),
     ($2,$4,'S9 far','S9 far address','shop',$7,$8),
@@ -103,7 +103,7 @@ function ids(result: Awaited<ReturnType<typeof searchOffers>>) {
   return result.offers.map((offer) => offer.id);
 }
 
-describe('S9 Search ranking on PostgreSQL 18', () => {
+describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
   it('preserves the closed legacy searchOffers call signatures at compile time', () => {
     const compileOnly = () => {
       void searchOffers(productName);
@@ -113,40 +113,40 @@ describe('S9 Search ranking on PostgreSQL 18', () => {
     expect(compileOnly).toBeTypeOf('function');
   });
 
-  it('with Buyer location ranks known geo by whole-meter distance, then freshness, then Offer.id', async () => {
+  it('with Buyer location ranks buyer-eligible Offers by whole-meter distance, then freshness, then Offer.id', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     expect(ids(result)).toEqual([
       offerIds.nearFreshA,
       offerIds.nearFreshB,
       offerIds.nearOld,
       offerIds.farNewer,
-      offerIds.geolessFresh,
-      offerIds.geolessOld,
     ]);
+    expect(ids(result)).not.toContain(offerIds.geolessFresh);
+    expect(ids(result)).not.toContain(offerIds.geolessOld);
   });
 
-  it('keeps a farther newer Offer below nearer visible Offers', async () => {
+  it('keeps a farther newer eligible Offer below nearer eligible Offers', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     expect(ids(result).indexOf(offerIds.nearOld)).toBeLessThan(ids(result).indexOf(offerIds.farNewer));
   });
 
-  it('without Buyer location ignores geo presence and sorts by freshness then Offer.id', async () => {
+  it('without Buyer location sorts buyer-eligible Offers by freshness then Offer.id', async () => {
     const result = await searchOffers(productName, db, lifecycleOptions);
     expect(ids(result)).toEqual([
-      offerIds.geolessFresh,
       offerIds.farNewer,
       offerIds.nearFreshA,
       offerIds.nearFreshB,
       offerIds.nearOld,
-      offerIds.geolessOld,
     ]);
   });
 
-  it('excludes inactive and cutoff-equal expired Offers before ranking', async () => {
+  it('excludes ineligible, inactive and cutoff-equal expired Offers before ranking', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
+    expect(ids(result)).not.toContain(offerIds.geolessFresh);
+    expect(ids(result)).not.toContain(offerIds.geolessOld);
     expect(ids(result)).not.toContain(offerIds.inactiveNearest);
     expect(ids(result)).not.toContain(offerIds.expiredNearest);
-    expect(result.offers).toHaveLength(6);
+    expect(result.offers).toHaveLength(4);
   });
 
   it('uses identical S6 canonical/alias semantics and exact ranking order', async () => {

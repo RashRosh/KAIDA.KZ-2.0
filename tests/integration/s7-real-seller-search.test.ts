@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from '../../src/db/client';
 import { seedIds } from '../../src/db/seed';
+import { setOwnedLocationGeo } from '../../src/modules/locations/application/set-owned-location-geo';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
 import { confirmSellerChangeSet } from '../../src/modules/seller-input/application/confirm-seller-change-set';
 import { createOfferManagementChangeSet } from '../../src/modules/seller-input/application/create-offer-management-change-set';
@@ -11,6 +12,7 @@ import {
   sellerOfferChangeBodySchema,
 } from '../../src/modules/seller-input/contracts/seller-change-set.contract';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
+import { updateOwnedSellerContacts } from '../../src/modules/sellers/application/update-owned-seller-contacts';
 import { connectTestDatabase } from './database';
 
 let db: Database;
@@ -50,8 +52,8 @@ beforeAll(async () => {
 
 afterAll(async () => { await pool.end(); });
 
-describe.sequential('S7 real Seller-created Offer through existing Search on PostgreSQL 18', () => {
-  it('proves proposal -> confirmation -> canonical/alias Search -> proposed/confirmed deactivation on the exact Offer', async () => {
+describe.sequential('S7 real Seller-created Offer through UX1D buyer-eligible Search on PostgreSQL 18', () => {
+  it('proves proposal -> confirmation -> canonical/alias Search -> proposed/confirmed deactivation on the exact eligible Offer', async () => {
     const userId = randomUUID();
     const phone = '+77000000771';
     const fixtureSuffix = userId.slice(0, 8);
@@ -70,6 +72,13 @@ describe.sequential('S7 real Seller-created Offer through existing Search on Pos
     }, { database: db });
     const locationId = seller.locations[0]!.id;
     const identity = { sellerId: seller.id, locationId, sellerComment };
+    await updateOwnedSellerContacts(userId, { phoneE164: '+77000000772' }, { database: db });
+    await setOwnedLocationGeo(
+      userId,
+      locationId,
+      { latitude: 43.238949, longitude: 76.889709 },
+      { database: db },
+    );
 
     try {
       const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
@@ -102,7 +111,7 @@ describe.sequential('S7 real Seller-created Offer through existing Search on Pos
       expect(canonicalOffer).toMatchObject({
         id: offerId,
         product: { id: seedIds.lambProduct, name: 'Баранина' },
-        seller: { id: seller.id, displayName: sellerName },
+        seller: { id: seller.id, displayName: sellerName, contacts: { phoneE164: '+77000000772' } },
         location: { id: locationId, name: locationName },
         sellerComment,
       });

@@ -154,7 +154,7 @@ describe('S8 Location geo on PostgreSQL 18', () => {
     }
   });
 
-  it('keeps raw geo out of Search projection for both shop and home Locations', async () => {
+  it('keeps raw geo out of buyer-eligible Search projection for both shop and home Locations', async () => {
     const shopUserId = '50000000-0000-4000-8000-000000000906';
     const homeUserId = '50000000-0000-4000-8000-000000000907';
     const shopPhone = '+77000000906';
@@ -175,6 +175,8 @@ describe('S8 Location geo on PostgreSQL 18', () => {
         seller: { displayName: 'S8 privacy home seller' },
         location: { name: 'S8 privacy home', type: 'home', addressText: 'S8 home address' },
       }, { database: db });
+      await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [shop.id, '+77000000916']);
+      await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [home.id, '+77000000917']);
       await setOwnedLocationGeo(shopUserId, shop.locations[0]!.id, { latitude: 43.21, longitude: 76.81 }, { database: db });
       await setOwnedLocationGeo(homeUserId, home.locations[0]!.id, { latitude: 43.22, longitude: 76.82 }, { database: db });
 

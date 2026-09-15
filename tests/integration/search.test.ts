@@ -4,7 +4,7 @@ import { searchOffers } from '../../src/modules/search/application/search-offers
 import { searchResponseSchema } from '../../src/modules/search/contracts/search.contract';
 import { connectTestDatabase } from './database';
 
-describe('S0 Search regression against PostgreSQL 18 after S1', () => {
+describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
   beforeAll(async () => { connection = await connectTestDatabase(); });
   afterAll(async () => { await connection?.pool.end(); });
@@ -16,7 +16,11 @@ describe('S0 Search regression against PostgreSQL 18 after S1', () => {
       offers: [{
         id: seedIds.lambOffer,
         product: { id: seedIds.lambProduct, name: 'Баранина' },
-        seller: { id: seedIds.seller, displayName: 'Асыл Ет, тестовый продавец' },
+        seller: {
+          id: seedIds.seller,
+          displayName: 'Асыл Ет, тестовый продавец',
+          contacts: { phoneE164: '+77000000001' },
+        },
         location: { id: seedIds.location, name: 'Тестовая мясная точка', addressText: 'Алматы, Зелёный базар, тестовый павильон 12' },
         price: { amount: '4200.00', currency: 'KZT', unit: 'кг' },
         sellerComment: 'Свежий привоз.',

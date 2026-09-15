@@ -87,14 +87,12 @@ afterAll(async () => {
   await pool.end();
 });
 
-describe('S10 Search Seller contacts projection on PostgreSQL 18', () => {
-  it('keeps the exact legacy Seller JSON shape when Seller has no contacts', async () => {
+describe('S10 Search Seller contacts projection on PostgreSQL 18 after UX1D eligibility', () => {
+  it('keeps a Seller with no contact phone valid seller-side but excludes its Offers from buyer Search', async () => {
     const result = await searchOffers(productName, db, options);
-    const seller = sellerObject(result);
-    expect(Object.hasOwn(seller, 'contacts')).toBe(false);
-    expect(Object.prototype.hasOwnProperty.call(seller, 'contacts')).toBe(false);
-    expect(JSON.stringify(seller)).not.toContain('contacts');
-    expect(seller).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
+    expect(result.offers).toEqual([]);
+    const stored = await pool.query('SELECT id,contact_phone_e164 FROM sellers WHERE id=$1', [sellerId]);
+    expect(stored.rows).toEqual([{ id: sellerId, contact_phone_e164: null }]);
   });
 
   it('projects only structured public contacts and leaks no private Seller/Identity/geo/ranking data', async () => {
@@ -103,6 +101,7 @@ describe('S10 Search Seller contacts projection on PostgreSQL 18', () => {
       WHERE id=$1`, [sellerId, '+12025550123', '+447911123456', 'kaida_shop', 'kaida.shop']);
 
     const result = await searchOffers(productName, db, { ...options, buyerLocation });
+    expect(ids(result)).toEqual([offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer]);
     expect(sellerObject(result)).toEqual({
       id: sellerId,
       displayName: 'S10 Search Seller',
@@ -122,14 +121,15 @@ describe('S10 Search Seller contacts projection on PostgreSQL 18', () => {
     ]) expect(serialized).not.toContain(forbidden);
   });
 
-  it('preserves S1 visibility, S6 alias resolution and exact S9 ordering before and after contacts change', async () => {
-    const expectedWithGeo = [offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer, offerIds.geolessNewest];
-    const expectedWithoutGeo = [offerIds.geolessNewest, offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld];
+  it('preserves S1 visibility, S6 alias resolution and exact S9 ordering among buyer-eligible Offers when optional contacts change', async () => {
+    const expectedWithGeo = [offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer];
+    const expectedWithoutGeo = [offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld];
 
     const withGeo = await searchOffers(productName, db, { ...options, buyerLocation });
     const withoutGeo = await searchOffers(productName, db, options);
     expect(ids(withGeo)).toEqual(expectedWithGeo);
     expect(ids(withoutGeo)).toEqual(expectedWithoutGeo);
+    expect(ids(withGeo)).not.toContain(offerIds.geolessNewest);
     expect(ids(withGeo)).not.toContain(offerIds.inactive);
     expect(ids(withGeo)).not.toContain(offerIds.expired);
 
