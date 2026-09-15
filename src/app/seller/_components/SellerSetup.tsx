@@ -13,6 +13,7 @@ type ApiError = { error?: { code?: string; message?: string } };
 type SellerResponse = { seller: SellerView | null };
 type LocationGeoResponse = { location: LocationView };
 type ContactsResponse = { contacts: OwnerContacts };
+type AuthMeResponse = { user: { id: string; phone: string } | null };
 
 const typeLabels: Record<LocationType, string> = {
   market: 'Рынок',
@@ -104,6 +105,16 @@ export function SellerSetup() {
           setState('ready');
           return;
         }
+
+        let identityPhone = '';
+        try {
+          const identityResponse = await fetch('/api/auth/me', { cache: 'no-store' });
+          const identityData = await identityResponse.json() as AuthMeResponse & ApiError;
+          if (identityResponse.ok) identityPhone = identityData.user?.phone ?? '';
+        } catch {
+          // Prefill is convenience only; seller can still enter a public phone manually.
+        }
+
         setSeller(data.seller);
 
         if (data.seller) {
@@ -115,11 +126,14 @@ export function SellerSetup() {
               setContactsLoadError(contactsData.error?.message ?? 'Не удалось загрузить контакты.');
             } else {
               applyContacts(contactsData.contacts);
+              if (!contactsData.contacts.phoneE164 && identityPhone) setPhoneE164(identityPhone);
               setContactsLoaded(true);
             }
           } catch {
             if (active) setContactsLoadError('Не удалось загрузить контакты.');
           }
+        } else if (identityPhone) {
+          setPhoneE164(identityPhone);
         }
         setState('ready');
       } catch {
@@ -157,7 +171,17 @@ export function SellerSetup() {
     setError('');
     setSuccess('');
 
+    const normalizedLocationName = locationName.trim();
+    const normalizedAddress = addressText.trim();
     const contacts = contactPayload();
+    if (!normalizedLocationName) {
+      setError('Укажите название торговой точки.');
+      return;
+    }
+    if (!normalizedAddress) {
+      setError('Укажите адрес торговой точки.');
+      return;
+    }
     if (!contacts.phoneE164) {
       setError('Укажите телефон для покупателей.');
       return;
@@ -169,8 +193,8 @@ export function SellerSetup() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          seller: { displayName },
-          location: { name: locationName, type: locationType, addressText },
+          seller: { displayName: displayName.trim() || normalizedLocationName },
+          location: { name: normalizedLocationName, type: locationType, addressText: normalizedAddress },
         }),
       });
       const data = await response.json() as SellerResponse & ApiError;
@@ -355,16 +379,17 @@ export function SellerSetup() {
             <div className={styles.formSection}>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
-                  <label htmlFor="seller-display-name">Название продавца</label>
-                  <input id="seller-display-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={120} disabled={submitting} />
+                  <label htmlFor="seller-display-name">Имя</label>
+                  <input id="seller-display-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={120} disabled={submitting} autoComplete="name" />
+                  <span className={styles.fieldHelp}>Как к вам будут обращаться покупатели. Можно оставить пустым.</span>
                 </div>
                 <div className={styles.field}>
-                  <label htmlFor="location-name">Название торговой точки</label>
-                  <input id="location-name" value={locationName} onChange={(event) => setLocationName(event.target.value)} maxLength={120} disabled={submitting} />
+                  <label htmlFor="location-name">Название торговой точки <span aria-hidden="true">*</span></label>
+                  <input id="location-name" value={locationName} onChange={(event) => setLocationName(event.target.value)} maxLength={120} disabled={submitting} required />
                 </div>
                 <div className={styles.field}>
-                  <label htmlFor="location-type">Тип торговой точки</label>
-                  <select id="location-type" value={locationType} onChange={(event) => setLocationType(event.target.value as LocationType)} disabled={submitting}>
+                  <label htmlFor="location-type">Тип торговой точки <span aria-hidden="true">*</span></label>
+                  <select id="location-type" value={locationType} onChange={(event) => setLocationType(event.target.value as LocationType)} disabled={submitting} required>
                     <option value="market">Рынок</option>
                     <option value="shop">Магазин</option>
                     <option value="pavilion">Павильон</option>
@@ -373,8 +398,8 @@ export function SellerSetup() {
                   </select>
                 </div>
                 <div className={`${styles.field} ${styles.fieldWide}`}>
-                  <label htmlFor="location-address">Адрес</label>
-                  <input id="location-address" value={addressText} onChange={(event) => setAddressText(event.target.value)} maxLength={500} disabled={submitting} autoComplete="street-address" />
+                  <label htmlFor="location-address">Адрес <span aria-hidden="true">*</span></label>
+                  <input id="location-address" value={addressText} onChange={(event) => setAddressText(event.target.value)} maxLength={500} disabled={submitting} autoComplete="street-address" required />
                   <span className={styles.fieldHelp}>Например: Алматы, Абая 150, вход со двора</span>
                 </div>
               </div>
@@ -382,11 +407,11 @@ export function SellerSetup() {
 
             <fieldset className={styles.formSection}>
               <legend>Контакты для покупателей</legend>
-              <p className={styles.sectionHint}>Телефон обязателен для показа предложений. Мессенджеры можно добавить сейчас или позже.</p>
+              <p className={styles.sectionHint}>Телефон обязателен. Номер входа подставляется автоматически; при необходимости его можно изменить. Мессенджеры можно добавить сейчас или позже.</p>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
-                  <label htmlFor="seller-contact-phone">Телефон</label>
-                  <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={submitting} autoComplete="tel" placeholder="+77001234567" />
+                  <label htmlFor="seller-contact-phone">Телефон <span aria-hidden="true">*</span></label>
+                  <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={submitting} autoComplete="tel" placeholder="+77001234567" required />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
@@ -404,8 +429,8 @@ export function SellerSetup() {
             </fieldset>
 
             <section className={styles.formSection} aria-labelledby="pending-geo-heading">
-              <h3 id="pending-geo-heading">Местоположение</h3>
-              <p className={styles.sectionHint}>После сохранения точки подтвердите геопозицию, находясь на месте. Адрес и геопозиция пока сохраняются отдельно: автоматическое определение адреса потребует отдельного geocoding API.</p>
+              <h3 id="pending-geo-heading">Местоположение <span aria-hidden="true">*</span></h3>
+              <p className={styles.sectionHint}>Обязательно для поиска по расстоянию. После сохранения точки подтвердите геопозицию, находясь на месте. Адрес и геопозиция сохраняются отдельно: автоматическое определение адреса потребует отдельного geocoding API.</p>
             </section>
 
             {error && <p className={styles.error} role="alert">{error}</p>}
@@ -431,8 +456,8 @@ export function SellerSetup() {
               <p className={styles.sectionHint}>Телефон обязателен. Остальные каналы можно оставить пустыми.</p>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
-                  <label htmlFor="seller-contact-phone">Телефон</label>
-                  <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={savingContacts} autoComplete="tel" placeholder="+77001234567" />
+                  <label htmlFor="seller-contact-phone">Телефон <span aria-hidden="true">*</span></label>
+                  <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={savingContacts} autoComplete="tel" placeholder="+77001234567" required />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
@@ -453,8 +478,8 @@ export function SellerSetup() {
             </form>
 
             <section className={styles.formSection} aria-labelledby="onboarding-geo-heading">
-              <h3 id="onboarding-geo-heading">Местоположение</h3>
-              <p className={styles.sectionHint}>Нажмите кнопку, находясь в торговой точке. Браузер спросит разрешение только после вашего нажатия.</p>
+              <h3 id="onboarding-geo-heading">Местоположение <span aria-hidden="true">*</span></h3>
+              <p className={styles.sectionHint}>Обязательно для поиска по расстоянию. Нажмите кнопку, находясь в торговой точке. Браузер спросит разрешение только после вашего нажатия.</p>
               <p className={styles.geoState}>{firstLocation.geo ? 'Местоположение сохранено' : 'Местоположение не задано'}</p>
               {geoError?.locationId === firstLocation.id && <p className={styles.error} role="alert">{geoError.message}</p>}
               <div className={styles.onboardingActions}>
