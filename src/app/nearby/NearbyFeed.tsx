@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { nearbyResponseSchema, type NearbyResponse } from '@/modules/discovery/contracts/discovery.contract';
 import { buyerLocationSchema, type BuyerLocation } from '@/modules/search/contracts/buyer-location.contract';
 import { OfferCard } from '../_components/OfferCard';
@@ -10,11 +10,13 @@ type NearbyState =
   | { kind: 'initial' | 'locating' | 'loading' | 'geo_error' | 'request_error' }
   | { kind: 'success'; result: NearbyResponse };
 
+const NEARBY_NAV_INTENT_KEY = 'kaida:nearby-nav-intent';
+
 export function NearbyFeed() {
   const [state, setState] = useState<NearbyState>({ kind: 'initial' });
   const pending = useRef(false);
 
-  async function loadNearby(buyerLocation: BuyerLocation) {
+  const loadNearby = useCallback(async (buyerLocation: BuyerLocation) => {
     setState({ kind: 'loading' });
     try {
       const response = await fetch('/api/discovery/nearby', {
@@ -32,9 +34,9 @@ export function NearbyFeed() {
     } finally {
       pending.current = false;
     }
-  }
+  }, []);
 
-  function requestNearby() {
+  const requestNearby = useCallback(() => {
     if (pending.current) return;
     pending.current = true;
 
@@ -64,7 +66,19 @@ export function NearbyFeed() {
       },
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 },
     );
-  }
+  }, [loadNearby]);
+
+  useEffect(() => {
+    let autoStart = false;
+    try {
+      autoStart = window.sessionStorage.getItem(NEARBY_NAV_INTENT_KEY) === '1';
+      if (autoStart) window.sessionStorage.removeItem(NEARBY_NAV_INTENT_KEY);
+    } catch {
+      autoStart = false;
+    }
+
+    if (autoStart) requestNearby();
+  }, [requestNearby]);
 
   const busy = state.kind === 'locating' || state.kind === 'loading';
   const buttonLabel = state.kind === 'locating'
