@@ -116,7 +116,7 @@ async function assertEqualSocialRow(card: Locator, names: string[]) {
   await expect(row).toBeVisible();
   const rowBox = await row.boundingBox();
   expect(rowBox).not.toBeNull();
-  const boxes = [];
+  const boxes: Array<{ x: number; y: number; width: number; height: number }> = [];
   for (const name of names) {
     const link = card.getByRole('link', { name, exact: true });
     await expect(link).toBeVisible();
