@@ -1,23 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { SellerChangeSetCreate } from './SellerChangeSetCreate';
-import { SellerContactSettings } from './SellerContactSettings';
+import { SellerContactSettings, type OwnerContacts } from './SellerContactSettings';
 import { SellerOfferManagement } from './SellerOfferManagement';
 import styles from '../page.module.css';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type SellerResponse = { seller: SellerView | null };
 type LocationGeoResponse = { location: LocationView };
-type OwnerContacts = {
-  phoneE164: string | null;
-  whatsappPhoneE164: string | null;
-  telegramUsername: string | null;
-  instagramUsername: string | null;
-};
 type ContactsResponse = { contacts: OwnerContacts };
 
 const typeLabels: Record<LocationType, string> = {
@@ -44,6 +38,10 @@ function nullableCanonical(value: string, lowercase = false): string | null {
 export function SellerSetup() {
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready'>('loading');
   const [seller, setSeller] = useState<SellerView | null>(null);
+  const [savedContacts, setSavedContacts] = useState<OwnerContacts | null>(null);
+  const [contactsLoaded, setContactsLoaded] = useState(false);
+  const [contactsLoadError, setContactsLoadError] = useState('');
+
   const [displayName, setDisplayName] = useState('');
   const [locationName, setLocationName] = useState('');
   const [locationType, setLocationType] = useState<LocationType>('shop');
@@ -52,8 +50,7 @@ export function SellerSetup() {
   const [whatsappPhoneE164, setWhatsappPhoneE164] = useState('');
   const [telegramUsername, setTelegramUsername] = useState('');
   const [instagramUsername, setInstagramUsername] = useState('');
-  const [contactsLoaded, setContactsLoaded] = useState(false);
-  const [contactsLoadError, setContactsLoadError] = useState('');
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -66,6 +63,7 @@ export function SellerSetup() {
     setWhatsappPhoneE164(contacts.whatsappPhoneE164 ?? '');
     setTelegramUsername(contacts.telegramUsername ?? '');
     setInstagramUsername(contacts.instagramUsername ?? '');
+    setSavedContacts(contacts);
   }
 
   function contactPayload(): OwnerContacts {
@@ -96,14 +94,18 @@ export function SellerSetup() {
         setSeller(data.seller);
 
         if (data.seller) {
-          const contactsResponse = await fetch('/api/seller/contacts', { cache: 'no-store' });
-          const contactsData = await contactsResponse.json() as ContactsResponse & ApiError;
-          if (!active) return;
-          if (!contactsResponse.ok) {
-            setContactsLoadError(contactsData.error?.message ?? 'Не удалось загрузить контакты.');
-          } else {
-            applyContacts(contactsData.contacts);
-            setContactsLoaded(true);
+          try {
+            const contactsResponse = await fetch('/api/seller/contacts', { cache: 'no-store' });
+            const contactsData = await contactsResponse.json() as ContactsResponse & ApiError;
+            if (!active) return;
+            if (!contactsResponse.ok) {
+              setContactsLoadError(contactsData.error?.message ?? 'Не удалось загрузить контакты.');
+            } else {
+              applyContacts(contactsData.contacts);
+              setContactsLoaded(true);
+            }
+          } catch {
+            if (active) setContactsLoadError('Не удалось загрузить контакты.');
           }
         }
         setState('ready');
@@ -117,15 +119,14 @@ export function SellerSetup() {
   }, []);
 
   const firstLocation = seller?.locations[0] ?? null;
-  const phoneReady = nullableCanonical(phoneE164) !== null;
+  const phoneReady = savedContacts?.phoneE164 !== null && savedContacts?.phoneE164 !== undefined;
   const geoReady = Boolean(firstLocation?.geo);
   const onboardingComplete = Boolean(seller && firstLocation && contactsLoaded && phoneReady && geoReady);
-
-  const progress = useMemo(() => [
+  const progress = [
     { label: 'Точка продажи', done: Boolean(seller && firstLocation) },
     { label: 'Контакты', done: Boolean(contactsLoaded && phoneReady) },
     { label: 'Местоположение', done: geoReady },
-  ], [contactsLoaded, firstLocation, geoReady, phoneReady, seller]);
+  ];
 
   async function saveContacts(payload: OwnerContacts): Promise<boolean> {
     const response = await fetch('/api/seller/contacts', {
@@ -173,15 +174,23 @@ export function SellerSetup() {
         }
         return;
       }
-
-      setSeller(data.seller);
-      const contactsSaved = await saveContacts(contacts);
-      if (!contactsSaved) {
-        setContactsLoaded(true);
-        setError('Точка сохранена, но контакты не сохранились. Проверьте данные и повторите сохранение контактов.');
+      if (!data.seller) {
+        setError('Не удалось загрузить созданного продавца. Обновите страницу.');
         return;
       }
-      setSuccess('Точка и контакты сохранены. Осталось указать местоположение.');
+
+      setSeller(data.seller);
+      setContactsLoaded(true);
+      try {
+        const contactsSaved = await saveContacts(contacts);
+        if (!contactsSaved) {
+          setError('Точка сохранена, но контакты не сохранились. Проверьте данные и повторите сохранение контактов.');
+          return;
+        }
+        setSuccess('Точка и контакты сохранены. Осталось указать местоположение.');
+      } catch {
+        setError('Точка сохранена, но контакты не сохранились. Проверьте соединение и повторите сохранение контактов.');
+      }
     } catch {
       setError('Не удалось сохранить данные продавца.');
     } finally {
@@ -236,7 +245,6 @@ export function SellerSetup() {
               setGeoError({ locationId, message: data.error?.message ?? 'Не удалось сохранить местоположение.' });
               return;
             }
-
             setSeller((current) => current ? {
               ...current,
               locations: current.locations.map((location) => location.id === locationId ? data.location : location),
@@ -253,11 +261,7 @@ export function SellerSetup() {
         setGeoBusyLocationId(null);
         setGeoError({ locationId, message: browserGeoErrorMessage(geoPositionError) });
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
-      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
   }
 
@@ -273,17 +277,21 @@ export function SellerSetup() {
     );
   }
 
-  if (seller && !contactsLoaded) {
+  if (seller && !contactsLoaded && contactsLoadError) {
     return (
       <section className={styles.card}>
         <p className={styles.eyebrow}>Настройка продавца</p>
-        <h2>{contactsLoadError ? 'Не удалось продолжить настройку' : 'Загружаем контакты…'}</h2>
-        {contactsLoadError && <p className={styles.error} role="alert">{contactsLoadError} Обновите страницу и попробуйте снова.</p>}
+        <h2>Не удалось продолжить настройку</h2>
+        <p className={styles.error} role="alert">{contactsLoadError} Обновите страницу и попробуйте снова.</p>
       </section>
     );
   }
 
-  if (onboardingComplete && firstLocation) {
+  if (seller && !contactsLoaded) {
+    return <section className={styles.card}><p>Загружаем контакты…</p></section>;
+  }
+
+  if (seller && onboardingComplete && firstLocation) {
     return (
       <div className={styles.stack}>
         <section className={styles.card} aria-labelledby="seller-summary-heading">
@@ -316,7 +324,7 @@ export function SellerSetup() {
             })}
           </div>
         </section>
-        <SellerContactSettings />
+        <SellerContactSettings onSaved={setSavedContacts} />
         <SellerChangeSetCreate seller={seller} />
         <SellerOfferManagement />
       </div>
