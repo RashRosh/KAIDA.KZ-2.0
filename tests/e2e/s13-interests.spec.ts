@@ -59,7 +59,7 @@ test('buyer interest survives reload and a later login, then can be removed', as
     await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
 
     await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await login(page, phone);
 
     card = await searchSeedProduct(page);

@@ -148,7 +148,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
 
     await page.goto('/');
     await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();

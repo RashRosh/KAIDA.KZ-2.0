@@ -53,6 +53,11 @@ test('current main areas share the composed shell without horizontal overflow', 
     expect(primaryRowBox).not.toBeNull();
     expect(Math.abs(primaryRowBox!.height - expectedPrimaryRowHeight)).toBeLessThanOrEqual(1);
 
+    if (path === '/login') {
+      await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
+      continue;
+    }
+
     if (testInfo.project.name === 'mobile') {
       const nav = await openPrimaryNav(page);
       await expectNavEntries(nav);
@@ -114,11 +119,11 @@ test('desktop shell uses logo-search-auth top row and stable left navigation row
   test.skip(testInfo.project.name !== 'desktop', 'Desktop composition proof');
 
   await page.goto('/');
-  await expect(page.getByRole('link', { name: 'Войти', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
 
   const wordmarkBox = await page.getByRole('link', { name: 'KAIDA.KZ, главная', exact: true }).boundingBox();
   const searchBox = await page.getByRole('search', { name: 'Поиск из шапки' }).boundingBox();
-  const loginBox = await page.getByRole('link', { name: 'Войти', exact: true }).boundingBox();
+  const loginBox = await page.getByRole('button', { name: 'Войти', exact: true }).boundingBox();
   const navBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
 
   expect(wordmarkBox).not.toBeNull();

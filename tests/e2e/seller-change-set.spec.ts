@@ -95,7 +95,7 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();

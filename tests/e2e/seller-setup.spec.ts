@@ -102,7 +102,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();

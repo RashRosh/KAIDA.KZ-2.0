@@ -17,18 +17,17 @@
 ## Текущее состояние
 
 - Backlog начат после verified checkpoint `v0.0.14-s13`.
-- Последний verified checkpoint до текущего corrective slice: `v0.0.15-ux1a`.
-- UX1A закрыт; текущий незакрытый corrective slice: `UX1A.1 — Bolt shell/layout alignment`.
-- Согласованная последовательность после решения Product Owner: `UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → UX2 → M1 → M2 при необходимости → S14`.
-- `UX1A.2` зарезервирован под визуальный auth/login flow по Bolt reference и начинается только после полного закрытия UX1A.1 checkpoint.
-- Действующий contract: `docs/slices/UX1A1-shell-visual-alignment/SLICE_CONTRACT.md`.
+- Последний verified checkpoint: `v0.0.16-ux1a1`.
+- UX1A и UX1A.1 закрыты; текущий slice: `UX1A.2 — Bolt-like Auth modal`.
+- Согласованная последовательность: `UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → UX2 → M1 → M2 при необходимости → S14`.
+- Действующий contract: `docs/slices/UX1A2-auth-modal/SLICE_CONTRACT.md`.
 - Во время UX1A Product Owner утвердил Design System: Roboto, header `84/104px`, radius scale `8/12/16/20px`, без fake media slots до M1.
 
 ## Открытые пункты
 
 ### UX-001 — Скругления должны быть системными, а не случайными
 
-**Статус:** IN_SLICE — UX1A  
+**Статус:** DONE — UX1A / `v0.0.15-ux1a`  
 **Область:** Visual system
 
 Первоначальное наблюдение: controls выглядели чрезмерно скруглёнными. Временное решение `3px` было принято до появления полноценной дизайн-системы и отменено до закрытия UX1A.
@@ -41,7 +40,7 @@
 - `--radius-xl: 20px`;
 - `--radius-full` только там, где семантически нужен круглый chip/badge.
 
-UX1A вводит шкалу и применяет её к shell/существующим controls через tokens. Полный redesign Offer cards относится к UX1B.
+UX1A ввёл шкалу и применил её к shell/существующим controls через tokens. Полный redesign Offer cards относится к UX1B.
 
 ---
 
@@ -91,12 +90,12 @@ Seller-side часть этого пункта не входит в UX1A и до
 
 ### UX-005 — Несогласованная и нестабильная верхняя часть приложения
 
-**Статус:** IN_SLICE — UX1A.1  
+**Статус:** DONE — UX1A.1 / `v0.0.16-ux1a1`  
 **Область:** App shell / Visual consistency
 
 Верхняя зона приложения исторически различалась между страницами; первая попытка общего shell дополнительно выявила горизонтальный «прыжок» menu при переходе на seller page. После Bolt alignment отдельно выявлено движение desktop header Search вправо-влево при переключении `Поиск / Рядом / Продавцу`.
 
-**Утверждённое направление:**
+**Закрытое направление:**
 - одна shell-система на основных routes;
 - primary header `84px` mobile / `104px` desktop;
 - desktop global Search имеет стабильные `x/width` между основными routes и не зависит от ширины auth/context справа;
@@ -108,12 +107,12 @@ Seller-side часть этого пункта не входит в UX1A и до
 
 ### UX-006 — Нет понятного входа для продавца
 
-**Статус:** IN_SLICE — UX1A  
+**Статус:** DONE — UX1A / `v0.0.15-ux1a`  
 **Область:** Information architecture / Seller journey
 
 Пользователь, который хочет стать продавцом или управлять своими предложениями, не должен угадывать, где начинается seller flow.
 
-**Желаемое направление:** общий shell имеет понятный seller entry, ведущий в уже существующий `/seller` flow без изменения seller business behavior.
+**Закрытое направление:** общий shell имеет понятный seller entry, ведущий в существующий `/seller` flow без изменения seller business behavior.
 
 ---
 
@@ -155,7 +154,7 @@ UX1A/UX1A.1 закрывают shell/navigation/search composition. Card-first l
 
 ### UX-009 — Auth выглядит техническим и выбивается из нового shell
 
-**Статус:** OPEN — planned UX1A.2  
+**Статус:** IN_SLICE — UX1A.2  
 **Область:** Identity / Login presentation
 
 S2 Auth функционально закрыт и остаётся источником истины для phone normalization, OTP, session, persistence и logout. Проблема только в presentation: текущая отдельная login page визуально не соответствует Bolt-aligned shell.
@@ -167,9 +166,7 @@ S2 Auth функционально закрыт и остаётся источн
 - сохранить настоящий S2 API, dynamic test OTP, validation/error states, session persistence и logout;
 - не переносить browser-generated OTP, fake User/role или local-only auth из Bolt;
 - закрытие modal не создаёт User/session и не меняет auth state;
-- отдельный `/login` route может сохраниться как deep-link/accessibility fallback, но presentation и behavior не должны дублировать две независимые auth-реализации.
-
-UX1A.2 начинается только после полного checkpoint UX1A.1.
+- отдельный `/login` route сохраняется как deep-link/fallback и использует ту же auth implementation.
 
 ---
 
@@ -182,8 +179,8 @@ UX1A.2 начинается только после полного checkpoint UX
 Текущая зафиксированная последовательность UX/product work:
 
 - `UX1A` — app shell / navigation — CLOSED;
-- `UX1A.1` — Bolt shell/layout alignment — CURRENT, должен быть полностью закрыт первым;
-- `UX1A.2` — Bolt-like Auth modal поверх настоящего S2 Auth;
+- `UX1A.1` — Bolt shell/layout alignment — CLOSED (`v0.0.16-ux1a1`);
+- `UX1A.2` — Bolt-like Auth modal поверх настоящего S2 Auth — CURRENT;
 - `UX1B` — marketplace Offer cards без fake media slots;
 - `UX1C` — Nearby geo-intent cleanup;
 - `UX2` — seller onboarding cleanup;
