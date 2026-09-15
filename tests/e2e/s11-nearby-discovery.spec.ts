@@ -189,7 +189,7 @@ function assertSearchPrivacy(body: unknown) {
   }
 }
 
-test('Buyer clicks Nearby once, gets only nearby Offers, keeps contacts, and location is not persisted', async ({ page }) => {
+test('Buyer clicks Nearby once, gets only nearby buyer-eligible Offers, keeps actions, and location is not persisted', async ({ page }) => {
   await mockGeolocation(page, buyerLocation);
   let nearbyRequests = 0;
   page.on('request', (request) => {
@@ -212,7 +212,7 @@ test('Buyer clicks Nearby once, gets only nearby Offers, keeps contacts, and loc
   await expect(page.getByText(geolessLocationName)).toHaveCount(0);
 
   const firstCard = cards.nth(0);
-  for (const label of ['Позвонить', 'WhatsApp', 'Telegram', 'Instagram']) {
+  for (const label of ['Позвонить', 'Маршрут', 'WhatsApp', 'Telegram', 'Instagram']) {
     await expect(firstCard.getByRole('link', { name: label, exact: true })).toBeVisible();
   }
 
@@ -306,16 +306,16 @@ test('public Nearby API is anonymous, strict, radius-filtered and does not expos
   expect((await malformed.json()).error.code).toBe('INVALID_NEARBY_REQUEST');
 });
 
-test('closed Search API remains unfiltered by the S11 radius and keeps its old DTO', async ({ request }) => {
+test('Search API remains unfiltered by the S11 radius, applies UX1D eligibility and keeps its DTO private', async ({ request }) => {
   const getResponse = await request.get('/api/search', { params: { q: productName } });
   expect(getResponse.status()).toBe(200);
   const getBody = await getResponse.json();
   expect(getBody.offers.map((offer: { id: string }) => offer.id)).toEqual([
-    geolessOfferId,
     outsideOfferId,
     boundaryOfferId,
     insideOfferId,
   ]);
+  expect(getBody.offers.map((offer: { id: string }) => offer.id)).not.toContain(geolessOfferId);
   assertSearchPrivacy(getBody);
 
   const postResponse = await request.post('/api/search', { data: { q: productName, buyerLocation } });
@@ -325,9 +325,8 @@ test('closed Search API remains unfiltered by the S11 radius and keeps its old D
     insideOfferId,
     boundaryOfferId,
     outsideOfferId,
-    geolessOfferId,
   ]);
   expect(postBody.offers.map((offer: { id: string }) => offer.id)).toContain(outsideOfferId);
-  expect(postBody.offers.map((offer: { id: string }) => offer.id)).toContain(geolessOfferId);
+  expect(postBody.offers.map((offer: { id: string }) => offer.id)).not.toContain(geolessOfferId);
   assertSearchPrivacy(postBody);
 });

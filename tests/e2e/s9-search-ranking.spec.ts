@@ -52,7 +52,7 @@ test.beforeAll(async ({}, workerInfo) => {
 
   await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, productName]);
   await connection.pool.query('INSERT INTO product_aliases (product_id,name) VALUES ($1,$2)', [productId, aliasName]);
-  await connection.pool.query('INSERT INTO sellers (id,display_name) VALUES ($1,$2)', [sellerId, `S9 E2E seller ${suffix}`]);
+  await connection.pool.query('INSERT INTO sellers (id,display_name,contact_phone_e164) VALUES ($1,$2,$3)', [sellerId, `S9 E2E seller ${suffix}`, '+77015550901']);
   await connection.pool.query(`INSERT INTO locations (id,seller_id,name,address_text,type,latitude,longitude) VALUES
     ($1,$4,$5,'S9 near address','shop',$8,$9),
     ($2,$4,$6,'S9 far address','shop',$10,$11),
@@ -119,7 +119,7 @@ function assertPublicPrivacy(body: unknown) {
   }
 }
 
-test('Buyer location is explicit, transient, disableable and changes only the next explicit Search', async ({ page }) => {
+test('Buyer location is explicit, transient, disableable and changes only the next explicit Search among UX1D-eligible Offers', async ({ page }) => {
   await page.addInitScript((point) => {
     Object.defineProperty(window, '__s9GeoCalls', { value: 0, writable: true, configurable: true });
     Object.defineProperty(navigator, 'geolocation', {
@@ -160,7 +160,8 @@ test('Buyer location is explicit, transient, disableable and changes only the ne
   const firstRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await input.press('Enter');
   expect((await firstRequest).method()).toBe('GET');
-  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expect(page.getByText(geolessLocationName)).toHaveCount(0);
   expect(searchRequests).toBe(1);
 
   await page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true }).click();
@@ -172,7 +173,7 @@ test('Buyer location is explicit, transient, disableable and changes only the ne
   const postRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await input.press('Enter');
   expect((await postRequest).method()).toBe('POST');
-  await expectCardOrder(page, [nearLocationName, farLocationName, geolessLocationName]);
+  await expectCardOrder(page, [nearLocationName, farLocationName]);
   expect(searchRequests).toBe(2);
 
   await page.getByRole('button', { name: 'Не учитывать местоположение', exact: true }).click();
@@ -182,7 +183,7 @@ test('Buyer location is explicit, transient, disableable and changes only the ne
   const fallbackRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await input.press('Enter');
   expect((await fallbackRequest).method()).toBe('GET');
-  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
 
   await page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Не учитывать местоположение', exact: true })).toBeVisible();
@@ -218,10 +219,10 @@ test('browser geolocation failure is non-blocking and ordinary Search remains GE
   const requestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await input.press('Enter');
   expect((await requestPromise).method()).toBe('GET');
-  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
 });
 
-test('GET stays backward compatible and GET/POST share S6 semantics, privacy and deterministic ordering', async ({ request }) => {
+test('GET stays backward compatible and GET/POST share S6 semantics, privacy and deterministic ordering among buyer-eligible Offers', async ({ request }) => {
   for (const url of ['/api/search', '/api/search?q=', '/api/search?q=%20%20']) {
     const response = await request.get(url);
     expect(response.status()).toBe(400);
@@ -234,7 +235,8 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
   expect(getAlias.status()).toBe(200);
   const getCanonicalBody = await getCanonical.json();
   const getAliasBody = await getAlias.json();
-  expect(getCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([geolessOfferId, farOfferId, nearOfferId]);
+  expect(getCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([farOfferId, nearOfferId]);
+  expect(getCanonicalBody.offers.map((offer: { id: string }) => offer.id)).not.toContain(geolessOfferId);
   expect(getAliasBody.offers.map((offer: { id: string }) => offer.id)).toEqual(
     getCanonicalBody.offers.map((offer: { id: string }) => offer.id),
   );
@@ -249,7 +251,7 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
   expect(postAlias.status()).toBe(200);
   const postCanonicalBody = await postCanonical.json();
   const postAliasBody = await postAlias.json();
-  expect(postCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId, geolessOfferId]);
+  expect(postCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId]);
   expect(postAliasBody.offers.map((offer: { id: string }) => offer.id)).toEqual(
     postCanonicalBody.offers.map((offer: { id: string }) => offer.id),
   );
@@ -259,9 +261,9 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const repeatedGet = await (await request.get('/api/search', { params: { q: productName } })).json();
-    expect(repeatedGet.offers.map((offer: { id: string }) => offer.id)).toEqual([geolessOfferId, farOfferId, nearOfferId]);
+    expect(repeatedGet.offers.map((offer: { id: string }) => offer.id)).toEqual([farOfferId, nearOfferId]);
     const repeatedPost = await (await request.post('/api/search', { data: postBody })).json();
-    expect(repeatedPost.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId, geolessOfferId]);
+    expect(repeatedPost.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId]);
   }
 });
 

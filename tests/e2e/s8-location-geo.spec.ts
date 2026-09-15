@@ -98,11 +98,12 @@ async function installHomeSearchFixture(projectName: string) {
   const locationId = `30000000-0000-4000-8000-000000000${suffix}`;
   const offerId = `40000000-0000-4000-8000-000000000${suffix}`;
   const phone = projectName === 'mobile' ? '+77000000995' : '+77000000996';
+  const contactPhone = projectName === 'mobile' ? '+77000000985' : '+77000000986';
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
     const now = new Date();
     await pool.query('INSERT INTO users (id,phone_e164,created_at) VALUES ($1,$2,$3)', [userId, phone, now]);
-    await pool.query('INSERT INTO sellers (id,display_name,owner_user_id) VALUES ($1,$2,$3)', [sellerId, `S8 home privacy seller ${projectName}`, userId]);
+    await pool.query('INSERT INTO sellers (id,display_name,owner_user_id,contact_phone_e164) VALUES ($1,$2,$3,$4)', [sellerId, `S8 home privacy seller ${projectName}`, userId, contactPhone]);
     await pool.query(`INSERT INTO locations (id,seller_id,name,address_text,type,latitude,longitude)
       VALUES ($1,$2,$3,$4,'home',$5,$6)`, [locationId, sellerId, `S8 home privacy point ${projectName}`, `S8 home address ${projectName}`, 43.22, 76.82]);
     await pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,seller_comment,status,last_confirmed_at,revision,created_at,updated_at)
@@ -161,6 +162,8 @@ test('S8 Seller explicitly saves browser geolocation and public Search hides sho
     const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
     try {
       const now = new Date();
+      const contactPhone = testInfo.project.name === 'mobile' ? '+77000000981' : '+77000000982';
+      await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [ids.sellerId, contactPhone]);
       await pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,seller_comment,status,last_confirmed_at,revision,created_at,updated_at)
         VALUES ($1,$2,$3,$4,$5,'active',$6,1,$6,$6)`, [
         shopOfferId,
