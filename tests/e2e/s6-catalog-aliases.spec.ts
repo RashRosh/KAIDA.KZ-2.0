@@ -80,8 +80,8 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
 
     await page.goto('/seller');
     await page.getByLabel('Название продавца').fill('S6 E2E продавец');
-    await page.getByLabel('Название точки').fill('S6 E2E точка');
-    await page.getByLabel('Тип точки').selectOption('shop');
+    await page.getByLabel('Название торговой точки').fill('S6 E2E точка');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S6 E2E адрес');
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
