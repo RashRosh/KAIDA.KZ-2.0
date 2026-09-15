@@ -69,16 +69,17 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
     await page.getByLabel('Название точки').fill(`S10 ${project} point`);
     await page.getByLabel('Тип точки').selectOption('shop');
     await page.getByLabel('Адрес').fill(`Алматы, S10 ${project} address`);
-    await page.getByRole('button', { name: 'Создать продавца' }).click();
-
-    await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
     await page.getByLabel('Телефон', { exact: true }).fill('+12025550123');
     await page.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
     await page.getByLabel('Telegram', { exact: true }).fill(telegram);
     await page.getByLabel('Instagram', { exact: true }).fill(instagram);
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await expect(page.getByText('Точка и контакты сохранены.', { exact: false })).toBeVisible();
+
     await setSellerLocationGeo(phone);
+    await page.reload();
+    await expect(page.getByText('Настройка завершена', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('5432.10');
