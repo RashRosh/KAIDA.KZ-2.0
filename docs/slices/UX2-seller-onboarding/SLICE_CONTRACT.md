@@ -18,13 +18,13 @@
 UX2 объединяет существующие возможности в один onboarding-flow на `/seller`:
 
 - название продавца;
-- название первой точки;
+- название первой торговой точки;
 - тип Location из существующего закрытого списка;
 - адрес;
 - обязательный для завершения onboarding телефон покупателя;
 - опциональные WhatsApp / Telegram / Instagram;
 - явное сохранение текущего местоположения Location через browser geolocation;
-- понятное состояние прогресса: что уже сохранено и чего не хватает;
+- понятное состояние прогресса по фактически сохранённым данным;
 - продолжение незавершённого onboarding после reload;
 - после завершения — существующий Seller Input / управление Offers.
 
@@ -53,6 +53,21 @@ UX2 должен повторять присущие образцу Bolt ком�
 
 Bolt reference не переопределяет S3/S8/S10 semantics и не разрешает fake controls/data.
 
+### Approved manual-review refinement
+
+После визуального review Product Owner утвердил следующие уточнения UX2:
+
+- верхний технический eyebrow `Seller Input` отсутствует;
+- H1 страницы — `Настройка торговой точки`;
+- отдельная левая guide/progress колонка удаляется: onboarding занимает доступную рабочую ширину одной цельной панелью;
+- первая секция называется `Ваша торговая точка` и имеет нормальный внутренний верхний отступ;
+- видимые labels: `Название торговой точки` и `Тип торговой точки`;
+- у первой секции допускается только нейтральный декоративный store/location marker; загрузка реального avatar/photo не входит в UX2;
+- Address остаётся честным ручным полем с browser autocomplete hint/helper text, но без собственного address autocomplete dataset/API;
+- Address и Location geo не связываются автоматически: reverse geocoding требует отдельного provider/privacy slice;
+- geo по-прежнему сохраняется только после отдельного явного действия П2;
+- primary `Сохранить и продолжить` находится в нормальном padded action/footer flow: слева на desktop и full-width на узком mobile, а не прижимается к внешнему краю панели.
+
 ## Explicit out of scope
 
 - изменение Seller / Location DB schema;
@@ -64,9 +79,11 @@ Bolt reference не переопределяет S3/S8/S10 semantics и не р�
 - изменение имени/type/address существующей Location;
 - создание второй Location;
 - address autocomplete / geocoding;
+- reverse geocoding и автоматическое превращение browser geo в адрес;
 - карта и ручная установка pin;
 - ручной ввод latitude/longitude;
 - автоматический запрос geolocation;
+- реальный avatar/photo upload торговой точки;
 - изменение контактов через SellerChangeSet;
 - Offer business logic;
 - правило обязательной цены Offer;
@@ -119,7 +136,7 @@ Address autocomplete остаётся отдельным будущим реше
 
 1. Anonymous User на `/seller` по-прежнему получает существующий login gate.
 2. Авторизованный User без Seller видит один onboarding-flow, а не отдельную первичную форму и появляющуюся после неё несвязанную форму контактов.
-3. В onboarding доступны: название продавца, название точки, тип точки, адрес, телефон, WhatsApp, Telegram, Instagram.
+3. В onboarding доступны: название продавца, название торговой точки, тип торговой точки, адрес, телефон, WhatsApp, Telegram, Instagram.
 4. `Location.type` остаётся controlled choice из `market / shop / pavilion / home / other`.
 5. Телефон необходим, чтобы UI считал onboarding завершённым; WhatsApp / Telegram / Instagram опциональны; canonical validation остаётся S10.
 6. Создание Seller + первой Location использует неизменённый S3 setup contract и сохраняет atomicity.
@@ -131,8 +148,10 @@ Address autocomplete остаётся отдельным будущим реше
 12. После наличия Seller + Location + phone + geo UI показывает onboarding как завершённый и открывает существующий Seller Input / Offer-management путь без дополнительного технического setup.
 13. Identity phone автоматически не копируется в public Seller contact.
 14. Raw Location coordinates не показываются пользователю как текст и не становятся buyer-facing DTO из-за UX2.
-15. Композиция onboarding следует Bolt reference и Design System: один цельный визуальный flow, логические группы без ощущения отдельных технических экранов, рациональная desktop плотность и mobile-first hierarchy.
-16. UI не имеет horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440 px`; interactive targets минимум `44x44px`.
+15. Композиция onboarding следует Bolt reference и Design System: одна полноширинная рабочая панель без отдельной guide/sidebar, логические группы без ощущения технических экранов, рациональная desktop плотность и mobile-first hierarchy.
+16. H1 страницы — `Настройка торговой точки`; первая секция — `Ваша торговая точка`; address остаётся manual input без fake provider autocomplete/reverse geocoding; geo остаётся отдельным explicit action.
+17. Primary save action имеет собственный внутренний отступ от границ панели, выровнен слева на desktop и занимает доступную ширину на mobile.
+18. UI не имеет horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440 px`; interactive targets минимум `44x44px`.
 
 ## Automated test plan
 
@@ -142,6 +161,7 @@ Mobile + desktop:
 
 - anonymous login gate;
 - новый User проходит единый Seller onboarding;
+- H1 / labels / no-sidebar composition соответствуют approved review;
 - Seller/Location создаются;
 - contacts сохраняются;
 - geo запрашивается только по явному действию;
@@ -149,7 +169,7 @@ Mobile + desktop:
 - successful geo завершает onboarding;
 - reload после существенных partial states продолжает правильный этап;
 - после completion доступны существующие Seller Input controls;
-- layout остаётся цельным и без horizontal overflow.
+- save action alignment/touch target и layout без horizontal overflow подтверждены на representative widths.
 
 ### Integration
 
@@ -164,10 +184,11 @@ Mobile + desktop:
 ## Manual acceptance
 
 1. Войти новым тестовым User.
-2. Открыть `Продавцу`.
-3. В одном onboarding-flow заполнить Seller, Location, type, address, phone и при желании мессенджеры.
-4. Сохранить и убедиться, что интерфейс не превращается во «вторую настройку».
-5. Явно определить местоположение и разрешить browser geolocation.
-6. Убедиться, что onboarding показывает состояние «готово».
-7. Перезагрузить страницу и убедиться, что настройка не начинается заново, а П2 видит существующий Seller Input / управление предложениями.
-8. Проверить mobile и desktop визуально, в том числе Bolt-like composition/rhythm.
+2. Открыть `Продавцу` и увидеть H1 `Настройка торговой точки` без `Seller Input` и без отдельной левой progress-колонки.
+3. В одной полноширинной панели заполнить Seller, торговую точку, type, manual address, phone и при желании мессенджеры.
+4. Проверить, что первая секция называется `Ваша торговая точка`, имеет визуальный marker и нормальные внутренние отступы, а `Сохранить и продолжить` не прижат к краю.
+5. Сохранить и убедиться, что интерфейс не превращается во «вторую настройку».
+6. Явно определить местоположение и разрешить browser geolocation; адрес при этом не подменяется автоматически.
+7. Убедиться, что onboarding показывает состояние «готово».
+8. Перезагрузить страницу и убедиться, что настройка не начинается заново, а П2 видит существующий Seller Input / управление предложениями.
+9. Проверить mobile и desktop визуально, в том числе Bolt-like composition/rhythm.
