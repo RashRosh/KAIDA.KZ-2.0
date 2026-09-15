@@ -70,8 +70,8 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
 
     await page.goto('/seller');
     await page.getByLabel('Название продавца').fill('S4 E2E продавец');
-    await page.getByLabel('Название точки').fill('S4 E2E точка');
-    await page.getByLabel('Тип точки').selectOption('shop');
+    await page.getByLabel('Название торговой точки').fill('S4 E2E точка');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
