@@ -139,7 +139,8 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
 
     await onboarding.getByRole('button', { name: 'Сохранить и продолжить' }).click();
     await expect(page.getByText('Точка сохранена, но контакты не сохранились.', { exact: false })).toBeVisible();
-    await expect(page.getByText(pointName, { exact: true })).toBeVisible();
+    const savedPointRow = page.getByText('Торговая точка', { exact: true }).locator('..');
+    await expect(savedPointRow.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toHaveCount(0);
 
