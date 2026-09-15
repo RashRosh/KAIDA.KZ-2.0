@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
+import { ClearableInput } from './ClearableInput';
 import { SellerChangeSetCreate } from './SellerChangeSetCreate';
 import { SellerContactSettings, type OwnerContacts } from './SellerContactSettings';
 import { SellerOfferManagement } from './SellerOfferManagement';
@@ -112,7 +113,7 @@ export function SellerSetup() {
           const identityData = await identityResponse.json() as AuthMeResponse & ApiError;
           if (identityResponse.ok) identityPhone = identityData.user?.phone ?? '';
         } catch {
-          // Prefill is convenience only; seller can still enter a public phone manually.
+          // Prefill is convenience only; seller can still enter public contacts manually.
         }
 
         setSeller(data.seller);
@@ -126,7 +127,10 @@ export function SellerSetup() {
               setContactsLoadError(contactsData.error?.message ?? 'Не удалось загрузить контакты.');
             } else {
               applyContacts(contactsData.contacts);
-              if (!contactsData.contacts.phoneE164 && identityPhone) setPhoneE164(identityPhone);
+              if (!contactsData.contacts.phoneE164 && identityPhone) {
+                setPhoneE164(identityPhone);
+                if (!contactsData.contacts.whatsappPhoneE164) setWhatsappPhoneE164(identityPhone);
+              }
               setContactsLoaded(true);
             }
           } catch {
@@ -134,6 +138,7 @@ export function SellerSetup() {
           }
         } else if (identityPhone) {
           setPhoneE164(identityPhone);
+          setWhatsappPhoneE164(identityPhone);
         }
         setState('ready');
       } catch {
@@ -380,12 +385,12 @@ export function SellerSetup() {
               <div className={styles.formGrid}>
                 <div className={styles.field}>
                   <label htmlFor="seller-display-name">Имя</label>
-                  <input id="seller-display-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={120} disabled={submitting} autoComplete="name" />
+                  <ClearableInput id="seller-display-name" value={displayName} onValueChange={setDisplayName} clearLabel="Имя" maxLength={120} disabled={submitting} autoComplete="name" />
                   <span className={styles.fieldHelp}>Как к вам будут обращаться покупатели. Можно оставить пустым.</span>
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="location-name">Название торговой точки <span aria-hidden="true">*</span></label>
-                  <input id="location-name" value={locationName} onChange={(event) => setLocationName(event.target.value)} maxLength={120} disabled={submitting} required />
+                  <ClearableInput id="location-name" value={locationName} onValueChange={setLocationName} clearLabel="Название торговой точки" maxLength={120} disabled={submitting} required />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="location-type">Тип торговой точки <span aria-hidden="true">*</span></label>
@@ -399,7 +404,7 @@ export function SellerSetup() {
                 </div>
                 <div className={`${styles.field} ${styles.fieldWide}`}>
                   <label htmlFor="location-address">Адрес <span aria-hidden="true">*</span></label>
-                  <input id="location-address" value={addressText} onChange={(event) => setAddressText(event.target.value)} maxLength={500} disabled={submitting} autoComplete="street-address" required />
+                  <ClearableInput id="location-address" value={addressText} onValueChange={setAddressText} clearLabel="Адрес" maxLength={500} disabled={submitting} autoComplete="street-address" required />
                   <span className={styles.fieldHelp}>Например: Алматы, Абая 150, вход со двора</span>
                 </div>
               </div>
@@ -407,23 +412,23 @@ export function SellerSetup() {
 
             <fieldset className={styles.formSection}>
               <legend>Контакты для покупателей</legend>
-              <p className={styles.sectionHint}>Телефон обязателен. Номер входа подставляется автоматически; при необходимости его можно изменить. Мессенджеры можно добавить сейчас или позже.</p>
+              <p className={styles.sectionHint}>Телефон и WhatsApp по умолчанию заполняются номером входа; оба поля можно изменить, а WhatsApp — очистить, если его нет. Телефон обязателен.</p>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-phone">Телефон <span aria-hidden="true">*</span></label>
-                  <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={submitting} autoComplete="tel" placeholder="+77001234567" required />
+                  <ClearableInput id="seller-contact-phone" value={phoneE164} onValueChange={setPhoneE164} clearLabel="Телефон" maxLength={16} disabled={submitting} autoComplete="tel" placeholder="+77001234567" required />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
-                  <input id="seller-contact-whatsapp" value={whatsappPhoneE164} onChange={(event) => setWhatsappPhoneE164(event.target.value)} maxLength={16} disabled={submitting} inputMode="tel" placeholder="+77001234567" />
+                  <ClearableInput id="seller-contact-whatsapp" value={whatsappPhoneE164} onValueChange={setWhatsappPhoneE164} clearLabel="WhatsApp" maxLength={16} disabled={submitting} inputMode="tel" placeholder="+77001234567" />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-telegram">Telegram</label>
-                  <input id="seller-contact-telegram" value={telegramUsername} onChange={(event) => setTelegramUsername(event.target.value)} maxLength={64} disabled={submitting} autoCapitalize="none" placeholder="kaida_shop" />
+                  <ClearableInput id="seller-contact-telegram" value={telegramUsername} onValueChange={setTelegramUsername} clearLabel="Telegram" maxLength={64} disabled={submitting} autoCapitalize="none" placeholder="kaida_shop" />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-instagram">Instagram</label>
-                  <input id="seller-contact-instagram" value={instagramUsername} onChange={(event) => setInstagramUsername(event.target.value)} maxLength={64} disabled={submitting} autoCapitalize="none" placeholder="kaida.shop" />
+                  <ClearableInput id="seller-contact-instagram" value={instagramUsername} onValueChange={setInstagramUsername} clearLabel="Instagram" maxLength={64} disabled={submitting} autoCapitalize="none" placeholder="kaida.shop" />
                 </div>
               </div>
             </fieldset>
@@ -457,19 +462,19 @@ export function SellerSetup() {
               <div className={styles.formGrid}>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-phone">Телефон <span aria-hidden="true">*</span></label>
-                  <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={savingContacts} autoComplete="tel" placeholder="+77001234567" required />
+                  <ClearableInput id="seller-contact-phone" value={phoneE164} onValueChange={setPhoneE164} clearLabel="Телефон" maxLength={16} disabled={savingContacts} autoComplete="tel" placeholder="+77001234567" required />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
-                  <input id="seller-contact-whatsapp" value={whatsappPhoneE164} onChange={(event) => setWhatsappPhoneE164(event.target.value)} maxLength={16} disabled={savingContacts} inputMode="tel" placeholder="+77001234567" />
+                  <ClearableInput id="seller-contact-whatsapp" value={whatsappPhoneE164} onValueChange={setWhatsappPhoneE164} clearLabel="WhatsApp" maxLength={16} disabled={savingContacts} inputMode="tel" placeholder="+77001234567" />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-telegram">Telegram</label>
-                  <input id="seller-contact-telegram" value={telegramUsername} onChange={(event) => setTelegramUsername(event.target.value)} maxLength={64} disabled={savingContacts} autoCapitalize="none" placeholder="kaida_shop" />
+                  <ClearableInput id="seller-contact-telegram" value={telegramUsername} onValueChange={setTelegramUsername} clearLabel="Telegram" maxLength={64} disabled={savingContacts} autoCapitalize="none" placeholder="kaida_shop" />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="seller-contact-instagram">Instagram</label>
-                  <input id="seller-contact-instagram" value={instagramUsername} onChange={(event) => setInstagramUsername(event.target.value)} maxLength={64} disabled={savingContacts} autoCapitalize="none" placeholder="kaida.shop" />
+                  <ClearableInput id="seller-contact-instagram" value={instagramUsername} onValueChange={setInstagramUsername} clearLabel="Instagram" maxLength={64} disabled={savingContacts} autoCapitalize="none" placeholder="kaida.shop" />
                 </div>
               </div>
               <div className={styles.onboardingActions}>
