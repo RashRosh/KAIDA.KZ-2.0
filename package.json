@@ -19,7 +19,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed.ts",
-    "db:seed:demo": "tsx src/db/seed-demo-marketplace.ts",
+    "db:seed:demo": "tsx src/db/seed-demo-marketplace.ts && tsx src/db/patch-demo-actionability.ts",
     "db:test:prepare": "tsx tests/integration/prepare-database.ts",
     "verify": "pnpm lint && pnpm typecheck && pnpm db:migrate && pnpm db:seed && pnpm db:test:prepare && pnpm test:unit && pnpm test:integration && pnpm build && pnpm test:e2e"
   },
