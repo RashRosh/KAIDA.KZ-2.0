@@ -24,6 +24,17 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/seller', label: 'Продавцу', icon: 'store' },
 ];
 
+function BrandMark() {
+  return (
+    <span className={styles.brandMark} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" focusable="false">
+        <path d="M12 3L20 8V16L12 21L4 16V8L12 3Z" />
+        <circle cx="12" cy="12" r="2.5" />
+      </svg>
+    </span>
+  );
+}
+
 function NavIcon({ icon }: { icon: NavItem['icon'] }) {
   if (icon === 'search') {
     return (
@@ -116,30 +127,33 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
 
   return (
     <header className={styles.header}>
-      <div className={styles.topRow} data-testid="primary-header-row">
-        <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">
-          <span>KAIDA</span><span className={styles.wordmarkAccent}>.KZ</span>
-        </Link>
+      <div className={styles.container}>
+        <div className={styles.topRow} data-testid="primary-header-row">
+          <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">
+            <BrandMark />
+            <span className={styles.wordmarkText}>KAIDA<span className={styles.wordmarkAccent}>.KZ</span></span>
+          </Link>
 
-        <HeaderSearch />
+          <HeaderSearch />
 
-        <div className={styles.trailing}>
-          {showAuth ? <AuthStatus /> : <span className={styles.context}>{contextLabel}</span>}
-          <button
-            type="button"
-            className={styles.mobileMenuButton}
-            aria-label={mobileOpen ? 'Закрыть меню' : 'Открыть меню'}
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-primary-navigation"
-            onClick={() => setMobileOpen((open) => !open)}
-          >
-            <MenuIcon open={mobileOpen} />
-          </button>
+          <div className={styles.trailing}>
+            {showAuth ? <AuthStatus /> : <span className={styles.context}>{contextLabel}</span>}
+            <button
+              type="button"
+              className={styles.mobileMenuButton}
+              aria-label={mobileOpen ? 'Закрыть меню' : 'Открыть меню'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-primary-navigation"
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              <MenuIcon open={mobileOpen} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className={styles.desktopNavRow}>
-        <PrimaryNav className={styles.desktopNav} pathname={pathname} />
+        <div className={styles.desktopNavRow}>
+          <PrimaryNav className={styles.desktopNav} pathname={pathname} />
+        </div>
       </div>
 
       {mobileOpen ? (
