@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import styles from '../page.module.css';
 
-type OwnerContacts = {
+export type OwnerContacts = {
   phoneE164: string | null;
   whatsappPhoneE164: string | null;
   telegramUsername: string | null;
@@ -13,13 +13,17 @@ type OwnerContacts = {
 type ContactsResponse = { contacts: OwnerContacts };
 type ApiError = { error?: { code?: string; message?: string } };
 
+type SellerContactSettingsProps = {
+  onSaved?: (contacts: OwnerContacts) => void;
+};
+
 function nullableCanonical(value: string, lowercase = false): string | null {
   const trimmed = value.trim();
   if (trimmed.length === 0) return null;
   return lowercase ? trimmed.toLowerCase() : trimmed;
 }
 
-export function SellerContactSettings() {
+export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [phoneE164, setPhoneE164] = useState('');
@@ -79,6 +83,7 @@ export function SellerContactSettings() {
         return;
       }
       applyContacts(data.contacts);
+      onSaved?.(data.contacts);
       setSuccess('Контакты сохранены.');
     } catch {
       setError('Не удалось сохранить контакты.');
