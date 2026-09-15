@@ -37,7 +37,7 @@ async function migrateToPreS8(db: ReturnType<typeof drizzle>) {
 }
 
 describe('S8 migration upgrade path on PostgreSQL 18', () => {
-  it('upgrades 0000-0006 data through 0007 preserving identities and Offer.location_id, then current Search finds the migrated Offer', async () => {
+  it('upgrades 0000-0006 data through 0007 preserving identities and Offer.location_id while legacy geo-less Offer stays buyer-ineligible', async () => {
     await withMigrationTestDatabase({ name: 'kaida_s8_upgrade_test' }, async (pool, rawDb) => {
       await migrateToPreS8(rawDb);
       const db = rawDb as unknown as Database;
@@ -92,7 +92,7 @@ describe('S8 migration upgrade path on PostgreSQL 18', () => {
         .toEqual({ id: offerId, product_id: productId, seller_id: sellerId, location_id: locationId });
 
       const searchAfter = await searchOffers(productName, db, { clock: () => now, validityPeriodHours: 168 });
-      expect(searchAfter.offers.map((offer) => offer.id)).toEqual([offerId]);
+      expect(searchAfter.offers).toEqual([]);
 
       await expect(pool.query('UPDATE locations SET latitude=43,longitude=NULL WHERE id=$1', [locationId]))
         .rejects.toMatchObject({ code: '23514', constraint: 'locations_geo_complete_pair' });
