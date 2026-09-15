@@ -22,8 +22,9 @@ UX2 объединяет существующие возможности в од
 - обязательный тип Location из существующего закрытого списка;
 - обязательный адрес;
 - обязательный для завершения onboarding телефон покупателя;
-- номер текущей Identity предзаполняет поле телефона как editable convenience, но не публикуется и не сохраняется до явного submit;
+- номер текущей Identity предзаполняет поля телефона и WhatsApp как editable convenience, но не публикуется и не сохраняется до явного submit;
 - опциональные WhatsApp / Telegram / Instagram;
+- все текстовые/контактные inputs имеют явную кнопку очистки при наличии значения; controlled select `Тип торговой точки` пустого состояния не имеет;
 - обязательное для завершения onboarding явное сохранение текущего местоположения Location через browser geolocation;
 - понятное состояние прогресса по фактически сохранённым данным;
 - продолжение незавершённого onboarding после reload;
@@ -67,7 +68,8 @@ Bolt reference не переопределяет S3/S8/S10 semantics и не р�
 - `Название продавца` заменяется на опциональное поле `Имя` с helper `Как к вам будут обращаться покупатели`;
 - обязательные onboarding-поля/шаги визуально отмечаются `*`;
 - видимые обязательные labels включают `Название торговой точки`, `Тип торговой точки`, `Адрес`, `Телефон`; geo явно обозначается как обязательный шаг завершения;
-- phone input предзаполняется Identity phone при доступности, но остаётся редактируемым и сохраняется только после явного submit;
+- phone и WhatsApp предзаполняются Identity phone при доступности, но остаются независимыми редактируемыми полями после первоначального prefill и сохраняются только после явного submit;
+- у всех text/contact inputs при непустом значении есть доступная inline-кнопка очистки с touch target не меньше 44x44; у `Тип торговой точки` кнопки очистки нет;
 - у первой секции допускается только нейтральный декоративный store/location marker; загрузка реального avatar/photo не входит в UX2;
 - Address остаётся честным ручным полем с browser autocomplete hint/helper text, но без собственного address autocomplete dataset/API;
 - Address и Location geo не связываются автоматически: reverse geocoding требует отдельного provider/privacy slice;
@@ -132,6 +134,7 @@ Address autocomplete остаётся отдельным будущим реше
 - Seller onboarding UI/composition;
 - orchestration state `/seller`;
 - Seller page presentation/styles;
+- shared clearable text/contact input control;
 - reuse существующих auth-me / setup / contacts / geo client flows;
 - UX2 E2E;
 - directly affected seller E2E regressions;
@@ -145,23 +148,25 @@ Address autocomplete остаётся отдельным будущим реше
 2. Авторизованный User без Seller видит один onboarding-flow, а не отдельную первичную форму и появляющуюся после неё несвязанную форму контактов.
 3. В onboarding доступны: optional `Имя`, обязательные название торговой точки / тип / адрес / телефон, а также optional WhatsApp / Telegram / Instagram.
 4. `Имя` подписано как способ обращения покупателей и может быть пустым; при пустом имени S3 получает непустой `Seller.displayName`, равный названию торговой точки.
-5. `Location.type` остаётся controlled choice из `market / shop / pavilion / home / other`.
+5. `Location.type` остаётся controlled choice из `market / shop / pavilion / home / other` и не имеет empty/clear state.
 6. Название торговой точки и адрес обязательны для initial submit; существующая S3 server validation сохраняется.
 7. Телефон необходим, чтобы UI считал onboarding завершённым; WhatsApp / Telegram / Instagram опциональны; canonical validation остаётся S10.
-8. Для нового/partial Seller при отсутствии сохранённого public phone UI предзаполняет телефон current Identity; пользователь может заменить его до сохранения.
-9. Identity phone не записывается в Seller Contacts автоматически: public phone меняется только существующим явным S10 PUT после submit пользователя.
-10. Создание Seller + первой Location использует неизменённый S3 setup contract и сохраняет atomicity.
-11. Contacts сохраняются через существующий S10 owner contacts resource; UX2 не добавляет contacts в setup API.
-12. Если Seller + Location созданы, а contacts save завершился ошибкой, Seller/Location не удаляются и не создаются повторно; пользователь может продолжить onboarding.
-13. Geo является обязательной частью завершения логического onboarding, но запрашивается только отдельным явным действием П2 после существования Location; автоматического permission prompt нет.
-14. Ошибка/отказ browser geolocation оставляет Seller, Location и Contacts сохранёнными; geo step можно повторить позже.
-15. Reload на любом незавершённом состоянии продолжает onboarding с фактического server state, не предлагает создать второго Seller и не теряет уже сохранённые данные.
-16. После наличия Seller + Location + phone + geo UI показывает onboarding как завершённый и открывает существующий Seller Input / Offer-management путь без дополнительного технического setup.
-17. Raw Location coordinates не показываются пользователю как текст и не становятся buyer-facing DTO из-за UX2.
-18. Композиция onboarding следует Bolt reference и Design System: одна полноширинная рабочая панель без отдельной guide/sidebar, логические группы без ощущения технических экранов, рациональная desktop плотность и mobile-first hierarchy.
-19. H1 страницы — `Настройка торговой точки`; первая секция — `Ваша торговая точка`; address остаётся manual input без fake provider autocomplete/reverse geocoding; geo остаётся отдельным explicit action.
-20. Primary save action имеет собственный внутренний отступ от границ панели, выровнен слева на desktop и занимает доступную ширину на mobile.
-21. UI не имеет horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440 px`; interactive targets минимум `44x44px`.
+8. Для нового/partial Seller при отсутствии сохранённого public phone UI предзаполняет current Identity phone одновременно в `Телефон` и `WhatsApp`; оба значения можно изменить до сохранения, WhatsApp можно очистить полностью.
+9. После первоначального prefill `Телефон` и `WhatsApp` независимы: изменение одного поля не переписывает другое.
+10. Любой непустой text/contact input показывает доступную кнопку очистки; очистка обязательного поля допустима, но submit затем блокируется существующей validation до повторного заполнения.
+11. Identity phone не записывается в Seller Contacts автоматически: public contacts меняются только существующим явным S10 PUT после submit пользователя.
+12. Создание Seller + первой Location использует неизменённый S3 setup contract и сохраняет atomicity.
+13. Contacts сохраняются через существующий S10 owner contacts resource; UX2 не добавляет contacts в setup API.
+14. Если Seller + Location созданы, а contacts save завершился ошибкой, Seller/Location не удаляются и не создаются повторно; пользователь может продолжить onboarding.
+15. Geo является обязательной частью завершения логического onboarding, но запрашивается только отдельным явным действием П2 после существования Location; автоматического permission prompt нет.
+16. Ошибка/отказ browser geolocation оставляет Seller, Location и Contacts сохранёнными; geo step можно повторить позже.
+17. Reload на любом незавершённом состоянии продолжает onboarding с фактического server state, не предлагает создать второго Seller и не теряет уже сохранённые данные.
+18. После наличия Seller + Location + phone + geo UI показывает onboarding как завершённый и открывает существующий Seller Input / Offer-management путь без дополнительного технического setup.
+19. Raw Location coordinates не показываются пользователю как текст и не становятся buyer-facing DTO из-за UX2.
+20. Композиция onboarding следует Bolt reference и Design System: одна полноширинная рабочая панель без отдельной guide/sidebar, логические группы без ощущения технических экранов, рациональная desktop плотность и mobile-first hierarchy.
+21. H1 страницы — `Настройка торговой точки`; первая секция — `Ваша торговая точка`; address остаётся manual input без fake provider autocomplete/reverse geocoding; geo остаётся отдельным explicit action.
+22. Primary save action имеет собственный внутренний отступ от границ панели, выровнен слева на desktop и занимает доступную ширину на mobile.
+23. UI не имеет horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440 px`; interactive targets, включая clear buttons, минимум `44x44px`.
 
 ## Automated test plan
 
@@ -172,7 +177,8 @@ Mobile + desktop:
 - anonymous login gate;
 - новый User проходит единый Seller onboarding;
 - H1 / labels / required markers / no-sidebar composition соответствуют approved review;
-- Identity phone предзаполняется и может быть заменён перед save;
+- Identity phone предзаполняется одновременно в Phone + WhatsApp, поля можно независимо изменить/очистить перед save;
+- clear controls появляются на непустых text/contact fields и действительно очищают значение;
 - optional `Имя` можно оставить пустым, при этом S3 получает fallback displayName из названия торговой точки;
 - пустые обязательные название торговой точки / адрес / телефон не проходят UI submit;
 - Seller/Location создаются;
@@ -200,11 +206,12 @@ Mobile + desktop:
 2. Открыть `Продавцу` и увидеть H1 `Настройка торговой точки` без `Seller Input` и без отдельной левой progress-колонки.
 3. Убедиться, что `Имя` помечено как optional и объясняет, что это обращение покупателей.
 4. Увидеть `*` у названия торговой точки, типа, адреса, телефона и шага местоположения.
-5. Убедиться, что в `Телефон` уже подставлен номер входа; при желании заменить его другим номером.
-6. В одной полноширинной панели заполнить обязательные данные точки и при желании мессенджеры; optional имя можно оставить пустым.
-7. Проверить, что первая секция называется `Ваша торговая точка`, имеет визуальный marker и нормальные внутренние отступы, а `Сохранить и продолжить` не прижат к краю.
-8. Сохранить и убедиться, что интерфейс не превращается во «вторую настройку» и registration phone не считался публичным до save.
-9. Явно определить местоположение и разрешить browser geolocation; адрес при этом не подменяется автоматически.
-10. Убедиться, что onboarding показывает состояние «готово».
-11. Перезагрузить страницу и убедиться, что настройка не начинается заново, а П2 видит существующий Seller Input / управление предложениями.
-12. Проверить mobile и desktop визуально, в том числе Bolt-like composition/rhythm.
+5. Убедиться, что в `Телефон` и `WhatsApp` уже подставлен номер входа; изменить один из них и убедиться, что второй не меняется автоматически.
+6. Нажать очистку у WhatsApp и любого другого заполненного text input; значение должно очиститься, а layout не прыгать/не переполняться.
+7. В одной полноширинной панели заполнить обязательные данные точки и при желании мессенджеры; optional имя можно оставить пустым.
+8. Проверить, что первая секция называется `Ваша торговая точка`, имеет визуальный marker и нормальные внутренние отступы, а `Сохранить и продолжить` не прижат к краю.
+9. Сохранить и убедиться, что интерфейс не превращается во «вторую настройку» и registration phone/WhatsApp не считались публичными до save.
+10. Явно определить местоположение и разрешить browser geolocation; адрес при этом не подменяется автоматически.
+11. Убедиться, что onboarding показывает состояние «готово».
+12. Перезагрузить страницу и убедиться, что настройка не начинается заново, а П2 видит существующий Seller Input / управление предложениями.
+13. Проверить mobile и desktop визуально, в том числе Bolt-like composition/rhythm.
