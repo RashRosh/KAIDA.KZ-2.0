@@ -68,7 +68,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.goto('/seller');
     await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
-    await page.getByLabel('Название продавца').fill('S3 тестовый продавец');
+    await page.getByLabel('Имя', { exact: true }).fill('S3 тестовый продавец');
     await page.getByLabel('Название торговой точки').fill('S3 тестовая точка');
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
     await page.getByLabel('Адрес').fill('Алматы, тестовый адрес S3');
