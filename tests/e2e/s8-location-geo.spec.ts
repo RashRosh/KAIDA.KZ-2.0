@@ -52,8 +52,8 @@ async function login(page: Page, phone: string) {
 async function createSeller(page: Page, projectName: string, scenario: 'success' | 'failure') {
   await page.goto('/seller');
   await page.getByLabel('Название продавца').fill(`S8 E2E seller ${projectName}-${scenario}`);
-  await page.getByLabel('Название точки').fill(`S8 E2E point ${projectName}-${scenario}`);
-  await page.getByLabel('Тип точки').selectOption('shop');
+  await page.getByLabel('Название торговой точки').fill(`S8 E2E point ${projectName}-${scenario}`);
+  await page.getByLabel('Тип торговой точки').selectOption('shop');
   await page.getByLabel('Адрес').fill(`Алматы, S8 E2E address ${projectName}-${scenario}`);
   await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(projectName, scenario));
   await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
@@ -154,7 +154,7 @@ test('S8 browser geolocation denial stays client-side and keeps onboarding resum
 
     await page.reload();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Подготовим точку к публикации' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
   } finally {
     await cleanup(phone);
   }
