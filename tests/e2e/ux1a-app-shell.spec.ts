@@ -192,24 +192,3 @@ test('seller entry opens the existing seller flow', async ({ page }) => {
   await expect(page).toHaveURL(/\/seller$/);
   await expect(page.getByRole('heading', { name: 'Ваши товары в KAIDA.KZ', exact: true })).toBeVisible();
 });
-
-test('shell navigation to Nearby does not request geolocation automatically', async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(window, '__ux1aGeoCalls', { value: 0, writable: true, configurable: true });
-    Object.defineProperty(navigator, 'geolocation', {
-      configurable: true,
-      value: {
-        getCurrentPosition() {
-          (window as unknown as { __ux1aGeoCalls: number }).__ux1aGeoCalls += 1;
-        },
-      },
-    });
-  });
-
-  await page.goto('/');
-  const nav = await openPrimaryNav(page);
-  await nav.getByRole('link', { name: 'Рядом', exact: true }).click();
-  await expect(page).toHaveURL(/\/nearby$/);
-  await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as { __ux1aGeoCalls: number }).__ux1aGeoCalls)).toBe(0);
-});

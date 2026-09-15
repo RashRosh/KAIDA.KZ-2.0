@@ -24,6 +24,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/seller', label: 'Продавцу', icon: 'store' },
 ];
 
+const NEARBY_NAV_INTENT_KEY = 'kaida:nearby-nav-intent';
+
 function BrandMark() {
   return (
     <span className={styles.brandMark} aria-hidden="true">
@@ -68,6 +70,25 @@ function isActive(pathname: string, href: NavItem['href']) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function markNearbyIntent(event: React.MouseEvent<HTMLAnchorElement>, item: NavItem) {
+  if (
+    item.href !== '/nearby'
+    || event.button !== 0
+    || event.metaKey
+    || event.ctrlKey
+    || event.shiftKey
+    || event.altKey
+  ) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(NEARBY_NAV_INTENT_KEY, '1');
+  } catch {
+    // Navigation still works; /nearby keeps its explicit fallback action.
+  }
+}
+
 function PrimaryNav({
   className,
   pathname,
@@ -87,7 +108,10 @@ function PrimaryNav({
             href={item.href}
             className={`${styles.navLink} ${active ? styles.navLinkActive : ''}`}
             aria-current={active ? 'page' : undefined}
-            onClick={onNavigate}
+            onClick={(event) => {
+              markNearbyIntent(event, item);
+              onNavigate?.();
+            }}
           >
             <NavIcon icon={item.icon} />
             <span>{item.label}</span>

@@ -17,10 +17,9 @@
 ## Текущее состояние
 
 - Backlog начат после verified checkpoint `v0.0.14-s13`.
-- Последний verified checkpoint: `v0.0.16-ux1a1`.
-- UX1A и UX1A.1 закрыты; текущий slice: `UX1A.2 — Bolt-like Auth modal`.
-- Согласованная последовательность: `UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → UX2 → M1 → M2 при необходимости → S14`.
-- Действующий contract: `docs/slices/UX1A2-auth-modal/SLICE_CONTRACT.md`.
+- Последний verified checkpoint: `v0.0.18-ux1b`.
+- UX1A, UX1A.1, UX1A.2 и UX1B закрыты; текущий slice: `UX1C — Nearby geo-intent cleanup`.
+- Согласованная последовательность: `UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → отдельный buyer-actionability slice → UX2 → M1 → M2 при необходимости → S14`.
 - Во время UX1A Product Owner утвердил Design System: Roboto, header `84/104px`, radius scale `8/12/16/20px`, без fake media slots до M1.
 
 ## Открытые пункты
@@ -62,16 +61,16 @@ Seller-side часть этого пункта не входит в UX1A и до
 
 ### UX-003 — Повторное подтверждение после «Что рядом?»
 
-**Статус:** OPEN — planned UX1C  
+**Статус:** IN_SLICE — UX1C  
 **Область:** Discovery / Navigation
 
 После нажатия на «Что рядом?» появляется дополнительное действие «Показать товары рядом».
 
 Пользователь уже выразил намерение первым нажатием, поэтому второе подтверждение выглядит лишним.
 
-**Желаемое направление:** одно действие должно сразу запускать соответствующий сценарий, если дополнительное подтверждение не требуется по объективной причине.
+**Утверждённое направление UX1C:** одно действие `Рядом` должно сразу запускать соответствующий сценарий browser geolocation, если дополнительное подтверждение не требуется по объективной причине. Privacy contract S11 сохраняется: geolocation запрашивается только после явного пользовательского действия, координаты используются только для конкретного запроса и не сохраняются.
 
-**Дополнительно:** при планировании UX1C проверить другие затронутые пути на аналогичное повторное подтверждение одного и того же намерения без превращения slice в общий аудит всего приложения.
+**Дополнительно:** при планировании UX1C проверить другие непосредственно затронутые пути на аналогичное повторное подтверждение одного и того же намерения без превращения slice в общий аудит всего приложения.
 
 ---
 
@@ -139,34 +138,74 @@ Seller-side часть этого пункта не входит в UX1A и до
 
 ### UX-008 — Слишком низкая информационная плотность, нужен marketplace card layout
 
-**Статус:** OPEN — planned UX1B  
+**Статус:** DONE — UX1B / `v0.0.18-ux1b`  
 **Область:** Buyer UI / Layout / Offer cards
 
-Сейчас на основных экранах слишком много пустого пространства и слишком мало полезного контента в первом экране. Текущая композиция ближе к лендингу, чем к рабочему интерфейсу поиска и просмотра предложений.
+Первоначально на основных экранах было слишком много пустого пространства и слишком мало полезного контента в первом экране. Композиция была ближе к лендингу, чем к рабочему интерфейсу поиска и просмотра предложений.
 
-**Желаемое направление:** перейти к привычной marketplace-модели интерфейса: системный app shell, заметный поиск, плотная выдача карточками, меньше декоративных пустот и больше полезной информации в viewport.
-
-`boltkaida2` является основным visual/composition reference; его fake ratings/media/reviews и mock domain behavior не переносятся.
-
-UX1A/UX1A.1 закрывают shell/navigation/search composition. Card-first layout и адаптивная выдача принадлежат UX1B. Реальный media layout не входит в UX1B и начинается в M1.
+**Закрытое направление UX1B:** marketplace-модель интерфейса с системным app shell, заметным поиском и адаптивной плотной выдачей Offer cards. `boltkaida2` является основным visual/composition reference; fake ratings/media/reviews и mock domain behavior не переносятся. Реальный media layout начинается в M1.
 
 ---
 
 ### UX-009 — Auth выглядит техническим и выбивается из нового shell
 
-**Статус:** IN_SLICE — UX1A.2  
+**Статус:** DONE — UX1A.2 / `v0.0.17-ux1a2`  
 **Область:** Identity / Login presentation
 
-S2 Auth функционально закрыт и остаётся источником истины для phone normalization, OTP, session, persistence и logout. Проблема только в presentation: текущая отдельная login page визуально не соответствует Bolt-aligned shell.
+S2 Auth функционально закрыт и остаётся источником истины для phone normalization, OTP, session, persistence и logout.
 
-**Утверждённое направление UX1A.2:**
-- использовать `boltkaida2` AuthModal как visual/composition reference максимально близко;
-- вход открывается как centered modal/dialog поверх текущего интерфейса с затемнением/backdrop blur;
-- phone и OTP — два последовательных состояния одной modal-композиции;
-- сохранить настоящий S2 API, dynamic test OTP, validation/error states, session persistence и logout;
-- не переносить browser-generated OTP, fake User/role или local-only auth из Bolt;
-- закрытие modal не создаёт User/session и не меняет auth state;
-- отдельный `/login` route сохраняется как deep-link/fallback и использует ту же auth implementation.
+**Закрытое направление UX1A.2:**
+- `boltkaida2` AuthModal используется как visual/composition reference;
+- вход открывается centered modal/dialog поверх текущего интерфейса;
+- phone и OTP — два состояния одной modal-композиции;
+- настоящий S2 API, dynamic test OTP, validation/error states, session persistence и logout сохранены;
+- `/login` сохранён как deep-link/fallback на ту же auth implementation.
+
+---
+
+### UX-010 — Buyer Offer должен быть сразу actionable
+
+**Статус:** OPEN — requires separate buyer-actionability slice after UX1C  
+**Область:** Buyer Offer card / Search / Seller contacts / Location geo  
+**Тип:** UX-решение + изменение product eligibility contract
+
+Buyer-facing Offer должен давать два обязательных первичных действия: позвонить продавцу и построить маршрут до точки. При этом seller-side сущности могут существовать в неполном состоянии; обязательность относится не ко всему Seller/Location domain, а к eligibility Offer для buyer-facing выдачи.
+
+**Согласованное направление будущего slice:**
+
+- Offer допускается в buyer-facing Search/Discovery только при наличии `Seller.contactPhoneE164` и полной пары `Location.latitude + Location.longitude`;
+- неполный Seller/Location может существовать и редактироваться seller-side, но связанный Offer не становится buyer-visible до выполнения publishability requirements;
+- первая action row карточки обязательна и содержит две полноценные кнопки: `Позвонить` + `Маршрут`;
+- WhatsApp / Telegram / Instagram являются опциональными secondary actions и всегда находятся отдельной второй строкой;
+- secondary row не смешивается с `Позвонить`/`Маршрут` и не переносится на следующую строку;
+- secondary row всегда занимает всю доступную ширину карточки: если доступен 1 канал — одна кнопка занимает 100%; 2 канала — две равные кнопки делят 100%; 3 канала — три равные кнопки делят 100%; чем больше доступных каналов, тем уже каждая кнопка;
+- secondary actions визуально используют узнаваемые фирменные иконки WhatsApp / Telegram / Instagram; отсутствие канала не создаёт пустой placeholder;
+- конкретный способ построения маршрута и внешний map provider определяется только в Slice Contract этого будущего slice;
+- нельзя реализовывать это попутно в UX1C: изменение затрагивает закрытые S8/S10/S11/Search eligibility contracts и требует отдельного STOP/review перед утверждением нового contract.
+
+**До будущего slice:** текущие закрытые contracts остаются в силе, включая легальность geo-less Location в обычном Search и optional public Seller contacts. Demo-fixtures могут моделировать будущий layout, но не являются production contract.
+
+---
+
+### UX-011 — Search использует геолокацию, но не показывает расстояние
+
+**Статус:** OPEN — requires separate Search distance-presentation slice  
+**Область:** Buyer Search / Geo / Offer card  
+**Тип:** UX-проблема + изменение public Search contract
+
+В текущем S9 Search пользователь может явно передать своё местоположение, после чего результаты ранжируются по расстоянию. При этом Search DTO намеренно не публикует `distanceMeters`, поэтому карточка не может объяснить пользователю эффект включённой геолокации и не показывает, насколько далеко находится предложение.
+
+**Согласованное направление будущего slice:**
+
+- если конкретный Search выполнен с явным `buyerLocation`, каждая карточка Offer с полной Location geo должна показывать расстояние до покупателя;
+- расстояние должно вычисляться по уже закрытой S9 Haversine/whole-meter semantics, без новой параллельной формулы;
+- Search без buyer geo не показывает distance и сохраняет обычное freshness ordering;
+- raw Seller coordinates и Buyer coordinates по-прежнему не публикуются и не сохраняются;
+- способ отображения расстояния должен быть компактным и встроенным в существующую Bolt-aligned карточку, без отдельного декоративного блока;
+- изменение требует явного review закрытого S9 public Search DTO, потому что `distanceMeters` сейчас специально не входит в Search response contract;
+- не реализовывать это попутно в UX1C: UX1C меняет только intent/запуск Nearby и не должен расширять Search API.
+
+**До будущего slice:** текущая геокнопка Search остаётся функционально полезной только для distance-first ranking; отсутствие видимого расстояния признаётся UX-gap, а не основанием удалять геолокацию из Search.
 
 ---
 
@@ -180,9 +219,11 @@ S2 Auth функционально закрыт и остаётся источн
 
 - `UX1A` — app shell / navigation — CLOSED;
 - `UX1A.1` — Bolt shell/layout alignment — CLOSED (`v0.0.16-ux1a1`);
-- `UX1A.2` — Bolt-like Auth modal поверх настоящего S2 Auth — CURRENT;
-- `UX1B` — marketplace Offer cards без fake media slots;
-- `UX1C` — Nearby geo-intent cleanup;
+- `UX1A.2` — Bolt-like Auth modal поверх настоящего S2 Auth — CLOSED (`v0.0.17-ux1a2`);
+- `UX1B` — marketplace Offer cards без fake media slots — CLOSED (`v0.0.18-ux1b`);
+- `UX1C` — Nearby geo-intent cleanup — CURRENT;
+- отдельный buyer-actionability slice — publishability + `Позвонить`/`Маршрут` + secondary social row по UX-010;
+- отдельный Search distance-presentation slice — видимое расстояние при Search с buyer geo по UX-011;
 - `UX2` — seller onboarding cleanup;
 - `M1` — Offer photos end-to-end + реальный media layout;
 - `M2` — video/media extension при необходимости;
