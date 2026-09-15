@@ -78,7 +78,10 @@
 
 @media (max-width: 47.99rem) {
   .authMuted { display: none; }
-  .phone { display: none; }
+  .phone {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
   .loginLink { padding: 0 1.25rem; }
   .authRow button { width: 44px; padding: 0; }
   .authRow button span { display: none; }
