@@ -80,6 +80,7 @@ export function NearbyFeed() {
       ? 'Рядом пока нет актуальных предложений.'
       : `Найдено рядом: ${state.result.offers.length}`
     : '';
+  const hasResults = state.kind === 'success' && state.result.offers.length > 0;
 
   return (
     <section className={styles.searchArea} aria-label="Товары рядом">
@@ -103,15 +104,28 @@ export function NearbyFeed() {
       )}
 
       <div className={styles.results} aria-busy={busy}>
-        <p className={styles.feedback} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
-        {state.kind === 'success' && state.result.offers.length > 0 && (
-          <ul className={styles.offerList} aria-label="Предложения рядом">
-            {state.result.offers.map((offer) => (
-              <li key={offer.id}>
-                <OfferCard offer={offer} distanceMeters={offer.distanceMeters} />
-              </li>
-            ))}
-          </ul>
+        <p
+          className={`${styles.feedback} ${hasResults ? styles.feedbackVisuallyHidden : ''}`}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {feedback}
+        </p>
+        {hasResults && (
+          <>
+            <div className={styles.resultsHeader}>
+              <h2>Предложения рядом</h2>
+              <span className={styles.resultsCount}>({state.result.offers.length})</span>
+            </div>
+            <ul className={styles.offerList} aria-label="Предложения рядом">
+              {state.result.offers.map((offer) => (
+                <li key={offer.id}>
+                  <OfferCard offer={offer} distanceMeters={offer.distanceMeters} />
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
     </section>
