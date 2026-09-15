@@ -1,31 +1,43 @@
-.shell { max-width: 80rem; margin: 0 auto; padding: 0 1.25rem; }
-.header { min-height: 5.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--border); }
-.wordmark { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--primary); text-decoration: none; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.06em; }
-.testLabel { font-size: 0.875rem; color: var(--muted); text-align: right; }
-.main { padding: 2.25rem 0 2rem; }
-.eyebrow { color: var(--primary); font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; }
-.intro h1 { font-size: clamp(2.25rem, 4vw, 3.5rem); line-height: 1.12; letter-spacing: -0.045em; font-weight: 700; }
-.description { color: var(--muted); margin-top: 1rem; max-width: 25rem; }
-.secondaryLink { display: inline-flex; margin-top: 1.25rem; color: var(--primary); font-weight: 600; text-underline-offset: 0.2em; }
-.desktopBreak { display: none; }
-.searchArea { min-width: 0; margin-top: 2rem; }
-.label { display: block; font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
-.searchControls { display: flex; gap: 0.5rem; }
-.searchControls input { min-width: 0; width: 100%; height: 3.5rem; background: var(--surface); border: 1px solid var(--input-border); border-radius: var(--radius); padding: 0 0.875rem; color: var(--text); }
-.searchControls input::placeholder { color: var(--muted); opacity: 1; }
-.searchControls input[aria-invalid='true'] { border-color: var(--error); }
-.searchControls button { flex-shrink: 0; min-height: 3.5rem; padding: 0 1.125rem; border: 0; border-radius: var(--radius); background: var(--primary); color: #ffffff; font-weight: 600; transition: background 160ms ease; }
-.searchControls button:hover:not(:disabled) { background: var(--primary-hover); }
-.searchControls button:disabled { cursor: wait; background: #76618f; }
-.nearbyButton { min-height: 3.5rem; padding: 0 1.125rem; border: 0; border-radius: var(--radius); background: var(--primary); color: #ffffff; font-weight: 600; transition: background 160ms ease; }
-.nearbyButton:hover:not(:disabled) { background: var(--primary-hover); }
-.nearbyButton:disabled { cursor: wait; background: #76618f; }
-.help { color: var(--muted); font-size: 0.875rem; margin-top: 0.75rem; }
-.locationControls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.625rem 0.875rem; margin-top: 1rem; }
-.locationButton { min-height: 2.75rem; padding: 0 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-weight: 600; }
-.locationButton:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-.locationButton:disabled { cursor: wait; color: var(--muted); }
-.locationStatus { flex-basis: 100%; color: var(--muted); font-size: 0.875rem; }
+.shell { max-width: 80rem; margin: 0 auto; padding: 0 20px; }
+.main { padding: 24px 0; }
+.intro { max-width: 68rem; }
+.intro h1 { max-width: 68rem; font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; letter-spacing: 0; font-weight: 800; text-wrap: balance; }
+.headingAccent { color: var(--primary); }
+.description { color: var(--muted); margin-top: 12px; max-width: 42rem; font-size: 1rem; line-height: 1.5; }
+.searchArea { min-width: 0; max-width: 42rem; margin-top: 24px; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.searchControls { display: grid; grid-template-columns: minmax(0, 1fr) 1fr 56px; gap: 8px; align-items: stretch; }
+.queryField { position: relative; min-width: 0; grid-column: 1 / -1; }
+.queryIcon { position: absolute; left: 16px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.queryIcon svg,
+.searchSubmit svg,
+.locationToggle svg,
+.popularLabel svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.queryField input { min-width: 0; width: 100%; min-height: 56px; background: var(--surface); border: 1px solid var(--input-border); border-radius: 0.75rem; padding: 0 16px 0 48px; color: var(--text); font-size: 1rem; transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.queryField input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(103, 54, 189, 0.12); }
+.queryField input::placeholder { color: var(--muted); opacity: 1; }
+.queryField input[aria-invalid='true'] { border-color: var(--error); }
+.searchSubmit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; padding: 0 20px; border: 1px solid var(--primary); border-radius: 0.75rem; background: var(--primary); color: #ffffff; font-size: 0.875rem; line-height: 1.2; font-weight: 600; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.searchSubmit svg { width: 20px; height: 20px; }
+.searchSubmit:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+.searchSubmit:disabled { cursor: wait; background: var(--primary-disabled); border-color: var(--primary-disabled); }
+.locationToggle { display: inline-flex; align-items: center; justify-content: center; width: 56px; min-width: 56px; height: 56px; padding: 0; border: 1px solid var(--input-border); border-radius: 0.75rem; background: var(--surface); color: var(--muted); transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.locationToggle svg { width: 22px; height: 22px; }
+.locationToggle:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+.locationToggle[aria-pressed='true'] { border-color: var(--primary); background: var(--primary); color: #ffffff; }
+.locationToggle[aria-pressed='true']:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); color: #ffffff; }
+.locationToggle:disabled { cursor: wait; opacity: 0.65; }
+.locationPinActiveDot { fill: currentColor; }
+.popularSearches { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.popularLabel { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 0.8125rem; line-height: 1.4; font-weight: 600; white-space: nowrap; }
+.popularLabel svg { width: 14px; height: 14px; }
+.popularChip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; min-height: auto; border: 1px solid transparent; border-radius: 0.5rem; background: var(--surface-sunken); color: var(--text); font-size: 0.8125rem; line-height: 1.4; font-weight: 600; white-space: nowrap; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.popularChip:hover:not(:disabled) { border-color: color-mix(in srgb, var(--primary) 20%, transparent); background: var(--primary-soft); color: var(--primary); }
+.popularChip:disabled { cursor: wait; opacity: 0.65; }
+.nearbyButton { min-height: 44px; padding: 0 20px; border: 1px solid var(--primary); border-radius: 0.75rem; background: var(--primary); color: #ffffff; font-size: 0.875rem; font-weight: 600; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.nearbyButton:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+.nearbyButton:disabled { cursor: wait; background: var(--primary-disabled); border-color: var(--primary-disabled); }
+.locationStatus { color: var(--muted); font-size: 0.875rem; margin-top: 12px; }
 .error { color: var(--error); margin-top: 1rem; }
 .results { margin-top: 2rem; }
 .feedback { color: var(--muted); font-size: 0.875rem; }
@@ -51,16 +63,14 @@
 .contactAction { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); color: var(--primary); background: var(--surface); font-weight: 600; text-decoration: none; overflow-wrap: normal; }
 .contactAction:hover { border-color: var(--primary); }
 .footer { color: var(--muted); font-size: 0.875rem; padding: 1.5rem 0 2rem; border-top: 1px solid var(--border); }
+
+@media (min-width: 40rem) {
+  .searchControls { grid-template-columns: minmax(0, 1fr) auto 56px; }
+  .queryField { grid-column: auto; }
+}
+
 @media (min-width: 48rem) {
-  .shell { padding: 0 3rem; }
-  .header { min-height: 6.5rem; }
-  .wordmark { font-size: 1.75rem; }
-  .main { display: grid; grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.4fr); gap: 3rem; padding: 4.5rem 0 5rem; min-height: 36rem; }
-  .desktopBreak { display: initial; }
-  .searchArea { margin-top: 0; }
-  .searchControls { gap: 0.75rem; }
-  .searchControls input { padding: 0 1rem; }
-  .searchControls button { padding: 0 1.75rem; }
-  .nearbyButton { padding: 0 1.75rem; }
+  .shell { padding: 0 48px; }
+  .main { padding: 32px 0; }
   .offer { padding: 1.75rem; }
 }

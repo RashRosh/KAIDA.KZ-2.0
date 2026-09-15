@@ -12,13 +12,16 @@
 - Статусы: `OPEN`, `IN_SLICE`, `DONE`, `REJECTED`.
 - При `DONE` указывать slice/checkpoint, которым изменение было закрыто.
 - Визуальные решения сверяются с `docs/DESIGN_SYSTEM.md`; backlog не переопределяет утверждённую дизайн-систему.
+- `boltkaida2` используется как UX/UI composition reference: при отсутствии конфликта с closed product contracts сначала повторяем его композицию, размеры, отступы, тексты и ритм максимально близко, а отклоняемся только по объективной причине.
 
 ## Текущее состояние
 
 - Backlog начат после verified checkpoint `v0.0.14-s13`.
-- Verified base SHA: `ff8bd7eed8406d35e469c8a0a4bc2f6332068361`.
-- Согласованная последовательность: `UX1A → UX1B → UX1C → UX2 → M1 → M2 при необходимости → S14`.
-- Действующий contract: `docs/slices/UX1A-app-shell/SLICE_CONTRACT.md`.
+- Последний verified checkpoint до текущего corrective slice: `v0.0.15-ux1a`.
+- UX1A закрыт; текущий незакрытый corrective slice: `UX1A.1 — Bolt shell/layout alignment`.
+- Согласованная последовательность после решения Product Owner: `UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → UX2 → M1 → M2 при необходимости → S14`.
+- `UX1A.2` зарезервирован под визуальный auth/login flow по Bolt reference и начинается только после полного закрытия UX1A.1 checkpoint.
+- Действующий contract: `docs/slices/UX1A1-shell-visual-alignment/SLICE_CONTRACT.md`.
 - Во время UX1A Product Owner утвердил Design System: Roboto, header `84/104px`, radius scale `8/12/16/20px`, без fake media slots до M1.
 
 ## Открытые пункты
@@ -88,17 +91,18 @@ Seller-side часть этого пункта не входит в UX1A и до
 
 ### UX-005 — Несогласованная и нестабильная верхняя часть приложения
 
-**Статус:** IN_SLICE — UX1A  
+**Статус:** IN_SLICE — UX1A.1  
 **Область:** App shell / Visual consistency
 
-Верхняя зона приложения исторически различалась между страницами; первая попытка общего shell дополнительно выявила горизонтальный «прыжок» menu при переходе на seller page.
+Верхняя зона приложения исторически различалась между страницами; первая попытка общего shell дополнительно выявила горизонтальный «прыжок» menu при переходе на seller page. После Bolt alignment отдельно выявлено движение desktop header Search вправо-влево при переключении `Поиск / Рядом / Продавцу`.
 
 **Утверждённое направление:**
 - одна shell-система на основных routes;
 - primary header `84px` mobile / `104px` desktop;
-- desktop menu геометрически центрировано относительно viewport независимо от ширины auth/context area и наличия vertical scrollbar;
+- desktop global Search имеет стабильные `x/width` между основными routes и не зависит от ширины auth/context справа;
+- secondary desktop navigation имеет стабильную левую геометрию;
 - Roboto и tokens из Design System;
-- mobile navigation допускается отдельной строкой под primary header, чтобы не жертвовать 44px tap targets.
+- mobile navigation compact menu без постоянной второй строки.
 
 ---
 
@@ -143,9 +147,29 @@ Seller-side часть этого пункта не входит в UX1A и до
 
 **Желаемое направление:** перейти к привычной marketplace-модели интерфейса: системный app shell, заметный поиск, плотная выдача карточками, меньше декоративных пустот и больше полезной информации в viewport.
 
-Ориентир по структурному паттерну — крупные маркетплейсы вроде Ozon, без копирования визуального стиля или конкретной сетки.
+`boltkaida2` является основным visual/composition reference; его fake ratings/media/reviews и mock domain behavior не переносятся.
 
-UX1A закрывает shell/navigation. Card-first layout и адаптивная выдача принадлежат UX1B. Реальный media layout не входит в UX1B и начинается в M1.
+UX1A/UX1A.1 закрывают shell/navigation/search composition. Card-first layout и адаптивная выдача принадлежат UX1B. Реальный media layout не входит в UX1B и начинается в M1.
+
+---
+
+### UX-009 — Auth выглядит техническим и выбивается из нового shell
+
+**Статус:** OPEN — planned UX1A.2  
+**Область:** Identity / Login presentation
+
+S2 Auth функционально закрыт и остаётся источником истины для phone normalization, OTP, session, persistence и logout. Проблема только в presentation: текущая отдельная login page визуально не соответствует Bolt-aligned shell.
+
+**Утверждённое направление UX1A.2:**
+- использовать `boltkaida2` AuthModal как visual/composition reference максимально близко;
+- вход открывается как centered modal/dialog поверх текущего интерфейса с затемнением/backdrop blur;
+- phone и OTP — два последовательных состояния одной modal-композиции;
+- сохранить настоящий S2 API, dynamic test OTP, validation/error states, session persistence и logout;
+- не переносить browser-generated OTP, fake User/role или local-only auth из Bolt;
+- закрытие modal не создаёт User/session и не меняет auth state;
+- отдельный `/login` route может сохраниться как deep-link/accessibility fallback, но presentation и behavior не должны дублировать две независимые auth-реализации.
+
+UX1A.2 начинается только после полного checkpoint UX1A.1.
 
 ---
 
@@ -155,9 +179,11 @@ UX1A закрывает shell/navigation. Card-first layout и адаптивн�
 
 ## Примечание по последовательности
 
-Исходный объединённый UX1 был разделён до реализации, чтобы каждый slice решал одну проверяемую user task:
+Текущая зафиксированная последовательность UX/product work:
 
-- `UX1A` — app shell / navigation;
+- `UX1A` — app shell / navigation — CLOSED;
+- `UX1A.1` — Bolt shell/layout alignment — CURRENT, должен быть полностью закрыт первым;
+- `UX1A.2` — Bolt-like Auth modal поверх настоящего S2 Auth;
 - `UX1B` — marketplace Offer cards без fake media slots;
 - `UX1C` — Nearby geo-intent cleanup;
 - `UX2` — seller onboarding cleanup;
