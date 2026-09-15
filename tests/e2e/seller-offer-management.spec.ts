@@ -6,6 +6,10 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000861' : '+77000000862';
 }
 
+function publicPhoneFor(projectName: string) {
+  return projectName === 'mobile' ? '+77000000863' : '+77000000864';
+}
+
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
 }
@@ -32,7 +36,7 @@ async function cleanup(phone: string) {
 async function makeBuyerEligible(phone: string, projectName: string) {
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
-    const contactPhone = projectName === 'mobile' ? '+77000000863' : '+77000000864';
+    const contactPhone = publicPhoneFor(projectName);
     const seller = await pool.query(`
       UPDATE sellers s
       SET contact_phone_e164=$2
@@ -86,9 +90,12 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByLabel('Название точки').fill('S5 E2E точка');
     await page.getByLabel('Тип точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S5 E2E адрес');
-    await page.getByRole('button', { name: 'Создать продавца' }).click();
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
+    await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
+    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await makeBuyerEligible(phone, testInfo.project.name);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200.00');
