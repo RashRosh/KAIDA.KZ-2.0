@@ -7,6 +7,10 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000941' : '+77000000942';
 }
 
+function publicPhoneFor(projectName: string) {
+  return projectName === 'mobile' ? '+77000000943' : '+77000000944';
+}
+
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
 }
@@ -28,6 +32,18 @@ async function cleanup(phone: string) {
   } finally {
     await pool.end();
   }
+}
+
+async function completeOnboardingGeo(pool: Pool, phone: string) {
+  const result = await pool.query(`
+    UPDATE locations l
+    SET latitude=$2, longitude=$3
+    FROM sellers s
+    JOIN users u ON u.id=s.owner_user_id
+    WHERE l.seller_id=s.id AND u.phone_e164=$1
+    RETURNING l.id
+  `, [phone, 43.238949, 76.889709]);
+  expect(result.rows).toHaveLength(1);
 }
 
 test('Seller creates persisted proposal, confirms it once and reloads the result', async ({ page }, testInfo) => {
@@ -57,7 +73,11 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await page.getByLabel('Название точки').fill('S4 E2E точка');
     await page.getByLabel('Тип точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
-    await page.getByRole('button', { name: 'Создать продавца' }).click();
+    await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
+    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await completeOnboardingGeo(pool, phone);
+    await page.reload();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
