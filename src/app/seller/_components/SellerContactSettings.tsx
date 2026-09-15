@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { ClearableInput } from './ClearableInput';
 import styles from '../page.module.css';
 
 export type OwnerContacts = {
@@ -100,16 +101,16 @@ export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
       {loading ? <p className={styles.status}>Загружаем контакты…</p> : (
         <form className={styles.form} onSubmit={submit} noValidate>
           <label htmlFor="seller-contact-phone">Телефон</label>
-          <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={saving} autoComplete="tel" placeholder="+77001234567" />
+          <ClearableInput id="seller-contact-phone" value={phoneE164} onValueChange={setPhoneE164} clearLabel="Телефон" maxLength={16} disabled={saving} autoComplete="tel" placeholder="+77001234567" />
 
           <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
-          <input id="seller-contact-whatsapp" value={whatsappPhoneE164} onChange={(event) => setWhatsappPhoneE164(event.target.value)} maxLength={16} disabled={saving} inputMode="tel" placeholder="+77001234567" />
+          <ClearableInput id="seller-contact-whatsapp" value={whatsappPhoneE164} onValueChange={setWhatsappPhoneE164} clearLabel="WhatsApp" maxLength={16} disabled={saving} inputMode="tel" placeholder="+77001234567" />
 
           <label htmlFor="seller-contact-telegram">Telegram</label>
-          <input id="seller-contact-telegram" value={telegramUsername} onChange={(event) => setTelegramUsername(event.target.value)} maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida_shop" />
+          <ClearableInput id="seller-contact-telegram" value={telegramUsername} onValueChange={setTelegramUsername} clearLabel="Telegram" maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida_shop" />
 
           <label htmlFor="seller-contact-instagram">Instagram</label>
-          <input id="seller-contact-instagram" value={instagramUsername} onChange={(event) => setInstagramUsername(event.target.value)} maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida.shop" />
+          <ClearableInput id="seller-contact-instagram" value={instagramUsername} onValueChange={setInstagramUsername} clearLabel="Instagram" maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida.shop" />
 
           {error && <p className={styles.error} role="alert">{error}</p>}
           {success && <p className={styles.status} role="status">{success}</p>}
