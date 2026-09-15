@@ -120,6 +120,7 @@ async function assertEqualSocialRow(card: Locator, names: string[]) {
   for (const name of names) {
     const link = card.getByRole('link', { name, exact: true });
     await expect(link).toBeVisible();
+    expect((await link.textContent())?.trim()).toBe('');
     const box = await link.boundingBox();
     expect(box).not.toBeNull();
     boxes.push(box!);
@@ -137,7 +138,7 @@ async function assertEqualSocialRow(card: Locator, names: string[]) {
   if (names.length === 1) expect(Math.abs(boxes[0]!.width - rowBox!.width)).toBeLessThan(2);
 }
 
-test('UX1D OfferCard exposes Call+Route and keeps optional social actions in equal 3/2/1 rows without overflow', async ({ page, request }, testInfo) => {
+test('UX1D OfferCard exposes Call+Route and keeps optional social actions in equal icon-only 3/2/1 rows without overflow', async ({ page, request }, testInfo) => {
   let card = await runSearch(page);
   await expect(page.getByText(/UX1D no phone seller/)).toHaveCount(0);
   await expect(page.getByText(/UX1D no geo seller/)).toHaveCount(0);
