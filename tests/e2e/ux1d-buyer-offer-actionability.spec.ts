@@ -124,6 +124,13 @@ async function assertEqualSocialRow(card: Locator, names: string[]) {
     expect(box).not.toBeNull();
     boxes.push(box!);
     expect(box!.height).toBeGreaterThanOrEqual(44);
+
+    const icon = link.locator('img');
+    await expect(icon).toHaveCount(1);
+    const iconBox = await icon.boundingBox();
+    expect(iconBox).not.toBeNull();
+    expect(iconBox!.width).toBe(18);
+    expect(iconBox!.height).toBe(18);
   }
   expect(boxes.every((box) => Math.abs(box.y - boxes[0]!.y) < 1)).toBe(true);
   expect(Math.max(...boxes.map(({ width }) => width)) - Math.min(...boxes.map(({ width }) => width))).toBeLessThan(2);
