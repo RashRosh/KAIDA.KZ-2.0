@@ -189,7 +189,7 @@ function assertSearchPrivacy(body: unknown) {
   }
 }
 
-test('Buyer explicitly opens Nearby, gets only nearby Offers, keeps contacts, and location is not persisted', async ({ page }) => {
+test('Buyer clicks Nearby once, gets only nearby Offers, keeps contacts, and location is not persisted', async ({ page }) => {
   await mockGeolocation(page, buyerLocation);
   let nearbyRequests = 0;
   page.on('request', (request) => {
@@ -199,17 +199,11 @@ test('Buyer explicitly opens Nearby, gets only nearby Offers, keeps contacts, an
   await page.goto('/');
   await openNearbyFromShell(page);
   await expect(page).toHaveURL(/\/nearby$/);
-  await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(0);
-  expect(nearbyRequests).toBe(0);
-
-  await page.getByRole('button', { name: 'Показать товары рядом', exact: true }).click();
-  await expect(page.getByText('Найдено рядом: 2')).toBeVisible();
+  await expect(page.getByRole('article')).toHaveCount(2);
   expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(1);
   expect(nearbyRequests).toBe(1);
 
   const cards = page.getByRole('article');
-  await expect(cards).toHaveCount(2);
   await expect(cards.nth(0)).toContainText(insideLocationName);
   await expect(cards.nth(0)).toContainText('1000 м');
   await expect(cards.nth(1)).toContainText(boundaryLocationName);
@@ -230,6 +224,7 @@ test('Buyer explicitly opens Nearby, gets only nearby Offers, keeps contacts, an
   const persisted = JSON.stringify(browserPersistence);
   expect(persisted).not.toContain(String(buyerLocation.latitude));
   expect(persisted).not.toContain(String(buyerLocation.longitude));
+  expect(browserPersistence.sessionStorage).not.toContainEqual(['kaida:nearby-nav-intent', '1']);
 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
@@ -238,25 +233,31 @@ test('Buyer explicitly opens Nearby, gets only nearby Offers, keeps contacts, an
   await expect(page.getByRole('article')).toHaveCount(0);
 });
 
-test('geolocation denial shows an error and does not fall back to a global feed', async ({ page }) => {
+test('one-click Nearby geolocation denial shows an error and does not fall back to a global feed', async ({ page }) => {
   await mockGeolocation(page, null);
   let nearbyRequests = 0;
   page.on('request', (request) => {
     if (new URL(request.url()).pathname === '/api/discovery/nearby') nearbyRequests += 1;
   });
 
-  await page.goto('/nearby');
-  await page.getByRole('button', { name: 'Показать товары рядом', exact: true }).click();
+  await page.goto('/');
+  await openNearbyFromShell(page);
+  await expect(page).toHaveURL(/\/nearby$/);
   await expect(page.getByText('Не удалось определить местоположение. Раздел «Рядом» работает только с разрешённой геолокацией.')).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(1);
   expect(nearbyRequests).toBe(0);
   await expect(page.getByRole('article')).toHaveCount(0);
 });
 
-test('a valid location with no nearby Offers produces the empty state', async ({ page }) => {
+test('direct Nearby deep link waits for an explicit action and can produce the empty state', async ({ page }) => {
   await mockGeolocation(page, { latitude: -40.123456, longitude: -50.654321 });
   await page.goto('/nearby');
+  await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(0);
+
   await page.getByRole('button', { name: 'Показать товары рядом', exact: true }).click();
   await expect(page.getByText('Рядом пока нет актуальных предложений.')).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(1);
   await expect(page.getByRole('article')).toHaveCount(0);
 });
 
