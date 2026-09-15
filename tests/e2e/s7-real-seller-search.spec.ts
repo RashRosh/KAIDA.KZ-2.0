@@ -140,8 +140,8 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
 
     await sellerPage.goto('/seller');
     await sellerPage.getByLabel('Название продавца').fill(sellerName);
-    await sellerPage.getByLabel('Название точки').fill(locationName);
-    await sellerPage.getByLabel('Тип точки').selectOption('shop');
+    await sellerPage.getByLabel('Название торговой точки').fill(locationName);
+    await sellerPage.getByLabel('Тип торговой точки').selectOption('shop');
     await sellerPage.getByLabel('Адрес').fill(`Алматы, S7 E2E адрес ${suffix}`);
     await sellerPage.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await sellerPage.getByRole('button', { name: 'Сохранить и продолжить' }).click();
