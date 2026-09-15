@@ -29,6 +29,32 @@ async function cleanup(phone: string) {
   }
 }
 
+async function makeBuyerEligible(phone: string, projectName: string) {
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    const contactPhone = projectName === 'mobile' ? '+77000000863' : '+77000000864';
+    const seller = await pool.query(`
+      UPDATE sellers s
+      SET contact_phone_e164=$2
+      FROM users u
+      WHERE s.owner_user_id=u.id AND u.phone_e164=$1
+      RETURNING s.id
+    `, [phone, contactPhone]);
+    expect(seller.rows).toHaveLength(1);
+    const location = await pool.query(`
+      UPDATE locations l
+      SET latitude=$2, longitude=$3
+      FROM sellers s
+      JOIN users u ON u.id=s.owner_user_id
+      WHERE l.seller_id=s.id AND u.phone_e164=$1
+      RETURNING l.id
+    `, [phone, 43.238949, 76.889709]);
+    expect(location.rows).toHaveLength(1);
+  } finally {
+    await pool.end();
+  }
+}
+
 async function login(page: import('@playwright/test').Page, phone: string) {
   await page.goto('/seller');
   await page.getByRole('link', { name: 'Войти' }).click();
@@ -62,6 +88,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByLabel('Адрес').fill('Алматы, S5 E2E адрес');
     await page.getByRole('button', { name: 'Создать продавца' }).click();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
+    await makeBuyerEligible(phone, testInfo.project.name);
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200.00');
