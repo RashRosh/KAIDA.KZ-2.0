@@ -14,9 +14,9 @@ export const searchOfferSchema = z.object({
   location: z.object({ id: z.uuid(), name: z.string(), addressText: z.string() }),
   price: z.object({
     amount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    currency: z.string().regex(/^[A-Z]{3}$/),
+    currency: z.literal('KZT'),
     unit: z.string().nullable(),
-  }).nullable(),
+  }),
   sellerComment: z.string().nullable(),
 });
 
