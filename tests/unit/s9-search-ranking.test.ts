@@ -13,7 +13,7 @@ function offer(id: string): SearchOffer {
     product: { id: '10000000-0000-4000-8000-000000000001', name: 'S9 unit product' },
     seller: { id: '20000000-0000-4000-8000-000000000001', displayName: 'S9 unit seller' },
     location: { id: '30000000-0000-4000-8000-000000000001', name: 'S9 unit location', addressText: 'S9 unit address' },
-    price: null,
+    price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
   };
 }
