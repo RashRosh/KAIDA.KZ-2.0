@@ -27,12 +27,11 @@ async function expectSharedShell(page: Page, projectName: string) {
 
   await expect(header).toBeVisible();
   await expect(header.getByRole('link', { name: 'KAIDA.KZ, главная', exact: true })).toBeVisible();
+  await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toBeVisible();
 
   if (projectName === 'mobile') {
     await expect(header.getByRole('button', { name: 'Открыть меню', exact: true })).toBeVisible();
-    await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toBeHidden();
   } else {
-    await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toBeVisible();
     const nav = page.getByRole('navigation', { name: NAV_NAME });
     await expect(nav).toBeVisible();
     await expectNavEntries(nav);

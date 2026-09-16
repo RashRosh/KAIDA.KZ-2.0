@@ -78,11 +78,30 @@
 
 @media (max-width: 47.99rem) {
   .authMuted { display: none; }
-  .phone {
-    font-size: 0.8125rem;
-    line-height: 1.4;
+
+  .phone { font-size: 0.75rem; }
+
+  .loginLink,
+  .authRow button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
   }
-  .loginLink { padding: 0 1.25rem; }
-  .authRow button { width: 44px; padding: 0; }
+
+  .loginLink span,
+  .authRow button span { display: none; }
+}
+
+@media (max-width: 23.99rem) {
+  .phone { display: none; }
+}
+
+@media (min-width: 48rem) and (max-width: 71.99rem) {
+  .authRow button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
   .authRow button span { display: none; }
 }
