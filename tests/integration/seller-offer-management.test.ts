@@ -54,14 +54,14 @@ async function createS4Offer(userId: string, locationId: string, values: { amoun
   const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
     productName: 'Баранина',
     locationId,
-    price: values.amount === undefined ? null : { amount: values.amount, unit: values.unit ?? null },
+    price: { amount: values.amount ?? '1000.00', unit: values.unit ?? null },
     sellerComment: values.comment ?? null,
   }), { database: db });
   const confirmed = await confirmSellerChangeSet(userId, proposal.id, { database: db, clock: () => T0 });
   return confirmed.items[0]!.resultOffer!.id;
 }
 
-function updateInput(price: { amount: string; unit?: string | null } | null, sellerComment: string | null) {
+function updateInput(price: { amount: string; unit?: string | null }, sellerComment: string | null) {
   return sellerOfferChangeBodySchema.parse({ action: 'update_offer', price, sellerComment });
 }
 
@@ -89,7 +89,7 @@ beforeAll(async () => {
 
 afterAll(async () => { await pool.end(); });
 
-describe('S5 offer management on PostgreSQL 18', () => {
+describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () => {
   it('keeps S4 create public flow and DB default revision, then lists the owned Offer without exposing revision', async () => {
     const userId = '50000000-0000-4000-8000-000000000801';
     const phone = '+77000000801';
@@ -180,7 +180,7 @@ describe('S5 offer management on PostgreSQL 18', () => {
     }
   });
 
-  it('clears full-state fields, keeps inactive update inactive, and implements deactivate/activate freshness semantics on the same Offer', async () => {
+  it('clears comment without clearing price, keeps inactive update inactive, and preserves deactivate/activate freshness semantics', async () => {
     const userId = '50000000-0000-4000-8000-000000000803';
     const phone = '+77000000803';
     const seller = await createFixture(userId, phone, '803');
@@ -199,15 +199,15 @@ describe('S5 offer management on PostgreSQL 18', () => {
         .rejects.toBeInstanceOf(OfferAlreadyInactiveError);
       expect(await sellerCounts(seller.id)).toEqual(countsBeforeRejected);
 
-      const clearUpdate = await createOfferManagementChangeSet(userId, offerId, updateInput(null, null), { database: db });
-      await confirmSellerChangeSet(userId, clearUpdate.id, { database: db, clock: () => T2 });
+      const commentClearUpdate = await createOfferManagementChangeSet(userId, offerId, updateInput({ amount: '1000.00', unit: 'шт' }, null), { database: db });
+      await confirmSellerChangeSet(userId, commentClearUpdate.id, { database: db, clock: () => T2 });
       const cleared = await offerRow(offerId);
       expect(cleared).toMatchObject({
         id: offerId,
         status: 'inactive',
-        price_amount: null,
-        price_currency: null,
-        price_unit: null,
+        price_amount: '1000.00',
+        price_currency: 'KZT',
+        price_unit: 'шт',
         seller_comment: null,
         revision: 3,
       });
