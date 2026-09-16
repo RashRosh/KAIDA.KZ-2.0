@@ -70,11 +70,11 @@ describe('S4 migration upgrade path on PostgreSQL 18', () => {
       await expect(pool.query('INSERT INTO seller_change_sets (seller_id,status,confirmed_at) VALUES ($1,$2,$3)', [sellerId, 'confirmed', null])).rejects.toMatchObject({ code: '23514' });
       await expect(pool.query('INSERT INTO seller_change_sets (seller_id,status) VALUES ($1,$2)', ['99999999-9999-4999-8999-999999999999', 'proposed'])).rejects.toMatchObject({ code: '23503' });
 
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id) VALUES ($1,$2,$3,$4)', [changeSetId, 'update_offer', productId, locationId])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id) VALUES ($1,$2,$3,$4)', ['60000000-0000-4000-8000-000000000799', 'create_offer', productId, locationId])).rejects.toMatchObject({ code: '23503' });
+      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency) VALUES ($1,$2,$3,$4,$5,$6)', [changeSetId, 'update_offer', productId, locationId, '1', 'KZT'])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency) VALUES ($1,$2,$3,$4,$5,$6)', ['60000000-0000-4000-8000-000000000799', 'create_offer', productId, locationId, '1', 'KZT'])).rejects.toMatchObject({ code: '23503' });
       await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency) VALUES ($1,$2,$3,$4,$5,$6)', [changeSetId, 'create_offer', productId, locationId, '1.234', 'KZT'])).rejects.toMatchObject({ code: '23514' });
       await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_currency) VALUES ($1,$2,$3,$4,$5)', [changeSetId, 'create_offer', productId, locationId, 'KZT'])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,result_offer_id) VALUES ($1,$2,$3,$4,$5)', [changeSetId, 'create_offer', productId, locationId, '40000000-0000-4000-8000-000000000799'])).rejects.toMatchObject({ code: '23503' });
+      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,result_offer_id) VALUES ($1,$2,$3,$4,$5,$6,$7)', [changeSetId, 'create_offer', productId, locationId, '1', 'KZT', '40000000-0000-4000-8000-000000000799'])).rejects.toMatchObject({ code: '23503' });
 
       const index = await pool.query("SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='seller_change_items' AND indexname='seller_change_items_change_set_id_idx'");
       expect(index.rowCount).toBe(1);
