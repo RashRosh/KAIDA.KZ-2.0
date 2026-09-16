@@ -124,9 +124,8 @@ export function OfferCard({
         <div className={styles.offerTitleBlock}>
           <h2 id={`offer-${offer.id}`}>{offer.product.name}</h2>
           <p className={styles.price}>
-            {offer.price
-              ? <>{formatAmount(offer.price.amount)} {offer.price.currency === 'KZT' ? '₸' : offer.price.currency}{offer.price.unit && <span className={styles.priceUnit}> / {offer.price.unit}</span>}</>
-              : <span className={styles.noPrice}>Цена не указана</span>}
+            {formatAmount(offer.price.amount)} ₸
+            {offer.price.unit && <span className={styles.priceUnit}> / {offer.price.unit}</span>}
           </p>
         </div>
 
