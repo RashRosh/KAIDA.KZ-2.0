@@ -78,6 +78,7 @@ export function AuthStatus() {
           type="button"
           className={styles.loginLink}
           onClick={() => setLoginOpen(true)}
+          aria-label="Войти"
           aria-haspopup="dialog"
           aria-expanded={loginOpen}
         >
