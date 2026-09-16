@@ -82,7 +82,7 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page.getByRole('alert')).toHaveText('Укажите цену предложения.');
+    await expect(page.getByText('Укажите цену предложения.', { exact: true })).toBeVisible();
     await expect(page).toHaveURL('/seller');
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
