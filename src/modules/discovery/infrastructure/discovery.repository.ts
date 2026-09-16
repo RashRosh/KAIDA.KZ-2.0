@@ -50,7 +50,9 @@ export async function findVisibleDiscoveryCandidates(
     locationLongitude,
     ...row
   }) => {
-    if (priceAmount !== null && priceCurrency === null) throw new Error('Invalid stored price');
+    if (priceAmount === null || priceCurrency !== 'KZT') {
+      throw new Error('Buyer-visible Offer has invalid price');
+    }
 
     const offer: SearchOffer = {
       ...row,
@@ -63,9 +65,7 @@ export async function findVisibleDiscoveryCandidates(
           instagramUsername: sellerInstagramUsername,
         }),
       },
-      price: priceAmount !== null && priceCurrency !== null
-        ? { amount: priceAmount, currency: priceCurrency, unit: priceUnit }
-        : null,
+      price: { amount: priceAmount, currency: 'KZT', unit: priceUnit },
     };
 
     const locationGeo = locationLatitude === null || locationLongitude === null
