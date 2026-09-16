@@ -5,6 +5,7 @@ import { createOfferManagementChangeSet } from '@/modules/seller-input/applicati
 import {
   OfferAlreadyInactiveError,
   OfferNotFoundError,
+  OfferPriceRequiredError,
   OfferUpdateNoChangesError,
   SellerRequiredError,
   sellerOfferChangeBodySchema,
@@ -48,7 +49,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     if (error instanceof OfferNotFoundError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
     }
-    if (error instanceof OfferUpdateNoChangesError || error instanceof OfferAlreadyInactiveError) {
+    if (
+      error instanceof OfferUpdateNoChangesError
+      || error instanceof OfferAlreadyInactiveError
+      || error instanceof OfferPriceRequiredError
+    ) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }
     console.error('Seller offer change creation failed');
