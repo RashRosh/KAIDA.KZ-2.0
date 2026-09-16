@@ -4,15 +4,28 @@ import { sellerChangeSetCreateBodySchema, sellerChangeSetIdSchema } from '../../
 const locationId = '30000000-0000-4000-8000-000000000901';
 
 function parse(overrides: Record<string, unknown> = {}) {
-  return sellerChangeSetCreateBodySchema.safeParse({ productName: '  Баранина  ', locationId, ...overrides });
+  return sellerChangeSetCreateBodySchema.safeParse({
+    productName: '  Баранина  ',
+    locationId,
+    price: { amount: '1' },
+    ...overrides,
+  });
 }
 
-describe('S4 Seller Change Set validation', () => {
-  it('trims Product and normalizes absent optional values', () => {
+describe('S4 Seller Change Set validation after Mandatory Offer Price', () => {
+  it('requires price and trims Product while normalizing optional unit/comment', () => {
+    expect(sellerChangeSetCreateBodySchema.safeParse({ productName: 'Баранина', locationId }).success).toBe(false);
+    expect(parse({ price: null }).success).toBe(false);
+
     const result = parse();
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data).toEqual({ productName: 'Баранина', locationId, price: null, sellerComment: null });
+      expect(result.data).toEqual({
+        productName: 'Баранина',
+        locationId,
+        price: { amount: '1', unit: null },
+        sellerComment: null,
+      });
     }
   });
 
@@ -41,7 +54,7 @@ describe('S4 Seller Change Set validation', () => {
     expect(parse({ sellerComment: 'x'.repeat(501) }).success).toBe(false);
   });
 
-  it('keeps unit impossible without a price object and rejects client currency', () => {
+  it('keeps unit impossible outside price and rejects client currency', () => {
     expect(parse({ unit: 'кг' }).success).toBe(false);
     expect(parse({ price: { amount: '4200', unit: 'кг', currency: 'USD' } }).success).toBe(false);
   });
