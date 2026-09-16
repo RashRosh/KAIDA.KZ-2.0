@@ -78,10 +78,10 @@ test.beforeAll(async ({}, workerInfo) => {
   ]);
   const now = new Date();
   await connection.pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,status,last_confirmed_at,created_at,updated_at) VALUES
-    ($1,$4,$5,$6,'active',$10,$10,$10),
-    ($2,$4,$7,$8,'active',$10,$10,$10),
-    ($3,$4,$9,$11,'active',$10,$10,$10)`, [
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at) VALUES
+    ($1,$4,$5,$6,1000,'KZT','active',$10,$10,$10),
+    ($2,$4,$7,$8,1000,'KZT','active',$10,$10,$10),
+    ($3,$4,$9,$11,1000,'KZT','active',$10,$10,$10)`, [
     offerId,
     noPhoneOfferId,
     noGeoOfferId,
