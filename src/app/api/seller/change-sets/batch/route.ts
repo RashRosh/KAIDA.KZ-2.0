@@ -7,6 +7,7 @@ import {
   LocationNotFoundError,
   OfferAlreadyInactiveError,
   OfferNotFoundError,
+  OfferPriceRequiredError,
   OfferUpdateNoChangesError,
   ProductAmbiguousError,
   ProductNotFoundError,
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       error instanceof ProductAmbiguousError
       || error instanceof OfferUpdateNoChangesError
       || error instanceof OfferAlreadyInactiveError
+      || error instanceof OfferPriceRequiredError
       || error instanceof BatchOfferConflictError
     ) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
