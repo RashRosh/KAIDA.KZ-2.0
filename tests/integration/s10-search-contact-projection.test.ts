@@ -62,14 +62,14 @@ beforeAll(async () => {
     buyerLocation.latitude, buyerLocation.longitude, 43.338949, 76.989709,
   ]);
   await pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,status,last_confirmed_at,created_at,updated_at)
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at)
     VALUES
-    ($1,$7,$8,$9,'active',$12,$12,$12),
-    ($2,$7,$8,$9,'active',$13,$13,$13),
-    ($3,$7,$8,$10,'active',$14,$14,$14),
-    ($4,$7,$8,$11,'active',$15,$15,$15),
-    ($5,$7,$8,$9,'inactive',$16,$16,$16),
-    ($6,$7,$8,$9,'active',$17,$17,$17)`, [
+    ($1,$7,$8,$9,1000,'KZT','active',$12,$12,$12),
+    ($2,$7,$8,$9,1000,'KZT','active',$13,$13,$13),
+    ($3,$7,$8,$10,1000,'KZT','active',$14,$14,$14),
+    ($4,$7,$8,$11,1000,'KZT','active',$15,$15,$15),
+    ($5,$7,$8,$9,1000,'KZT','inactive',$16,$16,$16),
+    ($6,$7,$8,$9,1000,'KZT','active',$17,$17,$17)`, [
     offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer, offerIds.geolessNewest,
     offerIds.inactive, offerIds.expired, productId, sellerId,
     nearLocationId, farLocationId, geolessLocationId,
