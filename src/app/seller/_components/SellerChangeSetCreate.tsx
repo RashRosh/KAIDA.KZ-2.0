@@ -23,16 +23,20 @@ export function SellerChangeSetCreate({ seller }: { seller: SellerView }) {
     event.preventDefault();
     if (!location) return;
     setError('');
+    const normalizedAmount = priceAmount.trim();
+    if (normalizedAmount === '') {
+      setError('Укажите цену предложения.');
+      return;
+    }
     setSubmitting(true);
     try {
-      const normalizedAmount = priceAmount.trim();
       const response = await fetch('/api/seller/change-sets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productName,
           locationId: location.id,
-          price: normalizedAmount === '' ? null : { amount: normalizedAmount, unit: priceUnit },
+          price: { amount: normalizedAmount, unit: priceUnit },
           sellerComment,
         }),
       });
@@ -64,7 +68,7 @@ export function SellerChangeSetCreate({ seller }: { seller: SellerView }) {
         <input id="seller-product-name" value={productName} onChange={(event) => setProductName(event.target.value)} disabled={submitting} autoComplete="off" />
 
         <label htmlFor="seller-price-amount">Цена, ₸</label>
-        <input id="seller-price-amount" value={priceAmount} onChange={(event) => setPriceAmount(event.target.value)} disabled={submitting} inputMode="decimal" placeholder="Необязательно" />
+        <input id="seller-price-amount" value={priceAmount} onChange={(event) => setPriceAmount(event.target.value)} disabled={submitting} inputMode="decimal" placeholder="Обязательно" aria-required="true" />
 
         <label htmlFor="seller-price-unit">Единица</label>
         <input id="seller-price-unit" value={priceUnit} onChange={(event) => setPriceUnit(event.target.value)} maxLength={32} disabled={submitting || priceAmount.trim() === ''} placeholder="Например, кг" />
