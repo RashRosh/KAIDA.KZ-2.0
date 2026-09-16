@@ -91,6 +91,7 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');
+    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('1');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
     await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
