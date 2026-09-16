@@ -26,8 +26,8 @@ export async function createOffer(database: OfferWriteDb, values: {
   productId: string;
   sellerId: string;
   locationId: string;
-  priceAmount: string | null;
-  priceCurrency: 'KZT' | null;
+  priceAmount: string;
+  priceCurrency: 'KZT';
   priceUnit: string | null;
   sellerComment: string | null;
   confirmedAt: Date;
@@ -107,8 +107,8 @@ const managementUpdateReturning = {
 export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   offerId: string;
   expectedRevision: number;
-  priceAmount: string | null;
-  priceCurrency: 'KZT' | null;
+  priceAmount: string;
+  priceCurrency: 'KZT';
   priceUnit: string | null;
   sellerComment: string | null;
   confirmationTime: Date;
