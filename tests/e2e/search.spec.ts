@@ -71,13 +71,15 @@ test('unknown product clears the previous result', async ({ page }) => {
   await expect(page.getByRole('article')).toHaveCount(0);
 });
 
-test('beef has a missing price, not a zero', async ({ page }) => {
+test('beef has a mandatory price with no unit suffix', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Какой товар ищете?').fill('говядина');
   await page.getByLabel('Какой товар ищете?').press('Enter');
-  await expect(page.getByRole('article')).toContainText('Говядина');
-  await expect(page.getByRole('article')).toContainText('Цена не указана');
-  await expect(page.getByRole('article')).toContainText('Есть мякоть и мясо на кости.');
+  const card = page.getByRole('article');
+  await expect(card).toContainText('Говядина');
+  await expect(card).toContainText(/3\s900\s₸/);
+  await expect(card).not.toContainText('/');
+  await expect(card).toContainText('Есть мякоть и мясо на кости.');
 });
 
 test('empty query is validated without sending an API request', async ({ page }) => {
@@ -138,7 +140,7 @@ test('network failure clears old results and permits a real retry', async ({ pag
   await expect(input).toHaveValue('говядина');
   await page.unroute('**/api/search?*');
   await input.press('Enter');
-  await expect(page.getByRole('article')).toContainText('Цена не указана');
+  await expect(page.getByRole('article')).toContainText(/3\s900\s₸/);
 });
 
 test('HTTP boundary handles missing/empty query and parameterized exact search', async ({ request }) => {
