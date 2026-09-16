@@ -30,9 +30,8 @@ export async function createSellerChangeSet(
     if (productResolution.status === 'ambiguous') throw new ProductAmbiguousError();
     const product = productResolution.product;
 
-    const priceAmount = input.price?.amount ?? null;
-    const priceUnit = input.price?.unit ?? null;
-    const priceCurrency = input.price ? 'KZT' as const : null;
+    const priceAmount = input.price.amount;
+    const priceUnit = input.price.unit;
     const sellerComment = input.sellerComment ?? null;
 
     const changeSet = await createChangeSet(tx, seller.id);
@@ -41,7 +40,7 @@ export async function createSellerChangeSet(
       productId: product.id,
       locationId: location.id,
       priceAmount,
-      priceCurrency,
+      priceCurrency: 'KZT',
       priceUnit,
       sellerComment,
     });
@@ -57,7 +56,7 @@ export async function createSellerChangeSet(
         action: 'create_offer',
         product,
         location: { id: location.id, name: location.name, addressText: location.addressText, type: location.type },
-        price: priceAmount === null ? null : { amount: priceAmount, currency: 'KZT', unit: priceUnit },
+        price: { amount: priceAmount, currency: 'KZT', unit: priceUnit },
         sellerComment,
         resultOffer: null,
       }],
