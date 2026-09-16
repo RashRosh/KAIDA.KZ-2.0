@@ -150,6 +150,7 @@
 .field {
   min-width: 0;
   display: grid;
+  align-content: start;
   gap: 6px;
 }
 
@@ -519,32 +520,7 @@
   .onboardingActions button,
   .onboardingFooter button,
   .primaryLink,
-  .secondaryLinkButton,
-  .actions button {
+  .secondaryLinkButton {
     width: 100%;
-    text-align: center;
-  }
-
-  .summaryGrid {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  .summaryGrid dd {
-    margin-bottom: 8px;
-  }
-
-  .actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .offerHeader {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .offerStatus {
-    align-self: flex-start;
   }
 }
