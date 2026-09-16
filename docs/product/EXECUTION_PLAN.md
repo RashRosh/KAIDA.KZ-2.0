@@ -31,23 +31,26 @@
 
 Если Feature Map или UX Backlog содержат устаревший статус, это не должно автоматически менять очередь. Сначала синхронизируется документация.
 
-## Текущее verified состояние
+## Текущее состояние
 
-Последний product checkpoint:
+Последний ранее зафиксированный product checkpoint:
 
 - tag: `v0.0.21-ux2`;
 - commit: `819063ba005b6c51e3ff42129e79530ab2dc31cc`;
 - UX2 — Seller onboarding — CLOSED.
 
-Текущий `main` после docs-only planning maintenance:
+UX2A — post-UX2 Search / App Shell responsive correction — уже merged в `main`:
 
-- `2f9475811f240e1d4d2526d213d63a1d72bb7fe7`.
+- merge commit: `66fb1def48b59f9321b2c3eb21cb0320ac3071ce`;
+- branch CI и manual acceptance были PASS до merge.
 
-Он не меняет product behavior относительно verified UX2 checkpoint.
+Перед началом следующего executable slice исполнитель всё равно обязан проверить фактический latest verified checkpoint/tag и merged-main CI по обычным правилам проекта.
 
-Закрытые product / UX checkpoints:
+Закрытые product / UX capabilities до UX2:
 
 `S0–S13 → UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → UX1D → UX2`
+
+UX2A product behavior считается реализованным в `main`; его окончательный checkpoint evidence проверяется по repository state перед следующим slice.
 
 ## Три класса будущей работы
 
@@ -75,23 +78,23 @@ Capability сознательно не нужна текущему MVP-конт�
 
 Она остаётся в Feature Map / issue, но не участвует в выборе следующего slice до отдельного product decision.
 
+## Gate R1 decision — CLOSED
+
+После UX2A ручная product walkthrough выявила критичный seller-loop UX gap: обычное добавление и редактирование товара требуют лишних переходов и выставляют внутреннюю механику SellerChangeSet наружу.
+
+Product Owner решил не оставлять этот gap до конца roadmap.
+
+R1 decision:
+
+1. сначала закрыть **Mandatory Offer Price** как бизнес-инвариант;
+2. затем выполнить отдельный **Seller Offer Workspace** slice по Issue #27;
+3. только после этого продолжить Search Sorting.
+
+Причина порядка: новый seller workspace должен сразу строиться вокруг уже утверждённого mandatory-price invariant и не переделываться повторно следующим slice.
+
 ## COMMITTED — текущая твёрдая очередь
 
-### 1. NEXT — post-UX2 Search / App Shell responsive correction
-
-Связано с Issue #16.
-
-User task: Search в header должен оставаться usable на desktop, tablet/iPad и mobile без конфликтов элементов.
-
-Утверждённое направление:
-
-- текстовая кнопка `Искать` заменяется на одну компактную квадратную кнопку со стрелкой вправо на **всех ширинах**;
-- 1024px / iPad layout не допускает наложения Search, account identity и logout/menu;
-- Search behavior/API, Auth/session и business contracts не меняются.
-
-Рабочее обозначение до утверждения Slice Contract: **UX2A**.
-
-### 2. Mandatory Offer Price — отдельный contract-revision slice
+### 1. NEXT — Mandatory Offer Price
 
 Связано с Issue #13.
 
@@ -101,9 +104,39 @@ Product decision:
 - Seller не может удалить цену и оставить Offer publishable;
 - buyer-facing Offer всегда имеет цену.
 
-Это **не UI-fix**. Изменение конфликтует с закрытыми S4/S5 contracts и требует отдельного STOP/review и Slice Contract.
+Это не UI-fix. Изменение конфликтует с закрытыми S4/S5 contracts и требует отдельного STOP/review и Slice Contract.
 
 До реализации определить semantics `unit` и безопасную forward migration. Исторические migrations не переписывать.
+
+### 2. Seller Offer Workspace — simplified manual seller loop
+
+Связано с Issue #27.
+
+User task: P2 может добавить, изменить или выключить товар без технического путешествия по SellerChangeSet screens.
+
+Утверждённое UX-направление:
+
+- использовать Bolt seller flow как **UX/composition reference**, но не как архитектурную базу;
+- обычная работа происходит на одной seller workspace surface;
+- `Мои товары` видны в одном месте;
+- `+ Добавить товар` открывает короткую inline/local форму;
+- один понятный primary action завершает точное ручное действие;
+- после успеха Seller остаётся на seller workspace и сразу видит актуальный Offer;
+- edit выполняется in-place / inline без обязательного перехода на техническую review page;
+- deactivate/reactivate/refresh не должны заставлять пользователя думать терминами ChangeSet, если отдельный safety confirmation не нужен по реальному риску;
+- ordinary seller UI не показывает `SellerChangeSet`, `ChangeItem`, `proposed`, `confirmed` или технические Offer IDs как пользовательские понятия.
+
+Архитектурные invariants сохраняются:
+
+`Seller Input -> SellerChangeSet -> SellerChangeItem -> confirmation/apply -> Offer`
+
+Нельзя обходить SellerChangeSet или давать Seller Input прямой write в Offer.
+
+Сохраняются ownership, persisted server state, atomicity, idempotency/concurrency guarantees и S12 aggregate semantics.
+
+Slice Contract обязан явно пересмотреть закрытые S4/S5 presentation/confirmation semantics: текущий contract требует отдельной addressable review surface и отдельного confirm action. Для точного manual input допускается сделать финальный submit формы тем самым explicit confirmation/apply action, если архитектурная граница ChangeSet остаётся доказанной.
+
+Batch S12 не редизайнить автоматически; только проверить, не нарушает ли новый single-item UX общий закрытый contract.
 
 ### 3. Search Sorting A — explicit freshness / proximity + visible distance
 
@@ -219,9 +252,9 @@ Market не становится архитектурным центром; Offe
 
 Чтобы не пересобирать roadmap после каждой идеи, insertion candidates проверяются в фиксированных точках.
 
-### Gate R1 — после UX2A
+### Gate R1 — CLOSED after UX2A
 
-Проверить только blockers / критичные gaps, обнаруженные текущей responsive проверкой. Если blockers нет — идти в Mandatory Offer Price.
+Результат зафиксирован выше: Seller Offer Workspace поднят в COMMITTED после Mandatory Offer Price.
 
 ### Gate R2 — после Search Sorting B
 
