@@ -42,7 +42,7 @@ function baseOffer() {
     product: { id: '10000000-0000-4000-8000-000000001010', name: 'Баранина' },
     seller: { id: '20000000-0000-4000-8000-000000001010', displayName: 'Seller 1010' },
     location: { id: '30000000-0000-4000-8000-000000001010', name: 'Point 1010', addressText: 'Алматы' },
-    price: null,
+    price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
   };
 }
