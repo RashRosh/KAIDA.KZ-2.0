@@ -45,7 +45,7 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
     const timestamps = { createdAt: new Date('2026-09-11T00:00:00Z'), updatedAt: new Date('2026-09-11T00:00:00Z') };
     for (const offer of [
       { id: seedIds.lambOffer, productId: seedIds.lambProduct, priceAmount: '4200.00', priceCurrency: 'KZT', priceUnit: 'кг', sellerComment: 'Свежий привоз.' },
-      { id: seedIds.beefOffer, productId: seedIds.beefProduct, priceAmount: null, priceCurrency: null, priceUnit: null, sellerComment: 'Есть мякоть и мясо на кости.' },
+      { id: seedIds.beefOffer, productId: seedIds.beefProduct, priceAmount: '3900.00', priceCurrency: 'KZT', priceUnit: null, sellerComment: 'Есть мякоть и мясо на кости.' },
     ]) {
       const row = {
         ...offer,
@@ -66,7 +66,7 @@ async function main() {
   const { db, pool } = createDatabase(url);
   try {
     await seedDatabase(db);
-    console.log('UX1D seed complete: 2 products, 1 alias, 1 buyer-eligible seller/location, 2 fresh active offers.');
+    console.log('Mandatory Offer Price seed complete: 2 products, 1 alias, 1 buyer-eligible seller/location, 2 fresh priced active offers.');
   } finally {
     await pool.end();
   }
@@ -74,7 +74,7 @@ async function main() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(() => {
-    console.error('UX1D seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
+    console.error('Mandatory Offer Price seed failed. Check PostgreSQL, DATABASE_URL and migrations.');
     process.exitCode = 1;
   });
 }
