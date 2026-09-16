@@ -45,8 +45,8 @@ describe.sequential('S6 Search through Catalog aliases on PostgreSQL 18', () => 
     const inactiveId = '48000000-0000-4000-8000-000000000002';
     const expiredId = '48000000-0000-4000-8000-000000000003';
     try {
-      await connection.pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,status,last_confirmed_at)
-        VALUES ($1,$2,$3,$4,'active',$5),($6,$2,$3,$4,'inactive',$5),($7,$2,$3,$4,'active',$8)`, [
+      await connection.pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at)
+        VALUES ($1,$2,$3,$4,1000,'KZT','active',$5),($6,$2,$3,$4,1000,'KZT','inactive',$5),($7,$2,$3,$4,1000,'KZT','active',$8)`, [
         freshId, seedIds.lambProduct, seedIds.seller, seedIds.location, NOW,
         inactiveId, expiredId, new Date('2026-09-05T06:29:59.000Z'),
       ]);
