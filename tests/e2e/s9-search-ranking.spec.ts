@@ -70,11 +70,11 @@ test.beforeAll(async ({}, workerInfo) => {
     76.989709,
   ]);
   await connection.pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,status,last_confirmed_at,created_at,updated_at)
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at)
     VALUES
-    ($1,$4,$5,$6,'active',$9,$9,$9),
-    ($2,$4,$5,$7,'active',$10,$10,$10),
-    ($3,$4,$5,$8,'active',$11,$11,$11)`, [
+    ($1,$4,$5,$6,1000,'KZT','active',$9,$9,$9),
+    ($2,$4,$5,$7,1000,'KZT','active',$10,$10,$10),
+    ($3,$4,$5,$8,1000,'KZT','active',$11,$11,$11)`, [
     nearOfferId,
     farOfferId,
     geolessOfferId,
