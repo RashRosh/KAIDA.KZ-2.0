@@ -1,214 +1,154 @@
 # KAIDA.KZ 2.0 — Feature Map
 
-## Принцип
+Этот документ — **долгосрочная карта capabilities и зависимостей**.
 
-Каждый product slice должен заканчиваться поведением, которое можно открыть в браузере, проверить руками и покрыть тестом.
+Он не отвечает на вопрос «что делать следующим». Текущая очередь принадлежит только `docs/product/EXECUTION_PLAN.md`.
 
-KAIDA.KZ растёт вокруг одного цикла:
+## Product core
 
-`продавец сообщил → появился актуальный Offer → покупатель его нашёл → совершил действие`
+KAIDA.KZ строится вокруг цикла:
 
-Не строим сначала весь backend, весь frontend, всю БД или всю AI-инфраструктуру.
+`Seller Input → SellerChangeSet → Offer → Search / Discovery → Buyer Action`
 
-## Текущее verified состояние
+Центральная сущность — `Offer`: актуальное предложение конкретного Seller в конкретной Location.
 
-Фактически закрыты и считаются checkpoint contracts:
+Покупатель не обязан иметь отдельный Buyer profile. `User` — account, `Seller` — seller profile, `Location` — физическая точка продажи, `Product` — каноническая товарная сущность, `Category` — навигационная структура.
 
-`S0 → S1 → S2 → S3 → S4 → S5 → S6 → S7 → S8 → S9 → S10 → S11 → S12`
+## Историческая S-линейка
 
-Текущий verified checkpoint: **S12**.
+| ID | Capability | Dependency | Status |
+|---|---|---|---|
+| S0 | First Search | — | CLOSED |
+| S1 | Offer lifecycle / freshness cutoff | S0 | CLOSED |
+| S2 | Phone/test-OTP Auth | S0 | CLOSED |
+| S3 | Seller + first Location | S2 | CLOSED |
+| S4 | First SellerChangeSet → Offer | S3 | CLOSED |
+| S5 | Offer management through ChangeSet | S4 | CLOSED |
+| S6 | Product catalog + aliases | S0 | CLOSED |
+| S7 | Search real seller Offers | S4, S6 | CLOSED |
+| S8 | Seller Location coordinates | S3, S7 | CLOSED |
+| S9 | Search geo ranking | S1, S8 | CLOSED |
+| S10 | Buyer contact actions | S7 | CLOSED |
+| S11 | Nearby discovery | S8, S9 | CLOSED |
+| S12 | Batch manual SellerChangeSet | S5 | CLOSED |
+| S13 | Explicit Product interest | S2, S6 | CLOSED |
+| S14 | Discovery by explicit interests | S7, S13 | PLANNED |
+| S15 | Search learning / zero-result analysis | S6, S7 | PLANNED |
+| S16 | Operator moderation / disable bad Offer or Seller | S7 | PLANNED |
+| S17 | AI text → proposed ChangeSet | S12 | LATER |
+| S18 | Voice → proposed ChangeSet | S17 | LATER |
+| S19 | Photo input → proposed ChangeSet | S17 | LATER |
+| S20 | Video input → multi-item proposed ChangeSet | S17, S12 | LATER |
+| S21 | Telegram seller input on shared business logic | S17 | LATER |
+| S22 | Real SMS provider / public auth gate | S2 | BEFORE PUBLIC LAUNCH |
+| S23 | Buyer notifications about interesting Product Offers | S14 | LATER |
+| S24 | Deterministic personalized recommendations | S14 + data | LATER |
+| S25 | Active Offer volume policy | S5 | LATER |
+| S26 | Seller subscription / entitlements | S25 | LATER |
+| S27 | Paid seller convenience / accelerated bulk input | S20, S26 | LATER |
+| S28 | Offer promotion object | S9 | LATER |
+| S29 | Sponsored reach with honest labeling | S28 | LATER |
+| S30 | Behavioral ranking | S24 + data | LATER |
+| S31 | Product rarity signal | data | LATER |
+| S32 | Automated moderation / suspicious Offer detection | data | LATER |
+| S33 | Seller analytics | S28–S29 | LATER |
 
-Важно: фактическая граница между S8 и S9 уточнена по реализованному поведению:
+S-numbers отражают историческую capability map. Они **не задают текущую execution order** и не запрещают вставлять отдельно одобренные vertical slices между ними.
 
-- **S8** добавил и валидировал координаты `Location` продавца и owner-only способ сохранить их; public Search не публикует raw coordinates;
-- **S9** добавил transient buyer location в Search и детерминированное ранжирование: при buyer geo — distance first, затем freshness; без buyer geo — freshness. Buyer location и ranking metadata не становятся публичными полями Offer.
+## Вставленные / уточнённые capabilities
 
-Это уточнение фиксирует уже реализованные contracts и не меняет будущую продуктовую карту.
+Эти product requirements появились после первоначальной S-линейки. Подробные требования принадлежат GitHub Issues; порядок — `EXECUTION_PLAN.md`.
 
-## Базовая предметная модель
+| Capability | Issue | Main dependencies |
+|---|---:|---|
+| Market internal navigation / MarketPlace | #10 | Seller, Location, Search |
+| Explicit Search sorting: freshness/distance/price | #12 | S9, mandatory price, freshness policy |
+| Seller Offer Workspace | #27 | SellerChangeSet, mandatory price, Locations |
+| Seller Freshness Policy 2/7/14 | #31 | S1, S5, S9 |
+| Seller Freshness Reminder | #32 | freshness policy, seller workspace |
+| Nearby result-first UX | #34 | S11 / closed geo privacy |
+| Seller contextual entry/auth | #35 | S2, app shell |
+| Multiple Trading Points Workspace | #36 | Seller, Location, S8 |
+| UX reference / Design System reconciliation | #37 | docs/design maintenance |
+| M1 real Offer media | tracked by execution plan | Offer, seller workspace, buyer cards |
 
-На ранних этапах ядро ограничивается следующими понятиями:
+Mandatory Offer Price is already CLOSED at checkpoint `v0.0.23-mandatory-offer-price`; it is no longer future work.
 
-- `User` — учётная запись. Покупатель не обязан иметь отдельный Buyer-профиль;
-- `Seller` — профиль продавца, связанный с User;
-- `Location` — физическая точка продажи;
-- `Category` — иерархия навигации;
-- `Product` — то, что реально ищет человек;
-- `Offer` — текущее утверждение продавца: Seller X продаёт Product Y в Location Z сейчас;
-- `SellerChangeSet` — набор предлагаемых продавцом изменений;
-- `SellerChangeItem` — конкретное изменение внутри Change Set.
+## Domain evolution principles
 
-Позже добавляются BuyerInterest, Promotion, Subscription/Entitlement и другие сущности только когда их потребует конкретный slice.
+### Seller Input
 
-## Карта slices
+Все manual/AI/channels должны сходиться в одну business boundary:
 
-| ID | Область | Законченное поведение | Зависит от | Этап | Статус |
-|---|---|---|---|---|---|
-| S0 | Search/Core | Покупатель вводит товар и видит одно актуальное тестовое предложение | — | Foundation | CLOSED |
-| S1 | Offer lifecycle | Просроченный Offer перестаёт показываться | S0 | Foundation | CLOSED |
-| S2 | Auth | Пользователь входит по телефону через тестовый код | S0 | Foundation | CLOSED |
-| S3 | Seller / Location | Продавец создаёт свою точку продажи | S2 | Foundation | CLOSED |
-| S4 | Seller Input | Продавец создаёт один Change Set, подтверждает его, появляется Offer | S3 | Foundation | CLOSED |
-| S5 | Offer management | Продавец обновляет или выключает свой Offer через Change Set | S4 | Foundation | CLOSED |
-| S6 | Catalog | Поиск понимает Product и его поисковые варианты | S0 | Foundation | CLOSED |
-| S7 | Search | Покупатель находит реальные Offers, созданные продавцами | S4, S6 | MVP | CLOSED |
-| S8 | Geo / Location | Продавец сохраняет координаты своей Location; координаты валидируются и не публикуются как raw geo в Search | S3, S7 | MVP | CLOSED |
-| S9 | Search ranking | Опциональная transient buyer location меняет только порядок Search: distance → freshness; без geo — freshness; ordering детерминирован | S1, S8 | MVP | CLOSED |
-| S10 | Buyer action | Из Offer можно позвонить или перейти в WhatsApp / Telegram / Instagram | S7 | MVP | CLOSED |
-| S11 | Discovery | Покупатель открывает «Рядом» и видит актуальные товары поблизости | S8, S9 | MVP | CLOSED |
-| S12 | Seller Input | Продавец массово меняет несколько товаров одним Change Set | S5 | MVP | CLOSED |
-| S13 | Interests | Покупатель отмечает конкретный Product как интересующий | S2, S6 | MVP | PLANNED |
-| S14 | Discovery | Покупатель видит новые предложения по явно указанным интересам | S7, S13 | MVP | PLANNED |
-| S15 | Search learning | Оператор видит реальные запросы, нулевые выдачи и несопоставленные товары | S6, S7 | MVP | PLANNED |
-| S16 | Operations | Оператор может отключить ошибочный Offer или Seller | S7 | MVP / public beta | PLANNED |
-| S17 | AI Input | Продавец пишет свободный текст, AI предлагает Change Set | S12 | После MVP | PLANNED |
-| S18 | AI Input | Голос продавца превращается в предлагаемый Change Set | S17 | После MVP | PLANNED |
-| S19 | AI Input | Фото ассортимента превращается в предлагаемый Change Set | S17 | После MVP | PLANNED |
-| S20 | AI Input | Видео превращается в Change Set с несколькими Change Items | S17, S12 | После MVP | PLANNED |
-| S21 | Input channels | Telegram-бот использует ту же seller-input логику | S17 | После MVP | PLANNED |
-| S22 | Auth | Тестовый OTP заменяется реальным SMS-провайдером | S2 | До публичного запуска | PLANNED |
-| S23 | Notifications | Пользователь получает уведомление о новом Offer интересующего Product | S14 | После MVP | PLANNED |
-| S24 | Recommendations | Появляется детерминированная персональная выдача без ML | S14 + данные | После MVP | PLANNED |
-| S25 | Monetization | Система умеет ограничивать число активных Offers по политике тарифа | S5 | После MVP | PLANNED |
-| S26 | Subscription | Подписка меняет доступные лимиты и возможности Seller | S25 | После MVP | PLANNED |
-| S27 | Convenience | Платный тариф открывает ускоренные способы массового обновления | S20, S26 | После MVP | PLANNED |
-| S28 | Promotion | Seller может создать отдельное продвижение Offer | S9 | После MVP | PLANNED |
-| S29 | Promotion | Продвигаемый Offer получает дополнительный релевантный охват и маркируется | S28 | После MVP | PLANNED |
-| S30 | Recommendations | Поведенческий ranking учитывает клики, контакты и интересы | S24 + данные | Позднее | PLANNED |
-| S31 | Discovery | Редкость товара начинает влиять на показ | данные | Позднее | PLANNED |
-| S32 | Trust | Автоматическая модерация и поиск подозрительных Offers | данные | Позднее | PLANNED |
-| S33 | Seller analytics | Seller видит показы, открытия, контакты и эффективность продвижения | S28–S29 | Позднее | PLANNED |
+`input → SellerChangeSet → SellerChangeItem → confirmation/apply → Offer`
 
-## Оптимальный порядок первых slices
+AI не редактирует Offer напрямую.
 
-`S0 → S1 → S2 → S3 → S4 → S5 → S6 → S7 → S8 → S9 → S10 → S11 → S12 → S13 → S14 → S15`
+### Catalog
 
-AI появляется только после того, как без AI уже работает контур:
+Product ≠ search query.
 
-`Seller → ChangeSet → Offer → Search → Buyer`
+`Query Log → matched/unmatched/zero-result → analysis → controlled Product/alias/Category change`
 
-## Первые slices кратко
+Пользовательский запрос никогда не создаёт Product автоматически.
 
-### S0 — Первый поиск
+### Geo / markets
 
-П1 вводит `баранина` и получает тестовый Offer.
+Generic Location остаётся обычной точкой продажи.
 
-Не входят auth, карты, категории, AI, рекомендации, seller UI и монетизация.
+Если internal market navigation становится нужной, она развивается отдельным domain contour:
 
-Готово, если чистая установка позволяет загрузить seed, открыть приложение, найти баранину и получить правильный Offer, а неизвестный товар даёт empty state.
+`Market → MarketPlace → Seller Location`
 
-### S1 — Актуальность Offer
+Рынок не становится архитектурным центром KAIDA.KZ.
 
-Просроченный Offer перестаёт отображаться.
+### Media
 
-Входят status/last_confirmed_at и простая политика истечения. Не входят уведомления, cron-оркестрация и сложный freshness score.
+Seller-provided Offer media принадлежит Offer. Product canonical image/icon — отдельная capability.
 
-### S2 — Тестовая авторизация
+Offer media presentation и AI photo/video seller input — разные задачи и не должны смешиваться.
 
-Пользователь входит по номеру телефона через фиктивный OTP. Реальный SMS-провайдер не подключается.
+### Reviews / trust
 
-### S3 — Location продавца
+Reviews/rating допустимы только после отдельного data/moderation contract. Нельзя рисовать fake rating или reputation proxy заранее.
 
-П2 создаёт физическую точку продажи. Пока без сложной GIS-логики, схем рынков и филиальной архитектуры.
+### Monetization
 
-### S4 — Первый Seller Change Set
+Разделять:
 
-П2 вводит один товар, видит предлагаемое изменение, подтверждает его, после чего появляется Offer.
+- volume limits;
+- seller convenience;
+- Offer reach/promotion.
 
-AI не участвует.
+Promotion не обходит organic relevance/freshness eligibility.
 
-### S5 — Изменение Offer
+## MVP boundary
 
-П2 через Change Set меняет цену, комментарий, возвращает товар или выключает Offer.
+MVP должен доказать три цикла:
 
-### S6 — Product Catalog
+**Seller loop**  
+`Seller сообщает → подтверждает/обновляет → Offer остаётся актуальным`
 
-Появляются Category, Product, нормализованное имя, базовые aliases/synonyms и журнал запросов. Без AI и embeddings.
+**Buyer pull loop**  
+`Buyer ищет → находит актуальный Offer → связывается / строит маршрут`
 
-### S7 — Настоящий поиск
+**Buyer discovery loop**  
+`Buyer открывает KAIDA → видит актуальные Offers рядом или по явным интересам`
 
-Offer, подтверждённый Seller, становится виден Buyer в поиске.
+После S16 и committed core contour выполняется отдельный MVP/public-beta review. Само наличие будущих AI/monetization capabilities не является blocker для закрытого MVP.
 
-### S8 — Координаты Location
+## Что не строим заранее
 
-П2 сохраняет координаты своей точки через owner-only flow. В БД координаты должны быть полной парой, находиться в допустимых диапазонах и не принимать `NaN`/`Infinity`. Search может использовать Location geo внутренне, но не публикует raw coordinates покупателю.
+Без отдельного slice и измеримого сигнала не создавать:
 
-### S9 — Детерминированное ранжирование Search
+- микросервисы;
+- event bus/Kafka;
+- separate search cluster;
+- vector DB;
+- Kubernetes;
+- ML ranking;
+- generic notification platform;
+- сложную entitlement architecture;
+- пустые domain modules «на будущее».
 
-П1 может явно передать своё текущее местоположение только для конкретного Search. Оно не сохраняется как профильное состояние. При наличии buyer geo результаты сортируются по расстоянию, затем по freshness и стабильному tie-breaker; без buyer geo — по freshness и стабильному tie-breaker. Ranking metadata и raw geo не становятся публичным контрактом Offer.
-
-### S10 — Действие покупателя
-
-Из Offer можно выйти на продавца через телефон, WhatsApp, Telegram, Instagram. Корзина, заказ, платежи и внутренний чат не входят.
-
-### S11 — Что есть рядом
-
-П1 открывает ленту актуальных Offers рядом. Персонализация пока не используется.
-
-### S12 — Массовое ручное обновление
-
-Один SellerChangeSet содержит несколько SellerChangeItems. AI и видео пока не участвуют.
-
-### S13 — Явный интерес
-
-П1 явно отмечает Product как интересующий.
-
-### S14 — Для вас v0
-
-П1 видит Offers по явно указанным интересам без ML.
-
-### S15 — Search learning
-
-Оператор видит реальные поисковые запросы, zero-result и unmatched queries и на этой основе корректирует каталог вручную.
-
-## Где нельзя торопиться
-
-### AI
-
-AI должен быть только способом заполнить Seller Change Set. Он не должен быть частью ядра Offer lifecycle.
-
-### Рекомендации
-
-До накопления поведения достаточно Product Interest + расстояние + актуальность + новизна. ML до данных будет имитацией интеллекта.
-
-### Редкость
-
-Редкость нельзя надёжно оценивать до накопления статистики по предложениям, продавцам, времени и географии.
-
-### Монетизация
-
-Не жёстко зашивать лимит вроде `10 offers`. Нужна будущая политика/entitlement, но сама система тарифов не реализуется до отдельного slice.
-
-### Promotion
-
-Платное продвижение не должно ломать базовую релевантность поиска. Sponsored placement должен быть отделён от organic ranking.
-
-### Инфраструктура
-
-До появления измеримой проблемы не нужны микросервисы, Kafka, отдельный search cluster, vector DB, event bus, recommendation service или Kubernetes.
-
-## Что считать MVP
-
-Закрытый MVP должен доказать три цикла.
-
-**Seller loop:**
-
-`продавец сообщает → подтверждает → Offer становится актуальным`
-
-**Buyer pull loop:**
-
-`покупатель ищет → находит → связывается с продавцом`
-
-**Buyer discovery loop:**
-
-`покупатель открывает KAIDA → видит актуальный товар рядом или по интересу`
-
-Граница MVP ориентировочно находится после S15–S16, а не после появления AI.
-
-## Slice 0
-
-S0: **анонимный пользователь открывает KAIDA.KZ, вводит `баранина`, видит заранее созданный Offer и понимает, где её продают.**
-
-Это первый сквозной тест будущей архитектуры:
-
-`Browser → UI → API → Product/Offer/Location/Seller → PostgreSQL → Result`
+Текущую последовательность всегда брать из `docs/product/EXECUTION_PLAN.md`.

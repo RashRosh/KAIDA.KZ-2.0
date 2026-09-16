@@ -1,14 +1,133 @@
 # KAIDA.KZ 2.0
 
-Проверенная база проекта перед S2: `v0.0.2-s1`. В ветке `slice/s2-auth` реализуется S2 Auth: тестовый вход по телефону через динамический OTP, database-backed session и logout. Search S0/S1 остаётся анонимным.
+KAIDA.KZ помогает покупателю понять, **где сейчас купить нужный товар**, увидеть актуальные предложения поблизости и связаться с продавцом напрямую.
 
-До отдельной ручной приёмки S2 не считается READY, не merge в `main` и не получает tag `v0.0.3-s2`.
+Это не интернет-магазин с корзиной и checkout. Центральная сущность продукта — **Offer**: текущее подтверждённое предложение конкретного продавца в конкретной точке продажи.
+
+Базовый продуктовый цикл:
+
+`Seller Input → SellerChangeSet → Offer → Search / Discovery → Buyer Action`
+
+П1 = покупатель.  
+П2 = продавец.
+
+## Что уже работает
+
+Последний verified product checkpoint: **`v0.0.23-mandatory-offer-price`**.
+
+Закрыты и считаются product contracts:
+
+- S0–S13;
+- UX1A, UX1A.1, UX1A.2, UX1B, UX1C, UX1D;
+- UX2, UX2A;
+- Mandatory Offer Price.
+
+Фактически уже существуют:
+
+- анонимный Search по реальным seller Offers;
+- lifecycle Offer и исключение просроченных предложений;
+- phone/OTP test auth и persistent session;
+- Seller и Location;
+- SellerChangeSet / SellerChangeItem для создания и изменения Offers;
+- Product catalog + aliases;
+- geo Location и transient buyer location;
+- детерминированный Search ranking;
+- buyer actions: телефон, мессенджеры, маршрут;
+- Nearby;
+- batch manual Seller ChangeSet;
+- explicit Buyer interests;
+- responsive app shell и базовый seller flow;
+- обязательная цена для publishable Offer.
+
+Цена для publishable Offer сейчас обязательна: `price.amount >= 0`, `0` допустим, currency server-owned `KZT`, `unit = null` означает цену за Offer/лот/упаковку без `/unit` в buyer presentation.
+
+## Что делаем сейчас
+
+Текущая очередь **не берётся из README**. Канонический источник — [`docs/product/EXECUTION_PLAN.md`](docs/product/EXECUTION_PLAN.md).
+
+На текущем checkpoint следующий обязательный gate — **Issue #37: UX reference audit and Design System reconciliation**. Он включает сначала нормализацию живых проектных документов, затем сверку Design System с утверждённым UX-reference corpus.
+
+После закрытия #37 ближайший committed contour:
+
+`Seller Entry (#35) → Trading Points (#36) → Seller Offer Workspace (#27) → Freshness Policy (#31) → Freshness Reminder (#32) → Nearby correction (#34) → Search Sorting (#12) → M1 Offer media`
+
+Если очередь меняется, обновляется `EXECUTION_PLAN.md`; README остаётся обзором продукта, а не вторым roadmap.
+
+## Ключевые продуктовые правила
+
+### Offer и актуальность
+
+Offer — не карточка товара «вообще», а утверждение продавца о том, что товар доступен сейчас в конкретной Location.
+
+Свежесть — часть ценности KAIDA.KZ. Текущий closed lifecycle уже использует `last_confirmed_at`. Новая утверждённая policy `2 / 7 / 14` и proactive seller reminder зафиксированы в Issues #31 и #32 и будут реализовываться отдельными slices.
+
+### Seller Input
+
+Offer нельзя менять напрямую из seller-input канала.
+
+Инвариант:
+
+`Seller Input → SellerChangeSet → SellerChangeItem → confirmation/apply → Offer`
+
+В будущем текст, голос, фото, видео, web UI и Telegram должны использовать одну бизнес-логику. AI только предлагает Change Set; Seller подтверждает изменения.
+
+### Location
+
+Location — физическая точка продажи. Рынок не является центром архитектуры.
+
+Для больших рынков отдельно зафиксирована future-capability внутренней навигации: `Market → MarketPlace → Seller Location`, Issue #10. Она не должна превращать generic Location в набор nullable `market/row/stall/x/y` полей.
+
+### Buyer action
+
+KAIDA.KZ ведёт покупателя к продавцу, а не в checkout:
+
+- звонок;
+- WhatsApp / Telegram / Instagram, если доступны;
+- маршрут до Location.
+
+Корзина, заказ, оплата и доставка не добавляются без отдельного product slice.
+
+## Архитектура
+
+MVP — **modular monolith**. Микросервисы, Kafka, отдельный search cluster, vector DB и Kubernetes не добавляются без измеримой необходимости.
+
+Функциональные области появляются только когда их требует slice: Identity, Sellers, Locations, Catalog, Offers, Search, Discovery, Seller Input, AI Processing, Media, Reviews, Moderation, Notifications, Monetization, Analytics.
+
+Техническая база: [`docs/architecture/TECHNICAL_FOUNDATION_V0.md`](docs/architecture/TECHNICAL_FOUNDATION_V0.md).
+
+## Как устроены проектные документы
+
+У каждого типа информации один владелец:
+
+- [`AGENTS.md`](AGENTS.md) — короткий router для агента: что читать в зависимости от задачи;
+- [`docs/PROJECT_RULES.md`](docs/PROJECT_RULES.md) — процесс разработки и стабильные архитектурные правила;
+- [`docs/product/EXECUTION_PLAN.md`](docs/product/EXECUTION_PLAN.md) — **единственный источник текущей очередности**;
+- [`docs/product/FEATURE_MAP.md`](docs/product/FEATURE_MAP.md) — долгосрочная карта capabilities и зависимостей, не roadmap текущего дня;
+- GitHub Issues — подробные требования ещё не закрытой работы;
+- [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — UI/presentation rules;
+- [`docs/product/UX_REFERENCE_INDEX.md`](docs/product/UX_REFERENCE_INDEX.md) — routing по внешним UX references и результаты UX audit;
+- [`docs/UX_BACKLOG.md`](docs/UX_BACKLOG.md) — только короткий inbox ещё не разобранных UX-наблюдений;
+- `docs/slices/**/SLICE_CONTRACT.md` и исторические slice docs — точное поведение и evidence конкретных закрытых slices;
+- [`docs/agents/KAIDA_CONTROLLER.md`](docs/agents/KAIDA_CONTROLLER.md) — процедура независимой проверки slice.
+
+Фактический `main`, tag и CI всегда проверяются в GitHub. Текст из чата или старый SHA в документе не заменяет repository state.
+
+## Разработка
+
+Проект развивается маленькими vertical slices. Каждый product slice решает одну user task end-to-end и после завершения оставляет заведомо рабочий checkpoint.
+
+Нормальный цикл:
+
+`Slice Contract → implementation → targeted tests → full branch CI → manual acceptance → merge → merged-main CI → annotated checkpoint tag`
+
+Если новый slice требует изменить closed contract, изменение сначала явно согласовывается; соседний рефакторинг «заодно» запрещён.
 
 ## Stack
 
 - Node.js 24 LTS;
 - pnpm 11.19.0;
 - Next.js 16 App Router / Route Handlers;
+- React 19;
 - TypeScript strict;
 - PostgreSQL 18;
 - Drizzle ORM;
@@ -16,7 +135,7 @@
 - Vitest;
 - Playwright Chromium.
 
-Docker используется только для PostgreSQL. Mock/SQLite вместо integration database не используются.
+Docker используется для PostgreSQL. Integration tests работают с реальным PostgreSQL, не с SQLite/mock database.
 
 ## Локальный запуск
 
@@ -27,146 +146,25 @@ corepack enable
 corepack prepare pnpm@11.19.0 --activate
 pnpm install --frozen-lockfile
 cp .env.example .env
-```
-
-S2 требует локальный OTP HMAC secret. Сгенерируйте 32 random bytes / 64 hex characters стандартным `node:crypto`:
-
-```bash
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
-```
-
-Скопируйте результат в `.env`:
-
-```text
-IDENTITY_OTP_HMAC_SECRET_HEX=<64 hex characters>
-```
-
-Insecure fallback отсутствует. Настоящий secret в Git не коммитится. Для S2 не требуется внешний secret manager.
-
-Далее:
-
-```bash
 docker compose up -d --wait
 pnpm db:migrate
 pnpm db:seed
 pnpm dev
 ```
 
-Откройте `http://localhost:3000`.
+Для локального test OTP нужен `IDENTITY_OTP_HMAC_SECRET_HEX`. Сгенерировать 32 random bytes:
 
-## Environment
-
-Минимум:
-
-```text
-DATABASE_URL=postgresql://kaida:kaida_local@127.0.0.1:5432/kaida
-TEST_DATABASE_URL=postgresql://kaida:kaida_local@127.0.0.1:5432/kaida_test
-OFFER_VALIDITY_PERIOD_HOURS=168
-IDENTITY_OTP_TTL_SECONDS=300
-IDENTITY_SESSION_TTL_SECONDS=2592000
-IDENTITY_OTP_HMAC_SECRET_HEX=<required 64 hex chars>
-IDENTITY_COOKIE_SECURE=false
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-`OFFER_VALIDITY_PERIOD_HOURS=168`, OTP TTL 300 seconds и Session TTL 30 days являются technical defaults, не финальной продуктовой политикой.
+Актуальный полный перечень переменных — в [`.env.example`](.env.example).
 
-`IDENTITY_COOKIE_SECURE=false` допустим для локального HTTP. Public HTTPS deployment обязан использовать Secure cookie.
-
-## S2 Auth
-
-Пользовательский flow:
-
-```text
-anonymous
-→ phone
-→ test OTP
-→ verify
-→ User
-→ PostgreSQL session
-→ authenticated
-→ reload/browser reopen
-→ logout
-→ anonymous
-```
-
-Phone input S2 принимает KZ-oriented `+7` формы и нормализует к `+7XXXXXXXXXX`. Реального SMS в S2 нет.
-
-Каждый OTP request создаёт новый случайный six-digit code. Test delivery показывает code в UI. Plaintext OTP в PostgreSQL не хранится: verification material = HMAC-SHA-256 с отдельным 32-byte server secret.
-
-Session token создаётся как 32 random bytes, кодируется base64url и выдаётся только HttpOnly cookie `kaida_session`. В PostgreSQL хранится SHA-256 digest token.
-
-Cookie successful login:
-
-- HttpOnly;
-- SameSite=Lax;
-- Path=/;
-- configured Secure;
-- Expires = server session expires_at;
-- Max-Age = configured Session TTL.
-
-Logout удаляет DB session и ту же cookie с `Max-Age=0` и expired `Expires`.
-
-PostgreSQL `auth_sessions.expires_at` остаётся server-side source of truth.
-
-### Auth API
-
-- `POST /api/auth/otp/request`;
-- `POST /api/auth/otp/verify`;
-- `GET /api/auth/me`;
-- `POST /api/auth/logout`.
-
-Anonymous `/api/auth/me` возвращает HTTP 200:
-
-```json
-{ "user": null }
-```
-
-`GET /api/search?q=...` остаётся полностью anonymous.
-
-## Concurrency guarantees
-
-OTP replacement сериализуется per canonical phone через PostgreSQL transaction advisory lock. Lock key детерминированно вычисляется как SHA-256 от domain-separated phone, первые 8 bytes читаются как signed int64. Key не хранится в business data.
-
-Дополнительно PostgreSQL partial unique index запрещает два unfinished challenges одного phone.
-
-OTP consume выполняется conditional `UPDATE ... RETURNING` внутри той же transaction, где выполняются User get-or-create и session insert. Поэтому два concurrent verify одного challenge не могут дать два successful login.
-
-`users.phone_e164` имеет PostgreSQL UNIQUE. User creation использует `INSERT ... ON CONFLICT DO NOTHING`, затем lookup existing User.
-
-## Database / migrations
-
-Migration chain:
-
-- `0000_s0_first_search.sql`;
-- `0001_s1_offer_lifecycle.sql`;
-- `0002_s2_auth.sql`.
-
-S2 добавляет ровно три Identity tables:
-
-- `users`;
-- `auth_otp_challenges`;
-- `auth_sessions`.
-
-`0000` и `0001` не изменяются. Products/Sellers/Locations/Offers schema не меняется.
-
-S2 verification проверяет и clean chain, и real S1 → S2 upgrade на отдельной temporary PostgreSQL 18 database `kaida_s2_upgrade_test`.
-
-## Search / Offer lifecycle regression
-
-S0/S1 contracts сохраняются:
-
-- `баранина` → актуальный Offer;
-- `говядина` → nullable price;
-- `единорог` → empty;
-- exact case-insensitive Product search + trim;
-- Offer visible только если `status = active AND last_confirmed_at > cutoff`;
-- boundary `+1 ms / == cutoff / -1 ms` остаётся прежним.
-
-Identity не подключается к Search в S2. Global auth middleware отсутствует.
+Открыть: `http://localhost:3000`.
 
 ## Verification
 
-Установить Chromium один раз:
+Установить Chromium:
 
 ```bash
 pnpm exec playwright install --with-deps chromium
@@ -178,46 +176,10 @@ pnpm exec playwright install --with-deps chromium
 pnpm verify
 ```
 
-Он включает lint, typecheck, migrations, seed, clean test DB, unit, integration, production build и mobile+desktop E2E.
+`pnpm verify` включает lint, typecheck, migrations, seed, подготовку test DB, unit, integration, production build и E2E.
 
-GitHub Actions поднимает реальный `postgres:18` и выполняет тот же `pnpm verify` с explicit synthetic Identity test secret.
+## Public-launch caveat
 
-S2 дополнительно проверяет:
+Текущий phone auth использует **test OTP** и подходит для закрытого теста. Перед публичным запуском нужен отдельный real-SMS/security gate: provider, rate limiting, brute-force/abuse protection, resend/delivery policy, production secrets и Secure cookie.
 
-- phone/config/crypto/cookie unit tests;
-- OTP request/verify/session integration;
-- concurrent OTP requests;
-- exactly-one-success concurrent OTP consume;
-- concurrent User uniqueness;
-- S1 → S2 migration upgrade;
-- anonymous Search до/после login/logout;
-- persistent cookie/auth state;
-- expired OTP через direct DB test setup без debug API.
-
-## Public-launch security gate
-
-S2 предназначен только для закрытого теста и **не готов для публичного запуска**.
-
-До public launch обязательны:
-
-- убрать test OTP из API/UI;
-- подключить real SMS provider;
-- rate limiting request/verify;
-- brute-force protection;
-- anti-abuse controls;
-- resend policy;
-- delivery failure/retry policy;
-- production secret-management review;
-- Secure=true на публичном HTTPS deployment.
-
-Это launch blockers, а не необязательные улучшения. Основной переход предусмотрен S22.
-
-## Документы
-
-- `docs/PROJECT_RULES.md`;
-- `docs/architecture/TECHNICAL_FOUNDATION_V0.md`;
-- `docs/product/FEATURE_MAP.md`;
-- `docs/slices/S2-auth/FEATURE_SPEC.md`;
-- `docs/slices/S2-auth/IMPLEMENTATION_CONTRACT.md`;
-- `docs/slices/S2-auth/IMPLEMENTATION_NOTES.md`;
-- `docs/slices/S2-auth/VERIFICATION.md`.
+Текущая разработка и очередность публичного запуска определяются только через `EXECUTION_PLAN.md` и соответствующие Slice Contracts.
