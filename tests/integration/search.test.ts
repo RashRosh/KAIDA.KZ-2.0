@@ -4,7 +4,7 @@ import { searchOffers } from '../../src/modules/search/application/search-offers
 import { searchResponseSchema } from '../../src/modules/search/contracts/search.contract';
 import { connectTestDatabase } from './database';
 
-describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
+describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
   beforeAll(async () => { connection = await connectTestDatabase(); });
   afterAll(async () => { await connection?.pool.end(); });
@@ -39,10 +39,14 @@ describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
     expect((await searchOffers(query, connection.db)).offers).toEqual([]);
   });
 
-  it('returns nullable price for beef', async () => {
+  it('returns a mandatory KZT price with null unit for beef', async () => {
     const { offers } = await searchOffers('говядина', connection.db);
     expect(offers).toHaveLength(1);
-    expect(offers[0]).toMatchObject({ id: seedIds.beefOffer, product: { name: 'Говядина' }, price: null });
+    expect(offers[0]).toMatchObject({
+      id: seedIds.beefOffer,
+      product: { name: 'Говядина' },
+      price: { amount: '3900.00', currency: 'KZT', unit: null },
+    });
   });
 
   it('keeps only the deterministic seed fixtures stable on repeat with the same controlled seed time', async () => {
@@ -90,10 +94,10 @@ describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
     }
   });
 
-  it('rejects an offer pointing at a nonexistent product', async () => {
+  it('rejects a priced offer pointing at a nonexistent product', async () => {
     await expect(connection.pool.query(
-      `INSERT INTO offers (product_id, seller_id, location_id, status, last_confirmed_at)
-       VALUES ($1,$2,$3,'active',$4)`,
+      `INSERT INTO offers (product_id, seller_id, location_id, price_amount, price_currency, status, last_confirmed_at)
+       VALUES ($1,$2,$3,'1','KZT','active',$4)`,
       ['10000000-0000-4000-8000-000000000099', seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
     )).rejects.toMatchObject({ code: '23503' });
   });
@@ -102,17 +106,17 @@ describe('S0 Search regression against PostgreSQL 18 after UX1D', () => {
     await expect(connection.pool.query('INSERT INTO products (name) VALUES ($1)', [name])).rejects.toMatchObject({ code });
   });
 
-  it('accepts zero price and a null seller comment', async () => {
+  it('accepts zero price, null unit and a null seller comment', async () => {
     const client = await connection.pool.connect();
     try {
       await client.query('BEGIN');
       const result = await client.query(
         `INSERT INTO offers (
-          product_id, seller_id, location_id, price_amount, price_currency, seller_comment, status, last_confirmed_at
-        ) VALUES ($1,$2,$3,0,'KZT',NULL,'active',$4) RETURNING price_amount, seller_comment`,
+          product_id, seller_id, location_id, price_amount, price_currency, price_unit, seller_comment, status, last_confirmed_at
+        ) VALUES ($1,$2,$3,0,'KZT',NULL,NULL,'active',$4) RETURNING price_amount, price_unit, seller_comment`,
         [seedIds.lambProduct, seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
       );
-      expect(result.rows[0]).toEqual({ price_amount: '0', seller_comment: null });
+      expect(result.rows[0]).toEqual({ price_amount: '0', price_unit: null, seller_comment: null });
     } finally {
       await client.query('ROLLBACK');
       client.release();
