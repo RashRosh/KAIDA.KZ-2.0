@@ -9,6 +9,7 @@ import {
   LocationNotFoundError,
   OfferAlreadyInactiveError,
   OfferNotFoundError,
+  OfferPriceRequiredError,
   OfferUpdateNoChangesError,
   ProductAmbiguousError,
   ProductNotFoundError,
@@ -41,7 +42,7 @@ function normalizedCurrentPrice(offer: {
     if (offer.priceCurrency !== null || offer.priceUnit !== null) {
       throw new SellerInputInvariantError('Target Offer содержит некорректную форму цены.');
     }
-    return { amount: null, currency: null, unit: null } as const;
+    return null;
   }
   if (offer.priceCurrency !== 'KZT') {
     throw new SellerInputInvariantError('Цена target Offer имеет неподдерживаемую валюту.');
@@ -66,8 +67,8 @@ type PreparedCreateItem = {
   action: 'create_offer';
   productId: string;
   locationId: string;
-  priceAmount: string | null;
-  priceCurrency: 'KZT' | null;
+  priceAmount: string;
+  priceCurrency: 'KZT';
   priceUnit: string | null;
   sellerComment: string | null;
 };
@@ -76,8 +77,8 @@ type PreparedManagementItem = {
   action: 'update_offer' | 'deactivate_offer' | 'activate_offer';
   productId: string;
   locationId: string;
-  priceAmount: string | null;
-  priceCurrency: 'KZT' | null;
+  priceAmount: string;
+  priceCurrency: 'KZT';
   priceUnit: string | null;
   sellerComment: string | null;
   targetOfferId: string;
@@ -103,9 +104,9 @@ async function prepareItem(
       action: 'create_offer',
       productId: resolution.product.id,
       locationId: location.id,
-      priceAmount: input.price?.amount ?? null,
-      priceCurrency: input.price ? 'KZT' : null,
-      priceUnit: input.price?.unit ?? null,
+      priceAmount: input.price.amount,
+      priceCurrency: 'KZT',
+      priceUnit: input.price.unit,
       sellerComment: input.sellerComment ?? null,
     };
   }
@@ -119,16 +120,15 @@ async function prepareItem(
     throw new SellerInputInvariantError('Target Offer содержит некорректную revision.');
   }
 
-  const currentPrice = normalizedCurrentPrice(offer);
   if (input.action === 'update_offer') {
     if (offerUpdateIsNoOp(offer, input)) throw new OfferUpdateNoChangesError();
     return {
       action: input.action,
       productId: offer.productId,
       locationId: offer.locationId,
-      priceAmount: input.price?.amount ?? null,
-      priceCurrency: input.price ? 'KZT' : null,
-      priceUnit: input.price?.unit ?? null,
+      priceAmount: input.price.amount,
+      priceCurrency: 'KZT',
+      priceUnit: input.price.unit,
       sellerComment: input.sellerComment,
       targetOfferId: offer.id,
       expectedOfferRevision: offer.revision,
@@ -139,13 +139,16 @@ async function prepareItem(
     throw new OfferAlreadyInactiveError();
   }
 
+  const currentPrice = normalizedCurrentPrice(offer);
+  if (!currentPrice) throw new OfferPriceRequiredError();
+
   return {
     action: input.action,
     productId: offer.productId,
     locationId: offer.locationId,
     priceAmount: currentPrice.amount,
-    priceCurrency: currentPrice.amount === null ? null : 'KZT',
-    priceUnit: currentPrice.amount === null ? null : currentPrice.unit,
+    priceCurrency: 'KZT',
+    priceUnit: currentPrice.unit,
     sellerComment: normalizeNullableText(offer.sellerComment),
     targetOfferId: offer.id,
     expectedOfferRevision: offer.revision,
