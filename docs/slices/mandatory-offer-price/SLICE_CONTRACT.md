@@ -1,7 +1,7 @@
 # Mandatory Offer Price - Slice Contract
 
-**Status:** READY FOR CONTROLLER REVIEW  
-**Implementation:** NOT STARTED
+**Status:** APPROVED - IMPLEMENTATION AUTHORIZED  
+**Implementation:** AUTHORIZED
 
 ## 1. User task
 
