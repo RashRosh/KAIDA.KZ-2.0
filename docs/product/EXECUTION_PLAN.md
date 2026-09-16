@@ -7,400 +7,305 @@
 Он отвечает на вопросы:
 
 - какой verified product checkpoint сейчас последний;
-- какой executable slice идёт следующим;
-- какие этапы уже твёрдо включены в ближайшую очередь;
-- какие future capabilities могут быть вставлены раньше при наступлении понятного trigger;
-- какие вещи сознательно оставлены на более поздний этап.
+- что делаем следующим;
+- какие этапы твёрдо включены в ближайшую очередь;
+- где допускаются insertion decisions;
+- какие future capabilities пока не имеют фиксированного места.
 
-Он **не заменяет**:
+Он не заменяет:
 
-- `docs/PROJECT_RULES.md` — правила разработки и verification;
+- `docs/PROJECT_RULES.md` — процесс разработки и verification;
 - `docs/product/FEATURE_MAP.md` — долгосрочную карту capabilities и зависимостей;
+- `docs/DESIGN_SYSTEM.md` — визуальные и presentation rules;
 - Slice Contracts — точное поведение конкретного slice;
-- `docs/UX_BACKLOG.md` и GitHub Issues — наблюдения, product gaps и будущие идеи.
+- `docs/UX_BACKLOG.md` и GitHub Issues — наблюдения, gaps и future ideas.
 
-Новая идея сначала попадает в backlog / issue. Она не меняет уже открытый executable slice. Положение в очереди меняется только отдельным product decision и обновлением этого файла на checkpoint boundary.
+Перед началом любой работы исполнитель обязан проверить фактический `main`, checkpoint/tag и CI evidence. SHA в этом документе являются зафиксированным состоянием на момент обновления, а не заменой проверки репозитория.
 
-## Приоритет источников для планирования
+## Приоритет источников
+
+Для планирования:
 
 1. фактический repository state / verified checkpoint;
 2. `docs/PROJECT_RULES.md`;
-3. **этот `EXECUTION_PLAN.md` — для текущей очередности и insertion decisions**;
-4. `docs/product/FEATURE_MAP.md` — для общей карты и зависимостей;
-5. `docs/UX_BACKLOG.md` и Issues — для ещё не включённых наблюдений и требований.
+3. этот `EXECUTION_PLAN.md`;
+4. `docs/product/FEATURE_MAP.md`;
+5. `docs/UX_BACKLOG.md` и Issues.
 
-Если Feature Map или UX Backlog содержат устаревший статус, это не должно автоматически менять очередь. Сначала синхронизируется документация.
+Для UI/UX решений дополнительно действуют `docs/DESIGN_SYSTEM.md` и `docs/product/UX_REFERENCE_INDEX.md`. Внешние UX-материалы являются advisory evidence и не изменяют закрытые contracts автоматически.
 
-## Текущее состояние
+## Текущее verified состояние
 
-Последний ранее зафиксированный product checkpoint:
+Последний verified product checkpoint:
 
-- tag: `v0.0.21-ux2`;
-- commit: `819063ba005b6c51e3ff42129e79530ab2dc31cc`;
-- UX2 — Seller onboarding — CLOSED.
+- tag: `v0.0.23-mandatory-price`;
+- commit: `6abc68ac7d67b368c91cc350f48829f839ecc76e`;
+- Mandatory Offer Price — CLOSED;
+- Issue #13 — CLOSED / completed.
 
-UX2A — post-UX2 Search / App Shell responsive correction — уже merged в `main`:
+Закрытый price contract:
 
-- merge commit: `66fb1def48b59f9321b2c3eb21cb0320ac3071ce`;
-- branch CI и manual acceptance были PASS до merge.
+- publishable Offer требует `price.amount`;
+- `0` допустим, отрицательный amount недопустим;
+- currency server-owned `KZT`;
+- `unit = null` допустим и означает цену за Offer/лот/упаковку без `/unit` в buyer presentation;
+- buyer-facing publishable Offer без цены невозможен;
+- legacy no-price remediation не придумывает цену и не удаляет историю;
+- SellerChangeSet boundary сохранён.
 
-Перед началом следующего executable slice исполнитель обязан заново проверить фактический `main`, latest verified checkpoint/tag и CI evidence. Не доверять SHA из этого документа, если repository state уже изменился.
+До этого закрыты `S0–S13`, `UX1A`, `UX1A.1`, `UX1A.2`, `UX1B`, `UX1C`, `UX1D`, `UX2`, `UX2A`.
 
-Закрытые product / UX capabilities до UX2:
+## Правило очередности
 
-`S0–S13 → UX1A → UX1A.1 → UX1A.2 → UX1B → UX1C → UX1D → UX2`
+Работа делится на три класса:
 
-UX2A product behavior считается реализованным в `main`; его окончательный checkpoint evidence проверяется по repository state перед следующим slice.
+### COMMITTED
 
-## Три класса будущей работы
+Твёрдая ближайшая очередь. Следующий этап берётся сверху вниз. Перескочить через него можно только после отдельного Product Owner decision и обновления этого файла.
 
-### A. COMMITTED
+### INSERTION CANDIDATE
 
-Твёрдая ближайшая очередь. Следующий executable slice выбирается сверху вниз.
+Capability зафиксирована, но не имеет жёсткого номера. Для неё фиксируются earliest insertion point, trigger и latest useful point. Она рассматривается только на checkpoint boundary и не вклинивается внутрь уже открытого slice.
 
-Перескочить через пункт можно только после отдельного решения Product Owner и изменения этого документа.
+### LATER
 
-### B. INSERTION CANDIDATE
+Capability сознательно не участвует в ближайшем выборе до нового product signal/decision.
 
-Зафиксированная capability, которая **не означает «после всего»**.
+Если обнаружено утверждённое требование, которому нет места ни здесь, ни в Feature Map, оно считается `UNPLACED GAP` и должно быть явно разобрано, а не автоматически отправлено «после всего».
 
-Для неё должны быть понятны:
+---
 
-- `earliest insertion point` — раньше какого состояния её нельзя разумно начинать;
-- `trigger` — какое наблюдение или условие делает её актуальной сейчас;
-- `latest useful point` — до какого рубежа желательно принять решение, если capability нужна конкретному пилоту / запуску.
+# NEXT — UX Reference Audit / Design System reconciliation
 
-Insertion candidate не вклинивается внутрь уже открытого executable slice. Он рассматривается только на checkpoint boundary.
+Связано с Issue #37.
 
-### C. LATER
+Это **обязательный docs/research maintenance gate перед следующим UI/UX product slice**, а не продуктовая фича.
 
-Capability сознательно не нужна текущему MVP-контуру или ещё не имеет достаточных данных / product signal.
+Причина: несколько последовательных manual walkthrough выявили системные UX gaps, которые не стоит исправлять по одному экрану без сверки общей системы: лишний Nearby hero, отдельный geo toggle в Search, тупиковый seller onboarding, технический Seller cabinet и перегруженный ChangeSet-facing manual flow.
 
-Она остаётся в Feature Map / issue, но не участвует в выборе следующего slice до отдельного product decision.
+## Что должен сделать audit
 
-## Gate R1 decision — CLOSED
+1. Прочитать текущий `docs/DESIGN_SYSTEM.md` и закрытые UI/product contracts.
+2. Использовать `docs/product/UX_REFERENCE_INDEX.md` для выбора только релевантных материалов из Product Owner UX corpus в Google Drive.
+3. Для каждого вывода использовать классификацию:
+   - `KEEP` — правило KAIDA уже корректно;
+   - `ADAPT` — внешняя практика полезна после адаптации под KAIDA;
+   - `REJECT` — практика не подходит продуктовой модели или конфликтует с closed contract;
+   - `GAP` — полезное правило отсутствует и требует Product Owner decision до реализации.
+4. Обновить Design System минимально по утверждённым результатам.
+5. Не менять production UI/API/DB в рамках audit.
 
-После UX2A ручная product walkthrough выявила критичный seller-loop UX gap: обычное добавление и редактирование товара требуют лишних переходов и выставляют внутреннюю механику SellerChangeSet наружу.
+UX corpus folder:
 
-Product Owner решил не оставлять этот gap до конца roadmap.
+`https://drive.google.com/drive/folders/1Yb8ZWU5JnyzL4nj_7LS1SxRiW7tTEjk-?usp=sharing`
 
-Первое R1 decision:
+## Explicit Product Owner media decision
 
-1. сначала закрыть **Mandatory Offer Price** как бизнес-инвариант;
-2. затем выполнить отдельный **Seller Offer Workspace** slice по Issue #27;
-3. только после этого продолжить Search Sorting.
+Предыдущий абсолютный запрет Design System на media slots до M1 больше не является целевым правилом.
 
-После дополнительного walkthrough seller loop обнаружен ещё один core product gap: KAIDA.KZ должен не только хранить freshness, но и регулярно заставлять продавца подтверждать, что Offer всё ещё актуален. Product Owner утвердил отдельный **Seller Freshness Loop** до Search Sorting.
+Product Owner разрешил **временную demo/placeholder media presentation во время pre-MVP разработки, включая этапы до M1**, если она помогает честно спроектировать карточки и layout.
 
-Итоговый R1 / post-R1 committed order зафиксирован ниже.
+Граница решения:
 
-## Core product rule — Seller Freshness Loop
+- demo/placeholder media нельзя выдавать за реальные seller-uploaded Offer media;
+- нельзя вводить seller upload/storage/API/lifecycle/media business semantics до соответствующего M1 contract;
+- production behavior не должен зависеть от demo media;
+- M1 по-прежнему владеет реальными seller-provided Offer photos end-to-end;
+- audit обязан убрать противоречие из `docs/DESIGN_SYSTEM.md` до начала следующего UI product slice.
 
-Freshness Offer определяется от `last_confirmed_at`. Утверждена начальная policy `2 / 7 / 14` суток; thresholds должны задаваться policy/configuration, а не размазываться hard-coded constants по коду.
+Пока Issue #37 не закрыт и audit docs не merged в `main`, **следующий UI/UX product slice не начинается**.
 
-### Buyer semantics
+---
 
-- `< 2 days` — Offer fresh, обычная buyer-facing выдача;
-- `>= 2 days and < 7 days` — Offer ageing, остаётся buyer-visible, но попадает в более низкий deterministic freshness tier; buyer видит понятный возраст вроде `Обновлено 3 дня назад`;
-- `>= 7 days` — Offer исключён из всех buyer-facing выдач: Search, Nearby, Discovery;
-- buyer-facing Offer с возрастом актуальности `>= 7 days` существовать не должен.
+# COMMITTED — после UX audit
 
-Freshness tier сильнее обычной сортировки: fresh eligible Offers идут выше ageing eligible Offers. Внутри одного tier применяются актуальные правила Search sorting / ranking и deterministic tie-breakers.
+## 1. Seller Entry / contextual auth
 
-### Seller semantics
+Issue #35.
 
-- успешное `Всё без изменений` обновляет freshness до времени confirmation;
-- успешное изменение Offer также обновляет freshness до времени confirmation;
-- `>= 14 days` без актуализации — Offer исчезает из обычного рабочего списка Seller через archive/hidden lifecycle;
-- это **не hard delete**: Offer, ChangeSets и история остаются сохранены; physical deletion не является частью этой policy.
+User task: нажатие `Продавцу` должно вести к seller intent без тупиковой anonymous setup page.
 
-### Reminder semantics
+Утверждённое направление:
 
-Продавец должен регулярно получать prompt на reconfirmation активных Offers. Целевое направление — примерно ежедневный cadence, но reminder cadence является отдельной policy/configuration и не совпадает автоматически с 2/7/14 thresholds.
+- anonymous User: `Продавцу` -> существующий phone/OTP Auth modal;
+- successful auth из seller intent -> сразу `/seller`;
+- cancel -> остаётся на исходной buyer page;
+- authenticated User -> `/seller` напрямую;
+- S2 auth/session/security contracts сохраняются.
 
-Notification transport не фиксируется заранее как SMS / Telegram / Web Push. Отдельный reminder slice обязан выбрать минимальный реальный канал для текущей стадии и явно доказать scheduler/external-service/privacy/idempotency risks, если они действительно возникают.
+Это отдельный маленький slice перед перестройкой Seller Workspace.
 
-SellerChangeSet остаётся обязательной архитектурной границей. Ни reconfirmation, ни reminder не дают прямой write в Offer.
+## 2. Seller Trading Points Workspace
 
-## COMMITTED — текущая твёрдая очередь
+Issue #36.
 
-### 1. NEXT — Mandatory Offer Price
+User task: Seller видит торговые точки как понятные cards, может открыть карточку для редактирования и добавить ещё одну через соседний add-card/`+`.
 
-Связано с Issue #13.
+Правила:
 
-Product decision:
+- multiple Locations разрешены;
+- Seller contacts остаются Seller-level data;
+- Location хранит собственные name/type/address/geo;
+- не дублировать глобальные контакты по каждой Location без отдельного product decision;
+- при нескольких Locations Offer creation/edit обязан давать понятный Location choice;
+- Market internal navigation остаётся отдельной capability #10.
 
-- Seller не может создать/подтвердить publishable Offer без цены;
-- Seller не может удалить цену и оставить Offer publishable;
-- buyer-facing Offer всегда имеет цену.
+## 3. Seller Offer Workspace
 
-Это не UI-fix. Изменение конфликтует с закрытыми S4/S5 contracts и требует отдельного STOP/review и Slice Contract.
+Issue #27.
 
-До реализации определить semantics `unit` и безопасную forward migration. Исторические migrations не переписывать.
+User task: Seller управляет товарами как marketplace cards, а не как технической таблицей/ChangeSet console.
 
-### 2. Seller Offer Workspace — simplified manual seller loop
+Утверждённое направление:
 
-Связано с Issue #27.
+- `Мои товары` — card/grid layout;
+- рядом add-card / `Добавить товар`;
+- card показывает buyer-relevant core state: Product, mandatory price/unit semantics, Location, freshness/status и media presentation согласно актуальному Design System;
+- click card -> direct manual edit on seller workspace surface;
+- один понятный primary action завершает точное manual add/edit;
+- после success Seller остаётся в workspace;
+- ordinary UI не показывает `SellerChangeSet`, `ChangeItem`, `proposed`, `confirmed` и technical IDs как пользовательские понятия;
+- если first-time Seller начал с товара, финальный publish при нехватке Seller/Location data запрашивает их и продолжает намерение без потери заполненной формы.
 
-User task: P2 может добавить, изменить, выключить или подтвердить актуальность товара без технического путешествия по SellerChangeSet screens.
-
-Утверждённое UX-направление:
-
-- использовать Bolt seller flow как **UX/composition reference**, но не как архитектурную базу;
-- обычная работа происходит на одной seller workspace surface;
-- `Мои товары` видны в одном месте;
-- `+ Добавить товар` открывает короткую inline/local форму;
-- один понятный primary action завершает точное ручное действие;
-- после успеха Seller остаётся на seller workspace и сразу видит актуальный Offer;
-- edit выполняется in-place / inline без обязательного перехода на техническую review page;
-- freshness interaction должен поддерживать понятные seller actions вроде `Всё без изменений` и `Что-то изменилось`;
-- deactivate/reactivate/refresh не должны заставлять пользователя думать терминами ChangeSet, если отдельный safety confirmation не нужен по реальному риску;
-- ordinary seller UI не показывает `SellerChangeSet`, `ChangeItem`, `proposed`, `confirmed` или технические Offer IDs как пользовательские понятия.
-
-Архитектурные invariants сохраняются:
+Архитектура не меняется скрытно:
 
 `Seller Input -> SellerChangeSet -> SellerChangeItem -> confirmation/apply -> Offer`
 
-Нельзя обходить SellerChangeSet или давать Seller Input прямой write в Offer.
+S4/S5 presentation/confirmation contract revision должен быть явным в Slice Contract. Batch S12 не редизайнится автоматически.
 
-Сохраняются ownership, persisted server state, atomicity, idempotency/concurrency guarantees и S12 aggregate semantics.
+## 4. Seller Freshness Policy — 2 / 7 / 14
 
-Slice Contract обязан явно пересмотреть закрытые S4/S5 presentation/confirmation semantics: текущий contract требует отдельной addressable review surface и отдельного confirm action. Для точного manual input допускается сделать финальный submit формы тем самым explicit confirmation/apply action, если архитектурная граница ChangeSet остаётся доказанной.
+Issue #31.
 
-Batch S12 не редизайнить автоматически; только проверить, не нарушает ли новый single-item UX общий закрытый contract.
-
-### 3. Seller Freshness Policy — lifecycle degradation 2 / 7 / 14
-
-Связано с Issue #31.
-
-User task: Buyer понимает степень свежести предложения и никогда не видит Offer старше 7 суток; Seller не держит бесконечно заброшенные Offers в рабочем кабинете.
-
-Минимальное направление:
+Core rule:
 
 - `< 2d` — fresh;
-- `2d <= age < 7d` — ageing, buyer-visible, ниже fresh tier, с понятной age label;
-- `age >= 7d` — исключение из Search / Nearby / Discovery;
-- `age >= 14d` — скрытие/архив из обычного Seller workspace без hard delete;
-- любое successful reconfirm/update сбрасывает freshness clock;
-- policy thresholds configurable;
-- deterministic boundary tests на ровно `2d`, `7d`, `14d`, без sleep.
+- `2d <= age < 7d` — ageing, buyer-visible, но ниже fresh tier; buyer видит понятную age label;
+- `age >= 7d` — Offer полностью исключён из Search / Nearby / Discovery;
+- `age >= 14d` — Offer исчезает из обычного Seller working list через archive/hidden lifecycle без hard delete;
+- `Всё без изменений` и successful edit обновляют `last_confirmed_at`;
+- thresholds задаются policy/configuration;
+- boundary tests на ровно 2d/7d/14d deterministic, без sleep.
 
-Closed-contract revision затрагивает S1/S5/S9. Перед реализацией нужен отдельный STOP/review и Slice Contract; не переписывать исторические migrations.
+Freshness tier сильнее обычной сортировки: fresh eligible Offers идут выше ageing eligible Offers; внутри tier применяется выбранный sort и deterministic tie-breakers.
 
-### 4. Seller Freshness Reminder — proactive reconfirmation loop
+## 5. Seller Freshness Reminder
 
-Связано с Issue #32.
-
-User task: Seller не обязан сам помнить, когда нужно освежить Offers; KAIDA.KZ регулярно инициирует reconfirmation.
+Issue #32.
 
 Target flow:
 
-`Offer due -> reminder -> Seller Offer Workspace -> Всё без изменений / Что-то изменилось -> confirmation/apply -> freshness reset`
+`Offer due -> reminder -> Seller Workspace -> Всё без изменений / Что-то изменилось -> confirmation/apply -> freshness reset`
 
 Направление:
 
-- target cadence примерно daily, но cadence задаётся policy/configuration;
-- reminder ведёт на обычный Seller Workspace, не на техническую ChangeSet page;
-- transport/channel выбирается только в Slice Contract;
-- in-app due-state нельзя выдавать за external push, если внешнего уведомления фактически нет;
-- scheduler/background job, external service, privacy и duplicate-delivery/idempotency проверяются только если реально присутствуют в выбранной реализации.
+- target cadence примерно daily, но cadence отдельна от 2/7/14 thresholds и задаётся policy/configuration;
+- reminder ведёт в нормальный Seller Workspace, не на technical ChangeSet page;
+- transport выбирается отдельным Slice Contract;
+- scheduler/background job, external service, privacy и duplicate-delivery/idempotency доказываются только если реально присутствуют.
 
-Issue #31 владеет thresholds/ranking/archive semantics; #32 их не переопределяет.
+## 6. Nearby result-first correction
 
-### 5. Search Sorting A — explicit freshness / proximity + visible distance
+Issue #34.
 
-Связано с Issue #12 и UX-011.
-
-User task: Buyer явно понимает, как отсортирован Search, и может выбрать proximity ordering.
-
-Минимальное направление:
-
-- `Актуальнее` — явный default;
-- `Ближе` — после explicit buyer geolocation;
-- расстояние показывается пользователю;
-- сохраняются S9 Haversine / deterministic tie-breaker / privacy semantics;
-- новые explicit sort modes не могут нарушить закрытую к этому моменту Freshness Policy #31: fresh tier остаётся выше ageing tier, а `>= 7d` Offer не участвует в выдаче вообще.
-
-### 6. Search Sorting B — price ordering
-
-Зависит от Mandatory Offer Price и Freshness Policy.
+User task: `Рядом` сразу решает задачу просмотра nearby Offers, а не показывает большой explanatory landing block.
 
 Направление:
+
+- navigation `Рядом` является explicit geolocation intent;
+- после permission/location primary content — nearby Offer cards;
+- старый большой hero `Что есть рядом?` удаляется;
+- direct `/nearby` без предшествующего user intent не должен автоматически запрашивать location: только компактный permission/action state;
+- Nearby API/radius/privacy/eligibility не пересматриваются этим UI slice.
+
+## 7. Search Sorting A — freshness / proximity
+
+Issue #12.
+
+- один компактный sorting control;
+- `Актуальнее` — default;
+- `Ближе` — выбор этого режима сам является explicit action для browser geolocation request;
+- отдельного standalone geo pin/toggle нет;
+- после успешной геолокации показывается понятное расстояние;
+- denied/unavailable geo не ломает обычный Search;
+- S9 Haversine/privacy/deterministic semantics сохраняются;
+- Freshness Policy #31 остаётся верхним eligibility/tier rule.
+
+## 8. Search Sorting B — price
+
+Issue #12.
 
 - `Дешевле`;
-- при необходимости `Дороже`;
-- нельзя напрямую сравнивать несовместимые currency/unit semantics;
-- price sort работает только среди buyer-eligible Offers и не возвращает ageing tier выше fresh tier.
+- `Дороже` только если Slice Contract подтверждает полезность;
+- mandatory price уже закрыт checkpoint `v0.0.23-mandatory-price`;
+- перед реализацией нужно отдельно определить коммерческую comparability единиц: `unit = null` и разные units нельзя автоматически считать сопоставимыми;
+- price sort не обходит freshness eligibility/tier.
 
-До Slice Contract должна быть определена коммерческая сопоставимость цены/единицы.
+## 9. M1 — real Offer media
 
-### 7. M1 — Offer media
+M1 вводит настоящие seller-provided Offer photos end-to-end: data model, upload/storage/lifecycle, multiple photos, primary/cover semantics и buyer/seller presentation.
 
-Направление:
+Временные pre-MVP demo/placeholder visuals из Design System не являются заменой M1.
 
-- seller-provided media принадлежит Offer;
-- несколько фото;
-- primary/cover asset;
-- buyer card получает реальное media presentation;
-- Product canonical image/icon остаётся отдельной задачей.
+## 10. S14 — Discovery / `Для вас`
 
-Не смешивать с AI `photo -> Change Set`.
+Начинать только после закрытия предыдущего core seller/search/media contour либо отдельного Product Owner reprioritization.
 
-### 8. S14 — Discovery / «Для вас» v0
+## 11. S15 — Search learning
 
-Buyer видит Offers по явно указанным interests без ML.
+Query Log -> matched / unmatched / zero-result analysis -> controlled Product/alias/Category evolution. Search queries не создают Product автоматически.
 
-S13 уже закрыт и является зависимостью S14.
+## 12. S16 — Operations / MVP boundary review
 
-Discovery обязан использовать закрытую Freshness Policy: Offer `>= 7d` buyer не видит.
+После S16 провести отдельную проверку готовности MVP/public beta и решить, какие INSERTION CANDIDATES должны быть подняты до запуска.
 
-### 9. S15 — Search learning
+---
 
-Оператор видит реальные search queries, zero-result и unmatched queries и использует их для ручного улучшения Product / aliases / Category.
+# INSERTION CANDIDATES
 
-### 10. S16 — Operations
+## Market internal navigation — Issue #10
 
-Оператор может отключить ошибочный Offer или Seller.
+- earliest dependency: stable Seller/Location/Search foundation уже существует; practical implementation лучше рассматривать после ближайшего seller workspace/freshness contour;
+- trigger: пилот на крупных рынках показывает, что route только до Location/рынка недостаточен и buyer должен находить конкретный ряд/павильон/место;
+- direction: Market directory -> scheme/MarketPlaces -> Location binding -> buyer internal navigation;
+- не добавлять `market_id/row/stall/x/y` как набор nullable полей в generic Location.
 
-После S16 выполняется отдельная оценка фактической границы MVP / public beta и обязательных pre-launch gaps.
+## Additional Search filters
 
-## INSERTION CANDIDATES
+- earliest: после Sorting A/B и достаточной плотности выдачи;
+- trigger: реальные result sets показывают, что sorting недостаточно для сужения выбора;
+- possible filters только при наличии данных: radius, price range, rating после Reviews/Rating, media после M1, location type/Market when justified;
+- не создавать giant filter drawer заранее.
 
-Эти capabilities **не стоят автоматически после S16**. Они могут быть подняты в COMMITTED на ближайшем checkpoint boundary, если сработал trigger.
+## M2 — Offer video
 
-### Market internal navigation — Issue #10
+- earliest: после M1;
+- trigger: фото объективно недостаточно для подтверждённого seller/buyer use case;
+- если signal отсутствует, M2 остаётся deferred.
 
-**Earliest insertion point:** технические базовые зависимости Location/Search уже существуют; начинать можно только отдельными vertical slices после явного решения Product Owner.
+---
 
-**Trigger:** пилот / seller acquisition реально опирается на крупные рынки, где обычного маршрута до внешней Location недостаточно и Buyer должен понимать конкретный ряд / павильон / место.
+# LATER / dependency-gated
 
-**Latest useful point:** до запуска пилота, для которого внутренняя навигация по рынку является существенной частью buyer task.
+AI input/processing S17+ не начинается автоматически только из-за номера в Feature Map. AI остаётся способом сформировать SellerChangeSet, а не прямым writer в Offer.
 
-Если trigger не наступил, capability остаётся future и не задерживает общий MVP.
+Reviews/Rating, Moderation expansion, monetization, advanced analytics и другие capabilities получают отдельное место только после явного product decision и достаточных prerequisites. Не создавать UI/data на будущее.
 
-Разбивать минимум на:
+---
 
-- Market directory;
-- Market scheme / MarketPlaces;
-- Seller Location -> MarketPlace binding;
-- Buyer navigation/search inside Market.
+# Anti-drift rule for all agents
 
-Market не становится архитектурным центром; Offer остаётся центральной сущностью.
+Перед подготовкой каждого следующего Slice Contract:
 
-### Additional Search filters
+1. проверить текущий `main`, latest annotated checkpoint/tag и CI;
+2. прочитать `docs/PROJECT_RULES.md`;
+3. прочитать этот `EXECUTION_PLAN.md` и взять **первый незакрытый COMMITTED stage**;
+4. прочитать релевантные Feature Map / closed contracts / Issues;
+5. для UI/UX работы прочитать `docs/DESIGN_SYSTEM.md` и релевантные entries `docs/product/UX_REFERENCE_INDEX.md`;
+6. не заменять очередь идеей из чата/backlog без Product Owner decision;
+7. если внешний UX-reference предлагает contract-changing решение — `GAP/STOP`, а не silent adoption;
+8. новый product idea проходит путь:
 
-**Earliest insertion point:** после Search Sorting A. Отдельные фильтры имеют дополнительные зависимости.
+`observation -> Issue / UX Backlog -> Product Owner decision -> EXECUTION_PLAN insertion if needed -> Slice Contract -> Implementation`.
 
-**Trigger:** реальная выдача становится достаточно большой, чтобы сортировки `Актуальнее / Ближе / Дешевле` не помогали Buyer быстро сузить выбор.
-
-Кандидаты:
-
-- radius — после proximity semantics;
-- price range — после mandatory price и решения unit/comparability;
-- media/photo — после M1;
-- rating — только после появления Reviews/Rating data;
-- location type / Market — если использование этого реально оправдывает.
-
-Не добавлять `Только с ценой`: цена должна стать publishability invariant.
-
-### M2 — Offer video extension
-
-**Earliest insertion point:** после M1.
-
-**Trigger:** реальные seller/buyer сценарии показывают, что фото недостаточно и video как media Offer даёт отдельную пользовательскую ценность.
-
-**Latest useful point:** нет обязательного MVP deadline. Если trigger не доказан, M2 остаётся отложенным.
-
-### Real SMS provider — S22
-
-**Earliest insertion point:** Identity contract уже позволяет замену test OTP provider отдельным slice.
-
-**Trigger:** переход от закрытого теста к реальным внешним пользователям, которым нельзя выдавать test OTP.
-
-**Latest useful point:** до соответствующего публичного запуска.
-
-Не начинать только потому, что S22 есть в Feature Map: до trigger тестовый OTP остаётся допустимым.
-
-## RE-EVALUATION GATES
-
-Чтобы не пересобирать roadmap после каждой идеи, insertion candidates проверяются в фиксированных точках.
-
-### Gate R1 — CLOSED after UX2A
-
-Результат зафиксирован выше: Seller Offer Workspace и Seller Freshness Loop подняты в COMMITTED до Search Sorting.
-
-### Gate R2 — после Search Sorting B
-
-Проверить:
-
-- нужна ли Market Navigation конкретному ближайшему пилоту;
-- появились ли основания для Search filters;
-- нет ли нового критичного Buyer/Search gap, который делает M1 преждевременным.
-
-Если triggers не доказаны — продолжать в M1.
-
-### Gate R3 — после M1
-
-Проверить:
-
-- нужен ли M2 video;
-- нужен ли media-based Search filter;
-- появились ли другие media/product gaps, без которых S14 теряет смысл.
-
-Если triggers не доказаны — идти в S14.
-
-### Gate R4 — после S16 / перед public-beta decision
-
-Проверить весь список launch-critical gaps, включая:
-
-- существует ли реально работающий proactive Seller reminder channel, а не только in-app due-state;
-- необходимость real SMS provider S22;
-- moderation / operations adequacy;
-- unresolved product requirements, которые нужны именно выбранному формату пилота / public beta.
-
-Только после этого фиксируется следующая post-MVP / public-launch очередь.
-
-## LATER
-
-### AI Input S17+
-
-Не начинать без отдельного product decision и до устойчивого ручного seller loop.
-
-AI остаётся способом сформировать Seller Change Set, а не способом напрямую изменить Offer.
-
-### Recommendations / behavioral ranking / promotion / monetization
-
-Следовать зависимостям Feature Map и не поднимать их в текущую очередь без product signal и достаточных данных.
-
-## Unplaced requirement rule
-
-Если в UX Backlog, Issue или утверждённых product requirements обнаружено важное требование, но для него нет строки в Feature Map / COMMITTED / INSERTION CANDIDATES, оно не считается автоматически `LATER`.
-
-Оно помечается как **UNPLACED GAP** и выносится Product Owner на ближайший re-evaluation gate для решения:
-
-- включить в COMMITTED;
-- оформить как INSERTION CANDIDATE с trigger;
-- сознательно отнести в LATER;
-- отклонить.
-
-Так отсутствие номера slice не превращает важное требование в «когда-нибудь после всего».
-
-## Anti-drift rule
-
-Перед подготовкой **каждого следующего Slice Contract** исполнитель обязан:
-
-1. проверить текущий `main` и последний verified checkpoint;
-2. прочитать этот `EXECUTION_PLAN.md`;
-3. определить, находится ли проект на обычном checkpoint boundary или на одном из `R1–R4`;
-4. если re-evaluation gate не наступил — выбрать первый незакрытый пункт COMMITTED;
-5. если gate наступил — проверить triggers INSERTION CANDIDATES и получить явное решение Product Owner;
-6. проверить связанные Feature Map / UX Backlog / Issues;
-7. не подменять очередь новой идеей из чата или backlog без явного решения Product Owner.
-
-Если во время разработки появляется новая важная идея:
-
-`наблюдение -> Issue / UX Backlog -> завершить текущий slice -> checkpoint -> ближайший re-evaluation gate / Product Owner decision -> при необходимости изменить EXECUTION_PLAN -> отдельный Slice Contract`
-
-Нельзя просто вклинить её внутрь текущего executable slice.
-
-После закрытия этапа этот файл обновляется только если изменился verified state, COMMITTED order, insertion status или re-evaluation decision. Не создавать второй параллельный roadmap с тем же назначением.
+После закрытия каждого stage обновлять этот документ только если verified state или порядок действительно изменились. Не вести параллельный competing roadmap.
