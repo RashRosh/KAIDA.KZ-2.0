@@ -5,6 +5,7 @@ import { confirmSellerChangeSet } from '@/modules/seller-input/application/confi
 import {
   ChangeSetNotFoundError,
   OfferChangedError,
+  OfferPriceRequiredError,
   SellerRequiredError,
   sellerChangeSetIdSchema,
 } from '@/modules/seller-input/contracts/seller-change-set.contract';
@@ -31,7 +32,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   } catch (error) {
     if (error instanceof SellerRequiredError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     if (error instanceof ChangeSetNotFoundError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
-    if (error instanceof OfferChangedError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
+    if (error instanceof OfferChangedError || error instanceof OfferPriceRequiredError) {
+      return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
+    }
     console.error('Seller change set confirmation failed');
     return NextResponse.json({ error: { code: 'SELLER_INPUT_UNAVAILABLE', message: 'Не удалось подтвердить изменение продавца.' } }, { status: 503, headers: noStore });
   }
