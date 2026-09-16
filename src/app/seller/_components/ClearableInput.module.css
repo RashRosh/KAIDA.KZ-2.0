@@ -1,0 +1,56 @@
+.control {
+  position: relative;
+  min-width: 0;
+}
+
+.control input {
+  padding-right: 52px !important;
+}
+
+.control .clearButton {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.control .clearButton:hover:not(:disabled) {
+  border: 0;
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.control .clearButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.control .clearButton:disabled {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.45;
+}
+
+.control .clearButton svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { AppHeader } from '../_components/AppHeader';
 import { SellerSetup } from './_components/SellerSetup';
 import styles from './page.module.css';
@@ -10,10 +9,8 @@ export default function SellerPage() {
       <div className={styles.shell}>
         <main className={styles.main}>
           <div className={styles.intro}>
-            <p className={styles.eyebrow}>Seller Input</p>
-            <h1>Ваши товары в KAIDA.KZ</h1>
-            <p>Сначала настройте продавца и точку. Затем создавайте изменения ассортимента и подтверждайте их перед появлением Offer.</p>
-            <Link className={styles.primaryLink} href="/seller/batch">Изменить несколько товаров</Link>
+            <h1>Настройка торговой точки</h1>
+            <p>Укажите данные торговой точки и контакты. После сохранения подтвердите местоположение — и можно добавлять товары.</p>
           </div>
           <SellerSetup />
         </main>

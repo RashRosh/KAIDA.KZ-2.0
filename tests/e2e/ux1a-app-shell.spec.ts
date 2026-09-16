@@ -190,5 +190,5 @@ test('seller entry opens the existing seller flow', async ({ page }) => {
   const nav = await openPrimaryNav(page);
   await nav.getByRole('link', { name: 'Продавцу', exact: true }).click();
   await expect(page).toHaveURL(/\/seller$/);
-  await expect(page.getByRole('heading', { name: 'Ваши товары в KAIDA.KZ', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Настройка торговой точки', exact: true })).toBeVisible();
 });

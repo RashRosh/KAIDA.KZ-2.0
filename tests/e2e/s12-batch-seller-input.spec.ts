@@ -79,13 +79,17 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
   const sellerName = `S12 E2E ${testInfo.project.name}`;
   try {
     await page.goto('/seller');
-    await page.getByLabel('Название продавца').fill(sellerName);
-    await page.getByLabel('Название точки').fill('S12 E2E точка');
-    await page.getByLabel('Тип точки').selectOption('shop');
+    await page.getByLabel('Имя', { exact: true }).fill(sellerName);
+    await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
-    await page.getByRole('button', { name: 'Создать продавца' }).click();
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
+    await page.getByLabel('Телефон', { exact: true }).fill(testInfo.project.name === 'mobile' ? '+77000001263' : '+77000001264');
+    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+
     await makeBuyerEligible(auth.pool, auth.userId, testInfo.project.name);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await createOffer(page, 'Баранина', '4200.00', 'S12 старая баранина');
     await createOffer(page, 'Говядина', '3500.00', 'S12 старая говядина');

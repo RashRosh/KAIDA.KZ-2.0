@@ -1,9 +1,10 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { ClearableInput } from './ClearableInput';
 import styles from '../page.module.css';
 
-type OwnerContacts = {
+export type OwnerContacts = {
   phoneE164: string | null;
   whatsappPhoneE164: string | null;
   telegramUsername: string | null;
@@ -13,13 +14,17 @@ type OwnerContacts = {
 type ContactsResponse = { contacts: OwnerContacts };
 type ApiError = { error?: { code?: string; message?: string } };
 
+type SellerContactSettingsProps = {
+  onSaved?: (contacts: OwnerContacts) => void;
+};
+
 function nullableCanonical(value: string, lowercase = false): string | null {
   const trimmed = value.trim();
   if (trimmed.length === 0) return null;
   return lowercase ? trimmed.toLowerCase() : trimmed;
 }
 
-export function SellerContactSettings() {
+export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [phoneE164, setPhoneE164] = useState('');
@@ -79,6 +84,7 @@ export function SellerContactSettings() {
         return;
       }
       applyContacts(data.contacts);
+      onSaved?.(data.contacts);
       setSuccess('Контакты сохранены.');
     } catch {
       setError('Не удалось сохранить контакты.');
@@ -95,16 +101,16 @@ export function SellerContactSettings() {
       {loading ? <p className={styles.status}>Загружаем контакты…</p> : (
         <form className={styles.form} onSubmit={submit} noValidate>
           <label htmlFor="seller-contact-phone">Телефон</label>
-          <input id="seller-contact-phone" value={phoneE164} onChange={(event) => setPhoneE164(event.target.value)} maxLength={16} disabled={saving} autoComplete="tel" placeholder="+77001234567" />
+          <ClearableInput id="seller-contact-phone" value={phoneE164} onValueChange={setPhoneE164} clearLabel="Телефон" maxLength={16} disabled={saving} autoComplete="tel" placeholder="+77001234567" />
 
           <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
-          <input id="seller-contact-whatsapp" value={whatsappPhoneE164} onChange={(event) => setWhatsappPhoneE164(event.target.value)} maxLength={16} disabled={saving} inputMode="tel" placeholder="+77001234567" />
+          <ClearableInput id="seller-contact-whatsapp" value={whatsappPhoneE164} onValueChange={setWhatsappPhoneE164} clearLabel="WhatsApp" maxLength={16} disabled={saving} inputMode="tel" placeholder="+77001234567" />
 
           <label htmlFor="seller-contact-telegram">Telegram</label>
-          <input id="seller-contact-telegram" value={telegramUsername} onChange={(event) => setTelegramUsername(event.target.value)} maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida_shop" />
+          <ClearableInput id="seller-contact-telegram" value={telegramUsername} onValueChange={setTelegramUsername} clearLabel="Telegram" maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida_shop" />
 
           <label htmlFor="seller-contact-instagram">Instagram</label>
-          <input id="seller-contact-instagram" value={instagramUsername} onChange={(event) => setInstagramUsername(event.target.value)} maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida.shop" />
+          <ClearableInput id="seller-contact-instagram" value={instagramUsername} onValueChange={setInstagramUsername} clearLabel="Instagram" maxLength={64} disabled={saving} autoCapitalize="none" placeholder="kaida.shop" />
 
           {error && <p className={styles.error} role="alert">{error}</p>}
           {success && <p className={styles.status} role="status">{success}</p>}
