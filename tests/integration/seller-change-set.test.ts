@@ -43,7 +43,12 @@ async function createFixture(userId: string, phone: string, label: string) {
 }
 
 function input(locationId: string, values: Record<string, unknown> = {}) {
-  return sellerChangeSetCreateBodySchema.parse({ productName: 'Баранина', locationId, ...values });
+  return sellerChangeSetCreateBodySchema.parse({
+    productName: 'Баранина',
+    locationId,
+    price: { amount: '1' },
+    ...values,
+  });
 }
 
 async function sellerS4Counts(sellerId: string) {
@@ -61,8 +66,8 @@ beforeAll(async () => {
 
 afterAll(async () => { await pool.end(); });
 
-describe('S4 Seller Change Set on PostgreSQL 18', () => {
-  it('creates one persisted proposed Item in one flow and creates no Offer before confirmation', async () => {
+describe('S4 Seller Change Set on PostgreSQL 18 after Mandatory Offer Price', () => {
+  it('creates one priced persisted proposed Item in one flow and creates no Offer before confirmation', async () => {
     const userId = '50000000-0000-4000-8000-000000000601';
     const phone = '+77000000601';
     const seller = await createFixture(userId, phone, '601');
@@ -71,7 +76,12 @@ describe('S4 Seller Change Set on PostgreSQL 18', () => {
       expect(created.status).toBe('proposed');
       expect(created.confirmedAt).toBeNull();
       expect(created.items).toHaveLength(1);
-      expect(created.items[0]).toMatchObject({ action: 'create_offer', product: { id: seedIds.lambProduct, name: 'Баранина' }, resultOffer: null, price: null });
+      expect(created.items[0]).toMatchObject({
+        action: 'create_offer',
+        product: { id: seedIds.lambProduct, name: 'Баранина' },
+        resultOffer: null,
+        price: { amount: '1', currency: 'KZT', unit: null },
+      });
       expect(await sellerS4Counts(seller.id)).toEqual({ changeSets: 1, items: 1, offers: 0 });
 
       const loaded = await getSellerChangeSet(userId, created.id, { database: db });
@@ -122,7 +132,7 @@ describe('S4 Seller Change Set on PostgreSQL 18', () => {
       const invalid = {
         productName: 'Баранина',
         locationId: seller.locations[0]!.id,
-        price: null,
+        price: { amount: '1', unit: null },
         sellerComment: 'x'.repeat(501),
       } as SellerChangeSetCreateInput;
       await expect(createSellerChangeSet(userId, invalid, { database: db })).rejects.toBeTruthy();
@@ -183,15 +193,13 @@ describe('S4 Seller Change Set on PostgreSQL 18', () => {
     }
   });
 
-  it('stores no price as amount/currency/unit NULL and allows price without unit', async () => {
+  it('requires amount, accepts zero and stores a null unit', async () => {
     const userId = '50000000-0000-4000-8000-000000000606';
     const phone = '+77000000606';
     const seller = await createFixture(userId, phone, '606');
     try {
-      const noPrice = await createSellerChangeSet(userId, input(seller.locations[0]!.id), { database: db });
-      const noPriceRow = (await pool.query('SELECT price_amount, price_currency, price_unit FROM seller_change_items WHERE change_set_id=$1', [noPrice.id])).rows[0];
-      expect(noPriceRow).toEqual({ price_amount: null, price_currency: null, price_unit: null });
-
+      expect(sellerChangeSetCreateBodySchema.safeParse({ productName: 'Баранина', locationId: seller.locations[0]!.id }).success).toBe(false);
+      expect(sellerChangeSetCreateBodySchema.safeParse({ productName: 'Баранина', locationId: seller.locations[0]!.id, price: null }).success).toBe(false);
       const priced = await createSellerChangeSet(userId, input(seller.locations[0]!.id, { price: { amount: '0' } }), { database: db });
       const pricedRow = (await pool.query('SELECT price_amount, price_currency, price_unit FROM seller_change_items WHERE change_set_id=$1', [priced.id])).rows[0];
       expect(pricedRow).toEqual({ price_amount: '0', price_currency: 'KZT', price_unit: null });
