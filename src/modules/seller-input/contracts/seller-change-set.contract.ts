@@ -30,14 +30,14 @@ const priceSchema = z.object({
 export const sellerChangeSetCreateBodySchema = z.object({
   productName: z.string().trim().min(1),
   locationId: z.string().uuid(),
-  price: priceSchema.nullable().optional().transform((value) => value ?? null),
+  price: priceSchema,
   sellerComment: optionalCommentSchema,
 }).strict();
 
 export const sellerOfferChangeBodySchema = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('update_offer'),
-    price: priceSchema.nullable(),
+    price: priceSchema,
     sellerComment: requiredCommentSchema,
   }).strict(),
   z.object({ action: z.literal('deactivate_offer') }).strict(),
@@ -49,13 +49,13 @@ const sellerBatchChangeItemSchema = z.discriminatedUnion('action', [
     action: z.literal('create_offer'),
     productName: z.string().trim().min(1),
     locationId: z.string().uuid(),
-    price: priceSchema.nullable().optional().transform((value) => value ?? null),
+    price: priceSchema,
     sellerComment: optionalCommentSchema,
   }).strict(),
   z.object({
     action: z.literal('update_offer'),
     offerId: z.string().uuid(),
-    price: priceSchema.nullable(),
+    price: priceSchema,
     sellerComment: requiredCommentSchema,
   }).strict(),
   z.object({
@@ -152,6 +152,14 @@ export class OfferAlreadyInactiveError extends Error {
   constructor() {
     super('Предложение уже выключено.');
     this.name = 'OfferAlreadyInactiveError';
+  }
+}
+
+export class OfferPriceRequiredError extends Error {
+  readonly code = 'OFFER_PRICE_REQUIRED' as const;
+  constructor() {
+    super('Укажите цену предложения перед публикацией.');
+    this.name = 'OfferPriceRequiredError';
   }
 }
 
