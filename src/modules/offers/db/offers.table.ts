@@ -28,4 +28,8 @@ export const offers = pgTable('offers', {
     ${table.priceCurrency} IS NOT NULL AND ${table.priceCurrency} ~ '^[A-Z]{3}$'
   )`),
   check('offers_status_allowed', sql`${table.status} IN ('active', 'inactive')`),
+  check('offers_active_price_required', sql`${table.status} <> 'active' OR (
+    ${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'
+  )`),
+  check('offers_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
 ]);
