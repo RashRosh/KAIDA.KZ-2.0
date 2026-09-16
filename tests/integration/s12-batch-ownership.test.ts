@@ -72,15 +72,15 @@ describe('S12 batch ownership boundaries on PostgreSQL 18', () => {
 
       await expect(createBatchSellerChangeSet(ownUser, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
-          { action: 'create_offer', productName: 'Баранина', locationId: own.locations[0]!.id },
-          { action: 'create_offer', productName: 'Говядина', locationId: foreign.locations[0]!.id },
+          { action: 'create_offer', productName: 'Баранина', locationId: own.locations[0]!.id, price: { amount: '1' } },
+          { action: 'create_offer', productName: 'Говядина', locationId: foreign.locations[0]!.id, price: { amount: '1' } },
         ],
       }), { database: db })).rejects.toBeInstanceOf(LocationNotFoundError);
       expect(await changeSetCount(own.id)).toBe(before);
 
       await expect(createBatchSellerChangeSet(ownUser, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
-          { action: 'create_offer', productName: 'Баранина', locationId: own.locations[0]!.id },
+          { action: 'create_offer', productName: 'Баранина', locationId: own.locations[0]!.id, price: { amount: '1' } },
           { action: 'activate_offer', offerId: foreignOfferId },
         ],
       }), { database: db })).rejects.toBeInstanceOf(OfferNotFoundError);
