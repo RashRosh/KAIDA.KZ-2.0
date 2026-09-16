@@ -72,21 +72,21 @@ describe('S5 migration upgrade path on PostgreSQL 18', () => {
       const proposedId = '60000000-0000-4000-8000-000000000852';
       await pool.query('INSERT INTO seller_change_sets (id,seller_id,status) VALUES ($1,$2,$3)', [proposedId, sellerId, 'proposed']);
 
-      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,target_offer_id,expected_offer_revision)
-        VALUES ($1,'create_offer',$2,$3,$4,1)`, [proposedId, productId, locationId, offerId])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id)
-        VALUES ($1,'update_offer',$2,$3)`, [proposedId, productId, locationId])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,target_offer_id,expected_offer_revision)
-        VALUES ($1,'update_offer',$2,$3,$4,0)`, [proposedId, productId, locationId, offerId])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,target_offer_id,expected_offer_revision)
-        VALUES ($1,'update_offer',$2,$3,$4,1)`, [proposedId, productId, locationId, '40000000-0000-4000-8000-000000000999'])).rejects.toMatchObject({ code: '23503' });
-      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,target_offer_id,expected_offer_revision)
-        VALUES ($1,'delete_offer',$2,$3,$4,1)`, [proposedId, productId, locationId, offerId])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,target_offer_id,expected_offer_revision)
+        VALUES ($1,'create_offer',$2,$3,1,'KZT',$4,1)`, [proposedId, productId, locationId, offerId])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency)
+        VALUES ($1,'update_offer',$2,$3,1,'KZT')`, [proposedId, productId, locationId])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,target_offer_id,expected_offer_revision)
+        VALUES ($1,'update_offer',$2,$3,1,'KZT',$4,0)`, [proposedId, productId, locationId, offerId])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,target_offer_id,expected_offer_revision)
+        VALUES ($1,'update_offer',$2,$3,1,'KZT',$4,1)`, [proposedId, productId, locationId, '40000000-0000-4000-8000-000000000999'])).rejects.toMatchObject({ code: '23503' });
+      await expect(pool.query(`INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,target_offer_id,expected_offer_revision)
+        VALUES ($1,'delete_offer',$2,$3,1,'KZT',$4,1)`, [proposedId, productId, locationId, offerId])).rejects.toMatchObject({ code: '23514' });
 
       for (const action of ['update_offer', 'deactivate_offer', 'activate_offer']) {
         const id = crypto.randomUUID();
-        await expect(pool.query(`INSERT INTO seller_change_items (id,change_set_id,action,product_id,location_id,target_offer_id,expected_offer_revision)
-          VALUES ($1,$2,$3,$4,$5,$6,1)`, [id, proposedId, action, productId, locationId, offerId])).resolves.toBeDefined();
+        await expect(pool.query(`INSERT INTO seller_change_items (id,change_set_id,action,product_id,location_id,price_amount,price_currency,target_offer_id,expected_offer_revision)
+          VALUES ($1,$2,$3,$4,$5,1,'KZT',$6,1)`, [id, proposedId, action, productId, locationId, offerId])).resolves.toBeDefined();
       }
 
       const revisionDefault = await pool.query(`SELECT column_default,is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='offers' AND column_name='revision'`);
