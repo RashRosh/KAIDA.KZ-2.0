@@ -56,4 +56,5 @@ export const sellerChangeItems = pgTable('seller_change_items', {
     AND ${table.targetOfferId} IS NOT NULL
     AND ${table.expectedOfferRevision} IS NOT NULL
   )`),
+  check('seller_change_items_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
 ]);
