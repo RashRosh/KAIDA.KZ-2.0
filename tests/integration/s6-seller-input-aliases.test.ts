@@ -50,19 +50,20 @@ beforeAll(async () => {
 });
 afterAll(async () => { await pool.end(); });
 
-describe.sequential('S6 Seller Input through shared Catalog resolver', () => {
+describe.sequential('S6 Seller Input through shared Catalog resolver after Mandatory Offer Price', () => {
   it('creates an alias proposal with canonical Product preview and confirms canonical product_id', async () => {
     const userId = '50000000-0000-4000-8000-000000000961';
     const phone = '+77000000961';
     const seller = await fixture(userId, phone);
     try {
-      const input = sellerChangeSetCreateBodySchema.parse({ productName: '  МЯСО БАРАНА  ', locationId: seller.locations[0]!.id });
+      const input = sellerChangeSetCreateBodySchema.parse({ productName: '  МЯСО БАРАНА  ', locationId: seller.locations[0]!.id, price: { amount: '1' } });
       const proposed = await createSellerChangeSet(userId, input, { database: db });
       expect(proposed.status).toBe('proposed');
       expect(proposed.items[0]).toMatchObject({
         action: 'create_offer',
         product: { id: seedIds.lambProduct, name: 'Баранина' },
         resultOffer: null,
+        price: { amount: '1', currency: 'KZT', unit: null },
       });
       expect(await sellerCounts(seller.id)).toEqual({ changeSets: 1, items: 1, offers: 0 });
 
@@ -71,8 +72,8 @@ describe.sequential('S6 Seller Input through shared Catalog resolver', () => {
 
       const confirmed = await confirmSellerChangeSet(userId, proposed.id, { database: db, clock: () => NOW });
       expect(confirmed.items[0]!.resultOffer).not.toBeNull();
-      const storedOffer = (await pool.query('SELECT product_id FROM offers WHERE id=$1', [confirmed.items[0]!.resultOffer!.id])).rows[0];
-      expect(storedOffer.product_id).toBe(seedIds.lambProduct);
+      const storedOffer = (await pool.query('SELECT product_id,price_amount,price_currency FROM offers WHERE id=$1', [confirmed.items[0]!.resultOffer!.id])).rows[0];
+      expect(storedOffer).toEqual({ product_id: seedIds.lambProduct, price_amount: '1', price_currency: 'KZT' });
     } finally {
       await cleanupUser(userId, phone);
     }
@@ -83,7 +84,7 @@ describe.sequential('S6 Seller Input through shared Catalog resolver', () => {
     const phone = '+77000000962';
     const seller = await fixture(userId, phone);
     try {
-      const input = sellerChangeSetCreateBodySchema.parse({ productName: 'S6 отсутствующий товар', locationId: seller.locations[0]!.id });
+      const input = sellerChangeSetCreateBodySchema.parse({ productName: 'S6 отсутствующий товар', locationId: seller.locations[0]!.id, price: { amount: '1' } });
       await expect(createSellerChangeSet(userId, input, { database: db })).rejects.toBeInstanceOf(ProductNotFoundError);
       expect(await sellerCounts(seller.id)).toEqual({ changeSets: 0, items: 0, offers: 0 });
     } finally {
@@ -102,7 +103,7 @@ describe.sequential('S6 Seller Input through shared Catalog resolver', () => {
     try {
       await pool.query('INSERT INTO products (id,name) VALUES ($1,$2),($3,$4)', [a, 'S6 Seller Ambiguous A', b, 'S6 Seller Ambiguous B']);
       await pool.query('INSERT INTO product_aliases (id,product_id,name) VALUES ($1,$2,$3),($4,$5,$6)', [aliasA, a, 'S6 спорный продавец', aliasB, b, 'S6 спорный продавец']);
-      const input = sellerChangeSetCreateBodySchema.parse({ productName: 'S6 спорный продавец', locationId: seller.locations[0]!.id });
+      const input = sellerChangeSetCreateBodySchema.parse({ productName: 'S6 спорный продавец', locationId: seller.locations[0]!.id, price: { amount: '1' } });
       await expect(createSellerChangeSet(userId, input, { database: db })).rejects.toBeInstanceOf(ProductAmbiguousError);
       expect(await sellerCounts(seller.id)).toEqual({ changeSets: 0, items: 0, offers: 0 });
     } finally {
