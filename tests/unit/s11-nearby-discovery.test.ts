@@ -24,7 +24,7 @@ function offer(id: string): SearchOffer {
     product: { id: '10000000-0000-4000-8000-000000011000', name: 'S11 unit product' },
     seller: { id: '20000000-0000-4000-8000-000000011000', displayName: 'S11 unit seller' },
     location: { id: '30000000-0000-4000-8000-000000011000', name: 'S11 unit location', addressText: 'S11 unit address' },
-    price: null,
+    price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
   };
 }
