@@ -91,7 +91,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
             action: item.action,
             productName: item.productName,
             locationId: item.locationId,
-            price: amount === '' ? null : { amount, unit: item.priceUnit },
+            price: { amount, unit: item.priceUnit },
             sellerComment: item.sellerComment,
           };
         }
@@ -100,7 +100,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
           return {
             action: item.action,
             offerId: item.offerId,
-            price: amount === '' ? null : { amount, unit: item.priceUnit },
+            price: { amount, unit: item.priceUnit },
             sellerComment: item.sellerComment,
           };
         }
@@ -112,6 +112,22 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
+    const missingPrice = items.some((item) =>
+      (item.action === 'create_offer' || item.action === 'update_offer') && item.priceAmount.trim() === '');
+    if (missingPrice) {
+      setError('Укажите цену для каждого создаваемого или изменяемого Offer.');
+      return;
+    }
+    const invalidActivation = items.some((item) => {
+      if (item.action !== 'activate_offer') return false;
+      const offer = offers.find((candidate) => candidate.id === item.offerId);
+      return offer?.price === null;
+    });
+    if (invalidActivation) {
+      setError('Сначала укажите цену Offer перед включением.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const response = await fetch('/api/seller/change-sets/batch', {
@@ -180,7 +196,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
             {(item.action === 'create_offer' || item.action === 'update_offer') && (
               <>
                 <label htmlFor={`batch-price-${item.key}`}>Цена, ₸</label>
-                <input id={`batch-price-${item.key}`} value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder="Без цены" />
+                <input id={`batch-price-${item.key}`} value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder="Обязательно" aria-required="true" />
                 <label htmlFor={`batch-unit-${item.key}`}>Единица</label>
                 <input id={`batch-unit-${item.key}`} value={item.priceUnit} onChange={(event) => updateItem(item.key, { priceUnit: event.target.value })} maxLength={32} disabled={submitting || item.priceAmount.trim() === ''} placeholder="Например, кг" />
                 <label htmlFor={`batch-comment-${item.key}`}>Комментарий продавца</label>
