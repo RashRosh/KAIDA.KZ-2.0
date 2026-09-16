@@ -24,12 +24,11 @@ export function HeaderSearch() {
           enterKeyHint="search"
         />
       </div>
-      <button type="submit">
+      <button type="submit" aria-label="Искать">
         <svg className={styles.headerButtonIcon} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="m16 16 4.25 4.25" />
+          <path d="M5 12h14" />
+          <path d="m14 7 5 5-5 5" />
         </svg>
-        <span>Искать</span>
       </button>
     </form>
   );
