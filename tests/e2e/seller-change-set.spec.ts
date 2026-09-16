@@ -46,7 +46,7 @@ async function completeOnboardingGeo(pool: Pool, phone: string) {
   expect(result.rows).toHaveLength(1);
 }
 
-test('Seller creates persisted proposal, confirms it once and reloads the result', async ({ page }, testInfo) => {
+test('Seller must price a proposal, confirms it once and buyer sees KZT amount without a unit suffix', async ({ page }, testInfo) => {
   const phone = phoneFor(testInfo.project.name);
   await cleanup(phone);
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
@@ -81,15 +81,19 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
+    await page.getByRole('button', { name: 'Создать изменение' }).click();
+    await expect(page.getByRole('alert')).toHaveText('Укажите цену предложения.');
+    await expect(page).toHaveURL('/seller');
+
+    const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
+    expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
+    expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
+
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4321.50');
-    await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S4 E2E свежий привоз');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
     await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
-
-    const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
-    expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
 
     const url = page.url();
     await page.reload();
@@ -102,6 +106,8 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(1);
     const resultId = (await pool.query('SELECT result_offer_id FROM seller_change_items WHERE change_set_id=$1', [url.split('/').pop()])).rows[0].result_offer_id;
+    expect((await pool.query('SELECT price_amount,price_currency,price_unit FROM offers WHERE id=$1', [resultId])).rows[0])
+      .toEqual({ price_amount: '4321.50', price_currency: 'KZT', price_unit: null });
 
     await page.reload();
     await expect(page.getByText('Предложение подтверждено. Offer создан.')).toBeVisible();
@@ -110,7 +116,10 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+    const createdCard = page.getByRole('article').filter({ hasText: 'S4 E2E продавец' });
+    await expect(createdCard).toHaveCount(1);
+    await expect(createdCard).toContainText(/4\s321,5\s₸/);
+    await expect(createdCard).not.toContainText(' / ');
     expect((await pool.query('SELECT * FROM offers WHERE id=$1', [seedIds.lambOffer])).rows[0]).toEqual(seedBefore);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
@@ -118,7 +127,7 @@ test('Seller creates persisted proposal, confirms it once and reloads the result
     await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+    await expect(createdCard).toHaveCount(1);
   } finally {
     await pool.end();
     await cleanup(phone);
