@@ -89,16 +89,16 @@ beforeAll(async () => {
   ]);
 
   await pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,status,last_confirmed_at,created_at,updated_at)
+    (id,product_id,seller_id,location_id,price_amount,price_currency,price_unit,status,last_confirmed_at,created_at,updated_at)
     VALUES
-    ($1,$9,$10,$11,'active',$15,$15,$15),
-    ($2,$9,$10,$11,'active',$15,$15,$15),
-    ($3,$9,$10,$11,'active',$16,$16,$16),
-    ($4,$9,$10,$12,'active',$17,$17,$17),
-    ($5,$9,$10,$13,'active',$18,$18,$18),
-    ($6,$9,$10,$14,'active',$19,$19,$19),
-    ($7,$9,$10,$11,'inactive',$20,$20,$20),
-    ($8,$9,$10,$11,'active',$21,$21,$21)`, [
+    ($1,$9,$10,$11,'1','KZT',NULL,'active',$15,$15,$15),
+    ($2,$9,$10,$11,'1','KZT',NULL,'active',$15,$15,$15),
+    ($3,$9,$10,$11,'1','KZT',NULL,'active',$16,$16,$16),
+    ($4,$9,$10,$12,'1','KZT',NULL,'active',$17,$17,$17),
+    ($5,$9,$10,$13,'1','KZT',NULL,'active',$18,$18,$18),
+    ($6,$9,$10,$14,'1','KZT',NULL,'active',$19,$19,$19),
+    ($7,$9,$10,$11,'1','KZT',NULL,'inactive',$20,$20,$20),
+    ($8,$9,$10,$11,'1','KZT',NULL,'active',$21,$21,$21)`, [
     offerIds.insideFreshA,
     offerIds.insideFreshB,
     offerIds.insideOld,
