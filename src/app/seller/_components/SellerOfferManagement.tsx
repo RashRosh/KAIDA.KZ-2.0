@@ -75,9 +75,13 @@ export function SellerOfferManagement() {
   async function submitUpdate(event: FormEvent<HTMLFormElement>, offerId: string) {
     event.preventDefault();
     const amount = priceAmount.trim();
+    if (amount === '') {
+      setError('Укажите цену предложения.');
+      return;
+    }
     await createProposal(offerId, {
       action: 'update_offer',
-      price: amount === '' ? null : { amount, unit: priceUnit },
+      price: { amount, unit: priceUnit },
       sellerComment,
     });
   }
@@ -95,6 +99,7 @@ export function SellerOfferManagement() {
         {offers.map((offer) => {
           const editing = editingOfferId === offer.id;
           const submitting = submittingOfferId === offer.id;
+          const needsPrice = offer.price === null;
           return (
             <article key={offer.id} className={styles.offerCard} data-testid={`seller-offer-${offer.id}`}>
               <div className={styles.offerHeader}>
@@ -105,7 +110,7 @@ export function SellerOfferManagement() {
                 <span className={styles.offerStatus}>{offer.status === 'active' ? 'Активно' : 'Выключено'}</span>
               </div>
               <dl className={styles.summaryGrid}>
-                <dt>Цена</dt><dd>{offer.price ? `${offer.price.amount} ${offer.price.currency}${offer.price.unit ? ` / ${offer.price.unit}` : ''}` : 'Цена не указана'}</dd>
+                <dt>Цена</dt><dd>{offer.price ? `${offer.price.amount} ${offer.price.currency}${offer.price.unit ? ` / ${offer.price.unit}` : ''}` : 'Требуется цена'}</dd>
                 <dt>Комментарий</dt><dd>{offer.sellerComment ?? 'Не указан'}</dd>
               </dl>
 
@@ -114,17 +119,17 @@ export function SellerOfferManagement() {
                 {offer.status === 'active' ? (
                   <>
                     <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'deactivate_offer' })} disabled={submitting}>{submitting ? 'Создаём…' : 'Выключить'}</button>
-                    <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting}>{submitting ? 'Создаём…' : 'Подтвердить актуальность'}</button>
+                    <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting || needsPrice}>{needsPrice ? 'Сначала укажите цену' : submitting ? 'Создаём…' : 'Подтвердить актуальность'}</button>
                   </>
                 ) : (
-                  <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting}>{submitting ? 'Создаём…' : 'Включить'}</button>
+                  <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting || needsPrice}>{needsPrice ? 'Сначала укажите цену' : submitting ? 'Создаём…' : 'Включить'}</button>
                 )}
               </div>
 
               {editing && (
                 <form className={styles.inlineForm} onSubmit={(event) => void submitUpdate(event, offer.id)} noValidate>
                   <label htmlFor={`offer-price-${offer.id}`}>Цена, ₸</label>
-                  <input id={`offer-price-${offer.id}`} value={priceAmount} onChange={(event) => setPriceAmount(event.target.value)} inputMode="decimal" disabled={submitting} placeholder="Без цены" />
+                  <input id={`offer-price-${offer.id}`} value={priceAmount} onChange={(event) => setPriceAmount(event.target.value)} inputMode="decimal" disabled={submitting} placeholder="Обязательно" aria-required="true" />
                   <label htmlFor={`offer-unit-${offer.id}`}>Единица</label>
                   <input id={`offer-unit-${offer.id}`} value={priceUnit} onChange={(event) => setPriceUnit(event.target.value)} maxLength={32} disabled={submitting || priceAmount.trim() === ''} placeholder="Например, кг" />
                   <label htmlFor={`offer-comment-${offer.id}`}>Комментарий продавца</label>
