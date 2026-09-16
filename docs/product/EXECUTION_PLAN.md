@@ -19,7 +19,7 @@
 - Slice Contracts — точное поведение конкретного slice;
 - `docs/UX_BACKLOG.md` и GitHub Issues — наблюдения, product gaps и будущие идеи.
 
-Новая идея сначала попадает в backlog / issue. Она не меняет текущий executable slice. Положение в очереди меняется только отдельным product decision и обновлением этого файла на checkpoint boundary.
+Новая идея сначала попадает в backlog / issue. Она не меняет уже открытый executable slice. Положение в очереди меняется только отдельным product decision и обновлением этого файла на checkpoint boundary.
 
 ## Приоритет источников для планирования
 
@@ -44,7 +44,7 @@ UX2A — post-UX2 Search / App Shell responsive correction — уже merged в 
 - merge commit: `66fb1def48b59f9321b2c3eb21cb0320ac3071ce`;
 - branch CI и manual acceptance были PASS до merge.
 
-Перед началом следующего executable slice исполнитель всё равно обязан проверить фактический latest verified checkpoint/tag и merged-main CI по обычным правилам проекта.
+Перед началом следующего executable slice исполнитель обязан заново проверить фактический `main`, latest verified checkpoint/tag и CI evidence. Не доверять SHA из этого документа, если repository state уже изменился.
 
 Закрытые product / UX capabilities до UX2:
 
@@ -84,13 +84,43 @@ Capability сознательно не нужна текущему MVP-конт�
 
 Product Owner решил не оставлять этот gap до конца roadmap.
 
-R1 decision:
+Первое R1 decision:
 
 1. сначала закрыть **Mandatory Offer Price** как бизнес-инвариант;
 2. затем выполнить отдельный **Seller Offer Workspace** slice по Issue #27;
 3. только после этого продолжить Search Sorting.
 
-Причина порядка: новый seller workspace должен сразу строиться вокруг уже утверждённого mandatory-price invariant и не переделываться повторно следующим slice.
+После дополнительного walkthrough seller loop обнаружен ещё один core product gap: KAIDA.KZ должен не только хранить freshness, но и регулярно заставлять продавца подтверждать, что Offer всё ещё актуален. Product Owner утвердил отдельный **Seller Freshness Loop** до Search Sorting.
+
+Итоговый R1 / post-R1 committed order зафиксирован ниже.
+
+## Core product rule — Seller Freshness Loop
+
+Freshness Offer определяется от `last_confirmed_at`. Утверждена начальная policy `2 / 7 / 14` суток; thresholds должны задаваться policy/configuration, а не размазываться hard-coded constants по коду.
+
+### Buyer semantics
+
+- `< 2 days` — Offer fresh, обычная buyer-facing выдача;
+- `>= 2 days and < 7 days` — Offer ageing, остаётся buyer-visible, но попадает в более низкий deterministic freshness tier; buyer видит понятный возраст вроде `Обновлено 3 дня назад`;
+- `>= 7 days` — Offer исключён из всех buyer-facing выдач: Search, Nearby, Discovery;
+- buyer-facing Offer с возрастом актуальности `>= 7 days` существовать не должен.
+
+Freshness tier сильнее обычной сортировки: fresh eligible Offers идут выше ageing eligible Offers. Внутри одного tier применяются актуальные правила Search sorting / ranking и deterministic tie-breakers.
+
+### Seller semantics
+
+- успешное `Всё без изменений` обновляет freshness до времени confirmation;
+- успешное изменение Offer также обновляет freshness до времени confirmation;
+- `>= 14 days` без актуализации — Offer исчезает из обычного рабочего списка Seller через archive/hidden lifecycle;
+- это **не hard delete**: Offer, ChangeSets и история остаются сохранены; physical deletion не является частью этой policy.
+
+### Reminder semantics
+
+Продавец должен регулярно получать prompt на reconfirmation активных Offers. Целевое направление — примерно ежедневный cadence, но reminder cadence является отдельной policy/configuration и не совпадает автоматически с 2/7/14 thresholds.
+
+Notification transport не фиксируется заранее как SMS / Telegram / Web Push. Отдельный reminder slice обязан выбрать минимальный реальный канал для текущей стадии и явно доказать scheduler/external-service/privacy/idempotency risks, если они действительно возникают.
+
+SellerChangeSet остаётся обязательной архитектурной границей. Ни reconfirmation, ни reminder не дают прямой write в Offer.
 
 ## COMMITTED — текущая твёрдая очередь
 
@@ -112,7 +142,7 @@ Product decision:
 
 Связано с Issue #27.
 
-User task: P2 может добавить, изменить или выключить товар без технического путешествия по SellerChangeSet screens.
+User task: P2 может добавить, изменить, выключить или подтвердить актуальность товара без технического путешествия по SellerChangeSet screens.
 
 Утверждённое UX-направление:
 
@@ -123,6 +153,7 @@ User task: P2 может добавить, изменить или выключ�
 - один понятный primary action завершает точное ручное действие;
 - после успеха Seller остаётся на seller workspace и сразу видит актуальный Offer;
 - edit выполняется in-place / inline без обязательного перехода на техническую review page;
+- freshness interaction должен поддерживать понятные seller actions вроде `Всё без изменений` и `Что-то изменилось`;
 - deactivate/reactivate/refresh не должны заставлять пользователя думать терминами ChangeSet, если отдельный safety confirmation не нужен по реальному риску;
 - ordinary seller UI не показывает `SellerChangeSet`, `ChangeItem`, `proposed`, `confirmed` или технические Offer IDs как пользовательские понятия.
 
@@ -138,7 +169,45 @@ Slice Contract обязан явно пересмотреть закрытые S
 
 Batch S12 не редизайнить автоматически; только проверить, не нарушает ли новый single-item UX общий закрытый contract.
 
-### 3. Search Sorting A — explicit freshness / proximity + visible distance
+### 3. Seller Freshness Policy — lifecycle degradation 2 / 7 / 14
+
+Связано с Issue #31.
+
+User task: Buyer понимает степень свежести предложения и никогда не видит Offer старше 7 суток; Seller не держит бесконечно заброшенные Offers в рабочем кабинете.
+
+Минимальное направление:
+
+- `< 2d` — fresh;
+- `2d <= age < 7d` — ageing, buyer-visible, ниже fresh tier, с понятной age label;
+- `age >= 7d` — исключение из Search / Nearby / Discovery;
+- `age >= 14d` — скрытие/архив из обычного Seller workspace без hard delete;
+- любое successful reconfirm/update сбрасывает freshness clock;
+- policy thresholds configurable;
+- deterministic boundary tests на ровно `2d`, `7d`, `14d`, без sleep.
+
+Closed-contract revision затрагивает S1/S5/S9. Перед реализацией нужен отдельный STOP/review и Slice Contract; не переписывать исторические migrations.
+
+### 4. Seller Freshness Reminder — proactive reconfirmation loop
+
+Связано с Issue #32.
+
+User task: Seller не обязан сам помнить, когда нужно освежить Offers; KAIDA.KZ регулярно инициирует reconfirmation.
+
+Target flow:
+
+`Offer due -> reminder -> Seller Offer Workspace -> Всё без изменений / Что-то изменилось -> confirmation/apply -> freshness reset`
+
+Направление:
+
+- target cadence примерно daily, но cadence задаётся policy/configuration;
+- reminder ведёт на обычный Seller Workspace, не на техническую ChangeSet page;
+- transport/channel выбирается только в Slice Contract;
+- in-app due-state нельзя выдавать за external push, если внешнего уведомления фактически нет;
+- scheduler/background job, external service, privacy и duplicate-delivery/idempotency проверяются только если реально присутствуют в выбранной реализации.
+
+Issue #31 владеет thresholds/ranking/archive semantics; #32 их не переопределяет.
+
+### 5. Search Sorting A — explicit freshness / proximity + visible distance
 
 Связано с Issue #12 и UX-011.
 
@@ -149,21 +218,23 @@ User task: Buyer явно понимает, как отсортирован Sear
 - `Актуальнее` — явный default;
 - `Ближе` — после explicit buyer geolocation;
 - расстояние показывается пользователю;
-- сохраняются S9 Haversine / deterministic tie-breaker / privacy semantics.
+- сохраняются S9 Haversine / deterministic tie-breaker / privacy semantics;
+- новые explicit sort modes не могут нарушить закрытую к этому моменту Freshness Policy #31: fresh tier остаётся выше ageing tier, а `>= 7d` Offer не участвует в выдаче вообще.
 
-### 4. Search Sorting B — price ordering
+### 6. Search Sorting B — price ordering
 
-Зависит от Mandatory Offer Price.
+Зависит от Mandatory Offer Price и Freshness Policy.
 
 Направление:
 
 - `Дешевле`;
 - при необходимости `Дороже`;
-- нельзя напрямую сравнивать несовместимые currency/unit semantics.
+- нельзя напрямую сравнивать несовместимые currency/unit semantics;
+- price sort работает только среди buyer-eligible Offers и не возвращает ageing tier выше fresh tier.
 
 До Slice Contract должна быть определена коммерческая сопоставимость цены/единицы.
 
-### 5. M1 — Offer media
+### 7. M1 — Offer media
 
 Направление:
 
@@ -175,17 +246,19 @@ User task: Buyer явно понимает, как отсортирован Sear
 
 Не смешивать с AI `photo -> Change Set`.
 
-### 6. S14 — Discovery / «Для вас» v0
+### 8. S14 — Discovery / «Для вас» v0
 
 Buyer видит Offers по явно указанным interests без ML.
 
 S13 уже закрыт и является зависимостью S14.
 
-### 7. S15 — Search learning
+Discovery обязан использовать закрытую Freshness Policy: Offer `>= 7d` buyer не видит.
+
+### 9. S15 — Search learning
 
 Оператор видит реальные search queries, zero-result и unmatched queries и использует их для ручного улучшения Product / aliases / Category.
 
-### 8. S16 — Operations
+### 10. S16 — Operations
 
 Оператор может отключить ошибочный Offer или Seller.
 
@@ -254,7 +327,7 @@ Market не становится архитектурным центром; Offe
 
 ### Gate R1 — CLOSED after UX2A
 
-Результат зафиксирован выше: Seller Offer Workspace поднят в COMMITTED после Mandatory Offer Price.
+Результат зафиксирован выше: Seller Offer Workspace и Seller Freshness Loop подняты в COMMITTED до Search Sorting.
 
 ### Gate R2 — после Search Sorting B
 
@@ -280,6 +353,7 @@ Market не становится архитектурным центром; Offe
 
 Проверить весь список launch-critical gaps, включая:
 
+- существует ли реально работающий proactive Seller reminder channel, а не только in-app due-state;
 - необходимость real SMS provider S22;
 - moderation / operations adequacy;
 - unresolved product requirements, которые нужны именно выбранному формату пилота / public beta.
