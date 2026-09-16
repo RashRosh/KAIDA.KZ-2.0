@@ -107,8 +107,8 @@ test.beforeAll(async ({}, workerInfo) => {
   ] as const;
   for (const [id, locationId, status, confirmedAt] of offerFixtures) {
     await connection.pool.query(`INSERT INTO offers
-      (id,product_id,seller_id,location_id,status,last_confirmed_at,created_at,updated_at)
-      VALUES ($1,$2,$3,$4,$5,$6,$6,$6)`, [
+      (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at)
+      VALUES ($1,$2,$3,$4,1000,'KZT',$5,$6,$6,$6)`, [
       id,
       productId,
       sellerId,
