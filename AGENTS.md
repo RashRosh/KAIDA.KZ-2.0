@@ -10,6 +10,25 @@ Before doing any work in this repository, read and follow:
 
 Do not treat chat memory or copied status text as a substitute for current repository state.
 
+## UI / UX work
+
+Before preparing or implementing any UI/UX Slice Contract, also read:
+
+- `docs/DESIGN_SYSTEM.md`;
+- `docs/product/UX_REFERENCE_INDEX.md`;
+- only the external UX references from that index that are relevant to the current user task.
+
+External UX references are advisory evidence, not a new source of truth. Compare them with KAIDA closed contracts and Design System using `KEEP / ADAPT / REJECT / GAP`:
+
+- `KEEP` — current KAIDA rule already fits;
+- `ADAPT` — use the principle after adapting it to KAIDA product semantics;
+- `REJECT` — unsuitable or conflicting guidance;
+- `GAP` — potentially useful missing rule that requires Product Owner decision before implementation.
+
+Never change a closed product contract, API, privacy rule or architecture boundary merely because a generic e-commerce guide recommends another pattern.
+
+If `EXECUTION_PLAN.md` contains an open mandatory UX/design audit gate, complete that gate before starting the later UI/UX product slice.
+
 ## KAIDA Controller mode
 
 If the user asks to:
