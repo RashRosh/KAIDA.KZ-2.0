@@ -13,6 +13,7 @@ import { findSellerByOwner } from '../../sellers/infrastructure/sellers.reposito
 import {
   ChangeSetNotFoundError,
   OfferChangedError,
+  OfferPriceRequiredError,
   SellerInputInvariantError,
   SellerRequiredError,
   type SellerChangeSetView,
@@ -27,6 +28,13 @@ import {
 } from '../infrastructure/seller-change-sets.repository';
 
 type LockedOffer = NonNullable<Awaited<ReturnType<typeof lockOfferById>>>;
+type LockedItem = Awaited<ReturnType<typeof lockChangeItems>>[number];
+
+function assertPricedItem(item: LockedItem): asserts item is LockedItem & { priceAmount: string; priceCurrency: 'KZT' } {
+  if (item.priceAmount === null || item.priceCurrency !== 'KZT') {
+    throw new OfferPriceRequiredError();
+  }
+}
 
 async function loadFinalView(
   database: Parameters<typeof findChangeSetViewByIdAndSeller>[0],
@@ -93,6 +101,7 @@ export async function confirmSellerChangeSet(
         if (item.resultOfferId !== null) {
           throw new SellerInputInvariantError('Proposed create_offer Item уже содержит result_offer_id.');
         }
+        assertPricedItem(item);
         continue;
       }
 
@@ -146,22 +155,24 @@ export async function confirmSellerChangeSet(
       if (item.action === 'deactivate_offer' && targetOffer.status !== 'active') {
         throw new SellerInputInvariantError('Deactivate proposal ожидает active target Offer на своей revision.');
       }
-      if (item.action === 'update_offer' && item.priceAmount !== null && item.priceCurrency !== 'KZT') {
-        throw new SellerInputInvariantError('Update Item содержит неподдерживаемую валюту.');
+      assertPricedItem(item);
+      if (item.action === 'activate_offer' && (targetOffer.priceAmount === null || targetOffer.priceCurrency !== 'KZT')) {
+        throw new OfferPriceRequiredError();
       }
     }
 
     const confirmationTime = clock();
 
     for (const item of items) {
+      assertPricedItem(item);
       if (item.action === 'create_offer') {
         const offer = await createOffer(tx, {
           productId: item.productId,
           sellerId: seller.id,
           locationId: item.locationId,
           priceAmount: item.priceAmount,
-          priceCurrency: item.priceAmount === null ? null : 'KZT',
-          priceUnit: item.priceAmount === null ? null : item.priceUnit,
+          priceCurrency: 'KZT',
+          priceUnit: item.priceUnit,
           sellerComment: item.sellerComment,
           confirmedAt: confirmationTime,
         });
@@ -178,8 +189,8 @@ export async function confirmSellerChangeSet(
           offerId: targetOffer.id,
           expectedRevision: item.expectedOfferRevision!,
           priceAmount: item.priceAmount,
-          priceCurrency: item.priceAmount === null ? null : 'KZT',
-          priceUnit: item.priceAmount === null ? null : item.priceUnit,
+          priceCurrency: 'KZT',
+          priceUnit: item.priceUnit,
           sellerComment: item.sellerComment,
           confirmationTime,
         });
