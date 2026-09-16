@@ -9,8 +9,8 @@ function parse(value: unknown) {
   return sellerOfferChangeBodySchema.safeParse(value);
 }
 
-describe('S5 seller offer management validation', () => {
-  it('accepts full-state update and trims unit/comment', () => {
+describe('S5 seller offer management validation after Mandatory Offer Price', () => {
+  it('accepts full-state priced update and trims unit/comment', () => {
     const result = parse({
       action: 'update_offer',
       price: { amount: '4500.00', unit: '  кг  ' },
@@ -26,20 +26,14 @@ describe('S5 seller offer management validation', () => {
     }
   });
 
-  it('accepts explicit nulls as clear operations', () => {
-    expect(parse({ action: 'update_offer', price: null, sellerComment: null })).toMatchObject({
-      success: true,
-      data: { action: 'update_offer', price: null, sellerComment: null },
-    });
-  });
-
-  it('requires both update keys and has no partial patch semantics', () => {
-    expect(parse({ action: 'update_offer', price: null }).success).toBe(false);
+  it('rejects clearing or omitting price while preserving comment clearing', () => {
+    expect(parse({ action: 'update_offer', price: null, sellerComment: null }).success).toBe(false);
     expect(parse({ action: 'update_offer', sellerComment: null }).success).toBe(false);
-    expect(parse({ action: 'update_offer' }).success).toBe(false);
+    expect(parse({ action: 'update_offer', price: { amount: '1' } }).success).toBe(false);
+    expect(parse({ action: 'update_offer', price: { amount: '1' }, sellerComment: null }).success).toBe(true);
   });
 
-  it.each(['0', '1', '4200', '4200.5', '4200.50', '999999999999.99'])('accepts S4-compatible price %s', (amount) => {
+  it.each(['0', '1', '4200', '4200.5', '4200.50', '999999999999.99'])('accepts price %s', (amount) => {
     expect(parse({ action: 'update_offer', price: { amount }, sellerComment: null }).success).toBe(true);
   });
 
@@ -78,7 +72,7 @@ describe('S5 seller offer management validation', () => {
     expect(parse({ action: 'activate_offer', [field]: 'spoof' }).success).toBe(false);
   });
 
-  it('detects normalized semantic no-op instead of raw string equality', () => {
+  it('detects normalized priced semantic no-op and treats legacy no-price Offer as needing remediation', () => {
     const parsed = sellerOfferChangeBodySchema.parse({
       action: 'update_offer',
       price: { amount: '4500.0', unit: ' кг ' },
@@ -93,14 +87,12 @@ describe('S5 seller offer management validation', () => {
       sellerComment: 'Свежая партия',
     }, parsed)).toBe(true);
 
-    const clear = sellerOfferChangeBodySchema.parse({ action: 'update_offer', price: null, sellerComment: null });
-    if (clear.action !== 'update_offer') throw new Error('unexpected action');
     expect(offerUpdateIsNoOp({
       priceAmount: null,
       priceCurrency: null,
       priceUnit: null,
-      sellerComment: null,
-    }, clear)).toBe(true);
+      sellerComment: 'Свежая партия',
+    }, parsed)).toBe(false);
 
     expect(offerUpdateIsNoOp({
       priceAmount: '4501.00',
