@@ -3,7 +3,10 @@
 Before doing any work in this repository, read and follow:
 
 - `docs/PROJECT_RULES.md`
+- `docs/product/EXECUTION_PLAN.md`
 - `docs/product/FEATURE_MAP.md`
+
+`EXECUTION_PLAN.md` is the canonical source for the **current execution order** and inserted/reprioritized stages. `FEATURE_MAP.md` is the longer-range capability/dependency map. Do not start a later capability only because it appears next numerically in Feature Map if `EXECUTION_PLAN.md` says otherwise.
 
 Do not treat chat memory or copied status text as a substitute for current repository state.
 
