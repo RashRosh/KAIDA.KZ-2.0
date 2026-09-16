@@ -76,7 +76,7 @@ beforeAll(async () => {
 
 afterAll(async () => { await pool.end(); });
 
-describe('S12 batch seller input on PostgreSQL 18', () => {
+describe('S12 batch seller input on PostgreSQL 18 after Mandatory Offer Price', () => {
   it('persists one multi-item proposal, keeps buyer truth unchanged before confirm, then applies the whole mixed batch once', async () => {
     const userId = '50000000-0000-4000-8000-000000001201';
     const phone = '+77000001201';
@@ -139,7 +139,7 @@ describe('S12 batch seller input on PostgreSQL 18', () => {
       await expect(createBatchSellerChangeSet(userId, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
           { action: 'activate_offer', offerId: lambId },
-          { action: 'create_offer', productName: 'Несуществующий S12 товар', locationId },
+          { action: 'create_offer', productName: 'Несуществующий S12 товар', locationId, price: { amount: '1' } },
         ],
       }), { database: db })).rejects.toBeInstanceOf(ProductNotFoundError);
       expect(await counts(seller.id)).toEqual(before);
