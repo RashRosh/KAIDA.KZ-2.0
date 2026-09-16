@@ -5,6 +5,7 @@ import { findSellerByOwner } from '../../sellers/infrastructure/sellers.reposito
 import {
   OfferAlreadyInactiveError,
   OfferNotFoundError,
+  OfferPriceRequiredError,
   OfferUpdateNoChangesError,
   SellerInputInvariantError,
   SellerRequiredError,
@@ -40,14 +41,6 @@ export function offerUpdateIsNoOp(
   input: Extract<SellerOfferChangeInput, { action: 'update_offer' }>,
 ): boolean {
   const currentComment = normalizeNullableText(offer.sellerComment);
-
-  if (input.price === null) {
-    return offer.priceAmount === null
-      && offer.priceCurrency === null
-      && offer.priceUnit === null
-      && currentComment === input.sellerComment;
-  }
-
   if (offer.priceAmount === null || offer.priceCurrency !== 'KZT') return false;
 
   return canonicalDecimal(offer.priceAmount) === canonicalDecimal(input.price.amount)
@@ -64,7 +57,7 @@ function normalizedCurrentPrice(offer: {
     if (offer.priceCurrency !== null || offer.priceUnit !== null) {
       throw new SellerInputInvariantError('Target Offer содержит некорректную форму цены.');
     }
-    return { amount: null, currency: null, unit: null } as const;
+    return null;
   }
   if (offer.priceCurrency !== 'KZT') {
     throw new SellerInputInvariantError('Цена target Offer имеет неподдерживаемую валюту.');
@@ -97,25 +90,23 @@ export async function createOfferManagementChangeSet(
       throw new SellerInputInvariantError('Target Offer содержит некорректную revision.');
     }
 
-    const currentPrice = normalizedCurrentPrice(offer);
-    let priceAmount: string | null;
-    let priceCurrency: 'KZT' | null;
+    let priceAmount: string;
     let priceUnit: string | null;
     let sellerComment: string | null;
 
     if (input.action === 'update_offer') {
       if (offerUpdateIsNoOp(offer, input)) throw new OfferUpdateNoChangesError();
-      priceAmount = input.price?.amount ?? null;
-      priceCurrency = input.price ? 'KZT' : null;
-      priceUnit = input.price?.unit ?? null;
+      priceAmount = input.price.amount;
+      priceUnit = input.price.unit;
       sellerComment = input.sellerComment;
     } else {
       if (input.action === 'deactivate_offer' && offer.status === 'inactive') {
         throw new OfferAlreadyInactiveError();
       }
+      const currentPrice = normalizedCurrentPrice(offer);
+      if (!currentPrice) throw new OfferPriceRequiredError();
       priceAmount = currentPrice.amount;
-      priceCurrency = currentPrice.amount === null ? null : 'KZT';
-      priceUnit = currentPrice.amount === null ? null : currentPrice.unit;
+      priceUnit = currentPrice.unit;
       sellerComment = normalizeNullableText(offer.sellerComment);
     }
 
@@ -126,7 +117,7 @@ export async function createOfferManagementChangeSet(
       productId: offer.productId,
       locationId: offer.locationId,
       priceAmount,
-      priceCurrency,
+      priceCurrency: 'KZT',
       priceUnit,
       sellerComment,
       targetOfferId: offer.id,
