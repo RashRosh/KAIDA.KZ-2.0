@@ -74,13 +74,13 @@ beforeAll(async () => {
   ]);
 
   await pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,status,last_confirmed_at,created_at,updated_at) VALUES
-    ($1,$7,$8,$12,'active',$16,$16,$16),
-    ($2,$7,$9,$13,'active',$16,$16,$16),
-    ($3,$7,$10,$14,'active',$16,$16,$16),
-    ($4,$7,$11,$15,'active',$16,$16,$16),
-    ($5,$7,$8,$12,'inactive',$16,$16,$16),
-    ($6,$7,$8,$12,'active',$17,$17,$17)`, [
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at) VALUES
+    ($1,$7,$8,$12,1000,'KZT','active',$16,$16,$16),
+    ($2,$7,$9,$13,1000,'KZT','active',$16,$16,$16),
+    ($3,$7,$10,$14,1000,'KZT','active',$16,$16,$16),
+    ($4,$7,$11,$15,1000,'KZT','active',$16,$16,$16),
+    ($5,$7,$8,$12,1000,'KZT','inactive',$16,$16,$16),
+    ($6,$7,$8,$12,1000,'KZT','active',$17,$17,$17)`, [
     offerIds.eligible,
     offerIds.noPhone,
     offerIds.noGeo,
