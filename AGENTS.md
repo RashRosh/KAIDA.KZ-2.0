@@ -1,58 +1,63 @@
-# KAIDA.KZ 2.0 agent instructions
+# KAIDA.KZ 2.0 — Agent Router
 
-Before doing any work in this repository, read and follow:
+Этот файл не является product spec или roadmap. Его задача — сказать агенту, **какие источники читать для конкретной работы**.
 
-- `docs/PROJECT_RULES.md`
-- `docs/product/EXECUTION_PLAN.md`
-- `docs/product/FEATURE_MAP.md`
+## Перед любой работой
 
-`EXECUTION_PLAN.md` is the canonical source for the **current execution order** and inserted/reprioritized stages. `FEATURE_MAP.md` is the longer-range capability/dependency map. Do not start a later capability only because it appears next numerically in Feature Map if `EXECUTION_PLAN.md` says otherwise.
+Сначала самостоятельно проверь фактический repository state: текущий `main`, relevant branch/PR, последний verified checkpoint/tag и CI evidence.
 
-Do not treat chat memory or copied status text as a substitute for current repository state.
+Затем прочитай:
+
+1. `docs/PROJECT_RULES.md` — процесс, verification и устойчивые product/architecture boundaries;
+2. `docs/product/EXECUTION_PLAN.md` — единственный канонический текущий порядок работ;
+3. `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости.
+
+Не используй chat memory, старый README, historical status line или номер следующего `Sxx` как замену актуальному `EXECUTION_PLAN.md`.
+
+## Если готовится или реализуется конкретный slice
+
+Дополнительно прочитай:
+
+- утверждённый `docs/slices/**/SLICE_CONTRACT.md`, если он уже существует;
+- contracts закрытых slices, которые реально затрагивает изменение;
+- detailed GitHub Issue, если текущий этап ссылается на него.
+
+Slice Contract определяет точное поведение и acceptance. Issue/Feature Map/Design System не имеют права молча расширять его scope.
 
 ## UI / UX work
 
-Before preparing or implementing any UI/UX Slice Contract, also read:
+Перед подготовкой или реализацией UI/UX Slice Contract дополнительно прочитай:
 
 - `docs/DESIGN_SYSTEM.md`;
 - `docs/product/UX_REFERENCE_INDEX.md`;
-- only the external UX references from that index that are relevant to the current user task.
+- только релевантные внешние UX references, перечисленные для текущей user task.
 
-External UX references are advisory evidence, not a new source of truth. Compare them with KAIDA closed contracts and Design System using `KEEP / ADAPT / REJECT / GAP`:
+Внешние references — advisory evidence, не источник нового contract. Findings классифицируются как:
 
-- `KEEP` — current KAIDA rule already fits;
-- `ADAPT` — use the principle after adapting it to KAIDA product semantics;
-- `REJECT` — unsuitable or conflicting guidance;
-- `GAP` — potentially useful missing rule that requires Product Owner decision before implementation.
+- `KEEP` — текущее KAIDA rule уже подходит;
+- `ADAPT` — принцип полезен после адаптации под KAIDA;
+- `REJECT` — конфликтует с продуктовой моделью/closed contract;
+- `GAP` — требует отдельного Product Owner decision.
 
-Never change a closed product contract, API, privacy rule or architecture boundary merely because a generic e-commerce guide recommends another pattern.
-
-If `EXECUTION_PLAN.md` contains an open mandatory UX/design audit gate, complete that gate before starting the later UI/UX product slice.
+Если `EXECUTION_PLAN.md` содержит незакрытый обязательный UX/design maintenance gate, следующий UI/UX product slice не начинается до закрытия этого gate.
 
 ## KAIDA Controller mode
 
-If the user asks to:
+Если пользователь просит `Проверь <slice>`, `Запусти KAIDA Controller`, проверить contract, diff, readiness к manual acceptance/merge/checkpoint или выступить независимым контролёром — дополнительно прочитай:
 
-- `Проверь <slice>`;
-- `Запусти KAIDA Controller`;
-- review a Slice Contract;
-- review implementation against an approved Slice Contract;
-- decide whether a slice is ready for manual acceptance, merge or checkpoint;
-- act as independent controller/reviewer;
+- `docs/agents/KAIDA_CONTROLLER.md`.
 
-then also read and follow:
+Controller не проектирует и не реализует slice. Он проверяет exact repository evidence и даёт gate verdict.
 
-- `docs/agents/KAIDA_CONTROLLER.md`
+## Главное правило
 
-In Controller mode:
+У каждого типа информации один владелец:
 
-- independently inspect the current repository, relevant contracts, diff, CI and checkpoint evidence;
-- do not redesign the slice;
-- do not implement product changes;
-- do not expand verification without a real risk reason;
-- do not start the next slice automatically;
-- give an explicit gate verdict for the exact SHA being reviewed.
+- процесс и boundaries → `PROJECT_RULES.md`;
+- текущая очередь → `EXECUTION_PLAN.md`;
+- долгосрочная capability map → `FEATURE_MAP.md`;
+- visual/presentation rules → `DESIGN_SYSTEM.md`;
+- unresolved detailed work → GitHub Issues;
+- exact slice behavior → Slice Contract.
 
-## Normal implementation mode
-
-Outside Controller mode, `docs/PROJECT_RULES.md` remains authoritative. Work in small vertical slices, preserve closed contracts, keep scope minimal, and do not modify `main` directly unless the project process explicitly allows it.
+Не создавай параллельный roadmap или второй набор инструкций без объективной необходимости.
