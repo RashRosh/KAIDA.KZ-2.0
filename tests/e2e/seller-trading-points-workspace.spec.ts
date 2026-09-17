@@ -49,7 +49,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await page.getByLabel('Имя', { exact: true }).fill(`Seller 36 ${testInfo.project.name}`);
     await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(firstName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
-    await page.getByLabel('Адрес').fill('Алматы, адрес A');
+    await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, адрес A');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
     await expect(page.getByText(`Точка: ${firstName}`, { exact: false })).toBeVisible();
@@ -62,7 +62,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await add.click();
     await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(secondName);
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
-    await page.getByLabel('Адрес').fill('Алматы, адрес B');
+    await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, адрес B');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
     await expect(page.locator('[data-testid^="trading-point-"]')).toHaveCount(2);
@@ -73,7 +73,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await expect(page.getByRole('heading', { name: 'Изменить торговую точку' })).toBeVisible();
     await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(editedName);
     await page.getByLabel('Тип торговой точки').selectOption('market');
-    await page.getByLabel('Адрес').fill('Алматы, изменённый адрес B');
+    await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, изменённый адрес B');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Торговая точка сохранена.', { exact: true })).toBeVisible();
     expect(await page.locator('body').innerText()).not.toContain('43.');
