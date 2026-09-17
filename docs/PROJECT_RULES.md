@@ -1,352 +1,300 @@
 # KAIDA.KZ 2.0 — Project Rules / Process v2
 
-Этот документ является обязательным правилом разработки проекта.
+Этот документ владеет **процессом разработки, verification и устойчивыми product/architecture boundaries**. Он не является roadmap и не определяет текущую очередность — за неё отвечает `docs/product/EXECUTION_PLAN.md`.
 
-## 1. Проект начинается с нуля
+## 1. Общий принцип
 
-Старый код KAIDA.KZ не используется как архитектурная база и не переносится автоматически.
+KAIDA.KZ 2.0 развивается с нуля. Старый KAIDA.KZ не является архитектурной базой и не переносится автоматически.
 
-Старые ТЗ, код и материалы могут использоваться только как:
+Разработка идёт маленькими независимыми vertical slices. Каждый product slice решает **одну конкретную пользовательскую задачу полностью**:
 
-- источник продуктовых требований;
-- историческая справка;
-- источник уже принятых продуктовых решений.
+```text
+UI → API → business logic → DB → tests → manual acceptance
+```
 
-Никакая старая реализация не считается предпочтительной только потому, что она уже существует.
+Следующий product slice начинается только после закрытия предыдущего checkpoint, если Product Owner явно не согласовал отдельную независимую maintenance-задачу.
 
-## 2. Разработка продукта только через vertical slices
+Главный критерий прогресса — количество реально работающих и проверенных функций, а не объём кода.
 
-Не создавать весь MVP одним большим блоком.
+## 2. Источники истины
 
-Каждый product slice решает одну конкретную пользовательскую задачу полностью:
+Роли документов разделены:
 
-`UI → API → бизнес-логика → БД → тесты → ручная проверка`
+- `AGENTS.md` — маршрутизатор: что читать;
+- `PROJECT_RULES.md` — процесс и устойчивые boundaries;
+- `docs/product/EXECUTION_PLAN.md` — единственный текущий execution order;
+- `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости;
+- `docs/DESIGN_SYSTEM.md` — visual/presentation rules;
+- GitHub Issues — подробные требования к незакрытой работе;
+- `docs/slices/**/SLICE_CONTRACT.md` — точное поведение конкретного slice.
 
-Следующий product slice начинается только после закрытия предыдущего checkpoint, если явно не согласована отдельная независимая maintenance-задача.
+Фактический repository state, tags и CI всегда проверяются напрямую. Исторический статус внутри README, Feature Map, старого issue или чата не заменяет текущий evidence.
 
-Maintenance по документации, тестовой инфраструктуре, CI или tooling не считается новым product slice, если она:
+## 3. Slice Contract
 
-- не меняет пользовательское поведение;
-- не меняет публичный API/contract;
-- не добавляет product capability;
-- имеет ограниченный заранее описанный scope.
+До реализации каждого product slice подготовить компактный Slice Contract. Он должен содержать:
 
-## 3. Порядок работы над product slice
+1. одну user task;
+2. scope;
+3. explicit out of scope;
+4. затрагиваемые закрытые contracts;
+5. ожидаемые модули/границы изменения без лишней фиксации внутренних имён файлов и типов;
+6. реальные risk flags;
+7. 5–12 acceptance criteria;
+8. automated verification plan только для нужных уровней;
+9. короткий manual acceptance scenario.
 
-Для каждой функции:
+Не создавать второй большой Implementation Contract, если Slice Contract уже однозначно определяет поведение.
 
-1. определить пользовательскую задачу;
-2. написать короткий Feature Spec;
-3. явно определить scope и out of scope;
-4. определить acceptance criteria;
-5. определить закрытые contracts, которые должны сохраниться;
-6. определить разрешённые модули и файлы;
-7. определить риски изменения и verification plan;
-8. написать или обновить необходимые acceptance tests;
-9. реализовать функцию;
-10. выполнить targeted verification по изменённому поведению и затронутым границам;
-11. выполнить обязательный full branch CI на финальном исполняемом head;
-12. выполнить manual acceptance в реальном интерфейсе для пользовательского поведения;
-13. merge в `main` только после прохождения gates;
-14. дождаться merged-main CI;
-15. создать checkpoint tag;
-16. только после этого начинать следующий product slice.
+Slice Contract фиксирует **поведение и архитектурные границы**, а не каждую внутреннюю функцию, имя файла или исторический test helper.
 
-Не требуется механически повторять один и тот же полный verification несколько раз без изменения SHA или без отдельной причины риска.
+## 4. Закрытые contracts
 
-## 4. Ограничение изменений
+После verified checkpoint закрытым считается проверенное обещанное поведение, например:
 
-Не переписывать и не рефакторить соседние части проекта без необходимости.
+- пользовательский flow;
+- public API и его semantics;
+- business/data invariant;
+- ownership/privacy boundary;
+- migration guarantee;
+- lifecycle/ranking rule;
+- межмодульная архитектурная граница.
 
-Если изменение требует затронуть другой модуль или изменить закрытый публичный contract, сначала нужно объяснить:
+Закрытым contract не является каждый старый test file, helper, internal type или implementation detail.
+
+Если новый slice действительно требует изменить закрытый contract, **STOP до реализации** и объяснить:
 
 - какой contract мешает;
 - почему без изменения нельзя;
-- необходимое изменение;
+- какое изменение предлагается;
 - последствия;
-- дополнительные файлы/модули;
-- какие будущие slices или contracts затрагиваются.
+- какие slices/modules будут затронуты.
 
-Не использовать задачи типа "переделай приложение", "исправь всё" или "улучши архитектуру как считаешь нужным".
+Старый тест можно менять, если его assumption устарел из-за легитимного развития системы и реальное закрытое поведение сохраняется.
 
-## 5. Архитектура MVP
+## 5. Risk flags
 
-Базовый подход: **modular monolith**.
+Для каждого slice явно проверить наличие следующих рисков:
 
-Микросервисы не используются без объективной необходимости.
+- DB migration;
+- public API;
+- auth/security/privacy;
+- concurrency/atomicity;
+- data loss;
+- external service.
 
-Предполагаемые функциональные области по мере появления требований:
+Дополнительные проверки добавлять только для реально присутствующих рисков.
 
-- Identity;
-- Sellers;
-- Locations;
-- Catalog;
-- Offers;
-- Search;
-- Discovery;
-- Seller Input;
-- AI Processing;
-- Media;
-- Reviews;
-- Moderation;
-- Notifications;
-- Monetization;
-- Analytics.
+Не требовать migration proof, concurrency stress или external-service verification просто потому, что такие проверки существуют в проекте.
 
-Пустые модули "на будущее" не создаются.
+## 6. Реализация
 
-Границы модулей определяются публичными контрактами. Внутренняя реализация одного модуля не должна бесконтрольно проникать в другой.
+После утверждения Slice Contract:
 
-## 6. Closed contracts
+1. сделать минимальный необходимый diff;
+2. не рефакторить соседние области без необходимости;
+3. выполнить targeted verification для изменённого поведения и рисков;
+4. получить один актуальный full regression proof на финальном executable head;
+5. выполнить branch CI;
+6. выполнить manual acceptance пользовательского сценария;
+7. проверить diff на scope creep и closed-contract changes;
+8. merge в `main`;
+9. дождаться merged-main CI;
+10. создать annotated checkpoint tag;
+11. только после этого начинать следующий product slice.
 
-После закрытия slice его проверенное поведение считается **closed contract**.
+## 7. Verification
 
-Closed contract означает стабильность того, что реально обещано системой, например:
+Verification выбирается по риску, а не по максимальному количеству прогонов.
 
-- пользовательского поведения;
-- публичного API и его semantics;
-- data invariants;
-- migration guarantees;
-- privacy boundaries;
-- lifecycle/ranking/ownership semantics;
-- согласованных межмодульных контрактов.
+Обычные уровни:
 
-Closed contract **не означает неизменность каждого historical test file или test helper**.
+- unit — чистая бизнес-логика/validation;
+- integration — API, repository, DB constraints, transactions;
+- migration upgrade proof — если реально меняется schema/migration;
+- E2E — пользовательский flow и UI/API wiring;
+- lint/typecheck/build — compilation/runtime boundary.
 
-Historical tests можно менять без открытия продуктового contract, если изменение необходимо для:
+Один green full branch CI на финальном executable head может одновременно быть full regression proof.
 
-- устранения дефекта test harness;
-- удаления race/flakiness;
-- подключения к общему deterministic helper;
-- адаптации stale test assumption к разрешённому additive изменению;
-- улучшения тестовой инфраструктуры без изменения проверяемого поведения.
+Повторные exact-SHA runs нужны только при реальной причине:
 
-При таком изменении contract assertions должны оставаться эквивалентными. Нельзя ослаблять реальную продуктовую гарантию ради зелёного теста.
-
-Если assertion действительно выражает closed contract и новый slice с ним конфликтует, это contract change и требует отдельного согласования до реализации.
-
-## 7. Risk-based verification
-
-Verification выбирается по риску и затронутым слоям, а не по правилу "запустить всё максимально много раз".
-
-### 7.1 Targeted verification
-
-Сначала запускаются проверки, непосредственно связанные с изменением:
-
-- unit — для чистой бизнес-логики/validation;
-- integration — для API, repository, DB constraints, transactions, migrations;
-- migration-upgrade proof — если меняется schema/migration или migration harness;
-- E2E — для пользовательского сценария и UI/API wiring;
-- build/typecheck/lint — когда изменение может затронуть compilation/runtime boundary.
-
-Targeted tests должны доказывать изменённый риск, а не просто существовать формально.
-
-### 7.2 Full regression
-
-Перед закрытием executable change должен существовать один актуальный полный regression proof на соответствующем head.
-
-Обязательный full branch CI может одновременно быть этим full regression proof. Отдельный локальный `pnpm verify` перед тем же самым CI не является обязательным ритуалом, если он ничего не добавляет к доказательству.
-
-Локальный полный regression нужен, когда он реально сокращает риск/обратную связь или когда CI недоступен.
-
-### 7.3 Повторные прогоны
-
-Несколько одинаковых полных прогонов на одном SHA не требуются по умолчанию.
-
-Повторение оправдано, если проверяется:
-
-- race condition;
-- flaky teardown;
-- concurrency;
-- nondeterminism;
+- flaky/nondeterministic failure;
+- concurrency/race;
+- teardown instability;
 - environment-specific failure;
-- другой риск, который одним успешным запуском доказать нельзя.
+- повторяемость является частью доказываемого contract.
 
-Количество повторов определяется конкретным риском и фиксируется в verification plan.
+Manual acceptance проверяет продукт глазами пользователя и не должен дублировать SQL/API/CI проверки.
 
-### 7.4 Failure classification
+Для docs-only/test-infrastructure/tooling maintenance manual UI acceptance не требуется, если production behavior не менялся.
 
-Если после изменения появляется новый failure, до следующего исправления нужно классифицировать его как:
+## 8. Failure classification
+
+Новый failure сначала классифицируется как:
 
 1. `PRODUCT DEFECT`;
 2. `STALE REGRESSION ASSUMPTION`;
 3. `TEST IMPLEMENTATION / TEST HARNESS DEFECT`;
 4. `ENVIRONMENT / PROCEDURE / TOOLING`.
 
-Нельзя цепочкой менять production и historical tests, не поняв класс ошибки.
+Production нельзя менять только ради stale assertion. Тест нельзя ослаблять только ради зелёного CI.
 
-Production нельзя менять только ради stale assertion. Test нельзя ослаблять только ради зелёного CI.
+Общую повторяющуюся test-DB/pool teardown/`pg_stat_activity`/cleanup/drop-database логику выносить в deterministic harness, если это уменьшает race и дублирование.
 
-## 8. Обязательные gates product slice
+## 9. Роль KAIDA Controller
 
-Risk-based verification уменьшает лишнее дублирование, но не отменяет контрольные точки.
+Controller не проектирует slice заново и не пишет product code.
 
-Для завершённого пользовательского slice обязательны:
+Он отвечает только на четыре вопроса:
 
-1. **Targeted automated proof** — проверки рисков конкретного slice.
-2. **Branch CI** — полный CI на финальном branch head.
-3. **Manual acceptance** — человек проходит согласованный пользовательский сценарий в реальном интерфейсе.
-4. **Merge в main** — только после первых трёх gates.
-5. **Merged-main CI** — полный CI уже на фактическом merged `main`.
-6. **Checkpoint tag** — создаётся только после green merged-main CI.
+1. соответствует ли diff утверждённому Slice Contract;
+2. не нарушены ли closed contracts;
+3. покрыты ли реальные risk flags достаточным evidence;
+4. можно ли конкретный SHA пропустить через текущий gate / считать checkpoint.
 
-Если после successful branch CI меняется executable code, config, migration или test behavior, прежний branch CI больше не доказывает новый head и должен быть повторён.
+Подробная процедура: `docs/agents/KAIDA_CONTROLLER.md`.
 
-Если автоматический workflow запускается также на tag, его failure является blocker. Но отдельный искусственный повтор полного suite только ради того, чтобы третий раз проверить тот же exact commit, не требуется.
+## 10. Архитектура MVP
 
-Manual acceptance не заменяет automated proof, а automated proof не заменяет manual acceptance пользовательского поведения.
+Базовая архитектура — **modular monolith**.
 
-Для docs-only/test-infrastructure maintenance manual UI acceptance не обязателен, если production behavior не менялось; verification определяется риском maintenance-задачи.
+Не использовать микросервисы, Kafka, отдельный search cluster, vector DB, event bus или Kubernetes без измеримой необходимости.
 
-## 9. Суть продукта
+Функциональные области появляются по мере реальных требований: Identity, Sellers, Locations, Catalog, Offers, Search, Discovery, Seller Input, AI Processing, Media, Reviews, Moderation, Notifications, Monetization, Analytics.
 
-KAIDA.KZ не является путеводителем по рынкам.
+Не создавать пустые модули «на будущее».
 
-Главная задача: помочь покупателю понять, где сейчас купить нужный товар, а также показать товары, которые потенциально могут его заинтересовать.
+## 11. Суть продукта
 
-Центральная сущность: **Offer**, актуальное предложение продавца.
+KAIDA.KZ не является интернет-магазином и не является путеводителем по рынкам.
 
-Рынок, магазин, павильон, небольшая торговая точка и другие места являются типами `Location`. Рынок не является центром архитектуры.
+Главная задача: помочь покупателю понять, **где сейчас купить нужный товар**, а также показать товары, которые могут его заинтересовать.
+
+Центральная сущность — **Offer**, актуальное предложение продавца.
+
+`Location` описывает конкретную физическую точку продажи. Магазин, павильон, киоск, домашняя точка, место на рынке и другие варианты — формы Location или будущих специализированных spatial relations. Рынок не становится архитектурным центром.
 
 Базовая цепочка:
 
-`Seller Input → Normalization / Processing → Offer → Search / Matching / Discovery → Buyer Action`
+```text
+Seller Input
+→ Normalization / Processing
+→ Offer
+→ Search / Matching / Discovery
+→ Buyer Action
+```
 
 П1 = покупатель.
-
 П2 = продавец.
 
-## 10. Seller Input и AI
+## 12. Seller Input и ChangeSet
 
-В перспективе П2 сможет обновлять данные через:
+Все seller-input каналы в перспективе используют одну бизнес-логику: web, text, voice, photo, video, Telegram и т. п.
 
-- текст;
-- голос;
-- фото;
-- видео;
-- веб-интерфейс;
-- Telegram-бот.
+AI никогда не изменяет Offer напрямую.
 
-Все каналы должны использовать одну бизнес-логику.
+Обязательная архитектурная граница:
 
-Telegram-бот не получает отдельную бизнес-логику.
+```text
+Seller Input
+→ SellerChangeSet
+→ SellerChangeItem(s)
+→ confirmation / apply
+→ Offer
+```
 
-AI не изменяет Offer напрямую.
+Один SellerChangeSet может содержать несколько SellerChangeItems.
 
-Любой AI-ввод проходит через Seller Change Set:
+UI может скрывать техническую сущность ChangeSet от продавца, но не обходить её business guarantees без отдельного contract revision.
 
-`сырой ввод → AI предлагает изменения → П2 проверяет → П2 подтверждает → Offers изменяются`
+## 13. Offer freshness
 
-Устойчивый вариант для массового ввода:
+Свежесть — часть core product value. Seller должен иметь возможность регулярно подтверждать, что Offer всё ещё актуален, или обновлять его.
 
-- один `SellerChangeSet`;
-- внутри несколько `SellerChangeItems`;
-- продавец видит пакет изменений и подтверждает его по предусмотренному сценарию.
+Точные thresholds, ranking degradation, buyer visibility и reminder cadence принадлежат отдельным Slice Contracts / current Issues и не дублируются здесь. `EXECUTION_PLAN.md` определяет, когда эти revisions выполняются.
 
-Короткий комментарий продавца относится к Offer, а не к Product.
+## 14. Каталог и Search learning
 
-## 11. Монетизация
+`Product` и пользовательский поисковый термин — не одно и то же.
 
-Архитектурно учитывать три независимых направления.
-
-### 11.1 Объём
-
-Бесплатный тариф ограничивает количество активных товаров/предложений.
-
-Рабочая гипотеза около 10, но число нельзя жёстко зашивать в бизнес-логику. Оно должно задаваться политикой тарифа или конфигурацией.
-
-### 11.2 Удобство
-
-Продвинутые способы массового обновления ассортимента могут быть платными.
-
-Особенно видео:
-
-`видео ассортимента → распознавание товаров/цен/комментариев → Seller Change Set с несколькими items → подтверждение`
-
-Платная ценность здесь в скорости массового обновления, а не в самом факте загрузки видео.
-
-### 11.3 Охват
-
-П2 сможет отдельно продвигать Offer:
-
-- рядом;
-- на больший радиус;
-- релевантным пользователям;
-- с более широким охватом.
-
-Подписка П2 и продвижение Offer являются разными механизмами монетизации и не должны смешиваться архитектурно.
-
-Продвижение не должно ломать релевантность органической выдачи.
-
-## 12. Каталог
-
-Каталог строится по реальному поисковому поведению, но пользовательские запросы не должны автоматически создавать новые Products.
+Пользовательский запрос не создаёт Product автоматически.
 
 Правильный цикл:
 
-`Search Query Log → matched / unmatched / zero result → анализ → изменение Product / aliases / Category`
+```text
+Search Query Log
+→ matched / unmatched / zero-result analysis
+→ controlled Product / alias / Category changes
+```
 
-Пример:
+## 15. Контакты продавца
 
-`Мясо` может быть родительской категорией, но основными сущностями поиска являются баранина, говядина, конина, свинина, курица и т.д.
+Не хранить произвольные внешние URL там, где достаточно структурированного identifier/handle. Для Telegram, Instagram и похожих сервисов предпочтительно хранить username/handle и строить ссылку внутри KAIDA.KZ.
 
-## 13. Контакты П2
+## 16. Авторизация
 
-Не позволять произвольные внешние URL там, где достаточно структурированного идентификатора.
+Для закрытого теста допустим flow `phone → test OTP → session`.
 
-Для Telegram, Instagram и подобных сервисов предпочтительно хранить username/handle и формировать ссылку внутри KAIDA.KZ.
+Identity должен позволять заменить test delivery реальным SMS provider без переписывания остальной системы.
 
-## 14. Авторизация
+Public-launch security requirements определяются отдельными launch-stage contracts; test OTP не является production-ready механизмом.
 
-Для закрытого теста допускается телефонная авторизация через фиктивный код без SMS-провайдера.
+## 17. Монетизация
 
-Identity должен позволять заменить тестовый механизм реальным SMS-провайдером без переписывания остальной системы.
+Архитектурно учитывать три независимых направления:
 
-## 15. Дизайн
+- **объём** — лимит активных Offers по policy/tariff;
+- **удобство** — более быстрые/массовые способы seller input;
+- **охват** — отдельное продвижение Offer.
 
-- mobile-first;
-- полноценный responsive;
-- фиолетовая основная гамма вместо прежней зеленоватой;
-- UI развивается вместе с vertical slices;
-- сначала рабочий сценарий, затем визуальная доводка;
-- не проектировать весь интерфейс заранее.
+Не смешивать subscription Seller и promotion Offer. Promotion не должен обходить organic relevance/freshness eligibility.
 
-## 16. Git и рабочие версии
+## 18. UI / UX
+
+Mobile-first, полноценный responsive.
+
+Design System развивается вместе со slices, но не имеет права менять business contract самостоятельно.
+
+Перед UI/UX slice использовать `docs/DESIGN_SYSTEM.md` и релевантные материалы из `docs/product/UX_REFERENCE_INDEX.md`.
+
+Внешние UX references — advisory evidence. Их findings классифицируются `KEEP / ADAPT / REJECT / GAP`.
+
+## 19. Git и checkpoints
 
 `main` содержит только проверенное состояние.
 
-Product slice ведётся в отдельной ветке вида:
+Product slice разрабатывается в отдельной ветке. Небольшие осмысленные commits предпочтительнее одного большого.
 
-`slice/s0-search`
+После завершения product slice:
 
-Ограниченная maintenance-задача может выполняться в отдельной ветке вида:
+```text
+targeted proof
+→ full branch CI
+→ manual acceptance
+→ diff audit
+→ merge main
+→ merged-main CI
+→ annotated checkpoint tag
+```
 
-`maintenance/<short-purpose>`
+Всегда должна сохраняться возможность быстро вернуться к последнему verified checkpoint.
 
-После завершённого product slice:
-
-- branch CI green;
-- manual acceptance PASS;
-- merge в `main`;
-- merged-main CI green;
-- checkpoint tag.
-
-Пример контрольной точки:
-
-`v0.0.1-s0`
-
-Checkpoint tag указывает только на проверенное состояние `main`.
-
-## 17. Главный запрет
+## 20. Главный запрет
 
 Не писать весь MVP одним заходом по большому ТЗ.
 
+Большие документы — источник требований, а не прямой prompt для генерации приложения.
+
 Правильная цепочка:
 
-`Master Product Spec → Feature Map → Feature Spec → Acceptance Tests → Implementation → Verification`
+```text
+Product vision
+→ Feature Map / Execution Plan
+→ Slice Contract
+→ Acceptance / verification
+→ Implementation
+→ Checkpoint
+```
 
-Если Feature Spec нельзя однозначно проверить человеком за один проход, его нужно разделить.
-
-## 18. Критерий прогресса
-
-Главный показатель прогресса не количество написанного кода и не количество повторных прогонов CI, а количество маленьких законченных функций, которые реально работают, сохраняют закрытые contracts, доказаны подходящими проверками и зафиксированы как рабочие контрольные точки.
+Если Slice Contract нельзя однозначно проверить человеком за один проход, его нужно разделить.

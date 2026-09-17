@@ -1,50 +1,38 @@
-# KAIDA.KZ 2.0 — Design System v1.0
+# KAIDA.KZ 2.0 — Design System
 
-**Назначение:** источник истины по визуальному языку и интерфейсным правилам KAIDA.KZ.  
-**Актуализировано:** 15 сентября 2026.  
-**Verified base при принятии:** `v0.0.14-s13`, `main = ff8bd7ee`.  
-**Первый adoption slice:** `UX1A — App shell / navigation`.
+Этот документ является источником истины по **visual language и presentation rules** KAIDA.KZ.
 
-Документ нормализован из утверждённой Product Owner дизайн-системы. Текущий verified state проекта всегда берётся из репозитория, а не из исторической строки статуса внутри дизайн-документа.
+Он не владеет execution order, business contracts или current checkpoint. Текущая очередь — `docs/product/EXECUTION_PLAN.md`; точное поведение slice — его Slice Contract.
 
 ## 0. Приоритет и применение
 
-При конфликте источников:
+При UI/UX работе:
 
-1. `docs/slices/<slice>/SLICE_CONTRACT.md` и закрытые slice contracts — поведение, тексты, API, privacy/business semantics;
-2. `docs/PROJECT_RULES.md` и Technical Foundation;
-3. этот Design System — visual language, tokens, layout, spacing, responsive rules, presentation states;
-4. общие представления исполнителя о том, «как обычно делают».
+1. closed contracts и утверждённый текущий Slice Contract определяют поведение/API/privacy/business semantics;
+2. `docs/PROJECT_RULES.md` определяет process и stable boundaries;
+3. explicit Product Owner decisions определяют утверждённые product/UX revisions;
+4. этот Design System определяет visual/presentation rules;
+5. `docs/product/UX_REFERENCE_INDEX.md` и внешние references дают advisory evidence;
+6. общие привычки исполнителя идут последними.
 
-Design System не имеет права самостоятельно менять закрытое поведение, публичный API, business rule, тексты ошибок или ARIA semantics. Если визуальное решение требует contract change — STOP и отдельное согласование.
+Design System не имеет права самостоятельно менять closed contract. Если визуальное решение требует contract revision — STOP и отдельное согласование.
 
-Токены и компоненты внедряются **только по мере открытых slices**. Нельзя рефакторить весь UI или создавать компоненты «на будущее» только потому, что они описаны здесь.
-
-### Решения Product Owner, уточнившие исходный документ
-
-- UI-шрифт: **Roboto** вместо Manrope / Plus Jakarta Sans;
-- radii: системная шкала **8 / 12 / 16 / 20px** по назначению; временное решение `3px` отменено до закрытия UX1A;
-- primary header: **84px mobile / 104px desktop (>=768px)**; route navigation не должна вызывать horizontal layout shift;
-- UX1B не резервирует fake media slots; реальный media layout появляется в M1 вместе с media model/data;
-- reviews/rating — запланированная capability, а не вечный запрет; до отдельного slice нельзя показывать фиктивный рейтинг без данных.
-
----
+Tokens/components вводятся только когда нужны открытому slice. Не рефакторировать весь UI «ради системы».
 
 ## 1. Продуктовая рамка UI
 
-KAIDA — не магазин. Пользователь находит, где товар есть **сейчас**, и связывается с продавцом напрямую.
+KAIDA — не интернет-магазин. Пользователь находит, где товар есть **сейчас**, и связывается с продавцом напрямую.
 
-1. **Свежесть важнее полноты.** Offer должен давать понять, насколько недавно продавец его подтверждал, когда соответствующее UI-представление будет введено своим slice.
-2. **Место важнее доставки.** Точка продажи и расстояние визуально важнее имени продавца.
-3. **Действие — контакт, а не заказ.** Корзины в текущей модели нет; целевое действие — звонок/мессенджер.
-4. **Гео — ускоритель, не шлагбаум.** Интерфейс работает без geolocation; запрос координат только по явному действию пользователя и в границах закрытых geo contracts.
-5. **Продвижение не ломает органическую релевантность.** Promotion — будущая capability и не даёт права обходить relevance/freshness filters.
-
----
+- **Свежесть важнее декоративной полноты.** Когда freshness UI введён соответствующим contract, возраст подтверждения должен быть понятен пользователю.
+- **Location важнее доставки.** Точка продажи/расстояние важнее имени Seller.
+- **Buyer action — контакт/маршрут, не checkout.** Корзины и заказа в текущей модели нет.
+- **Geo — ускоритель, не шлагбаум.** Browser location запрашивается только после explicit user intent и в границах closed privacy contracts.
+- **Marketplace density вместо landing-page пустоты.** Search/result screens должны быстро выводить пользователя к полезному контенту.
+- **Promotion не ломает organic relevance/freshness.** Future promoted presentation остаётся честно маркированной.
 
 ## 2. Tokens
 
-Все глобальные tokens живут в `src/app/globals.css :root`. Компоненты не должны плодить literal colors/radii/durations. Component-specific dimensions допустимы локально.
+Глобальные tokens живут в `src/app/globals.css :root`. Новые компоненты не должны плодить literal colors/radii/durations, если соответствующий token уже существует.
 
 ### 2.1 Color
 
@@ -75,22 +63,20 @@ KAIDA — не магазин. Пользователь находит, где �
 
 Rules:
 
-- `--border` — decorative border only; interactive controls use `--border-strong` / `--primary`;
-- state is never communicated only by color; text/icon semantics remain necessary;
-- green/amber are reserved for freshness semantics, not fake discounts or urgency;
-- promoted Offers do not get a special attention color.
+- decorative border → `--border`; interactive control → `--border-strong` / `--primary`;
+- state never communicates only by color;
+- green/amber reserved for truthful freshness/status semantics, not fake urgency;
+- promoted Offers do not get an attention-grabbing relevance-breaking color.
 
 ### 2.2 Typography
 
-Primary family: **Roboto**, Cyrillic-capable, working weights `400 / 600 / 700 / 800`.
+Primary UI family: **Roboto**, Cyrillic-capable. Working weights: `400 / 600 / 700 / 800`.
 
-Runtime rule: browser must receive the font as an app-hosted static asset; no runtime request from the user's browser to Google Fonts or another external font service. Current Next.js wiring may use `next/font`, which emits self-hosted build assets.
+Browser получает app-hosted static font assets; runtime request к Google Fonts/другому внешнему font service не нужен.
 
 ```css
 --font-sans: var(--font-roboto), system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
 ```
-
-Type scale:
 
 | role | size / line-height | weight |
 |---|---|---:|
@@ -105,7 +91,7 @@ Type scale:
 | price | `1.375rem` / 1.2 | 700 |
 | price-lg | `1.75rem` / 1.15 | 800 |
 
-Comparable numbers use `font-variant-numeric: tabular-nums`. Normal body line length is capped around `42rem`, product description around `38rem`. Full-uppercase UI text is not a general styling technique.
+Comparable numbers use `font-variant-numeric: tabular-nums`.
 
 ### 2.3 Spacing
 
@@ -125,15 +111,15 @@ Comparable numbers use `font-variant-numeric: tabular-nums`. Normal body line le
 --space-16: 4rem;
 ```
 
-Mobile page side padding `20px`; desktop `48px`. Vertical rhythm is owned by containers/gaps, not arbitrary element margins.
+Mobile page side padding `20px`; desktop `48px`. Vertical rhythm принадлежит container/gap, а не случайным margins.
 
 ### 2.4 Radii, borders, shadows
 
 ```css
---radius-sm: 0.5rem;  /* 8px: chips, badges, small controls */
---radius: 0.75rem;    /* 12px: inputs, normal buttons, secondary blocks */
---radius-lg: 1rem;    /* 16px: Offer/card surfaces */
---radius-xl: 1.25rem; /* 20px: large panels/media */
+--radius-sm: 0.5rem;  /* 8px */
+--radius: 0.75rem;    /* 12px */
+--radius-lg: 1rem;    /* 16px */
+--radius-xl: 1.25rem; /* 20px */
 --radius-full: 999px;
 --border-width: 1px;
 
@@ -142,7 +128,7 @@ Mobile page side padding `20px`; desktop `48px`. Vertical rhythm is owned by con
 --shadow-pop: 0 8px 24px rgba(37, 29, 51, 0.12);
 ```
 
-Default card separation is border, not decorative shadow.
+Default card separation — border, не декоративная тень.
 
 ### 2.5 Motion and layers
 
@@ -159,8 +145,6 @@ Default card separation is border, not decorative shadow.
 
 Animate only `opacity`, `transform`, `background-color`, `border-color`, `color`. Respect `prefers-reduced-motion`.
 
----
-
 ## 3. Responsive layout
 
 Breakpoints:
@@ -169,195 +153,218 @@ Breakpoints:
 - `64rem / 1024px` — lg;
 - `80rem / 1280px` — xl.
 
-Representative verification widths: **360, 390, 768, 1024, 1440**. Minimum supported width: **320px**, no page-level horizontal scroll.
+Representative verification widths: **360, 390, 768, 1024, 1440**. Minimum supported width: **320px**. Page-level horizontal scroll запрещён.
 
-Content container: `max-width: 80rem`, centered. Mobile side padding `20px`, desktop `48px`.
+Content container: `max-width: 80rem`, centered. Primary header: `84px` mobile / `104px` from 768px unless explicit later Slice Contract revises it.
 
-Primary header height: `84px` mobile, `104px` from 768px. This is a visual contract; scrollbar/auth/context differences must not shift desktop navigation horizontally. Mobile navigation may be a separate shell row when needed to preserve 44px touch targets.
+Route/auth/context differences не должны вызывать accidental horizontal layout shift.
 
-No sticky header on mobile. `position: sticky` is reserved for flows that explicitly need it (for example future contact/search panels according to their slice).
-
----
+Sticky header не является default на mobile. `position: sticky` вводится только когда конкретный flow это обосновывает.
 
 ## 4. Base controls
 
 ### Buttons
 
-Variants: `primary`, `secondary`, `ghost`, `danger`. One dominant primary action per visible decision context.
+Variants: `primary`, `secondary`, `ghost`, `danger`.
 
-Minimum touch target: `44x44px`. Standard button height `2.75rem`; large primary action `3.5rem`. Small controls use `--radius-sm`, normal controls use `--radius`.
+- minimum touch target `44x44px`;
+- standard height `2.75rem`;
+- large primary action `3.5rem`;
+- один dominant primary action на один visible decision context;
+- loading блокирует repeated submit и показывает process verb (`Ищем…`, `Сохраняем…`).
 
-Loading disables repeated action and changes text to a process verb (`Ищем…`, `Сохраняем…`). A genuinely unavailable action requires an explanation, not only gray styling.
+Icon-only action допустим только при очевидной semantics и с `aria-label`.
 
-### Search field
+### Search
 
-Keep closed S0 semantics: visible label, explicit form submit, Enter works, loading prevents duplicate submit, validation/error/status preserve existing strings and ARIA wiring.
+Closed Search semantics сохраняются, пока отдельный Slice Contract их не пересмотрит:
 
-Field/search-button height `3.5rem`; interactive border `--border-strong`; radius `--radius`.
+- explicit submit;
+- Enter работает;
+- loading предотвращает duplicate submit;
+- validation/status/ARIA не ослабляются.
 
-### Geo control
+Global Search submit использует компактный icon-only directional control по закрытому UX2A behavior.
 
-Closed S9/S11 privacy semantics win over visual design. Geolocation is requested only after explicit user action and never becomes a hidden prerequisite for Search.
+Search sorting/proximity controls принадлежат отдельным Search Sorting contracts; Design System не вводит standalone geo toggle сам по себе.
 
-### Interest
+### Geo
 
-Closed S13 strings/semantics stay unchanged. `aria-pressed` remains part of the contract.
+Geolocation никогда не становится скрытым prerequisite для обычного Search. Browser permission запрашивается только после explicit user intent.
 
----
+### Controlled inputs
 
-## 5. OfferCard direction
+Когда допустимое множество реально известно системе, controlled choice предпочтительнее свободного ввода. Точный control определяется current Slice Contract и domain semantics.
 
-Offer is the central buyer-facing unit. UX1B may redesign the existing card hierarchy/density, but **must not invent media before M1**.
+## 5. Cards and marketplace composition
 
-Target information hierarchy once the relevant data/UI slices exist:
+Buyer и Seller рабочие поверхности стремятся к marketplace/card composition, а не к technical tables или explanatory landing pages, если таблица не является объективно лучшим способом выполнить user task.
 
-1. freshness;
-2. Product name;
-3. price / `Цена не указана`;
-4. Location + address + distance when distance is server-provided;
-5. Seller;
+Card должна показывать только truthful data/current state. Нельзя создавать fake ratings, fake availability, invented discount/urgency или technical domain jargon для пользователя.
+
+Whole card не становится автоматически giant link: explicit actions остаются отдельными, если это лучше соответствует задаче и accessibility.
+
+## 6. OfferCard direction
+
+Offer — центральная buyer-facing unit.
+
+Базовая hierarchy по мере наличия соответствующих contracts/data:
+
+1. Product / primary media presentation;
+2. mandatory price + unit semantics;
+3. freshness/age state;
+4. Location/address/distance;
+5. Seller/context;
 6. Seller comment;
-7. interest / contact actions.
+7. buyer actions.
 
-A whole card is not automatically one giant link. Existing explicit actions remain explicit.
+Конкретный order внутри карточки может уточняться Slice Contract, но price/location/freshness не должны теряться за декоративным контентом.
 
-### Media boundary
+### Media boundary — approved pre-MVP rule
 
-Before M1: no fake thumbnail, gray media rectangle, placeholder or reserved media column merely “for the future”.
+**Временная demo/placeholder media presentation разрешена до M1**, если она нужна для честного проектирования карточек/layout.
 
-M1 introduces real Offer photos end-to-end and the corresponding media layout. Product gets its own canonical image/icon by separate data decision. After M1, desired buyer priority is:
+Граница:
 
-`Offer primary media → Product image/icon → neutral fallback`.
+- demo/placeholder visual нельзя выдавать за реальные seller-uploaded Offer media;
+- до M1 нельзя вводить seller upload/storage/API/lifecycle/media business semantics без отдельного contract;
+- production behavior не должен зависеть от demo media;
+- M1 по-прежнему владеет real seller-provided Offer photos end-to-end;
+- к MVP boundary временная presentation либо опирается на реальный media contract, либо остаётся явно нейтральным fallback по актуальному Design System.
 
-M2 extends this with video only if needed.
+После M1 целевой priority:
 
----
+```text
+Offer primary media
+→ Product canonical image/icon (если такая capability существует)
+→ neutral fallback
+```
 
-## 6. Formatting rules
+M2 добавляет video только при подтверждённой необходимости.
 
-- Price example: `4 200 ₸ / кг`; no price → `Цена не указана`.
-- Do not substitute `0`, dash or invented `по запросу` for missing price.
-- Distance is shown only when the server contract returns it; buyer coordinates are never displayed.
-- Relative freshness text does not invent a live timer.
-- Formatting must reuse closed implementations/contracts where they already exist rather than silently replacing them.
+## 7. Formatting rules
 
----
+- price: `4 200 ₸ / кг`; при `unit = null` — цена без `/unit`;
+- publishable buyer-facing Offer без price больше не является допустимым current product state;
+- не подставлять `0`, dash или `по запросу` вместо отсутствующего price;
+- distance показывается только когда соответствующий public contract его возвращает;
+- raw Buyer/Seller coordinates никогда не показываются;
+- relative freshness text не притворяется live timer.
 
-## 7. Buyer screens
+## 8. Buyer screens
 
-### Home/Search
+### Search
 
-The UI should move away from a landing-page feel toward a working marketplace/search interface: less decorative empty space, stronger search prominence, useful content density. Exact card redesign is UX1B, not UX1A.
+Search — рабочая поверхность, не marketing hero. Полезный content/result state должен быть визуально приоритетным.
+
+Explicit sorting/proximity behavior определяется Issue/Slice Contract #12, а не generic Design System.
 
 ### Nearby
 
-Existing S11 behavior remains until UX1C. The redundant second confirmation is planned UX1C; UX1A only provides stable navigation entry and must not trigger geolocation automatically.
+Nearby direction — result-first. Большой explanatory hero не является целевой permanent composition. Privacy/deep-link behavior определяется соответствующим contract.
 
-### Interests / For You
+### Discovery / Interests
 
-S13 behavior remains closed. S14 starts only after UX1A → UX1B → UX1C → UX2 → M1/M2 sequence agreed by Product Owner.
+Closed S13 semantics сохраняются. Future `Для вас` вводится отдельным slice и не добавляется «для красоты» заранее.
 
----
+## 9. Seller UI
 
-## 8. Seller UI
+Seller-facing UI оперирует понятными пользовательскими сущностями и задачами: **торговые точки, товары/предложения, актуальность**.
 
-Seller never bypasses Seller Change Set when changing Offers. UI reorganization must not merge or bypass domain boundaries.
+Технические `SellerChangeSet`, `SellerChangeItem`, internal IDs и lifecycle codes не должны становиться ordinary seller-facing vocabulary только потому, что они существуют в backend.
 
-UX2 will address seller onboarding/setup density and the single coherent user journey for Seller + Location + contacts. UX1A only supplies a clear seller entry and a shared shell.
+При этом UI не имеет права обходить ChangeSet architecture:
 
-Controlled choices are preferred where valid values are known. Address is autocomplete/search, not a simplistic dropdown. These are UX2/later form decisions, not UX1A scope.
+```text
+Seller Input
+→ SellerChangeSet
+→ SellerChangeItem(s)
+→ confirmation / apply
+→ Offer
+```
 
----
+Seller workspace должен давать очевидный выбор между trading-point и Offer/product tasks; exact first-run/edit flows принадлежат соответствующим Slice Contracts.
 
-## 9. Reviews / Rating
+Multiple Locations отображаются как понятные trading-point cards, когда capability реализована. Seller-level contacts не дублируются по Location без отдельного model decision.
 
-Reviews and Seller rating are **planned KAIDA.KZ capabilities**, not permanent bans.
+## 10. Auth presentation
 
-Until dedicated slices define data, moderation and UI semantics:
+Phone/OTP auth использует единый modal/dialog pattern поверх текущего context, когда caller flow этого требует.
 
-- do not draw fake stars or ratings;
-- do not infer reputation from unrelated data;
-- do not add review UI “for future use”.
+- visible labels;
+- понятный process state;
+- keyboard/focus trap/close semantics;
+- background не должен случайно scroll/interact под modal;
+- caller intent/return destination определяется auth/seller-entry contract, не Design System самостоятельно.
 
-When implemented, existing product decisions still apply, including review media and moderation requirements; those details belong in their own Slice Contracts.
+## 11. Reviews / Rating
 
----
+Reviews/Rating — deferred capability, не permanent ban.
 
-## 10. Monetization presentation
+До реального Slice Contract:
 
-Volume limits, seller convenience and Offer reach are separate monetization axes. Subscription and promotion must not be conflated in UI or architecture.
+- не рисовать fake stars/ratings;
+- не выводить reputation из unrelated data;
+- не добавлять пустой review UI «на будущее».
 
-Promotion is future work and must remain visually honest: same eligibility/relevance/freshness constraints as organic results, explicit neutral labeling, no fake urgency or visual dominance.
+## 12. Monetization presentation
 
-Do not implement monetization UI before the corresponding slices/contracts.
+Volume limits, seller convenience и Offer promotion — разные axes.
 
----
+Promotion, когда появится, остаётся визуально честным: explicit neutral label, без fake urgency и без обхода eligibility/relevance/freshness.
 
-## 11. Accessibility
+## 13. Accessibility
 
 Baseline: WCAG 2.1 AA.
 
-- visible `:focus-visible` outline stays;
-- keyboard flow follows visual order;
-- visible labels on form controls;
-- existing `role=status`, `role=alert`, `aria-live`, `aria-invalid`, `aria-describedby` semantics are not weakened;
+- visible `:focus-visible`;
+- keyboard order следует visual/task order;
+- visible labels on forms;
+- существующие `role=status`, `role=alert`, `aria-live`, `aria-invalid`, `aria-describedby` не ослабляются;
 - minimum touch target `44x44px`;
 - `<html lang="ru">`;
-- motion respects `prefers-reduced-motion`;
-- no state relies on color alone.
+- `prefers-reduced-motion`;
+- state не полагается только на color.
 
----
+## 14. Iconography
 
-## 12. Iconography
+Use one linear SVG style (`24x24`, stroke примерно `1.5–2`, `currentColor`). Decorative icons with text → `aria-hidden`; icon-only action → `aria-label`.
 
-Use one linear SVG style (`24x24`, stroke roughly `1.5–2`, `currentColor`). Decorative icons with text are `aria-hidden`; icon-only actions need `aria-label` and are allowed only when meaning is unambiguous.
+Не использовать emoji как постоянные UI icons, icon fonts, fake urgency metaphors или e-commerce symbols (basket/delivery/discount), которых нет в product contract.
 
-Permanent non-product icon metaphors include basket/order, delivery, fake discount tag, fire/lightning urgency. A **rating star is not permanently forbidden**, but it is not used before a real Reviews/Rating slice establishes truthful rating data.
+Messenger logos — official brand assets, когда соответствующие actions реально существуют.
 
-Messenger logos, when introduced, come from official brand assets; until then text labels are acceptable.
+## 15. Что нельзя вводить без slice
 
----
+Не добавлять speculatively:
 
-## 13. Current permanent/temporary prohibitions
+- cart/order/payment/delivery/internal chat;
+- fake review/rating;
+- fake stock/discount urgency;
+- auto geolocation без explicit intent;
+- public raw coordinates;
+- infinite scroll/carousels только как decorative choice;
+- Tailwind/UI-kit migration как side effect;
+- global state manager для локальной задачи;
+- future components «на всякий случай».
 
-### Product capabilities not to invent without a slice
+## 16. UI verification checklist
 
-No cart/order/payment/delivery/internal chat or other capability absent from the current product contracts. Reviews/rating are specifically **deferred, not banned**.
+Перед закрытием UI slice проверить:
 
-### UI patterns
+1. visual rules используют system tokens;
+2. нет page-level overflow на 360 / 390 / 768 / 1024 / 1440;
+3. task hierarchy понятна без знания внутренней архитектуры;
+4. closed texts/API/privacy/ARIA semantics сохранены либо явно пересмотрены Slice Contract;
+5. keyboard/focus usable;
+6. demo media не маскируется под real seller media;
+7. fake review/availability/urgency отсутствуют;
+8. relevant targeted automated proof существует;
+9. final executable branch head имеет green full CI;
+10. пользовательский flow прошёл manual acceptance.
 
-No page-level horizontal scrolling, auto geolocation, infinite scroll as an incidental choice, fake urgency, accidental dark theme, gratuitous carousels, icon fonts, emoji-as-UI, or animations longer than the motion scale.
+## 17. UX reference audit
 
-### Technical
+Maintenance audit #37 сверил текущие rules с Product Owner UX corpus через `KEEP / ADAPT / REJECT / GAP`; conclusions зафиксированы в `docs/product/UX_REFERENCE_INDEX.md`.
 
-No Tailwind/UI-kit migration as a side effect, no global state manager for a local request, no client persistence of buyer coordinates beyond closed geo rules, no public seller coordinates, no literal colors/radii sprinkled through new CSS modules when a token exists.
-
----
-
-## 14. Slice mapping
-
-- `UX1A`: Roboto baseline, design tokens needed now, shared shell/navigation, header `84/104`, stable nav geometry, seller entry.
-- `UX1B`: buyer marketplace-card density/layout **without fake media slots**.
-- `UX1C`: Nearby explicit-intent cleanup.
-- `UX2`: seller onboarding/setup flow cleanup and relevant controlled inputs.
-- `M1`: Offer photos end-to-end + real media layout.
-- `M2`: video extension if necessary.
-- `S14`: For You after the corrective UX/media sequence.
-- Reviews/Rating: later dedicated slices; not implemented speculatively.
-
----
-
-## 15. UI commit checklist
-
-Before calling a UI slice complete:
-
-1. colors/radii/durations come from tokens;
-2. spacing follows the 4px system and responsive page padding;
-3. no horizontal overflow at 360, 390, 768, 1024, 1440;
-4. closed texts and ARIA semantics are preserved unless the Slice Contract explicitly changes them;
-5. keyboard/focus behavior remains usable;
-6. no future component is implemented merely because it appears in Design System;
-7. media is not faked before M1;
-8. reviews/rating are not faked before their slice;
-9. relevant targeted E2E proves the changed visual/interaction boundary;
-10. final executable branch head has green full CI and manual acceptance before merge.
+Audit может уточнять presentation rules, но не имеет права молча менять closed product contracts. Этот раздел остаётся историческим указателем на метод, а не execution roadmap.

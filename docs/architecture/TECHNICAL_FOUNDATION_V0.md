@@ -1,8 +1,10 @@
 # KAIDA.KZ 2.0 — Technical Foundation v0
 
-Этот фундамент выбран для первых vertical slices. Он не является попыткой заранее спроектировать весь будущий продукт.
+> **HISTORICAL FOUNDATION.** Этот документ фиксирует архитектурное решение старта S0 и сохраняется как history/evidence. Он **не является текущей инструкцией по очередности, UI или product state**. Текущие правила разработки — `docs/PROJECT_RULES.md`, текущая очередь — `docs/product/EXECUTION_PLAN.md`, фактический stack — `package.json`/repository state. Если текст ниже расходится с более поздним closed contract, побеждает более поздний verified contract.
 
-## Стек
+Этот фундамент был выбран для первых vertical slices. Он не является попыткой заранее спроектировать весь будущий продукт.
+
+## Стек на старте
 
 | Слой | Решение |
 |---|---|
@@ -22,15 +24,17 @@
 
 ## Почему один Next.js на старте
 
-Для первых slices не делим проект на отдельные frontend и backend приложения.
+Для первых slices проект не делился на отдельные frontend и backend приложения.
 
-Причина: отдельный backend сейчас создаёт два dev-процесса, отдельный deploy, CORS и больше точек отказа, не добавляя продуктовой ценности.
+Причина: отдельный backend создавал бы два dev-процесса, отдельный deploy, CORS и больше точек отказа без продуктовой ценности.
 
 При этом бизнес-логика не должна жить в Next.js route handlers.
 
 Структура ответственности:
 
-`HTTP → application module → repository → PostgreSQL`
+```text
+HTTP → application module → repository → PostgreSQL
+```
 
 UI и transport могут позднее быть заменены или вынесены, не меняя бизнес-модули.
 
@@ -40,8 +44,6 @@ UI и transport могут позднее быть заменены или вы�
 
 Владеет `Product`.
 
-Не знает цену, Seller, Location или Search UI.
-
 ### Sellers
 
 Владеет `Seller`.
@@ -50,28 +52,24 @@ UI и transport могут позднее быть заменены или вы�
 
 Владеет `Location`.
 
-Географическая логика появится только в отдельном slice.
-
 ### Offers
 
-Владеет `Offer`, утверждением о том, что конкретный Seller предлагает конкретный Product в конкретной Location.
+Владеет `Offer`: утверждением о том, что конкретный Seller предлагает конкретный Product в конкретной Location.
 
 ### Search
 
 Не владеет Product или Offer. Координирует read-case:
 
-`query → Product → Offers → search result`
+```text
+query → Product → Offers → search result
+```
 
-## Предлагаемая структура S0
+## Предлагавшаяся структура S0
 
 ```text
 kaida/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx
-│   │   └── api/
-│   │       └── search/
-│   │           └── route.ts
 │   ├── modules/
 │   │   ├── catalog/
 │   │   ├── sellers/
@@ -81,59 +79,49 @@ kaida/
 │   ├── db/
 │   └── shared/
 ├── tests/
-│   ├── integration/
-│   └── e2e/
 ├── drizzle/
-│   └── migrations/
 ├── docs/
 ├── docker-compose.yml
 ├── package.json
-├── pnpm-lock.yaml
 └── README.md
 ```
 
-`shared` нельзя превращать в свалку. То, что принадлежит конкретному доменному модулю, остаётся внутри этого модуля.
+`shared` нельзя превращать в свалку. То, что принадлежит конкретному доменному модулю, остаётся внутри модуля.
 
-## БД в S0
+## Историческая граница БД S0
 
-S0 создаёт только четыре продуктовые таблицы:
+S0 создавал только:
 
 - `products`;
 - `sellers`;
 - `locations`;
 - `offers`.
 
-Не создавать заранее User, Category, ChangeSet и другие будущие сущности.
+Позднейшие таблицы и invariants появились следующими verified slices и не описываются этим v0-документом.
 
-`last_confirmed_at`, expiry и статус Offer появляются отдельной миграцией в S1.
+## API S0
 
-## API в S0
-
-Одна продуктовая endpoint:
+Исторически первым product endpoint был:
 
 `GET /api/search?q=баранина`
 
-Допустим технический health check:
-
-`GET /api/health`
-
-CRUD API для Product/Seller/Location/Offer заранее не создаётся.
+CRUD API заранее не создавался.
 
 ## Миграции
 
-Изменения БД только через migrations.
+Изменения БД — через migrations:
 
-Нормальный процесс:
+```text
+schema change → migration → inspect → apply → test
+```
 
-`schema change → generate migration → inspect SQL → apply → test`
-
-Schema push не считается штатным способом изменения общей/production БД.
+Schema push не является штатным способом изменения shared/production DB.
 
 ## Тестовая стратегия
 
 ### Unit
 
-Проверяют чистую бизнес-логику там, где она реально существует. Не писать unit tests ради числа тестов.
+Проверяют чистую бизнес-логику там, где она реально существует.
 
 ### Integration
 
@@ -141,80 +129,39 @@ Schema push не считается штатным способом измене
 
 ### E2E
 
-Playwright проходит пользовательский сценарий через реальный интерфейс.
-
-Минимум проверяются mobile и desktop viewport.
+Playwright проверяет пользовательский сценарий через реальный интерфейс.
 
 ## Локальная инфраструктура
 
-Docker используется только для PostgreSQL.
+Docker используется для PostgreSQL; app работает обычным Node/Next process.
 
-Приложение запускается обычным Node/Next процессом.
-
-Локально должны существовать отдельные базы:
-
-- `kaida`;
-- `kaida_test`.
-
-Integration tests не меняют development database.
+Integration tests не должны изменять development database.
 
 ## CI
 
-С первого slice GitHub Actions должен выполнять минимум:
-
-`install → lint → typecheck → migrations → tests → build → E2E`
-
-Красный CI означает, что slice не готов.
+С первого slice CI включал install/lint/typecheck/migrations/tests/build/E2E. Актуальный verification contract определяется `PROJECT_RULES.md` и фактическим workflow.
 
 ## Git
 
-`main` = только рабочая версия.
+Исторический принцип сохраняется: `main` — только проверенное состояние, product slices работают в отдельных branches, checkpoints отмечаются tags.
 
-Работа над S0:
+## Что намеренно не строилось заранее
 
-`slice/s0-search`
+Без конкретной необходимости не добавлялись:
 
-После полного Definition of Done и ручной проверки:
-
-- merge в `main`;
-- tag `v0.0.1-s0`.
-
-## Дизайн S0
-
-S0 не должен быть технически уродливым, но полноценная дизайн-система не строится.
-
-Разрешены:
-
-- mobile-first responsive layout;
-- Plus Jakarta Sans;
-- CSS variables;
-- фиолетовый primary;
-- нормальная типографика;
-- поле поиска;
-- Offer card;
-- loading / empty / error states.
-
-Не подключать UI-kit только ради S0.
-
-## Что намеренно отсутствует
-
-До появления конкретного slice не добавлять:
-
-- отдельный NestJS/Fastify backend;
+- отдельный backend service;
 - Redis;
 - Elasticsearch;
-- Supabase как платформенный слой;
 - PostGIS;
 - vector DB;
-- queues;
-- event bus;
+- queues/event bus;
 - Kubernetes;
 - recommendation service;
 - AI orchestration platform;
-- сложный CDN;
-- auth provider;
-- observability stack.
+- сложный CDN/observability stack.
+
+Этот принцип complexity-on-demand остаётся актуальным через `PROJECT_RULES.md`; конкретный список технологий здесь является историческим context.
 
 ## Критерий правильности фундамента
 
-После каждого следующего slice система должна оставаться понятной, тестируемой и откатываемой к последней рабочей точке. Сложность добавляется только вслед за реальной продуктовой необходимостью.
+После каждого следующего slice система должна оставаться понятной, тестируемой и откатываемой к последнему verified checkpoint. Сложность добавляется только вслед за реальной продуктовой необходимостью.

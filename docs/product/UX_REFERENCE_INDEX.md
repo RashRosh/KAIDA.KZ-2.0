@@ -2,7 +2,7 @@
 
 ## Status
 
-`PRE-AUDIT` — initial index created for Issue #37.
+`AUDITED / APPROVED` — Product Owner approved the Issue #37 UX corpus reconciliation. No blocking GAP was found for the next scheduled slice, Seller Entry (#35).
 
 This file maps external UX reference material to KAIDA.KZ UI areas. It is **not** a product contract and does not override `docs/PROJECT_RULES.md`, closed Slice Contracts or `docs/DESIGN_SYSTEM.md`.
 
@@ -26,7 +26,7 @@ Definitions:
 - `KEEP` — current KAIDA rule already fits;
 - `ADAPT` — useful principle, adapted to KAIDA rather than copied literally;
 - `REJECT` — unsuitable, irrelevant, or conflicting with product/closed contract;
-- `GAP` — potentially useful rule absent from current product/Design System; requires Product Owner decision before implementation.
+- `GAP` — potentially useful rule absent from current product/Design System and requiring Product Owner decision before implementation.
 
 The corpus is largely about conventional e-commerce. KAIDA.KZ is not a checkout marketplace: the central unit is a fresh local Offer, place/freshness matter heavily, and the buyer action is direct seller contact. Guidance about cart, checkout, payment or delivery is therefore not automatically applicable.
 
@@ -45,7 +45,7 @@ Use for:
 - field width, placeholder, icon treatment;
 - interaction consistency and visual noise;
 - mobile considerations;
-- error/loading/feedback ideas when compatible with closed S0 semantics.
+- error/loading/feedback ideas when compatible with closed Search semantics.
 
 Do not copy automatically:
 
@@ -111,7 +111,7 @@ KAIDA adaptations:
 - freshness and Location are first-class information;
 - buyer action is contact/route, not add-to-cart;
 - whole-card click behavior must coexist with explicit seller/contact actions and accessibility;
-- photos are not required to be real seller media before M1.
+- temporary/demo visual media is permitted before M1 under the Design System boundary.
 
 ## Price / unit presentation
 
@@ -125,16 +125,16 @@ Use for:
 - price prominence;
 - thousands grouping;
 - currency hierarchy;
-- explaining what price refers to for weight/package goods;
+- making clear what a price refers to for weight/package goods;
 - avoiding duplicate/excess price information.
 
-Closed KAIDA contract after `v0.0.23-mandatory-price` wins:
+Closed KAIDA contract after `v0.0.23-mandatory-offer-price` wins:
 
 - price amount mandatory for publishable Offer;
 - server-owned KZT;
 - `unit = null` is valid and means Offer/lot/package price with no `/unit` suffix.
 
-Do not introduce discounts, old-price logic, club pricing or checkout semantics without a separate product slice.
+Do not introduce discounts, old-price logic, club pricing or checkout semantics without a separate product decision/slice.
 
 ## Media / photos
 
@@ -147,14 +147,12 @@ Secondary:
 
 - product-card reference above.
 
-Explicit Product Owner override to reconcile in Issue #37:
+Approved KAIDA boundary:
 
 - temporary/demo/placeholder media presentation is permitted during pre-MVP development, including before M1, when useful for truthful card/layout design;
 - it must not be represented as real seller-uploaded Offer media;
 - no seller media upload/storage/API/lifecycle semantics before M1;
 - M1 still owns real Offer media end-to-end.
-
-The UX audit must update `docs/DESIGN_SYSTEM.md` so the older absolute pre-M1 prohibition no longer conflicts with this decision.
 
 ## Description / characteristics
 
@@ -191,7 +189,7 @@ Use for:
 - modal focus/background-scroll behavior;
 - mobile usability and field ergonomics.
 
-Preserve S2 API/session/security semantics. Auth reference cannot add new auth methods or weaken current security boundaries by itself.
+Preserve S2 API/session/security semantics. Auth reference cannot add new auth methods or weaken current security/anti-abuse boundaries by itself.
 
 ## Seller first-run / onboarding
 
@@ -207,7 +205,7 @@ Use as heuristic for:
 - avoiding unnecessary steps;
 - preserving user intent across setup.
 
-Do not copy mobile app-tour mechanics literally into the web seller workspace. Current seller direction is defined by Issues #35, #36 and #27.
+Do not copy mobile app-tour/carousel mechanics literally into the web seller workspace. Current seller direction is defined by Issues #35, #36 and #27.
 
 ## Seller contacts / social / messengers
 
@@ -225,9 +223,7 @@ Use selectively for contact-action discoverability and messenger UX. KAIDA conta
 - `Когнитивные искажения в e-Commerce.md`
 - `Когнитивные искажения в e-Commerce. Часть 2.md`
 
-These may be consulted for a specific UX question, but they are not default requirements and must not justify dark patterns, fake urgency or manipulative presentation.
-
----
+Consult only for a concrete UX question. They do not justify dark patterns, fake urgency or manipulative presentation.
 
 ## Currently out of scope references
 
@@ -237,8 +233,47 @@ Do **not** read or implement them by default because KAIDA currently has no cart
 
 ---
 
-## Audit record
+## Issue #37 audit conclusions
 
-Issue #37 owns the first systematic reconciliation. Until it is closed, this index is a navigation aid, not proof that every listed reference has been fully audited.
+The first systematic audit compared the currently relevant KAIDA rules with the reference corpus. Conclusions are intentionally compact so this file remains an index, not a second Design System.
 
-After Issue #37, update this section with the audit checkpoint/PR and keep the index focused on source selection. Do not turn it into a second Design System or a second roadmap.
+### KEEP
+
+- Search stays obvious, consistently placed and visually low-noise; existing explicit submit/accessibility semantics remain.
+- Sorting should expose a small number of understandable, non-competing choices; the current KAIDA direction of freshness/proximity/price is compatible with the reference guidance.
+- Offer cards should be dense but not overloaded, avoid unjustified empty areas and keep price easy to scan.
+- Price remains prominent, grouped/readable and clearly associated with its unit semantics.
+- Auth modal should be low-friction, mobile-friendly, visually quiet and prevent accidental background interaction.
+- Seller first-run should minimize barriers and lead quickly to a useful task rather than explaining internal architecture.
+- Current responsive/accessibility baseline remains: readable fields, visible focus/labels, adequate touch targets and no accidental horizontal overflow.
+
+### ADAPT
+
+- Generic `whole card clickable` guidance is adapted: card interaction must coexist with explicit contact/route/edit actions and keyboard/accessibility semantics.
+- Generic `every product must have a photo` guidance becomes truthful temporary/neutral media presentation before M1; real seller media still requires M1.
+- Generic phone-auth ergonomics such as browser phone autofill, readable formatting and concise OTP expectation text may be used as presentation improvements without changing S2 security/API semantics.
+- Generic onboarding/app-tour guidance becomes an immediate seller workspace with obvious next tasks; no mandatory tutorial carousel.
+- Generic e-commerce sorting defaults become KAIDA-specific `Актуальнее` / `Ближе` / price semantics and remain subordinate to the Freshness Policy.
+- Messenger guidance is limited to discoverable supported Seller contact actions, not social-commerce duplication.
+
+### REJECT
+
+- Automatic sticky Search/header or catalog adjacency as universal requirements.
+- Popularity/rating/newness as generic default sorting for KAIDA.
+- Speculative large filter drawers without supporting data/use case.
+- Cart, checkout, delivery, payment, add-to-cart and conventional order-flow patterns in the current product.
+- Discount/old-price/club-price presentation without a corresponding KAIDA contract.
+- Fake ratings/reviews or other unavailable data.
+- Treating real product photos as mandatory before M1 or implying demo media is seller-provided.
+- Copying social storefronts, influencer/marketing mechanics or duplicated product catalogs into KAIDA product UI.
+- Treating generic UX advice such as `no CAPTCHA` or alternate login methods as permission to weaken future security/anti-abuse requirements.
+
+### GAP
+
+No additional Product Owner decision from this audit is required to prepare the next scheduled slice, **Seller Entry / contextual auth (#35)**.
+
+`UX-OBS-001` in `docs/UX_BACKLOG.md` remains a non-blocking observation about controlled choice vs free input. It should be evaluated only when a relevant seller form Slice Contract makes the decision concrete.
+
+## Audit lifecycle
+
+Issue #37 and PR #40 contain the maintenance evidence. Live gate status and current execution order belong to `docs/product/EXECUTION_PLAN.md`, not this index.
