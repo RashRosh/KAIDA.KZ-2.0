@@ -84,8 +84,9 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await page.getByLabel('Телефон', { exact: true }).fill(testInfo.project.name === 'mobile' ? '+77000001263' : '+77000001264');
-    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
     await makeBuyerEligible(auth.pool, auth.userId, testInfo.project.name);

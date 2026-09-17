@@ -91,8 +91,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByLabel('Название торговой точки').fill('S5 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S5 E2E адрес');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
-    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await makeBuyerEligible(phone, testInfo.project.name);
     await page.reload();

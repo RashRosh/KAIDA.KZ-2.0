@@ -74,8 +74,9 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await page.getByLabel('Название торговой точки').fill('S4 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
-    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
     await page.reload();

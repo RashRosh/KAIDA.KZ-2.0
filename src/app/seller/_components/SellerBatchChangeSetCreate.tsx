@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
@@ -40,9 +41,9 @@ function newDraft(locationId: string): DraftItem {
 
 export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
   const router = useRouter();
-  const firstLocationId = seller.locations[0]?.id ?? '';
+  const automaticLocationId = seller.locations.length === 1 ? seller.locations[0]!.id : '';
   const [offers, setOffers] = useState<SellerOfferView[]>([]);
-  const [items, setItems] = useState<DraftItem[]>(() => [newDraft(firstLocationId), newDraft(firstLocationId)]);
+  const [items, setItems] = useState<DraftItem[]>(() => [newDraft(automaticLocationId), newDraft(automaticLocationId)]);
   const [loadingOffers, setLoadingOffers] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -118,6 +119,11 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
       setError('Укажите цену для каждого создаваемого или изменяемого Offer.');
       return;
     }
+    const missingLocation = items.some((item) => item.action === 'create_offer' && item.locationId === '');
+    if (missingLocation) {
+      setError('Выберите торговую точку для каждого нового Offer.');
+      return;
+    }
     const invalidActivation = items.some((item) => {
       if (item.action !== 'activate_offer') return false;
       const offer = offers.find((candidate) => candidate.id === item.offerId);
@@ -148,7 +154,15 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
     }
   }
 
-  if (seller.locations.length === 0) return null;
+  if (seller.locations.length === 0) {
+    return (
+      <section className={styles.card} aria-labelledby="seller-batch-heading">
+        <h2 id="seller-batch-heading">Изменить несколько товаров</h2>
+        <p className={styles.muted}>Сначала добавьте торговую точку.</p>
+        <Link className={styles.secondaryLinkButton} href="/seller">Открыть торговые точки</Link>
+      </section>
+    );
+  }
 
   return (
     <section className={styles.card} aria-labelledby="seller-batch-heading">
@@ -165,7 +179,10 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
               id={`batch-action-${item.key}`}
               value={item.action}
               disabled={submitting}
-              onChange={(event) => updateItem(item.key, { action: event.target.value as Action, offerId: '' })}
+              onChange={(event) => {
+                const action = event.target.value as Action;
+                updateItem(item.key, { action, offerId: '', locationId: action === 'create_offer' ? automaticLocationId : '' });
+              }}
             >
               <option value="create_offer">Создать Offer</option>
               <option value="update_offer">Изменить Offer</option>
@@ -179,7 +196,8 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
                 <input id={`batch-product-${item.key}`} value={item.productName} onChange={(event) => updateItem(item.key, { productName: event.target.value })} disabled={submitting} />
 
                 <label htmlFor={`batch-location-${item.key}`}>Точка</label>
-                <select id={`batch-location-${item.key}`} value={item.locationId} onChange={(event) => updateItem(item.key, { locationId: event.target.value })} disabled={submitting}>
+                <select id={`batch-location-${item.key}`} value={item.locationId} onChange={(event) => updateItem(item.key, { locationId: event.target.value })} disabled={submitting} required>
+                  {seller.locations.length > 1 && <option value="">Выберите торговую точку</option>}
                   {seller.locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
                 </select>
               </>
@@ -209,7 +227,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
         ))}
 
         <div className={styles.actions}>
-          <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => [...current, newDraft(firstLocationId)])} disabled={submitting}>Добавить изменение</button>
+          <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => [...current, newDraft(automaticLocationId)])} disabled={submitting}>Добавить изменение</button>
           <button type="submit" disabled={submitting}>{submitting ? 'Создаём пакет…' : 'Проверить весь пакет'}</button>
         </div>
         {error && <p className={styles.error} role="alert">{error}</p>}

@@ -2,7 +2,7 @@
 
 **Issue:** #36 — Seller trading points: card-based edit and multiple locations
 
-**Status:** DRAFT FOR CONTROLLER REVIEW
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED
 
 **Base main:** `4011dbc55b2229bb731d16d7f8fbff4f8c2626d0`
 
