@@ -139,6 +139,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     await login(sellerPage, phone);
 
     await sellerPage.goto('/seller');
+    await sellerPage.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await sellerPage.getByLabel('Имя', { exact: true }).fill(sellerName);
     await sellerPage.getByLabel('Название торговой точки').fill(locationName);
     await sellerPage.getByLabel('Тип торговой точки').selectOption('shop');

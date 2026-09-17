@@ -1,6 +1,6 @@
 # Issue #35 — Seller Entry / contextual auth and workspace landing
 
-**Status:** DRAFT FOR PRODUCT OWNER / CONTROLLER REVIEW
+**Status:** `APPROVED — IMPLEMENTATION AUTHORIZED`
 
 **Base product checkpoint:** `v0.0.23-mandatory-offer-price`
 
@@ -86,7 +86,7 @@ Auth API/security, Seller ownership, setup atomicity и SellerChangeSet contract
 ## 8. Acceptance criteria
 
 1. Anonymous User нажимает `Продавцу` на buyer page: shared Auth modal открывается поверх этой page, URL не меняется на `/seller`.
-2. Закрытие seller-intent Auth через X, Escape или backdrop оставляет исходный URL/context, не создаёт session и возвращает keyboard focus к seller trigger.
+2. Закрытие seller-intent Auth через X, Escape или backdrop оставляет исходный URL/context, не создаёт session, очищает caller-specific seller intent и возвращает keyboard focus к seller trigger; последующий ordinary login сохраняет buyer destination.
 3. Successful phone/OTP Auth из seller intent использует существующие S2 endpoints/session и переводит User напрямую на `/seller` без второго login gate.
 4. Authenticated User нажимает `Продавцу` и открывает `/seller` напрямую без Auth modal.
 5. Ordinary `Войти` и direct `/login` сохраняют существующее post-auth buyer behavior; seller destination не становится глобальным Auth default.
@@ -95,10 +95,8 @@ Auth API/security, Seller ownership, setup atomicity и SellerChangeSet contract
 8. `Добавить товар` без owned Location открывает product/Offer input и позволяет ввести данные до завершения prerequisite; User не получает немедленное требование сначала создать Location.
 9. Попытка продолжить к SellerChangeSet creation/apply при отсутствующем prerequisite не создаёт и не применяет SellerChangeSet, не записывает Offer и переводит User в понятный flow заполнения required trading-point data.
 10. После завершения prerequisite в том же непрерывном flow ранее введённые product/Offer значения доступны без неожиданной потери; затем User явно продолжает существующий SellerChangeSet flow, и Offer не применяется автоматически.
-11. После завершённого seller setup `/seller` сохраняет существующий доступ к `Добавить товар`, batch entry, contacts и Offer management; создание/confirm Offer продолжает идти через SellerChangeSet.
-12. Direct anonymous `/seller` остаётся безопасным login-required fallback и не позволяет читать/изменять seller data.
-13. Seller entry, Auth modal и first-run landing работают keyboard-accessibly, сохраняют minimum `44x44px` targets и не создают horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440px`.
-14. Diff не содержит нового persisted draft/API/DB contract или изменений Auth/Seller public API, Identity/SellerChangeSet business logic, schema/migrations, mandatory price и других закрытых contracts сверх явно разрешённой navigation/presentation revision.
+11. После завершённого seller setup `/seller` сохраняет существующий доступ к `Добавить товар`, batch entry, contacts и Offer management; создание/confirm Offer продолжает идти через SellerChangeSet. Direct anonymous `/seller` остаётся безопасным login-required fallback и не позволяет читать/изменять seller data.
+12. Seller entry, Auth modal и first-run landing работают keyboard-accessibly, сохраняют minimum `44x44px` targets и не создают horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440px`; diff не содержит нового persisted draft/API/DB contract или изменений Auth/Seller public API, Identity/SellerChangeSet business logic, schema/migrations, mandatory price и других закрытых contracts сверх явно разрешённой navigation/presentation revision.
 
 ## 9. Automated test plan
 
@@ -144,4 +142,4 @@ Mobile + desktop:
 
 ## Review gate
 
-Этот документ не разрешает implementation. Следующий gate: Product Owner / Controller review и явное approval Slice Contract.
+Product Owner / Controller approved this Slice Contract. Implementation разрешена; merge и checkpoint остаются заблокированы до automated verification, branch CI, manual acceptance и Controller gate.

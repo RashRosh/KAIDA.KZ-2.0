@@ -42,6 +42,80 @@
   gap: 16px;
 }
 
+.firstRun {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.firstRun h2 {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.firstRunActions {
+  display: grid;
+  gap: 12px;
+}
+
+.firstRunAction {
+  width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.firstRunAction:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.firstRunAction > span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.firstRunAction strong {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.firstRunAction small {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.workspaceBackRow {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.draftNotice {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  color: var(--text);
+  line-height: 1.45;
+}
+
 .card,
 .onboardingPanel {
   border: 1px solid var(--border);
@@ -507,6 +581,14 @@
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
+  }
+
+  .firstRun {
+    padding: 24px;
+  }
+
+  .firstRunActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

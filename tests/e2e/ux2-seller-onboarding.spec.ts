@@ -46,6 +46,10 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
   try {
     await page.goto('/seller');
 
+    await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Торговая точка', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
     await expect(page.getByText('Seller Input', { exact: true })).toHaveCount(0);
 

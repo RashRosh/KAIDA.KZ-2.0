@@ -79,6 +79,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
   const sellerName = `S12 E2E ${testInfo.project.name}`;
   try {
     await page.goto('/seller');
+    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
     await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');

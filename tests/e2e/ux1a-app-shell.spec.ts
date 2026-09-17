@@ -135,7 +135,7 @@ test('desktop shell uses logo-search-auth top row and stable left navigation row
 
   const firstNavX = navBox!.x;
   const firstSearchGeometry = { x: searchBox!.x, width: searchBox!.width };
-  for (const linkName of ['Рядом', 'Продавцу', 'Поиск']) {
+  for (const linkName of ['Рядом', 'Поиск']) {
     await page.getByRole('navigation', { name: NAV_NAME }).getByRole('link', { name: linkName, exact: true }).click();
     await expectSharedShell(page, testInfo.project.name);
     const currentNavBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
@@ -184,10 +184,10 @@ test('mobile navigation is compact, dismissible and closes after route selection
   await expect(page.getByRole('navigation', { name: NAV_NAME })).toHaveCount(0);
 });
 
-test('seller entry opens the existing seller flow', async ({ page }) => {
+test('anonymous seller entry opens auth over the current page', async ({ page }) => {
   await page.goto('/');
   const nav = await openPrimaryNav(page);
   await nav.getByRole('link', { name: 'Продавцу', exact: true }).click();
-  await expect(page).toHaveURL(/\/seller$/);
-  await expect(page.getByRole('heading', { name: 'Настройка торговой точки', exact: true })).toBeVisible();
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
 });
