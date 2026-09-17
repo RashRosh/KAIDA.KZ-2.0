@@ -69,6 +69,7 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await expect(page).toHaveURL('/');
 
     await page.goto('/seller');
+    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await page.getByLabel('Имя', { exact: true }).fill('S4 E2E продавец');
     await page.getByLabel('Название торговой точки').fill('S4 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');

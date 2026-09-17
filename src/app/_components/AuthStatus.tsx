@@ -1,10 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { AuthModal } from './AuthModal';
+import { RefObject, useState } from 'react';
 import styles from './AuthStatus.module.css';
 
 type User = { id: string; phone: string };
+
+type AuthStatusProps = {
+  user: User | null | undefined;
+  loginOpen: boolean;
+  loginTriggerRef: RefObject<HTMLButtonElement | null>;
+  onLogin: () => void;
+  onLoggedOut: () => void;
+};
 
 function AuthIcon({ type }: { type: 'login' | 'logout' }) {
   return type === 'login' ? (
@@ -22,39 +29,17 @@ function AuthIcon({ type }: { type: 'login' | 'logout' }) {
   );
 }
 
-export function AuthStatus() {
-  const [user, setUser] = useState<User | null | undefined>(undefined);
+export function AuthStatus({ user, loginOpen, loginTriggerRef, onLogin, onLoggedOut }: AuthStatusProps) {
   const [loggingOut, setLoggingOut] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const loginTriggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    let active = true;
-    fetch('/api/auth/me', { cache: 'no-store' })
-      .then(async (response) => response.ok ? response.json() as Promise<{ user: User | null }> : { user: null })
-      .then((data) => { if (active) setUser(data.user); })
-      .catch(() => { if (active) setUser(null); });
-    return () => { active = false; };
-  }, []);
 
   async function handleLogout() {
     setLoggingOut(true);
     try {
       const response = await fetch('/api/auth/logout', { method: 'POST' });
-      if (response.ok) setUser(null);
+      if (response.ok) onLoggedOut();
     } finally {
       setLoggingOut(false);
     }
-  }
-
-  function closeLogin() {
-    setLoginOpen(false);
-    requestAnimationFrame(() => loginTriggerRef.current?.focus());
-  }
-
-  function handleAuthenticated(nextUser: User) {
-    setUser(nextUser);
-    setLoginOpen(false);
   }
 
   return (
@@ -77,7 +62,7 @@ export function AuthStatus() {
           ref={loginTriggerRef}
           type="button"
           className={styles.loginLink}
-          onClick={() => setLoginOpen(true)}
+          onClick={onLogin}
           aria-label="Войти"
           aria-haspopup="dialog"
           aria-expanded={loginOpen}
@@ -87,7 +72,6 @@ export function AuthStatus() {
         </button>
       )}
 
-      {loginOpen ? <AuthModal open onClose={closeLogin} onAuthenticated={handleAuthenticated} /> : null}
     </div>
   );
 }

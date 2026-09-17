@@ -46,6 +46,10 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
   try {
     await page.goto('/seller');
 
+    await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Торговая точка', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
     await expect(page.getByText('Seller Input', { exact: true })).toHaveCount(0);
 
@@ -154,9 +158,14 @@ test('UX2 is one resumable Bolt-like trading point onboarding flow and completio
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toHaveCount(0);
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(auth.publicPhone);
-    await expect(page.getByLabel('WhatsApp', { exact: true })).toHaveValue('+447911123456');
+    await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Торговая точка', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
+    await expect(onboarding.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
+    await expect(phone).toHaveValue(auth.publicPhone);
+    await expect(whatsapp).toHaveValue('+447911123456');
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
     await page.context().grantPermissions(['geolocation'], { origin: baseURL });

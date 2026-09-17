@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { ClearableInput } from './ClearableInput';
-import { SellerChangeSetCreate } from './SellerChangeSetCreate';
+import { SellerChangeSetCreate, type ProductDraft } from './SellerChangeSetCreate';
 import { SellerContactSettings, type OwnerContacts } from './SellerContactSettings';
 import { SellerOfferManagement } from './SellerOfferManagement';
 import styles from '../page.module.css';
@@ -24,6 +24,13 @@ const typeLabels: Record<LocationType, string> = {
   other: 'Другое',
 };
 
+const emptyProductDraft: ProductDraft = {
+  productName: '',
+  priceAmount: '',
+  priceUnit: '',
+  sellerComment: '',
+};
+
 function StorePointIcon() {
   return (
     <span className={styles.storePointIcon} aria-hidden="true">
@@ -32,6 +39,17 @@ function StorePointIcon() {
         <path d="M3 10 5.2 5h13.6L21 10" />
         <path d="M3 10c0 1.3 1 2.3 2.3 2.3S7.7 11.3 7.7 10c0 1.3 1 2.3 2.3 2.3s2.3-1 2.3-2.3c0 1.3 1 2.3 2.3 2.3s2.4-1 2.4-2.3c0 1.3 1 2.3 2.3 2.3S21 11.3 21 10" />
         <path d="M9 19v-4h6v4" />
+      </svg>
+    </span>
+  );
+}
+
+function ProductIcon() {
+  return (
+    <span className={styles.storePointIcon} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" />
+        <path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9" />
       </svg>
     </span>
   );
@@ -56,6 +74,10 @@ export function SellerSetup() {
   const [savedContacts, setSavedContacts] = useState<OwnerContacts | null>(null);
   const [contactsLoaded, setContactsLoaded] = useState(false);
   const [contactsLoadError, setContactsLoadError] = useState('');
+  const [workspaceMode, setWorkspaceMode] = useState<'landing' | 'setup' | 'product'>('landing');
+  const [productDraft, setProductDraft] = useState<ProductDraft>(emptyProductDraft);
+  const [resumeProductAfterSetup, setResumeProductAfterSetup] = useState(false);
+  const [productResumed, setProductResumed] = useState(false);
 
   const [displayName, setDisplayName] = useState('');
   const [locationName, setLocationName] = useState('');
@@ -155,6 +177,18 @@ export function SellerSetup() {
   const geoReady = Boolean(firstLocation?.geo);
   const onboardingComplete = Boolean(seller && firstLocation && contactsLoaded && phoneReady && geoReady);
 
+  function requireTradingPointSetup() {
+    setResumeProductAfterSetup(true);
+    setProductResumed(false);
+    setWorkspaceMode('setup');
+  }
+
+  function resumeProductFlow() {
+    setWorkspaceMode('product');
+    setResumeProductAfterSetup(false);
+    setProductResumed(true);
+  }
+
   async function saveContacts(payload: OwnerContacts): Promise<boolean> {
     const response = await fetch('/api/seller/contacts', {
       method: 'PUT',
@@ -168,6 +202,9 @@ export function SellerSetup() {
     }
     applyContacts(data.contacts);
     setContactsLoaded(true);
+    if (resumeProductAfterSetup && firstLocation?.geo && data.contacts.phoneE164) {
+      resumeProductFlow();
+    }
     return true;
   }
 
@@ -287,6 +324,7 @@ export function SellerSetup() {
               locations: current.locations.map((location) => location.id === locationId ? data.location : location),
             } : current);
             setSuccess('Местоположение сохранено. Настройка завершена.');
+            if (resumeProductAfterSetup && contactsLoaded && phoneReady) resumeProductFlow();
           } catch {
             setGeoError({ locationId, message: 'Не удалось сохранить местоположение.' });
           } finally {
@@ -306,11 +344,17 @@ export function SellerSetup() {
 
   if (state === 'anonymous') {
     return (
-      <section className={styles.card}>
-        <h2>Нужно войти</h2>
-        <p className={styles.muted}>Чтобы создать продавца и первую точку, войдите по телефону.</p>
-        <Link className={styles.primaryLink} href="/login">Войти</Link>
-      </section>
+      <>
+        <div className={styles.intro}>
+          <h1>Кабинет продавца</h1>
+          <p>Управляйте торговой точкой и товарами.</p>
+        </div>
+        <section className={styles.card}>
+          <h2>Нужно войти</h2>
+          <p className={styles.muted}>Чтобы открыть кабинет продавца, войдите по телефону.</p>
+          <Link className={styles.primaryLink} href="/login">Войти</Link>
+        </section>
+      </>
     );
   }
 
@@ -328,9 +372,62 @@ export function SellerSetup() {
     return <section className={styles.card}><p>Загружаем контакты…</p></section>;
   }
 
+  if (!onboardingComplete && workspaceMode === 'landing') {
+    return (
+      <>
+        <div className={styles.intro}>
+          <h1>Кабинет продавца</h1>
+          <p>С чего хотите начать? Можно сначала настроить торговую точку или заполнить товар.</p>
+        </div>
+        <section className={styles.firstRun} aria-labelledby="seller-first-run-heading">
+          <h2 id="seller-first-run-heading">Начните с понятной задачи</h2>
+          <div className={styles.firstRunActions}>
+            <button type="button" className={styles.firstRunAction} aria-label="Торговая точка" onClick={() => setWorkspaceMode('setup')}>
+              <StorePointIcon />
+              <span><strong>Торговая точка</strong><small>Адрес, контакты и местоположение</small></span>
+            </button>
+            <button type="button" className={styles.firstRunAction} aria-label="Добавить товар" onClick={() => setWorkspaceMode('product')}>
+              <ProductIcon />
+              <span><strong>Добавить товар</strong><small>Начните с товара, цену и описание можно ввести сразу</small></span>
+            </button>
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  if (workspaceMode === 'product' || (resumeProductAfterSetup && onboardingComplete)) {
+    return (
+      <>
+        <div className={styles.intro}>
+          <h1>Новый товар</h1>
+          <p>Offer появится только после создания, проверки и отдельного подтверждения изменения.</p>
+        </div>
+        <div className={styles.workspaceBackRow}>
+          {!onboardingComplete && (
+            <button type="button" className={styles.secondaryLinkButton} onClick={() => setWorkspaceMode('landing')}>Назад к выбору</button>
+          )}
+        </div>
+        <SellerChangeSetCreate
+          seller={seller}
+          prerequisiteComplete={onboardingComplete}
+          draft={productDraft}
+          onDraftChange={setProductDraft}
+          onPrerequisiteRequired={requireTradingPointSetup}
+          resumedAfterSetup={productResumed}
+        />
+      </>
+    );
+  }
+
   if (seller && onboardingComplete && firstLocation) {
     return (
-      <div className={styles.stack}>
+      <>
+        <div className={styles.intro}>
+          <h1>Кабинет продавца</h1>
+          <p>Управляйте торговой точкой и предложениями.</p>
+        </div>
+        <div className={styles.stack}>
         <section className={styles.card} aria-labelledby="seller-summary-heading">
           <p className={styles.eyebrow}>Настройка завершена</p>
           <div className={styles.completedHeader}>
@@ -362,14 +459,32 @@ export function SellerSetup() {
           </div>
         </section>
         <SellerContactSettings onSaved={setSavedContacts} />
-        <SellerChangeSetCreate seller={seller} />
+        <SellerChangeSetCreate
+          seller={seller}
+          prerequisiteComplete
+          draft={productDraft}
+          onDraftChange={setProductDraft}
+          onPrerequisiteRequired={requireTradingPointSetup}
+        />
         <SellerOfferManagement />
-      </div>
+        </div>
+      </>
     );
   }
 
   return (
-    <section className={styles.onboardingLayout} aria-labelledby="seller-onboarding-heading">
+    <>
+      <div className={styles.intro}>
+        <h1>Настройка торговой точки</h1>
+        <p>Укажите данные торговой точки и контакты. После сохранения подтвердите местоположение.</p>
+      </div>
+      {!resumeProductAfterSetup && (
+        <div className={styles.workspaceBackRow}>
+          <button type="button" className={styles.secondaryLinkButton} onClick={() => setWorkspaceMode('landing')}>Назад к выбору</button>
+        </div>
+      )}
+      {resumeProductAfterSetup && <p className={styles.draftNotice} role="status">Данные товара сохранены в этом окне. Завершите настройку точки, чтобы продолжить.</p>}
+      <section className={styles.onboardingLayout} aria-labelledby="seller-onboarding-heading">
       <div className={styles.onboardingPanel}>
         <header className={styles.onboardingPanelHeader}>
           <StorePointIcon />
@@ -501,6 +616,7 @@ export function SellerSetup() {
           <p className={styles.error} role="alert">У продавца не найдена первая точка. Обновите страницу.</p>
         )}
       </div>
-    </section>
+      </section>
+    </>
   );
 }

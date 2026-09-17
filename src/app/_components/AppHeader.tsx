@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { AuthModal } from './AuthModal';
 import { AuthStatus } from './AuthStatus';
 import { HeaderSearch } from './HeaderSearch';
 import styles from './AppHeader.module.css';
@@ -17,6 +18,8 @@ type NavItem = {
   label: 'Поиск' | 'Рядом' | 'Продавцу';
   icon: 'search' | 'pin' | 'store';
 };
+
+type User = { id: string; phone: string };
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Поиск', icon: 'search' },
@@ -93,10 +96,12 @@ function PrimaryNav({
   className,
   pathname,
   onNavigate,
+  onSellerIntent,
 }: {
   className: string;
   pathname: string;
   onNavigate?: () => void;
+  onSellerIntent: (event: MouseEvent<HTMLAnchorElement>) => void;
 }) {
   return (
     <nav className={className} aria-label="Основная навигация">
@@ -110,6 +115,10 @@ function PrimaryNav({
             aria-current={active ? 'page' : undefined}
             onClick={(event) => {
               markNearbyIntent(event, item);
+              if (item.href === '/seller') {
+                onSellerIntent(event);
+                return;
+              }
               onNavigate?.();
             }}
           >
@@ -136,10 +145,34 @@ function MenuIcon({ open }: { open: boolean }) {
 
 export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [authIntent, setAuthIntent] = useState<'ordinary' | 'seller' | null>(null);
+  const loginTriggerRef = useRef<HTMLButtonElement>(null);
+  const sellerTriggerRef = useRef<HTMLAnchorElement | null>(null);
+
+  const loadCurrentUser = useCallback(async (): Promise<User | null> => {
+    try {
+      const response = await fetch('/api/auth/me', { cache: 'no-store' });
+      if (!response.ok) return null;
+      const data = await response.json() as { user: User | null };
+      return data.user;
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    let active = true;
+    void loadCurrentUser().then((currentUser) => {
+      if (active) setUser(currentUser);
+    });
+    return () => { active = false; };
+  }, [loadCurrentUser]);
+
+  useEffect(() => {
+    if (!mobileOpen || authIntent !== null) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMobileOpen(false);
@@ -147,7 +180,59 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [mobileOpen]);
+  }, [mobileOpen, authIntent]);
+
+  async function handleSellerIntent(event: MouseEvent<HTMLAnchorElement>) {
+    if (
+      event.button !== 0
+      || event.metaKey
+      || event.ctrlKey
+      || event.shiftKey
+      || event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    sellerTriggerRef.current = event.currentTarget;
+
+    const currentUser = user === undefined ? await loadCurrentUser() : user;
+    setUser(currentUser);
+    if (currentUser) {
+      setMobileOpen(false);
+      router.push('/seller');
+      return;
+    }
+
+    setAuthIntent('seller');
+  }
+
+  function closeAuth() {
+    const cancelledIntent = authIntent;
+    setAuthIntent(null);
+    requestAnimationFrame(() => {
+      if (cancelledIntent === 'seller') sellerTriggerRef.current?.focus();
+      if (cancelledIntent === 'ordinary') loginTriggerRef.current?.focus();
+    });
+  }
+
+  function handleAuthenticated(nextUser: User) {
+    const completedIntent = authIntent;
+    setUser(nextUser);
+    setAuthIntent(null);
+    if (completedIntent === 'seller') {
+      setMobileOpen(false);
+      router.push('/seller');
+    }
+  }
+
+  function handleLoggedOut() {
+    setUser(null);
+    setMobileOpen(false);
+    if (pathname === '/seller' || pathname.startsWith('/seller/')) {
+      router.replace('/');
+    }
+  }
 
   return (
     <header className={styles.header}>
@@ -161,7 +246,15 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
           <HeaderSearch />
 
           <div className={styles.trailing}>
-            {showAuth ? <AuthStatus /> : <span className={styles.context}>{contextLabel}</span>}
+            {showAuth || user != null ? (
+              <AuthStatus
+                user={user}
+                loginOpen={authIntent === 'ordinary'}
+                loginTriggerRef={loginTriggerRef}
+                onLogin={() => setAuthIntent('ordinary')}
+                onLoggedOut={handleLoggedOut}
+              />
+            ) : <span className={styles.context}>{contextLabel}</span>}
             <button
               type="button"
               className={styles.mobileMenuButton}
@@ -176,7 +269,7 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
         </div>
 
         <div className={styles.desktopNavRow}>
-          <PrimaryNav className={styles.desktopNav} pathname={pathname} />
+          <PrimaryNav className={styles.desktopNav} pathname={pathname} onSellerIntent={handleSellerIntent} />
         </div>
       </div>
 
@@ -186,9 +279,11 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
             className={styles.mobileNav}
             pathname={pathname}
             onNavigate={() => setMobileOpen(false)}
+            onSellerIntent={handleSellerIntent}
           />
         </div>
       ) : null}
+      {authIntent ? <AuthModal open onClose={closeAuth} onAuthenticated={handleAuthenticated} /> : null}
     </header>
   );
 }

@@ -86,6 +86,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await login(page, phone);
 
     await page.goto('/seller');
+    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
     await page.getByLabel('Название торговой точки').fill('S5 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
