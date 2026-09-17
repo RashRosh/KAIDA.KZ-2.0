@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOwnedLocation } from '@/modules/locations/application/create-owned-location';
-import { SellerRequiredError } from '@/modules/locations/application/location-errors';
-import { locationIdentitySchema } from '@/modules/locations/contracts/location.contract';
-import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
-import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
+import { createOwnedLocation } from '../../../../modules/locations/application/create-owned-location';
+import { SellerRequiredError } from '../../../../modules/locations/application/location-errors';
+import { locationIdentitySchema } from '../../../../modules/locations/contracts/location.contract';
+import { resolveCurrentUser } from '../../../../modules/identity/application/resolve-current-user';
+import { SESSION_COOKIE_NAME } from '../../../../modules/identity/session/session-cookie';
 
 export const runtime = 'nodejs';
 const noStore = { 'Cache-Control': 'no-store' };
