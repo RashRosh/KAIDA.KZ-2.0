@@ -47,7 +47,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await page.getByLabel('Имя', { exact: true }).fill(`Seller 36 ${testInfo.project.name}`);
-    await page.getByLabel('Название торговой точки').fill(firstName);
+    await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(firstName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, адрес A');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -60,7 +60,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await expect(add).toBeVisible();
     expect((await add.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await add.click();
-    await page.getByLabel('Название торговой точки').fill(secondName);
+    await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(secondName);
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
     await page.getByLabel('Адрес').fill('Алматы, адрес B');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -71,7 +71,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await expect(secondCard).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('heading', { name: 'Изменить торговую точку' })).toBeVisible();
-    await page.getByLabel('Название торговой точки').fill(editedName);
+    await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(editedName);
     await page.getByLabel('Тип торговой точки').selectOption('market');
     await page.getByLabel('Адрес').fill('Алматы, изменённый адрес B');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();

@@ -71,8 +71,9 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     expect((await save.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await save.click();
 
+    const tradingPointCard = page.locator('[data-testid^="trading-point-"]');
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
-    await expect(page.getByText(pointName, { exact: true })).toBeVisible();
+    await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
@@ -84,7 +85,7 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     await page.reload();
-    await expect(page.getByText(pointName, { exact: true })).toBeVisible();
+    await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(auth.publicPhone);
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
