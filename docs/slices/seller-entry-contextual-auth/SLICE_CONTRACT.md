@@ -23,16 +23,17 @@
 - authenticated User без завершённого seller setup видит seller workspace empty/first-run landing, а не сразу линейную техническую форму;
 - landing содержит две понятные actions: `Торговая точка` и `Добавить товар`;
 - `Торговая точка` открывает существующий UX2 first-location setup/resume flow;
-- `Добавить товар` при незавершённом setup открывает внутри `/seller` честный prerequisite-state: для создания SellerChangeSet нужна owned Location; из этого state пользователь может перейти к существующему setup;
-- до появления owned Location product action не показывает фиктивно работающую product form, не собирает product draft и не вызывает SellerChangeSet API; поэтому slice не вводит новый draft persistence/data-loss contract;
-- после завершённого setup используется существующий `Добавить товар` / SellerChangeSet flow без изменения Offer mutation semantics;
+- `Добавить товар` является реальным product-first направлением: User может начать вводить product/Offer data до завершения Seller/Location setup;
+- отсутствие required Seller/owned Location проверяется не перед началом ввода, а на границе продолжения к SellerChangeSet creation/apply; до выполнения prerequisite SellerChangeSet/Offer mutation не происходит;
+- если prerequisite отсутствует, User получает понятный переход к существующему trading-point setup; уже введённые product data сохраняются в рамках этого непрерывного flow и после setup возвращаются без неожиданной потери;
+- после выполнения prerequisite User продолжает существующий `Добавить товар` / SellerChangeSet flow без изменения Offer mutation semantics; contract требует observable continuity данных, но не предписывает internal orchestration или persistence architecture;
 - direct anonymous deep link `/seller` может сохранить существующий login-required fallback; запрет относится к переходу через primary seller intent, который не должен сначала вести anonymous User на `/seller`.
 
 ## 3. Explicit out of scope
 
 - multiple Trading Points CRUD, cards и управление точками из Issue #36;
 - полноценный Seller Offer Workspace, Offer cards/list/edit из Issue #27;
-- product-first draft до появления owned Location, его session/server persistence или автоматическое восстановление;
+- persisted product draft, cross-session/cross-device recovery и новый draft API/DB/domain contract;
 - создание Seller/Location/Offer новых API или изменение существующих API;
 - изменение Seller setup, contacts, geo, ownership или atomicity semantics;
 - прямой write в Offer или обход SellerChangeSet/SellerChangeItem;
@@ -68,7 +69,7 @@ Auth API/security, Seller ownership, setup atomicity и SellerChangeSet contract
 - **Public API:** NO.
 - **Auth / security / privacy:** YES — меняются caller intent и post-auth navigation вокруг существующего Auth modal; S2 API/session/security semantics должны остаться неизменными.
 - **Concurrency / atomicity:** NO new risk — OTP и Seller setup guarantees не меняются.
-- **Data loss:** NO — до prerequisite completion product draft не собирается и не сохраняется.
+- **Data loss:** YES — product data вводится до prerequisite completion и может быть потеряна при переходе через trading-point setup. Targeted proof должен подтвердить сохранение введённых значений в рамках одного непрерывного product-first flow; persistence после deliberate reload, tab close или abandonment не входит в этот slice.
 - **External service:** NO.
 
 ## 7. Expected modules / boundaries
@@ -76,7 +77,7 @@ Auth API/security, Seller ownership, setup atomicity и SellerChangeSet contract
 - shared app-shell seller navigation trigger;
 - shared auth-state/modal orchestration с caller intent и destination;
 - `/seller` first-run/empty landing composition;
-- thin orchestration к существующему UX2 Seller setup и существующему SellerChangeSet create flow;
+- thin orchestration между product-first input, существующим UX2 Seller setup и существующим SellerChangeSet create flow, сохраняющая введённые значения в рамках одного flow без нового public persistence contract;
 - targeted seller-entry/auth E2E и непосредственно затронутые shell/onboarding regressions;
 - slice documentation.
 
@@ -91,11 +92,13 @@ Auth API/security, Seller ownership, setup atomicity и SellerChangeSet contract
 5. Ordinary `Войти` и direct `/login` сохраняют существующее post-auth buyer behavior; seller destination не становится глобальным Auth default.
 6. Authenticated User без Seller видит first-run seller workspace landing с двумя доступными actions: `Торговая точка` и `Добавить товар`; линейная setup form не является единственным немедленным содержимым страницы.
 7. `Торговая точка` открывает существующий UX2 setup, а partial setup после reload/resume продолжает использовать фактический server state и не создаёт второго Seller.
-8. `Добавить товар` без owned Location показывает понятный prerequisite-state внутри `/seller` и action перехода к setup; SellerChangeSet/Offer API при этом не вызываются и product data не притворяется сохранённой.
-9. После завершённого seller setup `/seller` сохраняет существующий доступ к `Добавить товар`, batch entry, contacts и Offer management; создание/confirm Offer продолжает идти через SellerChangeSet.
-10. Direct anonymous `/seller` остаётся безопасным login-required fallback и не позволяет читать/изменять seller data.
-11. Seller entry, Auth modal и first-run landing работают keyboard-accessibly, сохраняют minimum `44x44px` targets и не создают horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440px`.
-12. Diff не содержит изменений Auth/Seller public API, Identity/SellerChangeSet business logic, schema/migrations, mandatory price или других закрытых contracts сверх явно разрешённой navigation/presentation revision.
+8. `Добавить товар` без owned Location открывает product/Offer input и позволяет ввести данные до завершения prerequisite; User не получает немедленное требование сначала создать Location.
+9. Попытка продолжить к SellerChangeSet creation/apply при отсутствующем prerequisite не создаёт и не применяет SellerChangeSet, не записывает Offer и переводит User в понятный flow заполнения required trading-point data.
+10. После завершения prerequisite в том же непрерывном flow ранее введённые product/Offer значения доступны без неожиданной потери; затем User явно продолжает существующий SellerChangeSet flow, и Offer не применяется автоматически.
+11. После завершённого seller setup `/seller` сохраняет существующий доступ к `Добавить товар`, batch entry, contacts и Offer management; создание/confirm Offer продолжает идти через SellerChangeSet.
+12. Direct anonymous `/seller` остаётся безопасным login-required fallback и не позволяет читать/изменять seller data.
+13. Seller entry, Auth modal и first-run landing работают keyboard-accessibly, сохраняют minimum `44x44px` targets и не создают horizontal overflow на `320 / 360 / 390 / 768 / 1024 / 1440px`.
+14. Diff не содержит нового persisted draft/API/DB contract или изменений Auth/Seller public API, Identity/SellerChangeSet business logic, schema/migrations, mandatory price и других закрытых contracts сверх явно разрешённой navigation/presentation revision.
 
 ## 9. Automated test plan
 
@@ -110,7 +113,9 @@ Mobile + desktop:
 - ordinary `Войти` и `/login` сохраняют существующий buyer destination;
 - first-run landing показывает обе actions;
 - `Торговая точка` открывает существующий UX2 setup;
-- `Добавить товар` без Location показывает prerequisite-state и не отправляет seller/change-set mutations;
+- `Добавить товар` без Location открывает product input и принимает различимые product/Offer values до prerequisite completion;
+- продолжение из product input без Location открывает existing setup, не отправляя SellerChangeSet/Offer mutations;
+- завершение setup в том же flow возвращает ранее введённые values без потери, после чего User может продолжить существующий SellerChangeSet create/review/confirm flow;
 - partial UX2 state остаётся resumable;
 - completed Seller сохраняет существующий Add Product / ChangeSet flow;
 - representative widths, focus return и отсутствие horizontal overflow.
@@ -130,11 +135,12 @@ Mobile + desktop:
 1. На buyer Search page anonymous User нажимает `Продавцу`, видит shared Auth modal поверх той же страницы и закрывает его; route/context сохраняются.
 2. Повторно открыть seller intent, пройти phone/OTP Auth и убедиться, что сразу открыт `/seller` без промежуточного `Нужно войти → Войти`.
 3. Увидеть first-run seller workspace с actions `Торговая точка` и `Добавить товар`.
-4. Выбрать `Добавить товар`: увидеть честное объяснение prerequisite и переход к настройке точки без fake product save/API mutation.
-5. Открыть `Торговая точка` и убедиться, что используется существующий resumable UX2 setup.
-6. Вернуться на buyer page уже authenticated и нажать `Продавцу`: `/seller` открывается напрямую без modal.
-7. Выйти, выполнить ordinary `Войти` и убедиться, что вход не отправляет пользователя в `/seller` без seller intent.
-8. Повторить ключевой flow на mobile и desktop, включая keyboard close/focus и отсутствие overflow.
+4. Выбрать `Добавить товар`, до создания Location ввести различимые product/Offer values и продолжить; убедиться, что открывается существующий UX2 setup, а SellerChangeSet/Offer mutation ещё не отправлена.
+5. Завершить required trading-point setup в том же непрерывном flow и убедиться, что введённые product/Offer values сохранились; затем явно продолжить существующий SellerChangeSet flow и проверить, что Offer не применяется до его штатного confirm/apply.
+6. Отдельно открыть `Торговая точка` и убедиться, что используется существующий resumable UX2 setup.
+7. Вернуться на buyer page уже authenticated и нажать `Продавцу`: `/seller` открывается напрямую без modal.
+8. Выйти, выполнить ordinary `Войти` и убедиться, что вход не отправляет пользователя в `/seller` без seller intent.
+9. Повторить ключевой flow на mobile и desktop, включая keyboard close/focus и отсутствие overflow.
 
 ## Review gate
 
