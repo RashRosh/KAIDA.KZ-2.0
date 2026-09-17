@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
+import { PUT as updateLocationRequest } from '../../src/app/api/seller/locations/[id]/route';
+import { POST as createLocationRequest } from '../../src/app/api/seller/locations/route';
 import type { Database } from '../../src/db/client';
 import { findNearbyOffers } from '../../src/modules/discovery/application/find-nearby-offers';
 import { createOwnedLocation } from '../../src/modules/locations/application/create-owned-location';
@@ -17,9 +19,6 @@ import {
 } from '../../src/modules/seller-input/contracts/seller-change-set.contract';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
 import { connectTestDatabase, testDatabaseUrl } from './database';
-
-type CreateRoute = { POST(request: NextRequest): Promise<Response> };
-type UpdateRoute = { PUT(request: NextRequest, context: { params: Promise<{ id: string }> }): Promise<Response> };
 
 const NOW = new Date('2026-09-17T08:00:00.000Z');
 const originalDatabaseUrl = process.env.DATABASE_URL;
@@ -91,26 +90,23 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
     const owner = await fixture('0361');
     const foreign = await fixture('0362');
     try {
-      const createRoute = await import('../../src/app/api/seller/locations/route') as CreateRoute;
-      const updateRoute = await import('../../src/app/api/seller/locations/[id]/route') as UpdateRoute;
-
-      expect((await createRoute.POST(request('/api/seller/locations', 'POST', undefined, {
+      expect((await createLocationRequest(request('/api/seller/locations', 'POST', undefined, {
         name: 'Anonymous', type: 'shop', addressText: 'Anonymous address',
       }))).status).toBe(401);
 
-      const spoof = await createRoute.POST(request('/api/seller/locations', 'POST', owner.token, {
+      const spoof = await createLocationRequest(request('/api/seller/locations', 'POST', owner.token, {
         name: 'Spoof', type: 'shop', addressText: 'Spoof address', sellerId: foreign.seller.id,
       }));
       expect(spoof.status).toBe(400);
 
-      const createdResponse = await createRoute.POST(request('/api/seller/locations', 'POST', owner.token, {
+      const createdResponse = await createLocationRequest(request('/api/seller/locations', 'POST', owner.token, {
         name: '  Additional point  ', type: 'pavilion', addressText: '  Additional address  ',
       }));
       expect(createdResponse.status).toBe(201);
       const created = (await createdResponse.json()).location as { id: string };
       await setOwnedLocationGeo(owner.userId, created.id, { latitude: 43.24, longitude: 76.91 }, { database: db });
 
-      const editedResponse = await updateRoute.PUT(request(`/api/seller/locations/${created.id}`, 'PUT', owner.token, {
+      const editedResponse = await updateLocationRequest(request(`/api/seller/locations/${created.id}`, 'PUT', owner.token, {
         name: 'Edited point', type: 'market', addressText: 'Edited address',
       }), context(created.id));
       expect(editedResponse.status).toBe(200);
@@ -122,13 +118,13 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
         geo: { latitude: 43.24, longitude: 76.91 },
       });
 
-      const foreignResponse = await updateRoute.PUT(request(`/api/seller/locations/${foreign.seller.locations[0]!.id}`, 'PUT', owner.token, {
+      const foreignResponse = await updateLocationRequest(request(`/api/seller/locations/${foreign.seller.locations[0]!.id}`, 'PUT', owner.token, {
         name: 'No access', type: 'shop', addressText: 'No access',
       }), context(foreign.seller.locations[0]!.id));
-      const absentResponse = await updateRoute.PUT(request('/api/seller/locations/99999999-9999-4999-8999-999999999999', 'PUT', owner.token, {
+      const absentResponse = await updateLocationRequest(request('/api/seller/locations/99999999-9999-4999-8999-999999999999', 'PUT', owner.token, {
         name: 'Absent', type: 'shop', addressText: 'Absent',
       }), context('99999999-9999-4999-8999-999999999999'));
-      const malformedResponse = await updateRoute.PUT(request('/api/seller/locations/not-an-id', 'PUT', owner.token, {
+      const malformedResponse = await updateLocationRequest(request('/api/seller/locations/not-an-id', 'PUT', owner.token, {
         name: 'Malformed', type: 'shop', addressText: 'Malformed',
       }), context('not-an-id'));
       expect([foreignResponse.status, absentResponse.status, malformedResponse.status]).toEqual([404, 404, 404]);
