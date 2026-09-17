@@ -159,7 +159,7 @@ test('S8 browser geolocation denial stays client-side and keeps onboarding resum
     await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
-    await expect(page.getByLabel('Название торговой точки')).toHaveValue(`S8 E2E point ${testInfo.project.name}-failure`);
+    await expect(page.getByText(`S8 E2E point ${testInfo.project.name}-failure`, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
     expect(mutationRequests).toBe(0);
