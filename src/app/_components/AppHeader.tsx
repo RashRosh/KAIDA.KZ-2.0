@@ -226,6 +226,14 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
     }
   }
 
+  function handleLoggedOut() {
+    setUser(null);
+    setMobileOpen(false);
+    if (pathname === '/seller' || pathname.startsWith('/seller/')) {
+      router.replace('/');
+    }
+  }
+
   return (
     <header className={styles.header}>
       <div className={styles.container}>
@@ -238,13 +246,13 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
           <HeaderSearch />
 
           <div className={styles.trailing}>
-            {showAuth ? (
+            {showAuth || user != null ? (
               <AuthStatus
                 user={user}
                 loginOpen={authIntent === 'ordinary'}
                 loginTriggerRef={loginTriggerRef}
                 onLogin={() => setAuthIntent('ordinary')}
-                onLoggedOut={() => setUser(null)}
+                onLoggedOut={handleLoggedOut}
               />
             ) : <span className={styles.context}>{contextLabel}</span>}
             <button
