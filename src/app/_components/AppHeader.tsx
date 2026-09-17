@@ -172,7 +172,7 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
   }, [loadCurrentUser]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen || authIntent !== null) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMobileOpen(false);
@@ -180,7 +180,7 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [mobileOpen]);
+  }, [mobileOpen, authIntent]);
 
   async function handleSellerIntent(event: MouseEvent<HTMLAnchorElement>) {
     if (
