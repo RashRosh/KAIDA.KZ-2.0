@@ -114,7 +114,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
 
     await page.goto('/seller');
     await expect(page.getByRole('heading', { name: 'Мои предложения' })).toBeVisible();
-    await page.getByRole('button', { name: 'Изменить' }).click();
+    await page.getByRole('button', { name: 'Изменить', exact: true }).click();
     const editForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Проверить изменение' }) });
     await editForm.getByLabel('Цена, ₸').fill('4500.00');
     await editForm.getByLabel('Единица').fill('кг');
