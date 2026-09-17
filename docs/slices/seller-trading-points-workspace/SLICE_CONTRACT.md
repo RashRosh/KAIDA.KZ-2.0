@@ -28,12 +28,13 @@ Seller видит, добавляет и редактирует свои тор�
 - Seller contacts остаются отдельными Seller-level данными и могут продолжать редактироваться существующим owner flow. Они не входят в Location card payload и не дублируются при создании Location.
 - First-run action `Торговая точка` из #35 открывает или фокусирует область `Торговые точки`; при отсутствии точки она показывает тот же add/empty-state flow. Product-first prerequisite также приводит в этот flow, сохраняя draft в рамках непрерывного #35 flow.
 - Минимальная Offer compatibility adjustment применяется ко всем текущим seller UI paths, которые создают `create_offer` SellerChangeItem, включая single и batch create:
-  - **usable owned Location** для этого UI — persisted Location текущего Seller с валидными identity fields и complete saved geo; Seller-level public phone остаётся отдельным общим prerequisite по UX2/UX1D;
-  - `0` usable Locations: SellerChangeSet не создаётся; Seller направляется в соответствующую карточку/add flow для завершения точки, а #35 single product draft сохраняется в текущем непрерывном flow;
-  - `1` usable Location: UI может выбрать её автоматически и ясно показать выбранную точку до submit;
-  - `2+` usable Locations: каждый новый Offer требует явного выбора Location; первая Location не подставляется скрытым default;
+  - **offer-assignable owned Location** — persisted Location текущего Seller с valid required identity `name / type / addressText` по существующему contract;
+  - geo этой Location и Seller public phone могут быть null: они влияют только на buyer-facing eligibility по UX1D и не блокируют выбор Location или создание SellerChangeSet;
+  - `0` assignable Locations: SellerChangeSet не создаётся; Seller направляется в соответствующую карточку/add flow для создания точки, а #35 single product draft сохраняется в текущем непрерывном flow;
+  - `1` assignable Location: UI может выбрать её автоматически и ясно показать выбранную точку до submit;
+  - `2+` assignable Locations: каждый новый Offer требует явного выбора Location; первая Location не подставляется скрытым default;
   - backend перед созданием SellerChangeSet и повторно при confirm сохраняет существующую проверку `Location.seller_id == current Seller.id`.
-- Geo-less Location остаётся законным seller-side состоянием по S8/UX1D и видна в workspace, но до сохранения geo не предлагается как usable target в текущем product creation UI. Этот slice не вводит новый DB publishability flag.
+- Geo-less Location и Seller без public phone остаются законными seller-side состояниями по S8/UX1D. Такая Location доступна для назначения новому Offer, но Offer не становится buyer-visible, пока не выполнены существующие UX1D eligibility conditions. Этот slice не меняет Search/Nearby policy и не вводит новый DB publishability flag.
 - Редактирование Location не перепривязывает и не изменяет связанные Offer: их `location_id`, status, price, freshness и ChangeSet history сохраняются. Seller и buyer read models получают актуальные identity-данные Location через существующую связь.
 
 ## 3. Explicit out of scope
@@ -56,9 +57,9 @@ Seller видит, добавляет и редактирует свои тор�
 - **S2 Auth / S3 Seller ownership:** current User определяется server-side; один owned Seller принадлежит User; client не задаёт Seller/User ownership.
 - **S3 Seller / first Location:** Seller + первая Location для User без Seller создаются атомарно; required identity fields, limits, type set и DB constraints сохраняются.
 - **S8 Location Geo:** geo принадлежит Location, может быть null, сохраняется complete pair, меняется только owner-only explicit browser action и не публикуется как raw coordinates.
-- **S10 Seller contacts / UX1D buyer eligibility:** structured contacts принадлежат Seller; incomplete Location допустима seller-side; buyer visibility по-прежнему определяется существующей read-side policy.
+- **S10 Seller contacts / UX1D buyer eligibility:** structured contacts принадлежат Seller; geo-less Location, Seller без public phone и связанный Offer допустимы seller-side; phone + geo являются только buyer-facing eligibility conditions Search/Nearby и не блокируют Location assignment или SellerChangeSet creation.
 - **UX2 Seller onboarding:** first setup остаётся resumable по фактически сохранённым Seller / first Location / contacts / geo, без persisted completion flag.
-- **#35 Seller Entry:** contextual auth, first-run workspace actions и сохранение product-first draft в одном непрерывном prerequisite flow сохраняются.
+- **#35 Seller Entry:** contextual auth, first-run workspace actions и сохранение product-first draft в одном непрерывном prerequisite flow сохраняются; prerequisite для SellerChangeSet требует Seller и owned Location, но не создаёт seller-side обязательность geo/contact.
 - **S4 / S5 / S12 SellerChangeSet:** новый Offer создаётся только через SellerChangeSet; Location принадлежит Seller; confirmation atomic; batch остаётся all-or-nothing.
 - **Mandatory Offer Price:** create/update publishable Offer требует valid amount; currency остаётся server-owned `KZT`.
 - **Offer–Location relation:** каждый Offer хранит конкретный `location_id`; current Seller и Location ownership повторно проверяются на write/apply boundaries.
@@ -68,7 +69,7 @@ Seller видит, добавляет и редактирует свои тор�
 - **UX2:** generic Seller/Location edit и создание второй Location переходят из out of scope в постоянный card-based workspace flow. Одноразовая presentation-модель onboarding больше не является единственным способом работать с Location.
 - **#35:** action `Торговая точка` теперь ведёт в постоянную workspace area, а product-first prerequisite использует тот же first/add Location flow.
 - **S3 application surface:** неизменная атомарная setup boundary продолжает создавать Seller + first Location, но после неё добавляются отдельные owner capabilities create additional Location и edit Location identity.
-- **S4/S12 seller product presentation:** скрытый выбор `locations[0]` допустим только при одной usable Location; при нескольких новый Offer требует explicit Location choice. SellerChangeSet domain и apply semantics не меняются.
+- **S4/S12 seller product presentation:** скрытый выбор `locations[0]` допустим только при одной offer-assignable Location; при нескольких новый Offer требует explicit Location choice. SellerChangeSet domain и apply semantics не меняются.
 
 Другие закрытые public/business contracts этим slice не пересматриваются.
 
@@ -80,7 +81,7 @@ Seller видит, добавляет и редактирует свои тор�
 | Public API | **YES** | Нужны owner-scoped create Location и identity update semantics; current owner Location list остаётся source для workspace. Requests strict, ownership не client-owned. |
 | Auth / security / privacy | **YES** | Anonymous mutation запрещена; current User → owned Seller → owned Location проверяется server-side; foreign и nonexistent Location не различаются в edit/geo responses; raw coordinates не выводятся. |
 | Concurrency / atomicity | **YES, bounded** | Identity update меняет три identity fields одним row update и не трогает geo. Concurrent identity + geo updates не должны терять изменения друг друга. Два concurrent identity updates используют last-committed complete payload без field mixing/partial state. Независимые concurrent creates могут создать две разные owned Locations; deduplication не обещается. |
-| Data loss | **NO destructive path** | Edit явно заменяет identity values без history, но не удаляет Location, geo, Offer links или ChangeSet history. Failed validation/update не оставляет partial identity state. |
+| Data loss | **YES, bounded** | #35 product-first draft не должен терять различимые введённые значения при переходе `product-first → no Location → Trading Points flow → возврат` в одном непрерывном flow. Новый persisted draft/API/DB не вводится. Location edit не удаляет geo, Offer links или ChangeSet history; failed update не оставляет partial identity state. |
 | External service | **NO** | Existing browser Geolocation API остаётся client capability; backend providers/geocoding не добавляются. |
 
 ## 7. Expected modules / architectural areas
@@ -89,7 +90,7 @@ Seller видит, добавляет и редактирует свои тор�
 - Locations validation/application/repository boundary for owner-scoped create and identity update;
 - seller Location API routes and existing owner read projection;
 - orchestration of existing S3 first setup, Seller-level contacts and S8 geo action inside the persistent workspace;
-- minimal single and batch `create_offer` UI adjustment for usable Location resolution and explicit choice;
+- minimal single and batch `create_offer` UI adjustment for offer-assignable Location resolution and explicit choice;
 - targeted integration/E2E regressions around S3, S8, #35, S4/S12 and Offer–Location ownership;
 - slice documentation.
 
@@ -105,9 +106,9 @@ Seller видит, добавляет и редактирует свои тор�
 6. Concurrent identity + geo updates сохраняют оба результата; concurrent identity updates не создают смешанного/частичного payload и завершаются одним из полных valid payloads. Два самостоятельных concurrent create requests создают две отдельные owned Locations и не нарушают Seller/Location constraints.
 7. Seller-level phone/messengers нигде не копируются в Location cards, create/update payloads или rows; per-location contacts отсутствуют.
 8. Existing Offer, привязанные к редактируемой Location, сохраняют ids, `location_id`, status, price, freshness и history; hard delete/archive/reassignment действия в UI/API отсутствуют, а актуальные identity-данные точки отражаются через существующую связь.
-9. First-run action `Торговая точка` и product-first prerequisite #35 открывают новый workspace flow; различимый single-product draft сохраняется до возврата в SellerChangeSet creation в рамках одного непрерывного flow.
-10. При `0 / 1 / 2+` usable owned Locations current single create flow соответственно блокирует ChangeSet и ведёт к completion / автоматически показывает единственную точку / требует explicit choice без hidden first-location default. Те же правила выбора применяются к каждому batch `create_offer` item; update/activate/deactivate existing Offer не предлагают reassign Location.
-11. Любой созданный SellerChangeSet хранит выбранную valid owned Location; foreign/nonexistent Location отклоняется до proposal rows, confirmation повторно сохраняет ownership invariant, Offer не пишется напрямую и mandatory price остаётся обязательной.
+9. First-run action `Торговая точка` и product-first prerequisite #35 открывают новый workspace flow; различимые single-product values сохраняются без потери до возврата в SellerChangeSet creation в рамках одного непрерывного flow, без нового persisted draft/API/DB.
+10. При `0 / 1 / 2+` offer-assignable owned Locations current single create flow соответственно блокирует ChangeSet и ведёт к созданию Location / автоматически показывает единственную точку / требует explicit choice без hidden first-location default. Те же правила выбора применяются к каждому batch `create_offer` item; update/activate/deactivate existing Offer не предлагают reassign Location.
+11. Любой созданный SellerChangeSet хранит выбранную valid owned Location; geo и Seller public phone могут отсутствовать и не блокируют proposal/confirmation. Foreign/nonexistent Location отклоняется до proposal rows, confirmation повторно сохраняет ownership invariant, Offer не пишется напрямую и mandatory price остаётся обязательной. Geo/phone продолжают влиять только на buyer visibility по неизменной UX1D policy.
 12. Cards/forms следуют Design System и релевантным UX references: mobile-first, без page-level overflow на `320 / 360 / 390 / 768 / 1024 / 1440px`, visible labels/focus/status/errors, targets минимум `44x44px`, без product-card ecommerce mechanics, fake data или раскрытия raw coordinates.
 
 ## 9. Automated test plan
@@ -119,7 +120,8 @@ Seller видит, добавляет и редактирует свои тор�
 - owner edit succeeds; anonymous is rejected; foreign and nonexistent ids share non-disclosing not-found semantics;
 - identity update preserves Location id, seller id and geo; validation/failure leaves prior complete identity unchanged;
 - existing Offer links and Offer fields survive Location identity edit unchanged;
-- chosen owned Location is persisted in single/batch create proposal; foreign/nonexistent Location creates no ChangeSet/Item; existing confirmation ownership checks remain green.
+- chosen owned Location is persisted in single/batch create proposal; foreign/nonexistent Location creates no ChangeSet/Item; existing confirmation ownership checks remain green;
+- geo-less owned Location and Seller without public phone can be assigned to a new Offer through SellerChangeSet, while the resulting Offer remains absent from buyer Search/Nearby until existing UX1D eligibility conditions are met.
 
 ### Integration — bounded concurrency proof
 
@@ -131,7 +133,7 @@ No repeated exact-SHA CI run is required unless these tests expose nondeterminis
 
 ### Unit
 
-Targeted unit tests only for non-trivial pure logic introduced for `0 / 1 / 2+ usable Locations` selection and strict Location input validation. Do not add unit coverage for simple rendering/wiring already proven by integration/E2E.
+Targeted unit tests only for non-trivial pure logic introduced for `0 / 1 / 2+ offer-assignable Locations` selection and strict Location input validation. Do not add unit coverage for simple rendering/wiring already proven by integration/E2E.
 
 ### E2E — seller behavior
 
@@ -140,8 +142,9 @@ Mobile + desktop coverage:
 - #35 `Торговая точка` → empty/add first point → persistent `Торговые точки` area;
 - add second point, see two distinct cards, open one card, edit identity, reload and see persisted values plus unchanged geo state;
 - browser geo prompt occurs only after explicit per-card action; raw coordinates are never rendered;
-- product-first with `0` usable Locations preserves draft through completion; one usable Location is shown/selected automatically; two usable Locations require an explicit selection before single ChangeSet create;
-- representative batch `create_offer` item also requires explicit Location when multiple are usable;
+- product-first with `0` assignable Locations preserves distinguishable draft values through Location creation and return; one assignable Location is shown/selected automatically; two assignable Locations require an explicit selection before single ChangeSet create;
+- representative batch `create_offer` item also requires explicit Location when multiple are assignable;
+- Location без geo остаётся доступной для назначения новому Offer, Seller public phone не требуется для SellerChangeSet, а confirmed Offer сохраняет существующую UX1D invisibility в buyer Search/Nearby до появления phone + geo;
 - no horizontal overflow, keyboard/focus usability and clear loading/error/status feedback at representative widths.
 
 ### Migration / external service
@@ -152,11 +155,11 @@ After targeted verification: one full regression run and branch CI on the final 
 
 ## 10. Manual acceptance scenario
 
-1. Войти новым Seller и открыть `Торговая точка`: в кабинете увидеть empty state `Торговые точки`, создать первую точку и завершить её geo явным действием.
+1. Войти новым Seller и открыть `Торговая точка`: в кабинете увидеть empty state `Торговые точки` и создать первую точку; geo можно оставить незаданным.
 2. В той же области нажать add-card, создать вторую точку и увидеть обе карточки.
 3. Открыть вторую карточку, изменить название/type/address, сохранить и убедиться, что geo state не сбросился; при необходимости отдельно обновить местоположение.
 4. Вернуться в кабинет/reload и убедиться, что обе точки и изменения сохранились, а Seller contacts остались одним общим набором.
-5. Начать добавление товара: при двух usable Locations явно выбрать точку, создать proposal и на review увидеть именно её; Offer до штатного confirm не применяется.
+5. Начать добавление товара: при двух assignable Locations явно выбрать точку, в том числе точку без geo, создать proposal и на review увидеть именно её; отсутствие geo/public phone не блокирует SellerChangeSet, Offer до штатного confirm не применяется, а buyer visibility остаётся под существующей UX1D policy.
 6. Убедиться, что в карточках нет delete/per-location contacts/Offer management и что flow usable на mobile и desktop.
 
 ## 11. UX reference application
