@@ -203,7 +203,10 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
           { action: 'create_offer', productName: 'Говядина', locationId: second.id, price: { amount: '4500', unit: 'кг' } },
         ],
       }), { database: db });
-      expect(batch.items.map((item) => item.location.id)).toEqual([firstId, second.id]);
+      expect(Object.fromEntries(batch.items.map((item) => [item.product.name, item.location.id]))).toEqual({
+        Баранина: firstId,
+        Говядина: second.id,
+      });
       const batchConfirmed = await confirmSellerChangeSet(owner.userId, batch.id, { database: db, clock: () => NOW });
       const createdIds = [singleOfferId, ...batchConfirmed.items.map((item) => item.resultOffer!.id)];
 
