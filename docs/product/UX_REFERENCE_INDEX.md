@@ -2,7 +2,7 @@
 
 ## Status
 
-`AUDITED — AWAITING PRODUCT OWNER REVIEW` — Issue #37 UX corpus reconciliation completed on the maintenance branch. No blocking GAP was found for the next scheduled slice, Seller Entry (#35).
+`AUDITED / APPROVED` — Product Owner approved the Issue #37 UX corpus reconciliation. No blocking GAP was found for the next scheduled slice, Seller Entry (#35).
 
 This file maps external UX reference material to KAIDA.KZ UI areas. It is **not** a product contract and does not override `docs/PROJECT_RULES.md`, closed Slice Contracts or `docs/DESIGN_SYSTEM.md`.
 
@@ -270,10 +270,10 @@ The first systematic audit compared the currently relevant KAIDA rules with the 
 
 ### GAP
 
-No Product Owner decision is currently required to start the next scheduled slice, **Seller Entry / contextual auth (#35)**, once Issue #37 is approved, merged and closed.
+No additional Product Owner decision from this audit is required to prepare the next scheduled slice, **Seller Entry / contextual auth (#35)**.
 
 `UX-OBS-001` in `docs/UX_BACKLOG.md` remains a non-blocking observation about controlled choice vs free input. It should be evaluated only when a relevant seller form Slice Contract makes the decision concrete.
 
 ## Audit lifecycle
 
-This audit is complete at the documentation/research level on the maintenance branch, but Issue #37 remains open until Product Owner review, green final branch CI, merge to `main`, merged-main CI and repository consistency check. After merge, update the status/checkpoint reference without expanding this file into a roadmap.
+Issue #37 and PR #40 contain the maintenance evidence. Live gate status and current execution order belong to `docs/product/EXECUTION_PLAN.md`, not this index.

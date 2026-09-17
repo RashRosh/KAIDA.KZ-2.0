@@ -17,7 +17,7 @@
 
 ### UX-OBS-001 — Controlled choice вместо свободного ввода
 
-**Область:** Seller forms / data entry  
+**Область:** Seller forms / data entry
 **Статус:** OBSERVATION — проверить в ближайших seller workspace Slice Contracts / UX audit.
 
 Когда допустимые значения заранее известны системе, не заставлять пользователя вводить их произвольно.

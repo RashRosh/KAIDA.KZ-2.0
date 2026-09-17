@@ -185,7 +185,7 @@ Seller Input
 → Buyer Action
 ```
 
-П1 = покупатель.  
+П1 = покупатель.
 П2 = продавец.
 
 ## 12. Seller Input и ChangeSet

@@ -365,6 +365,6 @@ Messenger logos — official brand assets, когда соответствующ
 
 ## 17. UX reference audit
 
-До следующего UI-heavy product slice выполняется maintenance gate #37: текущие rules сверяются с Product Owner UX corpus через `KEEP / ADAPT / REJECT / GAP`.
+Maintenance audit #37 сверил текущие rules с Product Owner UX corpus через `KEEP / ADAPT / REJECT / GAP`; conclusions зафиксированы в `docs/product/UX_REFERENCE_INDEX.md`.
 
-Audit может уточнить presentation rules, но не имеет права молча менять closed product contracts. После завершения #37 этот раздел остаётся историческим указателем на метод, а не execution roadmap.
+Audit может уточнять presentation rules, но не имеет права молча менять closed product contracts. Этот раздел остаётся историческим указателем на метод, а не execution roadmap.

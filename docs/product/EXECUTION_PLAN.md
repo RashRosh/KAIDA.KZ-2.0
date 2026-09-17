@@ -31,47 +31,44 @@
 
 Текущий `main` может содержать более поздние docs/tooling maintenance commits без нового product checkpoint.
 
+После этого product checkpoint выполнен docs-only maintenance Issue #37: UX reference audit, Design System reconciliation и source-of-truth normalization. Он не создаёт новый product checkpoint/tag. Evidence хранится в Issue #37 и PR #40.
+
 ---
 
 # NEXT
 
-## #37 — UX reference audit + source-of-truth normalization
+## #35 — Seller Entry / contextual auth
 
-Статус: **COMMITTED maintenance gate**.
+Статус: **COMMITTED product slice**.
 
-До следующего UI/UX product slice необходимо:
+Следующая отдельная работа:
 
-- убрать противоречия между live planning/process/design docs;
-- нормализовать ownership источников;
-- сверить Design System с релевантным UX corpus через `KEEP / ADAPT / REJECT / GAP`;
-- обновить media rule: временная demo/placeholder presentation разрешена до M1, но не является real seller media contract;
-- закрыть GAP, влияющие на следующий UI-heavy slice;
-- получить green branch CI и merge maintenance change в `main`.
+- открыть Issue #35;
+- проверить relevant closed contracts;
+- подготовить compact Slice Contract отдельным проходом;
+- не начинать implementation до approval этого contract.
 
-Подробности: GitHub Issue #37.
-
-Пока #37 не закрыт, следующий UI/UX product slice не начинается.
+Подробности: GitHub Issue #35.
 
 ---
 
-# COMMITTED — после #37
+# COMMITTED — после #35
 
 Порядок выполняется сверху вниз. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
 |---|---|---|
-| 1 | Seller Entry / contextual auth | Issue #35 |
-| 2 | Seller Trading Points Workspace | Issue #36 |
-| 3 | Seller Offer Workspace | Issue #27 |
-| 4 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
-| 5 | Seller Freshness Reminder | Issue #32 |
-| 6 | Nearby result-first correction | Issue #34 |
-| 7 | Search Sorting A — freshness / proximity | Issue #12 |
-| 8 | Search Sorting B — price | Issue #12 |
-| 9 | M1 — real Offer media | Feature Map / future Slice Contract |
-| 10 | S14 — Discovery / `Для вас` | Feature Map |
-| 11 | S15 — Search learning | Feature Map |
-| 12 | S16 — Operations + MVP boundary review | Feature Map |
+| 1 | Seller Trading Points Workspace | Issue #36 |
+| 2 | Seller Offer Workspace | Issue #27 |
+| 3 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
+| 4 | Seller Freshness Reminder | Issue #32 |
+| 5 | Nearby result-first correction | Issue #34 |
+| 6 | Search Sorting A — freshness / proximity | Issue #12 |
+| 7 | Search Sorting B — price | Issue #12 |
+| 8 | M1 — real Offer media | Feature Map / future Slice Contract |
+| 9 | S14 — Discovery / `Для вас` | Feature Map |
+| 10 | S15 — Search learning | Feature Map |
+| 11 | S16 — Operations + MVP boundary review | Feature Map |
 
 ### Ключевые dependencies
 
@@ -129,7 +126,6 @@ AI остаётся способом сформировать Seller Change Set,
 
 Проверять insertion candidates и новые approved requirements:
 
-- после #37 UX audit;
 - после seller workspace + freshness contour;
 - после Search Sorting;
 - после M1;
