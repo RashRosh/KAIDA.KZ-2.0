@@ -14,7 +14,7 @@ Seller manages trading points, offers, contacts and pending changes from one con
 
 ## 2. Scope
 
-Per Issue #27 and the Product Owner scope decision recorded 2026-09-22 in `docs/product/EXECUTION_PLAN.md` and `docs/product/WIREFRAME_BRIEF.md` (Tier 1), this slice has two parts.
+Per Issue #27, the Product Owner scope decision recorded 2026-09-22 in `docs/product/EXECUTION_PLAN.md` and `docs/product/WIREFRAME_BRIEF.md` (Tier 1), and the later same-day elevation of the bundled wireframe artifact to authoritative UX target (`PROJECT_RULES.md` §18.1), this slice has two parts. The wireframe's `2a`–`2i` / `3a`–`3c` / `3e`–`3g` screens (per `WIREFRAME_BRIEF.md` Tier 1/2) are the target UI for part A/B below — implementation follows them directly rather than treating them as one advisory input among several.
 
 ### A. New: Offer Workspace grid (Issue #27 core ask)
 

@@ -12,9 +12,18 @@
 Tier 0–4) — https://claude.ai/artifact/5KhjaPcLntxAY4Mk2BC9zF. Сам артефакт фиксирует свой охват дословно:
 «Мобильный набор по брифу закрыт: 42 экрана, Tier 0–4… Осталась desktop-раскладка под UX1A/UX2A.»
 
-Это **advisory-материал** того же типа, что и внешние UX references (`PROJECT_RULES.md` §18,
-`UX_REFERENCE_INDEX.md`), не новый Slice Contract и не изменение `EXECUTION_PLAN.md`. Разбор по
-`KEEP/ADAPT/REJECT/GAP` — в `UX_REFERENCE_INDEX.md`, раздел «Follow-up spot-check (2026-09-22)».
+Изначально это был **advisory-материал** того же типа, что и внешние UX references (`PROJECT_RULES.md` §18,
+`UX_REFERENCE_INDEX.md`). Разбор по `KEEP/ADAPT/REJECT/GAP` — в `UX_REFERENCE_INDEX.md`, раздел «Follow-up
+spot-check (2026-09-22)».
+
+**Обновление статуса, 2026-09-22 (позже в тот же день):** Product Owner признал текущий продуктовый UX
+неудовлетворительным и отдельным решением поднял именно этот артефакт до **authoritative текущей UX-цели**
+presentation-слоя — см. `PROJECT_RULES.md` §18.1 и обновлённый раздел `UX_REFERENCE_INDEX.md`. Он по-прежнему не
+подменяет собой Slice Contract и не переписывает `EXECUTION_PLAN.md` напрямую (порядок работ и business-приоритеты
+не меняются этим решением), но перестаёт быть просто advisory: уже реализованные экраны, которые он покрывает,
+приводятся к нему как к целевому UI через Slice Contract соответствующей области; ещё не реализованные —
+проектируются по нему напрямую. Экраны, требующие новой business-механики (не только presentation), а не только
+переоформления — по-прежнему проходят через explicit Product Owner подтверждение до реализации.
 
 Что это меняет по тирам ниже:
 

@@ -260,6 +260,16 @@ Design System развивается вместе со slices, но не име�
 
 Внешние UX references — advisory evidence. Их findings классифицируются `KEEP / ADAPT / REJECT / GAP`.
 
+### 18.1 Bundled wireframe artifact — authoritative UX target (Product Owner decision, 2026-09-22)
+
+Текущий продуктовый UI признан неудовлетворительным. Bundled wireframe artifact (42 экрана, `1a`–`5e`, Tier 0–4, зафиксирован в `docs/product/WIREFRAME_BRIEF.md` и `docs/product/UX_REFERENCE_INDEX.md`, «Follow-up spot-check (2026-09-22)») перестаёт быть advisory evidence уровня внешнего UX reference и становится **authoritative текущей UX-целью** для presentation-слоя продукта:
+
+- уже реализованные экраны, которые он покрывает, приводятся к нему как к целевому UI (визуальная композиция, layout, states) в рамках обычных Slice Contracts соответствующих областей;
+- ещё не реализованные экраны проектируются по нему напрямую, без прохождения `KEEP/ADAPT/REJECT/GAP` фильтра как для стороннего материала;
+- это revision presentation/UX-приоритета, не business/data contract: auth, ownership, persistence, pricing, ChangeSet-архитектура и другие закрытые business/data contracts (раздел 4 выше) этим решением не пересматриваются и требуют обычной STOP-процедуры, если конкретный экран вайрфрейма явно требует новой бизнес-механики, которой сейчас нет ни в одном closed contract;
+- такая новая механика (например: paste-and-parse geo fallback, cross-cutting loading/offline/error states) не реализуется молча «потому что она есть в вайрфрейме» — по ней задаётся explicit вопрос Product Owner, и реализация идёт только после ответа;
+- Slice Contract каждой затронутой области отдельно фиксирует, какие экраны вайрфрейма входят в её scope — сам факт существования артефакта не заменяет Slice Contract и не отменяет `PROJECT_RULES.md` §3.
+
 ## 19. Git и checkpoints
 
 `main` содержит только проверенное состояние.

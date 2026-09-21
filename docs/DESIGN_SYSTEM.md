@@ -10,12 +10,12 @@
 
 1. closed contracts и утверждённый текущий Slice Contract определяют поведение/API/privacy/business semantics;
 2. `docs/PROJECT_RULES.md` определяет process и stable boundaries;
-3. explicit Product Owner decisions определяют утверждённые product/UX revisions;
-4. этот Design System определяет visual/presentation rules;
-5. `docs/product/UX_REFERENCE_INDEX.md` и внешние references дают advisory evidence;
+3. explicit Product Owner decisions определяют утверждённые product/UX revisions — включая `PROJECT_RULES.md` §18.1: bundled wireframe artifact является authoritative текущей UX-целью presentation-слоя, не generic advisory evidence;
+4. этот Design System определяет visual/presentation rules и приводится в соответствие с этой UX-целью по мере редизайна каждой области;
+5. `docs/product/UX_REFERENCE_INDEX.md` и прочие внешние references (не bundled wireframe artifact) дают advisory evidence;
 6. общие привычки исполнителя идут последними.
 
-Design System не имеет права самостоятельно менять closed contract. Если визуальное решение требует contract revision — STOP и отдельное согласование.
+Design System не имеет права самостоятельно менять closed business/data contract. Если конкретный экран вайрфрейма требует новой бизнес-механики, которой нет ни в одном closed contract — STOP и explicit вопрос Product Owner по `PROJECT_RULES.md` §18.1, прежде чем реализовывать эту механику.
 
 Tokens/components вводятся только когда нужны открытому slice. Не рефакторировать весь UI «ради системы».
 
@@ -367,4 +367,6 @@ Messenger logos — official brand assets, когда соответствующ
 
 Maintenance audit #37 сверил текущие rules с Product Owner UX corpus через `KEEP / ADAPT / REJECT / GAP`; conclusions зафиксированы в `docs/product/UX_REFERENCE_INDEX.md`.
 
-Audit может уточнять presentation rules, но не имеет права молча менять closed product contracts. Этот раздел остаётся историческим указателем на метод, а не execution roadmap.
+Audit может уточнять presentation rules, но не имеет права молча менять closed business/data contracts. Этот раздел остаётся историческим указателем на метод для generic внешних references, а не execution roadmap.
+
+Bundled wireframe artifact (`docs/product/WIREFRAME_BRIEF.md`) с 2026-09-22 выведен из этого `KEEP/ADAPT/REJECT/GAP` режима отдельным Product Owner решением — см. `PROJECT_RULES.md` §18.1. Для него `KEEP/ADAPT/REJECT/GAP` больше не определяет, применяется ли экран: применяется он напрямую как целевой UI; классификация остаётся полезной только для отдельного вопроса — не требует ли конкретный экран новой business-механики, которой ещё нет в closed contracts.

@@ -332,10 +332,16 @@ brief was written to prepare for. 42 screens, identifiers `1a`–`5e` continuing
 `KAIDA Wireframes.dc.html` numbering, self-reported as "Мобильный набор по брифу закрыт: 42 экрана, Tier 0–4…
 Осталась desktop-раскладка под UX1A/UX2A." Link: https://claude.ai/artifact/5KhjaPcLntxAY4Mk2BC9zF
 
-This is KAIDA's own commissioned design material, not a third-party e-commerce guide — treated with the same
-discipline as the earlier "Карта пути KAIDA" walkthrough artifact (2026-09-21 entries above): advisory evidence
-subject to `KEEP/ADAPT/REJECT/GAP` and `PROJECT_RULES.md` §4 STOP where a closed contract is touched, not an
-automatic contract, and it does not reorder `EXECUTION_PLAN.md`.
+**Status changed later the same day (2026-09-22):** the table below was originally written under the
+`KEEP/ADAPT/REJECT/GAP` discipline used for third-party advisory material. The Product Owner has since judged the
+current shipped UX unsatisfactory and elevated this specific artifact to the **authoritative current UX target**
+for the presentation layer — see `PROJECT_RULES.md` §18.1. It is no longer filtered through KEEP/ADAPT/REJECT/GAP
+to decide *whether* a screen applies; it applies directly, and existing implemented screens are brought into line
+with it through each area's ordinary Slice Contract. Closed **business/data** contracts (auth, ownership,
+persistence, pricing, ChangeSet architecture) are not reopened by this decision. The table below is kept as a
+historical record of the original per-finding read; the "touches closed/blocked contract" column is what still
+matters going forward — a `YES` there means new business mechanics, not just presentation, and still needs an
+explicit Product Owner answer before implementation per §18.1, not a silent adoption.
 
 | # | Finding | Classification | Touches closed/blocked contract? |
 |---|---|---|---|
@@ -349,6 +355,15 @@ automatic contract, and it does not reorder `EXECUTION_PLAN.md`.
 
 Nothing here was adopted into an open Slice Contract by this spot-check alone. `docs/product/WIREFRAME_BRIEF.md`
 updated to record this pass's tier coverage.
+
+**2026-09-22, later same day — Product Owner elevation to authoritative UX target (`PROJECT_RULES.md` §18.1):**
+this reclassifies rows 1, 4 and 7 above from advisory `KEEP`/`ADAPT` to directly-adopted target UI — no further
+KEEP/ADAPT gate needed to use them as the design for their respective screens. Row 3 (`UX-OBS-002`, cross-cutting
+loading/offline/error states) and row 2 (S8 paste-and-parse geo fallback, already Product-Owner-approved per
+`docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` but awaiting `EXECUTION_PLAN.md` scheduling) remain
+the two items in this table that introduce genuinely new business mechanics rather than pure presentation — both
+still require an explicit Product Owner answer before any implementation adopts them, per §18.1's carve-out. Row 5
+(Tier 3, После MVP) is unaffected: a complete-looking screen still isn't a scheduling decision on its own.
 
 ## Audit lifecycle
 
