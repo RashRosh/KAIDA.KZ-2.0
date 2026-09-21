@@ -325,6 +325,31 @@ Ad-hoc spot-check, not a full Issue-driven re-audit like #37. Triggered by a cod
 
 Only finding 1 requires the `PROJECT_RULES.md` §4 STOP procedure before any Slice Contract can adopt it — findings 3 and 4 are implementation-level and don't need Product Owner contract-revision sign-off, only ordinary scheduling. Nothing here was adopted into an open Slice Contract by this spot-check alone; recorded as advisory evidence per this file's own `KEEP/ADAPT/REJECT/GAP` rule, not a parallel roadmap. Findings 1 and 3 also got draft Slice Contracts prepared under `docs/slices/` (see below) — both require explicit approval before implementation, per `docs/product/EXECUTION_PLAN.md`'s "не начинать implementation до approval".
 
+## Follow-up spot-check (2026-09-22)
+
+Source: bundled wireframe artifact commissioned per `docs/product/WIREFRAME_BRIEF.md` — the "second pass" that
+brief was written to prepare for. 42 screens, identifiers `1a`–`5e` continuing the first-pass
+`KAIDA Wireframes.dc.html` numbering, self-reported as "Мобильный набор по брифу закрыт: 42 экрана, Tier 0–4…
+Осталась desktop-раскладка под UX1A/UX2A." Link: https://claude.ai/artifact/5KhjaPcLntxAY4Mk2BC9zF
+
+This is KAIDA's own commissioned design material, not a third-party e-commerce guide — treated with the same
+discipline as the earlier "Карта пути KAIDA" walkthrough artifact (2026-09-21 entries above): advisory evidence
+subject to `KEEP/ADAPT/REJECT/GAP` and `PROJECT_RULES.md` §4 STOP where a closed contract is touched, not an
+automatic contract, and it does not reorder `EXECUTION_PLAN.md`.
+
+| # | Finding | Classification | Touches closed/blocked contract? |
+|---|---|---|---|
+| 1 | `1a`–`1i`, `2a`–`2i`, `3a`–`3c`/`3e`–`3g` (buyer search/nearby/card/interests, seller cabinet/trading points/Change Set/Offer Workspace/freshness/`Для вас`/Мои интересы) match already-closed S0–S13/#35/#36 behavior, no new business rule | `KEEP` — reference material for the redesign pass, not new scope | NO |
+| 2 | `4e` ("1b · Ссылка на карту"): paste a 2ГИС/Google/Yandex Maps link → client-parsed coordinate preview → explicit confirm; unparseable input → "попросим прийти на точку" | Independently converges with the already-drafted mechanism in `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (paste-and-parse, no embedded map/SDK) | **YES — S8, blocked.** Added as a third convergent source in that draft's Section 0. Still requires explicit Product Owner approval before its Status changes from `PROPOSED — BLOCKED`. |
+| 3 | `4a`–`4c`: loading skeleton matching card shape, offline banner + stale-cache "Обновить", three-tier server-error severity (full-screen / local block / toast), explicit "ввод продавца не теряется никогда" | `GAP` — no Slice Contract or `docs/DESIGN_SYSTEM.md` section currently owns cross-cutting system states (checked: only an `--error` color token and two duplicate-submit lines exist today) | NO closed contract touched; recorded as `UX-OBS-002` in `docs/UX_BACKLOG.md`. |
+| 4 | `1j`/`1k`/`3a`/`3b`/`3c` fully wireframe Issue #27 (NEXT, Slice Contract not yet approved) and Issues #31/#32 (COMMITTED after #27) | `ADAPT` — good advisory input for those Slice Contracts once each is actually opened, in `EXECUTION_PLAN.md` order | NO — but the artifact must not be read as a finished contract for #27; do not skip the Slice Contract step. |
+| 5 | `5a`–`5d` (Notifications, Tariff, Promotion+Payment, Analytics drill-down) fully wireframe S23/S25–S29/S33; `1c`/`4f` deepen freeform/voice/AI-draft review (S17–S19) | Advisory only — **not actionable now** | These capabilities are `После MVP` / `LATER, dependency-gated` per `FEATURE_MAP.md` and `EXECUTION_PLAN.md`. A complete-looking deck is not a scheduling decision; treating it as one would violate `PROJECT_RULES.md` §20 ("не писать весь MVP одним заходом"). |
+| 6 | OTP resend button with visible countdown (`0:28`–`0:42`) on `2i` | Concrete UI evidence supporting the existing `GAP` already recorded in the Phone/OTP section above (2026-09-21) | NO — "OTP resend + timer" stays an unscheduled insertion candidate pending explicit Product Owner scheduling; no contract to touch yet. |
+| 7 | `5e` Tier 4 stubs (Market scheme, Reviews/rating, Offer video) rendered only as labeled empty slots | `KEEP` — matches current `INSERTION CANDIDATES` treatment in `EXECUTION_PLAN.md` exactly | NO |
+
+Nothing here was adopted into an open Slice Contract by this spot-check alone. `docs/product/WIREFRAME_BRIEF.md`
+updated to record this pass's tier coverage.
+
 ## Audit lifecycle
 
 Issue #37 and PR #40 contain the maintenance evidence for the original audit. Live gate status and current execution order belong to `docs/product/EXECUTION_PLAN.md`, not this index.

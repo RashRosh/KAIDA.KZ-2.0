@@ -45,7 +45,8 @@
 
 - открыть Issue #27;
 - проверить relevant closed contracts, включая закрытый Seller Trading Points (#36) и его multiple-Location semantics;
-- подготовить compact Slice Contract отдельным проходом;
+- scope подтверждён Product Owner 2026-09-22 и включает редизайн уже закрытых экранов кабинета продавца (хаб, карточки точек, выбор точки при 2+, управление предложением, контакты, Change Set confirm) — см. `docs/product/WIREFRAME_BRIEF.md`, раздел Tier 1;
+- подготовить compact Slice Contract отдельным проходом, перечислив эти экраны явно;
 - не начинать implementation до approval этого contract.
 
 Подробности: GitHub Issue #27.
@@ -109,14 +110,14 @@ Capability известна, но отдельный committed slice ещё не
 - до этого нельзя показывать fake rating/reviews;
 - если необходимость появится до MVP boundary — оформить Issue и insertion decision.
 
-## Seller Location geo fallback (proposed S8 revision)
+## Seller Location geo fallback (approved S8 revision)
 
-Capability известна из UX follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21): текущий S8 не даёт альтернативы browser-only geolocation «на месте», если доступ отклонён/недоступен. Draft Slice Contract подготовлен: `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (status: `PROPOSED — BLOCKED`).
+Capability известна из UX follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21), подтверждена вторым независимым источником 2026-09-22 (wireframe `4e`). Slice Contract утверждён Product Owner 2026-09-22: `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (status: `APPROVED — S8 REVISION ACCEPTED, AWAITING EXECUTION_PLAN SCHEDULING`). S8 revision approval (`PROJECT_RULES.md` §4 STOP procedure) закрыт — contract готов к реализации, но ещё не размещён в активной очереди.
 
-- earliest: не раньше explicit Product Owner approval ревизии закрытого S8 (`PROJECT_RULES.md` §4 STOP procedure);
-- trigger: Product Owner рассматривает draft contract и явно утверждает или отклоняет ревизию S8;
-- direction: сохранить existing browser-only action как primary path, добавить fallback только при denial/unavailability;
-- default without trigger: остаётся unscheduled, S8 behavior не меняется.
+- earliest: следующий re-evaluation gate (после seller workspace + freshness контура — см. `Re-evaluation gates` ниже);
+- trigger for actual scheduling: Product Owner переносит этот пункт в COMMITTED на одном из re-evaluation gates;
+- direction: сохранить existing browser-only action как primary path, добавить paste-and-parse fallback (координаты/ссылка на карту) только рядом с ним, без ослабления primary path;
+- default without further scheduling trigger: остаётся здесь как approved insertion candidate, не начинается вне очереди.
 
 ## OTP resend + timer
 

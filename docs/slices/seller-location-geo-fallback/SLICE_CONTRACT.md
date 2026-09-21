@@ -1,6 +1,11 @@
-# Seller Location geo fallback — proposed S8 revision
+# Seller Location geo fallback — approved S8 revision
 
-**Status:** `PROPOSED — BLOCKED ON CLOSED-CONTRACT REVISION APPROVAL`
+**Status:** `APPROVED — S8 REVISION ACCEPTED, AWAITING EXECUTION_PLAN SCHEDULING`
+
+**Approved:** 2026-09-22, Product Owner (RashRosh), in-conversation approval of Section 0's STOP write-up. Sections
+1–8 below are accepted as the Slice Contract content for this capability. Implementation still does not start
+until `EXECUTION_PLAN.md` actually schedules this slice at a re-evaluation gate — see that file's `INSERTION
+CANDIDATES` entry for current placement.
 
 **Base product checkpoint:** `v0.0.24-seller-entry`
 
@@ -8,7 +13,10 @@
 
 **Source:** UX follow-up spot-check, `docs/product/UX_REFERENCE_INDEX.md` (2026-09-21), finding #1 of the "Карта пути KAIDA" walkthrough artifact.
 
-This document is not an approved Slice Contract yet. Section 0 is the `PROJECT_RULES.md` §4 STOP write-up required before any closed contract may be revised. Sections 1+ are a draft of what the Slice Contract would contain **if** the revision is approved. No implementation may start from this document until Product Owner approval changes its Status line.
+Section 0 is the `PROJECT_RULES.md` §4 STOP write-up required before any closed contract may be revised; it has
+been reviewed and approved. Sections 1–8 are the accepted Slice Contract content. No implementation may start
+until `EXECUTION_PLAN.md` places this slice in the active queue — approval of the contract and scheduling of the
+work are two separate steps.
 
 ## 0. STOP — closed-contract revision request
 
@@ -37,6 +45,8 @@ Both sources also independently document "explain what access is for, before the
 
 This is deliberately the leaner option: it reduces this proposal's own risk profile (no new external service, no SDK) instead of adding one, and it solves the actual problem from the Youla precedent — a Seller can do this from anywhere, not only standing at the sales point.
 
+**Third convergent source (2026-09-22):** the KAIDA wireframe pass commissioned per `docs/product/WIREFRAME_BRIEF.md` independently arrived at the same mechanism — screen `4e` ("1b · Ссылка на карту"): paste a 2ГИС/Google Maps/Yandex Maps link into one field, client-side parse to a coordinate preview, explicit "Это верное место?" confirm before save, and an unparseable-input path that falls back to the on-site browser action ("попросим прийти на точку и нажать здесь"). See `docs/product/UX_REFERENCE_INDEX.md`, "Follow-up spot-check (2026-09-22)", finding #2. This is advisory design evidence, not an approval — it does not change the Status line below.
+
 **Consequences:**
 
 - S8 §11–12 must be revised to permit this second, manual coordinate-setting path;
@@ -46,22 +56,22 @@ This is deliberately the leaner option: it reduces this proposal's own risk prof
 
 **Which slices/modules are affected:** `S8-location-geo` (contract itself), `Locations` module (new use-case), Seller `/seller` UI (new control), possibly `Issue #36` Seller Trading Points card workspace (the natural UI location for this control now that Locations get their own cards) — this proposal is written to compose with #36, not replace it.
 
-**Decision needed:** Product Owner reviews this section and either approves a revision (which then unblocks sections 1+ below into a real Slice Contract) or rejects/defers it, in which case S8 stays exactly as closed today and this file stays `PROPOSED — BLOCKED`.
+**Decision:** approved 2026-09-22 (see Status line above). S8 §11–12 are revised as described; sections 1–8 below are the accepted contract content.
 
 ---
 
-## 1. User task (draft, contingent on approval)
+## 1. User task
 
 A Seller who cannot or does not want to grant browser geolocation while physically at the sales point can still set that Location's coordinates through a manual alternative, without the explicit on-site browser action being removed as the primary path.
 
-## 2. Scope (draft)
+## 2. Scope
 
 - existing explicit browser-only geolocation action (S8) remains unchanged and remains the recommended/primary path, always shown first/most prominent;
 - a manual fallback (paste coordinates or a maps-service link into one text field, client-side parsed, explicit confirm) becomes available alongside it, not gated behind a prior denial — a Seller who already knows they're off-site shouldn't be forced through a doomed permission prompt first;
 - the fallback requires an explicit Seller confirm action to save a point — no silent/automatic coordinate assignment from address text or from the pasted value without review;
 - owner-scoped mutation, validation ranges (`-90..90` / `-180..180`), pair-consistency, and the public Search privacy boundary (no raw geo in buyer-facing API) carry over unchanged from S8.
 
-## 3. Explicit out of scope (draft)
+## 3. Explicit out of scope
 
 - removing or weakening the existing explicit browser-only action;
 - reverse/forward geocoding or automatic address-to-coordinate conversion (stays out per UX2 and S8 boundaries) — the Seller supplies the coordinate value themselves via a tool of their choosing, KAIDA never calls a geocoding service;
@@ -70,14 +80,14 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 - changing Location identity fields (name/type/address) — that's Issue #36's scope;
 - Market/MarketPlace scheme (Issue #10).
 
-## 4. Closed contracts used / touched (draft)
+## 4. Closed contracts used / touched
 
 - **S8 Location Geo** — touched, as described in Section 0.
 - **S3 Seller/Location** — unchanged; still owner-scoped, still no coordinates at setup time.
 - **UX1D §22** — MVP map-provider boundary (2ГИС deeplink only, no SDK/API key/server-side call) is preserved, not touched — the chosen mechanism deliberately avoids needing any map provider at all.
 - **Design System §15** — "auto geolocation без explicit intent" stays forbidden; the fallback still requires an explicit Seller confirm action, just not necessarily the browser geolocation API.
 
-## 5. Risk flags (draft)
+## 5. Risk flags
 
 - **DB migration:** NO — same `latitude`/`longitude` columns, same constraints.
 - **Public API:** YES — new/changed owner-scoped mutation path accepting a manually-supplied point.
@@ -86,7 +96,7 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 - **Data loss:** NO.
 - **External service:** NO — client-side text/URL parsing only; no maps SDK, API key, or network call to any maps/geocoding provider.
 
-## 6. Acceptance criteria (draft, contingent on approval)
+## 6. Acceptance criteria
 
 1. The existing explicit browser-only geolocation action remains the primary, most visually prominent way to set a Location's geo point; the manual fallback is a secondary, clearly-labeled action, not equal-weight with it.
 2. The manual fallback is available whenever the Seller wants it — not gated behind first attempting and failing the browser action; a Seller who already knows they're off-site can go straight to it.
@@ -101,7 +111,7 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 11. No maps SDK, API key, iframe embed, or network call to any external maps/geocoding service is introduced anywhere in this flow.
 12. UI has no horizontal overflow and keeps minimum `44x44px` touch targets on `320/360/390/768/1024/1440px`.
 
-## 7. Automated verification plan (draft)
+## 7. Automated verification plan
 
 - **Unit:** parser for the paste field — valid `lat, lng` pairs (with/without spaces, with/without a trailing label), recognized link shapes from at least 2ГИС/Google Maps/Yandex Maps URL patterns, out-of-range values, malformed/unrecognized input, empty input.
 - **Integration:** owner-scoped manual-point mutation — valid save, invalid/out-of-range rejection, foreign-owner rejection, same-pair idempotent re-save; direct `/api/search` assertion that no raw geo/lat/lng leaks for a manually-set Location (mirrors existing S8 privacy test, run again against this new write path).
@@ -109,7 +119,7 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 - **Regression:** existing S8 E2E/integration/migration suites unchanged and passing.
 - One full branch CI on the final executable SHA after targeted proof.
 
-## 8. Manual acceptance scenario (draft)
+## 8. Manual acceptance scenario
 
 1. As a Seller with an existing Location and no saved geo, open the Location's geo control and confirm the browser-only action is still the prominent primary option.
 2. Confirm a secondary "enter manually" action is visible without first triggering/denying the browser prompt.
