@@ -6,6 +6,10 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000881' : '+77000000891';
 }
 
+function anonymousFlowPhoneFor(projectName: string) {
+  return projectName === 'mobile' ? '+77000000885' : '+77000000895';
+}
+
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
 }
@@ -66,6 +70,49 @@ test('buyer interest survives reload and a later login, then can be removed', as
     await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
     await card.getByRole('button', { name: 'В интересах' }).click();
     await expect(card.getByRole('button', { name: 'Добавить в интересы' })).toHaveAttribute('aria-pressed', 'false');
+  } finally {
+    await cleanup(phone);
+  }
+});
+
+test('anonymous buyer sees the interest control, cancelling auth makes no API call, and completing auth auto-applies the original click', async ({ page }, testInfo) => {
+  const phone = anonymousFlowPhoneFor(testInfo.project.name);
+  await cleanup(phone);
+  try {
+    await page.goto('/');
+    const card = await searchSeedProduct(page);
+    const heart = card.getByRole('button', { name: /Добавить в интересы|В интересах|Сохраняем/ });
+    await expect(heart).toBeVisible();
+    await expect(heart).toHaveAttribute('aria-pressed', 'false');
+
+    const interestRequests: string[] = [];
+    page.on('request', (request) => {
+      if (request.url().includes('/api/interests')) interestRequests.push(request.url());
+    });
+
+    const dialog = page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' });
+
+    await heart.click();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText('Чтобы сохранить интерес к предложению, войдите по номеру телефона.')).toBeVisible();
+
+    await dialog.getByRole('button', { name: 'Закрыть' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(heart).toHaveAttribute('aria-pressed', 'false');
+    expect(interestRequests).toHaveLength(0);
+
+    await heart.click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
+    const requestResponse = page.waitForResponse((response) => response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST');
+    await dialog.getByRole('button', { name: 'Получить код' }).click();
+    const requested = await (await requestResponse).json();
+    await dialog.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
+    await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
+    expect(interestRequests.some((url) => /\/api\/interests\/[^/]+$/.test(url))).toBe(true);
   } finally {
     await cleanup(phone);
   }

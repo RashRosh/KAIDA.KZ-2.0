@@ -17,6 +17,7 @@ type AuthModalProps = {
   open: boolean;
   onClose: () => void;
   onAuthenticated: (user: User) => void;
+  description?: string;
 };
 
 function ShieldIcon() {
@@ -52,7 +53,9 @@ function ArrowIcon() {
   );
 }
 
-export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
+const DEFAULT_DESCRIPTION = 'Введите номер телефона — получите код подтверждения.';
+
+export function AuthModal({ open, onClose, onAuthenticated, description = DEFAULT_DESCRIPTION }: AuthModalProps) {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [canonicalPhone, setCanonicalPhone] = useState('');
@@ -168,7 +171,7 @@ export function AuthModal({ open, onClose, onAuthenticated }: AuthModalProps) {
 
         {step === 'phone' ? (
           <>
-            <p id="auth-description" className={styles.description}>Введите номер телефона — получите код подтверждения.</p>
+            <p id="auth-description" className={styles.description}>{description}</p>
             <form className={styles.form} onSubmit={requestCode} noValidate>
               <div>
                 <label className={styles.label} htmlFor="auth-phone">Телефон</label>
