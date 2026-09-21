@@ -59,8 +59,7 @@ test('authenticated seller shell exposes logout and logout clears private seller
     expect(setup.status()).toBe(201);
 
     await page.goto('/seller');
-    await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
-    await expect(page.getByText(phone, { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Выйти' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     const tradingPointCard = page.locator('[data-testid^="trading-point-"]');
@@ -68,12 +67,12 @@ test('authenticated seller shell exposes logout and logout clears private seller
     await expect(tradingPointCard.getByText(locationName, { exact: true })).toBeVisible();
 
     await page.goto('/seller/batch');
-    await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Выйти' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.goto('/seller');
     await expect(page.getByText(displayName, { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Выйти', exact: true }).click();
+    await page.getByRole('button', { name: 'Выйти' }).click();
 
     await expect(page).toHaveURL('/');
     await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();

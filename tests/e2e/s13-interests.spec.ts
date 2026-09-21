@@ -35,7 +35,7 @@ async function login(page: Page, phone: string) {
   await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page).toHaveURL('/');
-  await expect(page.getByText(phone, { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
 }
 
 async function searchSeedProduct(page: Page) {

@@ -90,14 +90,15 @@ test('anonymous search, modal login, persistence, search after login and logout'
     await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(dialog).toBeHidden();
     await expect(page).toHaveURL('/');
-    await expect(page.getByText(phone, { exact: true })).toBeVisible();
+    const loggedInButton = page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) });
+    await expect(loggedInButton).toBeVisible();
 
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 
     await page.reload();
-    await expect(page.getByText(phone, { exact: true })).toBeVisible();
+    await expect(loggedInButton).toBeVisible();
     const cookies = await page.context().cookies();
     const sessionCookie = cookies.find((cookie) => cookie.name === 'kaida_session');
     expect(sessionCookie).toBeTruthy();
@@ -109,7 +110,7 @@ test('anonymous search, modal login, persistence, search after login and logout'
     const reopened = await browser.newContext({ storageState });
     const reopenedPage = await reopened.newPage();
     await reopenedPage.goto('/');
-    await expect(reopenedPage.getByText(phone, { exact: true })).toBeVisible();
+    await expect(reopenedPage.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
     await reopened.close();
 
     await page.getByRole('button', { name: 'Выйти' }).click();

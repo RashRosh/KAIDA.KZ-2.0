@@ -84,6 +84,7 @@
 
 .headerSearchField input {
   width: 100%;
+  min-width: 0;
   height: 44px;
   min-height: 44px;
   border: 1px solid var(--border-strong);
