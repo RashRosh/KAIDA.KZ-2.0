@@ -24,10 +24,10 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.24-seller-entry`;
-- checkpoint commit: `28eae6d64fac92b71339b3ae2f5235040f75b447`;
-- Seller Entry / contextual auth — CLOSED;
-- ранее закрыты `S0–S13`, `UX1A`, `UX1A.1`, `UX1A.2`, `UX1B`, `UX1C`, `UX1D`, `UX2`, `UX2A`, Mandatory Offer Price.
+- tag: `v0.0.25-seller-trading-points`;
+- checkpoint commit: `9bf77301eb9aea64ef8a2018dfc219dd1602efff`;
+- Seller Trading Points Workspace (#36) — CLOSED: card-based multiple Locations, per-card identity edit без изменения geo, unified create flow, explicit Location choice при 2+ assignable точках для single/batch product creation;
+- ранее закрыты `S0–S13`, `UX1A`, `UX1A.1`, `UX1A.2`, `UX1B`, `UX1C`, `UX1D`, `UX2`, `UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35).
 
 Текущий `main` может содержать более поздние docs/tooling maintenance commits без нового product checkpoint.
 
@@ -37,42 +37,40 @@
 
 # NEXT
 
-## #36 — Seller Trading Points Workspace
+## Issue #27 — Seller Offer Workspace
 
-Статус: **COMMITTED product slice**.
+Статус: **COMMITTED product slice**, следующий по очереди после закрытого #36.
 
 Следующая отдельная работа:
 
-- открыть Issue #36;
-- проверить relevant closed contracts, включая закрытый Seller Entry #35;
+- открыть Issue #27;
+- проверить relevant closed contracts, включая закрытый Seller Trading Points (#36) и его multiple-Location semantics;
 - подготовить compact Slice Contract отдельным проходом;
 - не начинать implementation до approval этого contract.
 
-Подробности: GitHub Issue #36.
+Подробности: GitHub Issue #27.
 
 ---
 
-# COMMITTED — после #36
+# COMMITTED — после #27
 
 Порядок выполняется сверху вниз. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
 |---|---|---|
-| 1 | Seller Offer Workspace | Issue #27 |
-| 2 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
-| 3 | Seller Freshness Reminder | Issue #32 |
-| 4 | Nearby result-first correction | Issue #34 |
-| 5 | Search Sorting A — freshness / proximity | Issue #12 |
-| 6 | Search Sorting B — price | Issue #12 |
-| 7 | M1 — real Offer media | Feature Map / future Slice Contract |
-| 8 | S14 — Discovery / `Для вас` | Feature Map |
-| 9 | S15 — Search learning | Feature Map |
-| 10 | S16 — Operations + MVP boundary review | Feature Map |
+| 1 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
+| 2 | Seller Freshness Reminder | Issue #32 |
+| 3 | Nearby result-first correction | Issue #34 |
+| 4 | Search Sorting A — freshness / proximity | Issue #12 |
+| 5 | Search Sorting B — price | Issue #12 |
+| 6 | M1 — real Offer media | Feature Map / future Slice Contract |
+| 7 | S14 — Discovery / `Для вас` | Feature Map |
+| 8 | S15 — Search learning | Feature Map |
+| 9 | S16 — Operations + MVP boundary review | Feature Map |
 
 ### Ключевые dependencies
 
-- Seller Entry закрыт и является prerequisite для перестройки seller workspace.
-- Trading Points Workspace должен существовать до полноценного Offer Workspace с multiple Locations.
+- Seller Entry и Trading Points Workspace закрыты и являются prerequisite для Seller Offer Workspace (#27, текущий NEXT).
 - Freshness Policy и Reminder идут после Offer Workspace, потому что reconfirmation должен жить в нормальном seller UX.
 - Search Sorting выполняется после Freshness Policy, чтобы sorting не закрепил устаревшую ranking semantics.
 - M1 вводит настоящие seller-provided Offer media end-to-end; временные pre-MVP visuals M1 не заменяют.
