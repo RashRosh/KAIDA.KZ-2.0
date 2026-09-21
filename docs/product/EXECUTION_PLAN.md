@@ -111,6 +111,32 @@ Capability известна, но отдельный committed slice ещё не
 - до этого нельзя показывать fake rating/reviews;
 - если необходимость появится до MVP boundary — оформить Issue и insertion decision.
 
+## Seller Location geo fallback (proposed S8 revision)
+
+Capability известна из UX follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21): текущий S8 не даёт альтернативы browser-only geolocation «на месте», если доступ отклонён/недоступен. Draft Slice Contract подготовлен: `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (status: `PROPOSED — BLOCKED`).
+
+- earliest: не раньше explicit Product Owner approval ревизии закрытого S8 (`PROJECT_RULES.md` §4 STOP procedure);
+- trigger: Product Owner рассматривает draft contract и явно утверждает или отклоняет ревизию S8;
+- direction: сохранить existing browser-only action как primary path, добавить fallback только при denial/unavailability;
+- default without trigger: остаётся unscheduled, S8 behavior не меняется.
+
+## OTP resend + timer
+
+Capability из второго follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21): `AuthModal.tsx` не имеет вообще никакого resend-механизма. UX-паттерн (кнопка + короткий таймер + одинаковый код при повторе) задокументирован в корпусе, но `S2-auth/FEATURE_SPEC.md` explicitly выносит `OTP resend throttling` / `resend policy` / `delivery failure/retry policy` за scope S2.
+
+- earliest: unscheduled — требует explicit product/security решения, не только UI;
+- trigger: Product Owner выбирает между (a) naive resend поверх существующего `/api/auth/otp/request` без throttling — тот же класс принятого pre-launch допущения, что и видимый test OTP код, или (b) отдельный slice с реальной resend/throttling policy ближе к launch;
+- default without trigger: остаётся unscheduled.
+
+## Unify buyer Search entry points
+
+Capability из того же follow-up spot-check: `HeaderSearch` (full-page GET) и `SearchForm` (client-side fetch) на `/` ведут себя по-разному, что совпадает с именованным антипаттерном из UX-референса. Не задевает closed UX2A/App Shell acceptance criteria (те фиксируют только visual submit pattern).
+
+- earliest: unscheduled — не в COMMITTED очереди;
+- trigger: Product Owner decision о приоритете этой чистки относительно текущей COMMITTED очереди;
+- direction: унифицировать submission behavior (вероятно — оба поля через client-side fetch), не меняя closed Search semantics (S0/S6/S7/S9) или UX2A visual submit pattern;
+- default without trigger: остаётся unscheduled UNPLACED GAP.
+
 ---
 
 # LATER / dependency-gated

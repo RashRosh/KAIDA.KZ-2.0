@@ -8,7 +8,9 @@ This file maps external UX reference material to KAIDA.KZ UI areas. It is **not*
 
 Reference corpus folder supplied by Product Owner:
 
-https://drive.google.com/drive/folders/1Yb8ZWU5JnyzL4nj_7LS1SxRiW7tTEjk-?usp=sharing
+https://drive.google.com/drive/folders/1y0IGHOKeGmOcgr7fMeO_ZITSDJyUozUa
+
+(The link previously recorded here — `1Yb8ZWU5JnyzL4nj_7LS1SxRiW7tTEjk-` — resolves to an empty shortcut folder named `UX-UI`; the actual 26-file corpus lives at the link above, titled `UX-UI — гайдлайны e-commerce`. Corrected 2026-09-21 after a broken-link check.)
 
 ## How agents must use this index
 
@@ -53,6 +55,8 @@ Do not copy automatically:
 - catalog adjacency assumptions;
 - any behavior that changes explicit Search submit, accessibility, geo/privacy or current app-shell contracts.
 
+**Follow-up spot-check (2026-09-21):** the reference explicitly names divergent multiple search boxes on one page as an anti-pattern (❌ re:Store example: "из одной строки поиска можно сделать аж три"). Current KAIDA implementation has two search inputs on `/` with different submit behavior (`HeaderSearch` full-page GET reload vs. `SearchForm` client-side fetch). This is a direct, named match to the documented anti-pattern, not an inference — see `GAP` below.
+
 ## Search sorting
 
 Primary reference:
@@ -77,6 +81,8 @@ Primary reference:
   https://drive.google.com/file/d/1Fyu6KRfQ8bQlY9hCxMGMhg2dOHsqvXs-/view
 
 Use only when a filter slice is actually scheduled. The current product decision is to avoid a giant speculative filter drawer. True filters require supporting data and demonstrated usefulness.
+
+**Follow-up spot-check (2026-09-21, second pass) — zero-result search recovery:** looked for a "no results" / empty-state recovery pattern (e.g. "expand radius", "show nearby anyway") in this reference. The only matching section is "Сброс фильтров" (§10), which is entirely about resetting already-applied filter chips — not applicable, since KAIDA's `SearchForm` has no filters to reset. No other indexed file in this corpus covers a plain query-search zero-result state. **Weak/no corpus evidence** — not classified `ADAPT`; recorded only as an unplaced observation worth revisiting once Search Sorting/filters (Issue #12) actually ships and there is a filter state to recover from.
 
 ## Catalog / navigation
 
@@ -163,6 +169,23 @@ Reference:
 
 Use only when a scheduled slice actually exposes richer Offer/Product descriptions. Do not invent attributes/schema from generic e-commerce guidance.
 
+## Favorites / Interests visibility
+
+Reference (newly indexed 2026-09-21, previously not mapped in this file):
+
+- `Проектируем работу с Избранным в интернет-магазине 117 гайдлайнов.md`
+  https://drive.google.com/file/d/1b6ycxXqcQGlvyjkCUIAvCeiweeDGCgwc/view
+
+Use for:
+
+- whether/how the save-for-later action is exposed to an unauthenticated visitor;
+- non-blocking authentication nudges vs. hiding the affordance entirely;
+- icon placement, hover/tap feedback, empty-state presentation.
+
+The reference marks "add to favorites requires login" as ❌ and "visible icon + non-blocking sign-in prompt" as ✅.
+
+KAIDA adaptation — does **not** require touching the closed S13 Interests API/DB contract (`docs/slices/S13-interests/SLICE_CONTRACT.md` keeps anonymous requests at `401`, no anonymous read/write): the button can be rendered to a guest at the UI layer and, on click while anonymous, open the existing Auth modal with a `buyer-interest` caller intent — the same contextual-auth pattern already approved for `Продавцу` in Seller Entry (#35), not a new auth mechanism. This is a presentation-layer `ADAPT`, not a business-contract `GAP`.
+
 ## Reviews / rating
 
 Reference:
@@ -191,6 +214,10 @@ Use for:
 
 Preserve S2 API/session/security semantics. Auth reference cannot add new auth methods or weaken current security/anti-abuse boundaries by itself.
 
+**Follow-up spot-check (2026-09-21, second pass):** checked against `AuthModal.tsx` directly — no matches for resend, timer or consent text anywhere in the file. Reference §13 "Повторный запрос кода" gives named ✅/❌ patterns: resend must exist, with a short (≤~1 min) countdown timer, correctly re-enabling after expiry, confirming the resend happened, and reusing the same code rather than issuing a second different one. Classified `GAP`, but implementing it depends on a prerequisite that `S2-auth/FEATURE_SPEC.md` explicitly lists as out of scope: "OTP resend throttling" / "resend policy" / "delivery failure/retry policy" (§ out-of-scope list, also repeated under pre-launch hardening: "resend policy", "delivery failure/retry policy"). A naive resend button could technically re-call the existing `/api/auth/otp/request` endpoint today with no new API, but would ship with no throttling — same category of accepted pre-launch gap as the already-disclosed visible test OTP code, not a silent regression. Needs an explicit scoped decision (ship naive resend now vs. wait for a real resend/throttling slice), not a default UI tweak.
+
+Reference §6 "Согласие с политиками" (consent text near the submit button, no checkbox needed, short, links open in a new tab) is separately `GAP`-behind-a-`GAP`: checked the app tree, there is no Privacy/Terms page to link to yet (`src/app/**/{privacy,terms,policy}*` — none found). This pattern cannot be adopted even at the presentation layer until such a page exists; not actionable now.
+
 ## Seller first-run / onboarding
 
 Reference:
@@ -206,6 +233,16 @@ Use as heuristic for:
 - preserving user intent across setup.
 
 Do not copy mobile app-tour/carousel mechanics literally into the web seller workspace. Current seller direction is defined by Issues #35, #36 and #27.
+
+**Seller Location geo — follow-up spot-check (2026-09-21):** the same reference's "Запросы доступа" section (permission-request patterns) is directly relevant to S8 Location Geo, not just generic onboarding:
+
+- request access with context/explanation before the system prompt (KAIDA already does this via the "на месте" helper text — `KEEP`);
+- named ✅ example **Юла** ("Если пользователь решил не предоставлять доступ к геолокации, предоставьте ему альтернативные способы указания местоположения") — Youla is a directly comparable local-classifieds marketplace with physical seller locations, not a generic e-commerce checkout;
+- named ✅ example Wildberries for "отработка события отказа" (explain how to grant access later after a denial).
+
+Independently, `Проектируем интерфейс оформления заказа выбор адреса и времени доставки. 162 гайдлайна.md` (otherwise out of scope per this index's cart/checkout exclusion below) documents the same pattern for delivery-address geolocation: geolocation is offered as a time-saving accelerator alongside manual entry, requested only at the relevant step, and denial is handled gracefully rather than blocking the task.
+
+Current KAIDA S8/UX2 implementation requires the seller to be physically at the sales point with no manual/map fallback if geolocation is denied or unavailable. Two independent sources — one a directly comparable competitor — converge on the same alternative-entry recommendation. This is classified `ADAPT` on UX merits, but implementing it is a revision of the closed S8 contract (`docs/slices/S8-location-geo/IMPLEMENTATION_CONTRACT.md` §11–12: browser-only explicit action, no map, no manual coordinates) and requires the `PROJECT_RULES.md` §4 STOP-before-revising-closed-contract procedure and explicit Product Owner sign-off before any Slice Contract adopts it.
 
 ## Seller contacts / social / messengers
 
@@ -274,6 +311,20 @@ No additional Product Owner decision from this audit is required to prepare the 
 
 `UX-OBS-001` in `docs/UX_BACKLOG.md` remains a non-blocking observation about controlled choice vs free input. It should be evaluated only when a relevant seller form Slice Contract makes the decision concrete.
 
+## Follow-up spot-check (2026-09-21)
+
+Ad-hoc spot-check, not a full Issue-driven re-audit like #37. Triggered by a code-based UX walkthrough artifact ("Карта пути KAIDA", П1/П2) prepared ahead of the Issue #36 (Seller Trading Points) Slice Contract, then cross-checked against this corpus at the Product Owner's explicit request rather than accepted as the agent's own unverified opinion. The walkthrough had 6 findings; one (false choice on seller workspace landing) was already covered by the Issue #36 direction itself and is not repeated here. All other 5 were run against this corpus in two passes (2026-09-21).
+
+| # | Finding | Classification | Touches closed contract? |
+|---|---|---|---|
+| 1 | Mandatory on-site-only geolocation for Location setup, no manual/map fallback | `ADAPT` — two independent sources, incl. a directly comparable competitor (Youla) | **YES — S8.** `IMPLEMENTATION_CONTRACT.md` §11–12 fixes browser-only explicit action, no map, no manual coordinates as closed behavior. STOP procedure required; see `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (proposal, blocked on Product Owner approval). |
+| 2 | Double SellerChangeSet confirmation for trivial seller edits (no quick "confirm as-is") | Not classified — corpus has no e-commerce-seller-confirmation-flow material; the closest general content (cognitive-bias status-quo/consistency sections) doesn't address this question either way | N/A — architectural tradeoff already documented in `docs/DESIGN_SYSTEM.md` §9 (ChangeSet cannot be bypassed); any quick-confirm affordance would sit inside that boundary, not revise it |
+| 3 | Buyer interest ("heart") button invisible to guests | `ADAPT` — named ❌/✅ pattern in Favorites reference | **NO.** Checked `S13-interests/SLICE_CONTRACT.md` §9 directly: "Exact visual placement is implementation detail." Anonymous API access stays `401`/no read-write either way — pure presentation-layer fix. |
+| 4 | Two search inputs on `/` with different submit behavior (GET reload vs. client fetch) | Direct match to a named anti-pattern in the Search reference (❌ re:Store example) | **NO.** Checked `UX2A-header-responsive/SLICE_CONTRACT.md`: its closed acceptance criteria fix the header submit's *visual pattern* (icon-only square arrow, 44×44px target) only — not the reload-vs-fetch submission mechanism. Currently an **unplaced observation** per `EXECUTION_PLAN.md`'s own UNPLACED GAP rule: not in COMMITTED, INSERTION CANDIDATES or Feature Map. |
+| 5 | Search "учитывать моё местоположение" geo toggle resets every page load | Weak/no evidence — the one relevant match (`Проектируем сортировку`, "Память сортировки") is explicitly flagged by its own author as "спорный момент" (debatable), not a recommended pattern | Not evaluated further; insufficient corpus support to classify as `ADAPT` or `REJECT` |
+
+Only finding 1 requires the `PROJECT_RULES.md` §4 STOP procedure before any Slice Contract can adopt it — findings 3 and 4 are implementation-level and don't need Product Owner contract-revision sign-off, only ordinary scheduling. Nothing here was adopted into an open Slice Contract by this spot-check alone; recorded as advisory evidence per this file's own `KEEP/ADAPT/REJECT/GAP` rule, not a parallel roadmap. Findings 1 and 3 also got draft Slice Contracts prepared under `docs/slices/` (see below) — both require explicit approval before implementation, per `docs/product/EXECUTION_PLAN.md`'s "не начинать implementation до approval".
+
 ## Audit lifecycle
 
-Issue #37 and PR #40 contain the maintenance evidence. Live gate status and current execution order belong to `docs/product/EXECUTION_PLAN.md`, not this index.
+Issue #37 and PR #40 contain the maintenance evidence for the original audit. Live gate status and current execution order belong to `docs/product/EXECUTION_PLAN.md`, not this index.
