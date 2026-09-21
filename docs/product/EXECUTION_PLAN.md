@@ -24,10 +24,10 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.25-seller-trading-points`;
-- checkpoint commit: `9bf77301eb9aea64ef8a2018dfc219dd1602efff`;
-- Seller Trading Points Workspace (#36) — CLOSED: card-based multiple Locations, per-card identity edit без изменения geo, unified create flow, explicit Location choice при 2+ assignable точках для single/batch product creation;
-- ранее закрыты `S0–S13`, `UX1A`, `UX1A.1`, `UX1A.2`, `UX1B`, `UX1C`, `UX1D`, `UX2`, `UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35).
+- tag: `v0.0.26-buyer-interest-guest-visibility`;
+- checkpoint commit: `f7e4b08c06f97dd8878666f726a5aadd93240d48`;
+- Buyer interest ("heart") visibility for guests — CLOSED: anonymous buyers see the same interest control as authenticated buyers, click opens the shared Auth modal with context, interest is applied automatically after successful auth, no anonymous Interests API call; folded in the same checkpoint after manual acceptance surfaced three adjacent fixes — header identity indicator (logout icon button instead of raw phone number), Auth modal phone input live-formatting, Nearby dropping its redundant intro block once real results load in favor of a results header + refresh control;
+- ранее закрыты `S0–S13`, `UX1A`, `UX1A.1`, `UX1A.2`, `UX1B`, `UX1C`, `UX1D`, `UX2`, `UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading Points Workspace (#36).
 
 Текущий `main` может содержать более поздние docs/tooling maintenance commits без нового product checkpoint.
 
