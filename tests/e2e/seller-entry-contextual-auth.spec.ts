@@ -87,7 +87,7 @@ test('seller-intent cancel keeps buyer context and cannot leak into ordinary log
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await authenticateInOpenModal(page, phone);
     await expect(page).toHaveURL(buyerUrl);
-    await expect(page.getByText(phone, { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
   } finally {
     await cleanup(phone);
   }
@@ -121,7 +121,7 @@ test('authenticated product-first flow preserves input through required setup be
   try {
     await authenticateThroughApi(page, phone);
     await page.goto('/');
-    await expect(page.getByText(phone, { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
 
     const nav = await openPrimaryNav(page);
     await nav.getByRole('link', { name: 'Продавцу', exact: true }).click();

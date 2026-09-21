@@ -55,6 +55,16 @@ function ArrowIcon() {
 
 const DEFAULT_DESCRIPTION = 'Введите номер телефона — получите код подтверждения.';
 
+// Live display grouping only; normalizeKzPhone already strips spaces/()/- server-side.
+function formatKzPhoneInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  const national = (digits.startsWith('8') || digits.startsWith('7') ? `7${digits.slice(1)}` : `7${digits}`).slice(0, 11);
+  const rest = national.slice(1);
+  const groups = [rest.slice(0, 3), rest.slice(3, 6), rest.slice(6, 8), rest.slice(8, 10)].filter(Boolean);
+  return groups.length ? `+7 ${groups.join(' ')}` : '+7';
+}
+
 export function AuthModal({ open, onClose, onAuthenticated, description = DEFAULT_DESCRIPTION }: AuthModalProps) {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
@@ -182,7 +192,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
                     type="tel"
                     autoComplete="tel"
                     value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
+                    onChange={(event) => setPhone(formatKzPhoneInput(event.target.value))}
                     placeholder="+7 700 123 45 67"
                     disabled={loading}
                     autoFocus

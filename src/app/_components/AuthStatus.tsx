@@ -46,12 +46,12 @@ export function AuthStatus({ user, loginOpen, loginTriggerRef, onLogin, onLogged
     <div className={styles.group}>
       {user === undefined ? <span className={styles.authMuted}>Проверяем вход…</span> : user ? (
         <div className={styles.authRow}>
-          <span className={styles.phone}>{user.phone}</span>
           <button
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            aria-label={loggingOut ? 'Выходим…' : 'Выйти'}
+            title={user.phone}
+            aria-label={loggingOut ? 'Выходим…' : `Выйти (${user.phone})`}
           >
             <AuthIcon type="logout" />
             <span>{loggingOut ? 'Выходим…' : 'Выйти'}</span>

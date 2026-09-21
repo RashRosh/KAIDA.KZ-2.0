@@ -68,23 +68,21 @@ test('UX2A keeps authenticated tablet and narrow header usable with one square S
 
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto('/');
-    await expect(page.getByText(PHONE, { exact: true })).toBeVisible();
+    const logoutButton = page.getByRole('button', { name: new RegExp(`^Выйти \\(${PHONE.replace('+', '\\+')}\\)$`) });
+    await expect(logoutButton).toBeVisible();
 
     const tablet = await expectSearchGeometry(page);
     const searchBox = await tablet.search.boundingBox();
-    const phoneBox = await page.getByText(PHONE, { exact: true }).boundingBox();
-    const logoutBox = await page.getByRole('button', { name: 'Выйти', exact: true }).boundingBox();
+    const logoutBox = await logoutButton.boundingBox();
     expect(searchBox).not.toBeNull();
-    expect(phoneBox).not.toBeNull();
     expect(logoutBox).not.toBeNull();
-    expect(overlaps(searchBox!, phoneBox!)).toBe(false);
     expect(overlaps(searchBox!, logoutBox!)).toBe(false);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.setViewportSize({ width: 390, height: 844 });
     const mobile = await expectSearchGeometry(page);
     const mobileSearchBox = await mobile.search.boundingBox();
-    const mobileLogoutBox = await page.getByRole('button', { name: 'Выйти', exact: true }).boundingBox();
+    const mobileLogoutBox = await logoutButton.boundingBox();
     const menuBox = await page.getByRole('button', { name: 'Открыть меню', exact: true }).boundingBox();
     expect(mobileSearchBox).not.toBeNull();
     expect(mobileLogoutBox).not.toBeNull();

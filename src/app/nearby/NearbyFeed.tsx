@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { nearbyResponseSchema, type NearbyResponse } from '@/modules/discovery/contracts/discovery.contract';
 import { buyerLocationSchema, type BuyerLocation } from '@/modules/search/contracts/buyer-location.contract';
@@ -11,6 +12,15 @@ type NearbyState =
   | { kind: 'success'; result: NearbyResponse };
 
 const NEARBY_NAV_INTENT_KEY = 'kaida:nearby-nav-intent';
+
+function RefreshIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M21 12a9 9 0 1 1-3-6.7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 3v6h-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export function NearbyFeed() {
   const [state, setState] = useState<NearbyState>({ kind: 'initial' });
@@ -98,15 +108,28 @@ export function NearbyFeed() {
 
   return (
     <section className={styles.searchArea} aria-label="Товары рядом">
-      <button
-        type="button"
-        className={styles.nearbyButton}
-        disabled={busy}
-        onClick={requestNearby}
-      >
-        {buttonLabel}
-      </button>
-      <p className={styles.help}>Местоположение используется только для этого запроса и не сохраняется.</p>
+      {!hasResults && (
+        <div className={styles.intro}>
+          <p className={styles.eyebrow}>Рядом</p>
+          <h1>Что есть рядом?</h1>
+          <p className={styles.description}>Посмотрите актуальные предложения поблизости без поискового запроса.</p>
+          <Link href="/" className={styles.secondaryLink}>Искать конкретный товар</Link>
+        </div>
+      )}
+
+      {!hasResults && (
+        <>
+          <button
+            type="button"
+            className={styles.nearbyButton}
+            disabled={busy}
+            onClick={requestNearby}
+          >
+            {buttonLabel}
+          </button>
+          <p className={styles.help}>Местоположение используется только для этого запроса и не сохраняется.</p>
+        </>
+      )}
 
       {state.kind === 'geo_error' && (
         <p className={styles.error} role="alert">
@@ -129,8 +152,18 @@ export function NearbyFeed() {
         {hasResults && (
           <>
             <div className={styles.resultsHeader}>
-              <h2>Предложения рядом</h2>
+              <h1>Предложения рядом</h1>
               <span className={styles.resultsCount}>({state.result.offers.length})</span>
+              <button
+                type="button"
+                className={styles.refreshButton}
+                disabled={busy}
+                onClick={requestNearby}
+                aria-label={buttonLabel}
+                title={buttonLabel}
+              >
+                <RefreshIcon />
+              </button>
             </div>
             <ul className={styles.offerList} aria-label="Предложения рядом">
               {state.result.offers.map((offer) => (
