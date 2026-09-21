@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import {
   interestResponseSchema,
   interestsResponseSchema,
@@ -10,6 +10,7 @@ import {
   type BuyerLocation,
 } from '@/modules/search/contracts/buyer-location.contract';
 import { searchQuerySchema, searchResponseSchema, type SearchResponse } from '@/modules/search/contracts/search.contract';
+import { AuthModal } from './AuthModal';
 import { OfferCard } from './OfferCard';
 import styles from '../page.module.css';
 
@@ -67,23 +68,29 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
   const [interestsState, setInterestsState] = useState<InterestsState>({ kind: 'loading' });
   const [pendingInterestIds, setPendingInterestIds] = useState<Set<string>>(() => new Set());
   const [interestError, setInterestError] = useState(false);
+  const [interestAuthProductId, setInterestAuthProductId] = useState<string | null>(null);
+  const interestTriggerRef = useRef<HTMLElement | null>(null);
   const pending = useRef(false);
   const input = useRef<HTMLInputElement>(null);
   const loading = state.kind === 'loading';
 
+  const loadInterests = useCallback(async (): Promise<InterestsState> => {
+    try {
+      const response = await fetch('/api/interests', { cache: 'no-store' });
+      if (response.status === 401) return { kind: 'anonymous' };
+      if (!response.ok) return { kind: 'error' };
+      const parsed = interestsResponseSchema.parse(await response.json());
+      return { kind: 'ready', productIds: new Set(parsed.interests.map((interest) => interest.product.id)) };
+    } catch {
+      return { kind: 'error' };
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
-    fetch('/api/interests', { cache: 'no-store' })
-      .then(async (response) => {
-        if (response.status === 401) return { kind: 'anonymous' } as const;
-        if (!response.ok) return { kind: 'error' } as const;
-        const parsed = interestsResponseSchema.parse(await response.json());
-        return { kind: 'ready', productIds: new Set(parsed.interests.map((interest) => interest.product.id)) } as const;
-      })
-      .then((nextState) => { if (active) setInterestsState(nextState); })
-      .catch(() => { if (active) setInterestsState({ kind: 'error' }); });
+    void loadInterests().then((nextState) => { if (active) setInterestsState(nextState); });
     return () => { active = false; };
-  }, []);
+  }, [loadInterests]);
 
   const executeSearch = useCallback(async (rawQuery: string, buyerLocation?: BuyerLocation) => {
     if (pending.current) return;
@@ -190,6 +197,38 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
         return next;
       });
     }
+  }
+
+  function requestInterestAuth(productId: string, event?: ReactMouseEvent<HTMLElement>) {
+    interestTriggerRef.current = event?.currentTarget ?? null;
+    setInterestAuthProductId(productId);
+  }
+
+  function cancelInterestAuth() {
+    setInterestAuthProductId(null);
+    requestAnimationFrame(() => interestTriggerRef.current?.focus());
+  }
+
+  async function completeInterestAuth() {
+    const productId = interestAuthProductId;
+    setInterestAuthProductId(null);
+    if (!productId) return;
+    setInterestError(false);
+    setPendingInterestIds((current) => new Set(current).add(productId));
+    try {
+      const response = await fetch(`/api/interests/${productId}`, { method: 'PUT', cache: 'no-store' });
+      if (!response.ok) throw new Error('Interest unavailable');
+      interestResponseSchema.parse(await response.json());
+    } catch {
+      setInterestError(true);
+    }
+    const refreshed = await loadInterests();
+    setInterestsState(refreshed);
+    setPendingInterestIds((current) => {
+      const next = new Set(current);
+      next.delete(productId);
+      return next;
+    });
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -324,13 +363,27 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
                     pending: pendingInterestIds.has(offer.product.id),
                     onToggle: () => toggleInterest(offer.product.id),
                   }
-                  : undefined;
+                  : interestsState.kind === 'anonymous'
+                    ? {
+                      active: false,
+                      pending: pendingInterestIds.has(offer.product.id),
+                      onToggle: (event?: ReactMouseEvent<HTMLElement>) => requestInterestAuth(offer.product.id, event),
+                    }
+                    : undefined;
                 return <li key={offer.id}><OfferCard offer={offer} interest={interest} /></li>;
               })}
             </ul>
           </>
         )}
       </div>
+      {interestAuthProductId && (
+        <AuthModal
+          open
+          description="Чтобы сохранить интерес к предложению, войдите по номеру телефона."
+          onClose={cancelInterestAuth}
+          onAuthenticated={() => { void completeInterestAuth(); }}
+        />
+      )}
     </section>
   );
 }
