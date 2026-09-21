@@ -1,11 +1,13 @@
 # Seller Location geo fallback — approved S8 revision
 
-**Status:** `APPROVED — S8 REVISION ACCEPTED, AWAITING EXECUTION_PLAN SCHEDULING`
+**Status:** `APPROVED — SCHEDULED IN EXECUTION_PLAN.md, COMMITTED #1 (next after Issue #27)`
 
 **Approved:** 2026-09-22, Product Owner (RashRosh), in-conversation approval of Section 0's STOP write-up. Sections
-1–8 below are accepted as the Slice Contract content for this capability. Implementation still does not start
-until `EXECUTION_PLAN.md` actually schedules this slice at a re-evaluation gate — see that file's `INSERTION
-CANDIDATES` entry for current placement.
+1–8 below are accepted as the Slice Contract content for this capability. Scheduled the same day into
+`docs/product/EXECUTION_PLAN.md`'s `COMMITTED — после #27` table as stage 1, ahead of Freshness Policy — approval
+of the contract and scheduling of the work, previously two separate steps, are both now complete. Implementation
+may begin once Issue #27 reaches its own merge/checkpoint per the normal `PROJECT_RULES.md` process (one product
+slice at a time on `main`).
 
 **Base product checkpoint:** `v0.0.24-seller-entry`
 

@@ -59,20 +59,22 @@
 
 | # | Stage | Owner |
 |---|---|---|
-| 1 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
-| 2 | Seller Freshness Reminder | Issue #32 |
-| 3 | Nearby result-first correction | Issue #34 |
-| 4 | Search Sorting A — freshness / proximity | Issue #12 |
-| 5 | Search Sorting B — price | Issue #12 |
-| 6 | M1 — real Offer media | Feature Map / future Slice Contract |
-| 7 | S14 — Discovery / `Для вас` | Feature Map |
-| 8 | S15 — Search learning | Feature Map |
-| 9 | S16 — Operations + MVP boundary review | Feature Map |
+| 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
+| 2 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
+| 3 | Seller Freshness Reminder | Issue #32 |
+| 4 | Nearby result-first correction | Issue #34 |
+| 5 | Search Sorting A — freshness / proximity | Issue #12 |
+| 6 | Search Sorting B — price | Issue #12 |
+| 7 | M1 — real Offer media | Feature Map / future Slice Contract |
+| 8 | S14 — Discovery / `Для вас` | Feature Map |
+| 9 | S15 — Search learning | Feature Map |
+| 10 | S16 — Operations + MVP boundary review | Feature Map |
 
 ### Ключевые dependencies
 
 - Seller Entry и Trading Points Workspace закрыты и являются prerequisite для Seller Offer Workspace (#27, текущий NEXT).
-- Freshness Policy и Reminder идут после Offer Workspace, потому что reconfirmation должен жить в нормальном seller UX.
+- Geo fallback запланирован сразу после #27: contract уже полностью утверждён (2026-09-22, S8 revision), не пересекается по затрагиваемым экранам с Offer Workspace (форма Location create/edit, а не offer cards), и больше не имеет причины ждать freshness contour — эта причина была сформулирована до решения о вайрфрейме как authoritative UX target (`PROJECT_RULES.md` §18.1).
+- Freshness Policy и Reminder идут после Offer Workspace и geo fallback, потому что reconfirmation должен жить в нормальном seller UX.
 - Search Sorting выполняется после Freshness Policy, чтобы sorting не закрепил устаревшую ranking semantics.
 - M1 вводит настоящие seller-provided Offer media end-to-end; временные pre-MVP visuals M1 не заменяют.
 
@@ -109,15 +111,6 @@ Capability известна, но отдельный committed slice ещё не
 - trigger: Product Owner утверждает конкретный trust/review use case и moderation/media semantics;
 - до этого нельзя показывать fake rating/reviews;
 - если необходимость появится до MVP boundary — оформить Issue и insertion decision.
-
-## Seller Location geo fallback (approved S8 revision)
-
-Capability известна из UX follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21), подтверждена вторым независимым источником 2026-09-22 (wireframe `4e`). Slice Contract утверждён Product Owner 2026-09-22: `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (status: `APPROVED — S8 REVISION ACCEPTED, AWAITING EXECUTION_PLAN SCHEDULING`). S8 revision approval (`PROJECT_RULES.md` §4 STOP procedure) закрыт — contract готов к реализации, но ещё не размещён в активной очереди.
-
-- earliest: следующий re-evaluation gate (после seller workspace + freshness контура — см. `Re-evaluation gates` ниже);
-- trigger for actual scheduling: Product Owner переносит этот пункт в COMMITTED на одном из re-evaluation gates;
-- direction: сохранить existing browser-only action как primary path, добавить paste-and-parse fallback (координаты/ссылка на карту) только рядом с ним, без ослабления primary path;
-- default without further scheduling trigger: остаётся здесь как approved insertion candidate, не начинается вне очереди.
 
 ## OTP resend + timer
 

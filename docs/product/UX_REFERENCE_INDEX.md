@@ -358,12 +358,12 @@ updated to record this pass's tier coverage.
 
 **2026-09-22, later same day — Product Owner elevation to authoritative UX target (`PROJECT_RULES.md` §18.1):**
 this reclassifies rows 1, 4 and 7 above from advisory `KEEP`/`ADAPT` to directly-adopted target UI — no further
-KEEP/ADAPT gate needed to use them as the design for their respective screens. Row 3 (`UX-OBS-002`, cross-cutting
-loading/offline/error states) and row 2 (S8 paste-and-parse geo fallback, already Product-Owner-approved per
-`docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` but awaiting `EXECUTION_PLAN.md` scheduling) remain
-the two items in this table that introduce genuinely new business mechanics rather than pure presentation — both
-still require an explicit Product Owner answer before any implementation adopts them, per §18.1's carve-out. Row 5
-(Tier 3, После MVP) is unaffected: a complete-looking screen still isn't a scheduling decision on its own.
+KEEP/ADAPT gate needed to use them as the design for their respective screens. Rows 2 and 3 were the two items in
+this table introducing genuinely new business mechanics rather than pure presentation, and both got an explicit
+Product Owner answer the same day: row 2 (S8 paste-and-parse geo fallback) is now scheduled as `EXECUTION_PLAN.md`
+COMMITTED stage 1, next after Issue #27; row 3 (`UX-OBS-002`, cross-cutting loading/offline/error states) is now
+an owned Design System rule at `docs/DESIGN_SYSTEM.md` §7.1. Row 5 (Tier 3, После MVP) is unaffected: a
+complete-looking screen still isn't a scheduling decision on its own.
 
 ## Audit lifecycle
 

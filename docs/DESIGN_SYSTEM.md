@@ -251,6 +251,20 @@ M2 добавляет video только при подтверждённой н�
 - raw Buyer/Seller coordinates никогда не показываются;
 - relative freshness text не притворяется live timer.
 
+## 7.1 System states (loading / offline / server error)
+
+Cross-cutting across every buyer and seller screen — added 2026-09-22 as part of promoting `UX-OBS-002` to an owned Design System rule ahead of the wireframe-driven redesign, so every screen touched during that redesign follows one pattern instead of inventing its own. Source: wireframe screens `4a`–`4c`.
+
+- **Loading:** the skeleton shape mirrors the shape of the content it precedes — no layout shift when real content replaces it. A bare spinner is acceptable only where no meaningful shape exists yet (e.g. first paint of an unknown-length list).
+- **Offline / stale data:** if a cached previous result exists, show it with a visible staleness cue and an explicit `Обновить` action, instead of a blank/offline screen. Only fall back to a dedicated offline state when there is no cached data to show.
+- **Server error severity — three tiers, chosen by whether the screen is meaningful without the failed data:**
+  - full-screen error — only when the screen has nothing useful to show without it;
+  - local block error — the failed section shows its own error/retry, the rest of the screen stays usable;
+  - toast — for a failed background/non-blocking action that doesn't invalidate what's already on screen.
+- **Seller input is never silently lost** to a network/loading/error interruption — an in-progress form value survives a failed submit or a lost connection at least until the Seller explicitly leaves the flow; this does not introduce a new persisted draft/API/DB contract beyond what a slice's own contract already allows (e.g. #35's in-flow product-first continuity).
+
+This section defines the pattern, not a new component library commitment — each redesigned slice implements it with whatever existing tokens/components fit and calls out in its own Slice Contract if a genuine new component is needed.
+
 ## 8. Buyer screens
 
 ### Search
