@@ -52,12 +52,12 @@ async function login(page: Page, phone: string) {
 async function createSeller(page: Page, projectName: string, scenario: 'success' | 'failure') {
   await page.goto('/seller');
   await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
-  await page.getByLabel('Имя', { exact: true }).fill(`S8 E2E seller ${projectName}-${scenario}`);
-  await page.getByLabel('Название торговой точки').fill(`S8 E2E point ${projectName}-${scenario}`);
+  await page.getByLabel('Название торговой точки').fill(`S8 E2E seller ${projectName}-${scenario}`);
   await page.getByLabel('Тип торговой точки').selectOption('shop');
   await page.getByLabel('Адрес').fill(`Алматы, S8 E2E address ${projectName}-${scenario}`);
+  await page.getByRole('button', { name: 'Сохранить точку' }).click();
   await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(projectName, scenario));
-  await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+  await page.getByRole('button', { name: 'Сохранить контакты' }).click();
   await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 }
 
@@ -155,13 +155,9 @@ test('S8 browser geolocation denial stays client-side and keeps onboarding resum
 
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Торговая точка', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
-    await expect(page.getByText(`S8 E2E point ${testInfo.project.name}-failure`, { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByText(`S8 E2E seller ${testInfo.project.name}-failure`, { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
     expect(mutationRequests).toBe(0);
   } finally {
     await cleanup(phone);

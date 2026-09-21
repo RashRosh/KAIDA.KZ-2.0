@@ -63,16 +63,15 @@ test('authenticated seller shell exposes logout and logout clears private seller
     await expect(page.getByText(phone, { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    const tradingPointCard = page.locator('[data-testid^="trading-point-"]');
     await expect(page.getByText(displayName, { exact: true })).toBeVisible();
-    await expect(page.getByText(locationName, { exact: true })).toBeVisible();
+    await expect(tradingPointCard.getByText(locationName, { exact: true })).toBeVisible();
 
     await page.goto('/seller/batch');
     await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
     await expect(page.getByText(displayName, { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Выйти', exact: true }).click();
 

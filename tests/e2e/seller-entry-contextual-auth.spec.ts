@@ -2,9 +2,6 @@ import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 
-const baseURL = 'http://127.0.0.1:3100';
-const GEO = { latitude: 43.238949, longitude: 76.889709 };
-
 function phoneFor(projectName: string, scenario: 'cancel' | 'seller' | 'product') {
   const suffix = projectName === 'mobile' ? '1' : '2';
   const stem = scenario === 'cancel' ? '215' : scenario === 'seller' ? '216' : '217';
@@ -151,24 +148,15 @@ test('authenticated product-first flow preserves input through required setup be
     });
 
     await page.getByRole('button', { name: 'Продолжить', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await expect(page.getByText('Данные товара сохранены в этом окне.', { exact: false })).toBeVisible();
     expect(changeSetMutations).toBe(0);
     expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets cs JOIN sellers s ON s.id=cs.seller_id JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0].count)).toBe(0);
 
-    await page.getByLabel('Имя', { exact: true }).fill(`Issue 35 ${testInfo.project.name}`);
-    await page.getByLabel('Название торговой точки').fill(`Issue 35 point ${testInfo.project.name}`);
+    await page.getByLabel('Название торговой точки').fill(`Issue 35 ${testInfo.project.name}`);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill(`Алматы, Issue 35 ${testInfo.project.name}`);
-    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
-    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
-    expect(changeSetMutations).toBe(0);
-
-    await page.context().grantPermissions(['geolocation'], { origin: baseURL });
-    await page.context().setGeolocation(GEO);
-    const geoSaved = page.waitForResponse((response) => /\/api\/seller\/locations\/[0-9a-f-]+\/geo$/.test(response.url()) && response.request().method() === 'PUT');
-    await page.getByRole('button', { name: 'Использовать моё местоположение' }).click();
-    expect((await geoSaved).status()).toBe(200);
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
     await expect(page.getByText('Торговая точка готова. Введённые данные товара сохранены', { exact: false })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Товар', exact: true })).toHaveValue('Баранина');

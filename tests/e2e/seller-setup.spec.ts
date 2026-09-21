@@ -67,17 +67,16 @@ test('authenticated User creates Seller + first Location and persists after relo
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Ваша торговая точка' })).toBeVisible();
-    await page.getByLabel('Имя', { exact: true }).fill('S3 тестовый продавец');
+    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await page.getByLabel('Название торговой точки').fill('S3 тестовая точка');
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
     await page.getByLabel('Адрес').fill('Алматы, тестовый адрес S3');
-    await page.getByLabel('Телефон', { exact: true }).fill(contactPhone);
-    await page.getByRole('button', { name: 'Сохранить и продолжить' }).click();
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
-    await expect(page.getByText('S3 тестовый продавец', { exact: true })).toBeVisible();
-    await expect(page.getByText('S3 тестовая точка', { exact: true })).toBeVisible();
+    await page.getByLabel('Телефон', { exact: true }).fill(contactPhone);
+    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
+
+    await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Павильон', { exact: true })).toBeVisible();
     await expect(page.getByText('Алматы, тестовый адрес S3', { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
@@ -86,18 +85,14 @@ test('authenticated User creates Seller + first Location and persists after relo
     const me = await page.context().request.get('/api/seller/me');
     expect(me.status()).toBe(200);
     const meBody = await me.json();
-    expect(meBody.seller.displayName).toBe('S3 тестовый продавец');
+    expect(meBody.seller.displayName).toBe('S3 тестовая точка');
     expect(Array.isArray(meBody.seller.locations)).toBe(true);
     expect(meBody.seller.locations).toHaveLength(1);
 
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Торговая точка', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Настройка торговой точки', level: 1 })).toBeVisible();
-    await expect(page.getByText('S3 тестовый продавец', { exact: true })).toBeVisible();
-    await expect(page.getByText('S3 тестовая точка', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     expect(await ownedSellerOfferCount(pool, phone)).toBe(0);
 

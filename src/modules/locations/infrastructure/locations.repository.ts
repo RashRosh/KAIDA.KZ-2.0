@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { locations } from '../db/locations.table';
-import type { LocationGeo, LocationType, LocationView } from '../contracts/location.contract';
+import type { LocationGeo, LocationIdentityInput, LocationType, LocationView } from '../contracts/location.contract';
 
 export type LocationDb = Pick<Database, 'insert' | 'select' | 'update'>;
 
@@ -69,6 +69,23 @@ export async function updateLocationGeo(
   const rows = await database
     .update(locations)
     .set({ latitude: values.latitude, longitude: values.longitude })
+    .where(and(eq(locations.id, values.locationId), eq(locations.sellerId, values.sellerId)))
+    .returning(locationSelection);
+
+  return rows[0] ? toLocationView(rows[0]) : null;
+}
+
+export async function updateLocationIdentity(
+  database: LocationDb,
+  values: { sellerId: string; locationId: string; identity: LocationIdentityInput },
+): Promise<LocationView | null> {
+  const rows = await database
+    .update(locations)
+    .set({
+      name: values.identity.name,
+      type: values.identity.type,
+      addressText: values.identity.addressText,
+    })
     .where(and(eq(locations.id, values.locationId), eq(locations.sellerId, values.sellerId)))
     .returning(locationSelection);
 
