@@ -1,6 +1,8 @@
 # Buyer interest ("heart") visibility for guests
 
-**Status:** `DRAFT — PENDING PRODUCT OWNER / CONTROLLER REVIEW`
+**Status:** `APPROVED — IMPLEMENTED AND MERGED`
+
+**Approved:** 2026-09-21, Product Owner (RashRosh). Implemented in `33dc208` and merged to `main` in `1313f3f`, re-verified in full ahead of merge (lint, typecheck, unit 287/287, integration 143/143, build, e2e 95/95). Three manual-acceptance fixes surfaced while exercising this slice's adjacent surfaces (header identity indicator, Auth modal phone live-formatting, Nearby redundant intro block) were folded into the same checkpoint via `fix/manual-acceptance-header-nearby-otp` — see `docs/product/EXECUTION_PLAN.md`'s checkpoint entry for the closing tag. This status line previously read `DRAFT — PENDING PRODUCT OWNER / CONTROLLER REVIEW`, which lagged the actual merge; corrected here to match repository state ahead of checkpoint tagging.
 
 **Base product checkpoint:** `v0.0.24-seller-entry`
 
