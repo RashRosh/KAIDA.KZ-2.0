@@ -44,7 +44,7 @@ Per Issue #27, the Product Owner scope decision recorded 2026-09-22 in `docs/pro
 - Removing or bypassing the SellerChangeSet architecture; any direct Offer write.
 - Hard deletion of Offer/history; only existing deactivate/reactivate lifecycle actions.
 - New auth/session/roles semantics.
-- Cross-cutting system states (loading-skeleton shape, offline banner, tiered server-error severity) — recorded as `GAP`/`UX-OBS-002` in `UX_REFERENCE_INDEX.md`, owned by no contract yet; this slice reuses existing minimal loading/error patterns and does not introduce that full system without a separate Product Owner decision.
+- Cross-cutting system states (loading-skeleton shape, offline banner, tiered server-error severity) — formerly `GAP`/`UX-OBS-002`, now owned by `docs/DESIGN_SYSTEM.md` §7.1 (2026-09-22). Screens touched by this redesign (hub, offer cards, inline/modal create-edit, trading points, contacts, Change Set confirm) implement §7.1's loading/offline/error pattern as part of this slice's own UI, per `PROJECT_RULES.md` §18.2 — no separate Product Owner decision is needed for this.
 - DB schema/migration changes — Offer/ChangeSet persistence model is unchanged, only presentation/read composition.
 - Contacts data model or new channels beyond existing structured Seller contacts (S10).
 - Mandatory price rule changes — the closed invariant is reused as-is.
