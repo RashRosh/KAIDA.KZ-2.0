@@ -2,7 +2,7 @@
 
 **Issue:** #27 — Seller Offer Workspace: marketplace cards and simplified manual seller input
 
-**Status:** DRAFT — AWAITING PRODUCT OWNER / CONTROLLER APPROVAL
+**Status:** APPROVED — Product Owner approval 2026-09-22 (Controller contract-review PASS same day)
 
 **Base main:** `239656d` (docs-only maintenance on top of checkpoint below)
 
@@ -142,3 +142,5 @@ After targeted verification: one full regression run and branch CI on the final 
 ## Review gate
 
 Controller/Product Owner approval is required before implementation. No production code, migration, tests, CI, manual acceptance, merge, tag or further Issue #27 work belongs to this contract-only pass.
+
+**Approved 2026-09-22.** Implementation may proceed on a dedicated branch per `PROJECT_RULES.md` §19.

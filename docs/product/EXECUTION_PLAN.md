@@ -39,17 +39,14 @@
 
 ## Issue #27 — Seller Offer Workspace
 
-Статус: **COMMITTED product slice**, следующий по очереди после закрытого #36.
+Статус: **Slice Contract APPROVED** (Product Owner + Controller contract-review PASS, 2026-09-22) — `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md`. Implementation в работе.
 
 Следующая отдельная работа:
 
-- открыть Issue #27;
-- проверить relevant closed contracts, включая закрытый Seller Trading Points (#36) и его multiple-Location semantics;
-- scope подтверждён Product Owner 2026-09-22 и включает редизайн уже закрытых экранов кабинета продавца (хаб, карточки точек, выбор точки при 2+, управление предложением, контакты, Change Set confirm) — см. `docs/product/WIREFRAME_BRIEF.md`, раздел Tier 1;
-- подготовить compact Slice Contract отдельным проходом, перечислив эти экраны явно;
-- не начинать implementation до approval этого contract.
+- реализовать на отдельной ветке по утверждённому Slice Contract (hub, offer grid/cards, inline/modal create-edit, редизайн trading points/contacts/Change Set confirm — см. contract разделы 2, 5);
+- следовать verification plan контракта (раздел 8) и manual acceptance сценарию (раздел 9) перед merge/checkpoint.
 
-Подробности: GitHub Issue #27.
+Подробности: GitHub Issue #27, `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md`.
 
 ---
 
