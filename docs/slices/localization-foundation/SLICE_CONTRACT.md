@@ -41,21 +41,18 @@ and login, without losing what they were doing.
 - One shared localization layer owns every KAIDA-owned user-facing string: visible text, placeholders, ARIA copy,
   page metadata, validation and error text. Components do not hardcode visible strings.
 - Each key exists in both locales. An automated check fails the build when a key is missing or empty in either locale.
-- Kazakh strings are prepared and checked by an LLM review pass (Product Owner decision, 2026-09-23). The Pass 3
-  prototype dictionary is the starting source. Text provenance is recorded next to the strings, so a later native
-  review can find what an LLM approved.
-- This slice moves into the layer and translates only what it owns: the shell (`S-11`: header, switch, buyer/seller
-  navigation, «Ещё»), shared system states (`S-12`: loading, offline, server error, «Повторить») and page metadata.
-  Every other surface is translated by the UI slice that rebuilds it to Pass 3. A UI slice is not complete while its
-  surface works in one language only (`FEATURE_MAP.md`).
-
-### Visibility of the switch during transition
-
-- The switch is shipped behind a configuration flag, off by default in production, so a user never switches to
-  Kazakh and lands on screens that are still Russian-only.
-- Automated proof runs with the flag on. The Product Owner turns the flag on in production once the F1–F3 surfaces
-  are covered in both locales; this is a release decision, not part of this slice.
-- With the flag off, behavior is the current Russian UI; `html lang="ru"`.
+- The whole interface is bilingual from the first release (Product Owner decision, 2026-09-23). This slice moves
+  every KAIDA-owned string of every existing route (buyer, seller, auth, errors, system states, metadata) into the
+  layer and ships it in `ru` and `kk`. There is no Russian-only screen once the switch is live, and no feature flag
+  hides the switch.
+- Kazakh strings may be drafted by an LLM or taken from the Pass 3 prototype dictionary, but a native Kazakh speaker
+  verifies every Kazakh string before merge. Verification is recorded next to the strings; an unverified string
+  blocks merge like a failing test.
+- Machine translation is never used for KAIDA-owned text at runtime; it exists only for Seller-authored data
+  (part 3).
+- The switch sits in the current header following `S-11` rules (one tap, `РУ / ҚАЗ` mobile, full names desktop).
+  The full `S-11` shell rebuild belongs to the UI slices. Every later UI slice keeps both locales verified for the
+  surfaces it adds or changes (`FEATURE_MAP.md`).
 
 ### API locale
 
@@ -77,7 +74,7 @@ and login, without losing what they were doing.
 ## 3. Explicit out of scope
 
 - Catalog names, aliases and Search (part 2); Seller comment translation (part 3).
-- Translating surfaces other than `S-11`, `S-12` and metadata; each UI slice owns its own surface.
+- Rebuilding existing screens to Pass 3 composition: this slice translates them as they are; UI slices rebuild them.
 - Translating Seller-authored names, addresses or custom units: these are always shown as written (Product Owner
   decision, 2026-09-23; see part 3).
 - Locale in URL, per-account language stored on the server, languages other than `ru`/`kk`.
@@ -87,7 +84,8 @@ and login, without losing what they were doing.
 
 - **S2 Auth:** the preference survives login/logout; session cookie and login semantics unchanged.
 - **Public API (S0/S7/S9/S10 read endpoints):** additive optional `locale` parameter; default output unchanged.
-- **UX1A/UX2A shell:** presentation of the shell is replaced by Pass 3 `S-11` only where this slice touches it.
+- **UX1A/UX2A shell:** gains the language switch; the rest of the shell presentation is unchanged here.
+- **All closed UI flows:** visible behavior in `ru` stays as today; only text moves into the layer.
 - No closed contract is revised.
 
 ## 5. Expected areas and risk flags
@@ -99,30 +97,33 @@ error rendering. Internal names and file layout are chosen during implementation
 |---|---|
 | Public API | Requests without `locale` return byte-identical payload semantics to today; a `kk` browser language header alone changes nothing. |
 | Auth / privacy | Cookie holds only `ru`/`kk`; login/logout do not touch it; it grants nothing. |
-| UX regression | With the flag off, the current Russian UI is unchanged. |
+| UX regression | In `ru` every existing screen reads exactly as today; the existing E2E suite passes unchanged. |
+| Text quality | Every Kazakh string is native-verified before merge; long Kazakh text does not clip at 320 px. |
 
 ## 6. Acceptance criteria
 
-1. With the flag on, Guest, Buyer and Seller switch language in one action on mobile and desktop.
+1. Guest, Buyer and Seller switch language in one action on mobile and desktop, on every route.
 2. The choice survives reload, navigation, login and logout on the same device.
 3. First visit follows browser language `kk`/`ru`, otherwise `ru`; an explicit choice overrides it; a corrupt cookie falls back safely.
 4. Switching keeps route, `?q=` and unfinished form input.
 5. `html lang` matches the active locale.
-6. Shell, system states and metadata exist in both locales; the missing-key check fails on a removed or empty key.
+6. Every KAIDA-owned string of every existing route exists in both locales; no hardcoded visible string remains; the missing-key check fails on a removed or empty key.
 7. Kazakh letters render in the primary UI font, not a fallback font.
 8. API without `locale` answers as today; with `locale=kk` only display fields change; `Accept-Language` is ignored.
 9. The UI shows error text by `code` in the active locale.
-10. With the flag off, production behavior equals today.
+10. Every Kazakh string carries a native-speaker verification record; in `ru` every screen reads as today.
 
 ## 7. Verification and manual acceptance
 
 - Unit: locale resolution order (cookie → browser language → `ru`), invalid cookie, key-parity check.
 - Integration: API with/without `locale`, with a `kk` `Accept-Language` header and no parameter.
-- E2E (flag on): one-tap switch on mobile width, desktop switch, persistence through reload and auth, `?q=` and form
-  input kept, `html lang`, keyboard and screen-reader names of the switch, no clipping of Kazakh shell text at 320 px.
-- E2E (flag off): existing suite passes unchanged.
+- E2E: one-tap switch on mobile width, desktop switch, persistence through reload and auth, `?q=` and form input
+  kept, `html lang`, keyboard and screen-reader names of the switch; key buyer and seller routes walked in `kk`
+  without Russian KAIDA text and without clipping at 320 px.
+- Existing E2E suite passes unchanged in `ru`.
+- Native-speaker review of all Kazakh strings, recorded before merge.
 - One full regression run and branch CI on the final executable head.
 
-Manual scenario: enable the flag, open Search as a guest in `ru`, type a query, switch to `ҚАЗ` — the query stays,
-shell and system texts are Kazakh, `html lang="kk"`. Log in as a Seller, log out, reload — still Kazakh. Turn the flag
-off and confirm the site looks as it does today.
+Manual scenario: open Search as a guest in `ru`, type a query, switch to `ҚАЗ` — the query stays and every KAIDA text
+on the page is Kazakh, `html lang="kk"`. Walk Nearby, login, the Seller cabinet and the Offer form in `ҚАЗ` — no Russian
+interface text anywhere. Log out, reload — still Kazakh. Switch back to `РУ` — everything reads as before.

@@ -5,8 +5,9 @@
 **Part 2 of 3** localization contracts. Depends on part 1 (`docs/slices/localization-foundation/SLICE_CONTRACT.md`)
 for the active locale and the API `locale` parameter.
 
-**Decision sources:** `FEATURE_MAP.md` «Catalog localization model» (Product Owner, 2026-09-23); Kazakh catalog text
-checked by LLM review (Product Owner, 2026-09-23).
+**Decision sources:** `FEATURE_MAP.md` «Catalog localization model» (Product Owner, 2026-09-23); KAIDA-owned text,
+including catalog names, is verified by a native Kazakh speaker — machine translation is only for Seller-authored
+data (Product Owner, 2026-09-23).
 
 **Base product checkpoint:** `v0.0.26-buyer-interest-guest-visibility`.
 
@@ -30,11 +31,12 @@ A Buyer searches in Russian or Kazakh and finds the same Offers, and sees each P
 
 ### Kazakh catalog data
 
-- Kazakh names (and optional Kazakh aliases) for current Products are prepared as reviewed catalog data by an LLM
-  pass outside request time, then loaded as ordinary Catalog data with provenance `llm-reviewed`. Nothing is
+- Kazakh names (and optional Kazakh aliases) for current Products may be drafted by an LLM, but a native Kazakh
+  speaker verifies each one before it is loaded as ordinary Catalog data with a verification record. Nothing is
   machine-translated when a page renders or a request runs.
-- A Product without a Kazakh name is a catalog data gap: in `kk` it shows its Russian name marked `lang="ru"`, never
-  an invented or empty name. The data load reports every Product still missing a Kazakh name.
+- Every existing Product has a verified Kazakh name before merge. A Product added later without one is a catalog data
+  gap: in `kk` it shows its Russian name marked `lang="ru"`, never an invented or empty name. The data load reports
+  every Product still missing a Kazakh name.
 
 ### Search and display
 
@@ -68,7 +70,7 @@ Catalog persistence and migration, Product resolution, Search/Nearby read projec
 |---|---|
 | DB migration / data loss | Upgrade of an existing database keeps every Product id, name, alias and Offer link; Search answers the same for every existing term. |
 | Public API | Requests without `locale` return the same Product names as before. |
-| Data quality | No empty or invented Kazakh name; missing names are listed, and fall back to Russian marked `lang="ru"`. |
+| Data quality | Every existing Product has a native-verified Kazakh name; no empty or invented name; a later gap falls back to Russian marked `lang="ru"`. |
 
 ## 6. Acceptance criteria
 
@@ -77,7 +79,7 @@ Catalog persistence and migration, Product resolution, Search/Nearby read projec
 3. Russian and Kazakh name/alias of the same Product return the same set of eligible Offers.
 4. Two different Products sharing a term across languages return `ambiguous`, as in S6.
 5. With `locale=kk`, results show the Kazakh Product name; without `locale`, the Russian name.
-6. A Product without a Kazakh name shows its Russian name marked `lang="ru"` in `kk`.
+6. Every existing Product has a native-verified Kazakh name; a Product added later without one shows its Russian name marked `lang="ru"` in `kk`.
 7. Duplicate Kazakh names of different Products are rejected by the Catalog.
 8. Ranking, eligibility, price, contacts and geo privacy of results are unchanged.
 
@@ -86,10 +88,10 @@ Catalog persistence and migration, Product resolution, Search/Nearby read projec
 - Migration/integration: upgrade from the current schema with real-shaped data; ids and names preserved; bilingual
   resolution; cross-language ambiguity; `kk` fallback; uniqueness per locale.
 - API: with and without `locale`.
-- E2E (part 1 flag on): search `баранина` and `қой еті` find the same Offers; switching locale renames the Product in
+- E2E: search `баранина` and `қой еті` find the same Offers; switching locale renames the Product in
   results without losing the query.
 - One full regression run and branch CI on the final executable head.
 
 Manual scenario: search `баранина` in `ru`, then `қой еті` — same Offers. Switch to `ҚАЗ` — the query stays and the
-Product reads `Қой еті, жауырын`. Search a Product still missing a Kazakh name — its Russian name is shown, nothing
-is empty.
+Product reads `Қой еті, жауырын`. Add a test Product with only a Russian name and search it in `ҚАЗ` — its Russian
+name is shown, nothing is empty.

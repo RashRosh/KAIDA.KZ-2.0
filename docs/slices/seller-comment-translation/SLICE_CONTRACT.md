@@ -122,7 +122,7 @@ adapter, a Seller preview endpoint, buyer card and Seller form UI.
 - Integration with a fake translator adapter: detection result stored per version, `same-language`, mixed text,
   stale handling, late-result race, failure path, adapter disabled, legacy comments picked up after enabling.
 - API/read projection: card variants per interface locale.
-- E2E (part 1 flag on): Seller in `ru` UI writes a Kazakh comment; Buyer in `ru` sees the Russian translation with the
+- E2E: Seller in `ru` UI writes a Kazakh comment; Buyer in `ru` sees the Russian translation with the
   original toggle, Buyer in `kk` sees the original without a label; translator off → originals without labels and no
   preview action.
 - One full regression run and branch CI on the final executable head.
