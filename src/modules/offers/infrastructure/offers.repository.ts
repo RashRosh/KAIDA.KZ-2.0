@@ -2,6 +2,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
+import { sellers } from '../../sellers/db/sellers.table';
 import { offers } from '../db/offers.table';
 
 export type OfferWriteDb = Pick<Database, 'insert' | 'select' | 'update'>;
@@ -85,16 +86,24 @@ export async function lockOfferById(database: OfferWriteDb, id: string) {
   return rows[0] ?? null;
 }
 
-export async function listOffersBySeller(database: OfferWriteDb, sellerId: string) {
+export async function listOffersBySeller(database: OfferWriteDb, sellerId: string, locale: 'ru' | 'kk' = 'ru') {
   return database.select({
     ...managementOfferSelection,
-    productName: products.name,
+    productName: locale === 'kk'
+      ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
+      : products.name,
+    productNameLocale: locale === 'kk'
+      ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
+      : sql<'ru'>`'ru'`,
     locationName: locations.name,
     locationAddressText: locations.addressText,
     locationSellerId: locations.sellerId,
+    locationHasGeo: sql<boolean>`${locations.latitude} is not null and ${locations.longitude} is not null`,
+    sellerHasPublicPhone: sql<boolean>`${sellers.contactPhoneE164} is not null`,
   }).from(offers)
     .innerJoin(products, eq(offers.productId, products.id))
     .innerJoin(locations, eq(offers.locationId, locations.id))
+    .innerJoin(sellers, eq(offers.sellerId, sellers.id))
     .where(eq(offers.sellerId, sellerId))
     .orderBy(asc(offers.createdAt), asc(offers.id));
 }

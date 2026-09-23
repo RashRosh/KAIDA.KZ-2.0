@@ -53,15 +53,15 @@ async function makeBuyerEligible(pool: Pool, userId: string, projectName: string
 }
 
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
-  await page.goto('/seller');
+  await page.goto('/seller/offers/new');
   const create = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Добавить товар' }) });
   await create.getByRole('textbox', { name: 'Товар', exact: true }).fill(product);
   await create.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill(amount);
   await create.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
   await create.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
   await create.getByRole('button', { name: 'Создать изменение' }).click();
-  await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-  await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await expect(page).toHaveURL('/seller');
 }
 
 async function search(page: import('@playwright/test').Page, query: string) {
@@ -78,19 +78,20 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
   const auth = await authenticate(page, testInfo.project.name);
   const sellerName = `S12 E2E ${testInfo.project.name}`;
   try {
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
     await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
+    await page.goto('/seller/contacts');
     await page.getByLabel('Телефон', { exact: true }).fill(testInfo.project.name === 'mobile' ? '+77000001263' : '+77000001264');
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     await makeBuyerEligible(auth.pool, auth.userId, testInfo.project.name);
-    await page.reload();
+    await page.goto('/seller/offers/new');
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await createOffer(page, 'Баранина', '4200.00', 'S12 старая баранина');
@@ -99,17 +100,19 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await page.goto('/seller/batch');
     const first = page.getByTestId('batch-item-0');
     await first.getByLabel('Действие').selectOption('update_offer');
-    await first.getByLabel('Offer').selectOption({ label: 'Баранина · активно' });
+    await first.getByLabel('Предложение', { exact: true }).selectOption({ label: 'Баранина · активно' });
     await first.getByLabel('Цена, ₸').fill('4600.00');
     await first.getByLabel('Комментарий продавца').fill('S12 новая баранина');
 
     const second = page.getByTestId('batch-item-1');
     await second.getByLabel('Действие').selectOption('deactivate_offer');
-    await second.getByLabel('Offer').selectOption({ label: 'Говядина · активно' });
+    await second.getByLabel('Предложение', { exact: true }).selectOption({ label: 'Говядина · активно' });
     await page.getByRole('button', { name: 'Проверить весь пакет' }).click();
 
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await expect(page.getByText(/Пакет содержит 2 изменений/)).toBeVisible();
+    // One confirmation page lists both changes in seller words (seller-cabinet-overview S-10).
+    await expect(page.getByText('Изменение предложения', { exact: true })).toBeVisible();
+    await expect(page.getByText('Выключение предложения', { exact: true })).toBeVisible();
     const reviewUrl = page.url();
     await page.reload();
     await expect(page.getByText('S12 новая баранина', { exact: true })).toBeVisible();
@@ -126,8 +129,9 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await expect(oldBeefCard.getByText('S12 старая говядина', { exact: true })).toBeVisible();
 
     await page.goto(reviewUrl);
-    await page.getByRole('button', { name: 'Подтвердить весь пакет' }).click();
-    await expect(page.getByText(/Пакет из 2 изменений применён целиком/)).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
+    await expect(page).toHaveURL('/seller/offers');
+    await expect(page.getByRole('status').filter({ hasText: 'Изменения применены' })).toBeVisible();
 
     await search(page, 'баранина');
     const newLambCard = sellerOfferCard(page, sellerName);

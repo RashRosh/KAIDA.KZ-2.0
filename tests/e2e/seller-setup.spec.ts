@@ -65,16 +65,20 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page).toHaveURL('/');
 
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    // Seller cabinet: trading points and contacts are separate destinations (seller-cabinet-overview).
+    await page.goto('/seller/points');
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await page.getByLabel('Название торговой точки').fill('S3 тестовая точка');
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
     await page.getByLabel('Адрес').fill('Алматы, тестовый адрес S3');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
 
+    await page.goto('/seller/contacts');
     await page.getByLabel('Телефон', { exact: true }).fill(contactPhone);
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
+    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+    await page.goto('/seller/points');
 
     await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Павильон', { exact: true })).toBeVisible();
@@ -90,7 +94,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     expect(meBody.seller.locations).toHaveLength(1);
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Точки', level: 1 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();

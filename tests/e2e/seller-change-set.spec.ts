@@ -68,24 +68,26 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page).toHaveURL('/');
 
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
-    await page.getByLabel('Имя', { exact: true }).fill('S4 E2E продавец');
+    // Seller cabinet: point, contacts and «Добавить товар» are separate destinations (seller-cabinet-overview).
+    await page.goto('/seller/points');
+    await page.getByLabel('Имя', { exact: true }).fill(`S4 E2E продавец ${testInfo.project.name}`);
     await page.getByLabel('Название торговой точки').fill('S4 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await page.goto('/seller/contacts');
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
-    await page.reload();
+    await page.goto('/seller/offers/new');
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page.getByText('Укажите цену предложения.', { exact: true })).toBeVisible();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL('/seller/offers/new');
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
@@ -95,30 +97,33 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S4 E2E свежий привоз');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
 
     const url = page.url();
     await page.reload();
     await expect(page).toHaveURL(url);
-    await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Баранина' })).toBeVisible();
+    await expect(page.getByText('Новое предложение', { exact: true })).toBeVisible();
+    await expect(page.getByText('Баранина', { exact: true })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-    await expect(page.getByText('Предложение подтверждено. Offer создан.')).toBeVisible();
-    await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    // The confirmation page replaces itself with the overview that started the change.
+    await expect(page).toHaveURL('/seller');
+    await expect(page.getByRole('status').filter({ hasText: 'Опубликовано — предложение видно покупателям' })).toBeVisible();
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(1);
     const resultId = (await pool.query('SELECT result_offer_id FROM seller_change_items WHERE change_set_id=$1', [url.split('/').pop()])).rows[0].result_offer_id;
     expect((await pool.query('SELECT price_amount,price_currency,price_unit FROM offers WHERE id=$1', [resultId])).rows[0])
       .toEqual({ price_amount: '4321.50', price_currency: 'KZT', price_unit: null });
 
-    await page.reload();
-    await expect(page.getByText('Предложение подтверждено. Offer создан.')).toBeVisible();
-    await expect(page.getByText(`ID: ${resultId}`, { exact: true })).toBeVisible();
+    // A confirmed deep link is read-only and shows no technical identifiers.
+    await page.goto(url);
+    await expect(page.getByRole('heading', { name: 'Изменения подтверждены', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Подтвердить/ })).toHaveCount(0);
+    await expect(page.getByText(resultId)).toHaveCount(0);
 
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    const createdCard = page.getByRole('article').filter({ hasText: 'S4 E2E продавец' });
+    const createdCard = page.getByRole('article').filter({ hasText: `S4 E2E продавец ${testInfo.project.name}` });
     await expect(createdCard).toHaveCount(1);
     await expect(createdCard).toContainText(/4\s321,5\s₸/);
     await expect(createdCard).not.toContainText(' / ');

@@ -205,7 +205,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
               </>
             ) : (
               <>
-                <label htmlFor={`batch-offer-${item.key}`}>Offer</label>
+                <label htmlFor={`batch-offer-${item.key}`}>{t('cabinet.offerField')}</label>
                 <select id={`batch-offer-${item.key}`} value={item.offerId} onChange={(event) => selectOffer(item, event.target.value)} disabled={submitting || loadingOffers}>
                   <option value="">{t('batch.chooseOffer')}</option>
                   {offers.map((offer) => <option key={offer.id} value={offer.id}>{offer.product.name} · {offer.status === 'active' ? t('batch.active') : t('batch.inactive')}</option>)}

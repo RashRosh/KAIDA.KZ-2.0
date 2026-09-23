@@ -2,12 +2,14 @@ import type { OfferStatus } from '../db/offers.table';
 
 export type SellerOfferView = {
   id: string;
-  product: { id: string; name: string };
+  product: { id: string; name: string; nameLocale?: 'ru' | 'kk' };
   location: { id: string; name: string; addressText: string };
   price: { amount: string; currency: 'KZT'; unit: string | null } | null;
   sellerComment: string | null;
   status: OfferStatus;
   lastConfirmedAt: string;
+  // Whether Search and Nearby currently show this Offer, by the same policy as the buyer read.
+  buyerVisible: boolean;
 };
 
 export class SellerOffersSellerRequiredError extends Error {

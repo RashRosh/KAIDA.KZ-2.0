@@ -85,18 +85,19 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
   try {
     await login(page, phone);
 
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
     await page.getByLabel('Название торговой точки').fill('S5 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S5 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
+    await page.goto('/seller/contacts');
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await makeBuyerEligible(phone, testInfo.project.name);
-    await page.reload();
+    await page.goto('/seller/offers/new');
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
@@ -104,25 +105,26 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S5 старая партия');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-    await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await expect(page).toHaveURL('/seller');
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(page.getByText('S5 старая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard.getByText('S5 старая партия', { exact: true })).toBeVisible();
     await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
 
-    await page.goto('/seller');
-    await expect(page.getByRole('heading', { name: 'Мои предложения' })).toBeVisible();
+    // Seller cabinet: offers live on /seller/offers; one primary action per card, the rest in «Другие действия».
+    await page.goto('/seller/offers');
+    await expect(page.getByRole('heading', { name: 'Предложения', level: 1 })).toBeVisible();
     await page.getByRole('button', { name: 'Изменить', exact: true }).click();
     const editForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Проверить изменение' }) });
     await editForm.getByLabel('Цена, ₸').fill('4500.00');
     await editForm.getByLabel('Единица').fill('кг');
     await editForm.getByLabel('Комментарий продавца').fill('S5 новая партия');
     await editForm.getByRole('button', { name: 'Проверить изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await expect(page.getByText('Новые цена и комментарий ещё не применены. Покупатели пока видят прежние данные.')).toBeVisible();
-    await expect(page.getByText('4500.00 KZT / кг', { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
+    await expect(page.getByText('Изменение предложения', { exact: true })).toBeVisible();
+    await expect(page.getByText(/4\s500 ₸ \/ кг/)).toBeVisible();
     await expect(page.getByText('S5 новая партия', { exact: true })).toBeVisible();
 
     const updateReviewUrl = page.url();
@@ -132,55 +134,59 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(page.getByText('S5 старая партия', { exact: true })).toBeVisible();
-    await expect(page.getByText('S5 новая партия', { exact: true })).toHaveCount(0);
+    await expect(sellerOfferCard.getByText('S5 старая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard.getByText('S5 новая партия', { exact: true })).toHaveCount(0);
     await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
 
     await page.goto(updateReviewUrl);
-    await page.getByRole('button', { name: 'Подтвердить изменение' }).click();
-    await expect(page.getByText('Новые цена и комментарий применены.')).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await expect(page).toHaveURL('/seller/offers');
+    await expect(page.getByRole('status').filter({ hasText: 'Изменения сохранены' })).toBeVisible();
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(page.getByText('S5 новая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard.getByText('S5 новая партия', { exact: true })).toBeVisible();
     await expect(sellerOfferCard.getByText(/4 500 ₸/)).toBeVisible();
-    await expect(page.getByText('S5 старая партия', { exact: true })).toHaveCount(0);
+    await expect(sellerOfferCard.getByText('S5 старая партия', { exact: true })).toHaveCount(0);
 
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Выключить' }).click();
-    await expect(page.getByText('Offer ещё не выключен и остаётся доступен покупателям по обычным правилам поиска.')).toBeVisible();
+    await page.goto('/seller/offers');
+    await page.getByRole('button', { name: /Другие действия: Баранина/ }).click();
+    await page.getByRole('menuitem', { name: 'Выключить' }).click();
+    await expect(page.getByText('Выключение предложения', { exact: true })).toBeVisible();
     const deactivateReviewUrl = page.url();
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
     await page.goto(deactivateReviewUrl);
-    await page.getByRole('button', { name: 'Подтвердить выключение' }).click();
-    await expect(page.getByText('Offer выключен.', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Предложение выключено' })).toBeVisible();
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toHaveCount(0);
 
-    await page.goto('/seller');
+    await page.goto('/seller/offers');
     await page.getByRole('button', { name: 'Включить' }).click();
-    await expect(page.getByText('Актуальность Offer ещё не подтверждена повторно.')).toBeVisible();
-    await page.getByRole('button', { name: 'Подтвердить актуальность' }).click();
-    await expect(page.getByText('Актуальность Offer подтверждена.')).toBeVisible();
+    await expect(page.getByText('Включение предложения', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Предложение включено' })).toBeVisible();
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(page.getByText('S5 новая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard.getByText('S5 новая партия', { exact: true })).toBeVisible();
 
-    await page.goto('/seller');
+    await page.goto('/seller/offers');
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Мои предложения' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Предложения', level: 1 })).toBeVisible();
     await expect(page.getByText('Активно', { exact: true }).first()).toBeVisible();
+
+    await page.goto('/seller/offers/new');
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4700.00');
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S5 второй Offer');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-    await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await expect(page).toHaveURL('/seller');
 
     await page.goto('/');
     await page.getByRole('button', { name: 'Выйти' }).click();

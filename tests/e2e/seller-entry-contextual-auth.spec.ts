@@ -104,9 +104,10 @@ test('seller-intent OTP success routes to the first-run workspace', async ({ pag
     await authenticateInOpenModal(page, phone);
 
     await expect(page).toHaveURL('/seller');
-    await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Торговая точка', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Добавить товар', exact: true })).toBeVisible();
+    // Seller cabinet first run: one primary action; trading points are a cabinet destination.
+    await expect(page.getByRole('heading', { name: 'Начните с первого предложения', level: 1 })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Добавить товар', exact: true })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Разделы кабинета' }).getByRole('link', { name: 'Точки' }).filter({ visible: true })).toHaveCount(1);
   } finally {
     await cleanup(phone);
   }
@@ -132,11 +133,12 @@ test('authenticated product-first flow preserves input through required setup be
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     }
-    const actionBox = await page.getByRole('button', { name: 'Добавить товар', exact: true }).boundingBox();
+    const actionBox = await page.getByRole('link', { name: 'Добавить товар', exact: true }).boundingBox();
     expect(actionBox).not.toBeNull();
     expect(actionBox!.height).toBeGreaterThanOrEqual(44);
 
-    await page.getByRole('button', { name: 'Добавить товар', exact: true }).click();
+    await page.getByRole('link', { name: 'Добавить товар', exact: true }).click();
+    await expect(page).toHaveURL('/seller/offers/new');
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill(price);
     await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
@@ -169,7 +171,8 @@ test('authenticated product-first flow preserves input through required setup be
     await page.getByRole('button', { name: 'Создать изменение', exact: true }).click();
     expect((await proposalCreated).status()).toBe(201);
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
+    await expect(page.getByText('Новое предложение', { exact: true })).toBeVisible();
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(1);
