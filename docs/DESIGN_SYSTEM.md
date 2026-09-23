@@ -59,6 +59,7 @@ KAIDA — не интернет-магазин. Пользователь нах�
 --stale-soft: #fdf3e2;
 --neutral-label: #5b5568;
 --neutral-soft: #efedf3;
+--primary-accent: var(--primary);
 ```
 
 Rules:
@@ -67,6 +68,12 @@ Rules:
 - state never communicates only by color;
 - green/amber reserved for truthful freshness/status semantics, not fake urgency;
 - promoted Offers do not get an attention-grabbing relevance-breaking color.
+
+#### Dark scope (seller area only)
+
+Added 2026-09-22 for the wireframe-driven seller redesign (Issue #27, see that Slice Contract's §10). `/seller/**` wraps its content in `src/app/seller/seller-theme.module.css`'s `.dark` class, which redefines the same token names above (plus `color: var(--text)` on the wrapper itself — `color` is inherited from wherever it's first declared, so an element that never redeclares `color: var(--text)` on its own keeps whatever value was computed at `body`; setting it again at the theme boundary is what makes normal inheritance carry the right value down past that boundary) to a dark palette, and a `.vars`-only variant (no `background`/layout) for portaled content (`BottomSheet` renders via `createPortal` to `document.body`, which sits outside any wrapper in the DOM — custom properties don't cross that boundary on their own). `--primary` stays the same violet everywhere (already legible on both light and dark surfaces for a white-text filled button); `--primary-accent` is the token to use for text/border/icon accents directly on a dark surface, where the base `--primary` would be too close in luminance to read.
+
+Not a general dark-mode feature — buyer-facing pages are untouched and there is no theme toggle.
 
 ### 2.2 Typography
 
@@ -196,6 +203,18 @@ Geolocation никогда не становится скрытым prerequisite
 
 Когда допустимое множество реально известно системе, controlled choice предпочтительнее свободного ввода. Точный control определяется current Slice Contract и domain semantics.
 
+### Language switch
+
+Shared app shell содержит постоянно доступный переключатель `Русский / Қазақша` на buyer и seller routes, включая anonymous state. Используются названия языков, а не флаги.
+
+- переключатель не конкурирует с primary action текущего экрана;
+- active language различим визуально и программно;
+- minimum touch target каждого action — `44x44px`;
+- смена языка не сбрасывает текущий маршрут, введённые данные или незавершённую пользовательскую задачу;
+- layout должен выдерживать длину русского и казахского текста без clipping, overlap и горизонтального overflow;
+- локализуются visible copy, validation/error/status text, placeholders, `aria-label`, `aria-describedby`, `title`, alt text и metadata;
+- hardcoded user-facing strings в production components не допускаются после введения localization layer.
+
 ## 5. Cards and marketplace composition
 
 Buyer и Seller рабочие поверхности стремятся к marketplace/card composition, а не к technical tables или explanatory landing pages, если таблица не является объективно лучшим способом выполнить user task.
@@ -261,6 +280,7 @@ Cross-cutting across every buyer and seller screen — added 2026-09-22 as part 
   - full-screen error — only when the screen has nothing useful to show without it;
   - local block error — the failed section shows its own error/retry, the rest of the screen stays usable;
   - toast — for a failed background/non-blocking action that doesn't invalidate what's already on screen.
+- **Текст ошибки содержит ровно две вещи** (Product Owner decision, 2026-09-23): что не получилось и что пользователь может сделать. Пример: `Не удалось сохранить. Проверьте соединение и повторите.` Декоративный технический идентификатор (код вида `5F2A`, «обратитесь в поддержку с номером…») **не показывается**: продукт не отдаёт таких кодов, и поддержка не сможет найти по нему запрос. Correlation ID вводится только вместе с реальной системой логирования и поддержки, отдельным решением.
 - **Seller input is never silently lost** to a network/loading/error interruption — an in-progress form value survives a failed submit or a lost connection at least until the Seller explicitly leaves the flow; this does not introduce a new persisted draft/API/DB contract beyond what a slice's own contract already allows (e.g. #35's in-flow product-first continuity).
 
 This section defines the pattern, not a new component library commitment — each redesigned slice implements it with whatever existing tokens/components fit and calls out in its own Slice Contract if a genuine new component is needed.
@@ -301,6 +321,12 @@ Seller workspace должен давать очевидный выбор меж�
 
 Multiple Locations отображаются как понятные trading-point cards, когда capability реализована. Seller-level contacts не дублируются по Location без отдельного model decision.
 
+### Seller workspace navigation and in-flow forms (2026-09-22, Issue #27 wireframe redesign)
+
+- Seller area (`/seller/**`) uses a dark theme scoped via `seller-theme.module.css`, not the buyer-facing light theme — see §2.1's "Dark scope" note for the tokens and why.
+- The workspace is route-based, not a single stacked page: a bottom tab bar (`SellerTabBar`, mirrored by `PROJECT_RULES.md`'s existing "no fabricated capability" rule — the third tab renders visibly disabled/"скоро" rather than being hidden, when the capability is real but not yet built) switches between the hub and its sub-areas, following whatever grouping the current wireframe/Slice Contract shows rather than one page trying to hold every seller task at once.
+- In-flow create/edit/confirm forms use `BottomSheet` (`src/app/seller/_components/BottomSheet.tsx`), not the general-purpose centered `Modal.tsx` — same focus-trap/Esc/scroll-lock contract, different chrome (slides from the bottom, drag handle, rounded top corners only). Use `BottomSheet` for new seller in-flow forms unless a specific wireframe screen shows otherwise; `Modal.tsx` remains available for non-seller or non-form uses (e.g. `AuthModal`).
+
 ## 10. Auth presentation
 
 Phone/OTP auth использует единый modal/dialog pattern поверх текущего context, когда caller flow этого требует.
@@ -336,9 +362,19 @@ Baseline: WCAG 2.1 AA.
 - visible labels on forms;
 - существующие `role=status`, `role=alert`, `aria-live`, `aria-invalid`, `aria-describedby` не ослабляются;
 - minimum touch target `44x44px`;
-- `<html lang="ru">`;
+- `<html lang>` динамически соответствует активному `ru` или `kk`;
 - `prefers-reduced-motion`;
 - state не полагается только на color.
+
+### 13.1 Overlay focus management
+
+Правило для modal, bottom sheet и любого другого overlay с ловушкой фокуса:
+
+- при открытии фокус переводится внутрь overlay **один раз**; при закрытии возвращается на элемент, который его открыл;
+- пока overlay открыт, фокус **не перезахватывается** при изменениях состояния — ввод в поле внутри overlay не должен возвращать фокус на первый элемент;
+- клавиатурный обработчик и ловушка фокуса живут на протяжении всей открытой сессии overlay и не пересоздаются на каждый рендер.
+
+**Почему это записано.** В отклонённой реализации прохода #27 эффект, устанавливавший ловушку фокуса, зависел от колбэка `onClose`. Родитель пересоздавал колбэк на каждое нажатие клавиши, эффект перезапускался, и фокус уезжал на первый элемент после каждого введённого символа — форма внутри bottom sheet становилась непригодной. Рабочее решение — держать колбэк в ref и оставить в зависимостях эффекта только факт открытия. Компоненты той ветки в `main` не переносятся; сохраняется само правило, чтобы новая реализация overlay не повторила этот дефект.
 
 ## 14. Iconography
 
@@ -375,7 +411,8 @@ Messenger logos — official brand assets, когда соответствующ
 7. fake review/availability/urgency отсутствуют;
 8. relevant targeted automated proof существует;
 9. final executable branch head имеет green full CI;
-10. пользовательский flow прошёл manual acceptance.
+10. пользовательский flow прошёл manual acceptance;
+11. изменённая поверхность полностью проверена на русском и казахском, включая system/error states, accessibility copy и длинный текст без overflow.
 
 ## 17. UX reference audit
 

@@ -37,26 +37,61 @@
 
 # NEXT
 
-## Issue #27 — Seller Offer Workspace
+## UI redesign stabilization gate — feature freeze
 
-Статус: **Slice Contract APPROVED** (Product Owner + Controller contract-review PASS, 2026-09-22) — `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md`. Implementation в работе.
+Статус: **PRODUCT FEATURE FREEZE / UX RESET** — Product Owner decision 2026-09-22.
 
-Следующая отдельная работа:
+Текущий UX признан неудовлетворительным. До закрытия этого gate новые product capabilities из очереди ниже не начинаются.
 
-- реализовать на отдельной ветке по утверждённому Slice Contract (hub, offer grid/cards, inline/modal create-edit, редизайн trading points/contacts/Change Set confirm — см. contract разделы 2, 5);
-- следовать verification plan контракта (раздел 8) и manual acceptance сценарию (раздел 9) перед merge/checkpoint.
+Ветка `slice/seller-offer-workspace` / `3b029d3` **не допускается к PR/merge/checkpoint**. Её локальные automated results не являются UX acceptance, её page composition не является базой нового UI.
 
-Подробности: GitHub Issue #27, `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md`.
+**Судьба ветки (Product Owner decision, 2026-09-23): удалить после переноса полезного.** Ревью показало, что переносить нечего: единственная независимая находка — исправление перехвата фокуса в overlay — относится к компонентам `Modal.tsx` и `BottomSheet.tsx`, которых на `main` не существует (созданы коммитами `4818261` и `f5c2dfb` самой ветки). Патч применять не к чему, поэтому сохранено правило, а не код: `DESIGN_SYSTEM.md` §13.1. История коммитов остаётся в Git; сама ветка удаляется, чтобы будущий агент не принял её за актуальное направление разработки.
+
+Обязательная последовательность gate:
+
+1. преобразовать authoritative wireframes в compact navigation/state/action/data specification для ключевых buyer/seller flows;
+2. включить в specification обязательный глобальный `Русский / Қазақша` switch и полное покрытие обоих языков для всех KAIDA-owned strings, system states, accessibility copy и catalog-owned display data;
+3. определить responsive rules для desktop без попытки дорисовать 42 независимых desktop-экрана;
+4. подготовить статический либо fixture-driven prototype ключевых flows поверх нового UI shell и показать каждый core flow на русском и казахском;
+5. получить Product Owner UX acceptance композиции, переходов, состояний и обеих языковых версий;
+6. подготовить localization Slice Contract (locale persistence/fallback, catalog representation, bilingual Search proof, единая модель перевода seller-authored names/addresses/comments) и переписать Slice Contract #27 либо заменить его несколькими компактными UI slice contracts;
+7. реализовать принятый UI поверх существующих domain modules, API, DB и closed core contracts;
+8. для каждого vertical slice выполнить targeted proof в обеих локалях, full branch CI, manual acceptance, diff audit, merge, merged-main CI и checkpoint по `PROJECT_RULES.md` §19.
+
+Working draft для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md`. Он остаётся draft до Product Owner review и не разрешает начинать production UI branch.
+
+### Ход gate
+
+| Шаг | Статус на 2026-09-23 |
+|---|---|
+| 1–3 | Выполнены как draft: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
+| 4 | **Прототип сдан.** Проход 3 вайрфреймов по ТЗ `docs/product/WIREFRAME_TASK_PASS3.md`: 63 состояния × `ru`/`kk`, 7 desktop-вариантов, разделы длинного контента, переходов и доступности. Ревью выполнено, список обязательных правок передан автору |
+| 5 | **Не получен.** UX acceptance невозможен до закрытия правок прохода 3 |
+| 6–8 | Не начаты |
+
+Решения Product Owner, принятые 2026-09-23 по итогам ревью прохода 3 (каждое зафиксировано в файле-владельце):
+
+- внешние зависимости — `PROJECT_RULES.md` §10.1;
+- подсказки адреса из собственного справочника, без внешнего геокодера и без обязательной карты — `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` §9, `FEATURE_MAP.md`;
+- единица измерения — controlled choice + `Другое` — `FEATURE_MAP.md`;
+- модель локализации каталога и правила автоперевода seller-контента — `FEATURE_MAP.md`;
+- текст ошибки без декоративного технического кода — `DESIGN_SYSTEM.md` §7.1;
+- поведение фокуса в overlay — `DESIGN_SYSTEM.md` §13.1.
+
+Граница redesign: presentation layer можно пересобирать с нуля; изменения auth/ownership/privacy/persistence/pricing/Offer lifecycle/ChangeSet/public API проходят отдельную contract revision по `PROJECT_RULES.md` §4 и §18.2.
+
+Подробности и исторический rejected pass: GitHub Issue #27, `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md` §10–11.
 
 ---
 
-# COMMITTED — после #27
+# FROZEN COMMITTED QUEUE — после UI redesign checkpoint
 
-Порядок выполняется сверху вниз. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
+Эти stages сохраняют порядок, но ни один из них не стартует до закрытия UI redesign stabilization gate. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
 |---|---|---|
 | 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
+| 1a | KAIDA address directory на открытых данных (подсказки адреса) | `FEATURE_MAP.md` / future Slice Contract |
 | 2 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
 | 3 | Seller Freshness Reminder | Issue #32 |
 | 4 | Nearby result-first correction | Issue #34 |
@@ -69,9 +104,10 @@
 
 ### Ключевые dependencies
 
-- Seller Entry и Trading Points Workspace закрыты и являются prerequisite для Seller Offer Workspace (#27, текущий NEXT).
-- Geo fallback запланирован сразу после #27: contract уже полностью утверждён (2026-09-22, S8 revision), не пересекается по затрагиваемым экранам с Offer Workspace (форма Location create/edit, а не offer cards), и больше не имеет причины ждать freshness contour — эта причина была сформулирована до решения о вайрфрейме как authoritative UX target (`PROJECT_RULES.md` §18.1).
-- Freshness Policy и Reminder идут после Offer Workspace и geo fallback, потому что reconfirmation должен жить в нормальном seller UX.
+- Seller Entry и Trading Points Workspace закрыты и остаются проверенным product core; их текущая presentation не обязана сохраняться в redesign.
+- Geo fallback остаётся первым product stage после redesign checkpoint: contract утверждён (2026-09-22, S8 revision), но feature freeze запрещает начинать его раньше.
+- Address directory (stage 1a) идёт **после** geo fallback, а не вместо него: подсказки адреса — улучшение поверх пути, который обязан работать без них (`PROJECT_RULES.md` §10.1). Ручной ввод адреса, действие «я на точке» и вставка ссылки на карту остаются полноценными путями и после появления справочника. Первый шаг stage 1a — проверка фактического покрытия адресов Алматы в выбранном открытом источнике; её результат определяет объём, а не сам факт старта.
+- Freshness Policy и Reminder идут после redesign checkpoint и geo fallback, потому что reconfirmation должен жить в принятом seller UX.
 - Search Sorting выполняется после Freshness Policy, чтобы sorting не закрепил устаревшую ranking semantics.
 - M1 вводит настоящие seller-provided Offer media end-to-end; временные pre-MVP visuals M1 не заменяют.
 

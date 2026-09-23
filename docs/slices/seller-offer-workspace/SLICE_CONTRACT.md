@@ -2,7 +2,7 @@
 
 **Issue:** #27 — Seller Offer Workspace: marketplace cards and simplified manual seller input
 
-**Status:** APPROVED — Product Owner approval 2026-09-22 (Controller contract-review PASS same day)
+**Status:** IMPLEMENTATION REJECTED FOR MERGE — UX reset required by Product Owner decision 2026-09-22; contract must be revised or decomposed before reimplementation
 
 **Base main:** `239656d` (docs-only maintenance on top of checkpoint below)
 
@@ -144,3 +144,47 @@ After targeted verification: one full regression run and branch CI on the final 
 Controller/Product Owner approval is required before implementation. No production code, migration, tests, CI, manual acceptance, merge, tag or further Issue #27 work belongs to this contract-only pass.
 
 **Approved 2026-09-22.** Implementation may proceed on a dedicated branch per `PROJECT_RULES.md` §19.
+
+## 10. Historical rejected pass — wireframe-driven deviation (2026-09-22)
+
+This section records historical implementation evidence from the rejected `3b029d3` pass; it is not current implementation authority. At the time, the pass treated the wireframe as automatically cancelling STOP for conflicts. Section 11 and the revised `PROJECT_RULES.md` §18.1–§18.3 supersede that interpretation.
+
+The seller-facing screens described above (Parts A/B) were implemented as written, but a direct visual comparison against the bundled wireframe artifact — opened via a locally-saved copy of its HTML, since the live `claude.ai/artifact/...` URL is blocked for headless/automated access by Cloudflare — showed the artifact's own seller screens (`2a`–`2i`, `3a`) go materially beyond this contract's presentation text. The rejected pass changed the following areas:
+
+- **Dark theme, scoped to `/seller/**` only.** New CSS custom-property overrides (`src/app/seller/seller-theme.module.css`) cascade through a wrapper in `src/app/seller/layout.tsx`. Buyer-facing pages are untouched. `--primary` (the existing violet accent) is unchanged; a new `--primary-accent` token was added for text/border legibility on dark surfaces (also added to `globals.css :root` as an alias to `--primary`, so it degrades safely if ever referenced in the light theme).
+- **Route-based tabs instead of one stacked page.** `/seller` (hub, compact summary), `/seller/offers` (full searchable/filterable/location-grouped workspace — the wireframe's own `3a` caption literally says it "opережает Slice Contract по #27"), `/seller/points` (trading points), `/seller/contacts` (contacts, reached via a settings icon on the hub — the wireframe's own tab bar has no contacts tab). A third "Статистика" tab is rendered disabled/"скоро" — analytics is Tier 3 / Issue S33, still out of scope; this follows the same placeholder precedent as `WIREFRAME_BRIEF.md`'s Tier 4 items.
+- **`BottomSheet` component** (`src/app/seller/_components/BottomSheet.tsx`), sibling to the existing `Modal.tsx`, used for offer create/edit, the change-set confirm step, and trading-point create/edit — matching the wireframe's "шторка" (bottom-sheet) interaction pattern for all in-workspace forms, in place of a centered dialog.
+- **Offer Workspace grouping/filtering is presentation-only**, derived client-side from the existing `SellerOfferView[]` already fetched — no new endpoint. Groups by `location.id`; filter chips reuse the existing `price === null` "needs attention" signal (not a new freshness threshold, which stays out of scope per #31/#32) and `status === 'inactive'`.
+- **Change-set price diff** (old price struck through → new) is best-effort and purely client-side: the offer being edited is already known to the caller before the change-set exists, so its price is threaded through as an optional prop for display only. A fresh deep-link reload of `/seller/change-sets/[id]` has no such client state and falls back to showing just the new price — a graceful degradation, not a new read field on the closed `SellerChangeSetItemView` contract.
+- **Contacts screen rebuilt as per-channel toggles** (`role="switch"`) with a live "as the buyer sees it" preview and a no-channel warning banner, still the same `PUT /api/seller/contacts` endpoint and the same four fields (phone/WhatsApp/Telegram/Instagram — the wireframe shows three; Instagram is kept as a fourth row since the data model is unchanged).
+- **Hub "Последние изменения"** shows one honest, uniform "обновлено {relative time}" phrasing rather than the wireframe's two different phrasings ("подтверждено"/"цена изменена"), since the current data (`lastConfirmedAt` only) cannot actually distinguish those two cases without a change-history log that doesn't exist — inventing the distinction would violate Design System §7's "truthful data" rule.
+
+None of this reopens S1/S3/S4/S5/S8/S10/S12/#35/#36/Mandatory-Price — every mutation still goes through the exact same endpoints, and the `SellerChangeSet → SellerChangeItem → confirmation → Offer` architecture is unchanged. Full regression (287 unit / 143 integration / 95 E2E across both projects) stayed green after this pass.
+
+## 11. Product Owner UX reset decision (2026-09-22)
+
+После визуальной оценки Product Owner отклонил эту implementation как основу для merge: результат не достигает целевого UX bundled wireframes. Automated regression доказывает сохранность core contracts, но не заменяет UX acceptance.
+
+Решение:
+
+- `slice/seller-offer-workspace` / `3b029d3` не открывается как release PR, не сливается в `main` и не получает checkpoint tag; по решению Product Owner от 2026-09-23 ветка удаляется после переноса полезного — переносить оказалось нечего (см. §12);
+- §10 описывает историческую попытку и не является принятым target implementation;
+- следующая реализация начинается с navigation/state/action/data specification и статического либо fixture-driven prototype ключевых flows;
+- presentation layer разрешено пересобрать с нуля поверх существующих domain modules, API, DB и closed core contracts;
+- отдельные primitives/helpers из rejected branch могут быть перенесены только после review и не делают её page composition принятой (фактический результат review — см. §12);
+- новый production pass начинается только после Product Owner UX acceptance прототипа и revised/decomposed Slice Contract;
+- до redesign checkpoint действует feature freeze из `docs/product/EXECUTION_PLAN.md`.
+
+Это решение заменяет историческую трактовку §10 о том, что wireframe автоматически отменяет STOP для business/data conflicts. Актуальная граница определена `PROJECT_RULES.md` §18.1–§18.3: wireframe authoritative для UX; изменение проверенного core требует явной contract revision.
+
+## 12. Результат review отклонённой ветки (2026-09-23)
+
+§11 допускал перенос полезных изолированных primitives/helpers после отдельного review. Review выполнен. **Переносить нечего.**
+
+Единственная находка, не зависящая от отклонённой композиции, — исправление перехвата фокуса в overlay: эффект, устанавливавший focus trap, зависел от колбэка `onClose`, родитель пересоздавал колбэк на каждое нажатие клавиши, и фокус уезжал на первый элемент после каждого введённого символа. Исправление — держать колбэк в ref, оставив в зависимостях эффекта только факт открытия.
+
+Перенести его отдельным bugfix-slice невозможно: компоненты `src/app/_components/Modal.tsx` и `src/app/seller/_components/BottomSheet.tsx` на `main` отсутствуют — они созданы коммитами `4818261` и `f5c2dfb` самой отклонённой ветки. Патч применять не к чему.
+
+Поэтому сохранено правило, а не код: `DESIGN_SYSTEM.md` §13.1 «Overlay focus management». Новая реализация overlay обязана ему следовать.
+
+Ветка удаляется. История коммитов остаётся в Git и доступна по SHA, если понадобится посмотреть детали.
