@@ -65,8 +65,8 @@ Working draft для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md
 | Шаг | Статус на 2026-09-23 |
 |---|---|
 | 1–3 | Выполнены как draft: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
-| 4 | **Pass 3.1 проверен в Chrome; остался один переход F2.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. Исправления из §10 приняты; в `S-07__address-selected` адрес расходится с вариантом из `zero-create`, а открытый список ошибочно объявляет вариант выбранным для экранного диктора. Точный список — `WIREFRAME_PASS3_REVIEW.md` §11. Достаточно точечной правки этой пары кадров на двух языках |
-| 5 | **Не получен.** UX acceptance ожидает исправленный переход `S-07__zero-create → address-selected` и Product Owner visual approval |
+| 4 | **Прототип проверен; замечания закрыты.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. `S-07__zero-create → address-selected` совпадает по адресу в `ru`/`kk`; до выбора `aria-selected="false"`. Остальные исправления приняты ранее. Evidence и вердикт — `WIREFRAME_PASS3_REVIEW.md` §12 |
+| 5 | **Ожидает Product Owner visual acceptance.** После одобрения композиции, переходов, состояний и двух языковых версий можно переходить к шагу 6 |
 | 6–8 | Не начаты |
 
 Решения Product Owner, принятые 2026-09-23 по итогам ревью прохода 3 (каждое зафиксировано в файле-владельце):
