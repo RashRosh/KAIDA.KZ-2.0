@@ -10,12 +10,12 @@
 
 1. closed contracts и утверждённый текущий Slice Contract определяют поведение/API/privacy/business semantics;
 2. `docs/PROJECT_RULES.md` определяет process и stable boundaries;
-3. explicit Product Owner decisions определяют утверждённые product/UX revisions;
-4. этот Design System определяет visual/presentation rules;
-5. `docs/product/UX_REFERENCE_INDEX.md` и внешние references дают advisory evidence;
+3. explicit Product Owner decisions определяют утверждённые product/UX revisions — включая актуальную цепочку UX-reset artifacts из `PROJECT_RULES.md` §18.1; исторический набор из 42 кадров сам по себе больше не является прямым implementation target;
+4. этот Design System определяет visual/presentation rules и приводится в соответствие с этой UX-целью по мере редизайна каждой области;
+5. `docs/product/UX_REFERENCE_INDEX.md` и прочие внешние references дают advisory evidence; исторические внутренние wireframe exports применяются только через authority lifecycle из `PROJECT_RULES.md` §18.1;
 6. общие привычки исполнителя идут последними.
 
-Design System не имеет права самостоятельно менять closed contract. Если визуальное решение требует contract revision — STOP и отдельное согласование.
+Design System не имеет права самостоятельно менять closed business/data contract. Если конкретный экран вайрфрейма требует новой бизнес-механики, которой нет ни в одном closed contract — STOP и explicit вопрос Product Owner по `PROJECT_RULES.md` §18.1, прежде чем реализовывать эту механику.
 
 Tokens/components вводятся только когда нужны открытому slice. Не рефакторировать весь UI «ради системы».
 
@@ -196,6 +196,24 @@ Geolocation никогда не становится скрытым prerequisite
 
 Когда допустимое множество реально известно системе, controlled choice предпочтительнее свободного ввода. Точный control определяется current Slice Contract и domain semantics.
 
+### Language switch
+
+Shared app shell содержит постоянно доступный переключатель русского и казахского языков на buyer и seller routes, включая anonymous state.
+
+- на desktop видимы полные названия `Русский / Қазақша`;
+- на mobile используется компактный прямой переключатель `РУ / ҚАЗ`;
+- tap по неактивному mobile-варианту сразу меняет язык без menu, sheet или confirmation step;
+- полные названия языков сохраняются в `aria-label` mobile controls;
+- флаги не используются;
+
+- переключатель не конкурирует с primary action текущего экрана;
+- active language различим визуально и программно;
+- minimum touch target каждого action — `44x44px`;
+- смена языка не сбрасывает текущий маршрут, введённые данные или незавершённую пользовательскую задачу;
+- layout должен выдерживать длину русского и казахского текста без clipping, overlap и горизонтального overflow;
+- локализуются visible copy, validation/error/status text, placeholders, `aria-label`, `aria-describedby`, `title`, alt text и metadata;
+- hardcoded user-facing strings в production components не допускаются после введения localization layer.
+
 ## 5. Cards and marketplace composition
 
 Buyer и Seller рабочие поверхности стремятся к marketplace/card composition, а не к technical tables или explanatory landing pages, если таблица не является объективно лучшим способом выполнить user task.
@@ -251,6 +269,21 @@ M2 добавляет video только при подтверждённой н�
 - raw Buyer/Seller coordinates никогда не показываются;
 - relative freshness text не притворяется live timer.
 
+## 7.1 System states (loading / offline / server error)
+
+Cross-cutting across every buyer and seller screen — added 2026-09-22 as part of promoting `UX-OBS-002` to an owned Design System rule ahead of the wireframe-driven redesign, so every screen touched during that redesign follows one pattern instead of inventing its own. Source: wireframe screens `4a`–`4c`.
+
+- **Loading:** the skeleton shape mirrors the shape of the content it precedes — no layout shift when real content replaces it. A bare spinner is acceptable only where no meaningful shape exists yet (e.g. first paint of an unknown-length list).
+- **Offline / stale data:** if a cached previous result exists, show it with a visible staleness cue and an explicit `Обновить` action, instead of a blank/offline screen. Only fall back to a dedicated offline state when there is no cached data to show.
+- **Server error severity — three tiers, chosen by whether the screen is meaningful without the failed data:**
+  - full-screen error — only when the screen has nothing useful to show without it;
+  - local block error — the failed section shows its own error/retry, the rest of the screen stays usable;
+  - toast — for a failed background/non-blocking action that doesn't invalidate what's already on screen.
+- **Текст ошибки содержит ровно две вещи** (Product Owner decision, 2026-09-23): что не получилось и что пользователь может сделать. Пример: `Не удалось сохранить. Проверьте соединение и повторите.` Декоративный технический идентификатор (код вида `5F2A`, «обратитесь в поддержку с номером…») **не показывается**: продукт не отдаёт таких кодов, и поддержка не сможет найти по нему запрос. Correlation ID вводится только вместе с реальной системой логирования и поддержки, отдельным решением.
+- **Seller input is never silently lost** to a network/loading/error interruption — an in-progress form value survives a failed submit or a lost connection at least until the Seller explicitly leaves the flow; this does not introduce a new persisted draft/API/DB contract beyond what a slice's own contract already allows (e.g. #35's in-flow product-first continuity).
+
+This section defines the pattern, not a new component library commitment — each redesigned slice implements it with whatever existing tokens/components fit and calls out in its own Slice Contract if a genuine new component is needed.
+
 ## 8. Buyer screens
 
 ### Search
@@ -287,6 +320,12 @@ Seller workspace должен давать очевидный выбор меж�
 
 Multiple Locations отображаются как понятные trading-point cards, когда capability реализована. Seller-level contacts не дублируются по Location без отдельного model decision.
 
+### Seller workspace navigation and in-flow forms
+
+- Seller navigation показывает только существующие destinations. Disabled/`скоро` capability не занимает постоянный слот.
+- Точная mobile/desktop navigation composition, тема и тип in-flow surface берутся из визуально принятого прототипа и фиксируются Slice Contract затронутой поверхности.
+- Create/edit/confirm может использовать полноэкранный шаг, dialog, side sheet или bottom sheet, если выбранный pattern сохраняет одну state machine, явный review/confirm и правила accessibility из §13. Не ссылаться на компоненты отклонённой ветки как на существующую основу.
+
 ## 10. Auth presentation
 
 Phone/OTP auth использует единый modal/dialog pattern поверх текущего context, когда caller flow этого требует.
@@ -322,9 +361,19 @@ Baseline: WCAG 2.1 AA.
 - visible labels on forms;
 - существующие `role=status`, `role=alert`, `aria-live`, `aria-invalid`, `aria-describedby` не ослабляются;
 - minimum touch target `44x44px`;
-- `<html lang="ru">`;
+- `<html lang>` динамически соответствует активному `ru` или `kk`;
 - `prefers-reduced-motion`;
 - state не полагается только на color.
+
+### 13.1 Overlay focus management
+
+Правило для modal, bottom sheet и любого другого overlay с ловушкой фокуса:
+
+- при открытии фокус переводится внутрь overlay **один раз**; при закрытии возвращается на элемент, который его открыл;
+- пока overlay открыт, фокус **не перезахватывается** при изменениях состояния — ввод в поле внутри overlay не должен возвращать фокус на первый элемент;
+- клавиатурный обработчик и ловушка фокуса живут на протяжении всей открытой сессии overlay и не пересоздаются на каждый рендер.
+
+**Почему это записано.** В отклонённой реализации прохода #27 эффект, устанавливавший ловушку фокуса, зависел от колбэка `onClose`. Родитель пересоздавал колбэк на каждое нажатие клавиши, эффект перезапускался, и фокус уезжал на первый элемент после каждого введённого символа — форма внутри bottom sheet становилась непригодной. Рабочее решение — держать колбэк в ref и оставить в зависимостях эффекта только факт открытия. Компоненты той ветки в `main` не переносятся; сохраняется само правило, чтобы новая реализация overlay не повторила этот дефект.
 
 ## 14. Iconography
 
@@ -361,10 +410,16 @@ Messenger logos — official brand assets, когда соответствующ
 7. fake review/availability/urgency отсутствуют;
 8. relevant targeted automated proof существует;
 9. final executable branch head имеет green full CI;
-10. пользовательский flow прошёл manual acceptance.
+10. пользовательский flow прошёл manual acceptance;
+11. изменённая поверхность полностью проверена на русском и казахском, включая system/error states, accessibility copy и длинный текст без overflow.
 
 ## 17. UX reference audit
 
 Maintenance audit #37 сверил текущие rules с Product Owner UX corpus через `KEEP / ADAPT / REJECT / GAP`; conclusions зафиксированы в `docs/product/UX_REFERENCE_INDEX.md`.
 
-Audit может уточнять presentation rules, но не имеет права молча менять closed product contracts. Этот раздел остаётся историческим указателем на метод, а не execution roadmap.
+Audit может уточнять presentation rules, но не имеет права молча менять closed business/data contracts. Этот раздел остаётся историческим указателем на метод для generic внешних references, а не execution roadmap.
+
+Второй wireframe pass из `WIREFRAME_BRIEF.md` в 2026-09-22 временно был прямой UX-целью, но после UX reset pass 3
+сохраняется как исторический evidence/inventory. Текущую применимость поверхности определяет цепочка
+`UX_NAVIGATION_STATE_SPEC.md` → `WIREFRAME_TASK_PASS3.md` → `WIREFRAME_PASS3_REVIEW.md` → визуально принятый
+исправленный прототип. Классификация всё ещё полезна для проверки, не требует ли дизайн новой business-механики.

@@ -6,15 +6,39 @@
 > `BUYER_JOURNEY.md`, `FEATURE_MAP.md`, `EXECUTION_PLAN.md`, и разбор экранов 1a–1l из первого захода
 > (`KAIDA Wireframes.dc.html`).
 
+> **Инструкции на третий заход вынесены в отдельный документ:** `docs/product/WIREFRAME_TASK_PASS3.md`.
+> Он отменяет tier-инструкции этого брифа для следующего захода дизайнера (что удалить, объединить, переработать
+> и добавить). Результат этого захода и обязательные правки — `docs/product/WIREFRAME_PASS3_REVIEW.md`.
+> Настоящий файл сохраняется как история двух предыдущих заходов и опись 42 кадров.
+> Поэтому более поздние формулировки ниже об authoritative-статусе второго захода являются историей решения,
+> а не текущей командой реализации. Актуальная authority lifecycle — `PROJECT_RULES.md` §18.1.
+
 ## Статус после второго захода (2026-09-22)
 
 Второй заход, который готовил этот бриф, состоялся: bundled-артефакт (42 экрана, идентификаторы `1a`–`5e`,
 Tier 0–4) — https://claude.ai/artifact/5KhjaPcLntxAY4Mk2BC9zF. Сам артефакт фиксирует свой охват дословно:
 «Мобильный набор по брифу закрыт: 42 экрана, Tier 0–4… Осталась desktop-раскладка под UX1A/UX2A.»
 
-Это **advisory-материал** того же типа, что и внешние UX references (`PROJECT_RULES.md` §18,
-`UX_REFERENCE_INDEX.md`), не новый Slice Contract и не изменение `EXECUTION_PLAN.md`. Разбор по
-`KEEP/ADAPT/REJECT/GAP` — в `UX_REFERENCE_INDEX.md`, раздел «Follow-up spot-check (2026-09-22)».
+Изначально это был **advisory-материал** того же типа, что и внешние UX references (`PROJECT_RULES.md` §18,
+`UX_REFERENCE_INDEX.md`). Разбор по `KEEP/ADAPT/REJECT/GAP` — в `UX_REFERENCE_INDEX.md`, раздел «Follow-up
+spot-check (2026-09-22)».
+
+**Обновление статуса, 2026-09-22 (позже в тот же день):** Product Owner признал текущий продуктовый UX
+неудовлетворительным и отдельным решением поднял именно этот артефакт до **authoritative текущей UX-цели**
+presentation-слоя — см. `PROJECT_RULES.md` §18.1 и обновлённый раздел `UX_REFERENCE_INDEX.md`. Он по-прежнему не
+подменяет собой Slice Contract и не переписывает `EXECUTION_PLAN.md` напрямую (порядок работ и business-приоритеты
+не меняются этим решением), но перестаёт быть просто advisory: уже реализованные экраны, которые он покрывает,
+приводятся к нему как к целевому UI через Slice Contract соответствующей области; ещё не реализованные —
+проектируются по нему напрямую. Экраны, требующие новой business-механики (не только presentation), а не только
+переоформления — по-прежнему проходят через explicit Product Owner подтверждение до реализации.
+
+**Обязательное дополнение Product Owner, 2026-09-22:** KAIDA полностью поддерживает русский и казахский языки.
+Отсутствие language switch в отдельных кадрах артефакта не означает, что он optional: новый shared app shell
+обязан содержать switch русского/казахского языка: `Русский / Қазақша` на desktop и прямой `РУ / ҚАЗ` в один tap
+на mobile без промежуточного меню. Каждый core flow прототипируется и принимается в обеих локалях. Все
+KAIDA-owned user-facing strings, system states, validation/errors, accessibility copy и catalog-owned display data
+имеют версии `ru` и `kk`. Для seller-authored names/addresses/comments localization Slice Contract обязан выбрать
+единую модель перевода и fallback; отсутствие решения нельзя молча подменять разным поведением на разных экранах.
 
 Что это меняет по тирам ниже:
 

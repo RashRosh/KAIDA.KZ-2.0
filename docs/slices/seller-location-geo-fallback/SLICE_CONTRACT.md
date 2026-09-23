@@ -1,11 +1,13 @@
 # Seller Location geo fallback — approved S8 revision
 
-**Status:** `APPROVED — S8 REVISION ACCEPTED, AWAITING EXECUTION_PLAN SCHEDULING`
+**Status:** `APPROVED — SCHEDULED IN EXECUTION_PLAN.md, COMMITTED #1 (next after Issue #27)`
 
 **Approved:** 2026-09-22, Product Owner (RashRosh), in-conversation approval of Section 0's STOP write-up. Sections
-1–8 below are accepted as the Slice Contract content for this capability. Implementation still does not start
-until `EXECUTION_PLAN.md` actually schedules this slice at a re-evaluation gate — see that file's `INSERTION
-CANDIDATES` entry for current placement.
+1–8 below are accepted as the Slice Contract content for this capability. Scheduled the same day into
+`docs/product/EXECUTION_PLAN.md`'s frozen committed queue as stage 1 after the UI redesign checkpoint, ahead of Freshness Policy — approval
+of the contract and scheduling of the work, previously two separate steps, are both now complete. Implementation
+may begin only after the UI redesign stabilization gate closes and `EXECUTION_PLAN.md` makes this the active stage
+(one product slice at a time on `main`). The rejected Issue #27 implementation is not a prerequisite.
 
 **Base product checkpoint:** `v0.0.24-seller-entry`
 
@@ -14,9 +16,9 @@ CANDIDATES` entry for current placement.
 **Source:** UX follow-up spot-check, `docs/product/UX_REFERENCE_INDEX.md` (2026-09-21), finding #1 of the "Карта пути KAIDA" walkthrough artifact.
 
 Section 0 is the `PROJECT_RULES.md` §4 STOP write-up required before any closed contract may be revised; it has
-been reviewed and approved. Sections 1–8 are the accepted Slice Contract content. No implementation may start
-until `EXECUTION_PLAN.md` places this slice in the active queue — approval of the contract and scheduling of the
-work are two separate steps.
+been reviewed and approved. Sections 1–8 are the accepted Slice Contract content. The stage is scheduled but
+frozen: no implementation may start until the UI redesign checkpoint closes and `EXECUTION_PLAN.md` makes this
+the active stage.
 
 ## 0. STOP — closed-contract revision request
 
@@ -129,3 +131,27 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 6. Paste unrelated text and confirm a clear, non-technical error appears and nothing saves.
 7. Verify via existing buyer Search that no raw coordinates are exposed for this Location.
 8. Check mobile and desktop layout for overflow and touch targets.
+
+## 9. Product Owner decision, 2026-09-23 — address suggestions from a KAIDA-owned directory
+
+Проход 3 вайрфреймов нарисовал поле адреса с подсказками и подтверждение точки на интерактивной карте. Это конфликтовало с §3 выше. Product Owner разрешил конфликт так:
+
+**Принято.** Подсказки адреса допускаются, но только из **собственного справочника KAIDA** на открытых данных (в первую очередь OpenStreetMap), размещённого внутри системы. Внешний платный геокодер не подключается — `PROJECT_RULES.md` §10.1.
+
+**Отклонено.** Интерактивная карта как обязательный элемент flow. Подтверждение точки на карте не является необходимым шагом создания Location.
+
+**Целевой сценарий:**
+
+1. продавец начинает вводить адрес;
+2. KAIDA показывает варианты из собственного справочника;
+3. выбор варианта даёт `addressText` и координаты;
+4. если нужного адреса нет — видимый путь `Ввести вручную`;
+5. для ручного адреса координаты задаются существующим действием «я на точке» (browser geolocation, уже реализовано) либо вставкой ссылки на карту по механизму разделов 1–8 этого контракта.
+
+**Что это меняет в §3.** Пункт «reverse/forward geocoding or automatic address-to-coordinate conversion stays out» больше не абсолютен: он продолжает запрещать **вызов внешнего сервиса геокодирования**, но не запрещает сопоставление адреса с координатой по собственным данным. Пункт про embedded interactive map/picker остаётся в силе полностью.
+
+**Что это НЕ меняет.** Owner-scoped mutation, диапазоны валидации, парная согласованность координат и privacy boundary (никаких raw geo в buyer-facing API) — без изменений. Существующее on-site действие остаётся и не ослабляется.
+
+**Границы работ.** Сам справочник (импорт и обновление открытых данных, хранение, поиск с опечатками) — **отдельная capability и отдельный slice**, он не растворяется в UI-работе и не входит в scope разделов 1–8. Перед его планированием отдельно проверяется фактическое покрытие адресов Алматы в выбранном источнике. Недостаточное покрытие не ломает сценарий: ручной ввод остаётся полноценным путём.
+
+**Статус.** Это решение зафиксировано, но реализация по-прежнему заморожена до закрытия UI redesign stabilization gate (`docs/product/EXECUTION_PLAN.md`). Формальная ревизия текста §3 и S8 §11–12 выполняется при старте этого stage, а не задним числом.

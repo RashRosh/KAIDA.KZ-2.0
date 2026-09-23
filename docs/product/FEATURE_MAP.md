@@ -85,11 +85,61 @@ Seller Input
 - Seller freshness degradation and reminders;
 - explicit Search sorting / visible proximity;
 - real Offer media (M1);
+- complete Russian/Kazakh localization with a global language switch;
+- KAIDA-owned address directory built on open data (OpenStreetMap) for Location address suggestions;
 - Market internal navigation as future spatial capability.
 
 Наличие capability в этом разделе **не означает**, что её можно начать вне текущей очереди.
 
 ## Stable capability principles
+
+### Russian / Kazakh localization
+
+KAIDA is a bilingual product. Every KAIDA-owned user-facing string must exist in Russian and Kazakh: navigation, headings, buttons, hints, validation, errors, empty/loading/offline states, statuses, confirmation text, auth, accessibility labels, metadata and other system copy.
+
+The shared app shell provides a visible Russian/Kazakh language switch for anonymous buyers, authenticated buyers and Sellers. The selected language applies consistently across buyer and seller routes and survives navigation and reload on the same device. Responsive presentation and interaction are owned by `DESIGN_SYSTEM.md`.
+
+Catalog-owned display data needed to complete a user task (for example Product and Category names) must have Russian and Kazakh presentation. Search must accept the supported names/aliases in both languages.
+
+**Catalog localization model (Product Owner decision, 2026-09-23).** `Product` stays one language-independent entity. Its display names become per-language values, and aliases are linked to a language as well: `Product → localized names → localized aliases`. System catalog names are curated and verified, never machine-translated at render time. Two forbidden shortcuts: packing Russian and Kazakh into the single `name` column, and treating today's language-agnostic aliases as a localization system. The current model is not reshaped before the localization slice starts.
+
+**Seller-authored content translation (Product Owner decision, 2026-09-23).** Automatic translation is the target model, and these rules are fixed now:
+
+1. the Seller's original text is always the source of truth;
+2. the Seller writes it once, in their own language;
+3. translation is produced automatically once that capability exists;
+4. the reader can always reach the original;
+5. editing the original makes the previous translation stale and it must be regenerated;
+6. a failed translation falls back to the original — neither seller nor buyer flow breaks;
+7. machine output never becomes the only stored text;
+8. in the first stage Search does not depend on machine translation of seller comments; product search runs through the Product Catalog and aliases.
+
+**Scope of seller translation (Product Owner decision, 2026-09-23).** Only the Seller's Offer comment is machine-translated. The Seller may write it in any language regardless of the interface language; its language is detected from the text, never assumed from the interface. Buyers see it in their interface language with a translation mark and access to the original. Seller name, trading-point name, address and custom price unit are always shown as written, in every language. The translator is a server-side LLM; until it is connected, the Seller-facing «Проверить перевод» action is hidden and buyers see the original. The whole interface is bilingual from the first release, with no Russian-only screens behind the language switch. Kazakh KAIDA-owned strings and Kazakh catalog names may be drafted by an LLM but are verified by a native Kazakh speaker before merge; machine translation at runtime is used only for Seller-authored data (the comment).
+
+Storage shape and exact behavior are decided in the three localization Slice Contracts (`docs/slices/localization-foundation/`, `docs/slices/catalog-localization/`, `docs/slices/seller-comment-translation/`), not here. Per §10.1 of `PROJECT_RULES.md`, the translation provider is an improvement over a working path, never a required dependency of seller or buyer flows.
+
+No UI slice is complete if its changed user-facing surface works in only one supported language. Exact locale storage, URL strategy, fallback behavior and seller-authored content translation belong to the localization Slice Contract and must not fragment across individual screens.
+
+### Offer price unit
+
+Единица измерения — controlled choice с коротким закреплённым списком и вариантом `Другое` со свободным вводом (Product Owner decision, 2026-09-23). Свободный ввод как основной механизм не используется: он быстро порождает несовместимые варианты одного и того же значения (`кг`, `килограмм`, `кг.`, `за кг`).
+
+Первый список: `кг`, `шт`, `л`, `упак.`, `другое`.
+
+`100 г`, `500 г`, `1,5 кг` и подобное — **не** единицы измерения, а количество или размер упаковки. Если такая потребность появится, она моделируется отдельной сущностью, а не растворяется в поле единицы.
+
+Wireframe может показывать этот controlled choice, но production implementation требует contract decision о canonical
+codes (`kg`, `piece`, `liter`, `package`, `other` либо эквивалент), локализованном display, legacy free-text values и
+семантике `Другое`. Хранить только русские labels как новые canonical values нельзя: это конфликтует с RU/KZ
+presentation. Существующий nullable/free-text API не меняется молча внутри UI slice.
+
+### KAIDA address directory
+
+Подсказки адреса при создании торговой точки строятся на собственном справочнике KAIDA поверх открытых данных (в первую очередь OpenStreetMap), размещённом внутри системы. Внешний платный геокодер не подключается — см. `PROJECT_RULES.md` §10.1.
+
+Сценарий: продавец вводит адрес → KAIDA предлагает варианты из своего справочника → выбор даёт `addressText` и координаты. Обязателен видимый путь `Ввести вручную`; для ручного адреса координаты задаются существующим действием «я на точке» (browser geolocation) или вставкой ссылки на карту, когда этот механизм будет реализован.
+
+Справочник — отдельная capability со своим slice: импорт и обновление открытых данных, хранение, поиск с опечатками. Перед его планированием отдельно проверяются фактическое покрытие адресов Алматы, licence/attribution requirements выбранного источника, update cadence и operational стоимость собственного hosting/index. Недостаточное покрытие или временная недоступность справочника не ломают сценарий — ручной ввод остаётся полноценным путём, а не аварийным.
 
 ### Seller freshness
 

@@ -37,42 +37,78 @@
 
 # NEXT
 
-## Issue #27 — Seller Offer Workspace
+## UI redesign stabilization gate — feature freeze
 
-Статус: **COMMITTED product slice**, следующий по очереди после закрытого #36.
+Статус: **UX target accepted; feature freeze remains until implementation gates close** — Product Owner accepted Pass 3 on 2026-09-23.
 
-Следующая отдельная работа:
+Текущий UX признан неудовлетворительным. До закрытия этого gate новые product capabilities из очереди ниже не начинаются.
 
-- открыть Issue #27;
-- проверить relevant closed contracts, включая закрытый Seller Trading Points (#36) и его multiple-Location semantics;
-- scope подтверждён Product Owner 2026-09-22 и включает редизайн уже закрытых экранов кабинета продавца (хаб, карточки точек, выбор точки при 2+, управление предложением, контакты, Change Set confirm) — см. `docs/product/WIREFRAME_BRIEF.md`, раздел Tier 1;
-- подготовить compact Slice Contract отдельным проходом, перечислив эти экраны явно;
-- не начинать implementation до approval этого contract.
+Ветка `slice/seller-offer-workspace` / `3b029d3` **не допускается к PR/merge/checkpoint**. Её локальные automated results не являются UX acceptance, её page composition не является базой нового UI.
 
-Подробности: GitHub Issue #27.
+**Судьба ветки (Product Owner decision, 2026-09-23): удалить после переноса полезного.** Ревью показало, что переносить нечего: единственная независимая находка — исправление перехвата фокуса в overlay — относится к компонентам `Modal.tsx` и `BottomSheet.tsx`, которых на `main` не существует (созданы коммитами `4818261` и `f5c2dfb` самой ветки). Патч применять не к чему, поэтому сохранено правило, а не код: `DESIGN_SYSTEM.md` §13.1. История коммитов остаётся в Git; сама ветка удаляется, чтобы будущий агент не принял её за актуальное направление разработки.
+
+Обязательная последовательность gate:
+
+1. преобразовать исходные wireframes в compact navigation/state/action/data specification для ключевых buyer/seller flows;
+2. включить в specification обязательный глобальный switch русского/казахского языка и полное покрытие обоих языков для всех KAIDA-owned strings, system states, accessibility copy и catalog-owned display data; responsive presentation следует `DESIGN_SYSTEM.md`;
+3. определить responsive rules для desktop без попытки дорисовать 42 независимых desktop-экрана;
+4. подготовить статический либо fixture-driven prototype ключевых flows поверх нового UI shell и показать каждый core flow на русском и казахском;
+5. получить Product Owner UX acceptance композиции, переходов, состояний и обеих языковых версий;
+6. подготовить localization Slice Contract (locale persistence/fallback, catalog representation, bilingual Search proof, единая модель перевода seller-authored content; решением Product Owner 2026-09-23 переводится только комментарий продавца) и переписать Slice Contract #27 либо заменить его несколькими компактными UI slice contracts;
+7. реализовать принятый UI поверх существующих domain modules, API, DB и closed core contracts;
+8. для каждого vertical slice выполнить targeted proof в обеих локалях, full branch CI, manual acceptance, diff audit, merge, merged-main CI и checkpoint по `PROJECT_RULES.md` §19.
+
+Принятая navigation/state specification для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md`. Принятие UX target разрешает подготовку Slice Contracts и UI branch; production changes выполняются только по утверждённым контрактам.
+
+### Ход gate
+
+| Шаг | Статус на 2026-09-23 |
+|---|---|
+| 1–3 | Выполнены и приняты как UX target: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
+| 4 | **Прототип проверен; замечания закрыты.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. `S-07__zero-create → address-selected` совпадает по адресу в `ru`/`kk`; до выбора `aria-selected="false"`. Остальные исправления приняты ранее. Evidence и вердикт — `WIREFRAME_PASS3_REVIEW.md` §12 |
+| 5 | **ACCEPTED 2026-09-23.** Product Owner: «принимаю Pass 3». Решение записано в `WIREFRAME_PASS3_REVIEW.md` §13 |
+| 6 | **В работе.** Localization разделён на три контракта, все **APPROVED** Product Owner 2026-09-23: `localization-foundation` → `catalog-localization` → `seller-comment-translation` (порядок реализации тот же). Revision/decomposition #27 по принятому UX target не начата; GitHub Issue #27 ещё содержит устаревшее направление «без отдельной страницы подтверждения», противоречащее принятому `S-10` |
+| 7–8 | Не начаты |
+
+Решения Product Owner, принятые 2026-09-23 по итогам ревью прохода 3 (каждое зафиксировано в файле-владельце):
+
+- внешние зависимости — `PROJECT_RULES.md` §10.1;
+- подсказки адреса из собственного справочника, без внешнего геокодера и без обязательной карты — `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` §9, `FEATURE_MAP.md`;
+- единица измерения — controlled choice + `Другое` — `FEATURE_MAP.md`;
+- модель локализации каталога и правила автоперевода seller-контента — `FEATURE_MAP.md`;
+- текст ошибки без декоративного технического кода — `DESIGN_SYSTEM.md` §7.1;
+- поведение фокуса в overlay — `DESIGN_SYSTEM.md` §13.1.
+
+Граница redesign: presentation layer можно пересобирать с нуля; изменения auth/ownership/privacy/persistence/pricing/Offer lifecycle/ChangeSet/public API проходят отдельную contract revision по `PROJECT_RULES.md` §4 и §18.2.
+
+Подробности и исторический rejected pass: GitHub Issue #27, `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md` §10–11.
 
 ---
 
-# COMMITTED — после #27
+# FROZEN COMMITTED QUEUE — после UI redesign checkpoint
 
-Порядок выполняется сверху вниз. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
+Эти stages сохраняют порядок, но ни один из них не стартует до закрытия UI redesign stabilization gate. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
 |---|---|---|
-| 1 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
-| 2 | Seller Freshness Reminder | Issue #32 |
-| 3 | Nearby result-first correction | Issue #34 |
-| 4 | Search Sorting A — freshness / proximity | Issue #12 |
-| 5 | Search Sorting B — price | Issue #12 |
-| 6 | M1 — real Offer media | Feature Map / future Slice Contract |
-| 7 | S14 — Discovery / `Для вас` | Feature Map |
-| 8 | S15 — Search learning | Feature Map |
-| 9 | S16 — Operations + MVP boundary review | Feature Map |
+| 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
+| 1a | KAIDA address directory на открытых данных (подсказки адреса) | `FEATURE_MAP.md` / future Slice Contract |
+| 2 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
+| 3 | Seller Freshness Reminder | Issue #32 |
+| 4 | Nearby result-first correction | Issue #34 |
+| 5 | Search Sorting A — freshness / proximity | Issue #12 |
+| 6 | Search Sorting B — price | Issue #12 |
+| 7 | M1 — real Offer media | Feature Map / future Slice Contract |
+| 8 | S14 — Discovery / `Для вас` | Feature Map |
+| 9 | S15 — Search learning | Feature Map |
+| 10 | S16 — Operations + MVP boundary review | Feature Map |
 
 ### Ключевые dependencies
 
-- Seller Entry и Trading Points Workspace закрыты и являются prerequisite для Seller Offer Workspace (#27, текущий NEXT).
-- Freshness Policy и Reminder идут после Offer Workspace, потому что reconfirmation должен жить в нормальном seller UX.
+- Seller Entry и Trading Points Workspace закрыты и остаются проверенным product core; их текущая presentation не обязана сохраняться в redesign.
+- Geo fallback остаётся первым product stage после redesign checkpoint: contract утверждён (2026-09-22, S8 revision), но feature freeze запрещает начинать его раньше.
+- Address directory (stage 1a) идёт **после** geo fallback, а не вместо него: подсказки адреса — улучшение поверх пути, который обязан работать без них (`PROJECT_RULES.md` §10.1). Ручной ввод адреса и действие «я на точке» доступны в initial UI; вставка ссылки активируется только на stage 1, подсказки — только на stage 1a. Принятый prototype может показывать целевую композицию с явной маркировкой future data source, но UI implementation не имеет права молча реализовать stages 1/1a внутри redesign slice. Первый шаг stage 1a — проверка покрытия адресов Алматы, licence/attribution requirements и operational модели выбранного открытого источника.
+- Freshness Policy и Reminder идут после redesign checkpoint и geo fallback, потому что reconfirmation должен жить в принятом seller UX.
 - Search Sorting выполняется после Freshness Policy, чтобы sorting не закрепил устаревшую ranking semantics.
 - M1 вводит настоящие seller-provided Offer media end-to-end; временные pre-MVP visuals M1 не заменяют.
 
@@ -109,15 +145,6 @@ Capability известна, но отдельный committed slice ещё не
 - trigger: Product Owner утверждает конкретный trust/review use case и moderation/media semantics;
 - до этого нельзя показывать fake rating/reviews;
 - если необходимость появится до MVP boundary — оформить Issue и insertion decision.
-
-## Seller Location geo fallback (approved S8 revision)
-
-Capability известна из UX follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21), подтверждена вторым независимым источником 2026-09-22 (wireframe `4e`). Slice Contract утверждён Product Owner 2026-09-22: `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (status: `APPROVED — S8 REVISION ACCEPTED, AWAITING EXECUTION_PLAN SCHEDULING`). S8 revision approval (`PROJECT_RULES.md` §4 STOP procedure) закрыт — contract готов к реализации, но ещё не размещён в активной очереди.
-
-- earliest: следующий re-evaluation gate (после seller workspace + freshness контура — см. `Re-evaluation gates` ниже);
-- trigger for actual scheduling: Product Owner переносит этот пункт в COMMITTED на одном из re-evaluation gates;
-- direction: сохранить existing browser-only action как primary path, добавить paste-and-parse fallback (координаты/ссылка на карту) только рядом с ним, без ослабления primary path;
-- default without further scheduling trigger: остаётся здесь как approved insertion candidate, не начинается вне очереди.
 
 ## OTP resend + timer
 
