@@ -98,7 +98,7 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
       const offerId = await createS4Offer(userId, seller.locations[0]!.id, { amount: '4200.00', unit: 'кг', comment: 'Исходная партия' });
       expect((await offerRow(offerId)).revision).toBe(1);
 
-      const owned = await listOwnedOffers(userId, { database: db });
+      const owned = await listOwnedOffers(userId, { database: db, clock: () => T1 });
       expect(owned).toHaveLength(1);
       expect(owned[0]).toEqual({
         id: offerId,
@@ -108,6 +108,7 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
         sellerComment: 'Исходная партия',
         status: 'active',
         lastConfirmedAt: T0.toISOString(),
+        buyerVisible: true,
       });
       expect('revision' in owned[0]!).toBe(false);
     } finally {

@@ -138,20 +138,21 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
   try {
     await login(sellerPage, phone);
 
-    await sellerPage.goto('/seller');
-    await sellerPage.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    await sellerPage.goto('/seller/points');
     await sellerPage.getByLabel('Имя', { exact: true }).fill(sellerName);
     await sellerPage.getByLabel('Название торговой точки').fill(locationName);
     await sellerPage.getByLabel('Тип торговой точки').selectOption('shop');
     await sellerPage.getByLabel('Адрес').fill(`Алматы, S7 E2E адрес ${suffix}`);
     await sellerPage.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(sellerPage.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
+    await sellerPage.goto('/seller/contacts');
     await sellerPage.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await sellerPage.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(sellerPage.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await expect(sellerPage.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     const ids = await sellerIdentity(phone);
     await makeBuyerEligible(ids, testInfo.project.name);
-    await sellerPage.reload();
+    await sellerPage.goto('/seller/offers/new');
     await expect(sellerPage.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
     const identity = { ...ids, sellerComment };
 
@@ -161,8 +162,8 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     await sellerPage.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(sellerComment);
     await sellerPage.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(sellerPage).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await expect(sellerPage.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
-    await expect(sellerPage.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(sellerPage.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
+    await expect(sellerPage.getByText('Баранина', { exact: true })).toBeVisible();
 
     const beforeConfirmation = await buyerSearch(buyerPage, 'Баранина');
     expect(containsIdentity(beforeConfirmation, identity)).toBe(false);
@@ -173,13 +174,13 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
       && response.url().endsWith('/confirm')
       && response.request().method() === 'POST'
     ));
-    await sellerPage.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
+    await sellerPage.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
     const createConfirm = await createConfirmResponse;
     expect(createConfirm.status()).toBe(200);
     const createBody = await createConfirm.json() as ConfirmBody;
     const offerId = createBody.changeSet.items[0]?.resultOffer?.id;
     expect(offerId).toBeTruthy();
-    await expect(sellerPage.getByText('Предложение подтверждено. Offer создан.')).toBeVisible();
+    await expect(sellerPage).toHaveURL('/seller');
 
     const canonical = await buyerSearch(buyerPage, 'Баранина');
     const canonicalOffer = canonical.offers.find((offer) => offer.id === offerId);
@@ -199,10 +200,11 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     await expect(sellerOfferCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
     await expect(sellerOfferCard.getByText(sellerComment, { exact: true })).toBeVisible();
 
-    await sellerPage.goto('/seller');
-    await expect(sellerPage.getByRole('heading', { name: 'Мои предложения' })).toBeVisible();
-    await sellerPage.getByRole('button', { name: 'Выключить' }).click();
-    await expect(sellerPage.getByText('Offer ещё не выключен и остаётся доступен покупателям по обычным правилам поиска.')).toBeVisible();
+    // Seller cabinet: switching off lives in the offer card's «Другие действия» menu (seller-cabinet-overview).
+    await sellerPage.goto('/seller/offers');
+    await sellerPage.getByRole('button', { name: /Другие действия: Баранина/ }).click();
+    await sellerPage.getByRole('menuitem', { name: 'Выключить' }).click();
+    await expect(sellerPage.getByText('Выключение предложения', { exact: true })).toBeVisible();
 
     const canonicalWhileProposed = await buyerSearch(buyerPage, 'Баранина');
     const aliasWhileProposed = await buyerSearch(buyerPage, 'мясо барана');
@@ -214,12 +216,13 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
       && response.url().endsWith('/confirm')
       && response.request().method() === 'POST'
     ));
-    await sellerPage.getByRole('button', { name: 'Подтвердить выключение' }).click();
+    await sellerPage.getByRole('button', { name: 'Подтвердить', exact: true }).click();
     const deactivateConfirm = await deactivateConfirmResponse;
     expect(deactivateConfirm.status()).toBe(200);
     const deactivateBody = await deactivateConfirm.json() as ConfirmBody;
     expect(deactivateBody.changeSet.items[0]?.resultOffer).toMatchObject({ id: offerId, status: 'inactive' });
-    await expect(sellerPage.getByText('Offer выключен.', { exact: true })).toBeVisible();
+    await expect(sellerPage.getByRole('status').filter({ hasText: 'Предложение выключено' })).toBeVisible();
+    await expect(sellerPage.getByText('Выключено', { exact: true })).toBeVisible();
 
     const canonicalAfterDeactivation = await buyerSearch(buyerPage, 'Баранина');
     const aliasAfterDeactivation = await buyerSearch(buyerPage, 'мясо барана');

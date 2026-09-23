@@ -43,8 +43,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
   await cleanup(phone);
   try {
     await authenticate(page, phone);
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    await page.goto('/seller/points');
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await page.getByLabel('Имя', { exact: true }).fill(`Seller 36 ${testInfo.project.name}`);
     await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(firstName);
@@ -52,9 +51,8 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, адрес A');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
-    await expect(page.getByText(`Точка: ${firstName}`, { exact: false })).toBeVisible();
+    await expect(page.locator('[data-testid^="trading-point-"]').getByText(firstName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
 
     const add = page.getByRole('button', { name: 'Добавить торговую точку' });
     await expect(add).toBeVisible();
@@ -86,6 +84,8 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
 
     await page.reload();
     await expect(page.getByText(editedName, { exact: true })).toBeVisible();
+    // Seller cabinet: «Добавить товар» is its own page; with two points the choice stays explicit.
+    await page.goto('/seller/offers/new');
     const locationChoice = page.getByLabel('Торговая точка', { exact: true });
     await expect(locationChoice).toHaveValue('');
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
@@ -95,8 +95,8 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await locationChoice.selectOption({ label: `${editedName} · Алматы, изменённый адрес B` });
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-    await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await expect(page).toHaveURL('/seller');
 
     const search = await page.request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
     expect(search.status()).toBe(200);
@@ -114,7 +114,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await secondItem.getByLabel('Существующий товар каталога').fill('Говядина');
     await secondItem.getByLabel('Цена, ₸').fill('4500');
     await page.getByRole('button', { name: 'Проверить весь пакет' }).click();
-    await expect(page.getByText('Выберите торговую точку для каждого нового Offer.', { exact: true })).toBeVisible();
+    await expect(page.getByText('Выберите торговую точку для каждого нового предложения.', { exact: true })).toBeVisible();
     await secondItem.getByLabel('Точка').selectOption({ label: editedName });
     await page.getByRole('button', { name: 'Проверить весь пакет' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);

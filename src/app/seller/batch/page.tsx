@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { AppHeader } from '../../_components/AppHeader';
 import { SellerBatchChangeSetCreate } from '../_components/SellerBatchChangeSetCreate';
+import { SellerCabinetFrame } from '../_components/SellerCabinetFrame';
 import styles from '../page.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -48,8 +49,7 @@ export default function SellerBatchPage() {
   return (
     <>
       <AppHeader showAuth={false} contextLabel={t('context.seller')} />
-      <div className={styles.shell}>
-        <main className={styles.main}>
+      <SellerCabinetFrame active="offers">
           <div className={styles.intro}>
             <p className={styles.eyebrow}>{t('batch.eyebrow')}</p>
             <h1>{t('batch.pageTitle')}</h1>
@@ -61,8 +61,7 @@ export default function SellerBatchPage() {
           {state === 'ready' && error && <section className={styles.card}><p className={styles.error} role="alert">{error}</p></section>}
           {state === 'ready' && !error && !seller && <section className={styles.card}><p>{t('batch.setupFirst')}</p><Link className={styles.secondaryLink} href="/seller">{t('batch.setupSeller')}</Link></section>}
           {state === 'ready' && seller && <SellerBatchChangeSetCreate seller={seller} />}
-        </main>
-      </div>
+      </SellerCabinetFrame>
     </>
   );
 }

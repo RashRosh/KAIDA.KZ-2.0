@@ -44,8 +44,8 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
   const auth = await authenticate(page, testInfo.project.name);
   const pointName = `UX2 ${testInfo.project.name} point`;
   try {
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    // Seller cabinet: trading points and contacts are separate destinations (seller-cabinet-overview).
+    await page.goto('/seller/points');
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
 
     const name = page.getByLabel('Имя', { exact: true });
@@ -75,8 +75,8 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
+    await page.goto('/seller/contacts');
     await page.getByLabel('Телефон', { exact: true }).fill(auth.publicPhone);
     await page.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
     await page.getByLabel('Telegram', { exact: true }).fill(`ux2_${testInfo.project.name}`);
@@ -85,8 +85,9 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     await page.reload();
-    await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(auth.publicPhone);
+    await page.goto('/seller/points');
+    await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
     await page.context().grantPermissions(['geolocation'], { origin: baseURL });
@@ -97,8 +98,11 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await expect(page.getByText('Местоположение сохранено.', { exact: true }).first()).toBeVisible();
 
     await page.reload();
-    await expect(page.getByText('Настройка завершена', { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
+    await expect(page.getByText('Местоположение сохранено', { exact: false }).first()).toBeVisible();
+    // With a point, contacts and geo but no Offers yet, the overview is the first-run state with one action.
+    await page.goto('/seller');
+    await expect(page.getByRole('heading', { name: 'Начните с первого предложения', level: 1 })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Добавить товар' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(auth.pool, auth.userId, auth.phone);

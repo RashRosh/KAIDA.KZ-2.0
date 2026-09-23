@@ -58,21 +58,32 @@ test('authenticated seller shell exposes logout and logout clears private seller
     });
     expect(setup.status()).toBe(201);
 
-    await page.goto('/seller');
-    await expect(page.getByRole('button', { name: 'Выйти' })).toBeVisible();
+    // Seller cabinet: logout sits in the desktop navigation and in «Ещё» on mobile (seller-cabinet-overview).
+    const mobile = testInfo.project.name === 'mobile';
+    const logout = async () => {
+      if (mobile) {
+        await page.getByRole('button', { name: 'Ещё' }).click();
+        return page.getByRole('dialog', { name: 'Ещё' }).getByRole('button', { name: 'Выйти' });
+      }
+      return page.getByRole('navigation', { name: 'Разделы кабинета' }).getByRole('button', { name: 'Выйти' });
+    };
+
+    await page.goto('/seller/points');
+    await expect(await logout()).toBeVisible();
+    if (mobile) await page.keyboard.press('Escape');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     const tradingPointCard = page.locator('[data-testid^="trading-point-"]');
-    await expect(page.getByText(displayName, { exact: true })).toBeVisible();
     await expect(tradingPointCard.getByText(locationName, { exact: true })).toBeVisible();
 
     await page.goto('/seller/batch');
-    await expect(page.getByRole('button', { name: 'Выйти' })).toBeVisible();
+    await expect(await logout()).toBeVisible();
+    if (mobile) await page.keyboard.press('Escape');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-    await page.goto('/seller');
-    await expect(page.getByText(displayName, { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Выйти' }).click();
+    await page.goto('/seller/points');
+    await expect(tradingPointCard.getByText(locationName, { exact: true })).toBeVisible();
+    await (await logout()).click();
 
     await expect(page).toHaveURL('/');
     await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();

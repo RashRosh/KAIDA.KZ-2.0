@@ -78,26 +78,27 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page).toHaveURL('/');
 
-    await page.goto('/seller');
-    await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+    await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('S6 E2E продавец');
     await page.getByLabel('Название торговой точки').fill('S6 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S6 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
+    await page.goto('/seller/contacts');
     await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
-    await page.reload();
+    await page.goto('/seller/offers/new');
     await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('1');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
-    await expect(page.getByText('Предложение ещё не применено. Offer пока не создан.')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
+    await expect(page.getByText('Баранина', { exact: true })).toBeVisible();
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
@@ -105,8 +106,8 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     const itemBefore = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemBefore).toEqual({ product_id: seedIds.lambProduct, result_offer_id: null });
 
-    await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-    await expect(page.getByText('Предложение подтверждено. Offer создан.')).toBeVisible();
+    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await expect(page).toHaveURL('/seller');
     const itemAfter = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemAfter.product_id).toBe(seedIds.lambProduct);
     expect(itemAfter.result_offer_id).not.toBeNull();

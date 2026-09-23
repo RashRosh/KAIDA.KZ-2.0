@@ -70,7 +70,7 @@ async function login(page: Page, phone: string) {
 }
 
 async function publishOffer(page: Page, comment: string) {
-  await page.goto('/seller');
+  await page.goto('/seller/offers/new');
   await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
   await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
   await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200');
@@ -79,8 +79,8 @@ async function publishOffer(page: Page, comment: string) {
 
 async function confirmOffer(page: Page) {
   await page.getByRole('button', { name: 'Создать изменение' }).click();
-  await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-  await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await expect(page).toHaveURL('/seller');
 }
 
 async function searchLamb(page: Page, query = 'баранина', label = 'Какой товар ищете?') {

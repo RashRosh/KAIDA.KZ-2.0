@@ -50,25 +50,28 @@ async function login(page: Page, phone: string) {
 }
 
 async function createSeller(page: Page, projectName: string, scenario: 'success' | 'failure') {
-  await page.goto('/seller');
-  await page.getByRole('button', { name: 'Торговая точка', exact: true }).click();
+  await page.goto('/seller/points');
   await page.getByLabel('Название торговой точки').fill(`S8 E2E seller ${projectName}-${scenario}`);
   await page.getByLabel('Тип торговой точки').selectOption('shop');
   await page.getByLabel('Адрес').fill(`Алматы, S8 E2E address ${projectName}-${scenario}`);
   await page.getByRole('button', { name: 'Сохранить точку' }).click();
+  await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
+  await page.goto('/seller/contacts');
   await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(projectName, scenario));
   await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-  await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
+  await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+  await page.goto('/seller/points');
 }
 
 async function createLambOffer(page: Page, comment: string) {
+  await page.goto('/seller/offers/new');
   await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
   await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4100.00');
   await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
   await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
   await page.getByRole('button', { name: 'Создать изменение' }).click();
-  await page.getByRole('button', { name: 'Подтвердить и создать Offer' }).click();
-  await expect(page.getByText('Offer создан', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await expect(page).toHaveURL('/seller');
 }
 
 test('S8 Seller explicitly saves browser geolocation and public Search hides raw coordinates', async ({ page }, testInfo) => {
@@ -98,7 +101,6 @@ test('S8 Seller explicitly saves browser geolocation and public Search hides raw
       .toHaveText('Местоположение сохранено.');
 
     await page.reload();
-    await expect(page.getByText('Настройка завершена', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Обновить местоположение' })).toBeVisible();
     await createLambOffer(page, comment);
 
@@ -155,7 +157,7 @@ test('S8 browser geolocation denial stays client-side and keeps onboarding resum
     expect((await me.json()).seller.locations[0].geo).toBeNull();
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Кабинет продавца', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Точки', level: 1 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
     await expect(page.getByText(`S8 E2E seller ${testInfo.project.name}-failure`, { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();

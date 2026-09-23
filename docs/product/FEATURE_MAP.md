@@ -118,6 +118,8 @@ Catalog-owned display data needed to complete a user task (for example Product a
 
 Storage shape and exact behavior are decided in the three localization Slice Contracts (`docs/slices/localization-foundation/`, `docs/slices/catalog-localization/`, `docs/slices/seller-comment-translation/`), not here. Per §10.1 of `PROJECT_RULES.md`, the translation provider is an improvement over a working path, never a required dependency of seller or buyer flows.
 
+**Translator connection deferred (Product Owner decision, 2026-09-23).** `seller-comment-translation` shipped in `v0.0.29` with the translator switched off in production (`SELLER_COMMENT_TRANSLATOR=off`); the only adapter is a deterministic test/demo stand-in. No external translation provider is chosen now. A real server-side LLM is connected and tested near MVP, when KAIDA starts moving to its own server; until then buyers see comments as written and the Seller form shows no translation hint or preview.
+
 No UI slice is complete if its changed user-facing surface works in only one supported language. Exact locale storage, URL strategy, fallback behavior and seller-authored content translation belong to the localization Slice Contract and must not fragment across individual screens.
 
 ### Offer price unit

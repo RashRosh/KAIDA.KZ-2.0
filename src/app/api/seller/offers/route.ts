@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 const noStore = { 'Cache-Control': 'no-store' };
 
 export async function GET(request: NextRequest): Promise<Response> {
-  void localeFromApiRequest(request);
+  const locale = localeFromApiRequest(request);
   let user;
   try {
     user = await resolveCurrentUser(request.cookies.get(SESSION_COOKIE_NAME)?.value);
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const offers = await listOwnedOffers(user.id);
+    const offers = await listOwnedOffers(user.id, { locale });
     return NextResponse.json({ offers }, { status: 200, headers: noStore });
   } catch (error) {
     if (error instanceof SellerOffersSellerRequiredError) {
