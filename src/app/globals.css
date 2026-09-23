@@ -25,7 +25,7 @@
   --neutral-label: #5b5568;
   --neutral-soft: #efedf3;
 
-  --font-sans: var(--font-roboto), system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-sans: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;

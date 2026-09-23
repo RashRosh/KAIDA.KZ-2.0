@@ -1,0 +1,5 @@
+.switcher { display: inline-flex; align-items: center; gap: 0.125rem; padding: 0.125rem; border: 1px solid var(--border); border-radius: var(--radius-full); background: var(--surface); }
+.choice { border: 0; border-radius: var(--radius-full); padding: 0.35rem 0.6rem; background: transparent; color: var(--muted); font-size: 0.8125rem; font-weight: 700; }
+.choice[aria-pressed='true'] { background: var(--primary-soft); color: var(--primary); }
+.mobile { display: none; }
+@media (max-width: 47.99rem) { .desktop { display: none; } .mobile { display: inline; } .choice { padding-inline: 0.45rem; } }

@@ -45,9 +45,9 @@ and login, without losing what they were doing.
   every KAIDA-owned string of every existing route (buyer, seller, auth, errors, system states, metadata) into the
   layer and ships it in `ru` and `kk`. There is no Russian-only screen once the switch is live, and no feature flag
   hides the switch.
-- Kazakh strings may be drafted by an LLM or taken from the Pass 3 prototype dictionary, but a native Kazakh speaker
-  verifies every Kazakh string before merge. Verification is recorded next to the strings; an unverified string
-  blocks merge like a failing test.
+- Kazakh strings may be drafted by an LLM or taken from the Pass 3 prototype dictionary. Product Owner accepted the
+  current dictionary as the working release copy on 2026-09-23 and explicitly deferred native-speaker review: it does
+  not block implementation or merge. Corrections returned by the reviewer are applied as a follow-up copy update.
 - Phrases with numbers and dates are whole localized templates, never glued from pieces. Russian uses its plural
   forms (`1 предложение / 3 предложения / 5 предложений`); Kazakh keeps the noun singular after a number
   (`3 ұсыныс`). Kazakh date and time phrases carry the suffix that matches the word by vowel harmony
@@ -102,7 +102,7 @@ error rendering. Internal names and file layout are chosen during implementation
 | Public API | Requests without `locale` return byte-identical payload semantics to today; a `kk` browser language header alone changes nothing. |
 | Auth / privacy | Cookie holds only `ru`/`kk`; login/logout do not touch it; it grants nothing. |
 | UX regression | In `ru` every existing screen reads exactly as today; the existing E2E suite passes unchanged. |
-| Text quality | Every Kazakh string is native-verified before merge; long Kazakh text does not clip at 320 px. |
+| Text quality | Current Kazakh copy is accepted provisionally by Product Owner; native review is a follow-up. Long Kazakh text does not clip at 320 px. |
 
 ## 6. Acceptance criteria
 
@@ -115,7 +115,7 @@ error rendering. Internal names and file layout are chosen during implementation
 7. Kazakh letters render in the primary UI font, not a fallback font.
 8. API without `locale` answers as today; with `locale=kk` only display fields change; `Accept-Language` is ignored.
 9. The UI shows error text by `code` in the active locale.
-10. Every Kazakh string carries a native-speaker verification record; in `ru` every screen reads as today.
+10. Current Kazakh strings match the provisionally accepted review dictionary; in `ru` every screen reads as today.
 
 ## 7. Verification and manual acceptance
 
@@ -126,7 +126,8 @@ error rendering. Internal names and file layout are chosen during implementation
   kept, `html lang`, keyboard and screen-reader names of the switch; key buyer and seller routes walked in `kk`
   without Russian KAIDA text and without clipping at 320 px.
 - Existing E2E suite passes unchanged in `ru`.
-- Native-speaker review of all Kazakh strings, recorded before merge.
+- Native-speaker review is collected asynchronously after the working copy ships; returned corrections are applied
+  without reopening unrelated localization behavior.
 - One full regression run and branch CI on the final executable head.
 
 Manual scenario: open Search as a guest in `ru`, type a query, switch to `ҚАЗ` — the query stays and every KAIDA text

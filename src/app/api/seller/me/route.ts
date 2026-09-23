@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { getOwnedSeller } from '@/modules/sellers/application/get-owned-seller';
+import { localeFromApiRequest } from '../../../../i18n/api';
 
 export const runtime = 'nodejs';
 
 const noStore = { 'Cache-Control': 'no-store' };
 
 export async function GET(request: NextRequest): Promise<Response> {
+  void localeFromApiRequest(request);
   let user;
   try {
     const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;

@@ -4,6 +4,7 @@ import { resolveCurrentUser } from '../../../../modules/identity/application/res
 import { SESSION_COOKIE_NAME } from '../../../../modules/identity/session/session-cookie';
 import { getOwnedSellerContacts } from '../../../../modules/sellers/application/get-owned-seller-contacts';
 import { updateOwnedSellerContacts } from '../../../../modules/sellers/application/update-owned-seller-contacts';
+import { localeFromApiRequest } from '../../../../i18n/api';
 
 export const runtime = 'nodejs';
 
@@ -36,6 +37,7 @@ async function resolveOwner(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest): Promise<Response> {
+  void localeFromApiRequest(request);
   const owner = await resolveOwner(request);
   if (!owner.ok) return owner.response;
 

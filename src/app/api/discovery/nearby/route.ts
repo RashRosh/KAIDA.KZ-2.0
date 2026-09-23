@@ -1,5 +1,6 @@
 import { findNearbyOffers } from '@/modules/discovery/application/find-nearby-offers';
 import { nearbyRequestSchema } from '@/modules/discovery/contracts/discovery.contract';
+import { localeFromApiRequest } from '../../../../i18n/api';
 
 export const runtime = 'nodejs';
 
@@ -12,6 +13,7 @@ const invalidRequestBody = {
 };
 
 export async function POST(request: Request): Promise<Response> {
+  void localeFromApiRequest(request);
   let body: unknown;
   try {
     body = await request.json();

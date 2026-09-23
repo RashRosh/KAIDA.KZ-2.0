@@ -55,21 +55,21 @@ test('buyer interest survives reload and a later login, then can be removed', as
     await login(page, phone);
 
     let card = await searchSeedProduct(page);
-    await card.getByRole('button', { name: 'Добавить в интересы' }).click();
-    await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
+    await card.getByRole('button', { name: 'Добавить в избранное' }).click();
+    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
 
     await page.reload();
     card = await searchSeedProduct(page);
-    await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
 
     await page.getByRole('button', { name: 'Выйти' }).click();
     await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await login(page, phone);
 
     card = await searchSeedProduct(page);
-    await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
-    await card.getByRole('button', { name: 'В интересах' }).click();
-    await expect(card.getByRole('button', { name: 'Добавить в интересы' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await card.getByRole('button', { name: 'В избранном' }).click();
+    await expect(card.getByRole('button', { name: 'Добавить в избранное' })).toHaveAttribute('aria-pressed', 'false');
   } finally {
     await cleanup(phone);
   }
@@ -81,7 +81,7 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
   try {
     await page.goto('/');
     const card = await searchSeedProduct(page);
-    const heart = card.getByRole('button', { name: /Добавить в интересы|В интересах|Сохраняем/ });
+    const heart = card.getByRole('button', { name: /Добавить в избранное|В избранном|Сохраняем/ });
     await expect(heart).toBeVisible();
     await expect(heart).toHaveAttribute('aria-pressed', 'false');
 
@@ -94,7 +94,7 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
 
     await heart.click();
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Чтобы сохранить интерес к предложению, войдите по номеру телефона.')).toBeVisible();
+    await expect(dialog.getByText('Чтобы добавить товар в избранное, войдите по номеру телефона.')).toBeVisible();
 
     await dialog.getByRole('button', { name: 'Закрыть' }).click();
     await expect(dialog).toBeHidden();
@@ -111,7 +111,7 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
     await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
 
     await expect(dialog).toBeHidden();
-    await expect(card.getByRole('button', { name: 'В интересах' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
     expect(interestRequests.some((url) => /\/api\/interests\/[^/]+$/.test(url))).toBe(true);
   } finally {
     await cleanup(phone);

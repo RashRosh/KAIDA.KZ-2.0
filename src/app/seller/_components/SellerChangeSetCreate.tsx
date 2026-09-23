@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import styles from '../page.module.css';
+import { useI18n } from '../../../i18n/I18nProvider';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type CreateResponse = { changeSet?: SellerChangeSetView } & ApiError;
@@ -35,6 +36,7 @@ export function SellerChangeSetCreate({
   onPrerequisiteRequired,
   resumedAfterSetup = false,
 }: SellerChangeSetCreateProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const [locationId, setLocationId] = useState(() => automaticLocationId(seller));
   const [error, setError] = useState('');
@@ -62,12 +64,12 @@ export function SellerChangeSetCreate({
     event.preventDefault();
     setError('');
     if (draft.productName.trim() === '') {
-      setError('Укажите товар.');
+      setError(t('offerCreate.productRequired'));
       return;
     }
     const normalizedAmount = draft.priceAmount.trim();
     if (normalizedAmount === '') {
-      setError('Укажите цену предложения.');
+      setError(t('offerCreate.priceRequired'));
       return;
     }
     if (!seller || locations.length === 0) {
@@ -75,7 +77,7 @@ export function SellerChangeSetCreate({
       return;
     }
     if (!location) {
-      setError('Выберите торговую точку.');
+      setError(t('offerCreate.locationRequired'));
       return;
     }
     setSubmitting(true);
@@ -92,12 +94,12 @@ export function SellerChangeSetCreate({
       });
       const data = await response.json() as CreateResponse;
       if (!response.ok || !data.changeSet) {
-        setError(data.error?.message ?? 'Не удалось создать изменение.');
+        setError(t('offerCreate.error'));
         return;
       }
       router.push(`/seller/change-sets/${data.changeSet.id}`);
     } catch {
-      setError('Не удалось создать изменение.');
+      setError(t('offerCreate.error'));
     } finally {
       setSubmitting(false);
     }
@@ -105,34 +107,34 @@ export function SellerChangeSetCreate({
 
   return (
     <section className={styles.card} aria-labelledby="seller-change-set-create-heading">
-      <h2 id="seller-change-set-create-heading">Добавить товар</h2>
-      <p className={styles.muted}>Заполните товар и цену. Если торговой точки ещё нет, добавим её перед созданием изменения.</p>
-      {resumedAfterSetup && <p className={styles.status} role="status">Торговая точка готова. Введённые данные товара сохранены — проверьте их и продолжите.</p>}
+      <h2 id="seller-change-set-create-heading">{t('offerCreate.title')}</h2>
+      <p className={styles.muted}>{t('offerCreate.description')}</p>
+      {resumedAfterSetup && <p className={styles.status} role="status">{t('offerCreate.resumed')}</p>}
       <form className={styles.form} onSubmit={submit} noValidate>
-        {locations.length === 1 && location && <p className={styles.muted}>Точка: <strong>{location.name}</strong> · {location.addressText}</p>}
+        {locations.length === 1 && location && <p className={styles.muted}>{t('offerCreate.point', { name: location.name })} · {location.addressText}</p>}
         {locations.length > 1 && (
           <>
-            <label htmlFor="seller-offer-location">Торговая точка</label>
+            <label htmlFor="seller-offer-location">{t('seller.tradingPoint')}</label>
             <select id="seller-offer-location" value={locationId} onChange={(event) => setLocationId(event.target.value)} disabled={submitting} required>
-              <option value="">Выберите торговую точку</option>
+              <option value="">{t('offerCreate.chooseLocation')}</option>
               {locations.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name} · {candidate.addressText}</option>)}
             </select>
           </>
         )}
-        <label htmlFor="seller-product-name">Товар</label>
+        <label htmlFor="seller-product-name">{t('offerCreate.product')}</label>
         <input id="seller-product-name" value={draft.productName} onChange={(event) => updateDraft('productName', event.target.value)} disabled={submitting} autoComplete="off" />
 
-        <label htmlFor="seller-price-amount">Цена, ₸</label>
-        <input id="seller-price-amount" value={draft.priceAmount} onChange={(event) => updateDraft('priceAmount', event.target.value)} disabled={submitting} inputMode="decimal" placeholder="Обязательно" aria-required="true" />
+        <label htmlFor="seller-price-amount">{t('offerCreate.price')}</label>
+        <input id="seller-price-amount" value={draft.priceAmount} onChange={(event) => updateDraft('priceAmount', event.target.value)} disabled={submitting} inputMode="decimal" placeholder={t('offerCreate.required')} aria-required="true" />
 
-        <label htmlFor="seller-price-unit">Единица</label>
-        <input id="seller-price-unit" value={draft.priceUnit} onChange={(event) => updateDraft('priceUnit', event.target.value)} maxLength={32} disabled={submitting || draft.priceAmount.trim() === ''} placeholder="Например, кг" />
+        <label htmlFor="seller-price-unit">{t('offerCreate.unit')}</label>
+        <input id="seller-price-unit" value={draft.priceUnit} onChange={(event) => updateDraft('priceUnit', event.target.value)} maxLength={32} disabled={submitting || draft.priceAmount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
 
-        <label htmlFor="seller-comment">Комментарий продавца</label>
-        <textarea id="seller-comment" value={draft.sellerComment} onChange={(event) => updateDraft('sellerComment', event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder="Необязательно" />
+        <label htmlFor="seller-comment">{t('offerCreate.comment')}</label>
+        <textarea id="seller-comment" value={draft.sellerComment} onChange={(event) => updateDraft('sellerComment', event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder={t('offerCreate.optional')} />
 
         {error && <p className={styles.error} role="alert">{error}</p>}
-        <button type="submit" disabled={submitting}>{submitting ? 'Создаём…' : locations.length > 0 ? 'Создать изменение' : 'Продолжить'}</button>
+        <button type="submit" disabled={submitting}>{submitting ? t('offerCreate.creating') : locations.length > 0 ? t('offerCreate.create') : t('offerCreate.continue')}</button>
       </form>
     </section>
   );

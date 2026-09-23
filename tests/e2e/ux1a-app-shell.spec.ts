@@ -86,7 +86,7 @@ test('current main areas share the composed shell without horizontal overflow', 
   await expect(searchInput).toBeVisible();
   expect(await searchInput.evaluate((element) => getComputedStyle(element).borderRadius)).toBe('12px');
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarGutter)).toContain('stable');
-  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain('Roboto');
+  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain('Inter');
 
   const radii = await page.evaluate(() => {
     const root = getComputedStyle(document.documentElement);
@@ -158,7 +158,7 @@ test('desktop header search enters the real buyer search flow', async ({ page },
 
   await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('баранина');
   await expect(page.getByLabel('Какой товар ищете?')).toHaveValue('баранина');
-  await expect(page.getByRole('status')).toContainText('Найдено предложений:');
+  await expect(page.getByRole('status')).toHaveText('Найдено 1 предложение');
 });
 
 test('mobile navigation is compact, dismissible and closes after route selection', async ({ page }, testInfo) => {

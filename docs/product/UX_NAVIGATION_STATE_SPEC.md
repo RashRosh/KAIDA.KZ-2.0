@@ -141,7 +141,7 @@ deactivate/activate proposal, ChangeSet review, revision conflict, confirm succe
 | Поиск | `/` + canonical query parameter | Всегда |
 | Рядом | `/nearby` | Всегда; location запрашивается только после действия |
 
-`Для вас` и read/manage `Интересы` добавляются в primary navigation только вместе с S14. До этого не нужны ни disabled
+`Для вас` и read/manage `Избранное` добавляются в primary navigation только вместе с S14. До этого не нужны ни disabled
 tabs, ни `скоро` в постоянной навигации.
 
 ### 3.3 Seller navigation
@@ -256,7 +256,7 @@ Slice Contract.
 | `3d` | Search sorting | **DEFER** до Sorting A/B после freshness |
 | `3e` | M1 photo | **DEFER** до real media contract; не использовать декоративную fake photo |
 | `3f` | `Для вас` | **DEFER** до S14 |
-| `3g` | Мои интересы | **DEFER** до S14 read/manage side |
+| `3g` | Избранное | **DEFER** до S14 read/manage side |
 
 **Исправление нумерации (2026-09-23).** Первая редакция этой таблицы подписывала `3a`/`3b`/`3c` как
 «Одиночное создание/редактирование Offer», «Product-first seller step» и «Batch offer entry/review». Это неверно:
@@ -378,7 +378,7 @@ microcopy и размеры трудно инспектировать, desktop �
 5. mobile и desktop layouts для ключевых surfaces;
 6. switchable fixture states без API/DB wiring.
 
-Не нужны в первом prototype: batch, AI, photo upload, sorting, freshness notifications, `Для вас`, Interests management,
+Не нужны в первом prototype: batch, AI, photo upload, sorting, freshness notifications, `Для вас`, управление Избранным,
 promotion, payments, tariffs, analytics, reviews, market map и video.
 
 ## 10. Визуальный acceptance gate

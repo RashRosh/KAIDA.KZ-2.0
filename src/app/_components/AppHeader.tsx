@@ -6,6 +6,8 @@ import { MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { AuthModal } from './AuthModal';
 import { AuthStatus } from './AuthStatus';
 import { HeaderSearch } from './HeaderSearch';
+import { LanguageSwitch } from './LanguageSwitch';
+import { useI18n } from '@/i18n/I18nProvider';
 import styles from './AppHeader.module.css';
 
 type AppHeaderProps = {
@@ -15,16 +17,16 @@ type AppHeaderProps = {
 
 type NavItem = {
   href: '/' | '/nearby' | '/seller';
-  label: 'Поиск' | 'Рядом' | 'Продавцу';
+  labelKey: 'nav.search' | 'nav.nearby' | 'nav.seller';
   icon: 'search' | 'pin' | 'store';
 };
 
 type User = { id: string; phone: string };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Поиск', icon: 'search' },
-  { href: '/nearby', label: 'Рядом', icon: 'pin' },
-  { href: '/seller', label: 'Продавцу', icon: 'store' },
+  { href: '/', labelKey: 'nav.search', icon: 'search' },
+  { href: '/nearby', labelKey: 'nav.nearby', icon: 'pin' },
+  { href: '/seller', labelKey: 'nav.seller', icon: 'store' },
 ];
 
 const NEARBY_NAV_INTENT_KEY = 'kaida:nearby-nav-intent';
@@ -103,8 +105,9 @@ function PrimaryNav({
   onNavigate?: () => void;
   onSellerIntent: (event: MouseEvent<HTMLAnchorElement>) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <nav className={className} aria-label="Основная навигация">
+    <nav className={className} aria-label={t('nav.main')}>
       {NAV_ITEMS.map((item) => {
         const active = isActive(pathname, item.href);
         return (
@@ -123,7 +126,7 @@ function PrimaryNav({
             }}
           >
             <NavIcon icon={item.icon} />
-            <span>{item.label}</span>
+            <span>{t(item.labelKey)}</span>
           </Link>
         );
       })}
@@ -144,6 +147,7 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
+  const { t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -238,7 +242,7 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.topRow} data-testid="primary-header-row">
-          <Link href="/" className={styles.wordmark} aria-label="KAIDA.KZ, главная">
+          <Link href="/" className={styles.wordmark} aria-label={t('brand.home')}>
             <BrandMark />
             <span className={styles.wordmarkText}>KAIDA<span className={styles.wordmarkAccent}>.KZ</span></span>
           </Link>
@@ -246,6 +250,7 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
           <HeaderSearch />
 
           <div className={styles.trailing}>
+            <LanguageSwitch />
             {showAuth || user != null ? (
               <AuthStatus
                 user={user}
@@ -258,7 +263,7 @@ export function AppHeader({ contextLabel, showAuth = true }: AppHeaderProps) {
             <button
               type="button"
               className={styles.mobileMenuButton}
-              aria-label={mobileOpen ? 'Закрыть меню' : 'Открыть меню'}
+              aria-label={mobileOpen ? t('menu.close') : t('menu.open')}
               aria-expanded={mobileOpen}
               aria-controls="mobile-primary-navigation"
               onClick={() => setMobileOpen((open) => !open)}

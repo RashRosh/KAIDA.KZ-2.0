@@ -8,6 +8,7 @@ import { SellerContactSettings, type OwnerContacts } from './SellerContactSettin
 import { SellerOfferManagement } from './SellerOfferManagement';
 import { SellerTradingPoints } from './SellerTradingPoints';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type SellerResponse = { seller: SellerView | null };
@@ -45,6 +46,7 @@ function ProductIcon() {
 }
 
 export function SellerSetup() {
+  const { locale, t } = useI18n();
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready'>('loading');
   const [seller, setSeller] = useState<SellerView | null>(null);
   const [savedContacts, setSavedContacts] = useState<OwnerContacts | null>(null);
@@ -61,7 +63,7 @@ export function SellerSetup() {
     let active = true;
     void (async () => {
       try {
-        const response = await fetch('/api/seller/me', { cache: 'no-store' });
+        const response = await fetch(`/api/seller/me?locale=${locale}`, { cache: 'no-store' });
         if (!active) return;
         if (response.status === 401) {
           setState('anonymous');
@@ -69,7 +71,7 @@ export function SellerSetup() {
         }
         const data = await response.json() as SellerResponse & ApiError;
         if (!response.ok) {
-          setError(data.error?.message ?? 'Не удалось загрузить данные продавца.');
+          setError(t('seller.loadError'));
           setState('ready');
           return;
         }
@@ -78,16 +80,16 @@ export function SellerSetup() {
 
         if (data.seller) {
           try {
-            const contactsResponse = await fetch('/api/seller/contacts', { cache: 'no-store' });
+            const contactsResponse = await fetch(`/api/seller/contacts?locale=${locale}`, { cache: 'no-store' });
             const contactsData = await contactsResponse.json() as ContactsResponse & ApiError;
             if (!active) return;
             if (!contactsResponse.ok) {
-              setContactsLoadError(contactsData.error?.message ?? 'Не удалось загрузить контакты.');
+              setContactsLoadError(t('seller.contactsLoadError'));
             } else {
               setSavedContacts(contactsData.contacts);
             }
           } catch {
-            if (active) setContactsLoadError('Не удалось загрузить контакты.');
+            if (active) setContactsLoadError(t('seller.contactsLoadError'));
           } finally {
             if (active) setContactsLoaded(true);
           }
@@ -95,12 +97,12 @@ export function SellerSetup() {
         setState('ready');
       } catch {
         if (!active) return;
-        setError('Не удалось загрузить данные продавца.');
+        setError(t('seller.loadError'));
         setState('ready');
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [locale, t]);
 
   const firstLocation = seller?.locations[0] ?? null;
   const phoneReady = savedContacts?.phoneE164 !== null && savedContacts?.phoneE164 !== undefined;
@@ -119,19 +121,19 @@ export function SellerSetup() {
     setProductResumed(true);
   }
 
-  if (state === 'loading') return <section className={styles.card}><p>Загружаем…</p></section>;
+  if (state === 'loading') return <section className={styles.card}><p>{t('seller.loading')}</p></section>;
 
   if (state === 'anonymous') {
     return (
       <>
         <div className={styles.intro}>
-          <h1>Кабинет продавца</h1>
-          <p>Управляйте торговой точкой и товарами.</p>
+          <h1>{t('seller.cabinet')}</h1>
+          <p>{t('seller.managePointProducts')}</p>
         </div>
         <section className={styles.card}>
-          <h2>Нужно войти</h2>
-          <p className={styles.muted}>Чтобы открыть кабинет продавца, войдите по телефону.</p>
-          <Link className={styles.primaryLink} href="/login">Войти</Link>
+          <h2>{t('seller.loginRequired')}</h2>
+          <p className={styles.muted}>{t('seller.loginHelp')}</p>
+          <Link className={styles.primaryLink} href="/login">{t('auth.signIn')}</Link>
         </section>
       </>
     );
@@ -141,19 +143,19 @@ export function SellerSetup() {
     return (
       <>
         <div className={styles.intro}>
-          <h1>Кабинет продавца</h1>
-          <p>С чего хотите начать? Можно сначала настроить торговую точку или заполнить товар.</p>
+          <h1>{t('seller.cabinet')}</h1>
+          <p>{t('seller.firstChoice')}</p>
         </div>
         <section className={styles.firstRun} aria-labelledby="seller-first-run-heading">
-          <h2 id="seller-first-run-heading">Начните с понятной задачи</h2>
+          <h2 id="seller-first-run-heading">{t('seller.startTask')}</h2>
           <div className={styles.firstRunActions}>
-            <button type="button" className={styles.firstRunAction} aria-label="Торговая точка" onClick={() => setWorkspaceMode('setup')}>
+            <button type="button" className={styles.firstRunAction} aria-label={t('seller.tradingPoint')} onClick={() => setWorkspaceMode('setup')}>
               <StorePointIcon />
-              <span><strong>Торговая точка</strong><small>Создайте первую точку продаж</small></span>
+              <span><strong>{t('seller.tradingPoint')}</strong><small>{t('seller.createFirstPoint')}</small></span>
             </button>
-            <button type="button" className={styles.firstRunAction} aria-label="Добавить товар" onClick={() => setWorkspaceMode('product')}>
+            <button type="button" className={styles.firstRunAction} aria-label={t('seller.addProduct')} onClick={() => setWorkspaceMode('product')}>
               <ProductIcon />
-              <span><strong>Добавить товар</strong><small>Начните с товара, цену и описание можно ввести сразу</small></span>
+              <span><strong>{t('seller.addProduct')}</strong><small>{t('seller.addProductHint')}</small></span>
             </button>
           </div>
         </section>
@@ -165,11 +167,11 @@ export function SellerSetup() {
     return (
       <>
         <div className={styles.intro}>
-          <h1>Новый товар</h1>
-          <p>Offer появится только после создания, проверки и отдельного подтверждения изменения.</p>
+          <h1>{t('seller.newProduct')}</h1>
+          <p>{t('seller.offerAfterConfirm')}</p>
         </div>
         <div className={styles.workspaceBackRow}>
-          <button type="button" className={styles.secondaryLinkButton} onClick={() => setWorkspaceMode('landing')}>Назад в кабинет</button>
+          <button type="button" className={styles.secondaryLinkButton} onClick={() => setWorkspaceMode('landing')}>{t('seller.backCabinet')}</button>
         </div>
           <SellerChangeSetCreate
             seller={seller}
@@ -186,18 +188,18 @@ export function SellerSetup() {
     return (
       <>
         <div className={styles.intro}>
-          <h1>Кабинет продавца</h1>
-          <p>Управляйте торговой точкой и предложениями.</p>
+          <h1>{t('seller.cabinet')}</h1>
+          <p>{t('seller.managePointOffers')}</p>
         </div>
         <div className={styles.stack}>
         <section className={styles.card} aria-labelledby="seller-summary-heading">
-          <p className={styles.eyebrow}>{onboardingComplete ? 'Настройка завершена' : 'Профиль продавца'}</p>
+          <p className={styles.eyebrow}>{onboardingComplete ? t('seller.setupComplete') : t('seller.profile')}</p>
           <div className={styles.completedHeader}>
             <div>
               <h2 id="seller-summary-heading">{seller.displayName}</h2>
-              <p className={styles.muted}>{onboardingComplete ? 'Точка готова. Теперь можно добавлять и обновлять товары.' : 'Товары можно добавлять уже сейчас. Контакты и geo влияют только на показ покупателям.'}</p>
+              <p className={styles.muted}>{onboardingComplete ? t('seller.readyHint') : t('seller.incompleteHint')}</p>
             </div>
-            <Link className={styles.secondaryLinkButton} href="/seller/batch">Изменить несколько товаров</Link>
+            <Link className={styles.secondaryLinkButton} href="/seller/batch">{t('seller.batchLink')}</Link>
           </div>
         </section>
         {error && <p className={styles.error} role="alert">{error}</p>}
@@ -224,15 +226,15 @@ export function SellerSetup() {
   return (
     <>
       <div className={styles.intro}>
-        <h1>Кабинет продавца</h1>
-        <p>Создайте первую торговую точку. Контакты и местоположение можно добавить позже.</p>
+        <h1>{t('seller.cabinet')}</h1>
+        <p>{t('seller.createPointIntro')}</p>
       </div>
       {!resumeProductAfterSetup && (
         <div className={styles.workspaceBackRow}>
-          <button type="button" className={styles.secondaryLinkButton} onClick={() => setWorkspaceMode('landing')}>Назад к выбору</button>
+          <button type="button" className={styles.secondaryLinkButton} onClick={() => setWorkspaceMode('landing')}>{t('seller.backChoice')}</button>
         </div>
       )}
-      {resumeProductAfterSetup && <p className={styles.draftNotice} role="status">Данные товара сохранены в этом окне. Создайте точку, чтобы продолжить.</p>}
+      {resumeProductAfterSetup && <p className={styles.draftNotice} role="status">{t('seller.draftKept')}</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       <SellerTradingPoints
         seller={null}

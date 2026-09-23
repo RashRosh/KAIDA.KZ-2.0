@@ -2,6 +2,7 @@ import Image from 'next/image';
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
 import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';
+import { useI18n } from '../../i18n/I18nProvider';
 
 // Keep the decimal as a string throughout formatting, including large amounts.
 export function formatAmount(amount: string): string {
@@ -114,6 +115,7 @@ export function OfferCard({
   distanceMeters?: number;
   interest?: InterestControl;
 }) {
+  const { t } = useI18n();
   const contactActions = offer.seller.contacts ? buildContactActions(offer.seller.contacts) : [];
   const phoneAction = contactActions.find((action) => action.label === 'Позвонить');
   const socialActions = contactActions.filter((action) => action.label !== 'Позвонить');
@@ -138,7 +140,7 @@ export function OfferCard({
             onClick={interest.onToggle}
           >
             <HeartIcon filled={interest.active} />
-            <span>{interest.pending ? 'Сохраняем…' : interest.active ? 'В интересах' : 'Добавить в интересы'}</span>
+            <span>{interest.pending ? t('offer.saving') : interest.active ? t('offer.inInterests') : t('offer.addInterest')}</span>
           </button>
         )}
       </div>
@@ -148,7 +150,7 @@ export function OfferCard({
         <div className={styles.locationCopy}>
           <div className={styles.locationLine}>
             <strong>{offer.location.name}</strong>
-            {distanceMeters !== undefined && <span className={styles.distance}>{distanceMeters} м</span>}
+            {distanceMeters !== undefined && <span className={styles.distance}>{t('offer.distanceMeters', { count: distanceMeters })}</span>}
           </div>
           <span className={styles.address}>{offer.location.addressText}</span>
         </div>
@@ -163,10 +165,10 @@ export function OfferCard({
 
       {phoneAction && (
         <div className={styles.offerActions}>
-          <div className={styles.primaryActions} aria-label="Основные действия">
+          <div className={styles.primaryActions} aria-label={t('offer.primaryActions')}>
             <a className={`${styles.contactAction} ${styles.contactActionPrimary}`} href={phoneAction.href}>
               <PhoneIcon />
-              <span>Позвонить</span>
+              <span>{t('offer.call')}</span>
             </a>
             <a
               className={`${styles.contactAction} ${styles.routeAction}`}
@@ -175,7 +177,7 @@ export function OfferCard({
               rel="noopener noreferrer"
             >
               <RouteIcon />
-              <span>Маршрут</span>
+              <span>{t('offer.route')}</span>
             </a>
           </div>
 
@@ -183,7 +185,7 @@ export function OfferCard({
             <div
               className={styles.secondaryActions}
               data-count={socialActions.length}
-              aria-label="Дополнительные контакты"
+              aria-label={t('offer.moreContacts')}
             >
               {socialActions.map((action) => (
                 <a

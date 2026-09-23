@@ -1,12 +1,14 @@
 import { searchOffers } from '@/modules/search/application/search-offers';
 import { geoSearchRequestSchema } from '@/modules/search/contracts/buyer-location.contract';
 import { searchQuerySchema } from '@/modules/search/contracts/search.contract';
+import { localeFromApiRequest } from '../../../i18n/api';
 
 export const runtime = 'nodejs';
 
 const noStoreHeaders = { 'Cache-Control': 'no-store' };
 
 export async function GET(request: Request): Promise<Response> {
+  void localeFromApiRequest(request);
   const parsed = searchQuerySchema.safeParse(new URL(request.url).searchParams.get('q'));
   if (!parsed.success) {
     return Response.json(
@@ -26,6 +28,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  void localeFromApiRequest(request);
   let body: unknown;
   try {
     body = await request.json();
