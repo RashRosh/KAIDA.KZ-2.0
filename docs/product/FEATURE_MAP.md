@@ -133,6 +133,9 @@ codes (`kg`, `piece`, `liter`, `package`, `other` либо эквивалент)
 семантике `Другое`. Хранить только русские labels как новые canonical values нельзя: это конфликтует с RU/KZ
 presentation. Существующий nullable/free-text API не меняется молча внутри UI slice.
 
+Exact proposed storage, migration and API revision are owned by
+`docs/slices/offer-price-unit/SLICE_CONTRACT.md`; it must be approved before `seller-offer-editor` starts.
+
 ### KAIDA address directory
 
 Подсказки адреса при создании торговой точки строятся на собственном справочнике KAIDA поверх открытых данных (в первую очередь OpenStreetMap), размещённом внутри системы. Внешний платный геокодер не подключается — см. `PROJECT_RULES.md` §10.1.

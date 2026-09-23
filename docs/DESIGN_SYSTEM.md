@@ -34,22 +34,61 @@ KAIDA — не интернет-магазин. Пользователь нах�
 
 Глобальные tokens живут в `src/app/globals.css :root`. Новые компоненты не должны плодить literal colors/radii/durations, если соответствующий token уже существует.
 
+**Pass 3 global visual decision (Product Owner, 2026-09-23).** Inter and the exact Pass 3 palette below replace the
+previous global typography and palette for buyer and seller surfaces together. The values were copied from the
+accepted Pass 3 artifact; approximate substitutes are not allowed. Implementation includes responsive visual
+regression of the existing buyer shell, Search, Nearby, Offer cards and Auth at
+`320 / 390 / 768 / 1024 / 1440`.
+
 ### 2.1 Color
 
 ```css
---background: #faf9fc;
---bg: var(--background);
---surface: #ffffff;
---surface-sunken: #f2eff7;
---text: #251d33;
---muted: #696171;
---border: #ddd7e4;
---input-border: #81768c;
---border-strong: var(--input-border);
---primary: #6736bd;
---primary-hover: #51299a;
---primary-soft: #f3edfd;
---primary-disabled: #76618f;
+--kp-purple-100: #f6e6fe;
+--kp-purple-600: #9900cc;
+--kp-purple-700: #7900a3;
+--kp-gold-50: #fcf6e9;
+--kp-gold-100: #faebce;
+--kp-gold-500: #a87d01;
+--kp-gold-700: #684c00;
+--kp-neutral-100: #f4f1f5;
+--kp-neutral-200: #e6e2e8;
+--kp-neutral-300: #d3ced5;
+--kp-neutral-500: #848087;
+--kp-neutral-600: #656168;
+--kp-neutral-800: #2d2b2f;
+--kp-neutral-900: #161418;
+
+--k-bg: var(--kp-gold-50);
+--k-surface: #ffffff;
+--k-sunken: var(--kp-neutral-100);
+--k-text: var(--kp-neutral-900);
+--k-text-muted: var(--kp-neutral-600);
+--k-border: var(--kp-neutral-200);
+--k-border-strong: var(--kp-neutral-300);
+--k-field-border: var(--kp-neutral-500);
+--k-action: var(--kp-purple-600);
+--k-action-strong: var(--kp-purple-700);
+--k-on-action: #ffffff;
+--k-action-tint: var(--kp-purple-100);
+--k-focus: var(--kp-purple-600);
+--k-attn: var(--kp-gold-500);
+--k-attn-tint: var(--kp-gold-100);
+--k-attn-ink: var(--kp-gold-700);
+
+/* Compatibility aliases removed only when all existing components use --k-* directly. */
+--background: var(--k-bg);
+--bg: var(--k-bg);
+--surface: var(--k-surface);
+--surface-sunken: var(--k-sunken);
+--text: var(--k-text);
+--muted: var(--k-text-muted);
+--border: var(--k-border);
+--input-border: var(--k-field-border);
+--border-strong: var(--k-border-strong);
+--primary: var(--k-action);
+--primary-hover: var(--k-action-strong);
+--primary-soft: var(--k-action-tint);
+--primary-disabled: var(--kp-neutral-500);
 --error: #9c253d;
 --danger: var(--error);
 --error-soft: #fdecef;
@@ -58,7 +97,7 @@ KAIDA — не интернет-магазин. Пользователь нах�
 --stale: #8a5a00;
 --stale-soft: #fdf3e2;
 --neutral-label: #5b5568;
---neutral-soft: #efedf3;
+--neutral-soft: var(--k-sunken);
 ```
 
 Rules:
@@ -70,12 +109,12 @@ Rules:
 
 ### 2.2 Typography
 
-Primary UI family: **Roboto**, Cyrillic-capable. Working weights: `400 / 600 / 700 / 800`.
+Primary UI family: **Inter**, with Cyrillic and Kazakh glyph coverage. Working weights: `400 / 600 / 700 / 800`.
 
 Browser получает app-hosted static font assets; runtime request к Google Fonts/другому внешнему font service не нужен.
 
 ```css
---font-sans: var(--font-roboto), system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+--font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
 ```
 
 | role | size / line-height | weight |
@@ -126,6 +165,8 @@ Mobile page side padding `20px`; desktop `48px`. Vertical rhythm принадл�
 --shadow-card: 0 1px 2px rgba(37, 29, 51, 0.06);
 --shadow-sticky: 0 -2px 12px rgba(37, 29, 51, 0.08);
 --shadow-pop: 0 8px 24px rgba(37, 29, 51, 0.12);
+--k-elev-3: 0 -8px 28px rgba(22, 20, 24, 0.16);
+--k-elev-frame: 0 2px 4px rgba(22, 20, 24, 0.06), 0 14px 34px rgba(22, 20, 24, 0.10);
 ```
 
 Default card separation — border, не декоративная тень.

@@ -2,7 +2,7 @@
 
 **Issue:** #27 — Seller Offer Workspace: marketplace cards and simplified manual seller input
 
-**Status:** IMPLEMENTATION REJECTED FOR MERGE — UX reset required by Product Owner decision 2026-09-22; contract must be revised or decomposed before reimplementation
+**Status:** SUPERSEDED — decomposed on 2026-09-23 into three seller UI contracts (§13). Kept as history only.
 
 **Base main:** `239656d` (docs-only maintenance on top of checkpoint below)
 
@@ -189,3 +189,19 @@ None of this reopens S1/S3/S4/S5/S8/S10/S12/#35/#36/Mandatory-Price — every mu
 Поэтому сохранено правило, а не код: `DESIGN_SYSTEM.md` §13.1 «Overlay focus management». Новая реализация overlay обязана ему следовать.
 
 Ветка удаляется. История коммитов остаётся в Git и доступна по SHA, если понадобится посмотреть детали.
+
+## 13. Decomposition by accepted Pass 3 (2026-09-23)
+
+This contract is replaced by three compact seller UI contracts, implemented after all three localization contracts.
+Exact order, including the `offer-price-unit` prerequisite between seller parts 1 and 2, is owned by
+`EXECUTION_PLAN.md`:
+
+1. `docs/slices/seller-cabinet-overview/SLICE_CONTRACT.md` — seller navigation, overview `S-04`, offers list `S-05`,
+   confirmation page `S-10`, switch off/on;
+2. `docs/slices/seller-offer-editor/SLICE_CONTRACT.md` — create/edit form `S-06`, trading-point step `S-07`;
+3. `docs/slices/seller-points-contacts/SLICE_CONTRACT.md` — trading points `S-08`, contacts `S-09`.
+
+Issue #27 direction "no separate confirmation page" is superseded by accepted `S-10`: the confirmation page stays
+addressable (`/seller/change-sets/:id`), so S4/S5 confirmation semantics need no revision. Pass 3 elements that need
+core not yet built — expired status and reconfirmation (#31), unit codes, address suggestions and map link
+(stages 1/1a), comment translation hint — are excluded from these contracts and listed there explicitly.

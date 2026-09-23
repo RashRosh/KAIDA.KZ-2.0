@@ -72,9 +72,8 @@ and login, without losing what they were doing.
 ### Font coverage
 
 - The primary UI font ships the glyphs for all Kazakh letters (`ә ғ қ ң ө ұ ү һ і`, upper and lower case); today's
-  `latin` + `cyrillic` subset lacks most of them. Font family choice (Roboto in `DESIGN_SYSTEM.md` §2.2 vs Inter in
-  the Pass 3 prototype) belongs to the UI slices and Design System; this slice only guarantees coverage of the
-  family in use.
+  `latin` + `cyrillic` subset lacks most of them. The chosen global family is Inter (`DESIGN_SYSTEM.md` §2.2,
+  Product Owner decision 2026-09-23); this slice guarantees that its app-hosted assets cover the required glyphs.
 
 ## 3. Explicit out of scope
 
