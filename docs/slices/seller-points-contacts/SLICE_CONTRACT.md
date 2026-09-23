@@ -1,6 +1,7 @@
 # Seller trading points and contacts — Slice Contract
 
-**Status:** DRAFT — awaiting Product Owner approval.
+**Status:** APPROVED — Product Owner, 2026-09-23. Implementation remains gated by the order below and
+`PROJECT_RULES.md`.
 
 **Part 3 of 3** seller UI contracts (list in `docs/slices/seller-cabinet-overview/SLICE_CONTRACT.md`). Starts after
 part 2 is merged.
@@ -60,7 +61,7 @@ Points and contacts presentation only. No DB, migration or API change.
 |---|---|
 | Privacy | Raw coordinates never shown; only the present/absent label. |
 | Data loss | Unsaved point or contact edits prompt before discard; switching language keeps them. |
-| Regression | Buyer cards still show no-contact state correctly after all channels are switched off. |
+| Regression | After all channels are switched off, UX1D buyer eligibility hides the Seller's Offers from Search and Nearby; restoring the required phone makes eligible Offers visible again. |
 
 ## 6. Acceptance criteria
 
@@ -69,7 +70,8 @@ Points and contacts presentation only. No DB, migration or API change.
 3. Editing name, address or type never changes coordinates; `Я на точке` still works.
 4. Adding a point works from this screen and the new point is offered in the part 2 point step.
 5. Contacts show four channels with switches; all-off shows the honest warning and can still be saved.
-6. After switching all channels off, buyer Search cards show the no-contact state.
+6. After switching all channels off, the Seller's Offers are absent from Search and Nearby under closed UX1D
+   eligibility; restoring the required phone makes otherwise eligible Offers visible again.
 7. Every changed surface works in `ru` and `kk`, Kazakh native-verified, no clipping at 320 px; seller-written names
    and addresses are shown as written.
 8. Loading, error, focus, keyboard and 44×44 px targets per `DESIGN_SYSTEM.md` §7.1 and §13.
@@ -78,9 +80,9 @@ Points and contacts presentation only. No DB, migration or API change.
 ## 7. Verification and manual acceptance
 
 - E2E (mobile + desktop, `ru` + `kk`): list, edit, add, `Я на точке` with granted and denied permission, contacts
-  on/off, all-off warning, buyer no-contact state after save.
+  on/off, all-off warning, buyer eligibility after all-off and after restoring the required phone.
 - One full regression run and branch CI on the final executable head.
 
 Manual scenario: open `Точки`, rename a point, check coordinates did not change, add a second point. Open
-`Контакты`, switch everything off, read the warning, save; find your offer in buyer Search — it shows no contact.
-Switch the phone back on. Repeat in `ҚАЗ` on a phone width.
+`Контакты`, switch everything off, read the warning, save; confirm the Offer is absent from buyer Search and Nearby.
+Switch the phone back on and confirm the otherwise eligible Offer is visible again. Repeat in `ҚАЗ` on a phone width.

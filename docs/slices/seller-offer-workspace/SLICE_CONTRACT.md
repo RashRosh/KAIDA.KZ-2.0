@@ -192,8 +192,9 @@ None of this reopens S1/S3/S4/S5/S8/S10/S12/#35/#36/Mandatory-Price — every mu
 
 ## 13. Decomposition by accepted Pass 3 (2026-09-23)
 
-This contract is replaced by three compact seller UI contracts, implemented in this order after
-`localization-foundation`:
+This contract is replaced by three compact seller UI contracts, implemented after all three localization contracts.
+Exact order, including the `offer-price-unit` prerequisite between seller parts 1 and 2, is owned by
+`EXECUTION_PLAN.md`:
 
 1. `docs/slices/seller-cabinet-overview/SLICE_CONTRACT.md` — seller navigation, overview `S-04`, offers list `S-05`,
    confirmation page `S-10`, switch off/on;

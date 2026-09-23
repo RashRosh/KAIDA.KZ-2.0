@@ -1,6 +1,7 @@
 # Seller cabinet: navigation, overview and offers list — Slice Contract
 
-**Status:** DRAFT — awaiting Product Owner approval.
+**Status:** APPROVED — Product Owner, 2026-09-23. Implementation remains gated by the order below and
+`PROJECT_RULES.md`.
 
 **Part 1 of 3** seller UI contracts that replace the rejected Issue #27 contract
 (`docs/slices/seller-offer-workspace/SLICE_CONTRACT.md` §13):
@@ -9,8 +10,10 @@
 2. `docs/slices/seller-offer-editor/SLICE_CONTRACT.md` — create/edit form `S-06` and trading-point step `S-07`;
 3. `docs/slices/seller-points-contacts/SLICE_CONTRACT.md` — trading points `S-08` and contacts `S-09`.
 
-Order: 1 → 2 → 3. All three start only after `localization-foundation` is merged: every string goes through its
-string layer and ships in `ru` and `kk`.
+Order: 1 → `offer-price-unit` → 2 → 3. Seller UI starts only after all three approved localization
+contracts are merged: every string goes through the shared string layer, Product names exist in `ru` and `kk`, and
+the existing seller-comment translation behavior is preserved. `offer-price-unit` is inserted between parts 1 and
+2 because only the editor depends on it.
 
 **UX target:** accepted Pass 3 (`docs/product/WIREFRAME_PASS3_REVIEW.md` §13), surfaces `S-04`, `S-05`, `S-10`,
 seller part of `S-11`, `S-12`; `docs/product/UX_NAVIGATION_STATE_SPEC.md` §2 F3, §3.3–3.4.
@@ -82,10 +85,13 @@ list and switches it off or back on, without meeting technical words.
 
 ### Visual base
 
-- Pass 3 frames use a palette and font (Inter, gold background tint, purple action) that differ from
-  `DESIGN_SYSTEM.md` §2. Before UI code, this branch updates `DESIGN_SYSTEM.md` §2 to the accepted prototype tokens
-  and records the font family; the Kazakh glyph coverage guaranteed by `localization-foundation` must hold for it.
-  Token change applies app-wide, so buyer pages must not visibly break (they are rebuilt later, not here).
+- Product Owner decision, 2026-09-23: Inter and the accepted Pass 3 palette replace the current global font and
+  palette app-wide. Before UI code, `DESIGN_SYSTEM.md` §2 must record the exact tokens copied from the accepted
+  Pass 3 artifact; approximate or newly invented colour values are not allowed. Inter must be app-hosted and include
+  the Kazakh glyph coverage required by `localization-foundation`.
+- Because the token change applies before buyer screens are rebuilt, existing buyer Search, Nearby, Offer cards,
+  Auth and shared shell receive explicit responsive visual regression at 320, 390, 768, 1024 and 1440 px. Their
+  closed behavior and information hierarchy do not change in this slice.
 - Overlay rules from `DESIGN_SYSTEM.md` §13.1 apply to the `Ещё` menu and `Другие действия` menu.
 
 ## 3. Explicit out of scope
