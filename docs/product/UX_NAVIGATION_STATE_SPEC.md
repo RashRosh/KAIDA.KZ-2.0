@@ -1,8 +1,8 @@
 # KAIDA UX reset — navigation and state specification
 
-> **Status:** DRAFT FOR PRODUCT OWNER REVIEW  
-> **Purpose:** первый обязательный артефакт UI redesign stabilization gate из `EXECUTION_PLAN.md`.  
-> **Source:** bundled wireframe set `1a`–`5e` (`wf.pdf`), `WIREFRAME_BRIEF.md`, закрытые core contracts и фактические routes.  
+> **Status:** DRAFT FOR PRODUCT OWNER REVIEW
+> **Purpose:** первый обязательный артефакт UI redesign stabilization gate из `EXECUTION_PLAN.md`.
+> **Source:** bundled wireframe set `1a`–`5e` (`wf.pdf`), `WIREFRAME_BRIEF.md`, закрытые core contracts и фактические routes.
 > **This document is not:** новый roadmap, разрешение на production implementation или замена Slice Contract.
 
 ## 1. Вывод ревизии
@@ -398,13 +398,16 @@ Product Owner принимает prototype только если:
 Только после этого создаётся новая UI branch от актуального `main`, а production work разбивается на compact Slice
 Contracts. Экспериментальная `slice/seller-offer-workspace` не является base branch нового UI.
 
-## 11. Открытые Product Owner решения
+## 11. Принятые и оставшиеся Product Owner решения
 
-Эти решения не блокируют подготовку каркаса прототипа, но должны быть видимыми вариантами до production implementation:
+Принято 2026-09-23:
 
-1. **Перевод seller-authored content:** рекомендованный hybrid auto-translate + original + seller correction, либо другая
-   единая модель.
-2. **Seller mobile navigation:** четыре destinations сразу или три основных + `Ещё`.
-3. **Отдельная buyer Offer detail page:** нужна ли она до появления media/reviews, или card actions достаточно.
-4. **Map-link variant в прототипе:** показать как ближайшее committed направление либо оставить до следующего prototype
-   pass после принятия core flows.
+1. **Перевод seller-authored content:** automatic translation + доступный original + fallback к original; machine output
+   не становится единственным сохранённым текстом. Полная модель — `FEATURE_MAP.md` и будущий localization contract.
+2. **Map-link:** утверждённый необязательный geo-fallback вне основной F2; activation только на своём stage.
+
+Остаётся подтвердить при финальной visual acceptance исправленного прототипа:
+
+1. **Seller mobile navigation:** четыре destinations сразу или три основных + `Ещё`.
+2. **Отдельная buyer Offer detail page:** до media/reviews действия остаются на карточке; отдельная route не появляется
+   без нового решения.

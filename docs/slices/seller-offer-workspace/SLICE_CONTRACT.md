@@ -143,7 +143,8 @@ After targeted verification: one full regression run and branch CI on the final 
 
 Controller/Product Owner approval is required before implementation. No production code, migration, tests, CI, manual acceptance, merge, tag or further Issue #27 work belongs to this contract-only pass.
 
-**Approved 2026-09-22.** Implementation may proceed on a dedicated branch per `PROJECT_RULES.md` §19.
+**Historical approval 2026-09-22 — superseded.** Implementation proceeded and was rejected for merge. No further
+implementation may use §§1–9 as current authority; see §§10–12 and the UI redesign gate in `EXECUTION_PLAN.md`.
 
 ## 10. Historical rejected pass — wireframe-driven deviation (2026-09-22)
 
@@ -175,7 +176,7 @@ None of this reopens S1/S3/S4/S5/S8/S10/S12/#35/#36/Mandatory-Price — every mu
 - новый production pass начинается только после Product Owner UX acceptance прототипа и revised/decomposed Slice Contract;
 - до redesign checkpoint действует feature freeze из `docs/product/EXECUTION_PLAN.md`.
 
-Это решение заменяет историческую трактовку §10 о том, что wireframe автоматически отменяет STOP для business/data conflicts. Актуальная граница определена `PROJECT_RULES.md` §18.1–§18.3: wireframe authoritative для UX; изменение проверенного core требует явной contract revision.
+Это решение заменяет историческую трактовку §10 о том, что wireframe автоматически отменяет STOP для business/data conflicts. Актуальная граница определена `PROJECT_RULES.md` §18.1–§18.3: authority принадлежит текущей цепочке UX-reset artifacts и визуально принятому прототипу; изменение проверенного core требует явной contract revision.
 
 ## 12. Результат review отклонённой ветки (2026-09-23)
 

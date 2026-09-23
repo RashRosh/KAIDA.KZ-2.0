@@ -10,9 +10,9 @@
 
 1. closed contracts и утверждённый текущий Slice Contract определяют поведение/API/privacy/business semantics;
 2. `docs/PROJECT_RULES.md` определяет process и stable boundaries;
-3. explicit Product Owner decisions определяют утверждённые product/UX revisions — включая `PROJECT_RULES.md` §18.1: bundled wireframe artifact является authoritative текущей UX-целью presentation-слоя, не generic advisory evidence;
+3. explicit Product Owner decisions определяют утверждённые product/UX revisions — включая актуальную цепочку UX-reset artifacts из `PROJECT_RULES.md` §18.1; исторический набор из 42 кадров сам по себе больше не является прямым implementation target;
 4. этот Design System определяет visual/presentation rules и приводится в соответствие с этой UX-целью по мере редизайна каждой области;
-5. `docs/product/UX_REFERENCE_INDEX.md` и прочие внешние references (не bundled wireframe artifact) дают advisory evidence;
+5. `docs/product/UX_REFERENCE_INDEX.md` и прочие внешние references дают advisory evidence; исторические внутренние wireframe exports применяются только через authority lifecycle из `PROJECT_RULES.md` §18.1;
 6. общие привычки исполнителя идут последними.
 
 Design System не имеет права самостоятельно менять closed business/data contract. Если конкретный экран вайрфрейма требует новой бизнес-механики, которой нет ни в одном closed contract — STOP и explicit вопрос Product Owner по `PROJECT_RULES.md` §18.1, прежде чем реализовывать эту механику.
@@ -59,7 +59,6 @@ KAIDA — не интернет-магазин. Пользователь нах�
 --stale-soft: #fdf3e2;
 --neutral-label: #5b5568;
 --neutral-soft: #efedf3;
---primary-accent: var(--primary);
 ```
 
 Rules:
@@ -68,12 +67,6 @@ Rules:
 - state never communicates only by color;
 - green/amber reserved for truthful freshness/status semantics, not fake urgency;
 - promoted Offers do not get an attention-grabbing relevance-breaking color.
-
-#### Dark scope (seller area only)
-
-Added 2026-09-22 for the wireframe-driven seller redesign (Issue #27, see that Slice Contract's §10). `/seller/**` wraps its content in `src/app/seller/seller-theme.module.css`'s `.dark` class, which redefines the same token names above (plus `color: var(--text)` on the wrapper itself — `color` is inherited from wherever it's first declared, so an element that never redeclares `color: var(--text)` on its own keeps whatever value was computed at `body`; setting it again at the theme boundary is what makes normal inheritance carry the right value down past that boundary) to a dark palette, and a `.vars`-only variant (no `background`/layout) for portaled content (`BottomSheet` renders via `createPortal` to `document.body`, which sits outside any wrapper in the DOM — custom properties don't cross that boundary on their own). `--primary` stays the same violet everywhere (already legible on both light and dark surfaces for a white-text filled button); `--primary-accent` is the token to use for text/border/icon accents directly on a dark surface, where the base `--primary` would be too close in luminance to read.
-
-Not a general dark-mode feature — buyer-facing pages are untouched and there is no theme toggle.
 
 ### 2.2 Typography
 
@@ -321,11 +314,11 @@ Seller workspace должен давать очевидный выбор меж�
 
 Multiple Locations отображаются как понятные trading-point cards, когда capability реализована. Seller-level contacts не дублируются по Location без отдельного model decision.
 
-### Seller workspace navigation and in-flow forms (2026-09-22, Issue #27 wireframe redesign)
+### Seller workspace navigation and in-flow forms
 
-- Seller area (`/seller/**`) uses a dark theme scoped via `seller-theme.module.css`, not the buyer-facing light theme — see §2.1's "Dark scope" note for the tokens and why.
-- The workspace is route-based, not a single stacked page: a bottom tab bar (`SellerTabBar`, mirrored by `PROJECT_RULES.md`'s existing "no fabricated capability" rule — the third tab renders visibly disabled/"скоро" rather than being hidden, when the capability is real but not yet built) switches between the hub and its sub-areas, following whatever grouping the current wireframe/Slice Contract shows rather than one page trying to hold every seller task at once.
-- In-flow create/edit/confirm forms use `BottomSheet` (`src/app/seller/_components/BottomSheet.tsx`), not the general-purpose centered `Modal.tsx` — same focus-trap/Esc/scroll-lock contract, different chrome (slides from the bottom, drag handle, rounded top corners only). Use `BottomSheet` for new seller in-flow forms unless a specific wireframe screen shows otherwise; `Modal.tsx` remains available for non-seller or non-form uses (e.g. `AuthModal`).
+- Seller navigation показывает только существующие destinations. Disabled/`скоро` capability не занимает постоянный слот.
+- Точная mobile/desktop navigation composition, тема и тип in-flow surface берутся из визуально принятого прототипа и фиксируются Slice Contract затронутой поверхности.
+- Create/edit/confirm может использовать полноэкранный шаг, dialog, side sheet или bottom sheet, если выбранный pattern сохраняет одну state machine, явный review/confirm и правила accessibility из §13. Не ссылаться на компоненты отклонённой ветки как на существующую основу.
 
 ## 10. Auth presentation
 
@@ -420,4 +413,7 @@ Maintenance audit #37 сверил текущие rules с Product Owner UX corp
 
 Audit может уточнять presentation rules, но не имеет права молча менять closed business/data contracts. Этот раздел остаётся историческим указателем на метод для generic внешних references, а не execution roadmap.
 
-Bundled wireframe artifact (`docs/product/WIREFRAME_BRIEF.md`) с 2026-09-22 выведен из этого `KEEP/ADAPT/REJECT/GAP` режима отдельным Product Owner решением — см. `PROJECT_RULES.md` §18.1. Для него `KEEP/ADAPT/REJECT/GAP` больше не определяет, применяется ли экран: применяется он напрямую как целевой UI; классификация остаётся полезной только для отдельного вопроса — не требует ли конкретный экран новой business-механики, которой ещё нет в closed contracts.
+Второй wireframe pass из `WIREFRAME_BRIEF.md` в 2026-09-22 временно был прямой UX-целью, но после UX reset pass 3
+сохраняется как исторический evidence/inventory. Текущую применимость поверхности определяет цепочка
+`UX_NAVIGATION_STATE_SPEC.md` → `WIREFRAME_TASK_PASS3.md` → `WIREFRAME_PASS3_REVIEW.md` → визуально принятый
+исправленный прототип. Классификация всё ещё полезна для проверки, не требует ли дизайн новой business-механики.

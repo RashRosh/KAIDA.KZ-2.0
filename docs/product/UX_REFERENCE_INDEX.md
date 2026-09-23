@@ -343,6 +343,12 @@ historical record of the original per-finding read; the "touches closed/blocked 
 matters going forward — a `YES` there means new business mechanics, not just presentation, and still needs an
 explicit Product Owner answer before implementation per §18.1, not a silent adoption.
 
+**Superseded as a direct target on 2026-09-23:** the 42-frame artifact remains the historical source described by
+this table, but current UX-reset instructions are now owned by `UX_NAVIGATION_STATE_SPEC.md`,
+`WIREFRAME_TASK_PASS3.md` and `WIREFRAME_PASS3_REVIEW.md`. The corrected pass-3 prototype becomes implementation
+authority only after Product Owner visual acceptance and a durable artifact locator/copy is recorded. This note
+supersedes the older wording below wherever it calls the 42-frame export the current direct target.
+
 | # | Finding | Classification | Touches closed/blocked contract? |
 |---|---|---|---|
 | 1 | `1a`–`1i`, `2a`–`2i`, `3a`–`3c`/`3e`–`3g` (buyer search/nearby/card/interests, seller cabinet/trading points/Change Set/Offer Workspace/freshness/`Для вас`/Мои интересы) match already-closed S0–S13/#35/#36 behavior, no new business rule | `KEEP` — reference material for the redesign pass, not new scope | NO |

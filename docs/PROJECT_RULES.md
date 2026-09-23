@@ -271,18 +271,27 @@ Design System развивается вместе со slices, но не име�
 
 Внешние UX references — advisory evidence. Их findings классифицируются `KEEP / ADAPT / REJECT / GAP`.
 
-### 18.1 Bundled wireframe artifact — authoritative UX target (Product Owner decision, 2026-09-22, revised same day)
+### 18.1 UX reset artifacts — authority lifecycle (Product Owner decisions, 2026-09-22–23)
 
-Текущий продуктовый UI признан неудовлетворительным. Bundled wireframe artifact (42 экрана, `1a`–`5e`, Tier 0–4, зафиксирован в `docs/product/WIREFRAME_BRIEF.md` и `docs/product/UX_REFERENCE_INDEX.md`, «Follow-up spot-check (2026-09-22)») является **главным источником истины для пользовательского слоя**:
+Текущий продуктовый UI признан неудовлетворительным. Bundled wireframe artifact из 42 кадров (`1a`–`5e`) запустил UX reset и остаётся историческим источником композиционных идей и полной описью исходных кадров. После его ревизии он **не является прямым implementation target**: третий проход удаляет, объединяет и перерабатывает часть этих кадров.
+
+Во время stabilization gate текущая рабочая UX-цель определяется совместно:
+
+1. `docs/product/UX_NAVIGATION_STATE_SPEC.md` — surfaces, navigation, states, actions и data boundaries;
+2. `docs/product/WIREFRAME_TASK_PASS3.md` — обязательное ТЗ на новый прототип;
+3. `docs/product/WIREFRAME_PASS3_REVIEW.md` — принятые части и обязательные исправления по результату прохода;
+4. сам исправленный редактируемый прототип — только после Product Owner visual acceptance и фиксации его устойчивого locator/copy в репозитории.
+
+Эта цепочка является главным источником истины для пользовательского слоя в части:
 
 - information architecture, маршруты и переходы между экранами;
 - визуальная композиция, иерархия, layout и responsive-направление;
 - user-facing interaction patterns, состояния и последовательность действий;
 - vocabulary и presentation технических сущностей пользователю.
 
-Покрытый вайрфреймом экран разрешено пересобрать целиком, а не ретрофитить поверх прежней component/page-композиции. Существующий UI не является ограничением для нового presentation layer.
+Покрытый UX-reset экран разрешено пересобрать целиком, а не ретрофитить поверх прежней component/page-композиции. Существующий UI не является ограничением для нового presentation layer.
 
-Ещё не реализованные экраны проектируются по вайрфрейму напрямую. Уже реализованные экраны приводятся к нему через отдельные компактные UI slices. Slice Contract фиксирует конкретные экраны/состояния в scope; сам артефакт не заменяет контракт и не разрешает реализовать все 42 экрана одним большим diff.
+До visual acceptance исправленного прототипа production UI branch не начинается. После acceptance уже реализованные поверхности приводятся к принятому прототипу через отдельные компактные UI slices. Slice Contract фиксирует конкретные surfaces/states в scope; ни старый набор из 42 кадров, ни новый прототип не заменяют контракт и не разрешают один большой diff.
 
 ### 18.2 Граница между UX target и product core
 
@@ -292,7 +301,7 @@ Design System развивается вместе со slices, но не име�
 - Если экран требует новых данных, mutation semantics или изменения закрытого business contract, применяется обычный STOP из раздела 4 и готовится явная contract revision до production-кода.
 - Нельзя выдумывать отсутствующие данные или различия состояний только ради буквального визуального совпадения. Такой разрыв фиксируется как data/contract gap.
 - При неоднозначности экран сначала переводится в route/state/action/data specification. Трактовка должна сохранять видимый пользовательский замысел вайрфрейма и проверенные гарантии core.
-- Внешние UX references остаются advisory. Особый authoritative-статус относится только к bundled wireframe artifact.
+- Внешние UX references остаются advisory. Особый authoritative-статус относится только к актуальной принятой цепочке внутренних UX-reset artifacts из §18.1, а не к любому старому экспорту вайрфреймов.
 
 ### 18.3 UX acceptance до production wiring
 

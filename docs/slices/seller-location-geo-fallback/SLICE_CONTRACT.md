@@ -6,8 +6,8 @@
 1–8 below are accepted as the Slice Contract content for this capability. Scheduled the same day into
 `docs/product/EXECUTION_PLAN.md`'s frozen committed queue as stage 1 after the UI redesign checkpoint, ahead of Freshness Policy — approval
 of the contract and scheduling of the work, previously two separate steps, are both now complete. Implementation
-may begin once Issue #27 reaches its own merge/checkpoint per the normal `PROJECT_RULES.md` process (one product
-slice at a time on `main`).
+may begin only after the UI redesign stabilization gate closes and `EXECUTION_PLAN.md` makes this the active stage
+(one product slice at a time on `main`). The rejected Issue #27 implementation is not a prerequisite.
 
 **Base product checkpoint:** `v0.0.24-seller-entry`
 

@@ -49,7 +49,7 @@
 
 Обязательная последовательность gate:
 
-1. преобразовать authoritative wireframes в compact navigation/state/action/data specification для ключевых buyer/seller flows;
+1. преобразовать исходные wireframes в compact navigation/state/action/data specification для ключевых buyer/seller flows;
 2. включить в specification обязательный глобальный `Русский / Қазақша` switch и полное покрытие обоих языков для всех KAIDA-owned strings, system states, accessibility copy и catalog-owned display data;
 3. определить responsive rules для desktop без попытки дорисовать 42 независимых desktop-экрана;
 4. подготовить статический либо fixture-driven prototype ключевых flows поверх нового UI shell и показать каждый core flow на русском и казахском;
@@ -65,7 +65,7 @@ Working draft для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md
 | Шаг | Статус на 2026-09-23 |
 |---|---|
 | 1–3 | Выполнены как draft: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
-| 4 | **Прототип сдан.** Проход 3 вайрфреймов по ТЗ `docs/product/WIREFRAME_TASK_PASS3.md`: 63 состояния × `ru`/`kk`, 7 desktop-вариантов, разделы длинного контента, переходов и доступности. Ревью выполнено, список обязательных правок передан автору |
+| 4 | **Прототип внешне сдан, repository evidence неполный.** По review заявлены 63 состояния × `ru`/`kk`, 7 desktop-вариантов, разделы длинного контента, переходов и доступности. Сам редактируемый макет/экспорт и устойчивый locator в репозитории отсутствуют; до их фиксации выводы нельзя независимо воспроизвести. Список обязательных правок передан автору |
 | 5 | **Не получен.** UX acceptance невозможен до закрытия правок прохода 3 |
 | 6–8 | Не начаты |
 
@@ -106,7 +106,7 @@ Working draft для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md
 
 - Seller Entry и Trading Points Workspace закрыты и остаются проверенным product core; их текущая presentation не обязана сохраняться в redesign.
 - Geo fallback остаётся первым product stage после redesign checkpoint: contract утверждён (2026-09-22, S8 revision), но feature freeze запрещает начинать его раньше.
-- Address directory (stage 1a) идёт **после** geo fallback, а не вместо него: подсказки адреса — улучшение поверх пути, который обязан работать без них (`PROJECT_RULES.md` §10.1). Ручной ввод адреса, действие «я на точке» и вставка ссылки на карту остаются полноценными путями и после появления справочника. Первый шаг stage 1a — проверка фактического покрытия адресов Алматы в выбранном открытом источнике; её результат определяет объём, а не сам факт старта.
+- Address directory (stage 1a) идёт **после** geo fallback, а не вместо него: подсказки адреса — улучшение поверх пути, который обязан работать без них (`PROJECT_RULES.md` §10.1). Ручной ввод адреса и действие «я на точке» доступны в initial UI; вставка ссылки активируется только на stage 1, подсказки — только на stage 1a. Принятый prototype может показывать целевую композицию с явной маркировкой future data source, но UI implementation не имеет права молча реализовать stages 1/1a внутри redesign slice. Первый шаг stage 1a — проверка покрытия адресов Алматы, licence/attribution requirements и operational модели выбранного открытого источника.
 - Freshness Policy и Reminder идут после redesign checkpoint и geo fallback, потому что reconfirmation должен жить в принятом seller UX.
 - Search Sorting выполняется после Freshness Policy, чтобы sorting не закрепил устаревшую ranking semantics.
 - M1 вводит настоящие seller-provided Offer media end-to-end; временные pre-MVP visuals M1 не заменяют.
