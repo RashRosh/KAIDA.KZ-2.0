@@ -15,6 +15,7 @@ export const offers = pgTable('offers', {
   priceCurrency: char('price_currency', { length: 3 }),
   priceUnit: text('price_unit'),
   sellerComment: text('seller_comment'),
+  sellerCommentVersion: integer('seller_comment_version').notNull().default(1),
   status: text('status').$type<OfferStatus>().notNull(),
   lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true }).notNull(),
   revision: integer('revision').notNull().default(1),
@@ -28,6 +29,7 @@ export const offers = pgTable('offers', {
     ${table.priceCurrency} IS NOT NULL AND ${table.priceCurrency} ~ '^[A-Z]{3}$'
   )`),
   check('offers_status_allowed', sql`${table.status} IN ('active', 'inactive')`),
+  check('offers_seller_comment_version_positive', sql`${table.sellerCommentVersion} >= 1`),
   check('offers_active_price_required', sql`${table.status} <> 'active' OR (
     ${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'
   )`),

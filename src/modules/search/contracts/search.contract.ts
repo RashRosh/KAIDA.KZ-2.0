@@ -22,6 +22,16 @@ export const searchOfferSchema = z.object({
     unit: z.string().nullable(),
   }),
   sellerComment: z.string().nullable(),
+  // Present only while the translator is enabled and the comment is not already in the interface locale.
+  sellerCommentTranslation: z.discriminatedUnion('status', [
+    z.object({
+      status: z.literal('translated'),
+      text: z.string(),
+      locale: z.enum(['ru', 'kk']),
+      originalLocale: z.enum(['ru', 'kk']).optional(),
+    }),
+    z.object({ status: z.literal('unavailable') }),
+  ]).optional(),
 });
 
 export const searchResponseSchema = z.object({

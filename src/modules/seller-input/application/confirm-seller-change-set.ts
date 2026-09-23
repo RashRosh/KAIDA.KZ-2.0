@@ -9,6 +9,11 @@ import {
   lockOfferById,
 } from '../../offers/infrastructure/offers.repository';
 import { systemClock, type Clock } from '../../offers/lifecycle/offer-lifecycle';
+import {
+  disabledSellerCommentTranslationScheduler,
+  type PublishedSellerComment,
+  type ScheduleSellerCommentTranslations,
+} from '../../offers/translation/seller-comment-translator';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   ChangeSetNotFoundError,
@@ -70,12 +75,18 @@ async function validateConfirmedItems(
 export async function confirmSellerChangeSet(
   ownerUserId: string,
   changeSetId: string,
-  dependencies: { database?: Database; clock?: Clock } = {},
+  dependencies: {
+    database?: Database;
+    clock?: Clock;
+    scheduleCommentTranslations?: ScheduleSellerCommentTranslations;
+  } = {},
 ): Promise<SellerChangeSetView> {
   const database = dependencies.database ?? getDatabase();
   const clock = dependencies.clock ?? systemClock;
+  const scheduleCommentTranslations = dependencies.scheduleCommentTranslations
+    ?? disabledSellerCommentTranslationScheduler;
 
-  return database.transaction(async (tx) => {
+  const result = await database.transaction(async (tx) => {
     const seller = await findSellerByOwner(tx, ownerUserId);
     if (!seller) throw new SellerRequiredError();
 
@@ -89,7 +100,7 @@ export async function confirmSellerChangeSet(
 
     if (changeSet.status === 'confirmed') {
       await validateConfirmedItems(tx, seller.id, items);
-      return loadFinalView(tx, changeSet.id, seller.id);
+      return { view: await loadFinalView(tx, changeSet.id, seller.id), comments: [] as PublishedSellerComment[] };
     }
 
     const targetIds = new Set<string>();
@@ -162,6 +173,7 @@ export async function confirmSellerChangeSet(
     }
 
     const confirmationTime = clock();
+    const comments: PublishedSellerComment[] = [];
 
     for (const item of items) {
       assertPricedItem(item);
@@ -176,13 +188,20 @@ export async function confirmSellerChangeSet(
           sellerComment: item.sellerComment,
           confirmedAt: confirmationTime,
         });
+        if (offer.sellerComment) {
+          comments.push({
+            offerId: offer.id,
+            commentVersion: offer.sellerCommentVersion,
+            comment: offer.sellerComment,
+          });
+        }
         const linked = await linkResultOffer(tx, item.id, offer.id);
         if (linked.length !== 1) throw new SellerInputInvariantError('Result Offer не удалось связать с create_offer Item.');
         continue;
       }
 
       const targetOffer = lockedOffers.get(item.targetOfferId!)!;
-      let applied: Array<{ id: string }>;
+      let applied: Awaited<ReturnType<typeof applyOfferUpdateSnapshot>>;
 
       if (item.action === 'update_offer') {
         applied = await applyOfferUpdateSnapshot(tx, {
@@ -192,6 +211,7 @@ export async function confirmSellerChangeSet(
           priceCurrency: 'KZT',
           priceUnit: item.priceUnit,
           sellerComment: item.sellerComment,
+          sellerCommentChanged: item.sellerComment !== targetOffer.sellerComment,
           confirmationTime,
         });
       } else if (item.action === 'deactivate_offer') {
@@ -212,6 +232,15 @@ export async function confirmSellerChangeSet(
         throw new OfferChangedError();
       }
 
+      const appliedOffer = applied[0]!;
+      if (item.action === 'update_offer' && item.sellerComment !== targetOffer.sellerComment && appliedOffer.sellerComment) {
+        comments.push({
+          offerId: appliedOffer.id,
+          commentVersion: appliedOffer.sellerCommentVersion,
+          comment: appliedOffer.sellerComment,
+        });
+      }
+
       const linked = await linkResultOffer(tx, item.id, targetOffer.id);
       if (linked.length !== 1) throw new SellerInputInvariantError('Result Offer не удалось связать с management Change Item.');
     }
@@ -219,6 +248,19 @@ export async function confirmSellerChangeSet(
     const confirmed = await markChangeSetConfirmed(tx, changeSet.id, confirmationTime);
     if (confirmed.length !== 1) throw new SellerInputInvariantError('Change Set не удалось перевести в confirmed.');
 
-    return loadFinalView(tx, changeSet.id, seller.id);
+    return { view: await loadFinalView(tx, changeSet.id, seller.id), comments };
   });
+
+  if (result.comments.length > 0) {
+    // Translation is best effort: neither a synchronous throw nor a rejection may fail the confirmed ChangeSet.
+    try {
+      void Promise.resolve(scheduleCommentTranslations(result.comments)).catch(() => {
+        console.error('Seller comment translation scheduling failed');
+      });
+    } catch {
+      console.error('Seller comment translation scheduling failed');
+    }
+  }
+
+  return result.view;
 }

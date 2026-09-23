@@ -6,12 +6,13 @@ import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.co
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import styles from '../page.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
+import { CommentTranslationAssist } from './CommentTranslationAssist';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type OffersResponse = { offers?: SellerOfferView[] } & ApiError;
 type ChangeResponse = { changeSet?: SellerChangeSetView } & ApiError;
 
-export function SellerOfferManagement() {
+export function SellerOfferManagement({ commentTranslationEnabled = false }: { commentTranslationEnabled?: boolean }) {
   const { locale, t } = useI18n();
   const router = useRouter();
   const [offers, setOffers] = useState<SellerOfferView[]>([]);
@@ -136,6 +137,7 @@ export function SellerOfferManagement() {
                   <input id={`offer-unit-${offer.id}`} value={priceUnit} onChange={(event) => setPriceUnit(event.target.value)} maxLength={32} disabled={submitting || priceAmount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
                   <label htmlFor={`offer-comment-${offer.id}`}>{t('offerCreate.comment')}</label>
                   <textarea id={`offer-comment-${offer.id}`} value={sellerComment} onChange={(event) => setSellerComment(event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder={t('batch.noComment')} />
+                  <CommentTranslationAssist enabled={commentTranslationEnabled} comment={sellerComment} />
                   <div className={styles.actions}>
                     <button type="submit" disabled={submitting}>{submitting ? t('offerCreate.creating') : t('offerManage.review')}</button>
                     <button type="button" className={styles.secondaryButton} onClick={() => setEditingOfferId(null)} disabled={submitting}>{t('offerManage.cancel')}</button>

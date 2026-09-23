@@ -20,12 +20,15 @@ export default defineConfig({
     { name: 'mobile', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
     { name: 'desktop', use: { browserName: 'chromium', viewport: { width: 1440, height: 900 } } },
   ],
-  webServer: {
-    command: 'pnpm start --hostname 127.0.0.1 --port 3100',
-    url: 'http://127.0.0.1:3100',
+  // Two instances of one build: the default with the comment translator off (every existing flow must pass that
+  // way) and one with the deterministic fake translator for seller-comment-translation.spec.ts.
+  webServer: [false, true].map((translatorOn) => ({
+    command: `pnpm start --hostname 127.0.0.1 --port ${translatorOn ? 3101 : 3100}`,
+    url: `http://127.0.0.1:${translatorOn ? 3101 : 3100}`,
     reuseExistingServer: false,
     timeout: 120000,
     env: {
+      SELLER_COMMENT_TRANSLATOR: translatorOn ? 'fake' : 'off',
       DATABASE_URL: testDatabaseUrl(),
       NEARBY_RADIUS_METERS: String(NEARBY_RADIUS_METERS_DEFAULT),
       IDENTITY_OTP_TTL_SECONDS: '300',
@@ -34,5 +37,5 @@ export default defineConfig({
       IDENTITY_COOKIE_SECURE: 'false',
       NEXT_TELEMETRY_DISABLED: '1',
     },
-  },
+  })),
 });

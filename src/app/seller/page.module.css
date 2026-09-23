@@ -738,3 +738,24 @@
     width: 100%;
   }
 }
+
+.translationAssist {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.translationPreview {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
+
+.translationPreview p {
+  margin: 0;
+  line-height: 1.45;
+}

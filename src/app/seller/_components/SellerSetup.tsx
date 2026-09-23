@@ -45,7 +45,7 @@ function ProductIcon() {
   );
 }
 
-export function SellerSetup() {
+export function SellerSetup({ commentTranslationEnabled = false }: { commentTranslationEnabled?: boolean }) {
   const { locale, t } = useI18n();
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready'>('loading');
   const [seller, setSeller] = useState<SellerView | null>(null);
@@ -178,6 +178,7 @@ export function SellerSetup() {
             draft={productDraft}
           onDraftChange={setProductDraft}
           onPrerequisiteRequired={requireTradingPointSetup}
+          commentTranslationEnabled={commentTranslationEnabled}
           resumedAfterSetup={productResumed}
         />
       </>
@@ -216,8 +217,9 @@ export function SellerSetup() {
           draft={productDraft}
           onDraftChange={setProductDraft}
           onPrerequisiteRequired={requireTradingPointSetup}
+          commentTranslationEnabled={commentTranslationEnabled}
         />
-        <SellerOfferManagement />
+        <SellerOfferManagement commentTranslationEnabled={commentTranslationEnabled} />
         </div>
       </>
     );

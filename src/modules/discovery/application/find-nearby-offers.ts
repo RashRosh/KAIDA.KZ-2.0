@@ -23,6 +23,7 @@ type NearbyDiscoveryOptions = {
   validityPeriodHours?: number;
   nearbyRadiusMeters?: number;
   locale?: Locale;
+  commentTranslationEnabled?: boolean;
 };
 
 export async function findNearbyOffers(
@@ -40,9 +41,9 @@ export async function findNearbyOffers(
     : validateNearbyRadiusMeters(options.nearbyRadiusMeters);
   const cutoff = calculateOfferCutoff(now, validityPeriodHours);
   const db = database ?? getDatabase();
-  const candidates = options.locale
-    ? await findVisibleDiscoveryCandidates(db, cutoff, options.locale)
-    : await findVisibleDiscoveryCandidates(db, cutoff);
+  const candidates = options.locale === undefined && options.commentTranslationEnabled === undefined
+    ? await findVisibleDiscoveryCandidates(db, cutoff)
+    : await findVisibleDiscoveryCandidates(db, cutoff, options.locale, options.commentTranslationEnabled);
 
   return {
     offers: selectNearbyOffers(candidates, buyerLocation, nearbyRadiusMeters),

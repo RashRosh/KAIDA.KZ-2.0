@@ -93,6 +93,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
       .then((localized) => {
         if (!active || !localized) return;
         const names = new Map(localized.offers.map((offer) => [offer.product.id, offer.product]));
+        const comments = new Map(localized.offers.map((offer) => [offer.id, offer.sellerCommentTranslation]));
         setState({
           kind: 'success',
           result: {
@@ -100,6 +101,8 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
             offers: current.offers.map((offer) => ({
               ...offer,
               product: names.get(offer.product.id) ?? offer.product,
+              // The comment variant is per interface locale; an Offer missing from the refetch keeps no stale translation.
+              sellerCommentTranslation: comments.get(offer.id),
             })),
           },
         });

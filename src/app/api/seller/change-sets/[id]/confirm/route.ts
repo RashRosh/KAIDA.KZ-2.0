@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
+import { getSellerCommentTranslationScheduler } from '@/modules/offers/translation/seller-comment-translation.runtime';
 import { confirmSellerChangeSet } from '@/modules/seller-input/application/confirm-seller-change-set';
 import {
   ChangeSetNotFoundError,
@@ -27,7 +28,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (!parsedId.success) return NextResponse.json({ error: { code: 'INVALID_CHANGE_SET_ID', message: 'Некорректный идентификатор изменения.' } }, { status: 400, headers: noStore });
 
   try {
-    const changeSet = await confirmSellerChangeSet(user.id, parsedId.data);
+    const changeSet = await confirmSellerChangeSet(user.id, parsedId.data, {
+      scheduleCommentTranslations: getSellerCommentTranslationScheduler((task) => after(task)),
+    });
     return NextResponse.json({ changeSet }, { status: 200, headers: noStore });
   } catch (error) {
     if (error instanceof SellerRequiredError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
