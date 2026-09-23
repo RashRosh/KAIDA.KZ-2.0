@@ -6,6 +6,7 @@ import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import styles from '../page.module.css';
 import { useI18n } from '../../../i18n/I18nProvider';
+import { CommentTranslationAssist } from './CommentTranslationAssist';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type CreateResponse = { changeSet?: SellerChangeSetView } & ApiError;
@@ -23,6 +24,7 @@ type SellerChangeSetCreateProps = {
   onDraftChange: (draft: ProductDraft) => void;
   onPrerequisiteRequired: () => void;
   resumedAfterSetup?: boolean;
+  commentTranslationEnabled?: boolean;
 };
 
 export function automaticLocationId(seller: SellerView | null): string {
@@ -35,6 +37,7 @@ export function SellerChangeSetCreate({
   onDraftChange,
   onPrerequisiteRequired,
   resumedAfterSetup = false,
+  commentTranslationEnabled = false,
 }: SellerChangeSetCreateProps) {
   const { t } = useI18n();
   const router = useRouter();
@@ -132,6 +135,7 @@ export function SellerChangeSetCreate({
 
         <label htmlFor="seller-comment">{t('offerCreate.comment')}</label>
         <textarea id="seller-comment" value={draft.sellerComment} onChange={(event) => updateDraft('sellerComment', event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder={t('offerCreate.optional')} />
+        <CommentTranslationAssist enabled={commentTranslationEnabled} comment={draft.sellerComment} />
 
         {error && <p className={styles.error} role="alert">{error}</p>}
         <button type="submit" disabled={submitting}>{submitting ? t('offerCreate.creating') : locations.length > 0 ? t('offerCreate.create') : t('offerCreate.continue')}</button>

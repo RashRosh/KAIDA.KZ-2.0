@@ -61,7 +61,7 @@ describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
 
       expect((await pool.query('SELECT * FROM products WHERE id=$1', [productId])).rows[0]).toEqual(productBefore);
-      expect((await pool.query('SELECT * FROM offers WHERE id=$1', [offerId])).rows[0]).toEqual(offerBefore);
+      expect((await pool.query('SELECT * FROM offers WHERE id=$1', [offerId])).rows[0]).toEqual({ ...offerBefore, seller_comment_version: 1 });
       expect((await pool.query('SELECT * FROM seller_change_items WHERE id=$1', [itemId])).rows[0]).toEqual(itemBefore);
       expect((await pool.query("SELECT to_regclass('public.product_aliases') AS table_name")).rows[0].table_name).toBe('product_aliases');
 

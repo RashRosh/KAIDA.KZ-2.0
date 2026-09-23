@@ -61,9 +61,10 @@ describe('S3 migration upgrade path on PostgreSQL 18', () => {
       const beforeOffer = (await pool.query('SELECT * FROM offers WHERE id=$1', [legacyOffer])).rows[0];
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
       const afterOffer = (await pool.query('SELECT * FROM offers WHERE id=$1', [legacyOffer])).rows[0];
-      const { revision, ...preservedAfterOffer } = afterOffer;
+      const { revision, seller_comment_version: sellerCommentVersion, ...preservedAfterOffer } = afterOffer;
       expect(preservedAfterOffer).toEqual(beforeOffer);
       expect(revision).toBe(1);
+      expect(sellerCommentVersion).toBe(1);
 
       expect((await pool.query('SELECT owner_user_id FROM sellers WHERE id=$1', [canonicalSeller])).rows[0].owner_user_id).toBeNull();
       expect((await pool.query('SELECT seller_id, type FROM locations WHERE id=$1', [canonicalLocation])).rows[0]).toEqual({ seller_id: canonicalSeller, type: 'pavilion' });
@@ -76,7 +77,7 @@ describe('S3 migration upgrade path on PostgreSQL 18', () => {
         .rejects.toMatchObject({ code: '23514' });
 
       const offerColumns = (await pool.query("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='offers' ORDER BY ordinal_position")).rows.map((row) => row.column_name);
-      expect(offerColumns).toEqual(['id', 'product_id', 'seller_id', 'location_id', 'price_amount', 'price_currency', 'price_unit', 'seller_comment', 'created_at', 'updated_at', 'status', 'last_confirmed_at', 'revision']);
+      expect(offerColumns).toEqual(['id', 'product_id', 'seller_id', 'location_id', 'price_amount', 'price_currency', 'price_unit', 'seller_comment', 'created_at', 'updated_at', 'status', 'last_confirmed_at', 'revision', 'seller_comment_version']);
     });
   });
 

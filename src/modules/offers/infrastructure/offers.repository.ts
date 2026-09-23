@@ -15,6 +15,7 @@ const managementOfferSelection = {
   priceCurrency: offers.priceCurrency,
   priceUnit: offers.priceUnit,
   sellerComment: offers.sellerComment,
+  sellerCommentVersion: offers.sellerCommentVersion,
   status: offers.status,
   lastConfirmedAt: offers.lastConfirmedAt,
   revision: offers.revision,
@@ -49,6 +50,8 @@ export async function createOffer(database: OfferWriteDb, values: {
     sellerId: offers.sellerId,
     productId: offers.productId,
     locationId: offers.locationId,
+    sellerComment: offers.sellerComment,
+    sellerCommentVersion: offers.sellerCommentVersion,
     status: offers.status,
     lastConfirmedAt: offers.lastConfirmedAt,
   });
@@ -98,6 +101,8 @@ export async function listOffersBySeller(database: OfferWriteDb, sellerId: strin
 
 const managementUpdateReturning = {
   id: offers.id,
+  sellerComment: offers.sellerComment,
+  sellerCommentVersion: offers.sellerCommentVersion,
   status: offers.status,
   lastConfirmedAt: offers.lastConfirmedAt,
   revision: offers.revision,
@@ -111,6 +116,7 @@ export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   priceCurrency: 'KZT';
   priceUnit: string | null;
   sellerComment: string | null;
+  sellerCommentChanged: boolean;
   confirmationTime: Date;
 }) {
   return database.update(offers).set({
@@ -118,6 +124,9 @@ export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
     priceCurrency: values.priceCurrency,
     priceUnit: values.priceUnit,
     sellerComment: values.sellerComment,
+    sellerCommentVersion: values.sellerCommentChanged
+      ? sql`${offers.sellerCommentVersion} + 1`
+      : offers.sellerCommentVersion,
     lastConfirmedAt: values.confirmationTime,
     updatedAt: values.confirmationTime,
     revision: sql`${offers.revision} + 1`,

@@ -4,6 +4,13 @@ import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
+import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
+import {
+  currentCommentTranslationJoin,
+  currentCommentTranslationSelection,
+  projectBuyerCommentTranslation,
+} from '../../offers/translation/buyer-comment-translation.projection';
+import { isSellerCommentTranslationEnabled } from '../../offers/translation/seller-comment-translation.config';
 import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SearchOffer } from '../../search/contracts/search.contract';
@@ -14,6 +21,7 @@ export async function findVisibleDiscoveryCandidates(
   db: Database,
   cutoff: Date,
   locale: 'ru' | 'kk' = 'ru',
+  commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
 ): Promise<NearbyDiscoveryCandidate[]> {
   const rows = await db.select({
     id: offers.id,
@@ -34,6 +42,7 @@ export async function findVisibleDiscoveryCandidates(
     priceCurrency: offers.priceCurrency,
     priceUnit: offers.priceUnit,
     sellerComment: offers.sellerComment,
+    ...currentCommentTranslationSelection,
     lastConfirmedAt: offers.lastConfirmedAt,
     locationLatitude: locations.latitude,
     locationLongitude: locations.longitude,
@@ -41,6 +50,7 @@ export async function findVisibleDiscoveryCandidates(
     .innerJoin(products, eq(products.id, offers.productId))
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
+    .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
     .where(buyerVisibleOffersPredicate(cutoff))
     .orderBy(asc(offers.id));
 
@@ -58,6 +68,9 @@ export async function findVisibleDiscoveryCandidates(
     productId,
     productName,
     productNameLocale,
+    commentTranslationStatus,
+    commentTranslationText,
+    commentTranslationSourceLanguage,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
@@ -82,6 +95,15 @@ export async function findVisibleDiscoveryCandidates(
       },
       price: { amount: priceAmount, currency: 'KZT', unit: priceUnit },
     };
+    const sellerCommentTranslation = projectBuyerCommentTranslation({
+      enabled: commentTranslationEnabled,
+      locale,
+      sellerComment: rest.sellerComment,
+      status: commentTranslationStatus,
+      translatedText: commentTranslationText,
+      detectedSourceLanguage: commentTranslationSourceLanguage,
+    });
+    if (sellerCommentTranslation) offer.sellerCommentTranslation = sellerCommentTranslation;
 
     const locationGeo = locationLatitude === null || locationLongitude === null
       ? null

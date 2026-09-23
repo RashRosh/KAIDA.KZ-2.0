@@ -6,6 +6,13 @@ import { projectSellerPublicContactProperty } from '../../sellers/contact/projec
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
+import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
+import {
+  currentCommentTranslationJoin,
+  currentCommentTranslationSelection,
+  projectBuyerCommentTranslation,
+} from '../../offers/translation/buyer-comment-translation.projection';
+import { isSellerCommentTranslationEnabled } from '../../offers/translation/seller-comment-translation.config';
 import type { SearchOffer } from '../contracts/search.contract';
 import type { SearchRankingCandidate } from '../ranking/search-ranking';
 
@@ -16,6 +23,7 @@ export async function findOffersByProductId(
   productId: string,
   cutoff: Date,
   locale: 'ru' | 'kk' = 'ru',
+  commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
 ): Promise<SearchRankingCandidate[]> {
   const rows = await db.select({
     id: offers.id,
@@ -36,6 +44,7 @@ export async function findOffersByProductId(
     priceCurrency: offers.priceCurrency,
     priceUnit: offers.priceUnit,
     sellerComment: offers.sellerComment,
+    ...currentCommentTranslationSelection,
     lastConfirmedAt: offers.lastConfirmedAt,
     locationLatitude: locations.latitude,
     locationLongitude: locations.longitude,
@@ -43,6 +52,7 @@ export async function findOffersByProductId(
     .innerJoin(offers, eq(offers.productId, products.id))
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
+    .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
     .where(and(
       eq(products.id, productId),
       buyerVisibleOffersPredicate(cutoff),
@@ -63,6 +73,9 @@ export async function findOffersByProductId(
     productId: selectedProductId,
     productName,
     productNameLocale,
+    commentTranslationStatus,
+    commentTranslationText,
+    commentTranslationSourceLanguage,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
@@ -87,6 +100,15 @@ export async function findOffersByProductId(
       },
       price: { amount: priceAmount, currency: 'KZT', unit: priceUnit },
     };
+    const sellerCommentTranslation = projectBuyerCommentTranslation({
+      enabled: commentTranslationEnabled,
+      locale,
+      sellerComment: rest.sellerComment,
+      status: commentTranslationStatus,
+      translatedText: commentTranslationText,
+      detectedSourceLanguage: commentTranslationSourceLanguage,
+    });
+    if (sellerCommentTranslation) offer.sellerCommentTranslation = sellerCommentTranslation;
 
     const locationGeo = locationLatitude === null || locationLongitude === null
       ? null

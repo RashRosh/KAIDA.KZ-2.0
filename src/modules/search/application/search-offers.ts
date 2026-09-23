@@ -20,6 +20,7 @@ type SearchLifecycleOptions = {
   validityPeriodHours?: number;
   buyerLocation?: BuyerLocation;
   locale?: Locale;
+  commentTranslationEnabled?: boolean;
 };
 
 export async function searchOffers(
@@ -37,9 +38,10 @@ export async function searchOffers(
   const resolution = await resolveProduct(db, query);
   if (resolution.status !== 'resolved') return { query, offers: [] };
 
-  const candidates = lifecycleOptions.locale
-    ? await findOffersByProductId(db, resolution.product.id, cutoff, lifecycleOptions.locale)
-    : await findOffersByProductId(db, resolution.product.id, cutoff);
+  const { locale, commentTranslationEnabled } = lifecycleOptions;
+  const candidates = locale === undefined && commentTranslationEnabled === undefined
+    ? await findOffersByProductId(db, resolution.product.id, cutoff)
+    : await findOffersByProductId(db, resolution.product.id, cutoff, locale, commentTranslationEnabled);
   const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation)
     .map(({ offer }) => offer);
   return { query, offers };

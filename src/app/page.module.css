@@ -82,6 +82,12 @@
 .distance { color: var(--primary); font-size: 0.8125rem; line-height: 1.4; font-weight: 600; white-space: nowrap; }
 .address { display: block; margin-top: 2px; color: var(--muted); font-size: 0.8125rem; line-height: 1.4; }
 .comment { margin-top: 14px; padding-left: 12px; border-left: 2px solid var(--border); color: var(--text); font-size: 0.875rem; line-height: 1.45; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.commentBlock { margin-top: 14px; }
+.commentBlock .comment { margin-top: 0; }
+.commentMeta { margin: 4px 0 0; padding-left: 14px; color: var(--muted); font-size: 0.75rem; line-height: 1.4; }
+.commentToggle { display: inline; min-height: 0; padding: 0; border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+.commentToggle:hover { text-decoration: underline; }
+.commentToggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 2px; }
 .sellerLine { display: flex; align-items: center; gap: 8px; margin-top: 16px; color: var(--muted); font-size: 0.875rem; line-height: 1.45; }
 .sellerLine .offerMetaIcon { color: var(--muted); margin-top: 0; }
 .offerActions { margin-top: auto; padding-top: 16px; }

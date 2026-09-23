@@ -4,6 +4,7 @@ export { productLocalizedNames } from '../modules/catalog/db/product-localized-n
 export { sellers } from '../modules/sellers/db/sellers.table';
 export { locations } from '../modules/locations/db/locations.table';
 export { offers } from '../modules/offers/db/offers.table';
+export { offerCommentTranslations } from '../modules/offers/db/offer-comment-translations.table';
 export { users } from '../modules/identity/db/users.table';
 export { authOtpChallenges } from '../modules/identity/db/auth-otp-challenges.table';
 export { authSessions } from '../modules/identity/db/auth-sessions.table';

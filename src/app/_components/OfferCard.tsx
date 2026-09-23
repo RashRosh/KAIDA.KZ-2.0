@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Image from 'next/image';
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
 import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
@@ -106,6 +107,39 @@ function SocialIcon({ label }: { label: ContactAction['label'] }) {
   return null;
 }
 
+function OfferComment({ offer }: { offer: SearchOffer }) {
+  const { t } = useI18n();
+  const [showOriginal, setShowOriginal] = useState(false);
+  const comment = offer.sellerComment;
+  const translation = offer.sellerCommentTranslation;
+  if (!comment) return null;
+
+  if (translation?.status === 'translated') {
+    const original = showOriginal;
+    return (
+      <div className={styles.commentBlock} data-testid="offer-comment">
+        <p className={styles.comment} lang={original ? translation.originalLocale : translation.locale}>
+          {original ? comment : translation.text}
+        </p>
+        <p className={styles.commentMeta}>
+          <span>{original ? t('offer.originalText') : t('offer.autoTranslated')}</span>
+          <span aria-hidden="true"> · </span>
+          <button type="button" className={styles.commentToggle} onClick={() => setShowOriginal(!original)}>
+            {original ? t('offer.showTranslation') : t('offer.showOriginal')}
+          </button>
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.commentBlock} data-testid="offer-comment">
+      <p className={styles.comment}>{comment}</p>
+      {translation?.status === 'unavailable' && <p className={styles.commentMeta}>{t('offer.translationUnavailable')}</p>}
+    </div>
+  );
+}
+
 export function OfferCard({
   offer,
   distanceMeters,
@@ -156,7 +190,10 @@ export function OfferCard({
         </div>
       </div>
 
-      {offer.sellerComment && <p className={styles.comment}>{offer.sellerComment}</p>}
+      <OfferComment
+        key={`${offer.sellerCommentTranslation?.status ?? 'original'}:${offer.sellerCommentTranslation?.status === 'translated' ? offer.sellerCommentTranslation.locale : ''}`}
+        offer={offer}
+      />
 
       <div className={styles.sellerLine}>
         <span className={styles.offerMetaIcon}><SellerIcon /></span>

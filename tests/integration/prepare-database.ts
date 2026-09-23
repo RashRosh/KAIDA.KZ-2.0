@@ -17,7 +17,7 @@ async function prepare() {
     await seedDatabase(db, seedNow);
 
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-    const expected = ['auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'locations', 'offers', 'product_aliases', 'product_localized_names', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
+    const expected = ['auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'locations', 'offer_comment_translations', 'offers', 'product_aliases', 'product_localized_names', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
     if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(expected)) {
       throw new Error('Current clean migration chain must contain exactly the expected application tables');
     }
