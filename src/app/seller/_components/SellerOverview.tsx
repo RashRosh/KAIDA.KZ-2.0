@@ -6,10 +6,12 @@ import { useI18n } from '../../../i18n/I18nProvider';
 import { CabinetIcon } from './SellerCabinetFrame';
 import { CabinetLoginRequired, CabinetLoadError, CabinetSkeleton, CabinetNotice } from './CabinetStates';
 import { byMostRecentlyConfirmed, formatConfirmed, useCabinetData } from './cabinet-data';
+import { OfferEditorHost, useEditorHrefs } from './OfferEditorHost';
 
-export function SellerOverview() {
+export function SellerOverview({ commentTranslationEnabled = false }: { commentTranslationEnabled?: boolean }) {
   const { locale, t } = useI18n();
   const { data, retry } = useCabinetData(locale);
+  const { createHref } = useEditorHrefs();
 
   if (data.kind === 'loading') {
     return (
@@ -30,16 +32,18 @@ export function SellerOverview() {
   }
 
   const { seller, offers } = data;
+  const editor = <OfferEditorHost seller={seller} offers={offers} commentTranslationEnabled={commentTranslationEnabled} />;
   if (!seller || offers.length === 0) {
     return (
       <section aria-labelledby="overview-first-run">
         <p className={styles.eyebrowMuted}>{t('cabinet.title')}</p>
         <h1 id="overview-first-run" className={styles.title}>{t('overview.firstRunTitle')}</h1>
         <p className={styles.lead}>{t('overview.firstRunText')}</p>
-        <Link className={`${styles.primary} ${styles.large}`} href="/seller/offers/new">
+        <Link className={`${styles.primary} ${styles.large}`} href={createHref} scroll={false}>
           <CabinetIcon name="plus" />{t('seller.addProduct')}
         </Link>
         <CabinetNotice offers={offers} />
+        {editor}
       </section>
     );
   }
@@ -52,7 +56,7 @@ export function SellerOverview() {
     <>
       <div className={styles.pageHead}>
         <h1>{t('cabinet.overview')}</h1>
-        <Link className={styles.secondary} href="/seller/offers/new"><CabinetIcon name="plus" />{t('seller.addProduct')}</Link>
+        <Link className={styles.secondary} href={createHref} scroll={false}><CabinetIcon name="plus" />{t('seller.addProduct')}</Link>
       </div>
       <ul className={styles.stats} aria-label={t('overview.summary')}>
         <li className={styles.stat}><strong>{seller.locations.length}</strong><span>{t('overview.points')}</span></li>
@@ -76,6 +80,7 @@ export function SellerOverview() {
         </section>
       </div>
       <CabinetNotice offers={offers} />
+      {editor}
     </>
   );
 }

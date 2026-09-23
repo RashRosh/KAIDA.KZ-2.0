@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { seedIds } from '../../src/db/seed';
 import { testDatabaseUrl } from '../integration/database';
+import { fillOfferFields, offerEditor } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000941' : '+77000000942';
@@ -81,22 +82,27 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
-    await page.goto('/seller/offers/new');
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
-
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page.getByText('Укажите цену предложения.', { exact: true })).toBeVisible();
-    await expect(page).toHaveURL('/seller/offers/new');
+    // seller-offer-editor: «Добавить товар» on the overview opens the form in place.
+    await page.goto('/seller');
+    await page.getByRole('link', { name: 'Добавить товар' }).first().click();
+    const editor = offerEditor(page);
+    await fillOfferFields(page, { product: 'Баранина' });
+    await editor.getByRole('button', { name: 'Далее' }).click();
+    await expect(editor.getByText('Укажите цену.', { exact: true })).toBeVisible();
+    await expect(editor.getByRole('alert').filter({ hasText: 'Исправьте одно поле, чтобы продолжить' })).toBeVisible();
+    await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toBeFocused();
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
     expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
 
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4321.50');
-    await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S4 E2E свежий привоз');
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    await fillOfferFields(page, { price: '4321.50', comment: 'S4 E2E свежий привоз' });
+    await editor.getByRole('button', { name: 'Далее' }).click();
+    // One point: shown as chosen, one tap to continue.
+    await expect(editor.getByText('Предложение будет в этой точке')).toBeVisible();
+    await expect(editor.getByRole('radio', { name: /S4 E2E точка/ })).toBeChecked();
+    await editor.getByRole('button', { name: 'Продолжить' }).click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
 
     const url = page.url();
@@ -110,7 +116,7 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await expect(page).toHaveURL('/seller');
     await expect(page.getByRole('status').filter({ hasText: 'Опубликовано — предложение видно покупателям' })).toBeVisible();
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(1);
-    const resultId = (await pool.query('SELECT result_offer_id FROM seller_change_items WHERE change_set_id=$1', [url.split('/').pop()])).rows[0].result_offer_id;
+    const resultId = (await pool.query('SELECT result_offer_id FROM seller_change_items WHERE change_set_id=$1', [new URL(url).pathname.split('/').pop()])).rows[0].result_offer_id;
     expect((await pool.query('SELECT price_amount,price_currency,price_unit_code,price_unit_value FROM offers WHERE id=$1', [resultId])).rows[0])
       .toEqual({ price_amount: '4321.50', price_currency: 'KZT', price_unit_code: null, price_unit_value: null });
 

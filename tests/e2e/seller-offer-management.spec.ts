@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { proposeNewOffer, proposeOfferEdit } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000861' : '+77000000862';
@@ -97,16 +98,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await makeBuyerEligible(phone, testInfo.project.name);
-    await page.goto('/seller/offers/new');
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
-
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200.00');
-    await page.getByLabel('Единица', { exact: true }).selectOption('kg');
-    await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S5 старая партия');
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
+    await proposeNewOffer(page, { product: 'Баранина', price: '4200.00', unit: 'kg', comment: 'S5 старая партия' });
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     await search(page);
     await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
@@ -116,13 +110,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     // Seller cabinet: offers live on /seller/offers; one primary action per card, the rest in «Другие действия».
     await page.goto('/seller/offers');
     await expect(page.getByRole('heading', { name: 'Предложения', level: 1 })).toBeVisible();
-    await page.getByRole('button', { name: 'Изменить', exact: true }).click();
-    const editForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Проверить изменение' }) });
-    await editForm.getByLabel('Цена, ₸').fill('4500.00');
-    await editForm.getByLabel('Единица', { exact: true }).selectOption('kg');
-    await editForm.getByLabel('Комментарий продавца').fill('S5 новая партия');
-    await editForm.getByRole('button', { name: 'Проверить изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
+    await proposeOfferEdit(page, page.getByRole('article').first(), { price: '4500.00', unit: 'kg', comment: 'S5 новая партия' });
     await expect(page.getByText('Изменение предложения', { exact: true })).toBeVisible();
     await expect(page.getByText(/4\s500 ₸ \/ кг/)).toBeVisible();
     await expect(page.getByText('S5 новая партия', { exact: true })).toBeVisible();
@@ -179,14 +167,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByRole('heading', { name: 'Предложения', level: 1 })).toBeVisible();
     await expect(page.getByText('Активно', { exact: true }).first()).toBeVisible();
 
-    await page.goto('/seller/offers/new');
-
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4700.00');
-    await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S5 второй Offer');
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
+    await proposeNewOffer(page, { product: 'Баранина', price: '4700.00', comment: 'S5 второй Offer' });
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     await page.goto('/');
     await page.getByRole('button', { name: 'Выйти' }).click();

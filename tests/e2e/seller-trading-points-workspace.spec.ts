@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { fillOfferFields, offerEditor } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000367' : '+77000000368';
@@ -84,19 +85,22 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
 
     await page.reload();
     await expect(page.getByText(editedName, { exact: true })).toBeVisible();
-    // Seller cabinet: «Добавить товар» is its own page; with two points the choice stays explicit.
-    await page.goto('/seller/offers/new');
-    const locationChoice = page.getByLabel('Торговая точка', { exact: true });
-    await expect(locationChoice).toHaveValue('');
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4360');
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page.getByText('Выберите торговую точку.', { exact: true })).toBeVisible();
-    await locationChoice.selectOption({ label: `${editedName} · Алматы, изменённый адрес B` });
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    // seller-offer-editor: with two points the point step pre-selects nothing and waits for an explicit choice.
+    await page.goto('/seller/offers?new=1');
+    const editor = offerEditor(page);
+    await fillOfferFields(page, { product: 'Баранина', price: '4360' });
+    await editor.getByRole('button', { name: 'Далее' }).click();
+    await expect(editor.getByText('Выберите точку для этого предложения')).toBeVisible();
+    await expect(editor.getByRole('radio')).toHaveCount(2);
+    await expect(editor.getByRole('radio', { checked: true })).toHaveCount(0);
+    await expect(editor.getByText('Сначала выберите точку')).toBeVisible();
+    await expect(editor.getByRole('button', { name: 'Продолжить' })).toBeDisabled();
+    await editor.getByRole('radio', { name: new RegExp(editedName) }).check();
+    await editor.getByRole('button', { name: 'Продолжить' }).click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
+    await expect(page.getByText(editedName).first()).toBeVisible();
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     const search = await page.request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
     expect(search.status()).toBe(200);

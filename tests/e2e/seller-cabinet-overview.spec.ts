@@ -122,7 +122,7 @@ test('Seller cabinet: navigation, first run, overview counts, filters, switch of
     await expect(visibleCard.getByText('Активно', { exact: true })).toBeVisible();
     await expect(visibleCard.getByText(/Видно покупателям/)).toBeVisible();
     await expect(card(page, 'Баранина', `${sellerName} базар`).getByText(/Не видно покупателям/)).toBeVisible();
-    await expect(visibleCard.getByRole('button', { name: 'Изменить' })).toBeVisible();
+    await expect(visibleCard.getByRole('link', { name: 'Изменить' })).toBeVisible();
     await expectNoTechnicalWords(page);
 
     // Switch off through the confirmation page; Back never returns to an actionable review.
@@ -173,9 +173,10 @@ test('Confirm conflict from a second device applies nothing and offers a safe re
 
     await page.goto('/seller/offers?status=active');
     const target = card(page, 'Баранина', `${sellerName} лавка`);
-    await target.getByRole('button', { name: 'Изменить' }).click();
-    await target.getByLabel('Цена, ₸').fill('3400');
-    await target.getByRole('button', { name: 'Проверить изменение' }).click();
+    await target.getByRole('link', { name: 'Изменить' }).click();
+    const editor = page.getByRole('dialog', { name: 'Изменить предложение' });
+    await editor.getByRole('textbox', { name: 'Цена', exact: true }).fill('3400');
+    await editor.getByRole('button', { name: 'Далее' }).click();
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
     await expect(page.getByText('3 100 ₸ / кг').first()).toBeVisible();
 

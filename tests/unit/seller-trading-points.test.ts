@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { automaticLocationId } from '../../src/app/seller/_components/SellerChangeSetCreate';
+import { automaticLocationId } from '../../src/app/seller/_components/offer-editor-state';
 import { locationIdentitySchema, type LocationView } from '../../src/modules/locations/contracts/location.contract';
 import type { SellerView } from '../../src/modules/sellers/contracts/seller.contract';
 
