@@ -1,6 +1,6 @@
 # KAIDA UX reset — navigation and state specification
 
-> **Status:** DRAFT FOR PRODUCT OWNER REVIEW
+> **Status:** ACCEPTED AS UX TARGET — Product Owner accepted Pass 3 on 2026-09-23; exact implementation scope belongs to Slice Contracts.
 > **Purpose:** первый обязательный артефакт UI redesign stabilization gate из `EXECUTION_PLAN.md`.
 > **Source:** bundled wireframe set `1a`–`5e` (`wf.pdf`), `WIREFRAME_BRIEF.md`, закрытые core contracts и фактические routes.
 > **This document is not:** новый roadmap, разрешение на production implementation или замена Slice Contract.
@@ -398,7 +398,7 @@ Product Owner принимает prototype только если:
 Только после этого создаётся новая UI branch от актуального `main`, а production work разбивается на compact Slice
 Contracts. Экспериментальная `slice/seller-offer-workspace` не является base branch нового UI.
 
-## 11. Принятые и оставшиеся Product Owner решения
+## 11. Решения Product Owner
 
 Принято 2026-09-23:
 
@@ -406,8 +406,9 @@ Contracts. Экспериментальная `slice/seller-offer-workspace` н�
    не становится единственным сохранённым текстом. Полная модель — `FEATURE_MAP.md` и будущий localization contract.
 2. **Map-link:** утверждённый необязательный geo-fallback вне основной F2; activation только на своём stage.
 
-Остаётся подтвердить при финальной visual acceptance исправленного прототипа:
+Принято вместе с Pass 3 2026-09-23:
 
-1. **Seller mobile navigation:** четыре destinations сразу или три основных + `Ещё`.
-2. **Отдельная buyer Offer detail page:** до media/reviews действия остаются на карточке; отдельная route не появляется
+1. **Seller mobile navigation:** три основных destination (`Обзор`, `Предложения`, `Точки`) + `Ещё` для контактов и
+   выхода. На desktop контакты доступны в постоянной seller navigation.
+2. **Buyer Offer detail page:** до media/reviews действия остаются на карточке; отдельная route не появляется
    без нового решения.

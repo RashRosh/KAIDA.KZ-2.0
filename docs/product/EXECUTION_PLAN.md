@@ -39,7 +39,7 @@
 
 ## UI redesign stabilization gate — feature freeze
 
-Статус: **PRODUCT FEATURE FREEZE / UX RESET** — Product Owner decision 2026-09-22.
+Статус: **UX target accepted; feature freeze remains until implementation gates close** — Product Owner accepted Pass 3 on 2026-09-23.
 
 Текущий UX признан неудовлетворительным. До закрытия этого gate новые product capabilities из очереди ниже не начинаются.
 
@@ -58,16 +58,17 @@
 7. реализовать принятый UI поверх существующих domain modules, API, DB и closed core contracts;
 8. для каждого vertical slice выполнить targeted proof в обеих локалях, full branch CI, manual acceptance, diff audit, merge, merged-main CI и checkpoint по `PROJECT_RULES.md` §19.
 
-Working draft для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md`. Он остаётся draft до Product Owner review и не разрешает начинать production UI branch.
+Принятая navigation/state specification для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md`. Принятие UX target разрешает подготовку Slice Contracts и UI branch; production changes выполняются только по утверждённым контрактам.
 
 ### Ход gate
 
 | Шаг | Статус на 2026-09-23 |
 |---|---|
-| 1–3 | Выполнены как draft: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
+| 1–3 | Выполнены и приняты как UX target: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
 | 4 | **Прототип проверен; замечания закрыты.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. `S-07__zero-create → address-selected` совпадает по адресу в `ru`/`kk`; до выбора `aria-selected="false"`. Остальные исправления приняты ранее. Evidence и вердикт — `WIREFRAME_PASS3_REVIEW.md` §12 |
-| 5 | **Ожидает Product Owner visual acceptance.** После одобрения композиции, переходов, состояний и двух языковых версий можно переходить к шагу 6 |
-| 6–8 | Не начаты |
+| 5 | **ACCEPTED 2026-09-23.** Product Owner: «принимаю Pass 3». Решение записано в `WIREFRAME_PASS3_REVIEW.md` §13 |
+| 6 | **В работе.** Localization Slice Contract и revision/decomposition #27 по принятому UX target |
+| 7–8 | Не начаты |
 
 Решения Product Owner, принятые 2026-09-23 по итогам ревью прохода 3 (каждое зафиксировано в файле-владельце):
 
