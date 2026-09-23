@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 const noStore = { 'Cache-Control': 'no-store' };
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }): Promise<Response> {
-  void localeFromApiRequest(request);
+  const locale = localeFromApiRequest(request);
   let user;
   try {
     user = await resolveCurrentUser(request.cookies.get(SESSION_COOKIE_NAME)?.value);
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
   if (!parsedId.success) return NextResponse.json({ error: { code: 'INVALID_CHANGE_SET_ID', message: 'Некорректный идентификатор изменения.' } }, { status: 400, headers: noStore });
 
   try {
-    const changeSet = await getSellerChangeSet(user.id, parsedId.data);
+    const changeSet = await getSellerChangeSet(user.id, parsedId.data, { locale });
     return NextResponse.json({ changeSet }, { status: 200, headers: noStore });
   } catch (error) {
     if (error instanceof SellerRequiredError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });

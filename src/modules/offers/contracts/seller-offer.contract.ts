@@ -1,10 +1,12 @@
 import type { OfferStatus } from '../db/offers.table';
+import type { PriceUnit } from '../price-unit/price-unit';
 
 export type SellerOfferView = {
   id: string;
   product: { id: string; name: string; nameLocale?: 'ru' | 'kk' };
   location: { id: string; name: string; addressText: string };
-  price: { amount: string; currency: 'KZT'; unit: string | null } | null;
+  // unit is the display label in the requested locale; unitChoice is the stored structured value for edit forms.
+  price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
   sellerComment: string | null;
   status: OfferStatus;
   lastConfirmedAt: string;

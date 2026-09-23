@@ -49,7 +49,7 @@ async function createOffer(userId: string, locationId: string, productName: stri
   const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
     productName,
     locationId,
-    price: { amount, unit: 'кг' },
+    price: { amount, unit: { code: 'kg' } },
     sellerComment: comment,
   }), { database: db });
   const confirmed = await confirmSellerChangeSet(userId, proposal.id, { database: db, clock: () => T0 });
@@ -90,9 +90,9 @@ describe('S12 batch seller input on PostgreSQL 18 after Mandatory Offer Price', 
 
       const proposal = await createBatchSellerChangeSet(userId, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
-          { action: 'update_offer', offerId: lambId, price: { amount: '4500.00', unit: 'кг' }, sellerComment: 'Новая баранина' },
+          { action: 'update_offer', offerId: lambId, price: { amount: '4500.00', unit: { code: 'kg' } }, sellerComment: 'Новая баранина' },
           { action: 'deactivate_offer', offerId: beefId },
-          { action: 'create_offer', productName: 'Говядина', locationId, price: { amount: '3700.00', unit: 'кг' }, sellerComment: 'Новый Offer говядины' },
+          { action: 'create_offer', productName: 'Говядина', locationId, price: { amount: '3700.00', unit: { code: 'kg' } }, sellerComment: 'Новый Offer говядины' },
         ],
       }), { database: db });
 
@@ -146,7 +146,7 @@ describe('S12 batch seller input on PostgreSQL 18 after Mandatory Offer Price', 
 
       await expect(createBatchSellerChangeSet(userId, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
-          { action: 'update_offer', offerId: lambId, price: { amount: '4100.00', unit: 'кг' }, sellerComment: 'A' },
+          { action: 'update_offer', offerId: lambId, price: { amount: '4100.00', unit: { code: 'kg' } }, sellerComment: 'A' },
           { action: 'activate_offer', offerId: lambId },
         ],
       }), { database: db })).rejects.toBeInstanceOf(BatchOfferConflictError);
@@ -167,15 +167,15 @@ describe('S12 batch seller input on PostgreSQL 18 after Mandatory Offer Price', 
 
       const batch = await createBatchSellerChangeSet(userId, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
-          { action: 'create_offer', productName: 'Говядина', locationId, price: { amount: '3600.00', unit: 'кг' }, sellerComment: 'Не должен появиться' },
-          { action: 'update_offer', offerId: lambId, price: { amount: '4200.00', unit: 'кг' }, sellerComment: 'Batch lamb' },
+          { action: 'create_offer', productName: 'Говядина', locationId, price: { amount: '3600.00', unit: { code: 'kg' } }, sellerComment: 'Не должен появиться' },
+          { action: 'update_offer', offerId: lambId, price: { amount: '4200.00', unit: { code: 'kg' } }, sellerComment: 'Batch lamb' },
           { action: 'deactivate_offer', offerId: beefId },
         ],
       }), { database: db });
 
       const external = await createOfferManagementChangeSet(userId, lambId, sellerOfferChangeBodySchema.parse({
         action: 'update_offer',
-        price: { amount: '4100.00', unit: 'кг' },
+        price: { amount: '4100.00', unit: { code: 'kg' } },
         sellerComment: 'External winner',
       }), { database: db });
       await confirmSellerChangeSet(userId, external.id, { database: db, clock: () => T1 });

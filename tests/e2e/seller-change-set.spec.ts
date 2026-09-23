@@ -111,8 +111,8 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await expect(page.getByRole('status').filter({ hasText: 'Опубликовано — предложение видно покупателям' })).toBeVisible();
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(1);
     const resultId = (await pool.query('SELECT result_offer_id FROM seller_change_items WHERE change_set_id=$1', [url.split('/').pop()])).rows[0].result_offer_id;
-    expect((await pool.query('SELECT price_amount,price_currency,price_unit FROM offers WHERE id=$1', [resultId])).rows[0])
-      .toEqual({ price_amount: '4321.50', price_currency: 'KZT', price_unit: null });
+    expect((await pool.query('SELECT price_amount,price_currency,price_unit_code,price_unit_value FROM offers WHERE id=$1', [resultId])).rows[0])
+      .toEqual({ price_amount: '4321.50', price_currency: 'KZT', price_unit_code: null, price_unit_value: null });
 
     // A confirmed deep link is read-only and shows no technical identifiers.
     await page.goto(url);

@@ -42,7 +42,7 @@ async function fixture(userId: string, phone: string, label: string) {
     const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
       productName,
       locationId: seller.locations[0]!.id,
-      price: { amount, unit: 'кг' },
+      price: { amount, unit: { code: 'kg' } },
       sellerComment: `${productName} исходное`,
     }), { database: db });
     return (await confirmSellerChangeSet(userId, proposal.id, { database: db, clock: () => T0 })).items[0]!.resultOffer!.id;
@@ -58,8 +58,8 @@ async function fixture(userId: string, phone: string, label: string) {
 function batch(lambId: string, beefId: string, lambAmount: string, beefAmount: string, label: string) {
   return sellerBatchChangeSetCreateBodySchema.parse({
     items: [
-      { action: 'update_offer', offerId: lambId, price: { amount: lambAmount, unit: 'кг' }, sellerComment: `L ${label}` },
-      { action: 'update_offer', offerId: beefId, price: { amount: beefAmount, unit: 'кг' }, sellerComment: `B ${label}` },
+      { action: 'update_offer', offerId: lambId, price: { amount: lambAmount, unit: { code: 'kg' } }, sellerComment: `L ${label}` },
+      { action: 'update_offer', offerId: beefId, price: { amount: beefAmount, unit: { code: 'kg' } }, sellerComment: `B ${label}` },
     ],
   });
 }
@@ -110,8 +110,8 @@ describe('S12 batch concurrency on PostgreSQL 18', () => {
     const proposalA = await createBatchSellerChangeSet(userId, batch(lambId, beefId, '4200.00', '3700.00', 'A'), { database: db });
     const proposalB = await createBatchSellerChangeSet(userId, sellerBatchChangeSetCreateBodySchema.parse({
       items: [
-        { action: 'update_offer', offerId: beefId, price: { amount: '3800.00', unit: 'кг' }, sellerComment: 'B B' },
-        { action: 'update_offer', offerId: lambId, price: { amount: '4300.00', unit: 'кг' }, sellerComment: 'L B' },
+        { action: 'update_offer', offerId: beefId, price: { amount: '3800.00', unit: { code: 'kg' } }, sellerComment: 'B B' },
+        { action: 'update_offer', offerId: lambId, price: { amount: '4300.00', unit: { code: 'kg' } }, sellerComment: 'L B' },
       ],
     }), { database: db });
 

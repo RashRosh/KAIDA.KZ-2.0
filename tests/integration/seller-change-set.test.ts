@@ -149,7 +149,7 @@ describe('S4 Seller Change Set on PostgreSQL 18 after Mandatory Offer Price', ()
     try {
       const beforeSeed = (await pool.query('SELECT * FROM offers WHERE id=$1', [seedIds.lambOffer])).rows[0];
       const proposed = await createSellerChangeSet(userId, input(seller.locations[0]!.id, {
-        price: { amount: '4321.50', unit: 'кг' },
+        price: { amount: '4321.50', unit: { code: 'kg' } },
         sellerComment: 'S4 fresh lamb',
       }), { database: db });
 
@@ -165,7 +165,8 @@ describe('S4 Seller Change Set on PostgreSQL 18 after Mandatory Offer Price', ()
         location_id: seller.locations[0]!.id,
         price_amount: '4321.50',
         price_currency: 'KZT',
-        price_unit: 'кг',
+        price_unit_code: 'kg',
+        price_unit_value: null,
         seller_comment: 'S4 fresh lamb',
         status: 'active',
       });
@@ -201,8 +202,8 @@ describe('S4 Seller Change Set on PostgreSQL 18 after Mandatory Offer Price', ()
       expect(sellerChangeSetCreateBodySchema.safeParse({ productName: 'Баранина', locationId: seller.locations[0]!.id }).success).toBe(false);
       expect(sellerChangeSetCreateBodySchema.safeParse({ productName: 'Баранина', locationId: seller.locations[0]!.id, price: null }).success).toBe(false);
       const priced = await createSellerChangeSet(userId, input(seller.locations[0]!.id, { price: { amount: '0' } }), { database: db });
-      const pricedRow = (await pool.query('SELECT price_amount, price_currency, price_unit FROM seller_change_items WHERE change_set_id=$1', [priced.id])).rows[0];
-      expect(pricedRow).toEqual({ price_amount: '0', price_currency: 'KZT', price_unit: null });
+      const pricedRow = (await pool.query('SELECT price_amount, price_currency, price_unit_code, price_unit_value FROM seller_change_items WHERE change_set_id=$1', [priced.id])).rows[0];
+      expect(pricedRow).toEqual({ price_amount: '0', price_currency: 'KZT', price_unit_code: null, price_unit_value: null });
     } finally {
       await cleanupUser(userId, phone);
     }
@@ -232,8 +233,8 @@ describe('S4 Seller Change Set on PostgreSQL 18 after Mandatory Offer Price', ()
     const phone = '+77000000609';
     const seller = await createFixture(userId, phone, '609');
     try {
-      const a = await createSellerChangeSet(userId, input(seller.locations[0]!.id, { price: { amount: '1000', unit: 'кг' }, sellerComment: 'A' }), { database: db });
-      const b = await createSellerChangeSet(userId, input(seller.locations[0]!.id, { price: { amount: '1200', unit: 'кг' }, sellerComment: 'B' }), { database: db });
+      const a = await createSellerChangeSet(userId, input(seller.locations[0]!.id, { price: { amount: '1000', unit: { code: 'kg' } }, sellerComment: 'A' }), { database: db });
+      const b = await createSellerChangeSet(userId, input(seller.locations[0]!.id, { price: { amount: '1200', unit: { code: 'kg' } }, sellerComment: 'B' }), { database: db });
       const appliedA = await confirmSellerChangeSet(userId, a.id, { database: db, clock: () => NOW });
       const appliedB = await confirmSellerChangeSet(userId, b.id, { database: db, clock: () => NOW });
       expect(appliedA.items[0]!.resultOffer!.id).not.toBe(appliedB.items[0]!.resultOffer!.id);

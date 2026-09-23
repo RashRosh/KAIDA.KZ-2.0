@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { describe, expect, it } from 'vitest';
-import { withMigrationTestDatabase } from './migration-test-database';
+import { withMigrationTestDatabase, withStructuredPriceUnit } from './migration-test-database';
 
 async function createS4MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s4-migrations-'));
@@ -58,14 +58,14 @@ describe('S5 migration upgrade path on PostgreSQL 18', () => {
 
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
 
-      const offerAfter = (await pool.query('SELECT id,product_id,seller_id,location_id,price_amount,price_currency,price_unit,seller_comment,status,last_confirmed_at,created_at,updated_at,revision FROM offers WHERE id=$1', [offerId])).rows[0];
+      const offerAfter = (await pool.query('SELECT id,product_id,seller_id,location_id,price_amount,price_currency,price_unit_code,price_unit_value,seller_comment,status,last_confirmed_at,created_at,updated_at,revision FROM offers WHERE id=$1', [offerId])).rows[0];
       const { revision, ...preservedOffer } = offerAfter;
-      expect(preservedOffer).toEqual(offerBefore);
+      expect(preservedOffer).toEqual(withStructuredPriceUnit(offerBefore, 'kg'));
       expect(revision).toBe(1);
 
-      const itemAfter = (await pool.query('SELECT id,change_set_id,action,product_id,location_id,price_amount,price_currency,price_unit,seller_comment,result_offer_id,target_offer_id,expected_offer_revision FROM seller_change_items WHERE id=$1', [itemId])).rows[0];
+      const itemAfter = (await pool.query('SELECT id,change_set_id,action,product_id,location_id,price_amount,price_currency,price_unit_code,price_unit_value,seller_comment,result_offer_id,target_offer_id,expected_offer_revision FROM seller_change_items WHERE id=$1', [itemId])).rows[0];
       const { target_offer_id, expected_offer_revision, ...preservedItem } = itemAfter;
-      expect(preservedItem).toEqual(itemBefore);
+      expect(preservedItem).toEqual(withStructuredPriceUnit(itemBefore, 'kg'));
       expect(target_offer_id).toBeNull();
       expect(expected_offer_revision).toBeNull();
 

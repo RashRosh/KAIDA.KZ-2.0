@@ -8,6 +8,7 @@ import type { SellerChangeSetView } from '@/modules/seller-input/contracts/selle
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import styles from '../page.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
+import { PriceUnitField, emptyPriceUnitDraft, priceUnitDraftFrom, priceUnitFromDraft, type PriceUnitDraft } from './PriceUnitField';
 
 type Action = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
 type ApiError = { error?: { code?: string; message?: string } };
@@ -21,7 +22,7 @@ type DraftItem = {
   productName: string;
   locationId: string;
   priceAmount: string;
-  priceUnit: string;
+  priceUnit: PriceUnitDraft;
   sellerComment: string;
 };
 
@@ -35,7 +36,7 @@ function newDraft(locationId: string): DraftItem {
     productName: '',
     locationId,
     priceAmount: '',
-    priceUnit: '',
+    priceUnit: emptyPriceUnitDraft,
     sellerComment: '',
   };
 }
@@ -49,6 +50,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
   const [loadingOffers, setLoadingOffers] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [unitChecked, setUnitChecked] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -80,7 +82,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
     updateItem(item.key, {
       offerId,
       priceAmount: offer?.price?.amount ?? '',
-      priceUnit: offer?.price?.unit ?? '',
+      priceUnit: priceUnitDraftFrom(offer?.price?.unitChoice),
       sellerComment: offer?.sellerComment ?? '',
     });
   }
@@ -94,7 +96,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
             action: item.action,
             productName: item.productName,
             locationId: item.locationId,
-            price: { amount, unit: item.priceUnit },
+            price: { amount, unit: priceUnitFromDraft(item.priceUnit)?.unit ?? null },
             sellerComment: item.sellerComment,
           };
         }
@@ -103,7 +105,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
           return {
             action: item.action,
             offerId: item.offerId,
-            price: { amount, unit: item.priceUnit },
+            price: { amount, unit: priceUnitFromDraft(item.priceUnit)?.unit ?? null },
             sellerComment: item.sellerComment,
           };
         }
@@ -119,6 +121,13 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
       (item.action === 'create_offer' || item.action === 'update_offer') && item.priceAmount.trim() === '');
     if (missingPrice) {
       setError(t('batch.priceRequired'));
+      return;
+    }
+    const incompleteUnit = items.find((item) =>
+      (item.action === 'create_offer' || item.action === 'update_offer') && priceUnitFromDraft(item.priceUnit) === null);
+    setUnitChecked(true);
+    if (incompleteUnit) {
+      document.getElementById(`batch-unit-${incompleteUnit.key}-custom`)?.focus();
       return;
     }
     const missingLocation = items.some((item) => item.action === 'create_offer' && item.locationId === '');
@@ -217,8 +226,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
               <>
                 <label htmlFor={`batch-price-${item.key}`}>{t('offerCreate.price')}</label>
                 <input id={`batch-price-${item.key}`} value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
-                <label htmlFor={`batch-unit-${item.key}`}>{t('offerCreate.unit')}</label>
-                <input id={`batch-unit-${item.key}`} value={item.priceUnit} onChange={(event) => updateItem(item.key, { priceUnit: event.target.value })} maxLength={32} disabled={submitting || item.priceAmount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
+                <PriceUnitField id={`batch-unit-${item.key}`} draft={item.priceUnit} onChange={(priceUnit) => updateItem(item.key, { priceUnit })} disabled={submitting} showError={unitChecked} />
                 <label htmlFor={`batch-comment-${item.key}`}>{t('offerCreate.comment')}</label>
                 <textarea id={`batch-comment-${item.key}`} value={item.sellerComment} onChange={(event) => updateItem(item.key, { sellerComment: event.target.value })} maxLength={500} rows={2} disabled={submitting} placeholder={t('batch.noComment')} />
               </>

@@ -50,19 +50,25 @@ async function createFixture(userId: string, phone: string, label: string) {
   return seller;
 }
 
-async function createS4Offer(userId: string, locationId: string, values: { amount?: string; unit?: string | null; comment?: string | null } = {}) {
+const unitCodes = { 'кг': 'kg', 'шт': 'piece' } as const;
+
+function unitInput(label: 'кг' | 'шт' | null | undefined) {
+  return label ? { code: unitCodes[label] } : null;
+}
+
+async function createS4Offer(userId: string, locationId: string, values: { amount?: string; unit?: 'кг' | 'шт' | null; comment?: string | null } = {}) {
   const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
     productName: 'Баранина',
     locationId,
-    price: { amount: values.amount ?? '1000.00', unit: values.unit ?? null },
+    price: { amount: values.amount ?? '1000.00', unit: unitInput(values.unit) },
     sellerComment: values.comment ?? null,
   }), { database: db });
   const confirmed = await confirmSellerChangeSet(userId, proposal.id, { database: db, clock: () => T0 });
   return confirmed.items[0]!.resultOffer!.id;
 }
 
-function updateInput(price: { amount: string; unit?: string | null }, sellerComment: string | null) {
-  return sellerOfferChangeBodySchema.parse({ action: 'update_offer', price, sellerComment });
+function updateInput(price: { amount: string; unit?: 'кг' | 'шт' | null }, sellerComment: string | null) {
+  return sellerOfferChangeBodySchema.parse({ action: 'update_offer', price: { amount: price.amount, unit: unitInput(price.unit) }, sellerComment });
 }
 
 function actionInput(action: 'activate_offer' | 'deactivate_offer') {
@@ -104,7 +110,7 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
         id: offerId,
         product: { id: seedIds.lambProduct, name: 'Баранина' },
         location: { id: seller.locations[0]!.id, name: seller.locations[0]!.name, addressText: seller.locations[0]!.addressText },
-        price: { amount: '4200.00', currency: 'KZT', unit: 'кг' },
+        price: { amount: '4200.00', currency: 'KZT', unit: 'кг', unitChoice: { code: 'kg' } },
         sellerComment: 'Исходная партия',
         status: 'active',
         lastConfirmedAt: T0.toISOString(),
@@ -155,7 +161,8 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
       expect(applied).toMatchObject({
         price_amount: '4500.00',
         price_currency: 'KZT',
-        price_unit: 'кг',
+        price_unit_code: 'kg',
+        price_unit_value: null,
         seller_comment: 'Новая партия',
         status: 'active',
         revision: 2,
@@ -208,7 +215,8 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
         status: 'inactive',
         price_amount: '1000.00',
         price_currency: 'KZT',
-        price_unit: 'шт',
+        price_unit_code: 'piece',
+        price_unit_value: null,
         seller_comment: null,
         revision: 3,
       });

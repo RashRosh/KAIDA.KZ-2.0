@@ -244,6 +244,7 @@
 .form select,
 .form textarea,
 .inlineForm input,
+.inlineForm select,
 .inlineForm textarea {
   width: 100%;
   min-width: 0;
@@ -271,6 +272,7 @@
 .form select:focus,
 .form textarea:focus,
 .inlineForm input:focus,
+.inlineForm select:focus,
 .inlineForm textarea:focus {
   outline: none;
   border-color: var(--primary);

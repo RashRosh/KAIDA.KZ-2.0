@@ -40,7 +40,7 @@ async function createOffer(userId: string, locationId: string) {
   const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
     productName: 'Баранина',
     locationId,
-    price: { amount: '4000.00', unit: 'кг' },
+    price: { amount: '4000.00', unit: { code: 'kg' } },
     sellerComment: 'Foreign fixture',
   }), { database: db });
   return (await confirmSellerChangeSet(userId, proposal.id, { database: db, clock: () => T0 })).items[0]!.resultOffer!.id;

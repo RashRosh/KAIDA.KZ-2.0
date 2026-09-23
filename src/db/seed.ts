@@ -59,8 +59,8 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
     await tx.insert(locations).values(location).onConflictDoUpdate({ target: locations.id, set: location });
     const timestamps = { createdAt: new Date('2026-09-11T00:00:00Z'), updatedAt: new Date('2026-09-11T00:00:00Z') };
     for (const offer of [
-      { id: seedIds.lambOffer, productId: seedIds.lambProduct, priceAmount: '4200.00', priceCurrency: 'KZT', priceUnit: 'кг', sellerComment: 'Свежий привоз.' },
-      { id: seedIds.beefOffer, productId: seedIds.beefProduct, priceAmount: '3900.00', priceCurrency: 'KZT', priceUnit: null, sellerComment: 'Есть мякоть и мясо на кости.' },
+      { id: seedIds.lambOffer, productId: seedIds.lambProduct, priceAmount: '4200.00', priceCurrency: 'KZT', priceUnitCode: 'kg' as const, priceUnitValue: null, sellerComment: 'Свежий привоз.' },
+      { id: seedIds.beefOffer, productId: seedIds.beefProduct, priceAmount: '3900.00', priceCurrency: 'KZT', priceUnitCode: null, priceUnitValue: null, sellerComment: 'Есть мякоть и мясо на кости.' },
     ]) {
       const row = {
         ...offer,

@@ -7,6 +7,7 @@ import type { SellerChangeSetView } from '@/modules/seller-input/contracts/selle
 import styles from '../page.module.css';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
+import { PriceUnitField, priceUnitFromDraft, type PriceUnitDraft } from './PriceUnitField';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type CreateResponse = { changeSet?: SellerChangeSetView } & ApiError;
@@ -14,7 +15,7 @@ type CreateResponse = { changeSet?: SellerChangeSetView } & ApiError;
 export type ProductDraft = {
   productName: string;
   priceAmount: string;
-  priceUnit: string;
+  priceUnit: PriceUnitDraft;
   sellerComment: string;
 };
 
@@ -25,6 +26,7 @@ type SellerChangeSetCreateProps = {
   onPrerequisiteRequired: () => void;
   resumedAfterSetup?: boolean;
   commentTranslationEnabled?: boolean;
+  initialLocationId?: string;
 };
 
 export function automaticLocationId(seller: SellerView | null): string {
@@ -38,11 +40,15 @@ export function SellerChangeSetCreate({
   onPrerequisiteRequired,
   resumedAfterSetup = false,
   commentTranslationEnabled = false,
+  initialLocationId,
 }: SellerChangeSetCreateProps) {
   const { t } = useI18n();
   const router = useRouter();
-  const [locationId, setLocationId] = useState(() => automaticLocationId(seller));
+  const [locationId, setLocationId] = useState(() => (initialLocationId && seller?.locations.some((candidate) => candidate.id === initialLocationId)
+    ? initialLocationId
+    : automaticLocationId(seller)));
   const [error, setError] = useState('');
+  const [unitInvalid, setUnitInvalid] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const locations = seller?.locations ?? [];
   const location = locations.find((candidate) => candidate.id === locationId) ?? null;
@@ -59,7 +65,7 @@ export function SellerChangeSetCreate({
     });
   }, [seller]);
 
-  function updateDraft(field: keyof ProductDraft, value: string) {
+  function updateDraft(field: Exclude<keyof ProductDraft, 'priceUnit'>, value: string) {
     onDraftChange({ ...draft, [field]: value });
   }
 
@@ -73,6 +79,12 @@ export function SellerChangeSetCreate({
     const normalizedAmount = draft.priceAmount.trim();
     if (normalizedAmount === '') {
       setError(t('offerCreate.priceRequired'));
+      return;
+    }
+    const unit = priceUnitFromDraft(draft.priceUnit);
+    setUnitInvalid(unit === null);
+    if (unit === null) {
+      document.getElementById('seller-price-unit-custom')?.focus();
       return;
     }
     if (!seller || locations.length === 0) {
@@ -91,7 +103,7 @@ export function SellerChangeSetCreate({
         body: JSON.stringify({
           productName: draft.productName,
           locationId: location.id,
-          price: { amount: normalizedAmount, unit: draft.priceUnit },
+          price: { amount: normalizedAmount, unit: unit.unit },
           sellerComment: draft.sellerComment,
         }),
       });
@@ -130,8 +142,7 @@ export function SellerChangeSetCreate({
         <label htmlFor="seller-price-amount">{t('offerCreate.price')}</label>
         <input id="seller-price-amount" value={draft.priceAmount} onChange={(event) => updateDraft('priceAmount', event.target.value)} disabled={submitting} inputMode="decimal" placeholder={t('offerCreate.required')} aria-required="true" />
 
-        <label htmlFor="seller-price-unit">{t('offerCreate.unit')}</label>
-        <input id="seller-price-unit" value={draft.priceUnit} onChange={(event) => updateDraft('priceUnit', event.target.value)} maxLength={32} disabled={submitting || draft.priceAmount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
+        <PriceUnitField id="seller-price-unit" draft={draft.priceUnit} onChange={(priceUnit) => onDraftChange({ ...draft, priceUnit })} disabled={submitting} showError={unitInvalid} />
 
         <label htmlFor="seller-comment">{t('offerCreate.comment')}</label>
         <textarea id="seller-comment" value={draft.sellerComment} onChange={(event) => updateDraft('sellerComment', event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder={t('offerCreate.optional')} />

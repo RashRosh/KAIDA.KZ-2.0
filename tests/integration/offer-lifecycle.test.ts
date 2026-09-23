@@ -19,7 +19,7 @@ describe('S1 Offer Lifecycle against PostgreSQL 18', () => {
     await connection.pool.query('INSERT INTO products (id, name) VALUES ($1, $2)', [PRODUCT_ID, PRODUCT_NAME]);
     await connection.pool.query(
       `INSERT INTO offers (
-        id, product_id, seller_id, location_id, price_amount, price_currency, price_unit,
+        id, product_id, seller_id, location_id, price_amount, price_currency, price_unit_code,
         seller_comment, status, last_confirmed_at
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
       [
@@ -29,7 +29,7 @@ describe('S1 Offer Lifecycle against PostgreSQL 18', () => {
         seedIds.location,
         '990.00',
         'KZT',
-        'шт',
+        'piece',
         'Lifecycle fixture',
         'active',
         new Date('2026-09-11T11:00:00.000Z'),

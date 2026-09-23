@@ -14,6 +14,7 @@
     { "idx": 9, "version": "7", "when": 1789392000000, "tag": "0009_s13_buyer_interests", "breakpoints": true },
     { "idx": 10, "version": "7", "when": 1789585200000, "tag": "0010_mandatory_offer_price", "breakpoints": true },
     { "idx": 11, "version": "7", "when": 1789592400000, "tag": "0011_catalog_localization", "breakpoints": true },
-    { "idx": 12, "version": "7", "when": 1789596000000, "tag": "0012_seller_comment_translation", "breakpoints": true }
+    { "idx": 12, "version": "7", "when": 1789596000000, "tag": "0012_seller_comment_translation", "breakpoints": true },
+    { "idx": 13, "version": "7", "when": 1789660800000, "tag": "0013_offer_price_unit", "breakpoints": true }
   ]
 }

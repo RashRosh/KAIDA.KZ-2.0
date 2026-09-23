@@ -57,7 +57,7 @@ async function createOffer(page: import('@playwright/test').Page, product: strin
   const create = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Добавить товар' }) });
   await create.getByRole('textbox', { name: 'Товар', exact: true }).fill(product);
   await create.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill(amount);
-  await create.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+  await create.getByLabel('Единица', { exact: true }).selectOption('kg');
   await create.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
   await create.getByRole('button', { name: 'Создать изменение' }).click();
   await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();

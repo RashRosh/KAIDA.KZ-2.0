@@ -99,3 +99,11 @@ export async function withMigrationTestDatabase<T>(
     }
   }
 }
+
+// offer-price-unit (0013) replaces legacy free-text price_unit with a structured code plus custom value.
+// Older upgrade tests compare full rows, so they state the expected mapping explicitly through this helper.
+export function withStructuredPriceUnit<T extends Record<string, unknown>>(legacyRow: T, code: string | null, value: string | null = null) {
+  const { price_unit: _legacy, ...rest } = legacyRow;
+  void _legacy;
+  return { ...rest, price_unit_code: code, price_unit_value: value };
+}

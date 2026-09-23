@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { describe, expect, it } from 'vitest';
-import { withMigrationTestDatabase } from './migration-test-database';
+import { withMigrationTestDatabase, withStructuredPriceUnit } from './migration-test-database';
 
 async function createS3MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s3-migrations-'));
@@ -59,7 +59,7 @@ describe('S4 migration upgrade path on PostgreSQL 18', () => {
       expect((await pool.query('SELECT latitude,longitude FROM locations WHERE id=$1', [locationId])).rows[0]).toEqual({ latitude: null, longitude: null });
       const afterOffer = (await pool.query('SELECT * FROM offers WHERE id=$1', [offerId])).rows[0];
       const { revision, seller_comment_version: sellerCommentVersion, ...preservedAfterOffer } = afterOffer;
-      expect(preservedAfterOffer).toEqual(before.offer);
+      expect(preservedAfterOffer).toEqual(withStructuredPriceUnit(before.offer, 'kg'));
       expect(revision).toBe(1);
       expect(sellerCommentVersion).toBe(1);
       expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets')).rows[0].count)).toBe(0);

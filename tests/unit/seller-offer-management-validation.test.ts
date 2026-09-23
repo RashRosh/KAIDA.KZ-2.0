@@ -10,17 +10,17 @@ function parse(value: unknown) {
 }
 
 describe('S5 seller offer management validation after Mandatory Offer Price', () => {
-  it('accepts full-state priced update and trims unit/comment', () => {
+  it('accepts full-state priced update with a structured unit and trims comment', () => {
     const result = parse({
       action: 'update_offer',
-      price: { amount: '4500.00', unit: '  кг  ' },
+      price: { amount: '4500.00', unit: { code: 'kg' } },
       sellerComment: '  Новая партия  ',
     });
     expect(result.success).toBe(true);
     if (result.success && result.data.action === 'update_offer') {
       expect(result.data).toEqual({
         action: 'update_offer',
-        price: { amount: '4500.00', unit: 'кг' },
+        price: { amount: '4500.00', unit: { code: 'kg' } },
         sellerComment: 'Новая партия',
       });
     }
@@ -41,8 +41,9 @@ describe('S5 seller offer management validation after Mandatory Offer Price', ()
     expect(parse({ action: 'update_offer', price: { amount }, sellerComment: null }).success).toBe(false);
   });
 
-  it('normalizes blank update unit/comment to null', () => {
-    const result = parse({ action: 'update_offer', price: { amount: '12.50', unit: '   ' }, sellerComment: '   ' });
+  it('rejects free-text unit and normalizes blank update comment to null', () => {
+    expect(parse({ action: 'update_offer', price: { amount: '12.50', unit: 'кг' }, sellerComment: null }).success).toBe(false);
+    const result = parse({ action: 'update_offer', price: { amount: '12.50', unit: null }, sellerComment: '   ' });
     expect(result.success).toBe(true);
     if (result.success && result.data.action === 'update_offer') {
       expect(result.data.price).toEqual({ amount: '12.50', unit: null });
@@ -75,7 +76,7 @@ describe('S5 seller offer management validation after Mandatory Offer Price', ()
   it('detects normalized priced semantic no-op and treats legacy no-price Offer as needing remediation', () => {
     const parsed = sellerOfferChangeBodySchema.parse({
       action: 'update_offer',
-      price: { amount: '4500.0', unit: ' кг ' },
+      price: { amount: '4500.0', unit: { code: 'kg' } },
       sellerComment: ' Свежая партия ',
     });
     if (parsed.action !== 'update_offer') throw new Error('unexpected action');
@@ -83,7 +84,7 @@ describe('S5 seller offer management validation after Mandatory Offer Price', ()
     expect(offerUpdateIsNoOp({
       priceAmount: '4500.00',
       priceCurrency: 'KZT',
-      priceUnit: 'кг',
+      priceUnit: { code: 'kg' },
       sellerComment: 'Свежая партия',
     }, parsed)).toBe(true);
 
@@ -97,7 +98,7 @@ describe('S5 seller offer management validation after Mandatory Offer Price', ()
     expect(offerUpdateIsNoOp({
       priceAmount: '4501.00',
       priceCurrency: 'KZT',
-      priceUnit: 'кг',
+      priceUnit: { code: 'kg' },
       sellerComment: 'Свежая партия',
     }, parsed)).toBe(false);
   });

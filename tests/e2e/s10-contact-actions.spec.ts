@@ -87,7 +87,7 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
     await page.goto('/seller/offers/new');
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('5432.10');
-    await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+    await page.getByLabel('Единица', { exact: true }).selectOption('kg');
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(`S10 ${project} contacts offer`);
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);

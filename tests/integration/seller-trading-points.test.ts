@@ -141,11 +141,11 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
     try {
       const locationId = owner.seller.locations[0]!.id;
       const proposal = await createSellerChangeSet(owner.userId, sellerChangeSetCreateBodySchema.parse({
-        productName: 'Баранина', locationId, price: { amount: '4200', unit: 'кг' }, sellerComment: 'Existing link',
+        productName: 'Баранина', locationId, price: { amount: '4200', unit: { code: 'kg' } }, sellerComment: 'Existing link',
       }), { database: db });
       const confirmed = await confirmSellerChangeSet(owner.userId, proposal.id, { database: db, clock: () => NOW });
       const offerId = confirmed.items[0]!.resultOffer!.id;
-      const beforeOffer = (await pool.query('SELECT id,location_id,status,price_amount,price_currency,price_unit,seller_comment,last_confirmed_at FROM offers WHERE id=$1', [offerId])).rows[0];
+      const beforeOffer = (await pool.query('SELECT id,location_id,status,price_amount,price_currency,price_unit_code,price_unit_value,seller_comment,last_confirmed_at FROM offers WHERE id=$1', [offerId])).rows[0];
 
       await Promise.all([
         updateOwnedLocation(owner.userId, locationId, { name: 'Identity concurrent', type: 'home', addressText: 'Identity address' }, { database: db }),
@@ -174,7 +174,7 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
       expect((await pool.query('SELECT count(*)::int AS count FROM locations WHERE id IN ($1,$2) AND seller_id=$3', [createdA.id, createdB.id, owner.seller.id])).rows[0].count).toBe(2);
 
       await updateOwnedLocation(owner.userId, locationId, { name: 'Final name', type: 'shop', addressText: 'Final address' }, { database: db });
-      expect((await pool.query('SELECT id,location_id,status,price_amount,price_currency,price_unit,seller_comment,last_confirmed_at FROM offers WHERE id=$1', [offerId])).rows[0])
+      expect((await pool.query('SELECT id,location_id,status,price_amount,price_currency,price_unit_code,price_unit_value,seller_comment,last_confirmed_at FROM offers WHERE id=$1', [offerId])).rows[0])
         .toEqual(beforeOffer);
     } finally {
       await cleanupUser(owner.userId, owner.phone);
@@ -191,7 +191,7 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
       expect((await pool.query('SELECT contact_phone_e164 FROM sellers WHERE id=$1', [owner.seller.id])).rows[0].contact_phone_e164).toBeNull();
 
       const single = await createSellerChangeSet(owner.userId, sellerChangeSetCreateBodySchema.parse({
-        productName: 'Баранина', locationId: second.id, price: { amount: '4300', unit: 'кг' },
+        productName: 'Баранина', locationId: second.id, price: { amount: '4300', unit: { code: 'kg' } },
       }), { database: db });
       expect(single.items[0]!.location.id).toBe(second.id);
       const singleConfirmed = await confirmSellerChangeSet(owner.userId, single.id, { database: db, clock: () => NOW });
@@ -199,8 +199,8 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
 
       const batch = await createBatchSellerChangeSet(owner.userId, sellerBatchChangeSetCreateBodySchema.parse({
         items: [
-          { action: 'create_offer', productName: 'Баранина', locationId: firstId, price: { amount: '4400', unit: 'кг' } },
-          { action: 'create_offer', productName: 'Говядина', locationId: second.id, price: { amount: '4500', unit: 'кг' } },
+          { action: 'create_offer', productName: 'Баранина', locationId: firstId, price: { amount: '4400', unit: { code: 'kg' } } },
+          { action: 'create_offer', productName: 'Говядина', locationId: second.id, price: { amount: '4500', unit: { code: 'kg' } } },
         ],
       }), { database: db });
       expect(Object.fromEntries(batch.items.map((item) => [item.product.name, item.location.id]))).toEqual({

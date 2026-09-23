@@ -39,8 +39,8 @@ describe('S4 Seller Change Set validation after Mandatory Offer Price', () => {
     expect(parse({ price: { amount } }).success).toBe(false);
   });
 
-  it('normalizes blank unit and comment to null', () => {
-    const result = parse({ price: { amount: '4200.00', unit: '   ' }, sellerComment: '   ' });
+  it('normalizes blank comment to null and keeps an explicit null unit', () => {
+    const result = parse({ price: { amount: '4200.00', unit: null }, sellerComment: '   ' });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.price).toEqual({ amount: '4200.00', unit: null });
@@ -48,15 +48,34 @@ describe('S4 Seller Change Set validation after Mandatory Offer Price', () => {
     }
   });
 
-  it('accepts unit/comment boundaries and rejects values over them', () => {
-    expect(parse({ price: { amount: '1', unit: 'x'.repeat(32) }, sellerComment: 'x'.repeat(500) }).success).toBe(true);
-    expect(parse({ price: { amount: '1', unit: 'x'.repeat(33) } }).success).toBe(false);
+  it.each(['kg', 'piece', 'liter', 'package'])('accepts canonical unit %s and rejects a custom value on it', (code) => {
+    const result = parse({ price: { amount: '1', unit: { code } } });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.price.unit).toEqual({ code });
+    expect(parse({ price: { amount: '1', unit: { code, value: 'ведро' } } }).success).toBe(false);
+  });
+
+  it('requires a trimmed 1–40 character value for other and rejects free text or unknown codes', () => {
+    const trimmed = parse({ price: { amount: '1', unit: { code: 'other', value: '  ведро  ' } } });
+    expect(trimmed.success).toBe(true);
+    if (trimmed.success) expect(trimmed.data.price.unit).toEqual({ code: 'other', value: 'ведро' });
+    expect(parse({ price: { amount: '1', unit: { code: 'other', value: 'x'.repeat(40) } } }).success).toBe(true);
+    expect(parse({ price: { amount: '1', unit: { code: 'other', value: 'x'.repeat(41) } } }).success).toBe(false);
+    expect(parse({ price: { amount: '1', unit: { code: 'other', value: '   ' } } }).success).toBe(false);
+    expect(parse({ price: { amount: '1', unit: { code: 'other' } } }).success).toBe(false);
+    expect(parse({ price: { amount: '1', unit: 'кг' } }).success).toBe(false);
+    expect(parse({ price: { amount: '1', unit: { code: 'кг' } } }).success).toBe(false);
+    expect(parse({ price: { amount: '1', unit: { code: 'gram' } } }).success).toBe(false);
+  });
+
+  it('accepts comment boundary and rejects values over it', () => {
+    expect(parse({ sellerComment: 'x'.repeat(500) }).success).toBe(true);
     expect(parse({ sellerComment: 'x'.repeat(501) }).success).toBe(false);
   });
 
   it('keeps unit impossible outside price and rejects client currency', () => {
-    expect(parse({ unit: 'кг' }).success).toBe(false);
-    expect(parse({ price: { amount: '4200', unit: 'кг', currency: 'USD' } }).success).toBe(false);
+    expect(parse({ unit: { code: 'kg' } }).success).toBe(false);
+    expect(parse({ price: { amount: '4200', unit: { code: 'kg' }, currency: 'USD' } }).success).toBe(false);
   });
 
   it.each([

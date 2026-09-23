@@ -112,11 +112,11 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
       await client.query('BEGIN');
       const result = await client.query(
         `INSERT INTO offers (
-          product_id, seller_id, location_id, price_amount, price_currency, price_unit, seller_comment, status, last_confirmed_at
-        ) VALUES ($1,$2,$3,0,'KZT',NULL,NULL,'active',$4) RETURNING price_amount, price_unit, seller_comment`,
+          product_id, seller_id, location_id, price_amount, price_currency, price_unit_code, seller_comment, status, last_confirmed_at
+        ) VALUES ($1,$2,$3,0,'KZT',NULL,NULL,'active',$4) RETURNING price_amount, price_unit_code, seller_comment`,
         [seedIds.lambProduct, seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
       );
-      expect(result.rows[0]).toEqual({ price_amount: '0', price_unit: null, seller_comment: null });
+      expect(result.rows[0]).toEqual({ price_amount: '0', price_unit_code: null, seller_comment: null });
     } finally {
       await client.query('ROLLBACK');
       client.release();

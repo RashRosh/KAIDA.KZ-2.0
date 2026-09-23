@@ -141,7 +141,7 @@ test('authenticated product-first flow preserves input through required setup be
     await expect(page).toHaveURL('/seller/offers/new');
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill(price);
-    await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+    await page.getByLabel('Единица', { exact: true }).selectOption('kg');
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
 
     let changeSetMutations = 0;
@@ -163,7 +163,7 @@ test('authenticated product-first flow preserves input through required setup be
     await expect(page.getByText('Торговая точка готова. Введённые данные товара сохранены', { exact: false })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Товар', exact: true })).toHaveValue('Баранина');
     await expect(page.getByRole('textbox', { name: 'Цена, ₸', exact: true })).toHaveValue(price);
-    await expect(page.getByRole('textbox', { name: 'Единица', exact: true })).toHaveValue('кг');
+    await expect(page.getByLabel('Единица', { exact: true })).toHaveValue('kg');
     await expect(page.getByRole('textbox', { name: 'Комментарий продавца', exact: true })).toHaveValue(comment);
     expect(changeSetMutations).toBe(0);
 

@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
+import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import { SellerChangeSetCreate, type ProductDraft } from './SellerChangeSetCreate';
 import { SellerTradingPoints } from './SellerTradingPoints';
 import { CabinetLoginRequired } from './CabinetStates';
+import { emptyPriceUnitDraft, priceUnitDraftFrom } from './PriceUnitField';
 import styles from '../page.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -14,7 +17,7 @@ type SellerResponse = { seller: SellerView | null };
 const emptyProductDraft: ProductDraft = {
   productName: '',
   priceAmount: '',
-  priceUnit: '',
+  priceUnit: emptyPriceUnitDraft,
   sellerComment: '',
 };
 
@@ -28,6 +31,36 @@ export function SellerSetup({ commentTranslationEnabled = false }: { commentTran
   const [productDraft, setProductDraft] = useState<ProductDraft>(emptyProductDraft);
   const [productResumed, setProductResumed] = useState(false);
   const [error, setError] = useState('');
+  const returnedFrom = useSearchParams().get('from');
+  const [prefill, setPrefill] = useState<{ pending: boolean; locationId?: string }>(() => ({ pending: returnedFrom !== null }));
+
+  // «Вернуться к правке» from the review: refill the form from that proposed create, including its unit choice.
+  useEffect(() => {
+    if (returnedFrom === null) return;
+    let active = true;
+    void (async () => {
+      try {
+        const response = await fetch(`/api/seller/change-sets/${encodeURIComponent(returnedFrom)}`, { cache: 'no-store' });
+        const data = response.ok ? await response.json() as { changeSet?: SellerChangeSetView } : {};
+        const item = data.changeSet?.status === 'proposed' && data.changeSet.items.length === 1 ? data.changeSet.items[0] : undefined;
+        if (!active) return;
+        if (item?.action === 'create_offer' && item.price) {
+          setProductDraft({
+            productName: item.product.name,
+            priceAmount: item.price.amount,
+            priceUnit: priceUnitDraftFrom(item.price.unitChoice),
+            sellerComment: item.sellerComment ?? '',
+          });
+          setPrefill({ pending: false, locationId: item.location.id });
+          return;
+        }
+      } catch {
+        // An unreadable proposal just opens the empty form.
+      }
+      if (active) setPrefill({ pending: false });
+    })();
+    return () => { active = false; };
+  }, [returnedFrom]);
 
   useEffect(() => {
     let active = true;
@@ -67,7 +100,7 @@ export function SellerSetup({ commentTranslationEnabled = false }: { commentTran
     setProductResumed(true);
   }
 
-  if (state === 'loading') return <section className={styles.card}><p>{t('seller.loading')}</p></section>;
+  if (state === 'loading' || prefill.pending) return <section className={styles.card}><p>{t('seller.loading')}</p></section>;
   if (state === 'anonymous') return <CabinetLoginRequired />;
 
   if (mode === 'product') {
@@ -88,6 +121,7 @@ export function SellerSetup({ commentTranslationEnabled = false }: { commentTran
           onPrerequisiteRequired={requireTradingPointSetup}
           commentTranslationEnabled={commentTranslationEnabled}
           resumedAfterSetup={productResumed}
+          initialLocationId={prefill.locationId}
         />
       </>
     );

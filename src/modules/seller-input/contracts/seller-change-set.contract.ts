@@ -1,16 +1,11 @@
 import { z } from 'zod';
 import type { LocationType } from '../../locations/contracts/location.contract';
 import type { OfferStatus } from '../../offers/db/offers.table';
+import { priceUnitInputSchema, type PriceUnit } from '../../offers/price-unit/price-unit';
 import type { SellerChangeAction } from '../db/seller-change-items.table';
 import type { SellerChangeSetStatus } from '../db/seller-change-sets.table';
 
 export const SELLER_INPUT_PRICE_AMOUNT_PATTERN = /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/;
-
-const optionalUnitSchema = z.string().trim().max(32)
-  .transform((value) => value === '' ? null : value)
-  .nullable()
-  .optional()
-  .transform((value) => value ?? null);
 
 const optionalCommentSchema = z.string().trim().max(500)
   .transform((value) => value === '' ? null : value)
@@ -24,7 +19,7 @@ const requiredCommentSchema = z.string().trim().max(500)
 
 const priceSchema = z.object({
   amount: z.string().trim().regex(SELLER_INPUT_PRICE_AMOUNT_PATTERN),
-  unit: optionalUnitSchema,
+  unit: priceUnitInputSchema,
 }).strict();
 
 export const sellerChangeSetCreateBodySchema = z.object({
@@ -85,7 +80,7 @@ export type SellerChangeSetItemView = {
   action: SellerChangeAction;
   product: { id: string; name: string };
   location: { id: string; name: string; addressText: string; type: LocationType };
-  price: { amount: string; currency: 'KZT'; unit: string | null } | null;
+  price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
   sellerComment: string | null;
   resultOffer: { id: string; status: OfferStatus; lastConfirmedAt: string } | null;
 };

@@ -41,7 +41,7 @@ describe('S4 confirmation concurrency on PostgreSQL 18', () => {
       const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
         productName: 'Баранина',
         locationId: seller.locations[0]!.id,
-        price: { amount: '2500.00', unit: 'кг' },
+        price: { amount: '2500.00', unit: { code: 'kg' } },
       }), { database: db });
       const now = new Date('2026-09-12T07:00:00Z');
 
