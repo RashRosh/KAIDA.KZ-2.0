@@ -48,6 +48,11 @@ and login, without losing what they were doing.
 - Kazakh strings may be drafted by an LLM or taken from the Pass 3 prototype dictionary, but a native Kazakh speaker
   verifies every Kazakh string before merge. Verification is recorded next to the strings; an unverified string
   blocks merge like a failing test.
+- Phrases with numbers and dates are whole localized templates, never glued from pieces. Russian uses its plural
+  forms (`1 предложение / 3 предложения / 5 предложений`); Kazakh keeps the noun singular after a number
+  (`3 ұсыныс`). Kazakh date and time phrases carry the suffix that matches the word by vowel harmony
+  (`Бүгін 09:40-та расталды`, `12 қыркүйекте расталды`); unit tests cover these forms. Prices keep `3 200 ₸` in both
+  locales.
 - Machine translation is never used for KAIDA-owned text at runtime; it exists only for Seller-authored data
   (part 3).
 - The switch sits in the current header following `S-11` rules (one tap, `РУ / ҚАЗ` mobile, full names desktop).
@@ -115,7 +120,8 @@ error rendering. Internal names and file layout are chosen during implementation
 
 ## 7. Verification and manual acceptance
 
-- Unit: locale resolution order (cookie → browser language → `ru`), invalid cookie, key-parity check.
+- Unit: locale resolution order (cookie → browser language → `ru`), invalid cookie, key-parity check, Russian plural
+  forms, Kazakh number and date phrases.
 - Integration: API with/without `locale`, with a `kk` `Accept-Language` header and no parameter.
 - E2E: one-tap switch on mobile width, desktop switch, persistence through reload and auth, `?q=` and form input
   kept, `html lang`, keyboard and screen-reader names of the switch; key buyer and seller routes walked in `kk`
