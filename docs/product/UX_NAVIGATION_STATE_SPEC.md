@@ -124,7 +124,7 @@ deactivate/activate proposal, ChangeSet review, revision conflict, confirm succe
 На каждом экране доступны:
 
 - KAIDA logo/home;
-- `Русский / Қазақша`;
+- switch русского/казахского языка: `Русский / Қазақша` на desktop, прямой `РУ / ҚАЗ` в один tap на mobile;
 - `Войти` или компактное account действие;
 - понятный переход `Продавцу` из buyer context;
 - одинаковые loading/offline/error conventions.
@@ -371,7 +371,7 @@ microcopy и размеры трудно инспектировать, desktop �
 
 Прототип должен содержать только:
 
-1. shared shell с рабочим `Русский / Қазақша`;
+1. shared shell с рабочим switch русского/казахского языка по responsive rules из `DESIGN_SYSTEM.md`;
 2. F1: Search results, empty → Nearby, no-contact, geo denied и retry;
 3. F2: seller entry/Auth, first-run, product draft, `0/1/2+` Location choice, ChangeSet review, success;
 4. F3: seller hub, Offer Workspace, edit/deactivate/activate, conflict/error, refreshed success;

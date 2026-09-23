@@ -50,7 +50,7 @@
 Обязательная последовательность gate:
 
 1. преобразовать исходные wireframes в compact navigation/state/action/data specification для ключевых buyer/seller flows;
-2. включить в specification обязательный глобальный `Русский / Қазақша` switch и полное покрытие обоих языков для всех KAIDA-owned strings, system states, accessibility copy и catalog-owned display data;
+2. включить в specification обязательный глобальный switch русского/казахского языка и полное покрытие обоих языков для всех KAIDA-owned strings, system states, accessibility copy и catalog-owned display data; responsive presentation следует `DESIGN_SYSTEM.md`;
 3. определить responsive rules для desktop без попытки дорисовать 42 независимых desktop-экрана;
 4. подготовить статический либо fixture-driven prototype ключевых flows поверх нового UI shell и показать каждый core flow на русском и казахском;
 5. получить Product Owner UX acceptance композиции, переходов, состояний и обеих языковых версий;
@@ -65,7 +65,7 @@ Working draft для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md
 | Шаг | Статус на 2026-09-23 |
 |---|---|
 | 1–3 | Выполнены как draft: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
-| 4 | **Исправленный прототип получен и повторно проверен; требуется точечный Pass 3.1.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. Предыдущие пять правок выполнены. Повторная проверка export выявила два блокера F2 и три мелких несоответствия; точный список — `WIREFRAME_PASS3_REVIEW.md` §10. Основной состав, обе локали и визуальное направление не переделываются |
+| 4 | **Исправленный прототип получен и повторно проверен; требуется точечный Pass 3.1.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. Предыдущие пять правок выполнены. Повторная проверка export выявила два блокера F2 и два мелких несоответствия; точный список — `WIREFRAME_PASS3_REVIEW.md` §10. Основной состав, обе локали и визуальное направление не переделываются |
 | 5 | **Не получен.** UX acceptance ожидает только diff по `WIREFRAME_PASS3_REVIEW.md` §§10.2–10.4 |
 | 6–8 | Не начаты |
 

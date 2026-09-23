@@ -85,7 +85,7 @@ Seller Input
 - Seller freshness degradation and reminders;
 - explicit Search sorting / visible proximity;
 - real Offer media (M1);
-- complete Russian/Kazakh localization with a global `Русский / Қазақша` switch;
+- complete Russian/Kazakh localization with a global language switch;
 - KAIDA-owned address directory built on open data (OpenStreetMap) for Location address suggestions;
 - Market internal navigation as future spatial capability.
 
@@ -97,7 +97,7 @@ Seller Input
 
 KAIDA is a bilingual product. Every KAIDA-owned user-facing string must exist in Russian and Kazakh: navigation, headings, buttons, hints, validation, errors, empty/loading/offline states, statuses, confirmation text, auth, accessibility labels, metadata and other system copy.
 
-The shared app shell provides a visible `Русский / Қазақша` switch for anonymous buyers, authenticated buyers and Sellers. The selected language applies consistently across buyer and seller routes and survives navigation and reload on the same device.
+The shared app shell provides a visible Russian/Kazakh language switch for anonymous buyers, authenticated buyers and Sellers. The selected language applies consistently across buyer and seller routes and survives navigation and reload on the same device. Responsive presentation and interaction are owned by `DESIGN_SYSTEM.md`.
 
 Catalog-owned display data needed to complete a user task (for example Product and Category names) must have Russian and Kazakh presentation. Search must accept the supported names/aliases in both languages.
 

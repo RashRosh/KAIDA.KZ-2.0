@@ -34,7 +34,8 @@ presentation-слоя — см. `PROJECT_RULES.md` §18.1 и обновлённ�
 
 **Обязательное дополнение Product Owner, 2026-09-22:** KAIDA полностью поддерживает русский и казахский языки.
 Отсутствие language switch в отдельных кадрах артефакта не означает, что он optional: новый shared app shell
-обязан содержать `Русский / Қазақша`, а каждый core flow прототипируется и принимается в обеих локалях. Все
+обязан содержать switch русского/казахского языка: `Русский / Қазақша` на desktop и прямой `РУ / ҚАЗ` в один tap
+на mobile без промежуточного меню. Каждый core flow прототипируется и принимается в обеих локалях. Все
 KAIDA-owned user-facing strings, system states, validation/errors, accessibility copy и catalog-owned display data
 имеют версии `ru` и `kk`. Для seller-authored names/addresses/comments localization Slice Contract обязан выбрать
 единую модель перевода и fallback; отсутствие решения нельзя молча подменять разным поведением на разных экранах.

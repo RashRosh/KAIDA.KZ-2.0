@@ -198,7 +198,13 @@ Geolocation никогда не становится скрытым prerequisite
 
 ### Language switch
 
-Shared app shell содержит постоянно доступный переключатель `Русский / Қазақша` на buyer и seller routes, включая anonymous state. Используются названия языков, а не флаги.
+Shared app shell содержит постоянно доступный переключатель русского и казахского языков на buyer и seller routes, включая anonymous state.
+
+- на desktop видимы полные названия `Русский / Қазақша`;
+- на mobile используется компактный прямой переключатель `РУ / ҚАЗ`;
+- tap по неактивному mobile-варианту сразу меняет язык без menu, sheet или confirmation step;
+- полные названия языков сохраняются в `aria-label` mobile controls;
+- флаги не используются;
 
 - переключатель не конкурирует с primary action текущего экрана;
 - active language различим визуально и программно;
