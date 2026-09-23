@@ -1,12 +1,13 @@
 import 'dotenv/config';
 import { pathToFileURL } from 'node:url';
 import { createDatabase, type Database } from './client';
-import { productAliases, products, sellers, locations, offers } from './schema';
+import { productAliases, productLocalizedNames, products, sellers, locations, offers } from './schema';
 
 export const seedIds = {
   lambProduct: '10000000-0000-4000-8000-000000000001',
   beefProduct: '10000000-0000-4000-8000-000000000002',
   lambAlias: '11000000-0000-4000-8000-000000000001',
+  lambKazakhAlias: '11000000-0000-4000-8000-000000000002',
   seller: '20000000-0000-4000-8000-000000000001',
   location: '30000000-0000-4000-8000-000000000001',
   lambOffer: '40000000-0000-4000-8000-000000000001',
@@ -24,6 +25,20 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
     }
     const lambAlias = { id: seedIds.lambAlias, productId: seedIds.lambProduct, name: 'мясо барана' };
     await tx.insert(productAliases).values(lambAlias).onConflictDoUpdate({ target: productAliases.id, set: lambAlias });
+    const lambKazakhAlias = { id: seedIds.lambKazakhAlias, productId: seedIds.lambProduct, name: 'қой еті', locale: 'kk' };
+    await tx.insert(productAliases).values(lambKazakhAlias).onConflictDoUpdate({ target: productAliases.id, set: lambKazakhAlias });
+
+    for (const localizedName of [
+      { productId: seedIds.lambProduct, locale: 'ru', name: 'Баранина' },
+      { productId: seedIds.lambProduct, locale: 'kk', name: 'Қой еті, жауырын' },
+      { productId: seedIds.beefProduct, locale: 'ru', name: 'Говядина' },
+      { productId: seedIds.beefProduct, locale: 'kk', name: 'Сиыр еті' },
+    ]) {
+      await tx.insert(productLocalizedNames).values(localizedName).onConflictDoUpdate({
+        target: [productLocalizedNames.productId, productLocalizedNames.locale],
+        set: localizedName,
+      });
+    }
 
     const seller = {
       id: seedIds.seller,
@@ -66,7 +81,7 @@ async function main() {
   const { db, pool } = createDatabase(url);
   try {
     await seedDatabase(db);
-    console.log('Mandatory Offer Price seed complete: 2 products, 1 alias, 1 buyer-eligible seller/location, 2 fresh priced active offers.');
+    console.log('Catalog localization seed complete: 2 bilingual products, 2 aliases, 1 buyer-eligible seller/location, 2 fresh priced active offers.');
   } finally {
     await pool.end();
   }

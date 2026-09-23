@@ -75,10 +75,38 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
   const interestTriggerRef = useRef<HTMLElement | null>(null);
   const pending = useRef(false);
   const localeRef = useRef(locale);
+  const previousLocaleRef = useRef(locale);
   const input = useRef<HTMLInputElement>(null);
   const loading = state.kind === 'loading';
 
   useEffect(() => { localeRef.current = locale; }, [locale]);
+
+  useEffect(() => {
+    if (previousLocaleRef.current === locale) return;
+    previousLocaleRef.current = locale;
+    if (state.kind !== 'success' || state.result.offers.length === 0) return;
+
+    let active = true;
+    const current = state.result;
+    void fetch(`/api/search?${new URLSearchParams({ q: current.query, locale })}`, { cache: 'no-store' })
+      .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
+      .then((localized) => {
+        if (!active || !localized) return;
+        const names = new Map(localized.offers.map((offer) => [offer.product.id, offer.product]));
+        setState({
+          kind: 'success',
+          result: {
+            ...current,
+            offers: current.offers.map((offer) => ({
+              ...offer,
+              product: names.get(offer.product.id) ?? offer.product,
+            })),
+          },
+        });
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, [locale, state]);
 
   const loadInterests = useCallback(async (): Promise<InterestsState> => {
     try {

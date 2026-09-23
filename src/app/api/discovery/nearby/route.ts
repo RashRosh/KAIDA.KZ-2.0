@@ -13,7 +13,7 @@ const invalidRequestBody = {
 };
 
 export async function POST(request: Request): Promise<Response> {
-  void localeFromApiRequest(request);
+  const locale = localeFromApiRequest(request);
   let body: unknown;
   try {
     body = await request.json();
@@ -28,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     return Response.json(
-      await findNearbyOffers(parsed.data.buyerLocation),
+      await findNearbyOffers(parsed.data.buyerLocation, undefined, { locale }),
       { headers: noStoreHeaders },
     );
   } catch {

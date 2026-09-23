@@ -1,4 +1,4 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
@@ -15,10 +15,17 @@ export async function findOffersByProductId(
   db: Database,
   productId: string,
   cutoff: Date,
+  locale: 'ru' | 'kk' = 'ru',
 ): Promise<SearchRankingCandidate[]> {
   const rows = await db.select({
     id: offers.id,
-    product: { id: products.id, name: products.name },
+    productId: products.id,
+    productName: locale === 'kk'
+      ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
+      : products.name,
+    productNameLocale: locale === 'kk'
+      ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
+      : sql<'ru'>`'ru'`,
     seller: { id: sellers.id, displayName: sellers.displayName },
     sellerContactPhoneE164: sellers.contactPhoneE164,
     sellerWhatsappPhoneE164: sellers.whatsappPhoneE164,
@@ -53,16 +60,24 @@ export async function findOffersByProductId(
     lastConfirmedAt,
     locationLatitude,
     locationLongitude,
-    ...row
+    productId: selectedProductId,
+    productName,
+    productNameLocale,
+    ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
       throw new Error('Buyer-visible Offer has invalid price');
     }
 
     const offer: SearchOffer = {
-      ...row,
+      ...rest,
+      product: {
+        id: selectedProductId,
+        name: productName,
+        ...(locale === 'kk' ? { nameLocale: productNameLocale } : {}),
+      },
       seller: {
-        ...row.seller,
+        ...rest.seller,
         ...projectSellerPublicContactProperty({
           phoneE164: sellerContactPhoneE164,
           whatsappPhoneE164: sellerWhatsappPhoneE164,

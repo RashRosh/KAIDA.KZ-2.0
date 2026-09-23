@@ -17,7 +17,7 @@ async function prepare() {
     await seedDatabase(db, seedNow);
 
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-    const expected = ['auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'locations', 'offers', 'product_aliases', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
+    const expected = ['auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'locations', 'offers', 'product_aliases', 'product_localized_names', 'products', 'seller_change_items', 'seller_change_sets', 'sellers', 'users'];
     if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(expected)) {
       throw new Error('Current clean migration chain must contain exactly the expected application tables');
     }
@@ -42,10 +42,13 @@ async function prepare() {
     const locationCount = Number((await pool.query('SELECT count(*) FROM locations WHERE id=$1', [seedIds.location])).rows[0].count);
     const offerCount = Number((await pool.query('SELECT count(*) FROM offers WHERE id IN ($1,$2)', [seedIds.lambOffer, seedIds.beefOffer])).rows[0].count);
     const aliasCount = Number((await pool.query('SELECT count(*) FROM product_aliases')).rows[0].count);
+    const localizedNameCount = Number((await pool.query('SELECT count(*) FROM product_localized_names')).rows[0].count);
     const changeSetCount = Number((await pool.query('SELECT count(*) FROM seller_change_sets')).rows[0].count);
     const changeItemCount = Number((await pool.query('SELECT count(*) FROM seller_change_items')).rows[0].count);
     const interestCount = Number((await pool.query('SELECT count(*) FROM buyer_interests')).rows[0].count);
-    if (sellerCount !== 1 || locationCount !== 1 || offerCount !== 2 || aliasCount !== 1) throw new Error('S6 repeat seed must keep accepted fixtures deterministic');
+    if (sellerCount !== 1 || locationCount !== 1 || offerCount !== 2 || aliasCount !== 2 || localizedNameCount !== 4) {
+      throw new Error('Catalog localization repeat seed must keep accepted fixtures deterministic');
+    }
     if (changeSetCount !== 0 || changeItemCount !== 0) throw new Error('S6 seed must not create Seller Change Sets or Items');
     if (interestCount !== 0) throw new Error('S13 seed must not create Buyer Interests');
 

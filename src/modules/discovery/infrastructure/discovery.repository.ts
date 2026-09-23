@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
@@ -13,10 +13,17 @@ import type { NearbyDiscoveryCandidate } from '../ranking/nearby-discovery';
 export async function findVisibleDiscoveryCandidates(
   db: Database,
   cutoff: Date,
+  locale: 'ru' | 'kk' = 'ru',
 ): Promise<NearbyDiscoveryCandidate[]> {
   const rows = await db.select({
     id: offers.id,
-    product: { id: products.id, name: products.name },
+    productId: products.id,
+    productName: locale === 'kk'
+      ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
+      : products.name,
+    productNameLocale: locale === 'kk'
+      ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
+      : sql<'ru'>`'ru'`,
     seller: { id: sellers.id, displayName: sellers.displayName },
     sellerContactPhoneE164: sellers.contactPhoneE164,
     sellerWhatsappPhoneE164: sellers.whatsappPhoneE164,
@@ -48,16 +55,24 @@ export async function findVisibleDiscoveryCandidates(
     lastConfirmedAt,
     locationLatitude,
     locationLongitude,
-    ...row
+    productId,
+    productName,
+    productNameLocale,
+    ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
       throw new Error('Buyer-visible Offer has invalid price');
     }
 
     const offer: SearchOffer = {
-      ...row,
+      ...rest,
+      product: {
+        id: productId,
+        name: productName,
+        ...(locale === 'kk' ? { nameLocale: productNameLocale } : {}),
+      },
       seller: {
-        ...row.seller,
+        ...rest.seller,
         ...projectSellerPublicContactProperty({
           phoneE164: sellerContactPhoneE164,
           whatsappPhoneE164: sellerWhatsappPhoneE164,

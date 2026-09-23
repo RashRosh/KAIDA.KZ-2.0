@@ -16,11 +16,13 @@ import {
 import type { NearbyResponse } from '../contracts/discovery.contract';
 import { findVisibleDiscoveryCandidates } from '../infrastructure/discovery.repository';
 import { selectNearbyOffers } from '../ranking/nearby-discovery';
+import type { Locale } from '../../../i18n/config';
 
 type NearbyDiscoveryOptions = {
   clock?: Clock;
   validityPeriodHours?: number;
   nearbyRadiusMeters?: number;
+  locale?: Locale;
 };
 
 export async function findNearbyOffers(
@@ -38,7 +40,9 @@ export async function findNearbyOffers(
     : validateNearbyRadiusMeters(options.nearbyRadiusMeters);
   const cutoff = calculateOfferCutoff(now, validityPeriodHours);
   const db = database ?? getDatabase();
-  const candidates = await findVisibleDiscoveryCandidates(db, cutoff);
+  const candidates = options.locale
+    ? await findVisibleDiscoveryCandidates(db, cutoff, options.locale)
+    : await findVisibleDiscoveryCandidates(db, cutoff);
 
   return {
     offers: selectNearbyOffers(candidates, buyerLocation, nearbyRadiusMeters),

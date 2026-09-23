@@ -13,11 +13,13 @@ import type { BuyerLocation } from '../contracts/buyer-location.contract';
 import { searchQuerySchema, type SearchResponse } from '../contracts/search.contract';
 import { findOffersByProductId } from '../infrastructure/search.repository';
 import { rankSearchOfferCandidates } from '../ranking/search-ranking';
+import type { Locale } from '../../../i18n/config';
 
 type SearchLifecycleOptions = {
   clock?: Clock;
   validityPeriodHours?: number;
   buyerLocation?: BuyerLocation;
+  locale?: Locale;
 };
 
 export async function searchOffers(
@@ -35,7 +37,9 @@ export async function searchOffers(
   const resolution = await resolveProduct(db, query);
   if (resolution.status !== 'resolved') return { query, offers: [] };
 
-  const candidates = await findOffersByProductId(db, resolution.product.id, cutoff);
+  const candidates = lifecycleOptions.locale
+    ? await findOffersByProductId(db, resolution.product.id, cutoff, lifecycleOptions.locale)
+    : await findOffersByProductId(db, resolution.product.id, cutoff);
   const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation)
     .map(({ offer }) => offer);
   return { query, offers };
