@@ -114,7 +114,9 @@ Catalog-owned display data needed to complete a user task (for example Product a
 7. machine output never becomes the only stored text;
 8. in the first stage Search does not depend on machine translation of seller comments; product search runs through the Product Catalog and aliases.
 
-Storage shape (separate table or otherwise) is decided inside the localization Slice Contract, not here. Per §10.1 of `PROJECT_RULES.md`, the translation provider is an improvement over a working path, never a required dependency of seller or buyer flows.
+**Scope of seller translation (Product Owner decision, 2026-09-23).** Only the Seller's Offer comment is machine-translated. Seller name, trading-point name, address and custom price unit are always shown as written, in every language. The translator is a server-side LLM; until it is connected, the Seller-facing «Проверить перевод» action is hidden and buyers see the original. Kazakh KAIDA-owned strings and Kazakh catalog names are prepared and checked by an LLM review pass, with provenance recorded so a later native review can find them.
+
+Storage shape and exact behavior are decided in the three localization Slice Contracts (`docs/slices/localization-foundation/`, `docs/slices/catalog-localization/`, `docs/slices/seller-comment-translation/`), not here. Per §10.1 of `PROJECT_RULES.md`, the translation provider is an improvement over a working path, never a required dependency of seller or buyer flows.
 
 No UI slice is complete if its changed user-facing surface works in only one supported language. Exact locale storage, URL strategy, fallback behavior and seller-authored content translation belong to the localization Slice Contract and must not fragment across individual screens.
 

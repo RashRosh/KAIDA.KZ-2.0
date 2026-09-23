@@ -54,7 +54,7 @@
 3. определить responsive rules для desktop без попытки дорисовать 42 независимых desktop-экрана;
 4. подготовить статический либо fixture-driven prototype ключевых flows поверх нового UI shell и показать каждый core flow на русском и казахском;
 5. получить Product Owner UX acceptance композиции, переходов, состояний и обеих языковых версий;
-6. подготовить localization Slice Contract (locale persistence/fallback, catalog representation, bilingual Search proof, единая модель перевода seller-authored names/addresses/comments) и переписать Slice Contract #27 либо заменить его несколькими компактными UI slice contracts;
+6. подготовить localization Slice Contract (locale persistence/fallback, catalog representation, bilingual Search proof, единая модель перевода seller-authored content; решением Product Owner 2026-09-23 переводится только комментарий продавца) и переписать Slice Contract #27 либо заменить его несколькими компактными UI slice contracts;
 7. реализовать принятый UI поверх существующих domain modules, API, DB и closed core contracts;
 8. для каждого vertical slice выполнить targeted proof в обеих локалях, full branch CI, manual acceptance, diff audit, merge, merged-main CI и checkpoint по `PROJECT_RULES.md` §19.
 
@@ -67,7 +67,7 @@
 | 1–3 | Выполнены и приняты как UX target: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
 | 4 | **Прототип проверен; замечания закрыты.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. `S-07__zero-create → address-selected` совпадает по адресу в `ru`/`kk`; до выбора `aria-selected="false"`. Остальные исправления приняты ранее. Evidence и вердикт — `WIREFRAME_PASS3_REVIEW.md` §12 |
 | 5 | **ACCEPTED 2026-09-23.** Product Owner: «принимаю Pass 3». Решение записано в `WIREFRAME_PASS3_REVIEW.md` §13 |
-| 6 | **В работе.** Localization Slice Contract и revision/decomposition #27 по принятому UX target |
+| 6 | **В работе.** Localization разделён на три контракта, все `PROPOSED`, ждут Product Owner approval: `localization-foundation` → `catalog-localization` → `seller-comment-translation` (порядок реализации тот же). Revision/decomposition #27 по принятому UX target не начата; GitHub Issue #27 ещё содержит устаревшее направление «без отдельной страницы подтверждения», противоречащее принятому `S-10` |
 | 7–8 | Не начаты |
 
 Решения Product Owner, принятые 2026-09-23 по итогам ревью прохода 3 (каждое зафиксировано в файле-владельце):
