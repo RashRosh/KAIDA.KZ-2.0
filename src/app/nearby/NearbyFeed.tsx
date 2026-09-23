@@ -6,6 +6,7 @@ import { nearbyResponseSchema, type NearbyResponse } from '@/modules/discovery/c
 import { buyerLocationSchema, type BuyerLocation } from '@/modules/search/contracts/buyer-location.contract';
 import { OfferCard } from '../_components/OfferCard';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type NearbyState =
   | { kind: 'initial' | 'locating' | 'loading' | 'geo_error' | 'request_error' }
@@ -23,13 +24,17 @@ function RefreshIcon() {
 }
 
 export function NearbyFeed() {
+  const { locale, t } = useI18n();
   const [state, setState] = useState<NearbyState>({ kind: 'initial' });
   const pending = useRef(false);
+  const localeRef = useRef(locale);
+
+  useEffect(() => { localeRef.current = locale; }, [locale]);
 
   const loadNearby = useCallback(async (buyerLocation: BuyerLocation) => {
     setState({ kind: 'loading' });
     try {
-      const response = await fetch('/api/discovery/nearby', {
+      const response = await fetch(`/api/discovery/nearby?locale=${localeRef.current}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ buyerLocation }),
@@ -92,28 +97,28 @@ export function NearbyFeed() {
 
   const busy = state.kind === 'locating' || state.kind === 'loading';
   const buttonLabel = state.kind === 'locating'
-    ? 'Определяем местоположение…'
+    ? t('nearby.locating')
     : state.kind === 'loading'
-      ? 'Ищем товары рядом…'
+      ? t('nearby.loading')
       : state.kind === 'initial'
-        ? 'Показать товары рядом'
-        : 'Обновить товары рядом';
+        ? t('nearby.show')
+        : t('nearby.refresh');
 
   const feedback = state.kind === 'success'
     ? state.result.offers.length === 0
-      ? 'Рядом пока нет актуальных предложений.'
-      : `Найдено рядом: ${state.result.offers.length}`
+      ? t('nearby.empty')
+      : t('nearby.found', { count: state.result.offers.length })
     : '';
   const hasResults = state.kind === 'success' && state.result.offers.length > 0;
 
   return (
-    <section className={styles.searchArea} aria-label="Товары рядом">
+    <section className={styles.searchArea} aria-label={t('nearby.area')}>
       {!hasResults && (
         <div className={styles.intro}>
-          <p className={styles.eyebrow}>Рядом</p>
-          <h1>Что есть рядом?</h1>
-          <p className={styles.description}>Посмотрите актуальные предложения поблизости без поискового запроса.</p>
-          <Link href="/" className={styles.secondaryLink}>Искать конкретный товар</Link>
+          <p className={styles.eyebrow}>{t('nearby.eyebrow')}</p>
+          <h1>{t('nearby.title')}</h1>
+          <p className={styles.description}>{t('nearby.description')}</p>
+          <Link href="/" className={styles.secondaryLink}>{t('nearby.searchSpecific')}</Link>
         </div>
       )}
 
@@ -127,17 +132,17 @@ export function NearbyFeed() {
           >
             {buttonLabel}
           </button>
-          <p className={styles.help}>Местоположение используется только для этого запроса и не сохраняется.</p>
+          <p className={styles.help}>{t('nearby.privacy')}</p>
         </>
       )}
 
       {state.kind === 'geo_error' && (
         <p className={styles.error} role="alert">
-          Не удалось определить местоположение. Раздел «Рядом» работает только с разрешённой геолокацией.
+          {t('nearby.geoError')}
         </p>
       )}
       {state.kind === 'request_error' && (
-        <p className={styles.error} role="alert">Не удалось загрузить предложения рядом. Попробуйте ещё раз.</p>
+        <p className={styles.error} role="alert">{t('nearby.requestError')}</p>
       )}
 
       <div className={styles.results} aria-busy={busy}>
@@ -152,7 +157,7 @@ export function NearbyFeed() {
         {hasResults && (
           <>
             <div className={styles.resultsHeader}>
-              <h1>Предложения рядом</h1>
+              <h1>{t('nearby.offersTitle')}</h1>
               <span className={styles.resultsCount}>({state.result.offers.length})</span>
               <button
                 type="button"
@@ -165,7 +170,7 @@ export function NearbyFeed() {
                 <RefreshIcon />
               </button>
             </div>
-            <ul className={styles.offerList} aria-label="Предложения рядом">
+            <ul className={styles.offerList} aria-label={t('nearby.offersTitle')}>
               {state.result.offers.map((offer) => (
                 <li key={offer.id}>
                   <OfferCard offer={offer} distanceMeters={offer.distanceMeters} />

@@ -6,11 +6,13 @@ import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { AppHeader } from '../../_components/AppHeader';
 import { SellerBatchChangeSetCreate } from '../_components/SellerBatchChangeSetCreate';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type ApiError = { error?: { message?: string } };
 type SellerResponse = { seller: SellerView | null } & ApiError;
 
 export default function SellerBatchPage() {
+  const { locale, t } = useI18n();
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready'>('loading');
   const [seller, setSeller] = useState<SellerView | null>(null);
   const [error, setError] = useState('');
@@ -19,7 +21,7 @@ export default function SellerBatchPage() {
     let active = true;
     void (async () => {
       try {
-        const response = await fetch('/api/seller/me', { cache: 'no-store' });
+        const response = await fetch(`/api/seller/me?locale=${locale}`, { cache: 'no-store' });
         if (!active) return;
         if (response.status === 401) {
           setState('anonymous');
@@ -27,7 +29,7 @@ export default function SellerBatchPage() {
         }
         const data = await response.json() as SellerResponse;
         if (!response.ok) {
-          setError(data.error?.message ?? 'Не удалось загрузить продавца.');
+          setError(t('batch.loadSellerError'));
           setState('ready');
           return;
         }
@@ -35,29 +37,29 @@ export default function SellerBatchPage() {
         setState('ready');
       } catch {
         if (active) {
-          setError('Не удалось загрузить продавца.');
+          setError(t('batch.loadSellerError'));
           setState('ready');
         }
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [locale, t]);
 
   return (
     <>
-      <AppHeader showAuth={false} contextLabel="Продавец" />
+      <AppHeader showAuth={false} contextLabel={t('context.seller')} />
       <div className={styles.shell}>
         <main className={styles.main}>
           <div className={styles.intro}>
-            <p className={styles.eyebrow}>Seller Input · Batch</p>
-            <h1>Пакетное изменение ассортимента</h1>
-            <p>Соберите несколько изменений, проверьте их вместе и подтвердите одним действием.</p>
+            <p className={styles.eyebrow}>{t('batch.eyebrow')}</p>
+            <h1>{t('batch.pageTitle')}</h1>
+            <p>{t('batch.pageDescription')}</p>
           </div>
 
-          {state === 'loading' && <section className={styles.card}><p>Загружаем…</p></section>}
-          {state === 'anonymous' && <section className={styles.card}><h2>Нужно войти</h2><Link className={styles.primaryLink} href="/login">Войти</Link></section>}
+          {state === 'loading' && <section className={styles.card}><p>{t('seller.loading')}</p></section>}
+          {state === 'anonymous' && <section className={styles.card}><h2>{t('seller.loginRequired')}</h2><Link className={styles.primaryLink} href="/login">{t('auth.signIn')}</Link></section>}
           {state === 'ready' && error && <section className={styles.card}><p className={styles.error} role="alert">{error}</p></section>}
-          {state === 'ready' && !error && !seller && <section className={styles.card}><p>Сначала создайте продавца и точку.</p><Link className={styles.secondaryLink} href="/seller">Настроить продавца</Link></section>}
+          {state === 'ready' && !error && !seller && <section className={styles.card}><p>{t('batch.setupFirst')}</p><Link className={styles.secondaryLink} href="/seller">{t('batch.setupSeller')}</Link></section>}
           {state === 'ready' && seller && <SellerBatchChangeSetCreate seller={seller} />}
         </main>
       </div>

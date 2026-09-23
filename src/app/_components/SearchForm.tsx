@@ -13,6 +13,8 @@ import { searchQuerySchema, searchResponseSchema, type SearchResponse } from '@/
 import { AuthModal } from './AuthModal';
 import { OfferCard } from './OfferCard';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
+import { offerCount } from '@/i18n/format';
 
 type SearchState =
   | { kind: 'initial' | 'loading' | 'validation' | 'error' }
@@ -62,6 +64,7 @@ function TrendingIcon() {
 }
 
 export function SearchForm({ initialQuery = '' }: SearchFormProps) {
+  const { locale, t } = useI18n();
   const [query, setQuery] = useState(initialQuery);
   const [state, setState] = useState<SearchState>({ kind: 'initial' });
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
@@ -71,12 +74,15 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
   const [interestAuthProductId, setInterestAuthProductId] = useState<string | null>(null);
   const interestTriggerRef = useRef<HTMLElement | null>(null);
   const pending = useRef(false);
+  const localeRef = useRef(locale);
   const input = useRef<HTMLInputElement>(null);
   const loading = state.kind === 'loading';
 
+  useEffect(() => { localeRef.current = locale; }, [locale]);
+
   const loadInterests = useCallback(async (): Promise<InterestsState> => {
     try {
-      const response = await fetch('/api/interests', { cache: 'no-store' });
+      const response = await fetch(`/api/interests?locale=${locale}`, { cache: 'no-store' });
       if (response.status === 401) return { kind: 'anonymous' };
       if (!response.ok) return { kind: 'error' };
       const parsed = interestsResponseSchema.parse(await response.json());
@@ -84,7 +90,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
     } catch {
       return { kind: 'error' };
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     let active = true;
@@ -105,14 +111,14 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
     setState({ kind: 'loading' });
     try {
       const response = buyerLocation
-        ? await fetch('/api/search', {
+        ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ q: parsed.data, buyerLocation }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, locale: localeRef.current })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
@@ -245,34 +251,34 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
   }
 
   const feedback = loading
-    ? 'Ищем предложения…'
+    ? t('search.loadingOffers')
     : state.kind === 'success'
       ? state.result.offers.length === 0
-        ? 'По вашему запросу ничего не найдено.'
-        : `Найдено предложений: ${state.result.offers.length}`
+        ? t('search.empty')
+        : offerCount(locale, state.result.offers.length)
       : '';
 
   const locationStatus = locationState.kind === 'enabled'
-    ? 'Местоположение будет учтено при следующем поиске.'
+    ? t('search.locationEnabled')
     : locationState.kind === 'error'
-      ? 'Не удалось определить местоположение. Поиск работает без учёта расстояния.'
+      ? t('search.locationError')
       : '';
 
   const locationActionLabel = locationState.kind === 'enabled'
-    ? 'Не учитывать местоположение'
+    ? t('search.locationDisable')
     : locationState.kind === 'requesting'
-      ? 'Определяем местоположение…'
+      ? t('search.locationLoading')
       : locationState.kind === 'error'
-        ? 'Попробовать снова'
-        : 'Учитывать моё местоположение';
+        ? t('search.tryAgain')
+        : t('search.locationEnable');
 
   const locationEnabled = locationState.kind === 'enabled';
   const hasResults = state.kind === 'success' && state.result.offers.length > 0;
 
   return (
-    <section className={styles.searchArea} aria-label="Поиск предложений">
+    <section className={styles.searchArea} aria-label={t('search.area')}>
       <form onSubmit={submit} noValidate className={styles.searchForm}>
-        <label htmlFor="product-query" className={styles.srOnly}>Какой товар ищете?</label>
+        <label htmlFor="product-query" className={styles.srOnly}>{t('search.question')}</label>
         <div className={styles.searchControls}>
           <div className={styles.queryField}>
             <span className={styles.queryIcon}><SearchIcon /></span>
@@ -281,7 +287,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
               id="product-query"
               name="q"
               type="search"
-              placeholder="Баранина, мёд, картофель…"
+              placeholder={t('search.placeholder')}
               value={query}
               readOnly={loading}
               onChange={(event) => setQuery(event.target.value)}
@@ -293,7 +299,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
           </div>
           <button type="submit" className={styles.searchSubmit} disabled={loading}>
             <SearchIcon />
-            <span>{loading ? 'Ищем…' : 'Искать'}</span>
+            <span>{loading ? t('search.loading') : t('search.submit')}</span>
           </button>
           <button
             type="button"
@@ -311,12 +317,12 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
           </button>
         </div>
 
-        {state.kind === 'validation' && <p id="search-validation" className={styles.error} role="alert">Введите название товара.</p>}
+        {state.kind === 'validation' && <p id="search-validation" className={styles.error} role="alert">{t('search.validation')}</p>}
 
-        <div className={styles.popularSearches} aria-label="Популярные запросы">
+        <div className={styles.popularSearches} aria-label={t('search.popularQueries')}>
           <span className={styles.popularLabel}>
             <TrendingIcon />
-            Популярное:
+            {t('search.popular')}
           </span>
           {popularSearches.map((term) => (
             <button
@@ -347,15 +353,15 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
         >
           {feedback}
         </p>
-        {state.kind === 'error' && <p className={styles.error} role="alert">Не удалось выполнить поиск. Попробуйте ещё раз.</p>}
-        {interestError && <p className={styles.error} role="alert">Не удалось изменить интерес. Попробуйте ещё раз.</p>}
+        {state.kind === 'error' && <p className={styles.error} role="alert">{t('search.error')}</p>}
+        {interestError && <p className={styles.error} role="alert">{t('search.interestError')}</p>}
         {hasResults && (
           <>
             <div className={styles.resultsHeader}>
-              <h2>Результаты поиска</h2>
+              <h2>{t('search.results')}</h2>
               <span className={styles.resultsCount}>({state.result.offers.length})</span>
             </div>
-            <ul className={styles.offerList} aria-label="Предложения">
+            <ul className={styles.offerList} aria-label={t('search.offers')}>
               {state.result.offers.map((offer) => {
                 const interest = interestsState.kind === 'ready'
                   ? {
@@ -379,7 +385,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
       {interestAuthProductId && (
         <AuthModal
           open
-          description="Чтобы сохранить интерес к предложению, войдите по номеру телефона."
+          description={t('auth.interestDescription')}
           onClose={cancelInterestAuth}
           onAuthenticated={() => { void completeInterestAuth(); }}
         />

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { ClearableInput } from './ClearableInput';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export type OwnerContacts = {
   phoneE164: string | null;
@@ -25,6 +26,7 @@ function nullableCanonical(value: string, lowercase = false): string | null {
 }
 
 export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
+  const { locale, t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [phoneE164, setPhoneE164] = useState('');
@@ -45,22 +47,22 @@ export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
     let active = true;
     void (async () => {
       try {
-        const response = await fetch('/api/seller/contacts', { cache: 'no-store' });
+        const response = await fetch(`/api/seller/contacts?locale=${locale}`, { cache: 'no-store' });
         const data = await response.json() as ContactsResponse & ApiError;
         if (!active) return;
         if (!response.ok) {
-          setError(data.error?.message ?? 'Не удалось загрузить контакты.');
+          setError(t('seller.contactsLoadError'));
           return;
         }
         applyContacts(data.contacts);
       } catch {
-        if (active) setError('Не удалось загрузить контакты.');
+        if (active) setError(t('seller.contactsLoadError'));
       } finally {
         if (active) setLoading(false);
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [locale, t]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,14 +82,14 @@ export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
       });
       const data = await response.json() as ContactsResponse & ApiError;
       if (!response.ok) {
-        setError(data.error?.message ?? 'Не удалось сохранить контакты.');
+        setError(t('contacts.saveError'));
         return;
       }
       applyContacts(data.contacts);
       onSaved?.(data.contacts);
-      setSuccess('Контакты сохранены.');
+      setSuccess(t('contacts.saved'));
     } catch {
-      setError('Не удалось сохранить контакты.');
+      setError(t('contacts.saveError'));
     } finally {
       setSaving(false);
     }
@@ -95,13 +97,13 @@ export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
 
   return (
     <section className={styles.card} aria-labelledby="seller-contacts-heading">
-      <p className={styles.eyebrow}>Связь с покупателем</p>
-      <h2 id="seller-contacts-heading">Контакты для покупателей</h2>
-      <p className={styles.muted}>Эти контакты будут видны покупателям в ваших предложениях.</p>
-      {loading ? <p className={styles.status}>Загружаем контакты…</p> : (
+      <p className={styles.eyebrow}>{t('contacts.eyebrow')}</p>
+      <h2 id="seller-contacts-heading">{t('contacts.title')}</h2>
+      <p className={styles.muted}>{t('contacts.description')}</p>
+      {loading ? <p className={styles.status}>{t('contacts.loading')}</p> : (
         <form className={styles.form} onSubmit={submit} noValidate>
-          <label htmlFor="seller-contact-phone">Телефон</label>
-          <ClearableInput id="seller-contact-phone" value={phoneE164} onValueChange={setPhoneE164} clearLabel="Телефон" maxLength={16} disabled={saving} autoComplete="tel" placeholder="+77001234567" />
+          <label htmlFor="seller-contact-phone">{t('auth.phone')}</label>
+          <ClearableInput id="seller-contact-phone" value={phoneE164} onValueChange={setPhoneE164} clearLabel={t('auth.phone')} maxLength={16} disabled={saving} autoComplete="tel" placeholder="+77001234567" />
 
           <label htmlFor="seller-contact-whatsapp">WhatsApp</label>
           <ClearableInput id="seller-contact-whatsapp" value={whatsappPhoneE164} onValueChange={setWhatsappPhoneE164} clearLabel="WhatsApp" maxLength={16} disabled={saving} inputMode="tel" placeholder="+77001234567" />
@@ -114,7 +116,7 @@ export function SellerContactSettings({ onSaved }: SellerContactSettingsProps) {
 
           {error && <p className={styles.error} role="alert">{error}</p>}
           {success && <p className={styles.status} role="status">{success}</p>}
-          <button type="submit" disabled={saving}>{saving ? 'Сохраняем…' : 'Сохранить контакты'}</button>
+          <button type="submit" disabled={saving}>{saving ? t('contacts.saving') : t('contacts.save')}</button>
         </form>
       )}
     </section>

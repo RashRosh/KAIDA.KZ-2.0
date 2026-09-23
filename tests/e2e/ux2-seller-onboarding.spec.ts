@@ -94,7 +94,7 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     const geoMutation = page.waitForResponse((response) => /\/api\/seller\/locations\/[0-9a-f-]+\/geo$/.test(response.url()) && response.request().method() === 'PUT');
     await page.getByRole('button', { name: 'Использовать моё местоположение' }).click();
     expect((await geoMutation).status()).toBe(200);
-    await expect(page.getByText('Местоположение сохранено', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Местоположение сохранено.', { exact: true }).first()).toBeVisible();
 
     await page.reload();
     await expect(page.getByText('Настройка завершена', { exact: true })).toBeVisible();

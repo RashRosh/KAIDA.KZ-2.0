@@ -2,6 +2,7 @@
 
 import { RefObject, useState } from 'react';
 import styles from './AuthStatus.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type User = { id: string; phone: string };
 
@@ -31,6 +32,7 @@ function AuthIcon({ type }: { type: 'login' | 'logout' }) {
 
 export function AuthStatus({ user, loginOpen, loginTriggerRef, onLogin, onLoggedOut }: AuthStatusProps) {
   const [loggingOut, setLoggingOut] = useState(false);
+  const { t } = useI18n();
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -44,17 +46,17 @@ export function AuthStatus({ user, loginOpen, loginTriggerRef, onLogin, onLogged
 
   return (
     <div className={styles.group}>
-      {user === undefined ? <span className={styles.authMuted}>Проверяем вход…</span> : user ? (
+      {user === undefined ? <span className={styles.authMuted}>{t('auth.checking')}</span> : user ? (
         <div className={styles.authRow}>
           <button
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
             title={user.phone}
-            aria-label={loggingOut ? 'Выходим…' : `Выйти (${user.phone})`}
+            aria-label={loggingOut ? t('auth.signingOut') : t('auth.signOutPhone', { phone: user.phone })}
           >
             <AuthIcon type="logout" />
-            <span>{loggingOut ? 'Выходим…' : 'Выйти'}</span>
+            <span>{loggingOut ? t('auth.signingOut') : t('auth.signOut')}</span>
           </button>
         </div>
       ) : (
@@ -63,12 +65,12 @@ export function AuthStatus({ user, loginOpen, loginTriggerRef, onLogin, onLogged
           type="button"
           className={styles.loginLink}
           onClick={onLogin}
-          aria-label="Войти"
+          aria-label={t('auth.signIn')}
           aria-haspopup="dialog"
           aria-expanded={loginOpen}
         >
           <AuthIcon type="login" />
-          <span>Войти</span>
+          <span>{t('auth.signIn')}</span>
         </button>
       )}
 

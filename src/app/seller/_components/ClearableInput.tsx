@@ -2,6 +2,7 @@
 
 import type { InputHTMLAttributes } from 'react';
 import styles from './ClearableInput.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type ClearableInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> & {
   value: string;
@@ -10,6 +11,7 @@ type ClearableInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' |
 };
 
 export function ClearableInput({ value, onValueChange, clearLabel, disabled, ...props }: ClearableInputProps) {
+  const { t } = useI18n();
   return (
     <div className={styles.control}>
       <input
@@ -23,8 +25,8 @@ export function ClearableInput({ value, onValueChange, clearLabel, disabled, ...
         <button
           className={styles.clearButton}
           type="button"
-          aria-label={`Очистить поле «${clearLabel}»`}
-          title="Очистить"
+          aria-label={t('clear.field', { field: clearLabel })}
+          title={t('clear.action')}
           disabled={disabled}
           onClick={() => onValueChange('')}
         >

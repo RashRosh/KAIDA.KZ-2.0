@@ -4,9 +4,10 @@ import { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
 import styles from './AuthModal.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type User = { id: string; phone: string };
-type ErrorPayload = { error?: { message?: string } };
+type ErrorPayload = { error?: { code?: string; message?: string } };
 type RequestSuccess = {
   challenge: { id: string; expiresAt: string };
   delivery: { mode: 'test'; code: string };
@@ -53,8 +54,6 @@ function ArrowIcon() {
   );
 }
 
-const DEFAULT_DESCRIPTION = 'Введите номер телефона — получите код подтверждения.';
-
 // Live display grouping only; normalizeKzPhone already strips spaces/()/- server-side.
 function formatKzPhoneInput(raw: string): string {
   const digits = raw.replace(/\D/g, '');
@@ -65,7 +64,8 @@ function formatKzPhoneInput(raw: string): string {
   return groups.length ? `+7 ${groups.join(' ')}` : '+7';
 }
 
-export function AuthModal({ open, onClose, onAuthenticated, description = DEFAULT_DESCRIPTION }: AuthModalProps) {
+export function AuthModal({ open, onClose, onAuthenticated, description }: AuthModalProps) {
+  const { t } = useI18n();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [canonicalPhone, setCanonicalPhone] = useState('');
@@ -119,7 +119,8 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
       });
       const data = await response.json() as RequestSuccess & ErrorPayload;
       if (!response.ok) {
-        setError(data.error?.message ?? 'Не удалось получить код.');
+        const key = data.error?.code === 'INVALID_PHONE' ? 'error.INVALID_PHONE' : data.error?.code === 'AUTH_UNAVAILABLE' ? 'error.AUTH_UNAVAILABLE' : 'error.requestCode';
+        setError(t(key));
         return;
       }
       setCanonicalPhone(normalizeKzPhone(phone));
@@ -128,7 +129,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
       setCode('');
       setStep('otp');
     } catch {
-      setError('Не удалось получить код. Попробуйте ещё раз.');
+      setError(t('error.requestCode'));
     } finally {
       setLoading(false);
     }
@@ -146,12 +147,13 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
       });
       const data = await response.json() as VerifySuccess & ErrorPayload;
       if (!response.ok) {
-        setError(data.error?.message ?? 'Не удалось войти.');
+        const key = data.error?.code === 'INVALID_AUTH_REQUEST' ? 'error.INVALID_AUTH_REQUEST' : data.error?.code === 'INVALID_OTP' ? 'error.INVALID_OTP' : data.error?.code === 'OTP_EXPIRED' ? 'error.OTP_EXPIRED' : data.error?.code === 'AUTH_UNAVAILABLE' ? 'error.AUTH_UNAVAILABLE' : 'error.signIn';
+        setError(t(key));
         return;
       }
       onAuthenticated(data.user);
     } catch {
-      setError('Не удалось войти. Попробуйте ещё раз.');
+      setError(t('error.signIn'));
     } finally {
       setLoading(false);
     }
@@ -170,21 +172,21 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
   return createPortal(
     <div className={styles.overlay} data-testid="auth-backdrop" onMouseDown={handleBackdrop}>
       <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="auth-title" aria-describedby="auth-description">
-        <button type="button" className={styles.close} onClick={resetAndClose} aria-label="Закрыть">
+        <button type="button" className={styles.close} onClick={resetAndClose} aria-label={t('auth.close')}>
           <CloseIcon />
         </button>
 
         <div className={styles.titleRow}>
           <span className={styles.brandMark}><ShieldIcon /></span>
-          <h2 id="auth-title">Вход в KAIDA.KZ</h2>
+          <h2 id="auth-title">{t('auth.title')}</h2>
         </div>
 
         {step === 'phone' ? (
           <>
-            <p id="auth-description" className={styles.description}>{description}</p>
+            <p id="auth-description" className={styles.description}>{description ?? t('auth.defaultDescription')}</p>
             <form className={styles.form} onSubmit={requestCode} noValidate>
               <div>
-                <label className={styles.label} htmlFor="auth-phone">Телефон</label>
+                <label className={styles.label} htmlFor="auth-phone">{t('auth.phone')}</label>
                 <div className={styles.field}>
                   <span className={styles.fieldIcon}><PhoneIcon /></span>
                   <input
@@ -201,21 +203,21 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
               </div>
               {error && <p className={styles.error} role="alert">{error}</p>}
               <button type="submit" className={styles.primary} disabled={loading}>
-                <span>{loading ? 'Получаем…' : 'Получить код'}</span>
+                <span>{loading ? t('auth.gettingCode') : t('auth.getCode')}</span>
                 {!loading && <span className={styles.buttonIcon}><ArrowIcon /></span>}
               </button>
             </form>
           </>
         ) : (
           <>
-            <p id="auth-description" className={styles.description}>Код для <strong>{canonicalPhone}</strong></p>
+            <p id="auth-description" className={styles.description}>{t('auth.codeFor', { phone: canonicalPhone })}</p>
             <div className={styles.testCode} role="status">
-              <span>Тестовый режим: код показан в интерфейсе</span>
-              <strong>Тестовый код: {testCode}</strong>
+              <span>{t('auth.testMode')}</span>
+              <strong>{t('auth.testCode', { code: testCode })}</strong>
             </div>
             <form className={styles.form} onSubmit={verifyCode} noValidate>
               <div>
-                <label className={styles.label} htmlFor="auth-otp">Код из 6 цифр</label>
+                <label className={styles.label} htmlFor="auth-otp">{t('auth.otp')}</label>
                 <input
                   id="auth-otp"
                   className={styles.otpInput}
@@ -231,8 +233,8 @@ export function AuthModal({ open, onClose, onAuthenticated, description = DEFAUL
                 />
               </div>
               {error && <p className={styles.error} role="alert">{error}</p>}
-              <button type="submit" className={styles.primary} disabled={loading || code.length !== 6}>{loading ? 'Входим…' : 'Войти'}</button>
-              <button type="button" className={styles.secondary} onClick={changePhone} disabled={loading}>Изменить номер</button>
+              <button type="submit" className={styles.primary} disabled={loading || code.length !== 6}>{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
+              <button type="button" className={styles.secondary} onClick={changePhone} disabled={loading}>{t('auth.changePhone')}</button>
             </form>
           </>
         )}

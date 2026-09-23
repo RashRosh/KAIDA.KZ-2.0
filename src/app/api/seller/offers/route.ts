@@ -3,11 +3,13 @@ import { resolveCurrentUser } from '@/modules/identity/application/resolve-curre
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { listOwnedOffers } from '@/modules/offers/application/list-owned-offers';
 import { SellerOffersSellerRequiredError } from '@/modules/offers/contracts/seller-offer.contract';
+import { localeFromApiRequest } from '../../../../i18n/api';
 
 export const runtime = 'nodejs';
 const noStore = { 'Cache-Control': 'no-store' };
 
 export async function GET(request: NextRequest): Promise<Response> {
+  void localeFromApiRequest(request);
   let user;
   try {
     user = await resolveCurrentUser(request.cookies.get(SESSION_COOKIE_NAME)?.value);

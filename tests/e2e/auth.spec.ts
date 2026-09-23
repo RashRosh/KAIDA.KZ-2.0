@@ -79,7 +79,7 @@ test('anonymous search, modal login, persistence, search after login and logout'
     expect(otpResponse.status()).toBe(201);
     const requested = await otpResponse.json();
     const testCode = requested.delivery.code as string;
-    await expect(dialog.getByText(phone, { exact: true })).toBeVisible();
+    await expect(dialog.getByText(`Код для ${phone}`, { exact: true })).toBeVisible();
     await expect(dialog.getByText(`Тестовый код: ${testCode}`, { exact: true })).toBeVisible();
 
     await dialog.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode === '999999' ? '000000' : '999999');

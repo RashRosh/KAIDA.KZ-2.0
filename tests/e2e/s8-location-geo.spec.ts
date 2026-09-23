@@ -94,7 +94,8 @@ test('S8 Seller explicitly saves browser geolocation and public Search hides raw
     const saved = await saveResponse;
     expect(saved.status()).toBe(200);
     expect((await saved.json()).location.geo).toEqual(GEO);
-    await expect(page.getByText('Местоположение сохранено', { exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Торговые точки' }).getByRole('status'))
+      .toHaveText('Местоположение сохранено.');
 
     await page.reload();
     await expect(page.getByText('Настройка завершена', { exact: true })).toBeVisible();

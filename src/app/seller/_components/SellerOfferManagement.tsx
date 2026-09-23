@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type ApiError = { error?: { code?: string; message?: string } };
 type OffersResponse = { offers?: SellerOfferView[] } & ApiError;
 type ChangeResponse = { changeSet?: SellerChangeSetView } & ApiError;
 
 export function SellerOfferManagement() {
+  const { locale, t } = useI18n();
   const router = useRouter();
   const [offers, setOffers] = useState<SellerOfferView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,22 +27,22 @@ export function SellerOfferManagement() {
     let active = true;
     void (async () => {
       try {
-        const response = await fetch('/api/seller/offers', { cache: 'no-store' });
+        const response = await fetch(`/api/seller/offers?locale=${locale}`, { cache: 'no-store' });
         const data = await response.json() as OffersResponse;
         if (!active) return;
         if (!response.ok || !data.offers) {
-          setError(data.error?.message ?? 'Не удалось загрузить предложения.');
+          setError(t('offerManage.loadError'));
           return;
         }
         setOffers(data.offers);
       } catch {
-        if (active) setError('Не удалось загрузить предложения.');
+        if (active) setError(t('offerManage.loadError'));
       } finally {
         if (active) setLoading(false);
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [locale, t]);
 
   function beginEdit(offer: SellerOfferView) {
     setError('');
@@ -61,12 +63,12 @@ export function SellerOfferManagement() {
       });
       const data = await response.json() as ChangeResponse;
       if (!response.ok || !data.changeSet) {
-        setError(data.error?.message ?? 'Не удалось создать изменение.');
+        setError(t('offerCreate.error'));
         return;
       }
       router.push(`/seller/change-sets/${data.changeSet.id}`);
     } catch {
-      setError('Не удалось создать изменение.');
+      setError(t('offerCreate.error'));
     } finally {
       setSubmittingOfferId(null);
     }
@@ -76,7 +78,7 @@ export function SellerOfferManagement() {
     event.preventDefault();
     const amount = priceAmount.trim();
     if (amount === '') {
-      setError('Укажите цену предложения.');
+      setError(t('offerCreate.priceRequired'));
       return;
     }
     await createProposal(offerId, {
@@ -88,12 +90,12 @@ export function SellerOfferManagement() {
 
   return (
     <section className={styles.card} aria-labelledby="seller-offers-heading">
-      <p className={styles.eyebrow}>Offer management</p>
-      <h2 id="seller-offers-heading">Мои предложения</h2>
-      <p className={styles.muted}>Изменения применятся только после отдельного подтверждения.</p>
+      <p className={styles.eyebrow}>{t('offerManage.eyebrow')}</p>
+      <h2 id="seller-offers-heading">{t('offerManage.title')}</h2>
+      <p className={styles.muted}>{t('offerManage.description')}</p>
 
-      {loading && <p className={styles.muted}>Загружаем предложения…</p>}
-      {!loading && offers.length === 0 && <p className={styles.muted}>Пока нет созданных предложений.</p>}
+      {loading && <p className={styles.muted}>{t('offerManage.loading')}</p>}
+      {!loading && offers.length === 0 && <p className={styles.muted}>{t('offerManage.empty')}</p>}
 
       <div className={styles.offerList}>
         {offers.map((offer) => {
@@ -107,36 +109,36 @@ export function SellerOfferManagement() {
                   <h3>{offer.product.name}</h3>
                   <p className={styles.muted}>{offer.location.name} · {offer.location.addressText}</p>
                 </div>
-                <span className={styles.offerStatus}>{offer.status === 'active' ? 'Активно' : 'Выключено'}</span>
+                <span className={styles.offerStatus}>{offer.status === 'active' ? t('offerManage.active') : t('offerManage.inactive')}</span>
               </div>
               <dl className={styles.summaryGrid}>
-                <dt>Цена</dt><dd>{offer.price ? `${offer.price.amount} ${offer.price.currency}${offer.price.unit ? ` / ${offer.price.unit}` : ''}` : 'Требуется цена'}</dd>
-                <dt>Комментарий</dt><dd>{offer.sellerComment ?? 'Не указан'}</dd>
+                <dt>{t('review.price')}</dt><dd>{offer.price ? `${offer.price.amount} ${offer.price.currency}${offer.price.unit ? ` / ${offer.price.unit}` : ''}` : t('offerManage.priceRequired')}</dd>
+                <dt>{t('review.comment')}</dt><dd>{offer.sellerComment ?? t('review.notSpecified')}</dd>
               </dl>
 
               <div className={styles.actions}>
-                <button type="button" className={styles.secondaryButton} onClick={() => beginEdit(offer)} disabled={submitting}>Изменить</button>
+                <button type="button" className={styles.secondaryButton} onClick={() => beginEdit(offer)} disabled={submitting}>{t('offerManage.edit')}</button>
                 {offer.status === 'active' ? (
                   <>
-                    <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'deactivate_offer' })} disabled={submitting}>{submitting ? 'Создаём…' : 'Выключить'}</button>
-                    <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting || needsPrice}>{needsPrice ? 'Сначала укажите цену' : submitting ? 'Создаём…' : 'Подтвердить актуальность'}</button>
+                    <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'deactivate_offer' })} disabled={submitting}>{submitting ? t('offerCreate.creating') : t('offerManage.disable')}</button>
+                    <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting || needsPrice}>{needsPrice ? t('offerManage.priceFirst') : submitting ? t('offerCreate.creating') : t('offerManage.confirmFreshness')}</button>
                   </>
                 ) : (
-                  <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting || needsPrice}>{needsPrice ? 'Сначала укажите цену' : submitting ? 'Создаём…' : 'Включить'}</button>
+                  <button type="button" className={styles.secondaryButton} onClick={() => void createProposal(offer.id, { action: 'activate_offer' })} disabled={submitting || needsPrice}>{needsPrice ? t('offerManage.priceFirst') : submitting ? t('offerCreate.creating') : t('offerManage.enable')}</button>
                 )}
               </div>
 
               {editing && (
                 <form className={styles.inlineForm} onSubmit={(event) => void submitUpdate(event, offer.id)} noValidate>
-                  <label htmlFor={`offer-price-${offer.id}`}>Цена, ₸</label>
-                  <input id={`offer-price-${offer.id}`} value={priceAmount} onChange={(event) => setPriceAmount(event.target.value)} inputMode="decimal" disabled={submitting} placeholder="Обязательно" aria-required="true" />
-                  <label htmlFor={`offer-unit-${offer.id}`}>Единица</label>
-                  <input id={`offer-unit-${offer.id}`} value={priceUnit} onChange={(event) => setPriceUnit(event.target.value)} maxLength={32} disabled={submitting || priceAmount.trim() === ''} placeholder="Например, кг" />
-                  <label htmlFor={`offer-comment-${offer.id}`}>Комментарий продавца</label>
-                  <textarea id={`offer-comment-${offer.id}`} value={sellerComment} onChange={(event) => setSellerComment(event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder="Без комментария" />
+                  <label htmlFor={`offer-price-${offer.id}`}>{t('offerCreate.price')}</label>
+                  <input id={`offer-price-${offer.id}`} value={priceAmount} onChange={(event) => setPriceAmount(event.target.value)} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
+                  <label htmlFor={`offer-unit-${offer.id}`}>{t('offerCreate.unit')}</label>
+                  <input id={`offer-unit-${offer.id}`} value={priceUnit} onChange={(event) => setPriceUnit(event.target.value)} maxLength={32} disabled={submitting || priceAmount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
+                  <label htmlFor={`offer-comment-${offer.id}`}>{t('offerCreate.comment')}</label>
+                  <textarea id={`offer-comment-${offer.id}`} value={sellerComment} onChange={(event) => setSellerComment(event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder={t('batch.noComment')} />
                   <div className={styles.actions}>
-                    <button type="submit" disabled={submitting}>{submitting ? 'Создаём…' : 'Проверить изменение'}</button>
-                    <button type="button" className={styles.secondaryButton} onClick={() => setEditingOfferId(null)} disabled={submitting}>Отмена</button>
+                    <button type="submit" disabled={submitting}>{submitting ? t('offerCreate.creating') : t('offerManage.review')}</button>
+                    <button type="button" className={styles.secondaryButton} onClick={() => setEditingOfferId(null)} disabled={submitting}>{t('offerManage.cancel')}</button>
                   </div>
                 </form>
               )}

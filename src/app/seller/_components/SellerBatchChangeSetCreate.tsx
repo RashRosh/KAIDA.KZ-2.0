@@ -7,6 +7,7 @@ import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.co
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import styles from '../page.module.css';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type Action = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
 type ApiError = { error?: { code?: string; message?: string } };
@@ -40,6 +41,7 @@ function newDraft(locationId: string): DraftItem {
 }
 
 export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
+  const { locale, t } = useI18n();
   const router = useRouter();
   const automaticLocationId = seller.locations.length === 1 ? seller.locations[0]!.id : '';
   const [offers, setOffers] = useState<SellerOfferView[]>([]);
@@ -52,22 +54,22 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
     let active = true;
     void (async () => {
       try {
-        const response = await fetch('/api/seller/offers', { cache: 'no-store' });
+        const response = await fetch(`/api/seller/offers?locale=${locale}`, { cache: 'no-store' });
         const data = await response.json() as OffersResponse;
         if (!active) return;
         if (!response.ok || !data.offers) {
-          setError(data.error?.message ?? 'Не удалось загрузить предложения для пакета.');
+          setError(t('batch.loadOffersError'));
           return;
         }
         setOffers(data.offers);
       } catch {
-        if (active) setError('Не удалось загрузить предложения для пакета.');
+        if (active) setError(t('batch.loadOffersError'));
       } finally {
         if (active) setLoadingOffers(false);
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [locale, t]);
 
   function updateItem(key: number, patch: Partial<DraftItem>) {
     setItems((current) => current.map((item) => item.key === key ? { ...item, ...patch } : item));
@@ -116,12 +118,12 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
     const missingPrice = items.some((item) =>
       (item.action === 'create_offer' || item.action === 'update_offer') && item.priceAmount.trim() === '');
     if (missingPrice) {
-      setError('Укажите цену для каждого создаваемого или изменяемого Offer.');
+      setError(t('batch.priceRequired'));
       return;
     }
     const missingLocation = items.some((item) => item.action === 'create_offer' && item.locationId === '');
     if (missingLocation) {
-      setError('Выберите торговую точку для каждого нового Offer.');
+      setError(t('batch.locationRequired'));
       return;
     }
     const invalidActivation = items.some((item) => {
@@ -130,7 +132,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
       return offer?.price === null;
     });
     if (invalidActivation) {
-      setError('Сначала укажите цену Offer перед включением.');
+      setError(t('batch.activationPriceRequired'));
       return;
     }
 
@@ -143,12 +145,12 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
       });
       const data = await response.json() as CreateResponse;
       if (!response.ok || !data.changeSet) {
-        setError(data.error?.message ?? 'Не удалось создать пакет изменений.');
+        setError(t('batch.createError'));
         return;
       }
       router.push(`/seller/change-sets/${data.changeSet.id}`);
     } catch {
-      setError('Не удалось создать пакет изменений.');
+      setError(t('batch.createError'));
     } finally {
       setSubmitting(false);
     }
@@ -157,24 +159,24 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
   if (seller.locations.length === 0) {
     return (
       <section className={styles.card} aria-labelledby="seller-batch-heading">
-        <h2 id="seller-batch-heading">Изменить несколько товаров</h2>
-        <p className={styles.muted}>Сначала добавьте торговую точку.</p>
-        <Link className={styles.secondaryLinkButton} href="/seller">Открыть торговые точки</Link>
+        <h2 id="seller-batch-heading">{t('batch.changeSeveral')}</h2>
+        <p className={styles.muted}>{t('batch.addPointFirst')}</p>
+        <Link className={styles.secondaryLinkButton} href="/seller">{t('batch.openPoints')}</Link>
       </section>
     );
   }
 
   return (
     <section className={styles.card} aria-labelledby="seller-batch-heading">
-      <p className={styles.eyebrow}>Seller Input · Batch</p>
-      <h2 id="seller-batch-heading">Изменить несколько товаров</h2>
-      <p className={styles.muted}>Соберите минимум два изменения. Они применятся только вместе после одного подтверждения.</p>
+      <p className={styles.eyebrow}>{t('batch.eyebrow')}</p>
+      <h2 id="seller-batch-heading">{t('batch.changeSeveral')}</h2>
+      <p className={styles.muted}>{t('batch.description')}</p>
 
       <form className={styles.form} onSubmit={submit} noValidate>
         {items.map((item, index) => (
           <article key={item.key} className={styles.itemCard} data-testid={`batch-item-${index}`}>
-            <h3>Изменение {index + 1}</h3>
-            <label htmlFor={`batch-action-${item.key}`}>Действие</label>
+            <h3>{t('batch.changeNumber', { number: index + 1 })}</h3>
+            <label htmlFor={`batch-action-${item.key}`}>{t('batch.action')}</label>
             <select
               id={`batch-action-${item.key}`}
               value={item.action}
@@ -184,20 +186,20 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
                 updateItem(item.key, { action, offerId: '', locationId: action === 'create_offer' ? automaticLocationId : '' });
               }}
             >
-              <option value="create_offer">Создать Offer</option>
-              <option value="update_offer">Изменить Offer</option>
-              <option value="deactivate_offer">Выключить Offer</option>
-              <option value="activate_offer">Включить / подтвердить Offer</option>
+              <option value="create_offer">{t('batch.createOffer')}</option>
+              <option value="update_offer">{t('batch.updateOffer')}</option>
+              <option value="deactivate_offer">{t('batch.deactivateOffer')}</option>
+              <option value="activate_offer">{t('batch.activateOffer')}</option>
             </select>
 
             {item.action === 'create_offer' ? (
               <>
-                <label htmlFor={`batch-product-${item.key}`}>Существующий товар каталога</label>
+                <label htmlFor={`batch-product-${item.key}`}>{t('batch.catalogProduct')}</label>
                 <input id={`batch-product-${item.key}`} value={item.productName} onChange={(event) => updateItem(item.key, { productName: event.target.value })} disabled={submitting} />
 
-                <label htmlFor={`batch-location-${item.key}`}>Точка</label>
+                <label htmlFor={`batch-location-${item.key}`}>{t('review.point')}</label>
                 <select id={`batch-location-${item.key}`} value={item.locationId} onChange={(event) => updateItem(item.key, { locationId: event.target.value })} disabled={submitting} required>
-                  {seller.locations.length > 1 && <option value="">Выберите торговую точку</option>}
+                  {seller.locations.length > 1 && <option value="">{t('offerCreate.chooseLocation')}</option>}
                   {seller.locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
                 </select>
               </>
@@ -205,30 +207,30 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
               <>
                 <label htmlFor={`batch-offer-${item.key}`}>Offer</label>
                 <select id={`batch-offer-${item.key}`} value={item.offerId} onChange={(event) => selectOffer(item, event.target.value)} disabled={submitting || loadingOffers}>
-                  <option value="">Выберите Offer</option>
-                  {offers.map((offer) => <option key={offer.id} value={offer.id}>{offer.product.name} · {offer.status === 'active' ? 'активно' : 'выключено'}</option>)}
+                  <option value="">{t('batch.chooseOffer')}</option>
+                  {offers.map((offer) => <option key={offer.id} value={offer.id}>{offer.product.name} · {offer.status === 'active' ? t('batch.active') : t('batch.inactive')}</option>)}
                 </select>
               </>
             )}
 
             {(item.action === 'create_offer' || item.action === 'update_offer') && (
               <>
-                <label htmlFor={`batch-price-${item.key}`}>Цена, ₸</label>
-                <input id={`batch-price-${item.key}`} value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder="Обязательно" aria-required="true" />
-                <label htmlFor={`batch-unit-${item.key}`}>Единица</label>
-                <input id={`batch-unit-${item.key}`} value={item.priceUnit} onChange={(event) => updateItem(item.key, { priceUnit: event.target.value })} maxLength={32} disabled={submitting || item.priceAmount.trim() === ''} placeholder="Например, кг" />
-                <label htmlFor={`batch-comment-${item.key}`}>Комментарий продавца</label>
-                <textarea id={`batch-comment-${item.key}`} value={item.sellerComment} onChange={(event) => updateItem(item.key, { sellerComment: event.target.value })} maxLength={500} rows={2} disabled={submitting} placeholder="Без комментария" />
+                <label htmlFor={`batch-price-${item.key}`}>{t('offerCreate.price')}</label>
+                <input id={`batch-price-${item.key}`} value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
+                <label htmlFor={`batch-unit-${item.key}`}>{t('offerCreate.unit')}</label>
+                <input id={`batch-unit-${item.key}`} value={item.priceUnit} onChange={(event) => updateItem(item.key, { priceUnit: event.target.value })} maxLength={32} disabled={submitting || item.priceAmount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
+                <label htmlFor={`batch-comment-${item.key}`}>{t('offerCreate.comment')}</label>
+                <textarea id={`batch-comment-${item.key}`} value={item.sellerComment} onChange={(event) => updateItem(item.key, { sellerComment: event.target.value })} maxLength={500} rows={2} disabled={submitting} placeholder={t('batch.noComment')} />
               </>
             )}
 
-            {items.length > 2 && <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => current.filter((candidate) => candidate.key !== item.key))} disabled={submitting}>Убрать из пакета</button>}
+            {items.length > 2 && <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => current.filter((candidate) => candidate.key !== item.key))} disabled={submitting}>{t('batch.remove')}</button>}
           </article>
         ))}
 
         <div className={styles.actions}>
-          <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => [...current, newDraft(automaticLocationId)])} disabled={submitting}>Добавить изменение</button>
-          <button type="submit" disabled={submitting}>{submitting ? 'Создаём пакет…' : 'Проверить весь пакет'}</button>
+          <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => [...current, newDraft(automaticLocationId)])} disabled={submitting}>{t('batch.addChange')}</button>
+          <button type="submit" disabled={submitting}>{submitting ? t('batch.creating') : t('batch.review')}</button>
         </div>
         {error && <p className={styles.error} role="alert">{error}</p>}
       </form>
