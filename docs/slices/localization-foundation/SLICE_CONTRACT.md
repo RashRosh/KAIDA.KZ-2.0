@@ -1,6 +1,6 @@
 # Localization foundation — Slice Contract
 
-**Status:** PROPOSED — contract review before production implementation.
+**Status:** APPROVED — Product Owner, 2026-09-23. Implementation on a dedicated branch per `PROJECT_RULES.md` §19, in order part 1 → 2 → 3.
 
 **Part 1 of 3** localization contracts (gate step 6, `EXECUTION_PLAN.md`):
 

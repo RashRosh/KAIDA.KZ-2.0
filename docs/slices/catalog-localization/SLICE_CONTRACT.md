@@ -1,6 +1,6 @@
 # Catalog localization — Slice Contract
 
-**Status:** PROPOSED — contract review before production implementation.
+**Status:** APPROVED — Product Owner, 2026-09-23. Implementation on a dedicated branch per `PROJECT_RULES.md` §19, in order part 1 → 2 → 3.
 
 **Part 2 of 3** localization contracts. Depends on part 1 (`docs/slices/localization-foundation/SLICE_CONTRACT.md`)
 for the active locale and the API `locale` parameter.
