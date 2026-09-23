@@ -4,6 +4,7 @@ import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import { offers } from '../db/offers.table';
+import { priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../price-unit/price-unit';
 
 export type OfferWriteDb = Pick<Database, 'insert' | 'select' | 'update'>;
 
@@ -14,7 +15,8 @@ const managementOfferSelection = {
   locationId: offers.locationId,
   priceAmount: offers.priceAmount,
   priceCurrency: offers.priceCurrency,
-  priceUnit: offers.priceUnit,
+  priceUnitCode: offers.priceUnitCode,
+  priceUnitValue: offers.priceUnitValue,
   sellerComment: offers.sellerComment,
   sellerCommentVersion: offers.sellerCommentVersion,
   status: offers.status,
@@ -24,13 +26,18 @@ const managementOfferSelection = {
   updatedAt: offers.updatedAt,
 };
 
+function withPriceUnit<T extends { priceUnitCode: string | null; priceUnitValue: string | null }>(row: T) {
+  const { priceUnitCode, priceUnitValue, ...rest } = row;
+  return { ...rest, priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue) };
+}
+
 export async function createOffer(database: OfferWriteDb, values: {
   productId: string;
   sellerId: string;
   locationId: string;
   priceAmount: string;
   priceCurrency: 'KZT';
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
   sellerComment: string | null;
   confirmedAt: Date;
 }) {
@@ -40,7 +47,7 @@ export async function createOffer(database: OfferWriteDb, values: {
     locationId: values.locationId,
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
-    priceUnit: values.priceUnit,
+    ...priceUnitToColumns(values.priceUnit),
     sellerComment: values.sellerComment,
     status: 'active',
     lastConfirmedAt: values.confirmedAt,
@@ -63,7 +70,7 @@ export async function createOffer(database: OfferWriteDb, values: {
 
 export async function findOfferById(database: OfferWriteDb, id: string) {
   const rows = await database.select(managementOfferSelection).from(offers).where(eq(offers.id, id)).limit(1);
-  return rows[0] ?? null;
+  return rows[0] ? withPriceUnit(rows[0]) : null;
 }
 
 export async function findOwnedOfferForManagement(database: OfferWriteDb, id: string, sellerId: string) {
@@ -74,7 +81,7 @@ export async function findOwnedOfferForManagement(database: OfferWriteDb, id: st
     .innerJoin(locations, eq(offers.locationId, locations.id))
     .where(and(eq(offers.id, id), eq(offers.sellerId, sellerId)))
     .limit(1);
-  return rows[0] ?? null;
+  return rows[0] ? withPriceUnit(rows[0]) : null;
 }
 
 export async function lockOfferById(database: OfferWriteDb, id: string) {
@@ -83,11 +90,11 @@ export async function lockOfferById(database: OfferWriteDb, id: string) {
     .where(eq(offers.id, id))
     .for('update')
     .limit(1);
-  return rows[0] ?? null;
+  return rows[0] ? withPriceUnit(rows[0]) : null;
 }
 
 export async function listOffersBySeller(database: OfferWriteDb, sellerId: string, locale: 'ru' | 'kk' = 'ru') {
-  return database.select({
+  const rows = await database.select({
     ...managementOfferSelection,
     productName: locale === 'kk'
       ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
@@ -106,6 +113,7 @@ export async function listOffersBySeller(database: OfferWriteDb, sellerId: strin
     .innerJoin(sellers, eq(offers.sellerId, sellers.id))
     .where(eq(offers.sellerId, sellerId))
     .orderBy(asc(offers.createdAt), asc(offers.id));
+  return rows.map(withPriceUnit);
 }
 
 const managementUpdateReturning = {
@@ -123,7 +131,7 @@ export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   expectedRevision: number;
   priceAmount: string;
   priceCurrency: 'KZT';
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
   sellerComment: string | null;
   sellerCommentChanged: boolean;
   confirmationTime: Date;
@@ -131,7 +139,7 @@ export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   return database.update(offers).set({
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
-    priceUnit: values.priceUnit,
+    ...priceUnitToColumns(values.priceUnit),
     sellerComment: values.sellerComment,
     sellerCommentVersion: values.sellerCommentChanged
       ? sql`${offers.sellerCommentVersion} + 1`

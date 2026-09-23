@@ -2,6 +2,7 @@ import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
 import { findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
+import type { PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import { offerUpdateIsNoOp } from './create-offer-management-change-set';
 import {
@@ -36,7 +37,7 @@ function normalizeNullableText(value: string | null): string | null {
 function normalizedCurrentPrice(offer: {
   priceAmount: string | null;
   priceCurrency: string | null;
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
 }) {
   if (offer.priceAmount === null) {
     if (offer.priceCurrency !== null || offer.priceUnit !== null) {
@@ -50,7 +51,7 @@ function normalizedCurrentPrice(offer: {
   return {
     amount: offer.priceAmount,
     currency: 'KZT' as const,
-    unit: normalizeNullableText(offer.priceUnit),
+    unit: offer.priceUnit,
   };
 }
 
@@ -69,7 +70,7 @@ type PreparedCreateItem = {
   locationId: string;
   priceAmount: string;
   priceCurrency: 'KZT';
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
   sellerComment: string | null;
 };
 
@@ -79,7 +80,7 @@ type PreparedManagementItem = {
   locationId: string;
   priceAmount: string;
   priceCurrency: 'KZT';
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
   sellerComment: string | null;
   targetOfferId: string;
   expectedOfferRevision: number;

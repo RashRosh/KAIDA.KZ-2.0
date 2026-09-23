@@ -27,7 +27,7 @@ test('fresh active is visible; expired and inactive are hidden without lifecycle
     await pool.query('INSERT INTO products (id, name) VALUES ($1, $2)', [fixture.productId, fixture.productName]);
     await pool.query(
       `INSERT INTO offers (
-        id, product_id, seller_id, location_id, price_amount, price_currency, price_unit,
+        id, product_id, seller_id, location_id, price_amount, price_currency, price_unit_code,
         seller_comment, status, last_confirmed_at
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
       [
@@ -37,7 +37,7 @@ test('fresh active is visible; expired and inactive are hidden without lifecycle
         seedIds.location,
         '777.00',
         'KZT',
-        'шт',
+        'piece',
         'S1 E2E lifecycle fixture',
         'active',
         new Date(),

@@ -112,7 +112,7 @@ describe('Mandatory Offer Price migration upgrade on PostgreSQL 18', () => {
         revision: 8,
         price_amount: null,
         price_currency: null,
-        price_unit: null,
+        price_unit_code: null,
         seller_comment: 'active legacy',
         product_id: productId,
         seller_id: sellerId,
@@ -122,11 +122,11 @@ describe('Mandatory Offer Price migration upgrade on PostgreSQL 18', () => {
       expect(new Date(activeLegacy.updated_at).getTime()).toBeGreaterThan(beforeTime.getTime());
 
       const inactiveLegacy = (await pool.query('SELECT * FROM offers WHERE id=$1', [inactiveLegacyId])).rows[0];
-      expect(inactiveLegacy).toMatchObject({ status: 'inactive', revision: 3, price_amount: null, price_currency: null, price_unit: null });
+      expect(inactiveLegacy).toMatchObject({ status: 'inactive', revision: 3, price_amount: null, price_currency: null, price_unit_code: null });
       expect(new Date(inactiveLegacy.updated_at).toISOString()).toBe(beforeTime.toISOString());
 
       const priced = (await pool.query('SELECT * FROM offers WHERE id=$1', [pricedId])).rows[0];
-      expect(priced).toMatchObject({ status: 'active', revision: 4, price_amount: '1250.00', price_currency: 'KZT', price_unit: null });
+      expect(priced).toMatchObject({ status: 'active', revision: 4, price_amount: '1250.00', price_currency: 'KZT', price_unit_code: null });
       expect(Number((await pool.query('SELECT count(*) FROM offers')).rows[0].count)).toBe(countBefore);
 
       const constraints = await pool.query<{ conname: string; convalidated: boolean }>(`
@@ -157,11 +157,11 @@ describe('Mandatory Offer Price migration upgrade on PostgreSQL 18', () => {
       )).rejects.toMatchObject({ code: '23514' });
 
       const zero = await pool.query(
-        `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,price_unit,status,last_confirmed_at)
-         VALUES ($1,$2,$3,'0','KZT',NULL,'inactive',$4) RETURNING price_amount,price_currency,price_unit`,
+        `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,price_unit_code,status,last_confirmed_at)
+         VALUES ($1,$2,$3,'0','KZT',NULL,'inactive',$4) RETURNING price_amount,price_currency,price_unit_code`,
         [productId, sellerId, locationId, beforeTime],
       );
-      expect(zero.rows[0]).toEqual({ price_amount: '0', price_currency: 'KZT', price_unit: null });
+      expect(zero.rows[0]).toEqual({ price_amount: '0', price_currency: 'KZT', price_unit_code: null });
 
       await expect(confirmSellerChangeSet(userId, legacyCreateSetId, { database: db }))
         .rejects.toBeInstanceOf(OfferPriceRequiredError);
@@ -179,8 +179,8 @@ describe('Mandatory Offer Price migration upgrade on PostgreSQL 18', () => {
       });
       const remediation = await createOfferManagementChangeSet(userId, inactiveLegacyId, updateInput, { database: db });
       await confirmSellerChangeSet(userId, remediation.id, { database: db, clock: () => new Date('2026-09-16T12:00:00Z') });
-      expect((await pool.query('SELECT status,price_amount,price_currency,price_unit FROM offers WHERE id=$1', [inactiveLegacyId])).rows[0])
-        .toEqual({ status: 'inactive', price_amount: '2500.00', price_currency: 'KZT', price_unit: null });
+      expect((await pool.query('SELECT status,price_amount,price_currency,price_unit_code FROM offers WHERE id=$1', [inactiveLegacyId])).rows[0])
+        .toEqual({ status: 'inactive', price_amount: '2500.00', price_currency: 'KZT', price_unit_code: null });
 
       const activationInput = sellerOfferChangeBodySchema.parse({ action: 'activate_offer' });
       const activation = await createOfferManagementChangeSet(userId, inactiveLegacyId, activationInput, { database: db });

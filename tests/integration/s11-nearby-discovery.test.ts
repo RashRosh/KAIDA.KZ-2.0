@@ -89,7 +89,7 @@ beforeAll(async () => {
   ]);
 
   await pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,price_amount,price_currency,price_unit,status,last_confirmed_at,created_at,updated_at)
+    (id,product_id,seller_id,location_id,price_amount,price_currency,price_unit_code,status,last_confirmed_at,created_at,updated_at)
     VALUES
     ($1,$9,$10,$11,'1','KZT',NULL,'active',$15,$15,$15),
     ($2,$9,$10,$11,'1','KZT',NULL,'active',$15,$15,$15),

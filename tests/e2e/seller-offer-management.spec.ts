@@ -102,7 +102,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
 
     await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
     await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200.00');
-    await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+    await page.getByLabel('Единица', { exact: true }).selectOption('kg');
     await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill('S5 старая партия');
     await page.getByRole('button', { name: 'Создать изменение' }).click();
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
@@ -119,7 +119,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByRole('button', { name: 'Изменить', exact: true }).click();
     const editForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Проверить изменение' }) });
     await editForm.getByLabel('Цена, ₸').fill('4500.00');
-    await editForm.getByLabel('Единица').fill('кг');
+    await editForm.getByLabel('Единица', { exact: true }).selectOption('kg');
     await editForm.getByLabel('Комментарий продавца').fill('S5 новая партия');
     await editForm.getByRole('button', { name: 'Проверить изменение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);

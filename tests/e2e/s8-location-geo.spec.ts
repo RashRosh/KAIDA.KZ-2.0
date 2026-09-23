@@ -67,7 +67,7 @@ async function createLambOffer(page: Page, comment: string) {
   await page.goto('/seller/offers/new');
   await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
   await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4100.00');
-  await page.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+  await page.getByLabel('Единица', { exact: true }).selectOption('kg');
   await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
   await page.getByRole('button', { name: 'Создать изменение' }).click();
   await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();

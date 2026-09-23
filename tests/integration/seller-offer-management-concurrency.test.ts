@@ -39,7 +39,7 @@ async function fixture(userId: string, phone: string, label: string) {
   const created = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
     productName: 'Баранина',
     locationId: seller.locations[0]!.id,
-    price: { amount: '4000.00', unit: 'кг' },
+    price: { amount: '4000.00', unit: { code: 'kg' } },
     sellerComment: 'Исходное',
   }), { database: db });
   const confirmed = await confirmSellerChangeSet(userId, created.id, { database: db, clock: () => T0 });
@@ -49,7 +49,7 @@ async function fixture(userId: string, phone: string, label: string) {
 function update(amount: string, comment: string) {
   return sellerOfferChangeBodySchema.parse({
     action: 'update_offer',
-    price: { amount, unit: 'кг' },
+    price: { amount, unit: { code: 'kg' } },
     sellerComment: comment,
   });
 }

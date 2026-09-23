@@ -1,6 +1,7 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
+import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   OfferAlreadyInactiveError,
@@ -35,7 +36,7 @@ export function offerUpdateIsNoOp(
   offer: {
     priceAmount: string | null;
     priceCurrency: string | null;
-    priceUnit: string | null;
+    priceUnit: PriceUnit | null;
     sellerComment: string | null;
   },
   input: Extract<SellerOfferChangeInput, { action: 'update_offer' }>,
@@ -44,14 +45,14 @@ export function offerUpdateIsNoOp(
   if (offer.priceAmount === null || offer.priceCurrency !== 'KZT') return false;
 
   return canonicalDecimal(offer.priceAmount) === canonicalDecimal(input.price.amount)
-    && normalizeNullableText(offer.priceUnit) === input.price.unit
+    && samePriceUnit(offer.priceUnit, input.price.unit)
     && currentComment === input.sellerComment;
 }
 
 function normalizedCurrentPrice(offer: {
   priceAmount: string | null;
   priceCurrency: string | null;
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
 }) {
   if (offer.priceAmount === null) {
     if (offer.priceCurrency !== null || offer.priceUnit !== null) {
@@ -65,7 +66,7 @@ function normalizedCurrentPrice(offer: {
   return {
     amount: offer.priceAmount,
     currency: 'KZT' as const,
-    unit: normalizeNullableText(offer.priceUnit),
+    unit: offer.priceUnit,
   };
 }
 
@@ -91,7 +92,7 @@ export async function createOfferManagementChangeSet(
     }
 
     let priceAmount: string;
-    let priceUnit: string | null;
+    let priceUnit: PriceUnit | null;
     let sellerComment: string | null;
 
     if (input.action === 'update_offer') {

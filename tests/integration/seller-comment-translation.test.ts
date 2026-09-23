@@ -75,7 +75,7 @@ async function createOffer(
   const proposal = await createSellerChangeSet(fixture.userId, sellerChangeSetCreateBodySchema.parse({
     productName: 'Баранина',
     locationId: fixture.locationId,
-    price: { amount: '4200', unit: 'кг' },
+    price: { amount: '4200', unit: { code: 'kg' } },
     sellerComment: comment,
   }), { database: db });
   const confirmed = await confirmSellerChangeSet(fixture.userId, proposal.id, {
@@ -95,7 +95,7 @@ async function updateOffer(
 ) {
   const proposal = await createOfferManagementChangeSet(fixture.userId, offerId, sellerOfferChangeBodySchema.parse({
     action: 'update_offer',
-    price: { amount: values.amount, unit: 'кг' },
+    price: { amount: values.amount, unit: { code: 'kg' } },
     sellerComment: values.comment,
   }), { database: db });
   await confirmSellerChangeSet(fixture.userId, proposal.id, { database: db, clock: () => at, scheduleCommentTranslations: schedule });

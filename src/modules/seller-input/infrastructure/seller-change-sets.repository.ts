@@ -5,6 +5,8 @@ import type { LocationType } from '../../locations/contracts/location.contract';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import type { OfferStatus } from '../../offers/db/offers.table';
+import { formatPriceUnit, priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../../offers/price-unit/price-unit';
+import type { Locale } from '../../../i18n/config';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SellerChangeSetView } from '../contracts/seller-change-set.contract';
 import { sellerChangeItems, type SellerOfferManagementAction } from '../db/seller-change-items.table';
@@ -42,7 +44,7 @@ export async function createChangeItem(database: SellerInputDb, values: {
   locationId: string;
   priceAmount: string | null;
   priceCurrency: 'KZT' | null;
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
   sellerComment: string | null;
 }) {
   const rows = await database.insert(sellerChangeItems).values({
@@ -52,7 +54,7 @@ export async function createChangeItem(database: SellerInputDb, values: {
     locationId: values.locationId,
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
-    priceUnit: values.priceUnit,
+    ...priceUnitToColumns(values.priceUnit),
     sellerComment: values.sellerComment,
     targetOfferId: null,
     expectedOfferRevision: null,
@@ -69,7 +71,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
   locationId: string;
   priceAmount: string | null;
   priceCurrency: 'KZT' | null;
-  priceUnit: string | null;
+  priceUnit: PriceUnit | null;
   sellerComment: string | null;
   targetOfferId: string;
   expectedOfferRevision: number;
@@ -81,7 +83,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
     locationId: values.locationId,
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
-    priceUnit: values.priceUnit,
+    ...priceUnitToColumns(values.priceUnit),
     sellerComment: values.sellerComment,
     targetOfferId: values.targetOfferId,
     expectedOfferRevision: values.expectedOfferRevision,
@@ -91,7 +93,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
   return item;
 }
 
-export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, changeSetId: string, sellerId: string): Promise<SellerChangeSetView | null> {
+export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, changeSetId: string, sellerId: string, locale: Locale = 'ru'): Promise<SellerChangeSetView | null> {
   const headers = await database.select({
     id: sellerChangeSets.id,
     status: sellerChangeSets.status,
@@ -117,7 +119,8 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     locationType: locations.type,
     priceAmount: sellerChangeItems.priceAmount,
     priceCurrency: sellerChangeItems.priceCurrency,
-    priceUnit: sellerChangeItems.priceUnit,
+    priceUnitCode: sellerChangeItems.priceUnitCode,
+    priceUnitValue: sellerChangeItems.priceUnitValue,
     sellerComment: sellerChangeItems.sellerComment,
     resultOfferId: offers.id,
     resultOfferStatus: offers.status,
@@ -135,7 +138,9 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     createdAt: header.createdAt.toISOString(),
     confirmedAt: header.confirmedAt?.toISOString() ?? null,
     seller: { id: header.sellerId, displayName: header.sellerDisplayName },
-    items: rows.map((row) => ({
+    items: rows.map((row) => {
+      const unit = priceUnitFromColumns(row.priceUnitCode, row.priceUnitValue);
+      return {
       id: row.id,
       action: row.action,
       product: { id: row.productId, name: row.productName },
@@ -143,7 +148,8 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,
         currency: row.priceCurrency as 'KZT',
-        unit: row.priceUnit,
+        unit: formatPriceUnit(unit, locale),
+        unitChoice: unit,
       },
       sellerComment: row.sellerComment,
       resultOffer: row.resultOfferId && row.resultOfferStatus && row.resultOfferLastConfirmedAt ? {
@@ -151,7 +157,8 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
         status: row.resultOfferStatus as OfferStatus,
         lastConfirmedAt: row.resultOfferLastConfirmedAt.toISOString(),
       } : null,
-    })),
+      };
+    }),
   };
 }
 
@@ -169,14 +176,15 @@ export async function lockChangeSetByIdAndSeller(database: SellerInputDb, change
 }
 
 export async function lockChangeItems(database: SellerInputDb, changeSetId: string) {
-  return database.select({
+  const rows = await database.select({
     id: sellerChangeItems.id,
     action: sellerChangeItems.action,
     productId: sellerChangeItems.productId,
     locationId: sellerChangeItems.locationId,
     priceAmount: sellerChangeItems.priceAmount,
     priceCurrency: sellerChangeItems.priceCurrency,
-    priceUnit: sellerChangeItems.priceUnit,
+    priceUnitCode: sellerChangeItems.priceUnitCode,
+    priceUnitValue: sellerChangeItems.priceUnitValue,
     sellerComment: sellerChangeItems.sellerComment,
     targetOfferId: sellerChangeItems.targetOfferId,
     expectedOfferRevision: sellerChangeItems.expectedOfferRevision,
@@ -185,6 +193,7 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id))
     .for('update');
+  return rows.map(({ priceUnitCode, priceUnitValue, ...row }) => ({ ...row, priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue) }));
 }
 
 export async function linkResultOffer(database: SellerInputDb, itemId: string, offerId: string) {

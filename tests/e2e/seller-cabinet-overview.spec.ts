@@ -53,7 +53,7 @@ async function prepareCabinet(request: APIRequestContext, phones: { login: strin
   const shop = byName('лавка');
   const market = byName('базар');
   for (const [productName, amount, locationId] of [['Баранина', '3200', market.id], ['Говядина', '2700', shop.id], ['Баранина', '3100', shop.id]] as const) {
-    const created = await (await request.post('/api/seller/change-sets', { data: { productName, locationId, price: { amount, unit: 'кг' }, sellerComment: null } })).json();
+    const created = await (await request.post('/api/seller/change-sets', { data: { productName, locationId, price: { amount, unit: { code: 'kg' } }, sellerComment: null } })).json();
     expect((await request.post(`/api/seller/change-sets/${created.changeSet.id}/confirm`)).ok()).toBe(true);
   }
   const { offers } = await (await request.get('/api/seller/offers')).json();
@@ -185,7 +185,7 @@ test('Confirm conflict from a second device applies nothing and offers a safe re
       await login(other.request, phones.login);
       const { offers } = await (await other.request.get('/api/seller/offers')).json();
       const offer = offers.find((item: { product: { name: string }; location: { name: string } }) => item.product.name === 'Баранина' && item.location.name === `${sellerName} лавка`);
-      const change = await (await other.request.post(`/api/seller/offers/${offer.id}/change-sets`, { data: { action: 'update_offer', price: { amount: '3300', unit: 'кг' }, sellerComment: '' } })).json();
+      const change = await (await other.request.post(`/api/seller/offers/${offer.id}/change-sets`, { data: { action: 'update_offer', price: { amount: '3300', unit: { code: 'kg' } }, sellerComment: '' } })).json();
       expect((await other.request.post(`/api/seller/change-sets/${change.changeSet.id}/confirm`)).ok()).toBe(true);
     } finally {
       await other.close();

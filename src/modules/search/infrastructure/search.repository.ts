@@ -5,6 +5,7 @@ import { sellers } from '../../sellers/db/sellers.table';
 import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
+import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
 import {
@@ -42,7 +43,8 @@ export async function findOffersByProductId(
     location: { id: locations.id, name: locations.name, addressText: locations.addressText },
     priceAmount: offers.priceAmount,
     priceCurrency: offers.priceCurrency,
-    priceUnit: offers.priceUnit,
+    priceUnitCode: offers.priceUnitCode,
+    priceUnitValue: offers.priceUnitValue,
     sellerComment: offers.sellerComment,
     ...currentCommentTranslationSelection,
     lastConfirmedAt: offers.lastConfirmedAt,
@@ -62,7 +64,8 @@ export async function findOffersByProductId(
   return rows.map(({
     priceAmount,
     priceCurrency,
-    priceUnit,
+    priceUnitCode,
+    priceUnitValue,
     sellerContactPhoneE164,
     sellerWhatsappPhoneE164,
     sellerTelegramUsername,
@@ -98,7 +101,7 @@ export async function findOffersByProductId(
           instagramUsername: sellerInstagramUsername,
         }),
       },
-      price: { amount: priceAmount, currency: 'KZT', unit: priceUnit },
+      price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
     };
     const sellerCommentTranslation = projectBuyerCommentTranslation({
       enabled: commentTranslationEnabled,

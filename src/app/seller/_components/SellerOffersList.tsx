@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
+import type { PriceUnit } from '@/modules/offers/price-unit/price-unit';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import styles from '../cabinet.module.css';
 import legacy from '../page.module.css';
@@ -11,10 +12,12 @@ import { useI18n } from '../../../i18n/I18nProvider';
 import { CabinetIcon } from './SellerCabinetFrame';
 import { CabinetLoadError, CabinetLoginRequired, CabinetNotice, CabinetSkeleton, useConfirmedNotice } from './CabinetStates';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
+import { PriceUnitField, priceUnitDraftFrom, priceUnitFromDraft, type PriceUnitDraft } from './PriceUnitField';
 import { formatConfirmed, formatOfferPrice, useCabinetData } from './cabinet-data';
 
 type Filter = 'all' | 'active' | 'inactive';
 type ChangeResponse = { changeSet?: SellerChangeSetView };
+type EditValues = { amount: string; unit: PriceUnitDraft; comment: string };
 
 function parseFilter(value: string | null): Filter {
   return value === 'active' || value === 'inactive' ? value : 'all';
@@ -64,18 +67,21 @@ function ActionMenu({ label, children }: { label: string; children: (close: () =
   );
 }
 
-function EditForm({ offer, submitting, translationEnabled, onSubmit, onCancel }: {
+function EditForm({ offer, initial, submitting, translationEnabled, onSubmit, onCancel }: {
   offer: SellerOfferView;
+  initial?: EditValues;
   submitting: boolean;
   translationEnabled: boolean;
-  onSubmit: (values: { amount: string; unit: string; comment: string }) => void;
+  onSubmit: (values: { amount: string; unit: PriceUnit | null; comment: string }) => void;
   onCancel: () => void;
 }) {
   const { t } = useI18n();
-  const [amount, setAmount] = useState(offer.price?.amount ?? '');
-  const [unit, setUnit] = useState(offer.price?.unit ?? '');
-  const [comment, setComment] = useState(offer.sellerComment ?? '');
+  const [amount, setAmount] = useState(initial?.amount ?? offer.price?.amount ?? '');
+  const [unit, setUnit] = useState<PriceUnitDraft>(initial?.unit ?? priceUnitDraftFrom(offer.price?.unitChoice));
+  const [comment, setComment] = useState(initial?.comment ?? offer.sellerComment ?? '');
   const [error, setError] = useState('');
+  const [unitInvalid, setUnitInvalid] = useState(false);
+  const unitId = `offer-unit-${offer.id}`;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,15 +90,20 @@ function EditForm({ offer, submitting, translationEnabled, onSubmit, onCancel }:
       return;
     }
     setError('');
-    onSubmit({ amount: amount.trim(), unit, comment });
+    const parsedUnit = priceUnitFromDraft(unit);
+    setUnitInvalid(parsedUnit === null);
+    if (parsedUnit === null) {
+      document.getElementById(`${unitId}-custom`)?.focus();
+      return;
+    }
+    onSubmit({ amount: amount.trim(), unit: parsedUnit.unit, comment });
   }
 
   return (
     <form className={legacy.inlineForm} onSubmit={submit} noValidate>
       <label htmlFor={`offer-price-${offer.id}`}>{t('offerCreate.price')}</label>
       <input id={`offer-price-${offer.id}`} value={amount} onChange={(event) => setAmount(event.target.value)} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
-      <label htmlFor={`offer-unit-${offer.id}`}>{t('offerCreate.unit')}</label>
-      <input id={`offer-unit-${offer.id}`} value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={32} disabled={submitting || amount.trim() === ''} placeholder={t('offerCreate.unitExample')} />
+      <PriceUnitField id={unitId} draft={unit} onChange={setUnit} disabled={submitting} showError={unitInvalid} />
       <label htmlFor={`offer-comment-${offer.id}`}>{t('offerCreate.comment')}</label>
       <textarea id={`offer-comment-${offer.id}`} value={comment} onChange={(event) => setComment(event.target.value)} maxLength={500} rows={3} disabled={submitting} placeholder={t('batch.noComment')} />
       <CommentTranslationAssist enabled={translationEnabled} comment={comment} />
@@ -114,9 +125,38 @@ export function SellerOffersList({ commentTranslationEnabled = false }: { commen
   const { data, retry } = useCabinetData(locale);
   const { offerId: noticeOfferId } = useConfirmedNotice();
   const [highlightId] = useState(noticeOfferId);
+  const returnEditId = params.get('edit');
+  const returnedFrom = params.get('from');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [returnedValues, setReturnedValues] = useState<{ offerId: string; values: EditValues } | null>(null);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
+
+  // «Вернуться к правке» from the review: reopen that card's form with the proposed values, including the unit.
+  useEffect(() => {
+    if (!returnEditId || !returnedFrom) return;
+    let active = true;
+    void (async () => {
+      try {
+        const response = await fetch(`/api/seller/change-sets/${encodeURIComponent(returnedFrom)}`, { cache: 'no-store' });
+        const result = response.ok ? await response.json() as ChangeResponse : {};
+        const item = result.changeSet?.status === 'proposed' && result.changeSet.items.length === 1 ? result.changeSet.items[0] : undefined;
+        if (active && item?.action === 'update_offer' && item.price) {
+          setReturnedValues({
+            offerId: returnEditId,
+            values: { amount: item.price.amount, unit: priceUnitDraftFrom(item.price.unitChoice), comment: item.sellerComment ?? '' },
+          });
+        }
+      } catch {
+        // Fall back to the card's current values.
+      }
+      if (active) {
+        setEditingId(returnEditId);
+        router.replace(filter === 'all' ? pathname : `${pathname}?status=${filter}`, { scroll: false });
+      }
+    })();
+    return () => { active = false; };
+  }, [returnEditId, returnedFrom, filter, pathname, router]);
 
   const filterHref = (value: Filter) => (value === 'all' ? pathname : `${pathname}?status=${value}`);
   const returnPath = filter === 'all' ? '/seller/offers' : `/seller/offers?status=${filter}`;
@@ -240,6 +280,7 @@ export function SellerOffersList({ commentTranslationEnabled = false }: { commen
                 {editing && (
                   <EditForm
                     offer={offer}
+                    initial={returnedValues?.offerId === offer.id ? returnedValues.values : undefined}
                     submitting={submitting}
                     translationEnabled={commentTranslationEnabled}
                     onCancel={() => setEditingId(null)}

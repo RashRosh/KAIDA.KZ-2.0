@@ -48,7 +48,7 @@ describe.sequential('Seller cabinet owned-offers read', () => {
     }, { database: db });
     const locationId = seller.locations[0]!.id;
     const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
-      productName: 'Баранина', locationId, price: { amount: '3200', unit: 'кг' }, sellerComment: null,
+      productName: 'Баранина', locationId, price: { amount: '3200', unit: { code: 'kg' } }, sellerComment: null,
     }), { database: db });
     const offerId = (await confirmSellerChangeSet(userId, proposal.id, { database: db, clock: () => T0 })).items[0]!.resultOffer!.id;
 

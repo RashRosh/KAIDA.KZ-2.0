@@ -158,7 +158,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
 
     await sellerPage.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');
     await sellerPage.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4777.00');
-    await sellerPage.getByRole('textbox', { name: 'Единица', exact: true }).fill('кг');
+    await sellerPage.getByLabel('Единица', { exact: true }).selectOption('kg');
     await sellerPage.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(sellerComment);
     await sellerPage.getByRole('button', { name: 'Создать изменение' }).click();
     await expect(sellerPage).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);

@@ -103,7 +103,9 @@ test.describe('translator on', () => {
 
       // Nothing in the form asks for or assumes the comment language.
       const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Создать изменение' }) });
-      await expect(form.getByRole('combobox')).toHaveCount(0);
+      // offer-price-unit: the unit choice is the form's only dropdown; there is still no language picker.
+      await expect(form.getByRole('combobox')).toHaveCount(1);
+      await expect(form.getByRole('combobox', { name: 'Единица', exact: true })).toHaveCount(1);
       await expect(form.getByRole('radio')).toHaveCount(0);
       await expect(page.getByText('Покупатели увидят комментарий на своём языке — это автоперевод.')).toBeVisible();
       await page.getByRole('button', { name: 'Проверить перевод' }).click();

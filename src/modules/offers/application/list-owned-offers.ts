@@ -9,6 +9,7 @@ import {
 } from '../contracts/seller-offer.contract';
 import { listOffersBySeller } from '../infrastructure/offers.repository';
 import { calculateOfferCutoff, systemClock, type Clock } from '../lifecycle/offer-lifecycle';
+import { formatPriceUnit } from '../price-unit/price-unit';
 
 export async function listOwnedOffers(
   ownerUserId: string,
@@ -48,7 +49,8 @@ export async function listOwnedOffers(
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,
         currency: 'KZT' as const,
-        unit: row.priceUnit,
+        unit: formatPriceUnit(row.priceUnit, locale),
+        unitChoice: row.priceUnit,
       },
       sellerComment: row.sellerComment,
       status: row.status,

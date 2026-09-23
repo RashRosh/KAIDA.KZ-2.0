@@ -89,7 +89,7 @@ describe.sequential('S7 real Seller-created Offer through UX1D buyer-eligible Se
       const proposal = await createSellerChangeSet(userId, sellerChangeSetCreateBodySchema.parse({
         productName: 'мясо барана',
         locationId,
-        price: { amount: '4777.00', unit: 'кг' },
+        price: { amount: '4777.00', unit: { code: 'kg' } },
         sellerComment,
       }), { database: db });
 

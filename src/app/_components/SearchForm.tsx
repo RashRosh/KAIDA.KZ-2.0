@@ -94,6 +94,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
         if (!active || !localized) return;
         const names = new Map(localized.offers.map((offer) => [offer.product.id, offer.product]));
         const comments = new Map(localized.offers.map((offer) => [offer.id, offer.sellerCommentTranslation]));
+        const prices = new Map(localized.offers.map((offer) => [offer.id, offer.price]));
         setState({
           kind: 'success',
           result: {
@@ -101,6 +102,8 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
             offers: current.offers.map((offer) => ({
               ...offer,
               product: names.get(offer.product.id) ?? offer.product,
+              // Canonical unit labels follow the interface locale; custom units come back unchanged.
+              price: prices.get(offer.id) ?? offer.price,
               // The comment variant is per interface locale; an Offer missing from the refetch keeps no stale translation.
               sellerCommentTranslation: comments.get(offer.id),
             })),

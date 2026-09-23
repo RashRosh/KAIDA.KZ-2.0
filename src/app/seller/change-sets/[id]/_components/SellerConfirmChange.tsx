@@ -108,7 +108,13 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const isCreate = !isBatch && first.action === 'create_offer';
   const publishes = !isBatch && (first.action === 'create_offer' || first.action === 'update_offer' || first.action === 'activate_offer');
   const back = safeBack(params.get('back'), isBatch ? '/seller/offers' : isCreate ? '/seller' : '/seller/offers');
-  const editHref = isCreate ? '/seller/offers/new' : isBatch ? '/seller/batch' : back;
+  const editHref = isCreate
+    ? `/seller/offers/new?from=${changeSetId}`
+    : isBatch
+      ? '/seller/batch'
+      : first.action === 'update_offer' && targetOfferId
+        ? `${back}${back.includes('?') ? '&' : '?'}edit=${targetOfferId}&from=${changeSetId}`
+        : back;
   const current = targetOfferId ? owned?.find((offer) => offer.id === targetOfferId) : undefined;
 
   async function confirm() {
@@ -144,7 +150,7 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
       return;
     }
     const body = first.action === 'update_offer'
-      ? { action: 'update_offer', price: { amount: first.price?.amount ?? '', unit: first.price?.unit ?? '' }, sellerComment: first.sellerComment ?? '' }
+      ? { action: 'update_offer', price: { amount: first.price?.amount ?? '', unit: first.price?.unitChoice ?? null }, sellerComment: first.sellerComment ?? '' }
       : { action: first.action };
     setPhase('confirming');
     try {

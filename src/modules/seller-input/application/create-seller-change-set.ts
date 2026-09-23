@@ -1,6 +1,7 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
+import { formatPriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   LocationNotFoundError,
@@ -56,7 +57,7 @@ export async function createSellerChangeSet(
         action: 'create_offer',
         product,
         location: { id: location.id, name: location.name, addressText: location.addressText, type: location.type },
-        price: { amount: priceAmount, currency: 'KZT', unit: priceUnit },
+        price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnit), unitChoice: priceUnit },
         sellerComment,
         resultOffer: null,
       }],
