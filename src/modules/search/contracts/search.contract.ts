@@ -5,7 +5,11 @@ export const searchQuerySchema = z.string().trim().min(1, 'Введите наз
 
 export const searchOfferSchema = z.object({
   id: z.uuid(),
-  product: z.object({ id: z.uuid(), name: z.string() }),
+  product: z.object({
+    id: z.uuid(),
+    name: z.string(),
+    nameLocale: z.enum(['ru', 'kk']).optional(),
+  }),
   seller: z.object({
     id: z.uuid(),
     displayName: z.string(),

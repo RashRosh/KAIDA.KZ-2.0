@@ -124,7 +124,7 @@ export function OfferCard({
     <article className={styles.offer} aria-labelledby={`offer-${offer.id}`}>
       <div className={styles.offerTop}>
         <div className={styles.offerTitleBlock}>
-          <h2 id={`offer-${offer.id}`}>{offer.product.name}</h2>
+          <h2 id={`offer-${offer.id}`} lang={offer.product.nameLocale}>{offer.product.name}</h2>
           <p className={styles.price}>
             {formatAmount(offer.price.amount)} ₸
             {offer.price.unit && <span className={styles.priceUnit}> / {offer.price.unit}</span>}

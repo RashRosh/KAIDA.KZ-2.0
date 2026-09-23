@@ -130,6 +130,7 @@ describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
         { column_name: 'id', is_nullable: 'NO' },
         { column_name: 'product_id', is_nullable: 'NO' },
         { column_name: 'name', is_nullable: 'NO' },
+        { column_name: 'locale', is_nullable: 'YES' },
       ]);
 
       const constraints = await pool.query(`SELECT conname,contype FROM pg_constraint

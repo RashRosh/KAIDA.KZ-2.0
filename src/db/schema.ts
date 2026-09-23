@@ -1,5 +1,6 @@
 export { products } from '../modules/catalog/db/products.table';
 export { productAliases } from '../modules/catalog/db/product-aliases.table';
+export { productLocalizedNames } from '../modules/catalog/db/product-localized-names.table';
 export { sellers } from '../modules/sellers/db/sellers.table';
 export { locations } from '../modules/locations/db/locations.table';
 export { offers } from '../modules/offers/db/offers.table';

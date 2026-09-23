@@ -31,10 +31,10 @@ A Buyer searches in Russian or Kazakh and finds the same Offers, and sees each P
 
 ### Kazakh catalog data
 
-- Kazakh names (and optional Kazakh aliases) for current Products may be drafted by an LLM, but a native Kazakh
-  speaker verifies each one before it is loaded as ordinary Catalog data with a verification record. Nothing is
-  machine-translated when a page renders or a request runs.
-- Every existing Product has a verified Kazakh name before merge. A Product added later without one is a catalog data
+- Kazakh names (and optional Kazakh aliases) for current Products may be drafted by an LLM. Product Owner accepted
+  the current seed catalog as provisional release copy on 2026-09-23 and deferred native-speaker review; returned
+  corrections are applied as a follow-up data update. Nothing is machine-translated when a page renders or a request runs.
+- Every existing Product has a provisionally accepted Kazakh name before merge. A Product added later without one is a catalog data
   gap: in `kk` it shows its Russian name marked `lang="ru"`, never an invented or empty name. The data load reports
   every Product still missing a Kazakh name.
 
@@ -70,7 +70,7 @@ Catalog persistence and migration, Product resolution, Search/Nearby read projec
 |---|---|
 | DB migration / data loss | Upgrade of an existing database keeps every Product id, name, alias and Offer link; Search answers the same for every existing term. |
 | Public API | Requests without `locale` return the same Product names as before. |
-| Data quality | Every existing Product has a native-verified Kazakh name; no empty or invented name; a later gap falls back to Russian marked `lang="ru"`. |
+| Data quality | Every existing Product has a provisionally accepted Kazakh name; native review is a follow-up; a later gap falls back to Russian marked `lang="ru"`. |
 
 ## 6. Acceptance criteria
 
@@ -79,7 +79,7 @@ Catalog persistence and migration, Product resolution, Search/Nearby read projec
 3. Russian and Kazakh name/alias of the same Product return the same set of eligible Offers.
 4. Two different Products sharing a term across languages return `ambiguous`, as in S6.
 5. With `locale=kk`, results show the Kazakh Product name; without `locale`, the Russian name.
-6. Every existing Product has a native-verified Kazakh name; a Product added later without one shows its Russian name marked `lang="ru"` in `kk`.
+6. Every existing Product has a provisionally accepted Kazakh name; a Product added later without one shows its Russian name marked `lang="ru"` in `kk`.
 7. Duplicate Kazakh names of different Products are rejected by the Catalog.
 8. Ranking, eligibility, price, contacts and geo privacy of results are unchanged.
 

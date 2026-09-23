@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 const noStoreHeaders = { 'Cache-Control': 'no-store' };
 
 export async function GET(request: Request): Promise<Response> {
-  void localeFromApiRequest(request);
+  const locale = localeFromApiRequest(request);
   const parsed = searchQuerySchema.safeParse(new URL(request.url).searchParams.get('q'));
   if (!parsed.success) {
     return Response.json(
@@ -17,7 +17,7 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
   try {
-    return Response.json(await searchOffers(parsed.data), { headers: noStoreHeaders });
+    return Response.json(await searchOffers(parsed.data, undefined, { locale }), { headers: noStoreHeaders });
   } catch {
     console.error('Search request failed');
     return Response.json(
@@ -28,7 +28,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  void localeFromApiRequest(request);
+  const locale = localeFromApiRequest(request);
   let body: unknown;
   try {
     body = await request.json();
@@ -49,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     return Response.json(
-      await searchOffers(parsed.data.q, undefined, { buyerLocation: parsed.data.buyerLocation }),
+      await searchOffers(parsed.data.q, undefined, { buyerLocation: parsed.data.buyerLocation, locale }),
       { headers: noStoreHeaders },
     );
   } catch {
