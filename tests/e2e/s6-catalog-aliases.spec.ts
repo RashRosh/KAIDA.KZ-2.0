@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { seedIds } from '../../src/db/seed';
 import { testDatabaseUrl } from '../integration/database';
+import { proposeNewOffer } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000971' : '+77000000972';
@@ -90,24 +91,18 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     await page.getByRole('button', { name: 'Сохранить контакты' }).click();
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
-    await page.goto('/seller/offers/new');
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
-
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('1');
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    await proposeNewOffer(page, { product: 'мясо барана', price: '1' });
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
     await expect(page.getByText('Баранина', { exact: true })).toBeVisible();
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
-    const changeSetId = page.url().split('/').pop();
+    const changeSetId = new URL(page.url()).pathname.split('/').pop();
     const itemBefore = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemBefore).toEqual({ product_id: seedIds.lambProduct, result_offer_id: null });
 
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
     const itemAfter = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemAfter.product_id).toBe(seedIds.lambProduct);
     expect(itemAfter.result_offer_id).not.toBeNull();

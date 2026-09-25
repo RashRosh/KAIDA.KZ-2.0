@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { proposeNewOffer } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000001991' : '+77000001992';
@@ -84,15 +85,9 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
 
-    await page.goto('/seller/offers/new');
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('5432.10');
-    await page.getByLabel('Единица', { exact: true }).selectOption('kg');
-    await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(`S10 ${project} contacts offer`);
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    await proposeNewOffer(page, { product: 'Баранина', price: '5432.10', unit: 'kg', comment: `S10 ${project} contacts offer` });
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
