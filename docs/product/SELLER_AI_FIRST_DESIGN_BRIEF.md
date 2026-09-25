@@ -42,8 +42,9 @@
 - полноценного ручного сценария при недоступном ИИ.
 
 Для **этой concept-design итерации** новый AI-first flow заменяет прежнюю seller IA и не является косметической
-правкой старого кабинета. Для **реализации** принятая цепочка Pass 3 остаётся текущей authority до явного обновления
-[`PROJECT_RULES.md`](../PROJECT_RULES.md), [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) и новых Slice Contracts.
+правкой старого кабинета. С 2026-09-25 эта цепочка — единственная UX-цель для продавца и покупателя
+([`PROJECT_RULES.md`](../PROJECT_RULES.md) §18.1); Pass 3 — только история. Реализация идёт по новым Slice Contracts
+в порядке [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md).
 
 ## 1. Задача и северная звезда
 

@@ -283,32 +283,21 @@ contract самостоятельно. Обязательные UI-правил�
 
 ### 18.1 UX artifacts — authority lifecycle (Product Owner decisions, 2026-09-22–25)
 
-Текущий продуктовый UI признан неудовлетворительным. Ранние наборы вайрфреймов (42 кадра `1a`–`5e`, media pass
-поверх Pass 3) — только история в Git, не implementation target.
+Текущий продуктовый UI признан неудовлетворительным. Все прежние макеты — 42 кадра `1a`–`5e`, Pass 3 (продавец и
+покупатель), media pass — только история в Git, не implementation target (решение Product Owner, 2026-09-25).
 
-Текущая рабочая UX-цель — две цепочки.
+Единственная рабочая UX-цель для продавца и покупателя — AI-first цепочка:
 
-**Продавец (AI-first, с 2026-09-25):**
-
-1. `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` — ТЗ дизайнеру;
+1. `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` — ТЗ дизайнеру (seller, buyer и moderator surfaces);
 2. `docs/product/SELLER_AI_FIRST_DESIGN_REVISION_1.md` — решения PO и правки поверх первого макета; при расхождении
    с brief побеждает ревизия;
 3. макет https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 — только после Product Owner visual acceptance ревизии 1 и
    фиксации его устойчивого locator/copy в репозитории.
 
-Seller-части Pass 3 и `UX_NAVIGATION_STATE_SPEC.md` для продавца заменены этой цепочкой.
+Поверхность, которой в макете ещё нет (например, экран поиска, «Рядом», избранное), остаётся в текущем реализованном
+виде, пока макет её не нарисует; к Pass 3 её не подтягивают.
 
-**Покупатель (Pass 3, принят 2026-09-23):**
-
-1. `docs/product/UX_NAVIGATION_STATE_SPEC.md` — surfaces, navigation, states, actions и data boundaries;
-2. `docs/product/WIREFRAME_TASK_PASS3.md` — ТЗ на прототип;
-3. `docs/product/WIREFRAME_PASS3_REVIEW.md` — принятые части и обязательные исправления;
-4. прототип https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN.
-
-Где целевой макет продавца затрагивает покупателя (карточка в выдаче, детальная карточка, иконки связи), побеждает
-seller-цепочка после её visual acceptance.
-
-Каждая цепочка является главным источником истины для пользовательского слоя в части:
+Эта цепочка является главным источником истины для пользовательского слоя в части:
 
 - information architecture, маршруты и переходы между экранами;
 - визуальная композиция, иерархия, layout и responsive-направление;
