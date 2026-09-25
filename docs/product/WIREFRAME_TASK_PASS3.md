@@ -6,6 +6,12 @@
 > **Основание:** `docs/product/UX_NAVIGATION_STATE_SPEC.md`, `docs/PROJECT_RULES.md` §18.1–§18.3, `docs/DESIGN_SYSTEM.md`.
 > **После сдачи:** результат прохода разобран в `WIREFRAME_PASS3_REVIEW.md`; ответы и обязательные правки из review
 > supersede открытые вопросы первоначального ТЗ.
+>
+> **Media note, 2026-09-24:** media-ограничения этого исторического задания (§1, строки `3e`/`5e` в §4, запрет
+> decorative photos в §8 и связанный вопрос detail route в §12) относились к сдаче Pass 3. Для следующей точечной
+> итерации они superseded документом
+> `docs/product/WIREFRAME_MEDIA_REVISION_TASK.md`: demo/fixture photos разрешены до MVP для честного проектирования,
+> а real seller upload по-прежнему принадлежит M1.
 
 ## 0. Как читать этот документ
 

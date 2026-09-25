@@ -8,6 +8,11 @@
 > **Макет Pass 3:** https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN
 > **Evidence:** устойчивый внешний locator зафиксирован Product Owner 2026-09-23. Ссылка может требовать доступ к
 > Claude; при финальной сдаче исправлений предпочтительно дополнительно сохранить export/copy в репозитории.
+>
+> **Следующая точечная итерация, 2026-09-24:** принятый Pass 3 остаётся базой. Media-aware изменения выполняются
+> поверх него по `docs/product/WIREFRAME_MEDIA_REVISION_TASK.md`; это не отменяет visual acceptance ниже и не
+> разрешает production media до M1. До отдельной visual acceptance media revision locator выше остаётся текущим
+> canonical UX target; итоговый locator/export и заменённые frames фиксируются в этом review.
 
 ## 0. Что принято и не переделывается
 
