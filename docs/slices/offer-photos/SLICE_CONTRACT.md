@@ -1,12 +1,13 @@
-# Offer photos: upload, storage, buyer display — Slice Contract
+# Offer photos: upload, storage, buyer offer page — Slice Contract
 
-**Status:** DRAFT — ready for Product Owner approval; decisions recorded in §8.
+**Status:** APPROVED — Product Owner, 2026-09-25, with the changes recorded in §8. Open before implementation of the
+reminder copy only: wording O1 in §8.
 
 **Stage 1, item 1** of `docs/product/EXECUTION_PLAN.md` (seller without AI). This is M1, moved ahead of the frozen
 queue.
 
 **UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1):
-`AI-S09 · Editor · Media` and `· Manual · Validation` (seller), `AI-B01` result card and `AI-B02` gallery (buyer),
+`AI-S09 · Editor · Media` (seller), `AI-B01` result card and `AI-B02` offer detail (buyer),
 `States1`/`States2` media tile states. Mandatory UI rules: `PROJECT_RULES.md` §18.4.
 
 **Base product checkpoint:** `v0.0.32-seller-offer-editor`.
@@ -14,7 +15,7 @@ queue.
 ## 1. User task
 
 A Seller attaches up to five photos to a card, chooses the cover and order, and can change them later; a Buyer sees
-the cover in results and can look through all photos of the card.
+the cover in results, opens the card and looks through all its photos and details.
 
 ## 2. Scope and exact behavior
 
@@ -24,9 +25,8 @@ the cover in results and can look through all photos of the card.
   through a confirmed SellerChangeSet and increments the Offer revision.
 - **Photos are optional** (`FEATURE_MAP.md` «Seller AI-first model» п. 4, PO decision 2026-09-25, overriding the
   brief and the mockup's «Добавьте хотя бы одно фото товара»). A card without photos is published; before confirm the
-  Seller sees a neutral reminder: `Без фото карточка проигрывает конкурентам — покупатели чаще выбирают карточки с
-  фото` with `Добавить фото` and `Опубликовать без фото`. Not an error, not red, no checkbox. The full
-  incomplete-card reminder (photo, comment, opening hours) belongs to stage 1 item 3; this slice owns the photo part.
+  Seller sees a neutral reminder (wording O1, §8) with `Добавить фото` and `Опубликовать без фото`. Not an error, not red, no checkbox. The full
+  incomplete-card reminder (photo, comment) belongs to stage 1 item 3; this slice owns the photo part.
 - The absence of photos never changes buyer ranking or visibility; buyers see the neutral fallback.
 - `deactivate_offer` / `activate_offer` do not touch photos and do not require them.
 - Buyer visibility rules are unchanged: a photo is not an eligibility condition (S1/S9/S10 unchanged).
@@ -57,8 +57,10 @@ the cover in results and can look through all photos of the card.
 
 - A `Фото` section at the top of the form, as `AI-S09 · Editor · Media`: tiles with the cover marked, `+ Фото`,
   counter `N из 5`; at 5 the add tile is disabled with `Лимит`.
-- Per photo: `Сделать обложкой`, `Переместить` with left/right buttons (no drag required), `Удалить`. Drag to reorder
-  is optional and never the only way.
+- Reorder by long press and drag with the finger (the photo lifts, others make room, release drops it); the first
+  place is the cover.
+- The same by buttons, for accessibility and for anyone who cannot drag: per photo `Сделать обложкой`, `Переместить`
+  with left/right buttons, `Удалить`.
 - No photo validation. While any upload is in progress the submit waits for it or says which photo is still loading.
 - The section shows a quiet hint `Карточки с фото выбирают чаще` while it is empty.
 - Edit mode shows current photos; changing them is part of the same edit and follows the same confirm flow.
@@ -67,11 +69,23 @@ the cover in results and can look through all photos of the card.
 
 ### Buyer surfaces
 
-- The shared buyer Offer card (search and «Рядом») shows the cover thumbnail or the
-  neutral fallback that does not imitate a product (`AI-B01 · Variants`).
-- Tapping the photo opens a full-screen viewer: swipe and previous/next buttons, `2 из 4`, close; overlay rules of
-  §18.4. With one photo there is no navigation.
-- An image that fails to load shows the fallback; the card's name, price, point, contacts and route stay usable.
+- The shared buyer Offer card (search and «Рядом») shows the cover thumbnail or the neutral fallback that does not
+  imitate a product (`AI-B01 · Variants`).
+- **Tapping the cover or the name opens the Offer page** (`AI-B02`, new route with its own address, so it can be
+  shared, reloaded and opened from history). Contacts and `Маршрут` on the result card keep working without opening
+  it.
+- **Offer page** (subset of `AI-B02 · Detail · Full` / `· Fallback & no contacts` / `· Media error`):
+  - gallery on top: swipe and previous/next buttons, counter `2 из 4`, actuality plaque; one photo — no
+    navigation; no photos — neutral fallback;
+  - product name, pack size if present, price with unit, comment;
+  - trading point: name, address or landmark, distance when the buyer's location is already known (no new
+    geolocation request), `Маршрут`;
+  - available contacts as icon buttons (S10 rules, no empty or grey icons);
+  - `Назад` returns to the same result list and scroll position.
+- The page shows only an Offer the buyer is allowed to see now (same eligibility as search). Otherwise a neutral
+  `Предложение больше недоступно` with a way back to search — not an error page.
+- An image that fails to load shows `Фото не загрузилось` with `Повторить`; name, price, point, contacts and
+  route stay usable.
 - Alt text: product name plus `фото N из M`.
 
 ## 3. Explicit out of scope
@@ -82,7 +96,8 @@ the cover in results and can look through all photos of the card.
 - Complaints about photos and the system fallback after a confirmed complaint.
 - Cleanup of unattached photos, backup of the photo directory, CDN — follow-ups recorded in §5.
 - Restyling the rest of the editor to AI-S09 (stage 1 item 3); only the photo section follows the mockup here.
-- A buyer offer detail page (brief gap 13); the viewer opens over the current card.
+- On the Offer page: reviews and rating, `Пожаловаться на карточку`, the `Ещё` menu, public video, opening hours
+  (stage 1 item 2 adds them).
 
 ## 4. Closed contracts used and revisions
 
@@ -92,14 +107,17 @@ the cover in results and can look through all photos of the card.
   rejected. Optimistic revision check unchanged.
 - **S12 batch seller input — unchanged:** batch cards are created without photos and can get them by editing.
 - **`seller-offer-editor` — extended** with the photo section; its other behavior is unchanged.
-- **UX1B / UX1D buyer offer cards — extended** with the cover and viewer; content order otherwise unchanged.
+- **UX1B / UX1D buyer offer cards — extended** with the cover; cover and name become a link to the new Offer page;
+  contact and route actions on the card unchanged.
+- **Buyer offer route (brief gap 13) — new:** a public read-only Offer page; it reuses search eligibility and never
+  exposes a hidden, inactive or foreign-draft Offer, raw coordinates or seller data beyond what the card shows.
 - **Privacy (`PROJECT_RULES.md` §18.4: no raw coordinates in public):** kept by stripping metadata on upload.
 - **S1 lifecycle, S9 ranking, S10 contact actions:** unchanged.
 
 ## 5. Expected areas and risk flags
 
 New media module (upload, processing, storage boundary, serving), DB migration for photos and their link to Offers
-and ChangeSet items, ChangeSet validation and confirm, editor photo section, buyer card cover and viewer.
+and ChangeSet items, ChangeSet validation and confirm, editor photo section, buyer card cover and the new buyer Offer page.
 
 | Risk | Proof requirement |
 |---|---|
@@ -108,6 +126,7 @@ and ChangeSet items, ChangeSet validation and confirm, editor photo section, buy
 | Atomicity | A failing confirm leaves neither new Offer fields nor a changed photo list. |
 | Limits | More than 5 photos per Offer is rejected by the API, not only by the form. |
 | Abuse / resources | Size, type, pixel and 50-unattached limits enforced on the server. |
+| Visibility | The Offer page of an inactive or no-longer-eligible Offer shows «Предложение больше недоступно» and leaks no data. |
 | Double submit | Repeated confirm creates one Offer with one photo list. |
 | Disk growth | Unattached photos accumulate until the cleanup follow-up; recorded, not solved here. |
 | Backup | The photo directory is not in a backup yet; recorded as a launch prerequisite. |
@@ -116,12 +135,13 @@ and ChangeSet items, ChangeSet validation and confirm, editor photo section, buy
 
 1. A card can be published without photos; before confirm the Seller sees the non-blocking reminder.
 2. The Seller adds up to 5 photos, sees per-file progress, retries one failed file without losing the others.
-3. Cover and order can be changed with buttons alone; the first photo is the cover everywhere.
+3. Cover and order change by long-press drag and, equally, by buttons alone; the first photo is the cover everywhere.
 4. Editing a published card can add, replace, reorder or remove photos, including removing all of them.
 5. Served photos carry no metadata; only resized versions are stored.
 6. Unattached photos are visible to their owner only; photos of an active Offer are public; a foreign photo id is
    rejected.
-7. Buyer cards show the cover or the neutral fallback; the viewer shows all photos with `N из M` and meets §18.4.
+7. Buyer cards show the cover or the neutral fallback; tapping it opens the Offer page with the gallery (`N из M`),
+   details, point, route and contacts; `Назад` restores the list; an unavailable Offer shows the neutral message.
 8. A broken image never hides name, price, point, contacts or route.
 9. All new strings exist in `ru` and `kk`, Kazakh native-verified, no clipping at 320 px.
 10. Regression of S1/S4/S5/S9/S10/S12/`seller-offer-editor` stays green; ranking is identical with and without photos.
@@ -131,17 +151,24 @@ and ChangeSet items, ChangeSet validation and confirm, editor photo section, buy
 - Integration: upload processing (formats, size, small image, metadata removed), ownership, ChangeSet with and
   without photos, 5-photo limit, atomic confirm, access rules for serving.
 - E2E (mobile + desktop, `ru` + `kk`): create with photos; publish without photos through the reminder; one failed upload and retry;
-  reorder and cover by buttons; edit replacing photos; removing all photos; buyer cover, viewer, fallback.
+  reorder by drag and by buttons; edit replacing photos; removing all photos; buyer cover → Offer page, gallery, fallback, back to
+  the same list, unavailable Offer, direct link reload.
 - Unit: only for non-trivial ordering logic.
 - One full regression run and branch CI on the final executable head.
 
 Manual scenario: on a phone, `Продавцу` → add a card, take a photo with the camera and add two from the gallery,
-make the second one the cover, confirm — the card shows that cover in the list and in buyer search. Open the card as
-a buyer, swipe through three photos. Edit the card, delete all photos — after the reminder it publishes with the fallback. Repeat once in `ҚАЗ`.
+make the second one the cover, confirm — the card shows that cover in the list and in buyer search. As a buyer, tap the
+cover — the card page opens; swipe through three photos, go back — the same list. Edit the card, delete all photos — after the reminder it publishes with the fallback. Repeat once in `ҚАЗ`.
 
 ## 8. Product Owner decisions (2026-09-25)
 
 1. Photos are optional; a card without photos is published after a non-blocking reminder; no ranking effect.
 2. The text batch input (S12) stays as it is.
-3. Defaults taken without a separate decision (change them if needed): limits 5 photos / 15 MB / 300 px / 50
-   unattached; originals are not kept.
+3. Reorder by long-press drag **and** by buttons.
+4. Tapping the cover in results opens the Offer page with the full gallery and details (not a bare photo viewer).
+5. Storage, metadata removal and owner-only visibility before publication — approved as written.
+6. Defaults taken without a separate decision: limits 5 photos / 15 MB / 300 px / 50 unattached; originals are not
+   kept.
+
+**O1 — open:** wording of the no-photo reminder («Без фото карточка проигрывает конкурентам» — PO asked to rethink).
+Implementation may start; the final string is set before the UI part is merged.
