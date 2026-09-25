@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S04 · Видео · ошибки и права</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2456px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S04 · Seller · recorder edge states</div>
+    <h2 class="ab-title">Съёмка видео — права и сбои</h2>
+    <p class="ab-desc">Каждый сбой объясняет, что случилось, что сохранено и куда идти дальше. Ни один экран не заканчивается общей ошибкой: всегда есть фото, голос или ручной путь. Upload retry — в AI-S07.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S04 · Video · Camera denied</b><br>Доступ к камере запрещён</div>
+      <div class="ph">
+        <header class="bar flat"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Снять видео</div></header>
+        <main class="body" style="justify-content: center; gap: 16px; padding: 16px 20px;">
+          <div class="lic" style="width: 64px; height: 64px; border-radius: 20px; align-self: center;"><span class="ic i-camera lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Нет доступа к камере</h1>
+          <p class="t c2" style="text-align: center;">Разрешите камеру в настройках телефона: Настройки → KAIDA → Камера. Или начните другим способом.</p>
+        </main>
+        <div class="foot bare">
+          <button class="btn btn-p lg w">Открыть настройки</button>
+          <a class="btn btn-o w" href="S06.dc.html"><span class="ic i-mic sm"></span>Надиктовать товары</a>
+          <a class="btn btn-g w" href="S09.dc.html">Заполнить вручную</a>
+        </div>
+      </div>
+      <div class="note">Фото тоже требует камеру, поэтому альтернативы — голос и ручной ввод; выбор файлов из галереи доступен в AI-S05.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S04 · Video · Microphone denied</b><span class="tag tag-rev">Rev 1</span><br>Камера есть, звука нет</div>
+      <div class="ph">
+        <header class="bar flat"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Снять видео</div></header>
+        <main class="body" style="justify-content: center; gap: 16px; padding: 16px 20px;">
+          <div class="lic" style="width: 72px; height: 72px; border-radius: 22px; align-self: center;"><span class="ic i-video lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Видео запишется без звука</h1>
+          <p class="t c2" style="text-align: center;">Назвать цены голосом не получится. Разрешите звук или снимите без него — цены добавите в карточке.</p>
+        </main>
+        <div class="foot bare">
+          <button class="btn btn-p lg w">Разрешить звук</button>
+          <button class="btn btn-o w"><span class="ic i-video sm"></span>Снять без звука</button>
+          <a class="btn btn-g w" href="S05.dc.html"><span class="ic i-image sm"></span>Добавить фотографии</a>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.4</span>Не «нет микрофона», а следствие для продавца. «Разрешить звук» — повторный системный запрос, если браузер его ещё показывает, иначе инструкция по настройкам. <span class="tag tag-prop">Proposed</span>«Снять без звука»: черновики собираются по кадру, цены продавец вписывает в редакторе; «Заполнить вручную» остаётся в AI-S02.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S04 · Video · Device unavailable</b><br>Камеру занимает другое приложение</div>
+      <div class="ph">
+        <div class="vf" style="align-items: center; justify-content: center;">
+          <div class="ovl" style="top: 0;"><button class="vfbtn" aria-label="Закрыть"><span class="ic i-close"></span></button></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 32px; text-align: center;">
+            <span class="ic i-camera lg" style="color: #a8a2ab;"></span>
+            <div class="h3">Камера сейчас недоступна</div>
+            <p class="c" style="color: #d7d2da;">Закройте приложения, которые могут её использовать (звонок, другая камера), и повторите.</p>
+            <button class="btn btn-p" style="margin-top: 8px;"><span class="ic i-refresh sm"></span>Повторить</button>
+            <a class="btn btn-g" href="S09.dc.html" style="color: #e29dff;">Заполнить вручную</a>
+          </div>
+        </div>
+      </div>
+      <div class="note">Нейтральный тон, без кода ошибки. Повтор не требует заново проходить проверку звука.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S04 · Video · Interrupted</b><br>Запись прервана звонком</div>
+      <div class="ph">
+        <header class="bar" style="background: #100d11; color: #fff; border-color: #302c33;"><button class="ib" aria-label="Назад" style="color: #fff;"><span class="ic i-left"></span></button><div class="bar-t">Запись остановлена</div></header>
+        <div class="vf">
+          <div class="scene"><i class="blob" style="width: 100px; height: 100px; background: #d8b9a0;"></i><i class="blob" style="width: 70px; height: 70px; background: #e9c07a;"></i></div>
+          <div class="ovl" style="bottom: 12px;"><div class="hintbox" style="flex: 1; display: flex; align-items: center; gap: 10px;"><span class="ic i-play"></span><span class="num">0:52</span></div></div>
+        </div>
+        <div class="foot">
+          <div class="banner warn" role="status" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-phone" style="color: var(--warning);"></span><div style="flex: 1;"><div class="ts">Запись прервал звонок</div><p class="c c2">Первые 0:52 сохранены. Можно отправить их или снять заново.</p></div></div>
+          <button class="btn btn-p lg w">Сформировать карточки из 0:52</button>
+          <button class="btn btn-o w">Снять заново</button>
+        </div>
+      </div>
+      <div class="note">Продолжение той же записи не обещаем — pause/resume открыт (п. 22). Недоснятые товары — вторым видео или «Записать ещё» в пакете.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S04 · Video · Too long</b><br>Автостоп на 2:00</div>
+      <div class="ph">
+        <header class="bar" style="background: #100d11; color: #fff; border-color: #302c33;"><button class="ib" aria-label="Назад" style="color: #fff;"><span class="ic i-left"></span></button><div class="bar-t">Видео готово</div></header>
+        <div class="vf">
+          <div class="scene"><i class="blob" style="width: 90px; height: 90px; background: #c9b7de;"></i><i class="blob" style="width: 80px; height: 80px; background: #e3aaa0;"></i><i class="blob" style="width: 60px; height: 60px; background: #b7cf9c;"></i></div>
+          <div class="ovl" style="bottom: 12px;"><div class="hintbox" style="flex: 1; display: flex; align-items: center; gap: 10px;"><span class="ic i-play"></span><span class="num">2:00</span></div></div>
+        </div>
+        <div class="foot">
+          <div class="banner info" role="status" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-clock" style="color: var(--info);"></span><div style="flex: 1;"><div class="ts">Запись остановлена на 2:00</div><p class="c c2">Это максимум одного видео. Остальные товары снимите следующим видео.</p></div></div>
+          <button class="btn btn-p lg w">Сформировать карточки</button>
+          <button class="btn btn-o w"><span class="ic i-plus sm"></span>Снять ещё одно видео</button>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · upload</span>Предел размера файла — в upload contract. Экран «слишком большой» использует тот же шаблон с действием «Снять короче».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S04 · Video · Safe back</b><br>Выход без отправки</div>
+      <div class="ph">
+        <header class="bar" style="background: #100d11; color: #fff; border-color: #302c33;"><button class="ib" aria-label="Назад" style="color: #fff;"><span class="ic i-left"></span></button><div class="bar-t">Видео готово</div></header>
+        <div class="vf"><div class="scene"><i class="blob" style="width: 100px; height: 100px; background: #d8b9a0;"></i></div></div>
+        <div class="scrim"></div>
+        <div class="sheet" role="alertdialog" aria-labelledby="sb">
+          <div class="grab"></div>
+          <h2 class="h3" id="sb">Выйти без отправки?</h2>
+          <p class="t c2">Видео 1:24 останется на телефоне. Вернуться к нему можно с «Моей витрины».</p>
+          <button class="btn btn-p lg w">Сохранить и выйти</button>
+          <button class="btn btn-o w">Остаться</button>
+          <button class="btn btn-g w" style="color: var(--danger);"><span class="ic i-trash sm"></span>Удалить видео</button>
+        </div>
+      </div>
+      <div class="note">Системный back не теряет материал. Удаление — отдельное явное действие, не default.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2456,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

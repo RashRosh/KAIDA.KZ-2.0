@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Component / state matrix · 1</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2200px; height: 1340px; gap: 28px;">
+  <div class="ab-head">
+    <div class="ab-id">STATES · 1</div>
+    <h2 class="ab-title">Кнопки, контакты, поля, статусы карточки</h2>
+    <p class="ab-desc">Имена вариантов — Component / State / Context. Ни один статус не передаётся только цветом: слово или иконка обязательны. Специальных предупреждений о вероятности ошибки ИИ нет ни в одном компоненте.</p>
+  </div>
+
+  <div class="mx" style="grid-template-columns: 220px repeat(7, minmax(0, 1fr));">
+    <div class="mh">Button</div><div class="mh">Default</div><div class="mh">Pressed</div><div class="mh">Focus-visible</div><div class="mh">Disabled + причина</div><div class="mh">Loading</div><div class="mh">Success</div><div class="mh">Offline / queued</div>
+    <div><span class="rn">Primary</span><span class="vn">Button / * / Primary</span></div>
+    <div><span class="btn btn-p">Отправить</span></div><div><span class="btn btn-p pressed">Отправить</span></div><div><span class="btn btn-p focus">Отправить</span></div><div><span class="btn dis">Готово</span><span class="c">Выберите точку</span></div><div><span class="btn btn-p"><span class="spin"></span>Отправляем…</span></div><div><span class="btn btn-p" style="background: var(--success);"><span class="ic i-check sm"></span>Отправлено</span></div><div><span class="btn btn-p" style="background: var(--line-control);"><span class="ic i-clock sm"></span>Отправится при сети</span></div>
+    <div><span class="rn">Outline</span><span class="vn">Button / * / Outline</span></div>
+    <div><span class="btn btn-o">Перезаписать</span></div><div><span class="btn btn-o" style="background: var(--primary-soft);">Перезаписать</span></div><div><span class="btn btn-o focus">Перезаписать</span></div><div><span class="btn dis">Перезаписать</span></div><div><span class="btn btn-o"><span class="spin"></span>Сохраняем…</span></div><div><span class="c">—</span></div><div><span class="c">—</span></div>
+    <div><span class="rn">Ghost / Danger</span><span class="vn">Button / * / Ghost · Danger</span></div>
+    <div style="flex-direction: row; gap: 8px;"><span class="btn btn-g">Позже</span><span class="btn btn-d">Удалить навсегда</span></div><div><span class="btn btn-d" style="background: #9f1f24;">Удалить навсегда</span></div><div><span class="btn btn-d focus">Удалить навсегда</span></div><div><span class="btn dis">Удалить</span></div><div><span class="btn btn-d"><span class="spin"></span>Удаляем…</span></div><div><span class="c">Toast «Карточка удалена»</span></div><div><span class="c">—</span></div>
+  </div>
+
+  <div class="mx" style="grid-template-columns: 220px repeat(6, minmax(0, 1fr));">
+    <div class="mh">Contact icon (buyer)</div><div class="mh">Verified · Default</div><div class="mh">Pressed</div><div class="mh">Focus-visible</div><div class="mh">Disabled</div><div class="mh">Unverified</div><div class="mh">Accessible name</div>
+    <div><span class="rn">Phone</span><span class="vn">Contact icon / Phone / *</span></div>
+    <div><span class="ct"><span class="ic i-phone"></span></span></div><div><span class="ct pressed"><span class="ic i-phone"></span></span></div><div><span class="ct focus"><span class="ic i-phone"></span></span></div><div><span class="ct dis"><span class="ic i-phone" style="color: var(--ink3);"></span></span></div><div><span class="c">Не рендерится</span></div><div><span class="c">«Позвонить продавцу»</span></div>
+    <div><span class="rn">WhatsApp</span><span class="vn">Contact icon / WhatsApp / *</span></div>
+    <div><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span></div><div><span class="ct pressed"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span></div><div><span class="ct focus"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span></div><div><span class="ct dis"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span></div><div><span class="c">Не рендерится</span></div><div><span class="c">«Написать в WhatsApp»</span></div>
+    <div><span class="rn">Telegram</span><span class="vn">Contact icon / Telegram / *</span></div>
+    <div><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div><div><span class="ct pressed"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div><div><span class="ct focus"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div><div><span class="ct dis"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div><div><span class="c">Не рендерится</span></div><div><span class="c">«Написать в Telegram»</span></div>
+    <div><span class="rn">Route</span><span class="vn">Contact icon / Route / *</span></div>
+    <div><span class="ct route"><span class="ic i-route sm"></span>Маршрут</span></div><div><span class="ct route" style="background: var(--primary-pressed);"><span class="ic i-route sm"></span>Маршрут</span></div><div><span class="ct route focus"><span class="ic i-route sm"></span>Маршрут</span></div><div><span class="c">Всегда доступен: локация обязательна</span></div><div><span class="c">—</span></div><div><span class="c">«Маршрут до [точка]»</span></div>
+  </div>
+
+  <div class="cols" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start;">
+    <div class="mx" style="grid-template-columns: 180px repeat(3, minmax(0, 1fr));">
+      <div class="mh">Text field</div><div class="mh">Default / filled</div><div class="mh">Focus</div><div class="mh">Error</div>
+      <div><span class="rn">Field</span><span class="vn">Field / * / Text</span></div>
+      <div><div class="inp ph0">Название товара</div><div class="inp">Баранина, лопатка</div></div><div><div class="inp foc">Баранина|</div></div><div><div class="inp er ph0">Название товара</div><span class="c dn" style="color: var(--danger);">Напишите, что это за товар</span></div>
+      <div><span class="rn">Price + unit</span><span class="vn">Field / * / Price</span></div>
+      <div><div class="inp num"><span style="flex: 1;">5 000</span><span class="c2">₸</span></div></div><div><div class="inp foc num"><span style="flex: 1;">4 8</span><span class="c2">₸</span></div></div><div><div class="inp er ph0"><span style="flex: 1;">0</span><span>₸</span></div><span class="c" style="color: var(--danger);">Укажите цену больше 0 ₸</span></div>
+      <div><span class="rn">Disabled</span><span class="vn">Field / Disabled / Shared</span></div>
+      <div style="grid-column: span 3;"><div class="inp dis" style="max-width: 360px;">Баранина, лопатка</div><span class="c">Название общее для всех точек</span></div>
+    </div>
+
+    <div class="mx" style="grid-template-columns: 180px minmax(0, 1fr);">
+      <div class="mh">Card status</div><div class="mh">Варианты (слово + иконка)</div>
+      <div><span class="rn">Lifecycle</span><span class="vn">Card status / Lifecycle / *</span></div>
+      <div style="flex-direction: row; flex-wrap: wrap; gap: 6px;"><span class="bd bd-n"><span class="ic i-pencil"></span>Черновик</span><span class="bd bd-info"><span class="ic i-clock"></span>На модерации</span><span class="bd bd-err"><span class="ic i-alert"></span>Нужно исправить</span><span class="bd bd-err"><span class="ic i-close"></span>Отклонено</span><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span><span class="bd bd-n"><span class="ic i-power"></span>Выключено</span><span class="bd bd-n"><span class="ic i-archive"></span>В архиве</span></div>
+      <div><span class="rn">Revision</span><span class="vn">Card status / Revision / *</span></div>
+      <div style="flex-direction: row; flex-wrap: wrap; gap: 6px;"><span class="bd bd-line"><span class="ic i-history"></span>Изменения на модерации</span><span class="bd bd-line"><span class="ic i-clock"></span>Изменения ждут проверки</span></div>
+      <div><span class="rn">Task</span><span class="vn">Card status / Task / *</span></div>
+      <div style="flex-direction: row; flex-wrap: wrap; gap: 6px;"><span class="bd bd-warn"><span class="ic i-clock"></span>Подтвердите актуальность</span><span class="bd bd-warn"><span class="ic i-eyeoff"></span>Нужно подтвердить</span><span class="c">«Скрыто с витрины до подтверждения»</span></div>
+      <div><span class="rn">Source job</span><span class="vn">Upload job / * / Video · Photos · Audio</span></div>
+      <div style="flex-direction: row; flex-wrap: wrap; gap: 6px;"><span class="bd bd-p"><span class="ic i-upload"></span>Загружается</span><span class="bd bd-p"><span class="ic i-video"></span>Видео обрабатывается</span><span class="bd bd-p"><span class="ic i-image"></span>Фотографии обрабатываются</span><span class="bd bd-p"><span class="ic i-mic"></span>Аудио обрабатывается</span><span class="bd bd-n"><span class="ic i-clock"></span>Ожидает обработки</span><span class="bd bd-err"><span class="ic i-alert"></span>Ошибка обработки</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2200,"height":1340}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

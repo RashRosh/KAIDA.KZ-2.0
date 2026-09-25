@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F2 · Фото → голос → карточки</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F2</div>
+    <h2 class="ab-title">Фото → optional voice → карточки → модерация</h2>
+    <p class="ab-desc">Пакет фото отправляется с голосом или без. Голос перезаписывается без повторной загрузки фото. Фото, не связанные ИИ, возвращаются нейтральным блоком.</p>
+  </div>
+  <div class="fl">
+    <div class="fn"><div class="fid">AI-S02</div><div class="fnt">Выбор способа</div><div class="fns">«Добавить фотографии»</div></div>
+    <div class="fa"><span class="tr">Снять / выбрать</span><span class="ln"></span><span class="st">права на галерею</span></div>
+    <div class="fn"><div class="fid">AI-S05</div><div class="fnt">Выбор пакета</div><div class="fns">скролл-сетка, лимит не печатается</div></div>
+    <div class="fa"><span class="tr">«Далее · N фото»</span><span class="ln"></span><span class="st">локально</span></div>
+    <div class="fn"><div class="fid">AI-S05</div><div class="fnt">Пакет выбран</div><div class="fns">«Добавить голос» — необязательно</div></div>
+    <div class="fa"><span class="tr">«Добавить голос» (опц.)</span><span class="ln"></span><span class="st">проверка звука</span></div>
+    <div class="fn"><div class="fid">AI-S05</div><div class="fnt">Голос добавлен</div><div class="fns">перезаписать / удалить</div></div>
+    <div class="fa"><span class="tr">«Сформировать карточки»</span><span class="ln"></span><span class="st">вход при необходимости</span></div>
+    <div class="fn sys"><div class="fid">AI-S03 → S07</div><div class="fnt">Вход, загрузка, обработка</div><div class="fns">как в F1</div></div>
+    <div class="fa"><span class="tr">Push / in-app</span><span class="ln"></span><span class="st">черновики готовы</span></div>
+    <div class="fn"><div class="fid">AI-S08</div><div class="fnt">Пакет + «Фотографии без карточки»</div><div class="fns">Прикрепить / Создать карточку</div></div>
+    <div class="fa"><span class="tr">«Отправить готовые — N»</span><span class="ln"></span><span class="st">независимые версии</span></div>
+    <div class="fn sys"><div class="fid">AI-S14</div><div class="fnt">На модерации</div><div class="fns">результаты по отдельности</div></div>
+    <div class="fa"><span class="tr">Одобрено</span><span class="ln"></span><span class="st">видна покупателям</span></div>
+    <div class="fn end"><div class="fid">AI-B01</div><div class="fnt">На витрине</div><div class="fns">«Сегодня»</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Без голоса</b>→ сразу «Сформировать карточки»<br>↩ ИИ использует предметы, упаковку и ценники; пустые поля — обычная валидация в AI-S08</div>
+    <div class="fbr"><b>Голос не понравился</b>→ «Перезаписать»<br>↩ Возврат в AI-S05 · Voice added; фото не загружаются заново</div>
+    <div class="fbr"><b>Фото без карточки</b>→ AI-S08 · Photos without card<br>↩ «Прикрепить» → выбор черновика; «Создать карточку» → AI-S09 с этим фото</div>
+    <div class="fbr"><b>Один файл не загрузился</b>→ AI-S07 / AI-S09 · Media retry<br>↩ Повтор конкретного файла; остальные сохранены</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

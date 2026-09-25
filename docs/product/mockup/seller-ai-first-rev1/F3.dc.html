@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F3 · Голос → карточки → фото</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F3</div>
+    <h2 class="ab-title">Голос → карточки → обязательное добавление фото</h2>
+    <p class="ab-desc">Все карточки из голоса незавершены, пока нет хотя бы одного фото. Это сказано до отправки на распознавание, а в пакете выглядит как обычное недостающее поле.</p>
+  </div>
+  <div class="fl">
+    <div class="fn"><div class="fid">AI-S02</div><div class="fnt">Выбор способа</div><div class="fns">«Надиктовать товары»</div></div>
+    <div class="fa"><span class="tr">Разрешить микрофон</span><span class="ln"></span><span class="st">проверка звука</span></div>
+    <div class="fn"><div class="fid">AI-S06</div><div class="fnt">Проверка звука</div><div class="fns">«Слышно хорошо / Тихо / Не слышно»</div></div>
+    <div class="fa"><span class="tr">«Начать запись»</span><span class="ln"></span><span class="st">RU / KK / смешанная</span></div>
+    <div class="fn"><div class="fid">AI-S06</div><div class="fnt">Запись</div><div class="fns">несколько товаров</div></div>
+    <div class="fa"><span class="tr">«Остановить»</span><span class="ln"></span><span class="st">аудио на телефоне</span></div>
+    <div class="fn"><div class="fid">AI-S06</div><div class="fnt">Просмотр</div><div class="fns">предупреждение о фото</div></div>
+    <div class="fa"><span class="tr">«Сформировать карточки»</span><span class="ln"></span><span class="st">вход, загрузка</span></div>
+    <div class="fn sys"><div class="fid">AI-S03 → S07</div><div class="fnt">Обработка</div><div class="fns">в фоне</div></div>
+    <div class="fa"><span class="tr">Push / in-app</span><span class="ln"></span><span class="st">все без фото</span></div>
+    <div class="fn err"><div class="fid">AI-S08</div><div class="fnt">Пакет: «Добавьте фото»</div><div class="fns">0 готовых, CTA неактивен с причиной</div></div>
+    <div class="fa"><span class="tr">Открыть черновик</span><span class="ln"></span><span class="st">фото ≥ 1</span></div>
+    <div class="fn"><div class="fid">AI-S09</div><div class="fnt">Добавить фото</div><div class="fns">«Готово» → в пакет</div></div>
+    <div class="fa"><span class="tr">«Отправить готовые — N»</span><span class="ln"></span><span class="st">модерация</span></div>
+    <div class="fn end"><div class="fid">AI-S14 → B01</div><div class="fnt">На витрине</div><div class="fns">после одобрения</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Микрофон запрещён</b>→ шаблон AI-S04 · Microphone denied<br>↩ Настройки или AI-S05 / AI-S09</div>
+    <div class="fbr"><b>Часть значений не распознана</b>→ поля пустые, без «ИИ сомневается»<br>↩ Дозаполнить в AI-S09</div>
+    <div class="fbr"><b>Распознано 0 товаров</b>→ AI-S08 · None found<br>↩ «Записать ещё» → AI-S06 или «Добавить вручную» → AI-S09</div>
+    <div class="fbr"><b>Продавец ушёл, не добавив фото</b>→ черновики сохранены в «Моей витрине»<br>↩ AI-S01 · «Пакет не отправлен · Продолжить»</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

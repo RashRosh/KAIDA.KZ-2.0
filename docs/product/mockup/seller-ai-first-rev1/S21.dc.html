@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S21 · Инцидент по фото</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S21 · Seller · photo incident</div>
+    <h2 class="ab-title">Инцидент по фото</h2>
+    <p class="ab-desc">Подтверждённая жалоба скрывает только спорную версию фото, не всю карточку. Продавцу — конкретный снимок, понятная причина и последствия. Без личности жалобщика, числа сообщений и внутренних сигналов антифрода.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S21 · Incident · Detail</b><br>Snapshot, причина, последствия</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Фото скрыто</div></header>
+        <main class="body" style="gap: 14px;">
+          <div style="display: flex; gap: 12px;">
+            <div class="img m3" style="width: 112px; height: 112px; border-radius: 14px; filter: grayscale(0.4);"><span class="fresh" style="background: #c2272de6;">Скрыто</span></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><div class="ts">Курага · 500 г</div><p class="c">Сайран, контейнер 5</p><p class="c">Фото 1 · версия от 12 сентября</p></div>
+          </div>
+          <div class="card p16" style="gap: 6px;">
+            <div class="ov">Что случилось</div>
+            <p class="t">Покупатели сообщили, что товар на этом фото отличается от того, что продаётся. Модератор проверил и подтвердил.</p>
+          </div>
+          <div class="card p16" style="gap: 8px;">
+            <div class="ov">Последствия</div>
+            <div class="step"><span class="ic i-eyeoff sm c2"></span><p class="c c2">Это фото больше не показывается</p></div>
+            <div class="step"><span class="ic i-check sm ok"></span><p class="c c2">Карточка остаётся на витрине со следующим фото</p></div>
+            <div class="step"><span class="ic i-star sm c2"></span><p class="c c2">Один инцидент учтён в рейтинге точки и слабее — в общем рейтинге</p></div>
+          </div>
+        </main>
+        <div class="foot">
+          <button class="btn btn-p lg w"><span class="ic i-camera sm"></span>Заменить фото</button>
+          <div style="display: flex; gap: 8px;"><button class="btn btn-o" style="flex: 1;">Исправить карточку</button><button class="btn btn-o" style="flex: 1;">Объяснить</button></div>
+          <a class="btn btn-g w" href="S22.dc.html">Подать апелляцию</a>
+        </div>
+      </div>
+      <div class="note">Если скрыто единственное фото, карточка работает с нейтральным fallback; следующую редакцию продавец отправляет минимум с одним фото.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S21 · Incident · Explain</b><br>Объяснение для модератора</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Объяснение</div></header>
+        <main class="body" style="gap: 16px;">
+          <p class="t c2">Расскажите, что произошло. Объяснение увидит только модератор — оно не отменяет решение. Чтобы оспорить решение, подайте апелляцию.</p>
+          <div class="fld"><label for="ex">Ваше объяснение</label><div class="inp ta foc" id="ex" style="min-height: 120px;">Поставщик сменился, фото было старое. Сегодня загружу новое фото.</div><span class="hint num">74 / 1000</span></div>
+          <div class="fld"><div class="fl">Новое фото <span class="req">· необязательно</span></div><div class="mrow"><div class="mt img m3"></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div><span class="hint">Новое фото пройдёт обычную проверку перед показом</span></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Отправить</button></div>
+      </div>
+      <div class="note">Лимит символов — плейсхолдер: реальное значение задаёт contract. Введённый текст сохраняется при потере сети.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

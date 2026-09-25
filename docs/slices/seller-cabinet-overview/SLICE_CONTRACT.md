@@ -1,7 +1,11 @@
 # Seller cabinet: navigation, overview and offers list — Slice Contract
 
-**Status:** APPROVED — Product Owner, 2026-09-23. Implementation remains gated by the order below and
-`PROJECT_RULES.md`.
+**Status:** APPROVED — Product Owner, 2026-09-23. Implemented and closed in `v0.0.30-seller-cabinet-overview`.
+
+> **2026-09-25:** the overview surface and seller navigation are replaced by the AI-first target («Моя витрина»,
+> `Витрина / Точки / Ещё`; `PROJECT_RULES.md` §18.1). Part 3 (`seller-points-contacts`) was cancelled and removed; the
+> rejected Issue #27 contract referenced below lives in Git history. `DESIGN_SYSTEM.md` references read as
+> `PROJECT_RULES.md` §18.4.
 
 **Part 1 of 3** seller UI contracts that replace the rejected Issue #27 contract
 (`docs/slices/seller-offer-workspace/SLICE_CONTRACT.md` §13):

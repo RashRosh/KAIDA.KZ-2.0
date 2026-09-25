@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S09 · Единый редактор</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2456px; height: 1960px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S09 · Seller · editor (one component set)</div>
+    <h2 class="ab-title">Единый редактор карточки</h2>
+    <p class="ab-desc">Один набор компонентов для AI-черновика, пустой ручной формы, правки опубликованной карточки и восстановления из архива. Порядок секций: медиа → название → цена и «Цена за» → условная фасовка → комментарий → торговые точки → действие. Блокирует отправку только отсутствие обязательных данных: название, минимум 1 фото, цена, «Цена за», минимум 1 точка.</p>
+  </div>
+  <div class="row">
+
+    <!-- 1 AI-filled -->
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · AI-filled</b><br>Черновик из видео, вся форма</div>
+      <div class="ph tall">
+        <header class="bar"><button class="ib" aria-label="Назад к пакету"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div><button class="ib" aria-label="Ещё: исключить, удалить"><span class="ic i-more"></span></button></header>
+        <main class="body" style="gap: 20px;">
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;"><span class="lbl">Фото и видео</span><span class="c num">3 из 5 фото · видео 0 из 1</span></div>
+            <div class="mrow">
+              <div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div>
+              <div class="mt img m1" style="filter: brightness(0.94);"></div>
+              <div class="mt img m7"></div>
+              <button class="mt add" aria-label="Добавить фото"><span class="ic i-camera"></span>Фото</button>
+            </div>
+            <button class="mt add" style="width: 100%; height: 48px; flex-direction: row; gap: 8px;"><span class="ic i-video sm"></span>Добавить видео · необязательно</button>
+            <p class="c">Кадры взяты из вашего видео. Удерживайте фото, чтобы изменить порядок.</p>
+          </section>
+          <div class="fld"><label for="n1">Название товара</label><div class="inp" id="n1">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div class="fld"><label for="p1">Цена</label><div class="inp num" id="p1"><span style="flex: 1;">5 000</span><span class="c2">₸</span></div></div>
+            <div class="fld"><label for="u1">Цена за</label><div class="inp" id="u1"><span style="flex: 1;">кг</span><span class="ic i-down c2"></span></div></div>
+          </div>
+          <div class="fld"><div class="fl">Комментарий <span class="req">· необязательно</span></div><div class="inp ta" style="flex-direction: column; gap: 8px;"><span>Молодой барашек, разделываем при вас.</span><button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-mic sm"></span>Надиктовать</button></div></div>
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="lbl">Торговые точки</span>
+            <a class="card" href="S10.dc.html" style="flex-direction: row; align-items: center; gap: 12px; text-decoration: none; color: inherit;"><span class="ic i-pin pt"></span><div style="flex: 1;"><div class="ts">2 из 3 точек</div><p class="c">Зелёный базар, ряд 4 · Алтын Орда, павильон 12</p></div><span class="ic i-right c2"></span></a>
+            <p class="c c2"><span class="ic i-layers xs" style="vertical-align: -3px;"></span> Будет создано 2 карточки</p>
+            <a class="btn btn-g sm" href="S11.dc.html" style="align-self: flex-start; padding: 0;">Настроить данные по точкам</a>
+          </section>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">После отправки карточки проверит модерация. Покупатели увидят их после одобрения.</p></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Готово</button><button class="btn btn-g w">Исключить из отправки</button></div>
+      </div>
+      <div class="note">Внутри пакета «Готово» возвращает в AI-S08; отправка — одним CTA пакета. AI-значения — обычный текст полей, без подсветки и процентов. Для «кг» и «л» фасовка не раскрывается. Тап по «Цена за» → AI-S09 · Unit sheet.</div>
+    </div>
+
+    <!-- 2 Manual empty with validation -->
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Manual · Validation</b><span class="tag tag-rev">Rev 1</span><br>Пустая форма после попытки отправки</div>
+      <div class="ph tall">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Новая карточка</div></header>
+        <main class="body" style="gap: 20px;">
+          <div class="banner err" role="alert" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-alert dn"></span><div style="flex: 1;"><div class="ts">Заполните 5 полей</div><p class="c c2">Каждое отмечено ниже</p></div></div>
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото и видео</span><span class="c num">0 из 5 фото</span></div>
+            <div class="mrow"><button class="mt add" style="border-color: var(--danger); border-style: solid;"><span class="ic i-camera"></span>Фото</button><button class="mt add"><span class="ic i-video"></span>Видео</button></div>
+            <div class="fld"><div class="emsg"><span class="ic i-alert"></span>Добавьте хотя бы одно фото товара</div></div>
+          </section>
+          <div class="fld"><label for="n2">Название товара</label><div class="inp er ph0" id="n2" aria-invalid="true">Например, баранина, лопатка</div><div class="emsg"><span class="ic i-alert"></span>Напишите, что это за товар</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start;">
+            <div class="fld"><label for="p2">Цена</label><div class="inp er ph0" id="p2" aria-invalid="true" aria-describedby="p2e"><span style="flex: 1;">Сумма</span><span>₸</span></div><div class="emsg" id="p2e"><span class="ic i-alert"></span>Укажите цену больше 0 ₸</div></div>
+            <div class="fld"><label for="u2">Цена за</label><div class="inp er ph0" id="u2" aria-invalid="true" aria-describedby="u2e"><span style="flex: 1;">Выберите</span><span class="ic i-down"></span></div><div class="emsg" id="u2e"><span class="ic i-alert"></span>Выберите, за что цена</div></div>
+          </div>
+          <div class="fld"><div class="fl">Комментарий <span class="req">· необязательно</span></div><div class="inp ta ph0" style="flex-direction: column; gap: 8px;"><span>Сорт, откуда привезли, как продаёте</span><button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-mic sm"></span>Надиктовать</button></div></div>
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="lbl">Торговые точки</span>
+            <a class="card" href="S12A.dc.html" style="flex-direction: row; align-items: center; gap: 12px; text-decoration: none; color: inherit; border: 2px solid var(--danger);"><span class="ic i-plus pt"></span><div style="flex: 1;"><div class="ts pt">Добавить торговую точку</div><p class="c">Нужна, чтобы покупатель нашёл вас</p></div></a>
+            <div class="fld"><div class="emsg"><span class="ic i-alert"></span>Добавьте хотя бы одну точку</div></div>
+          </section>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Отправить на модерацию</button><button class="btn btn-g w">Сохранить черновик</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.4</span>У цены и «Цены за» — раздельные сообщения. В пустой цене — нейтральный placeholder «Сумма», а не «0». Ошибки видны после первой попытки отправки; фокус переходит к первому ошибочному полю.</div>
+    </div>
+
+    <!-- 2b Unit sheet -->
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Unit sheet</b><span class="tag tag-rev">Rev 1</span><br>Тап по полю «Цена за» в основной форме</div>
+      <div class="ph tall">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div></header>
+        <main class="body" style="gap: 20px;">
+          <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div></div>
+          <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div class="fld"><label>Цена</label><div class="inp num"><span style="flex: 1;">3 000</span><span class="c2">₸</span></div></div>
+            <div class="fld"><label>Цена за</label><div class="inp foc"><span style="flex: 1;" class="c2">Выберите</span><span class="ic i-down"></span></div></div>
+          </div>
+        </main>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="us">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center;"><h2 class="h3" id="us" style="flex: 1;">Цена за</h2><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button></div>
+          <div role="radiogroup" aria-labelledby="us" style="display: flex; flex-direction: column;">
+            <div class="li" role="radio" aria-checked="false"><span class="rd"></span><div class="mid"><div class="ts">кг</div><p class="c">«5 000 ₸ / кг»</p></div></div>
+            <div class="li" role="radio" aria-checked="false"><span class="rd"></span><div class="mid"><div class="ts">л</div><p class="c">«800 ₸ / л»</p></div></div>
+            <div class="li" role="radio" aria-checked="false"><span class="rd"></span><div class="mid"><div class="ts">шт.</div><p class="c">Вес или объём можно указать потом</p></div></div>
+            <div class="li" role="radio" aria-checked="true"><span class="rd on"></span><div class="mid"><div class="ts">упак.</div><p class="c">Появится необязательное «В упаковке»</p></div></div>
+            <div class="li" role="radio" aria-checked="false"><span class="rd"></span><div class="mid"><div class="ts">Другое</div><p class="c">Своя единица: пучок, связка, мешок</p></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.1</span>Sheet открывается тапом по полю «Цена за» в основной форме. Выбор закрывает sheet сразу, без кнопки «Готово»; фокус возвращается на поле. Следующее состояние — «Pack fields expanded».</div>
+    </div>
+
+    <!-- 4 Pack fields expanded -->
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Pack fields expanded</b><span class="tag tag-rev">Rev 1</span><br>Состояние редактора, не отдельный шаг</div>
+      <div class="ph tall">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div></header>
+        <main class="body" style="gap: 20px;">
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото и видео</span><span class="c num">2 из 5 фото</span></div>
+            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div>
+          </section>
+          <div class="fld"><label for="n4">Название товара</label><div class="inp" id="n4">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div class="fld"><label for="p4">Цена</label><div class="inp num" id="p4"><span style="flex: 1;">3 000</span><span class="c2">₸</span></div></div>
+            <div class="fld"><label for="u4">Цена за</label><div class="inp" id="u4"><span style="flex: 1;">упак.</span><span class="ic i-down c2"></span></div></div>
+          </div>
+          <div class="fld" style="background: var(--primary-soft); margin: -8px -8px 0; padding: 8px; border-radius: 12px;">
+            <label for="pk4">В упаковке <span class="req">· необязательно</span></label>
+            <div style="display: flex; gap: 8px;"><div class="inp foc num" id="pk4" style="flex: 1;">600</div><div class="inp" style="width: 112px;"><span style="flex: 1;">г</span><span class="ic i-down c2"></span></div></div>
+            <span class="hint">Покупатель увидит: «Баранина, лопатка · 600 г» и «3 000 ₸ / упаковка»</span>
+          </div>
+          <div class="fld"><div class="fl">Комментарий <span class="req">· необязательно</span></div><div class="inp ta" style="flex-direction: column; gap: 8px;"><span>Молодой барашек, фасуем утром.</span><button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-mic sm"></span>Надиктовать</button></div></div>
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="lbl">Торговые точки</span>
+            <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><span class="ic i-pin pt"></span><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Выбрана автоматически</p></div><span class="ic i-right c2"></span></div>
+            <p class="c c2">Будет создана 1 карточка</p>
+          </section>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Готово</button></div>
+      </div>
+      <div class="note" style="gap: 8px;"><span class="tag tag-rev">Rev 1 · п. 1.1</span>Фасовка раскрывается прямо в форме, между строкой «Цена / Цена за» и комментарием (подсветка — только для макета). Для других единиц в том же месте:
+        <div class="card" style="gap: 4px; padding: 10px;"><b>шт.</b><span class="pt">+ Указать вес или объём</span></div>
+        <div class="card" style="gap: 4px; padding: 10px;"><b>Другое</b><div class="inp" style="height: 40px;">Своя единица: пучок</div></div>
+        <div class="card" style="gap: 4px; padding: 10px;"><b>кг, л</b><span>ничего не раскрывается</span></div>
+      </div>
+    </div>
+
+    <!-- 3 Media states -->
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Media</b><br>Прогресс, повтор, лимит 5 + 1, обложка, порядок</div>
+      <div class="ph tall">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div></header>
+        <main class="body" style="gap: 20px;">
+          <section style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото</span><span class="c num">5 из 5 — максимум</span></div>
+            <div class="mrow">
+              <div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div>
+              <div class="mt img m7"><span class="x" style="background: #19161bb3;"><span class="ic i-drag"></span></span></div>
+              <div class="mt img m1 up" role="progressbar" aria-valuenow="64" aria-label="Загрузка фото 3"><div class="pb"><i style="width: 64%;"></i></div></div>
+              <div class="mt img m3 er"><div class="erl"><span class="ic i-refresh sm"></span>Повторить</div></div>
+            </div>
+            <div class="mrow"><div class="mt img m8"></div><div class="mt add" style="color: var(--ink3); border-color: var(--line);" aria-disabled="true"><span class="ic i-plus"></span>Лимит</div></div>
+            <div class="fld"><div class="emsg"><span class="ic i-alert"></span>Фото 4 не загрузилось. Остальные сохранены — нажмите, чтобы повторить.</div></div>
+          </section>
+          <section style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between;"><span class="lbl">Публичное видео</span><span class="c num">1 из 1</span></div>
+            <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><div class="mt img m2" style="display: flex; align-items: center; justify-content: center; width: 64px; height: 64px;"><span class="ic i-play" style="color: #fff;"></span></div><div style="flex: 1;"><div class="ts">Видео товара</div><p class="c num">0:18 · видно покупателям</p></div><button class="ib" aria-label="Действия с видео"><span class="ic i-more"></span></button></div>
+            <p class="c">Видео, из которого собраны черновики, сюда не подставляется — оно приватное.</p>
+          </section>
+          <div class="card p16" style="gap: 4px; box-shadow: var(--shadow-md);">
+            <div class="ov" style="padding: 4px 0 8px;">Фото 2</div>
+            <div class="li" style="min-height: 48px;"><span class="ic i-cover c2"></span><div class="mid"><div class="ts">Сделать обложкой</div></div></div>
+            <div class="li" style="min-height: 48px;"><span class="ic i-camera c2"></span><div class="mid"><div class="ts">Заменить</div></div></div>
+            <div class="li" style="min-height: 48px;"><span class="ic i-drag c2"></span><div class="mid"><div class="ts">Переместить</div></div><span class="c">← →</span></div>
+            <div class="li" style="min-height: 48px; color: var(--danger);"><span class="ic i-trash"></span><div class="mid"><div class="ts">Удалить</div></div></div>
+          </div>
+        </main>
+      </div>
+      <div class="note">Порядок меняется и без жеста: пункт «Переместить» + кнопки влево/вправо (доступность). Прогресс и ошибка — по каждому файлу отдельно.</div>
+    </div>
+
+    <!-- 5 Edit published · All points -->
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Edit published · All points</b><span class="tag tag-rev">Rev 1</span><br>Одна правка цены во всех точках товара</div>
+      <div class="ph tall">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Изменить карточку</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="banner info" style="padding: 12px 14px; border-radius: 14px; gap: 6px;">
+            <div style="display: flex; gap: 8px; align-items: center;"><span class="ic i-history" style="color: var(--info);"></span><div class="ts">Пока идёт проверка, покупатели видят прежнюю версию</div></div>
+            <p class="c c2">Новая версия заменит её после одобрения. Если её отклонят — прежняя останется на витрине.</p>
+          </div>
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="lbl">Фото и видео</span>
+            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div>
+          </section>
+          <div class="fld"><label for="n5">Название товара</label><div class="inp" id="n5">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div class="fld"><label for="p5">Цена</label><div class="inp foc num" id="p5"><span style="flex: 1;">4 800</span><span class="c2">₸</span></div><span class="hint">Было 5 000 ₸</span></div>
+            <div class="fld"><label for="u5">Цена за</label><div class="inp" id="u5"><span style="flex: 1;">кг</span><span class="ic i-down c2"></span></div></div>
+          </div>
+          <div class="fld"><div class="fl">Комментарий <span class="req">· необязательно</span></div><div class="inp ta" style="flex-direction: column; gap: 8px;"><span>Молодой барашек, разделываем при вас.</span><button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-mic sm"></span>Надиктовать</button></div></div>
+          <section class="card p16" style="gap: 6px;">
+            <div class="ts">Изменить также в других точках</div>
+            <p class="c">Эта карточка: Зелёный базар, ряд 4</p>
+            <div class="li" style="min-height: 48px;"><span class="cb on" role="checkbox" aria-checked="true"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Алтын Орда, павильон 12</div><p class="c num">5 000 → 4 800 ₸</p></div></div>
+            <div class="li" style="min-height: 48px;"><span class="cb on" role="checkbox" aria-checked="true"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Тастак, место 31</div><p class="c num">5 000 → 4 800 ₸</p></div></div>
+            <div class="li" style="min-height: 48px;"><span class="cb" role="checkbox" aria-checked="false"></span><div class="mid"><div class="ts">Сайран, контейнер 5</div><p class="c num"><span class="bd bd-p" style="height: 20px;">своя цена: 4 900 ₸</span> не меняется</p></div></div>
+            <p class="t" style="font-weight: 500; margin-top: 4px;"><span class="ic i-layers sm" style="vertical-align: -4px;"></span> Будет изменено 3 карточки</p>
+          </section>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Отправить изменения на модерацию</button><button class="btn btn-g w">Отменить изменения</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.2, 2.1, 2.3</span>Комментарий вернулся на место. Остальные точки товара отмечены по умолчанию; точка со своей ценой (AI-S11) — нет, чтобы не затереть её молча. Изменились только цена / «Цена за» / фасовка / комментарий — переключатель «Скрыть прежнюю версию» не показывается (он появляется только при смене фото или названия).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2456,"height":1960}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

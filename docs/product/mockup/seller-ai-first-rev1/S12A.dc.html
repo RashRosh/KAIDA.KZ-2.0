@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S12A · Создание и редактирование точки</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2856px; height: 1380px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S12A · Seller · point editor</div>
+    <h2 class="ab-title">Создание и редактирование точки</h2>
+    <p class="ab-desc">Три входа в местоположение: «Я сейчас на точке», «Найти адрес», «Вставить ссылку на карту» (2GIS, Google Maps, Яндекс Карты). Перед сохранением — всегда явное подтверждение распознанного адреса. Отказ в геолокации не блокирует два других способа. Принятый geo-contract: справочник KAIDA + локальный разбор ссылки + подтверждение парой координат, без встроенной карты. Сырые координаты покупателю не показываются.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Method</b><br>Новая точка, выбор способа</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Новая торговая точка</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="fld"><label for="pn">Название для покупателей</label><div class="inp foc" id="pn">Зелёный базар, ряд 4</div><span class="hint">Рынок, павильон, ряд или ориентир</span></div>
+          <div class="fld"><div class="fl">Где находится точка</div>
+            <div class="card" style="gap: 0; padding: 0 12px;">
+              <div class="li"><div class="lic p"><span class="ic i-locate"></span></div><div class="mid"><div class="ts">Я сейчас на точке</div><p class="c">Определим по телефону один раз</p></div><span class="ic i-right c2"></span></div>
+              <div class="li"><div class="lic p"><span class="ic i-search"></span></div><div class="mid"><div class="ts">Найти адрес</div><p class="c">Рынок, улица или дом</p></div><span class="ic i-right c2"></span></div>
+              <div class="li"><div class="lic p"><span class="ic i-link"></span></div><div class="mid"><div class="ts">Вставить ссылку на карту</div><p class="c">2GIS, Google Maps, Яндекс Карты</p></div><span class="ic i-right c2"></span></div>
+            </div>
+          </div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w dis" disabled>Сохранить точку</button><p class="c" style="text-align: center;">Сначала укажите местоположение</p></div>
+      </div>
+      <div class="note"><span class="tag tag-keep">Keep</span>Явный запрос геолокации, три равноправных способа из принятого geo-contract.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Geolocation denied</b><br>Отказ не блокирует другие способы</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Новая торговая точка</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="fld"><label for="pn2">Название для покупателей</label><div class="inp" id="pn2">Зелёный базар, ряд 4</div></div>
+          <div class="fld"><div class="fl">Где находится точка</div>
+            <div class="card" style="gap: 0; padding: 0 12px;">
+              <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-locate"></span></div><div class="mid"><div class="ts">Я сейчас на точке</div><p class="c">Нет доступа к местоположению</p></div></div>
+              <div class="li"><div class="lic p"><span class="ic i-search"></span></div><div class="mid"><div class="ts">Найти адрес</div><p class="c">Рынок, улица или дом</p></div><span class="ic i-right c2"></span></div>
+              <div class="li"><div class="lic p"><span class="ic i-link"></span></div><div class="mid"><div class="ts">Вставить ссылку на карту</div><p class="c">2GIS, Google Maps, Яндекс Карты</p></div><span class="ic i-right c2"></span></div>
+            </div>
+          </div>
+          <div class="banner gray" role="status" style="padding: 12px; border-radius: 14px; gap: 8px;"><div style="display: flex; gap: 10px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Местоположение не определилось. Найдите адрес или вставьте ссылку. Доступ можно включить в настройках телефона.</p></div><button class="btn btn-g sm" style="align-self: flex-start; padding: 0;">Открыть настройки</button></div>
+        </main>
+      </div>
+      <div class="note">Тот же шаблон для «геолокация недоступна / таймаут». До системного запроса — короткое пояснение «Определим по телефону один раз».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Address search</b><br>Поиск по справочнику KAIDA</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Найти адрес</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="inp foc" style="border-radius: 999px;"><span class="ic i-search c2"></span><span style="flex: 1;">зелёный базар</span><span class="ic i-close c2"></span></div>
+          <div style="display: flex; flex-direction: column;">
+            <div class="li"><span class="ic i-pin c2"></span><div class="mid"><div class="ts">Зелёный базар</div><p class="c">Алматы, ул. Жибек Жолы, 53</p></div></div>
+            <div class="li"><span class="ic i-pin c2"></span><div class="mid"><div class="ts">Зелёный базар · мясной павильон</div><p class="c">Алматы, ул. Жибек Жолы, 53</p></div></div>
+            <div class="li"><span class="ic i-pin c2"></span><div class="mid"><div class="ts">Зелёный квартал, торговый дом</div><p class="c">Алматы, мкр. Аксай-4</p></div></div>
+          </div>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-link c2"></span><div style="flex: 1;"><p class="c c2">Не нашли? Вставьте ссылку на точку из карт.</p></div></div>
+        </main>
+      </div>
+      <div class="note">Пустой результат: «Ничего не нашли по запросу» + переход к ссылке. Offline: «Поиск работает при сети», ввод сохранён.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Map link</b><br>Ссылка разобрана / не разобрана</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Ссылка на карту</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="fld"><label for="ml">Ссылка</label><div class="inp" id="ml" style="font-size: 14px;"><span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">https://2gis.kz/almaty/firm/7000…</span><span class="ic i-close c2"></span></div><div class="bd bd-ok"><span class="ic i-check"></span>2GIS · место найдено</div></div>
+          <div class="hr"></div>
+          <div class="fld"><label for="ml2">Ссылка</label><div class="inp er" id="ml2" style="font-size: 14px;"><span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">https://example.com/place/…</span></div><div class="emsg"><span class="ic i-alert"></span>Не получилось прочитать эту ссылку. Подойдут ссылки 2GIS, Google Maps и Яндекс Карт — или найдите адрес.</div></div>
+          <button class="btn btn-o w"><span class="ic i-search sm"></span>Найти адрес</button>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Далее</button></div>
+      </div>
+      <div class="note"><span class="tag tag-keep">Keep</span>Локальный разбор map-link без сетевой зависимости от map SDK.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Confirm location</b><br>Явное подтверждение перед сохранением</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Проверьте место</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="card p16" style="gap: 10px;">
+            <div class="ov">Мы определили</div>
+            <div class="h3">Зелёный базар · мясной павильон</div>
+            <p class="t c2">Алматы, ул. Жибек Жолы, 53</p>
+            <div class="hr"></div>
+            <div class="kv"><span>Координаты</span><span class="num">43.2621, 76.9528</span></div>
+            <p class="c">Видно только вам — для проверки. Покупатели увидят адрес и маршрут.</p>
+          </div>
+          <div class="fld"><label for="lm">Как найти на месте <span class="req">· необязательно</span></label><div class="inp ta" id="lm" style="min-height: 64px;">Вход с Жибек Жолы, ряд 4, третье место слева</div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Всё верно</button><button class="btn btn-g w">Указать другое место</button></div>
+      </div>
+      <div class="note" style="gap: 8px;"><span class="tag tag-prop">Proposed geo contract revision</span>Альтернатива с интерактивной картой и перемещаемым pin — не текущий компонент:
+        <div style="height: 88px; border-radius: 10px; background: #e8e4eb; position: relative; overflow: hidden;"><i style="position: absolute; left: 0; right: 0; top: 40px; height: 8px; background: #fff;"></i><i style="position: absolute; top: 0; bottom: 0; left: 120px; width: 8px; background: #fff;"></i><i style="position: absolute; left: 150px; top: 18px; width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: #9900cc;"></i></div>
+      </div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Contacts (first point)</b><span class="tag tag-rev">Rev 1</span><br>Первая точка: контакты пустые, необязательные</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Зелёный базар, ряд 4</div></header>
+        <main class="body" style="gap: 14px;">
+          <div style="display: flex; align-items: baseline; gap: 8px;"><h3 class="h3" style="flex: 1;">Контакты</h3><span class="c">необязательно</span></div>
+          <p class="c c2">Покупатели смогут позвонить или написать. Можно пропустить — маршрут до точки будет всегда.</p>
+          <div class="fld"><div style="display: flex; align-items: center; gap: 8px;"><span class="ic i-phone sm c2"></span><label for="f1">Телефон</label></div><div class="inp ph0" id="f1"><span>+7</span><span>Номер телефона</span></div></div>
+          <div class="fld"><div style="display: flex; align-items: center; gap: 8px;"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt="" style="width: 20px; height: 20px;"><label for="f2">WhatsApp</label></div><div class="inp ph0" id="f2"><span>+7</span><span>Номер WhatsApp</span></div></div>
+          <div class="fld"><div style="display: flex; align-items: center; gap: 8px;"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt="" style="width: 20px; height: 20px;"><label for="f3">Telegram</label></div><button class="btn btn-o w" id="f3"><span class="ic i-plus sm"></span>Подключить Telegram</button></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Сохранить точку</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.2</span>Первая точка — поля пустые. Заполненный номер подтверждается кодом (AI-S13); без контактов точка сохраняется.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S12A · Point · Contacts (copied)</b><span class="tag tag-rev">Rev 1</span><br>Следующая точка: контакты предыдущей</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Алтын Орда, павильон 12</div></header>
+        <main class="body" style="gap: 14px;">
+          <div style="display: flex; align-items: baseline; gap: 8px;"><h3 class="h3" style="flex: 1;">Контакты</h3><span class="c">необязательно</span></div>
+          <div class="banner info" style="padding: 10px 12px; border-radius: 12px; flex-direction: row; gap: 8px;"><span class="ic i-copy sm" style="color: var(--info);"></span><p class="c" style="color: var(--ink); flex: 1;">Контакты как у точки «Зелёный базар, ряд 4» — можно изменить до сохранения. Другие точки не изменятся.</p></div>
+          <div class="fld"><div style="display: flex; align-items: center; gap: 8px;"><span class="ic i-phone sm c2"></span><label for="c1" style="flex: 1;">Телефон</label><span class="bd bd-ok"><span class="ic i-check"></span>Подтверждён</span></div><div class="inp" id="c1"><span style="flex: 1;">+7 707 123 45 12</span><span class="ic i-close c2" aria-label="Удалить телефон"></span></div></div>
+          <div class="fld"><div style="display: flex; align-items: center; gap: 8px;"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt="" style="width: 20px; height: 20px;"><label for="c2" style="flex: 1;">WhatsApp</label><span class="bd bd-ok"><span class="ic i-check"></span>Подтверждён</span></div><div class="inp" id="c2"><span style="flex: 1;">Тот же номер</span><span class="ic i-close c2"></span></div></div>
+          <div class="fld"><div style="display: flex; align-items: center; gap: 8px;"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt="" style="width: 20px; height: 20px;"><label for="c3" style="flex: 1;">Telegram</label></div><button class="btn btn-o w" id="c3"><span class="ic i-plus sm"></span>Подключить Telegram</button></div>
+          <p class="c">Без контактов точка работает: покупатели строят маршрут.</p>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Сохранить точку</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.2</span><span>Решение PO: вторая, третья, десятая точка получают контакты <b>предыдущей</b> точки как видимые редактируемые значения. Менять можно сразу, до сохранения; позже — в каждой точке отдельно. Подтверждённый контакт повторной проверки не требует.</span></div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2856,"height":1380}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

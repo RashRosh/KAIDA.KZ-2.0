@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F7 · Жалоба на фото</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F7</div>
+    <h2 class="ab-title">Жалоба на фото → проверка → последствие → апелляция</h2>
+    <p class="ab-desc">Задание п. 20.10: всплеск одинаковых жалоб объединяется в один случай; подтверждение создаёт один инцидент и скрывает одну версию фото; продавец видит конкретное последствие и может обжаловать у другого модератора.</p>
+  </div>
+  <div class="fl">
+    <div class="fn"><div class="fid">AI-B02</div><div class="fnt">Детальная карточка</div><div class="fns">«Фото не соответствует товару»</div></div>
+    <div class="fa"><span class="tr">Выбрать фото</span><span class="ln"></span><span class="st">snapshot версии</span></div>
+    <div class="fn"><div class="fid">AI-B05</div><div class="fnt">Форма жалобы</div><div class="fns">вход по телефону</div></div>
+    <div class="fa"><span class="tr">«Отправить жалобу»</span><span class="ln"></span><span class="st">в кластер</span></div>
+    <div class="fn sys"><div class="fid">AI-M01 · M03</div><div class="fnt">Кластер · 7 → 1</div><div class="fns">всплеск: влияние заморожено</div></div>
+    <div class="fa"><span class="tr">Модератор</span><span class="ln"></span><span class="st">сигналы — подсказка</span></div>
+    <div class="fn"><div class="fid">AI-M04</div><div class="fnt">Подтвердить</div><div class="fns">preview: 1 фото, 1 инцидент</div></div>
+    <div class="fa"><span class="tr">Решение</span><span class="ln"></span><span class="st">фото скрыто</span></div>
+    <div class="fn"><div class="fid">AI-S21</div><div class="fnt">Инцидент у продавца</div><div class="fns">заменить / исправить / объяснить</div></div>
+    <div class="fa"><span class="tr">«Подать апелляцию»</span><span class="ln"></span><span class="st">другой модератор</span></div>
+    <div class="fn"><div class="fid">AI-S22 · M05</div><div class="fnt">Апелляция</div><div class="fns">audit trail</div></div>
+    <div class="fa"><span class="tr">Итог</span><span class="ln"></span><span class="st">всем сторонам</span></div>
+    <div class="fn end"><div class="fid">AI-S22 · B06</div><div class="fnt">Оставлено / отменено</div><div class="fns">покупатели видят итог в «Моих жалобах»</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Повторная жалоба того же пользователя</b>→ AI-B05 · Duplicate<br>↩ «Добавить уточнение» к активной</div>
+    <div class="fbr"><b>Жалоба не подтверждена</b>→ AI-B06 «Не подтверждено»<br>↩ Карточка и рейтинг не меняются</div>
+    <div class="fbr"><b>Продавец заменил фото во время проверки</b>→ жалоба остаётся про прежнюю версию<br>↩ Новое фото проходит обычную модерацию</div>
+    <div class="fbr"><b>Скрыто единственное фото</b>→ AI-B02 · Fallback, карточка активна<br>↩ Следующая редакция — минимум 1 фото</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S14 · Отправка и модерация</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2056px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S14 · Seller · moderation outcomes</div>
+    <h2 class="ab-title">Отправка и модерация</h2>
+    <p class="ab-desc">Каждая новая карточка проходит модерацию до показа. Безопасные одобряются автоматически, спорные смотрит человек — дизайн не обещает ручную проверку каждой и не называет сроков. Карточки пакета модерируются независимо: «Нужно исправить» показывает конкретную причину и конкретное поле/медиа, «Отклонено» — причину и апелляцию, где допустимо. Бейджа «Проверено KAIDA» нет.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S14 · Moderation · Sent</b><br>Сразу после отправки</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button><div class="bar-t">Отправлено</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="lic" style="width: 64px; height: 64px; border-radius: 20px; background: var(--info-soft); color: var(--info); align-self: center; margin-top: 8px;"><span class="ic i-shield lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Карточки на модерации</h1>
+          <p class="t c2" style="text-align: center;">3 товара · 5 карточек. Покупатели увидят каждую после одобрения. Результаты придут по отдельности.</p>
+          <div class="card" style="gap: 0; padding: 4px 12px;">
+            <div class="li"><div class="img m1" style="width: 40px; height: 40px; border-radius: 8px;"></div><div class="mid"><div class="ts">Баранина, лопатка</div><p class="c">2 точки</p></div><span class="bd bd-info"><span class="ic i-clock"></span>На модерации</span></div>
+            <div class="li"><div class="img m1" style="width: 40px; height: 40px; border-radius: 8px;"></div><div class="mid"><div class="ts">Баранина · 600 г</div><p class="c">2 точки</p></div><span class="bd bd-info"><span class="ic i-clock"></span>На модерации</span></div>
+            <div class="li"><div class="img m6" style="width: 40px; height: 40px; border-radius: 8px;"></div><div class="mid"><div class="ts">Айран · 1 л</div><p class="c">1 точка</p></div><span class="bd bd-info"><span class="ic i-clock"></span>На модерации</span></div>
+          </div>
+        </main>
+        <div class="foot bare"><a class="btn btn-p lg w" href="S01.dc.html">На «Мою витрину»</a></div>
+      </div>
+      <div class="note">Не «опубликовано» и не «появится через N минут» — нет SLA. 2 незавершённых черновика остались в «Моей витрине».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S14 · Moderation · Partial outcome</b><br>Независимые результаты пакета</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Результаты проверки</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="banner gray" style="padding: 12px 14px; border-radius: 14px;"><div class="ts num">4 на витрине · 1 нужно исправить</div><p class="c c2">Одобренные уже видны покупателям. Исправление одной карточки не задерживает остальные.</p></div>
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><div class="img m1" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Баранина, лопатка</div><p class="c">Зелёный базар, ряд 4</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div>
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><div class="img m1" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Баранина, лопатка</div><p class="c">Алтын Орда, павильон 12</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div>
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><div class="img m1" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Баранина · 600 г</div><p class="c">Зелёный базар, ряд 4</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div>
+          <a class="card" href="#" style="flex-direction: row; gap: 12px; align-items: center; text-decoration: none; color: inherit; border: 1.5px solid var(--danger);"><div class="img m1" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Баранина · 600 г</div><p class="c">Алтын Орда, павильон 12</p><span class="bd bd-err" style="margin-top: 4px;"><span class="ic i-alert"></span>Нужно исправить</span></div><span class="ic i-right c2"></span></a>
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><div class="img m6" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Айран · 1 л</div><p class="c">Зелёный базар, ряд 4</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div>
+          </main>
+      </div>
+      <div class="note">Одна и та же групповая карточка в разных точках может получить разные исходы — у каждой точки своя карточка (п. 18.2).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S14 · Moderation · Needs fix</b><br>Конкретная причина и конкретное медиа</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Нужно исправить</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="card p16" style="gap: 8px; border: 1.5px solid var(--danger);">
+            <span class="bd bd-err"><span class="ic i-alert"></span>Нужно исправить</span>
+            <div class="ts">Баранина · 600 г · Алтын Орда</div>
+            <p class="t">На фото 2 виден номер телефона на ценнике. Контакты указываются только в торговой точке.</p>
+          </div>
+          <div class="fld"><div class="fl">Что исправить</div>
+            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7 er" style="outline-width: 3px;"><span class="cv" style="background: var(--danger);">Фото 2</span></div></div>
+            <div class="emsg"><span class="ic i-alert"></span>Замените или удалите фото 2</div>
+          </div>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Остальные данные можно не менять. После исправления карточка снова пройдёт проверку.</p></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Исправить</button><button class="btn btn-g w">Удалить карточку</button></div>
+      </div>
+      <div class="note">«Исправить» открывает AI-S09 с фокусом на фото 2; затем «Отправить на модерацию» создаёт новую версию. Внутренних moderation codes нет.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S14 · Moderation · Rejected</b><br>Публикация запрещена</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Отклонено</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="card p16" style="gap: 8px;">
+            <span class="bd bd-err"><span class="ic i-close"></span>Отклонено</span>
+            <div class="ts">Энергетик «Ночной» · Сайран</div>
+            <p class="t">Этот товар нельзя размещать в KAIDA.</p>
+            <div class="banner gray" style="padding: 10px 12px; border-radius: 12px;"><p class="c c2">Причина: [категория из правил размещения]</p></div>
+          </div>
+          <div class="card p16" style="gap: 6px;">
+            <div class="ts">Не согласны с решением?</div>
+            <p class="c c2">Апелляцию рассмотрит другой модератор. Приложите пояснение и, если есть, документы.</p>
+            <a class="btn btn-o w" href="S22.dc.html" style="margin-top: 6px;">Подать апелляцию</a>
+          </div>
+        </main>
+        <div class="foot"><button class="btn btn-g w" style="color: var(--danger);"><span class="ic i-trash sm"></span>Удалить карточку</button></div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · taxonomy</span>Текст причины и доступность апелляции — из будущей moderation taxonomy и prohibited-content policy (п. 22). В скобках — место под формулировку, не выдуманное правило.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S14 · Moderation · Service unavailable</b><br>Новая версия ждёт, старая на витрине</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Баранина, лопатка</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="img m1" style="height: 180px; border-radius: 20px;"><span class="fresh fr0" style="position: absolute;">Сегодня</span></div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;"><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span><span class="bd bd-line"><span class="ic i-clock"></span>Изменения ждут проверки</span></div>
+          <div class="banner gray" role="status" style="padding: 12px; border-radius: 14px; gap: 6px;"><div class="ts">Проверка временно не работает</div><p class="c c2">Новая цена 4 800 ₸ отправится на проверку автоматически. До этого покупатели видят прежнюю версию — 5 000 ₸ / кг.</p></div>
+          <div class="kv"><span>Сейчас на витрине</span><span class="num">5 000 ₸ / кг</span></div>
+          <div class="kv"><span>Новая версия</span><span class="num">4 800 ₸ / кг</span></div>
+        </main>
+        <div class="foot"><button class="btn btn-o w">Выключить прежнюю версию</button><button class="btn btn-g w">Отменить изменения</button></div>
+      </div>
+      <div class="note">Недоступность модерации не убирает старую версию. Выключение — сразу и по желанию продавца.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2056,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

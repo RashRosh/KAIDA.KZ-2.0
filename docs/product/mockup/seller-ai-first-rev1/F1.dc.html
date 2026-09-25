@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F1 · Видео → карточки → модерация</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F1</div>
+    <h2 class="ab-title">Видео → карточки → модерация</h2>
+    <p class="ab-desc">Над стрелкой — trigger, под ней — системное состояние. Ниже — ветки: условие → состояние → точка возврата. Ни одна ветка не заканчивается тупиком.</p>
+    <div class="legend"><span><i></i>Экран</span><span><i style="background: var(--info-soft); border-color: #9cc9ea;"></i>Системное состояние</span><span><i style="background: var(--danger-soft); border-color: #f0b4b0;"></i>Сбой / исправление</span><span><i style="background: var(--success-soft); border-color: #9fd6ad;"></i>Результат</span></div>
+  </div>
+  <div class="fl">
+    <div class="fn"><div class="fid">AI-S01</div><div class="fnt">Моя витрина</div><div class="fns">Главный CTA «Сформировать карточки товаров»</div></div>
+    <div class="fa"><span class="tr">Нажать CTA</span><span class="ln"></span><span class="st">sheet открыт</span></div>
+    <div class="fn"><div class="fid">AI-S02</div><div class="fnt">Выбор способа</div><div class="fns">С помощью ИИ / Без ИИ</div></div>
+    <div class="fa"><span class="tr">«Снять видео»</span><span class="ln"></span><span class="st">запрос прав</span></div>
+    <div class="fn"><div class="fid">AI-S04</div><div class="fnt">Проверка звука → запись</div><div class="fns">до 2:00, рекомендация ≤ 10 товаров</div></div>
+    <div class="fa"><span class="tr">«Остановить»</span><span class="ln"></span><span class="st">видео на телефоне</span></div>
+    <div class="fn"><div class="fid">AI-S04</div><div class="fnt">Просмотр</div><div class="fns">голос слышен</div></div>
+    <div class="fa"><span class="tr">«Сформировать карточки»</span><span class="ln"></span><span class="st">нужен вход?</span></div>
+    <div class="fn"><div class="fid">AI-S03</div><div class="fnt">Вход по телефону</div><div class="fns">пропускается, если уже вошёл</div></div>
+    <div class="fa"><span class="tr">Код верный</span><span class="ln"></span><span class="st">upload start</span></div>
+    <div class="fn sys"><div class="fid">AI-S07</div><div class="fnt">Загрузка → обработка</div><div class="fns">после загрузки можно уйти</div></div>
+    <div class="fa"><span class="tr">Push / in-app</span><span class="ln"></span><span class="st">черновики готовы</span></div>
+    <div class="fn"><div class="fid">AI-S08 · S09 · S10</div><div class="fnt">Пакет черновиков</div><div class="fns">правки, фото, точки, сводка</div></div>
+    <div class="fa"><span class="tr">«Отправить готовые на модерацию — N»</span><span class="ln"></span><span class="st">N версий</span></div>
+    <div class="fn sys"><div class="fid">AI-S14</div><div class="fnt">На модерации</div><div class="fns">исходы независимы</div></div>
+    <div class="fa"><span class="tr">Одобрено</span><span class="ln"></span><span class="st">видна покупателям</span></div>
+    <div class="fn end"><div class="fid">AI-B01</div><div class="fnt">На витрине</div><div class="fns">актуальность «Сегодня»</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Нет прав на камеру / микрофон</b>→ AI-S04 · Camera / Microphone denied<br>↩ Возврат: разрешить, снять без звука (Rev 1) или AI-S02 (фото, голос, вручную)</div>
+    <div class="fbr"><b>В видео нет речи</b>→ AI-S04 · No audio (отправка заблокирована)<br>↩ «Перезаписать только голос» → Просмотр; видеоряд и кадры сохранены</div>
+    <div class="fbr"><b>Неверный / истёкший код</b>→ AI-S03 · Wrong code<br>↩ Код ещё раз; материал не теряется. Закрыл вход → AI-S03 · Back without loss</div>
+    <div class="fbr"><b>Сеть пропала при загрузке</b>→ AI-S07 · Offline (пауза)<br>↩ Автоповтор при сети или «Повторить сейчас» — без переснятия</div>
+    <div class="fbr"><b>ИИ недоступен после загрузки</b>→ AI-S07 · Ожидает обработки (автоповтор)<br>↩ Ждать или «Заполнить вручную» → AI-S09; поздний результат → AI-S07 · Conflict</div>
+    <div class="fbr"><b>Ошибка обработки</b>→ AI-S07 · Error<br>↩ «Повторить обработку» → AI-S07 или «Заполнить вручную» → AI-S09</div>
+    <div class="fbr"><b>Черновик без фото / цены / точки</b>→ AI-S08 исключён, сохранён<br>↩ Дозаполнить в AI-S09 позже; готовые уходят без него</div>
+    <div class="fbr"><b>«Нужно исправить» / «Отклонено»</b>→ AI-S14 · Needs fix / Rejected<br>↩ «Исправить» → AI-S09 → снова AI-S14; апелляция → AI-S22</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

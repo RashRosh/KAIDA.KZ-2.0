@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-M01 · Очередь модерации</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-M01 · Moderator · wireframe</div>
+    <h2 class="ab-title">Очередь</h2>
+    <p class="ab-desc">Серый wireflow для проверки связности seller / buyer. Три вкладки: «Карточки», «Жалобы», «Апелляции». Внутри «Жалоб» — фильтры «Фото» и «Подозрительные отзывы». Детальная desktop-система очередей — отдельное ТЗ.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-M01 · Queue · Cards</b><br>Новые карточки и редакции</div>
+      <div class="wf">
+        <div class="wbar">Модерация</div>
+        <div class="wtab"><span class="on">Карточки · 18</span><span>Жалобы · 4</span><span>Апелляции · 1</span></div>
+        <div class="wbody">
+          <div style="display: flex; gap: 6px;"><span class="wchip on">Все</span><span class="wchip">Новые</span><span class="wchip">Редакции</span><span class="wchip">Каталог</span></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><b>Баранина · 600 г</b><span>Новая · 2 точки · из пакета 5</span><span class="wchip" style="align-self: flex-start;">нет в каталоге</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><b>Баранина, лопатка</b><span>Редакция: цена 5 000 → 4 800</span><span class="wchip" style="align-self: flex-start;">на витрине старая версия</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><b>Энергетик «Ночной»</b><span>Новая · автопроверка: спорная категория</span></div></div>
+          <div class="wbox dash"><span>Безопасные карточки одобрены автоматически и сюда не попадают</span></div>
+        </div>
+      </div>
+      <div class="note">Одна строка = одна карточка конкретной точки: исходы пакета независимы.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M01 · Queue · Complaints</b><br>Фильтры «Фото» / «Подозрительные отзывы»</div>
+      <div class="wf">
+        <div class="wbar">Модерация</div>
+        <div class="wtab"><span>Карточки · 18</span><span class="on">Жалобы · 4</span><span>Апелляции · 1</span></div>
+        <div class="wbody">
+          <div style="display: flex; gap: 6px;"><span class="wchip on">Фото · 3</span><span class="wchip">Подозрительные отзывы · 1</span></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">snap</div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><b>Курага · 500 г · Сайран</b><span>Кластер: 7 сообщений → 1 случай</span><span class="wchip" style="align-self: flex-start;">всплеск · влияние заморожено</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">snap</div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><b>Помидоры · Тастак</b><span>2 сообщения</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">snap</div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><b>Укроп · Зелёный базар</b><span>1 сообщение · продавец уже заменил фото</span></div></div>
+        </div>
+      </div>
+      <div class="note">Число сообщений видно только модератору. Замена фото продавцом не закрывает жалобу на прежнюю версию (п. 18.4).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

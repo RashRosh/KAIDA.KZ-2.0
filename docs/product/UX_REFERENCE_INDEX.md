@@ -17,7 +17,7 @@ https://drive.google.com/drive/folders/1y0IGHOKeGmOcgr7fMeO_ZITSDJyUozUa
 For a UI/UX Slice Contract or implementation:
 
 1. establish current repository state and closed contracts;
-2. read `docs/DESIGN_SYSTEM.md`;
+2. read `docs/PROJECT_RULES.md` §18.1 (current mockup) and §18.4 (mandatory UI rules);
 3. use this index to select only the references relevant to the user task;
 4. compare reference guidance with KAIDA product semantics;
 5. classify findings as `KEEP`, `ADAPT`, `REJECT`, or `GAP`;
@@ -343,34 +343,4 @@ historical record of the original per-finding read; the "touches closed/blocked 
 matters going forward — a `YES` there means new business mechanics, not just presentation, and still needs an
 explicit Product Owner answer before implementation per §18.1, not a silent adoption.
 
-**Superseded as a direct target on 2026-09-23:** the 42-frame artifact remains the historical source described by
-this table, but current UX-reset instructions are now owned by `UX_NAVIGATION_STATE_SPEC.md`,
-`WIREFRAME_TASK_PASS3.md` and `WIREFRAME_PASS3_REVIEW.md`. The corrected pass-3 prototype becomes implementation
-authority only after Product Owner visual acceptance and a durable artifact locator/copy is recorded. This note
-supersedes the older wording below wherever it calls the 42-frame export the current direct target.
-
-| # | Finding | Classification | Touches closed/blocked contract? |
-|---|---|---|---|
-| 1 | `1a`–`1i`, `2a`–`2i`, `3a`–`3c`/`3e`–`3g` (buyer search/nearby/card/Избранное, seller cabinet/trading points/Change Set/Offer Workspace/freshness/`Для вас`) match already-closed S0–S13/#35/#36 behavior, no new business rule | `KEEP` — reference material for the redesign pass, not new scope | NO |
-| 2 | `4e` ("1b · Ссылка на карту"): paste a 2ГИС/Google/Yandex Maps link → client-parsed coordinate preview → explicit confirm; unparseable input → "попросим прийти на точку" | Independently converges with the already-drafted mechanism in `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` (paste-and-parse, no embedded map/SDK) | **YES — S8, blocked.** Added as a third convergent source in that draft's Section 0. Still requires explicit Product Owner approval before its Status changes from `PROPOSED — BLOCKED`. |
-| 3 | `4a`–`4c`: loading skeleton matching card shape, offline banner + stale-cache "Обновить", three-tier server-error severity (full-screen / local block / toast), explicit "ввод продавца не теряется никогда" | `GAP` — no Slice Contract or `docs/DESIGN_SYSTEM.md` section currently owns cross-cutting system states (checked: only an `--error` color token and two duplicate-submit lines exist today) | NO closed contract touched; recorded as `UX-OBS-002` in `docs/UX_BACKLOG.md`. |
-| 4 | `1j`/`1k`/`3a`/`3b`/`3c` fully wireframe Issue #27 (NEXT, Slice Contract not yet approved) and Issues #31/#32 (COMMITTED after #27) | `ADAPT` — good advisory input for those Slice Contracts once each is actually opened, in `EXECUTION_PLAN.md` order | NO — but the artifact must not be read as a finished contract for #27; do not skip the Slice Contract step. |
-| 5 | `5a`–`5d` (Notifications, Tariff, Promotion+Payment, Analytics drill-down) fully wireframe S23/S25–S29/S33; `1c`/`4f` deepen freeform/voice/AI-draft review (S17–S19) | Advisory only — **not actionable now** | These capabilities are `После MVP` / `LATER, dependency-gated` per `FEATURE_MAP.md` and `EXECUTION_PLAN.md`. A complete-looking deck is not a scheduling decision; treating it as one would violate `PROJECT_RULES.md` §20 ("не писать весь MVP одним заходом"). |
-| 6 | OTP resend button with visible countdown (`0:28`–`0:42`) on `2i` | Concrete UI evidence supporting the existing `GAP` already recorded in the Phone/OTP section above (2026-09-21) | NO — "OTP resend + timer" stays an unscheduled insertion candidate pending explicit Product Owner scheduling; no contract to touch yet. |
-| 7 | `5e` Tier 4 stubs (Market scheme, Reviews/rating, Offer video) rendered only as labeled empty slots | `KEEP` — matches current `INSERTION CANDIDATES` treatment in `EXECUTION_PLAN.md` exactly | NO |
-
-Nothing here was adopted into an open Slice Contract by this spot-check alone. `docs/product/WIREFRAME_BRIEF.md`
-updated to record this pass's tier coverage.
-
-**2026-09-22, later same day — Product Owner elevation to authoritative UX target (`PROJECT_RULES.md` §18.1):**
-this reclassifies rows 1, 4 and 7 above from advisory `KEEP`/`ADAPT` to directly-adopted target UI — no further
-KEEP/ADAPT gate needed to use them as the design for their respective screens. Rows 2 and 3 were the two items in
-this table introducing genuinely new business mechanics rather than pure presentation, and both got an explicit
-Product Owner answer the same day: row 2 (S8 paste-and-parse geo fallback) is now scheduled as `EXECUTION_PLAN.md`
-COMMITTED stage 1, next after Issue #27; row 3 (`UX-OBS-002`, cross-cutting loading/offline/error states) is now
-an owned Design System rule at `docs/DESIGN_SYSTEM.md` §7.1. Row 5 (Tier 3, После MVP) is unaffected: a
-complete-looking screen still isn't a scheduling decision on its own.
-
-## Audit lifecycle
-
-Issue #37 and PR #40 contain the maintenance evidence for the original audit. Live gate status and current execution order belong to `docs/product/EXECUTION_PLAN.md`, not this index.
+**Superseded (2026-09-25):** the 42-frame artifact and Pass 3 are history only. The single current UX target is the AI-first chain in `PROJECT_RULES.md` §18.1.

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S15 · Управление карточкой</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1656px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S15 · Seller · published card</div>
+    <h2 class="ab-title">Управление карточкой</h2>
+    <p class="ab-desc">После публикации — обычные действия без ИИ: «Редактировать», «Подтвердить актуальность», «Выключить» / «Включить», «Удалить». Подтверждение актуальности без изменений повторной модерации не требует. Выключение и удаление выполняются сразу. Удаление — отдельное необратимое действие, не перенос в архив.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S15 · Card · Published</b><br>Карточка продавца и действия</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Баранина, лопатка</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="img m1" style="height: 170px; border-radius: 20px;"><span class="fresh fr3">3 дня</span></div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;"><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span><span class="bd bd-warn"><span class="ic i-clock"></span>Подтвердите актуальность</span></div>
+          <div><span class="pr-lg">5 000 ₸</span> <span class="c2">/ кг</span></div>
+          <p class="c">Зелёный базар, ряд 4 · подтверждено 3 дня назад</p>
+          <div class="card" style="gap: 0; padding: 0 12px;">
+            <div class="li"><span class="ic i-check pt"></span><div class="mid"><div class="ts">Подтвердить актуальность</div><p class="c">Товар есть, цена та же</p></div></div>
+            <div class="li"><span class="ic i-pencil c2"></span><div class="mid"><div class="ts">Редактировать</div></div></div>
+            <div class="li"><span class="ic i-power c2"></span><div class="mid"><div class="ts">Выключить</div><p class="c">Скрыть с витрины на время</p></div></div>
+            <div class="li" style="color: var(--danger);"><span class="ic i-trash"></span><div class="mid"><div class="ts">Удалить</div></div></div>
+          </div>
+        </main>
+      </div>
+      <div class="note">Плашка на фото — та же, что видит покупатель («3 дня»). Задача актуальности — отдельный warning-бейдж.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S15 · Card · Actuality confirmed</b><br>Без повторной модерации</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Баранина, лопатка</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="img m1" style="height: 170px; border-radius: 20px;"><span class="fresh fr0">Сегодня</span></div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;"><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div>
+          <div><span class="pr-lg">5 000 ₸</span> <span class="c2">/ кг</span></div>
+          <p class="c">Зелёный базар, ряд 4 · подтверждено сегодня</p>
+          <div class="card" style="gap: 0; padding: 0 12px;">
+            <div class="li"><span class="ic i-pencil c2"></span><div class="mid"><div class="ts">Редактировать</div></div></div>
+            <div class="li"><span class="ic i-power c2"></span><div class="mid"><div class="ts">Выключить</div><p class="c">Скрыть с витрины на время</p></div></div>
+            <div class="li" style="color: var(--danger);"><span class="ic i-trash"></span><div class="mid"><div class="ts">Удалить</div></div></div>
+          </div>
+        </main>
+        <div class="toast" role="status"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Актуальность подтверждена</span></div>
+      </div>
+      <div class="note">Тост объявляется assistive technology без переноса фокуса. Таймер актуальности сброшен — плашка «Сегодня».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S15 · Card · Off</b><br>Продавец временно скрыл карточку</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Сыр курт, домашний</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="img m6" style="height: 170px; border-radius: 20px; opacity: 0.55;"></div>
+          <span class="bd bd-n"><span class="ic i-power"></span>Выключено</span>
+          <div><span class="pr-lg">400 ₸</span> <span class="c2">/ шт.</span></div>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px;"><p class="c c2">Покупатели не видят эту карточку. Включите, когда товар снова будет в продаже.</p></div>
+          <button class="btn btn-p lg w"><span class="ic i-power sm"></span>Включить</button>
+          <button class="btn btn-o w"><span class="ic i-pencil sm"></span>Редактировать</button>
+        </main>
+      </div>
+      <div class="note"><span class="tag tag-gap">Open · п. 22</span>Идёт ли таймер актуальности у выключенной карточки — открытое решение; экран его не обещает.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S15 · Card · Delete confirm</b><br>Необратимое действие</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Баранина, лопатка</div></header>
+        <main class="body"><div class="img m1" style="height: 170px; border-radius: 20px;"></div></main>
+        <div class="scrim"></div>
+        <div class="sheet" role="alertdialog" aria-labelledby="dl" aria-describedby="dd">
+          <div class="grab"></div>
+          <h2 class="h3" id="dl">Удалить карточку навсегда?</h2>
+          <p class="t c2" id="dd">Карточка исчезнет с витрины и из вашего кабинета. Восстановить удалённую карточку нельзя.</p>
+          <p class="c">Если товар закончился на время — лучше выключите карточку.</p>
+          <button class="btn btn-d lg w"><span class="ic i-trash sm"></span>Удалить навсегда</button>
+          <button class="btn btn-o w"><span class="ic i-power sm"></span>Выключить вместо удаления</button>
+          <button class="btn btn-g w">Отмена</button>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · lifecycle</span>Служебный audit trail, если нужен по compliance, невидим продавцу. Срок служебного хранения — открытое решение (п. 22).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1656,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

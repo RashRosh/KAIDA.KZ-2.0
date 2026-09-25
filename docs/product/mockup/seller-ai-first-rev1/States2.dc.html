@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Component / state matrix · 2</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2200px; height: 1420px; gap: 28px;">
+  <div class="ab-head">
+    <div class="ab-id">STATES · 2</div>
+    <h2 class="ab-title">Медиа, выбор точек, модерация, актуальность, рейтинг</h2>
+    <p class="ab-desc">Предлагаемые расширения DS. Всё строится на токенах KAIDA: без отдельной AI-палитры и «магических» эффектов.</p>
+  </div>
+
+  <div class="mx media" style="grid-template-columns: 200px repeat(8, minmax(0, 1fr));">
+    <div class="mh">Media tile</div><div class="mh">Add</div><div class="mh">Cover</div><div class="mh">Upload</div><div class="mh">Retry</div><div class="mh">Reorder</div><div class="mh">Limit</div><div class="mh">Fallback</div><div class="mh">Hidden by complaint</div>
+    <div><span class="rn">Photo</span><span class="vn">Media tile / * / Photo</span></div>
+    <div><span class="mt add"><span class="ic i-camera"></span>Фото</span></div>
+    <div><span class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></span></div>
+    <div><span class="mt img m1 up"><span class="pb"><i style="width: 60%;"></i></span></span><span class="c num">60%</span></div>
+    <div><span class="mt img m3 er"><span class="erl"><span class="ic i-refresh sm"></span>Повторить</span></span></div>
+    <div><span class="mt img m7"><span class="x"><span class="ic i-drag"></span></span></span><span class="c">+ «Переместить» ← →</span></div>
+    <div><span class="mt add" style="color: var(--ink3); border-color: var(--line);"><span class="ic i-plus"></span>Лимит</span><span class="c">5 из 5</span></div>
+    <div><span class="mt fb"><span class="ic i-logo" role="img" aria-label="Фото нет"></span></span></div>
+    <div><span class="mt img m3" style="filter: grayscale(0.5);"><span class="cv" style="background: var(--danger);">Скрыто</span></span><span class="c">только у продавца</span></div>
+    <div><span class="rn">Public video</span><span class="vn">Media tile / * / Video</span></div>
+    <div><span class="mt add"><span class="ic i-video"></span>Видео</span></div>
+    <div><span class="mt img m2" style="display: flex; align-items: center; justify-content: center;"><span class="ic i-play" style="color: #fff;"></span></span><span class="c">0:18</span></div>
+    <div><span class="mt img m2 up"><span class="pb"><i style="width: 30%;"></i></span></span></div>
+    <div><span class="mt img m2 er"><span class="erl"><span class="ic i-refresh sm"></span>Повторить</span></span></div>
+    <div><span class="c">—</span></div>
+    <div><span class="c">1 из 1</span></div>
+    <div><span class="c">Не показывается</span></div>
+    <div><span class="c">—</span></div>
+  </div>
+
+  <div class="cols" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start;">
+    <div class="mx" style="grid-template-columns: 220px minmax(0, 1fr) 180px;">
+      <div class="mh">Point selector</div><div class="mh">Вид</div><div class="mh">CTA</div>
+      <div><span class="rn">None exist</span><span class="vn">Point selector / None / Draft</span></div><div><span class="btn btn-p sm" style="align-self: flex-start;"><span class="ic i-plus sm"></span>Добавить торговую точку</span></div><div><span class="c">Черновик незавершён</span></div>
+      <div><span class="rn">Single</span><span class="vn">Point selector / Single / Auto</span></div><div style="flex-direction: row; align-items: center; gap: 8px;"><span class="cb on"><span class="ic i-check"></span></span><span class="ts">Зелёный базар</span><span class="c">· выбрана автоматически</span></div><div><span class="c">1 карточка</span></div>
+      <div><span class="rn">Multiple · none</span><span class="vn">Point selector / Multiple / None selected</span></div><div style="flex-direction: row; align-items: center; gap: 8px;"><span class="cb"></span><span class="ts">Все точки</span><span class="c">0 из 5</span></div><div><span class="btn dis sm">Готово</span></div>
+      <div><span class="rn">Subset</span><span class="vn">Point selector / Multiple / Subset</span></div><div style="flex-direction: row; align-items: center; gap: 8px;"><span class="cb" style="border-color: var(--primary);"><span style="width: 12px; height: 2px; background: var(--primary);"></span></span><span class="ts">Все точки</span><span class="c">3 из 5</span></div><div><span class="c">Будет создано 3 карточки</span></div>
+      <div><span class="rn">All</span><span class="vn">Point selector / Multiple / All</span></div><div style="flex-direction: row; align-items: center; gap: 8px;"><span class="cb on"><span class="ic i-check"></span></span><span class="ts">Все точки</span><span class="c">5 из 5</span></div><div><span class="c">Будет создано 5 карточек</span></div>
+      <div><span class="rn">Override</span><span class="vn">Point override / Custom / Price</span></div><div style="flex-direction: row; align-items: center; gap: 8px;"><span class="bd bd-p">Своё значение</span><span class="c">5 200 ₸ · «Вернуть общее значение»</span></div><div><span class="c">—</span></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      <div class="mx" style="grid-template-columns: 220px minmax(0, 1fr);">
+        <div class="mh">Moderation outcome</div><div class="mh">Вид и следующий шаг</div>
+        <div><span class="rn">Sent</span><span class="vn">Outcome / Pending / Batch</span></div><div style="flex-direction: row; gap: 8px; align-items: center;"><span class="bd bd-info"><span class="ic i-clock"></span>На модерации</span><span class="c">без срока</span></div>
+        <div><span class="rn">Needs fix</span><span class="vn">Outcome / Needs fix / Field</span></div><div style="flex-direction: row; gap: 8px; align-items: center;"><span class="bd bd-err"><span class="ic i-alert"></span>Нужно исправить</span><span class="c">поле + причина → «Исправить»</span></div>
+        <div><span class="rn">Rejected</span><span class="vn">Outcome / Rejected / Appealable</span></div><div style="flex-direction: row; gap: 8px; align-items: center;"><span class="bd bd-err"><span class="ic i-close"></span>Отклонено</span><span class="c">причина → «Подать апелляцию»</span></div>
+        <div><span class="rn">Mixed</span><span class="vn">Outcome summary / Mixed</span></div><div><span class="ts num">4 на витрине · 1 нужно исправить</span></div>
+      </div>
+      <div class="mx" style="grid-template-columns: 220px minmax(0, 1fr);">
+        <div class="mh">Actuality plaque</div><div class="mh">На фото / fallback</div>
+        <div><span class="rn">Visible</span><span class="vn">Actuality plaque / 0–6 days</span><span class="c">Цвет по возрасту: зелёный → оливковый → янтарный → серый. Цвет дублирует текст, не заменяет его; белый текст ≥ 4,9:1 на каждом шаге.</span></div>
+        <div style="flex-direction: row; flex-wrap: wrap; gap: 6px;"><span class="fresh fr0" style="position: static;">Сегодня</span><span class="fresh fr1" style="position: static;">Вчера</span><span class="fresh fr2" style="position: static;">2 дня</span><span class="fresh fr3" style="position: static;">3 дня</span><span class="fresh fr4" style="position: static;">4 дня</span><span class="fresh fr5" style="position: static;">5 дней</span><span class="fresh fr6" style="position: static;">6 дней</span></div>
+        <div><span class="rn">≥ 7 days</span><span class="vn">— (hidden from buyers)</span></div><div><span class="c">Плашки «7 дней» нет: карточка скрыта со всех buyer-поверхностей</span></div>
+      </div>
+      <div class="mx" style="grid-template-columns: 220px repeat(3, minmax(0, 1fr));">
+        <div class="mh">Rating summary</div><div class="mh">0</div><div class="mh">1–2</div><div class="mh">3+</div>
+        <div><span class="rn">Point / Seller</span><span class="vn">Rating summary / * / Point · Seller</span></div><div><span class="t c2">Нет оценок</span></div><div><span class="t">Мало оценок · 2 отзыва</span></div><div style="flex-direction: row; align-items: center; gap: 6px;"><span class="ic i-starf" style="color: var(--sun);"></span><span class="pr">4,7</span><span class="c2">· 12 отзывов</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2200,"height":1420}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

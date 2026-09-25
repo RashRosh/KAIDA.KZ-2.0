@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-B07 · Фильтры поиска</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1656px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-B07 · Buyer · search filters · Rev 1</div>
+    <h2 class="ab-title">Фильтры поиска</h2>
+    <p class="ab-desc">Кнопка «Фильтры» справа от строки поиска (AI-B01). Решение PO: только сортировка, расстояние и цена от–до. Порядок выдачи по умолчанию не меняется: актуальность и расстояние. Правило сравнения цен с разными единицами — будущий контракт, в макете не выдумывается.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-B07 · Filters · Open</b><span class="tag tag-rev">Rev 1</span><br>Bottom sheet поверх выдачи</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">помидоры</span></div><button class="ib" aria-label="Фильтры" style="width: 44px; position: relative;"><span class="ic i-filter"></span></button></header><main class="body" style="gap: 12px; padding: 12px;"><article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m4" style="width: 96px; height: 96px; border-radius: 12px;"><span class="fresh fr0">Сегодня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Помидоры розовые</h3>
+                <div><span class="pr">1 200 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2" style="margin-top: 2px;">Тастак, место 31</p>
+                <p class="c">Овощной ряд · 0,8 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут до Тастак, место 31"><span class="ic i-route sm"></span>Маршрут</a><span class="sp"></span><div class="cts"><a class="ct" href="#" aria-label="Позвонить продавцу"><span class="ic i-phone"></span></a><a class="ct" href="#" aria-label="Написать в WhatsApp"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></a></div></div>
+          </article><article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m3" style="width: 96px; height: 96px; border-radius: 12px;"><span class="fresh fr1">Вчера</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Помидоры черри</h3><p class="c c2" style="font-weight: 500;">500 г</p>
+                <div><span class="pr">1 800 ₸</span> <span class="c2" style="font-size: 14px;">/ упаковка</span></div>
+                <p class="c c2" style="margin-top: 2px;">Зелёный базар, ряд 7</p>
+                <p class="c">Овощи и зелень · 2,4 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут до Зелёный базар, ряд 7"><span class="ic i-route sm"></span>Маршрут</a></div>
+          </article></main><div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="fh" style="gap: 8px;">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center;"><h2 class="h3" id="fh" style="flex: 1;">Фильтры</h2><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button></div>
+          <div class="ov">Сортировка</div>
+          <div role="radiogroup" aria-label="Сортировка" style="display: flex; flex-direction: column;"><div class="li" style="min-height: 40px; padding: 2px 0;"><span class="rd"></span><div class="mid"><div class="t">Сначала ближе</div></div></div><div class="li" style="min-height: 40px; padding: 2px 0;"><span class="rd"></span><div class="mid"><div class="t">Сначала актуальнее</div></div></div><div class="li" style="min-height: 40px; padding: 2px 0;"><span class="rd on"></span><div class="mid"><div class="t">Сначала дешевле</div></div></div></div>
+          
+          <div class="ov" style="margin-top: 2px;">Расстояние</div>
+          <div class="chips" role="radiogroup" aria-label="Расстояние" style="gap: 6px; flex-wrap: nowrap;"><span class="chip" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="false">до 1 км</span><span class="chip on" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="true">до 3 км</span><span class="chip" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="false">до 5 км</span><span class="chip" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="false">Любое</span></div>
+          <div class="ov" style="margin-top: 2px;">Цена, ₸</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div class="inp ph0"><span class="c2">от</span><span style="flex: 1;"></span><span>₸</span></div><div class="inp num foc"><span class="c2">до</span><span style="flex: 1;">2 000</span><span class="c2">₸</span></div></div>
+          <p class="c" style="display: flex; gap: 6px;"><span class="ic i-info xs c2" style="margin-top: 2px;"></span><span>Сравниваем цену, как она указана в карточке: за кг, за шт., за упаковку.</span></p>
+          <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 2px;"><button class="btn btn-p lg w">Показать 8 предложений</button><button class="btn btn-g w" style="height: 36px;">Сбросить</button></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.5</span>Три блока — и больше ничего (решение PO). Сортировка — один выбор; расстояние — один выбор чипами; цена — два необязательных поля. Число на главной кнопке пересчитывается при каждом изменении. «Сбросить» возвращает значения по умолчанию: «Сначала актуальнее», «Любое», без цены.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B07 · Filters · No location</b><span class="tag tag-rev">Rev 1</span><br>Выбрано «Сначала ближе» без разрешения</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">помидоры</span></div><button class="ib" aria-label="Фильтры" style="width: 44px; position: relative;"><span class="ic i-filter"></span></button></header><main class="body" style="gap: 12px; padding: 12px;"><article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m4" style="width: 96px; height: 96px; border-radius: 12px;"><span class="fresh fr0">Сегодня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Помидоры розовые</h3>
+                <div><span class="pr">1 200 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2" style="margin-top: 2px;">Тастак, место 31</p>
+                <p class="c">Овощной ряд · 0,8 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут до Тастак, место 31"><span class="ic i-route sm"></span>Маршрут</a><span class="sp"></span><div class="cts"><a class="ct" href="#" aria-label="Позвонить продавцу"><span class="ic i-phone"></span></a><a class="ct" href="#" aria-label="Написать в WhatsApp"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></a></div></div>
+          </article></main><div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="fh" style="gap: 8px;">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center;"><h2 class="h3" id="fh" style="flex: 1;">Фильтры</h2><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button></div>
+          <div class="ov">Сортировка</div>
+          <div role="radiogroup" aria-label="Сортировка" style="display: flex; flex-direction: column;"><div class="li" style="min-height: 40px; padding: 2px 0;"><span class="rd on"></span><div class="mid"><div class="t">Сначала ближе</div></div></div><div class="li" style="min-height: 40px; padding: 2px 0;"><span class="rd"></span><div class="mid"><div class="t">Сначала актуальнее</div></div></div><div class="li" style="min-height: 40px; padding: 2px 0;"><span class="rd"></span><div class="mid"><div class="t">Сначала дешевле</div></div></div></div>
+          <div class="banner gray" role="status" style="gap: 8px; padding: 12px; border-radius: 14px;"><div style="display: flex; gap: 10px;"><span class="ic i-locate c2"></span><p class="c c2" style="flex: 1;">Чтобы искать рядом, нужно ваше местоположение. Без него работают «Сначала актуальнее», «Сначала дешевле» и цена.</p></div><button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-locate sm"></span>Разрешить геолокацию</button></div>
+          <div class="ov" style="margin-top: 2px;">Расстояние</div>
+          <div class="chips" role="radiogroup" aria-label="Расстояние" style="gap: 6px; flex-wrap: nowrap;"><span class="chip" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="false">до 1 км</span><span class="chip" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="false">до 3 км</span><span class="chip" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="false">до 5 км</span><span class="chip on" role="radio" style="padding: 0 10px; height: 34px;" aria-checked="true">Любое</span></div>
+          <div class="ov" style="margin-top: 2px;">Цена, ₸</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div class="inp ph0"><span class="c2">от</span><span style="flex: 1;"></span><span>₸</span></div><div class="inp ph0"><span class="c2">до</span><span style="flex: 1;"></span><span>₸</span></div></div>
+          <p class="c" style="display: flex; gap: 6px;"><span class="ic i-info xs c2" style="margin-top: 2px;"></span><span>Сравниваем цену, как она указана в карточке: за кг, за шт., за упаковку.</span></p>
+          <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 2px;"><button class="btn btn-p lg w">Показать 24 предложения</button><button class="btn btn-g w" style="height: 36px;">Сбросить</button></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.5</span>Геолокация не запрашивается при открытии фильтра — только по кнопке «Разрешить геолокацию». Пока разрешения нет, «Сначала ближе» и расстояние видны; при выборе появляется пояснение, а выдача остаётся в порядке «Сначала актуальнее». Остальные пункты работают.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B07 · Filters · Applied</b><span class="tag tag-rev">Rev 1</span><br>Счётчик на кнопке и чипы под поиском</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">помидоры</span></div><button class="ib" aria-label="Фильтры, активно 3" style="width: 44px; position: relative; background: var(--primary-soft); color: var(--primary-text);"><span class="ic i-filter"></span><span class="dot" style="top: 4px; margin-left: 26px;" aria-hidden="true">3</span></button></header><div style="display: flex; gap: 6px; overflow: hidden; padding: 8px 12px 0; flex: none; background: var(--bg);" aria-label="Активные фильтры"><button class="chip on" style="height: 32px; padding: 0 8px 0 12px; font-size: 13px;" aria-label="Убрать фильтр Сначала дешевле">Сначала дешевле<span class="ic i-close" style="width: 16px; height: 16px;"></span></button><button class="chip on" style="height: 32px; padding: 0 8px 0 12px; font-size: 13px;" aria-label="Убрать фильтр до 3 км">до 3 км<span class="ic i-close" style="width: 16px; height: 16px;"></span></button><button class="chip on" style="height: 32px; padding: 0 8px 0 12px; font-size: 13px;" aria-label="Убрать фильтр до 2 000 ₸">до 2 000 ₸<span class="ic i-close" style="width: 16px; height: 16px;"></span></button></div><main class="body" style="gap: 12px; padding: 12px;"><p class="c">8 предложений · до 3 км · сначала дешевле</p><article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m4" style="width: 96px; height: 96px; border-radius: 12px;"><span class="fresh fr0">Сегодня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Помидоры розовые</h3>
+                <div><span class="pr">1 200 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2" style="margin-top: 2px;">Тастак, место 31</p>
+                <p class="c">Овощной ряд · 0,8 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут до Тастак, место 31"><span class="ic i-route sm"></span>Маршрут</a><span class="sp"></span><div class="cts"><a class="ct" href="#" aria-label="Позвонить продавцу"><span class="ic i-phone"></span></a><a class="ct" href="#" aria-label="Написать в WhatsApp"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></a></div></div>
+          </article><article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m3" style="width: 96px; height: 96px; border-radius: 12px;"><span class="fresh fr1">Вчера</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Помидоры черри</h3><p class="c c2" style="font-weight: 500;">500 г</p>
+                <div><span class="pr">1 800 ₸</span> <span class="c2" style="font-size: 14px;">/ упаковка</span></div>
+                <p class="c c2" style="margin-top: 2px;">Зелёный базар, ряд 7</p>
+                <p class="c">Овощи и зелень · 2,4 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут до Зелёный базар, ряд 7"><span class="ic i-route sm"></span>Маршрут</a></div>
+          </article></main>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.5</span>Счётчик на «Фильтрах» = число настроек, отличных от значений по умолчанию. Каждый чип снимается крестиком по одному; выдача обновляется сразу. Чипы — одна строка, при нехватке места листаются вбок.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B07 · Filters · Empty</b><span class="tag tag-rev">Rev 1</span><br>Ничего не найдено из-за фильтров</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">помидоры</span></div><button class="ib" aria-label="Фильтры, активно 2" style="width: 44px; position: relative; background: var(--primary-soft); color: var(--primary-text);"><span class="ic i-filter"></span><span class="dot" style="top: 4px; margin-left: 26px;" aria-hidden="true">2</span></button></header><div style="display: flex; gap: 6px; padding: 8px 12px 0; flex: none;"><button class="chip on" style="height: 32px; padding: 0 8px 0 12px; font-size: 13px;" aria-label="Убрать фильтр до 1 км">до 1 км<span class="ic i-close" style="width: 16px; height: 16px;"></span></button><button class="chip on" style="height: 32px; padding: 0 8px 0 12px; font-size: 13px;" aria-label="Убрать фильтр до 500 ₸">до 500 ₸<span class="ic i-close" style="width: 16px; height: 16px;"></span></button></div>
+        <main class="body" style="justify-content: center; align-items: center; gap: 14px; padding: 24px; text-align: center;">
+          <div class="lic" style="width: 64px; height: 64px; border-radius: 20px;"><span class="ic i-filter lg"></span></div>
+          <h1 class="h2">С такими фильтрами ничего нет</h1>
+          <p class="t c2">Без фильтров по запросу «помидоры» рядом есть 24 предложения.</p>
+          <button class="btn btn-p lg w">Сбросить фильтры</button>
+          <button class="btn btn-g w">Изменить фильтры</button>
+        </main>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.5</span>Отдельно от обычного «ничего не найдено» по запросу: здесь причина — фильтры, поэтому главное действие «Сбросить фильтры», а число без фильтров подсказывает, что товар рядом есть. Если и без фильтров пусто — обычное пустое состояние поиска, без этого экрана.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1656,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S22 · Апелляция</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S22 · Seller · appeal</div>
+    <h2 class="ab-title">Апелляция</h2>
+    <p class="ab-desc">Доказательства, объяснение, статус и решение. Апелляцию рассматривает другой модератор — не тот, кто принял исходное решение. Срок рассмотрения не обещается (нет SLA).</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S22 · Appeal · Form</b><br>Объяснение и доказательства</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Апелляция</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><div class="img m3" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Фото скрыто · Курага · 500 г</div><p class="c">Решение от 22 сентября</p></div></div>
+          <div class="fld"><label for="ap1">Почему решение неверное</label><div class="inp ta foc" id="ap1" style="min-height: 104px;">На фото именно этот сорт кураги, я продаю его с августа.</div></div>
+          <div class="fld"><div class="fl">Доказательства <span class="req">· необязательно</span></div><div class="mrow"><div class="mt img m3"></div><div class="mt img m7"></div><button class="mt add"><span class="ic i-plus"></span>Файл</button></div><span class="hint">Фото товара на прилавке, накладная, ценник</span></div>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Рассмотрит другой модератор. Пока идёт рассмотрение, фото остаётся скрытым.</p></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Подать апелляцию</button></div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · appeal policy</span>Какие решения можно обжаловать и сколько раз — moderation taxonomy (gap 12, 15).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S22 · Appeal · Status &amp; decision</b><br>Этапы и оба исхода</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Апелляция</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="card p16" style="gap: 12px;">
+            <div class="step"><span class="n" style="background: var(--success-soft); color: var(--success);"><span class="ic i-check xs" style="vertical-align: -2px;"></span></span><div><div class="ts">Подана</div><p class="c">23 сентября</p></div></div>
+            <div class="step"><span class="n" style="background: var(--info-soft); color: var(--info);">2</span><div><div class="ts">На рассмотрении</div><p class="c">Другой модератор</p></div></div>
+            <div class="step"><span class="n" style="background: var(--sunken); color: var(--ink3);">3</span><div><div class="ts" style="color: var(--ink3);">Решение</div></div></div>
+          </div>
+          <div class="ov">Исходы</div>
+          <div class="banner ok" style="padding: 12px 14px; border-radius: 14px; gap: 4px;"><div class="ts">Решение отменено</div><p class="c c2">Фото снова показывается. Инцидент снят с рейтинга.</p></div>
+          <div class="banner gray" style="padding: 12px 14px; border-radius: 14px; gap: 4px;"><div class="ts">Решение оставлено</div><p class="c c2">Фото остаётся скрытым. Замените его, чтобы карточка выглядела полной.</p><button class="btn btn-o sm" style="align-self: flex-start; margin-top: 4px;"><span class="ic i-camera sm"></span>Заменить фото</button></div>
+        </main>
+      </div>
+      <div class="note">Исходы показаны вместе для handoff; в продукте виден один. Статус — шаги с номерами и словами, не только цвет.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

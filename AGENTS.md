@@ -22,15 +22,17 @@
 - contracts закрытых slices, которые реально затрагивает изменение;
 - detailed GitHub Issue, если текущий этап ссылается на него.
 
-Slice Contract определяет точное поведение и acceptance. Issue/Feature Map/Design System не имеют права молча расширять его scope.
+Slice Contract определяет точное поведение и acceptance. Issue/Feature Map/макет не имеют права молча расширять его scope.
 
 ## UI / UX work
 
 Перед подготовкой или реализацией UI/UX Slice Contract дополнительно прочитай:
 
-- `docs/DESIGN_SYSTEM.md`;
-- `docs/product/UX_REFERENCE_INDEX.md`;
-- только релевантные внешние UX references, перечисленные для текущей user task.
+- `docs/PROJECT_RULES.md` §18.1 (какой макет сейчас главный) и §18.4 (обязательные UI-правила);
+- для продавца — `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md`, `SELLER_AI_FIRST_DESIGN_REVISION_1.md` и сам макет;
+- `docs/product/UX_REFERENCE_INDEX.md` и только релевантные внешние UX references для текущей user task.
+
+Отдельного документа дизайн-системы нет: визуальный стиль задаёт принятый макет.
 
 Внешние references — advisory evidence, не источник нового contract. Findings классифицируются как:
 
@@ -56,7 +58,7 @@ Controller не проектирует и не реализует slice. Он п
 - процесс и boundaries → `PROJECT_RULES.md`;
 - текущая очередь → `EXECUTION_PLAN.md`;
 - долгосрочная capability map → `FEATURE_MAP.md`;
-- visual/presentation rules → `DESIGN_SYSTEM.md`;
+- визуальный стиль и композиция → принятый макет (`PROJECT_RULES.md` §18.1); обязательные UI-правила → `PROJECT_RULES.md` §18.4;
 - unresolved detailed work → GitHub Issues;
 - exact slice behavior → Slice Contract.
 

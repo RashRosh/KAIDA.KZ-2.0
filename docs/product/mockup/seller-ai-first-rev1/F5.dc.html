@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F5 · Новый продавец без точки</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F5</div>
+    <h2 class="ab-title">Новый продавец без точки → создание точки → возврат в пакет</h2>
+    <p class="ab-desc">Задание п. 20.1: три товара одним видео, вход, первая точка без контактов, отправка двух готовых карточек, третья остаётся незавершённой. Первая точка применяется ко всем черновикам пакета.</p>
+  </div>
+  <div class="fl">
+    <div class="fn"><div class="fid">AI-S01 · Empty</div><div class="fnt">Пустая витрина</div><div class="fns">без входа</div></div>
+    <div class="fa"><span class="tr">CTA → «Снять видео»</span><span class="ln"></span><span class="st">запись до входа</span></div>
+    <div class="fn"><div class="fid">AI-S04</div><div class="fnt">Видео · 3 товара</div><div class="fns">0:58</div></div>
+    <div class="fa"><span class="tr">«Сформировать карточки»</span><span class="ln"></span><span class="st">материал локально</span></div>
+    <div class="fn"><div class="fid">AI-S03</div><div class="fnt">Вход</div><div class="fns">видео сохранено</div></div>
+    <div class="fa"><span class="tr">Код верный</span><span class="ln"></span><span class="st">upload → обработка</span></div>
+    <div class="fn"><div class="fid">AI-S08</div><div class="fnt">3 черновика</div><div class="fns">все без точки; у 1 нет цены</div></div>
+    <div class="fa"><span class="tr">«Добавить торговую точку»</span><span class="ln"></span><span class="st">пакет сохранён</span></div>
+    <div class="fn"><div class="fid">AI-S12A</div><div class="fnt">Точка: адрес → подтверждение</div><div class="fns">контакты пропущены</div></div>
+    <div class="fa"><span class="tr">«Сохранить точку»</span><span class="ln"></span><span class="st">применена ко всем 3</span></div>
+    <div class="fn"><div class="fid">AI-S08</div><div class="fnt">2 готовы, 1 без цены</div><div class="fns">«Будет создано 2 карточки»</div></div>
+    <div class="fa"><span class="tr">«Отправить готовые — 2»</span><span class="ln"></span><span class="st">третья — черновик</span></div>
+    <div class="fn sys"><div class="fid">AI-S14</div><div class="fnt">На модерации · 2</div><div class="fns">черновик ждёт в S01</div></div>
+    <div class="fa"><span class="tr">Одобрено</span><span class="ln"></span><span class="st">маршрут без контактов</span></div>
+    <div class="fn end"><div class="fid">AI-B01</div><div class="fnt">На витрине · 2</div><div class="fns">только «Маршрут»</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Геолокация запрещена</b>→ AI-S12A · Geolocation denied<br>↩ «Найти адрес» или «Вставить ссылку на карту»</div>
+    <div class="fbr"><b>Ссылка не распознана</b>→ AI-S12A · Map link error<br>↩ «Найти адрес»; введённое название точки сохранено</div>
+    <div class="fbr"><b>Back из создания точки</b>→ «Выйти без сохранения точки?»<br>↩ Пакет черновиков нетронут, возврат в AI-S08</div>
+    <div class="fbr"><b>Позже выбор точек меняется</b>→ AI-S10 в каждой карточке<br>↩ Первая точка — только стартовое значение, не блокировка</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

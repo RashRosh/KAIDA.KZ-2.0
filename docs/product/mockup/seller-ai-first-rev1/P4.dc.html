@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Prototype · P4 · Ручной путь при выключенном ИИ</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab motion" style="width: 1100px; height: 1100px; flex-direction: row; gap: 48px; align-items: flex-start;">
+  <div class="ph">
+
+    <!-- 0 · Empty showcase -->
+    <sc-if value="{{ s0 }}" hint-placeholder-val="{{ true }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div><div class="lang"><span class="on">РУС</span><span>ҚАЗ</span></div></header>
+      <main class="body" style="justify-content: center; gap: 20px; padding: 24px 20px;">
+        <h1 class="h1" style="text-align: center;">Покажите товары покупателям рядом</h1>
+        <p class="t c2" style="text-align: center;">Добавьте товар: фото, название и цену. Карточка появится на витрине после вашего подтверждения.</p>
+        <button class="btn btn-p lg w" onClick="{{ go1 }}"><span class="ic i-plus"></span>Сформировать карточки товаров</button>
+      </main>
+      <nav class="nav"><span class="on"><span class="ic i-store"></span>Витрина</span><span><span class="ic i-pin"></span>Точки</span><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+
+    <!-- 1 · Source sheet, AI unavailable -->
+    <sc-if value="{{ s1 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div></header>
+      <main class="body"></main>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div style="display: flex; align-items: center;"><h2 class="h3" style="flex: 1;">Как сформировать карточки?</h2><button class="ib" aria-label="Закрыть" onClick="{{ go0 }}"><span class="ic i-close"></span></button></div>
+        <div class="banner gray" style="flex-direction: row; gap: 10px; padding: 12px; border-radius: 14px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Автоматическое заполнение пока не работает. Карточку можно заполнить вручную.</p></div>
+        <div class="ov">С помощью ИИ</div>
+        <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Временно недоступно</p></div></div>
+        <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div><p class="c">Временно недоступно</p></div></div>
+        <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div><p class="c">Временно недоступно</p></div></div>
+        <div class="ov">Без ИИ</div>
+        <button class="li card hl" onClick="{{ go2 }}" style="padding: 8px 12px; flex-direction: row; text-align: left;"><div class="lic p"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div><p class="c">Пустая карточка товара</p></div><span class="ic i-right pt"></span></button>
+      </div>
+    </sc-if>
+
+    <!-- 2 · Editor -->
+    <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go0 }}"><span class="ic i-left"></span></button><div class="bar-t">Новая карточка</div></header>
+      <main class="body" style="gap: 14px; overflow: auto;">
+        <sc-if value="{{ showErr }}" hint-placeholder-val="{{ false }}"><div class="banner err" role="alert" style="padding: 10px 12px; border-radius: 12px;"><p class="c" style="color: var(--ink);">Заполните поля, отмеченные ниже</p></div></sc-if>
+        <div class="fld">
+          <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото</span><span class="c">{{ photoCount }}</span></div>
+          <div class="mrow">
+            <sc-if value="{{ photo }}" hint-placeholder-val="{{ false }}"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div></sc-if>
+            <button class="mt add" onClick="{{ addPhoto }}" style="{{ photoStyle }}"><span class="ic i-camera"></span>Фото</button>
+          </div>
+          <sc-if value="{{ errPhoto }}" hint-placeholder-val="{{ false }}"><div class="emsg"><span class="ic i-alert"></span>Добавьте хотя бы одно фото товара</div></sc-if>
+        </div>
+        <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start;">
+          <div class="fld"><label>Цена</label><div class="inp num"><span style="flex: 1;">3 000</span><span class="c2">₸</span></div></div>
+          <div class="fld"><label>Цена за</label><button class="inp" onClick="{{ go3 }}" style="{{ unitStyle }}"><span style="flex: 1; text-align: left;">{{ unitLabel }}</span><span class="ic i-down c2"></span></button>
+            <sc-if value="{{ errUnit }}" hint-placeholder-val="{{ false }}"><div class="emsg"><span class="ic i-alert"></span>Выберите, за что цена</div></sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ isPack }}" hint-placeholder-val="{{ false }}">
+          <div class="fld"><label>В упаковке <span class="req">· необязательно</span></label><div style="display: flex; gap: 8px;"><div class="inp num" style="flex: 1;">600</div><div class="inp" style="width: 96px;">г</div></div></div>
+        </sc-if>
+        <sc-if value="{{ isPiece }}" hint-placeholder-val="{{ false }}"><span class="btn btn-g sm" style="align-self: flex-start; padding: 0;"><span class="ic i-plus sm"></span>Указать вес или объём</span></sc-if>
+        <sc-if value="{{ isOther }}" hint-placeholder-val="{{ false }}"><div class="fld"><label>Своя единица</label><div class="inp">пучок</div></div></sc-if>
+        <div class="fld"><div class="fl">Комментарий <span class="req">· необязательно</span></div><div class="inp ta" style="flex-direction: column; gap: 8px; min-height: 72px;"><span class="c2">Сорт, откуда привезли</span><div style="display: flex; gap: 8px; align-items: center;"><span class="btn sm dis"><span class="ic i-mic sm"></span>Надиктовать</span><span class="c">Временно недоступно</span></div></div></div>
+        <div class="fld"><div class="fl">Торговые точки</div>
+          <sc-if value="{{ noPoint }}" hint-placeholder-val="{{ true }}">
+            <button class="card" onClick="{{ go4 }}" style="flex-direction: row; align-items: center; gap: 12px; text-align: left; {{ pointStyle }}"><span class="ic i-plus pt"></span><div style="flex: 1;"><div class="ts pt">Добавить торговую точку</div><p class="c">Нужна, чтобы покупатель нашёл вас</p></div></button>
+            <sc-if value="{{ errPoint }}" hint-placeholder-val="{{ false }}"><div class="emsg"><span class="ic i-alert"></span>Добавьте хотя бы одну точку</div></sc-if>
+          </sc-if>
+          <sc-if value="{{ point1 }}" hint-placeholder-val="{{ false }}">
+            <div class="card hl" style="flex-direction: row; align-items: center; gap: 12px;"><span class="cb on"><span class="ic i-check"></span></span><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Будет создана 1 карточка</p></div></div>
+          </sc-if>
+        </div>
+      </main>
+      <sc-if value="{{ toastPoint }}" hint-placeholder-val="{{ false }}"><div class="toast" role="status" style="bottom: 96px;"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Точка добавлена и выбрана. Всё введённое на месте</span></div></sc-if>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ tryPublish }}">Проверить и опубликовать</button></div>
+    </sc-if>
+
+    <!-- 3 · Unit sheet -->
+    <sc-if value="{{ s3 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Новая карточка</div></header>
+      <main class="body"></main>
+      <div class="scrim"></div>
+      <div class="sheet" role="dialog" aria-label="Цена за">
+        <div class="grab"></div>
+        <div style="display: flex; align-items: center;"><h2 class="h3" style="flex: 1;">Цена за</h2><button class="ib" aria-label="Закрыть" onClick="{{ go2 }}"><span class="ic i-close"></span></button></div>
+        <sc-for list="{{ units }}" as="u" hint-placeholder-count="5">
+          <button class="li" onClick="{{ u.pick }}" style="text-align: left;"><span class="rd {{ u.on }}"></span><div class="mid"><div class="ts">{{ u.label }}</div><p class="c">{{ u.hint }}</p></div></button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- 4 · New point: search -->
+    <sc-if value="{{ s4 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад к карточке" onClick="{{ go2 }}"><span class="ic i-left"></span></button><div class="bar-t">Новая торговая точка</div></header>
+      <main class="body" style="gap: 14px;">
+        <div class="fld"><label>Название для покупателей</label><div class="inp">Зелёный базар, ряд 4</div></div>
+        <div class="fld"><div class="fl">Где находится точка · Найти адрес</div><div class="inp foc" style="border-radius: 999px;"><span class="ic i-search c2"></span><span style="flex: 1;">зелёный базар</span></div></div>
+        <button class="li" onClick="{{ go5 }}" style="text-align: left;"><span class="ic i-pin c2"></span><div class="mid"><div class="ts">Зелёный базар · мясной павильон</div><p class="c">Алматы, ул. Жибек Жолы, 53</p></div><span class="ic i-right c2"></span></button>
+        <div class="li"><span class="ic i-pin c2"></span><div class="mid"><div class="ts">Зелёный базар</div><p class="c">Алматы, ул. Жибек Жолы, 53</p></div></div>
+      </main>
+    </sc-if>
+
+    <!-- 5 · Confirm location -->
+    <sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go4 }}"><span class="ic i-left"></span></button><div class="bar-t">Проверьте место</div></header>
+      <main class="body" style="gap: 14px;">
+        <div class="card p16" style="gap: 8px;"><div class="ov">Мы определили</div><div class="h3">Зелёный базар · мясной павильон</div><p class="t c2">Алматы, ул. Жибек Жолы, 53</p><div class="kv"><span>Координаты</span><span class="num">43.2621, 76.9528</span></div><p class="c">Видно только вам. Покупатели увидят адрес и маршрут.</p></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go6 }}">Всё верно</button></div>
+    </sc-if>
+
+    <!-- 6 · First point contacts -->
+    <sc-if value="{{ s6 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go5 }}"><span class="ic i-left"></span></button><div class="bar-t">Зелёный базар, ряд 4</div></header>
+      <main class="body" style="gap: 14px;">
+        <div style="display: flex; align-items: baseline;"><h3 class="h3" style="flex: 1;">Контакты</h3><span class="c">необязательно</span></div>
+        <p class="c c2">Можно пропустить — маршрут до точки будет всегда.</p>
+        <div class="fld"><label>Телефон</label><div class="inp foc">+7 707 123 45 12</div></div>
+        <div class="fld"><label>WhatsApp</label><div class="inp ph0">+7 Номер WhatsApp</div></div>
+        <div class="fld"><label>Telegram</label><span class="btn btn-o w"><span class="ic i-plus sm"></span>Подключить Telegram</span></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ savePoint1 }}">Сохранить точку</button></div>
+    </sc-if>
+
+    <!-- 7 · Confirm new -->
+    <sc-if value="{{ s7 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Вернуться к правке" onClick="{{ go2 }}"><span class="ic i-left"></span></button><div class="bar-t">Проверьте карточку</div></header>
+      <main class="body" style="gap: 12px;">
+        <div class="card p16" style="gap: 8px;">
+          <div style="display: flex; gap: 12px;"><div class="img m1" style="width: 64px; height: 64px; border-radius: 12px;"></div><div style="flex: 1;"><div class="ts">Баранина, лопатка</div><sc-if value="{{ isPack }}" hint-placeholder-val="{{ false }}"><p class="c c2">600 г</p></sc-if><div><span class="pr">3 000 ₸</span> <span class="c2">/ {{ unitBuyer }}</span></div></div></div>
+          <div class="kv"><span>Точка</span><span>Зелёный базар, ряд 4</span></div>
+        </div>
+        <p class="t" style="font-weight: 500;">Будет опубликована 1 карточка</p>
+        <div class="banner info" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info" style="color: var(--info);"></span><p class="c" style="color: var(--ink); flex: 1;">Карточка появится на витрине сразу, без предварительной проверки. Вы несёте ответственность за то, чтобы фото, название и описание соответствовали законодательству Республики Казахстан. Карточки с запрещённым содержимым снимаются с витрины.</p></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go8 }}">Опубликовать</button><button class="btn btn-g w" onClick="{{ go2 }}">Вернуться к правке</button></div>
+    </sc-if>
+
+    <!-- 8 · Published -->
+    <sc-if value="{{ s8 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div><div class="lang"><span class="on">РУС</span><span>ҚАЗ</span></div></header>
+      <main class="body" style="gap: 12px;">
+        <span class="btn btn-p lg w"><span class="ic i-plus"></span>Сформировать карточки товаров</span>
+        <div class="card hl is-new" style="flex-direction: row; gap: 12px;"><div class="img m1" style="width: 56px; height: 56px; border-radius: 10px;"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><div class="ts">{{ cardTitle }}</div><div class="c c2"><b class="num" style="color: var(--ink);">3 000 ₸</b> / {{ unitBuyer }} · 1 точка</div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div></div>
+        <p class="c">Дальше: добавьте вторую точку во вкладке «Точки».</p>
+      </main>
+      <div class="toast" role="status"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Опубликовано</span></div>
+      <nav class="nav"><span class="on"><span class="ic i-store"></span>Витрина</span><button onClick="{{ go9 }}" style="background: none; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: 500 12px/16px var(--sans); color: var(--primary-text);"><span class="ic i-pin"></span>Точки</button><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+
+    <!-- 9 · Points list (1) -->
+    <sc-if value="{{ s9 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Мои точки</div></header>
+      <main class="body" style="gap: 10px;">
+        <div class="card" style="flex-direction: row; gap: 12px;"><div class="lic p"><span class="ic i-pin"></span></div><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">1 карточка · Телефон</p></div></div>
+        <button class="btn btn-o w" onClick="{{ go10 }}"><span class="ic i-plus sm"></span>Добавить торговую точку</button>
+      </main>
+      <nav class="nav"><span><span class="ic i-store"></span>Витрина</span><span class="on"><span class="ic i-pin"></span>Точки</span><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+
+    <!-- 10 · Second point, contacts copied -->
+    <sc-if value="{{ s10 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go9 }}"><span class="ic i-left"></span></button><div class="bar-t">Новая торговая точка</div></header>
+      <main class="body" style="gap: 12px;">
+        <div class="fld"><label>Название для покупателей</label><div class="inp">Алтын Орда, павильон 12</div></div>
+        <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="ic i-check ok"></span><p class="c" style="color: var(--ink); flex: 1;">Адрес подтверждён: рынок «Алтын Орда», павильон 12</p></div>
+        <div style="display: flex; align-items: baseline;"><h3 class="h3" style="flex: 1;">Контакты</h3><span class="c">необязательно</span></div>
+        <div class="banner info" style="padding: 10px 12px; border-radius: 12px; flex-direction: row; gap: 8px;"><span class="ic i-copy sm" style="color: var(--info);"></span><p class="c" style="color: var(--ink); flex: 1;">Контакты как у точки «Зелёный базар, ряд 4» — можно изменить.</p></div>
+        <div class="fld"><label>Телефон</label><div class="inp"><span style="flex: 1;">+7 707 123 45 12</span><span class="ic i-close c2"></span></div></div>
+        <div class="fld"><label>WhatsApp</label><div class="inp ph0">+7 Номер WhatsApp</div></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go11 }}">Сохранить точку</button></div>
+    </sc-if>
+
+    <!-- 11 · Points list (2) -->
+    <sc-if value="{{ s11 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Мои точки</div></header>
+      <main class="body" style="gap: 10px;">
+        <div class="card" style="flex-direction: row; gap: 12px;"><div class="lic p"><span class="ic i-pin"></span></div><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">1 карточка · Телефон</p></div></div>
+        <div class="card hl" style="flex-direction: row; gap: 12px;"><div class="lic p"><span class="ic i-pin"></span></div><div style="flex: 1;"><div class="ts">Алтын Орда, павильон 12</div><p class="c">0 карточек · Телефон</p></div></div>
+      </main>
+      <div class="toast" role="status"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Точка сохранена</span></div>
+      <nav class="nav"><button onClick="{{ go12 }}" style="background: none; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: 500 12px/16px var(--sans); color: var(--primary-text);"><span class="ic i-store"></span>Витрина</button><span class="on"><span class="ic i-pin"></span>Точки</span><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+
+    <!-- 12 · Showcase, card actions -->
+    <sc-if value="{{ s12 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div></header>
+      <main class="body" style="gap: 12px;">
+        <span class="btn btn-p lg w"><span class="ic i-plus"></span>Сформировать карточки товаров</span>
+        <div class="card" style="gap: 10px;"><div style="display: flex; gap: 12px;"><div class="img m1" style="width: 56px; height: 56px; border-radius: 10px;"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><div class="ts">{{ cardTitle }}</div><div class="c c2"><b class="num" style="color: var(--ink);">3 000 ₸</b> / {{ unitBuyer }} · 1 точка</div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div></div><button class="btn btn-o sm" onClick="{{ go13 }}" style="align-self: flex-start;"><span class="ic i-pencil sm"></span>Изменить</button></div>
+      </main>
+      <nav class="nav"><span class="on"><span class="ic i-store"></span>Витрина</span><span><span class="ic i-pin"></span>Точки</span><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+
+    <!-- 13 · Edit published, all points -->
+    <sc-if value="{{ s13 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go12 }}"><span class="ic i-left"></span></button><div class="bar-t">Изменить карточку</div></header>
+      <main class="body" style="gap: 12px;">
+        <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;"><div class="fld"><label>Цена</label><div class="inp foc num"><span style="flex: 1;">3 200</span><span class="c2">₸</span></div><span class="hint">Было 3 000 ₸</span></div><div class="fld"><label>Цена за</label><div class="inp">{{ unitLabel }}</div></div></div>
+        <div class="fld"><div class="fl">Комментарий</div><div class="inp ta" style="min-height: 48px;">Фасуем утром</div></div>
+        <section class="card" style="gap: 4px;">
+          <div class="ts">Точки товара</div>
+          <div class="li" style="min-height: 44px;"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Зелёный базар, ряд 4</div><p class="c num">3 000 → 3 200 ₸</p></div></div>
+          <button class="li" onClick="{{ toggleP2 }}" style="min-height: 44px; text-align: left;"><span class="cb {{ p2on }}"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Алтын Орда, павильон 12</div><p class="c">{{ p2hint }}</p></div></button>
+          <p class="c c2">{{ editCount }}</p>
+        </section>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go14 }}">Проверить и сохранить</button></div>
+    </sc-if>
+
+    <!-- 14 · Confirm edit -->
+    <sc-if value="{{ s14 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Вернуться к правке" onClick="{{ go13 }}"><span class="ic i-left"></span></button><div class="bar-t">Проверьте изменения</div></header>
+      <main class="body" style="gap: 12px;">
+        <div class="card p16" style="gap: 8px;">
+          <div class="ts">{{ cardTitle }}</div>
+          <div class="kv"><span>Зелёный базар, ряд 4</span><span class="num">3 000 → 3 200</span></div>
+          <sc-if value="{{ addP2 }}" hint-placeholder-val="{{ true }}"><div class="kv"><span>Алтын Орда, павильон 12</span><span class="num">новая · 3 200</span></div></sc-if>
+        </div>
+        <p class="t" style="font-weight: 500;">{{ editCount }}</p>
+        <div class="banner info" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info" style="color: var(--info);"></span><p class="c" style="color: var(--ink); flex: 1;">Карточка появится на витрине сразу, без предварительной проверки. Вы несёте ответственность за то, чтобы фото, название и описание соответствовали законодательству Республики Казахстан. Карточки с запрещённым содержимым снимаются с витрины.</p></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go15 }}">Опубликовать</button><button class="btn btn-g w" onClick="{{ go13 }}">Вернуться к правке</button></div>
+    </sc-if>
+
+    <!-- 15 · Showcase after edit -->
+    <sc-if value="{{ s15 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div></header>
+      <main class="body" style="gap: 12px;">
+        <span class="btn btn-p lg w"><span class="ic i-plus"></span>Сформировать карточки товаров</span>
+        <button class="card hl" onClick="{{ go16 }}" style="flex-direction: row; gap: 12px; text-align: left;"><div class="img m1" style="width: 56px; height: 56px; border-radius: 10px;"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><div class="ts">{{ cardTitle }}</div><div class="c c2"><b class="num" style="color: var(--ink);">3 200 ₸</b> / {{ unitBuyer }} · {{ pointsCount }}</div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div><span class="ic i-right c2"></span></button>
+      </main>
+      <div class="toast" role="status"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Изменения опубликованы</span></div>
+      <nav class="nav"><span class="on"><span class="ic i-store"></span>Витрина</span><span><span class="ic i-pin"></span>Точки</span><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+
+    <!-- 16 · Card per point -->
+    <sc-if value="{{ s16 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go15 }}"><span class="ic i-left"></span></button><div class="bar-t">{{ cardTitle }}</div></header>
+      <main class="body" style="gap: 12px;">
+        <div class="img m1" style="height: 110px; border-radius: 16px;"><span class="fresh fr0">Сегодня</span></div>
+        <div class="ov">В точках</div>
+        <div class="card" style="gap: 6px;"><div class="ts">Зелёный базар, ряд 4</div><p class="c num">3 200 ₸</p><span class="btn btn-g sm" style="align-self: flex-start; padding: 0;">Изменить только в этой точке</span></div>
+        <sc-if value="{{ addP2 }}" hint-placeholder-val="{{ true }}"><div class="card" style="gap: 6px;"><div class="ts">Алтын Орда, павильон 12</div><p class="c num">3 200 ₸</p><button class="btn btn-g sm" onClick="{{ go17 }}" style="align-self: flex-start; padding: 0;">Изменить только в этой точке</button></div></sc-if>
+      </main>
+    </sc-if>
+
+    <!-- 17 · Edit one point -->
+    <sc-if value="{{ s17 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go16 }}"><span class="ic i-left"></span></button><div class="bar-t">Изменить в точке</div></header>
+      <main class="body" style="gap: 14px;">
+        <div class="banner soft" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-pin pt"></span><p class="c" style="color: var(--ink); flex: 1;">Меняется только «Алтын Орда, павильон 12». Зелёный базар не изменится.</p></div>
+        <div class="fld"><label>Цена</label><div class="inp foc num"><span style="flex: 1;">3 300</span><span class="c2">₸</span></div><span class="bd bd-p">Своя цена</span></div>
+        <span class="btn btn-g sm" style="align-self: flex-start; padding: 0;"><span class="ic i-history sm"></span>Вернуть общую цену · 3 200 ₸</span>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go18 }}">Проверить и сохранить</button></div>
+    </sc-if>
+
+    <!-- 18 · Confirm one point -->
+    <sc-if value="{{ s18 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Вернуться к правке" onClick="{{ go17 }}"><span class="ic i-left"></span></button><div class="bar-t">Проверьте изменения</div></header>
+      <main class="body" style="gap: 12px;">
+        <div class="card p16" style="gap: 8px;"><div class="ts">{{ cardTitle }}</div><div class="kv"><span>Алтын Орда, павильон 12</span><span class="num">3 200 → 3 300</span></div></div>
+        <p class="t" style="font-weight: 500;">Будет изменена 1 карточка</p>
+        <div class="banner info" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info" style="color: var(--info);"></span><p class="c" style="color: var(--ink); flex: 1;">Карточка появится на витрине сразу, без предварительной проверки. Вы несёте ответственность за то, чтобы фото, название и описание соответствовали законодательству Республики Казахстан. Карточки с запрещённым содержимым снимаются с витрины.</p></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go19 }}">Опубликовать</button><button class="btn btn-g w" onClick="{{ go17 }}">Вернуться к правке</button></div>
+    </sc-if>
+
+    <!-- 19 · Done -->
+    <sc-if value="{{ s19 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div></header>
+      <main class="body" style="gap: 12px;">
+        <span class="btn btn-p lg w"><span class="ic i-plus"></span>Сформировать карточки товаров</span>
+        <div class="card hl" style="flex-direction: row; gap: 12px;"><div class="img m1" style="width: 56px; height: 56px; border-radius: 10px;"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><div class="ts">{{ cardTitle }}</div><div class="c c2"><b class="num" style="color: var(--ink);">3 200 – 3 300 ₸</b> / {{ unitBuyer }} · 2 точки</div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div></div>
+        <button class="btn btn-o w" onClick="{{ reset }}"><span class="ic i-refresh sm"></span>Пройти заново</button>
+      </main>
+      <div class="toast" role="status"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Изменения опубликованы</span></div>
+    </sc-if>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; padding-top: 8px;">
+    <div class="ab-id">Prototype · P4 · AI off · Rev 1</div>
+    <h2 class="ab-title" style="font-size: 28px; line-height: 34px;">Ручной путь при выключенном ИИ</h2>
+    <p class="ab-desc" style="font-size: 14px; line-height: 21px;">Кликаются: «Фото», поле «Цена за» (sheet с раскрытием фасовки), «Добавить торговую точку» с возвратом в форму, «Вернуться к правке» на подтверждении. «Проверить и опубликовать» без фото, единицы или точки подсветит поля.</p>
+    <div class="card p16" style="gap: 5px;">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="20">
+        <div class="step"><span class="n" style="{{ st.style }}">{{ st.n }}</span><p class="c" style="{{ st.tstyle }}">{{ st.label }}</p></div>
+      </sc-for>
+    </div>
+    <button class="btn btn-o" style="align-self: flex-start;" onClick="{{ reset }}"><span class="ic i-refresh sm"></span>Начать заново</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1100,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const s = st.s || 0;
+    const unit = st.unit || '';
+    const set = (o) => this.setState(o);
+    const labels = ['AI-S01 · Моя витрина · пусто', 'AI-S02 · ИИ недоступен', 'AI-S09 · Редактор (ручной)', 'AI-S09 · Unit sheet', 'AI-S12A · Найти адрес', 'AI-S12A · Подтверждение места', 'AI-S12A · Контакты первой точки', 'Confirm · AI off', 'Published · AI off', 'AI-S12 · Мои точки', 'AI-S12A · Вторая точка · контакты от первой', 'AI-S12 · Две точки', 'AI-S01 · Карточка', 'Edit published · AI off · все точки', 'Confirm · изменения', 'AI-S01 · Изменения опубликованы', 'AI-S15 · Карточка по точкам', 'Edit · только эта точка', 'Confirm · одна точка', 'Готово'];
+    const unitDefs = [
+      { v: 'кг', hint: '«3 000 ₸ / кг»' },
+      { v: 'л', hint: '«3 000 ₸ / л»' },
+      { v: 'шт.', hint: 'Вес или объём — по желанию' },
+      { v: 'упак.', hint: 'Появится «В упаковке»' },
+      { v: 'Другое', hint: 'Своя единица' }
+    ];
+    const missing = { photo: !st.photo, unit: !unit, point: !st.point1 };
+    const err = !!st.err;
+    const v = {
+      reset: () => set({ s: 0, photo: false, unit: '', point1: false, err: false, toastPoint: false, addP2: false }),
+      addPhoto: () => set({ photo: true }),
+      savePoint1: () => set({ point1: true, s: 2, toastPoint: true }),
+      tryPublish: () => { if (missing.photo || missing.unit || missing.point) set({ err: true }); else set({ s: 7, toastPoint: false }); },
+      toggleP2: () => set({ addP2: !st.addP2 }),
+      photo: !!st.photo,
+      photoCount: st.photo ? '1 из 5' : '0 из 5',
+      photoStyle: err && missing.photo ? 'border-color: var(--danger); border-style: solid;' : '',
+      errPhoto: err && missing.photo,
+      errUnit: err && missing.unit,
+      errPoint: err && missing.point,
+      showErr: err && (missing.photo || missing.unit || missing.point),
+      unitStyle: (err && missing.unit ? 'border: 2px solid var(--danger);' : '') + ' text-align: left; cursor: pointer;',
+      pointStyle: err && missing.point ? 'border: 2px solid var(--danger);' : '',
+      unitLabel: unit || 'Выберите',
+      unitBuyer: unit === 'упак.' ? 'упаковка' : (unit === 'Другое' ? 'пучок' : (unit || 'кг')),
+      isPack: unit === 'упак.', isPiece: unit === 'шт.', isOther: unit === 'Другое',
+      noPoint: !st.point1, point1: !!st.point1,
+      toastPoint: !!st.toastPoint,
+      cardTitle: unit === 'упак.' ? 'Баранина, лопатка · 600 г' : 'Баранина, лопатка',
+      units: unitDefs.map((u) => ({ label: u.v, hint: u.hint, on: unit === u.v ? 'on' : '', pick: () => set({ unit: u.v, s: 2 }) })),
+      addP2: !!st.addP2,
+      p2on: st.addP2 ? 'on' : '',
+      p2hint: st.addP2 ? 'Товар появится здесь · 3 200 ₸' : 'Нажмите, чтобы добавить товар в эту точку',
+      editCount: st.addP2 ? 'Будет изменена 1 карточка и опубликована 1 новая' : 'Будет изменена 1 карточка',
+      pointsCount: st.addP2 ? '2 точки' : '1 точка',
+      steps: labels.map((label, i) => ({ n: i + 1, label, style: i === s ? 'background: var(--primary); color: #fff;' : '', tstyle: i === s ? 'font-weight: 600; color: var(--ink);' : '' }))
+    };
+    for (let i = 0; i < labels.length; i++) { v['s' + i] = s === i; v['go' + i] = () => set({ s: i, toastPoint: false }); }
+    return v;
+  }
+}
+</script>
+</body>
+</html>

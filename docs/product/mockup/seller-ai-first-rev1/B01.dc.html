@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-B01 · Карточка в выдаче</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1256px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-B01 · Buyer · search result card</div>
+    <h2 class="ab-title">Карточка в выдаче</h2>
+    <p class="ab-desc">Фото или нейтральный fallback → плашка актуальности → название → фасовка → цена и единица → точка, ориентир, расстояние → только доступные контакты → маршрут. Телефон, WhatsApp и Telegram — официальные иконки без видимого текста, с aria-label и зоной 44×44. Порядок выдачи — актуальность и расстояние; рейтинг и жалобы на него не влияют.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-B01 · Result · Default</b><br>Полная карточка и маршрут-only</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">баранина</span></div><button class="ib" aria-label="Фильтры" style="width: 44px;"><span class="ic i-filter"></span></button></header>
+        <main class="body" style="gap: 12px; padding: 12px;">
+          <p class="c">Рядом с вами · сначала актуальные</p>
+          <article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m1" style="width: 112px; height: 112px; border-radius: 12px;"><span class="fresh fr0">Сегодня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Баранина, лопатка</h3>
+                <div><span class="pr">5 000 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2" style="margin-top: 2px;">Зелёный базар, ряд 4</p>
+                <p class="c">Мясной павильон · 1,2 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <a class="ct route" href="#" aria-label="Маршрут до Зелёный базар, ряд 4"><span class="ic i-route sm"></span>Маршрут</a>
+              <span class="sp"></span>
+              <div class="cts"><a class="ct" href="#" aria-label="Позвонить продавцу"><span class="ic i-phone"></span></a><a class="ct" href="#" aria-label="Написать в WhatsApp"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></a><a class="ct" href="#" aria-label="Написать в Telegram"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></a></div>
+            </div>
+          </article>
+          <article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m1" style="width: 112px; height: 112px; border-radius: 12px; filter: saturate(0.8);"><span class="fresh fr2">2 дня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Баранина</h3>
+                <p class="c c2" style="font-weight: 500;">600 г</p>
+                <div><span class="pr">3 000 ₸</span> <span class="c2" style="font-size: 14px;">/ упаковка</span></div>
+                <p class="c c2" style="margin-top: 2px;">Алтын Орда, павильон 12</p>
+                <p class="c">Продуктовый ряд, 2 этаж · 3,4 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <a class="ct route" href="#" aria-label="Маршрут до Алтын Орда, павильон 12"><span class="ic i-route sm"></span>Маршрут</a>
+            </div>
+          </article>
+        </main>
+      </div>
+      <div class="note">Вторая карточка — точка без контактов: только «Маршрут», без пустых или серых иконок. Фасовка — отдельная строка «600 г», не комментарий.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B01 · Result · Variants</b><br>Fallback, длинное название, 6 дней</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">напитки</span></div><button class="ib" aria-label="Фильтры" style="width: 44px;"><span class="ic i-filter"></span></button></header>
+        <main class="body" style="gap: 12px; padding: 12px;">
+          <article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img fb" style="width: 112px; height: 112px; border-radius: 12px; position: relative;"><span class="ic i-logo" role="img" aria-label="Фото нет"></span><span class="fresh fr1">Вчера</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Напиток газированный «Тархун»</h3>
+                <p class="c c2" style="font-weight: 500;">1,5 л</p>
+                <div><span class="pr">800 ₸</span> <span class="c2" style="font-size: 14px;">/ шт.</span></div>
+                <p class="c">Тастак, место 31 · 0,8 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic i-route sm"></span>Маршрут</a><span class="sp"></span><div class="cts"><a class="ct" href="#" aria-label="Позвонить продавцу"><span class="ic i-phone"></span></a></div></div>
+          </article>
+          <article class="card" style="gap: 10px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="img m3" style="width: 112px; height: 112px; border-radius: 12px;"><span class="fresh fr6">6 дней</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                <h3 class="h3 clamp2" style="font-size: 16px; line-height: 21px;">Курага узбекская, крупная, без косточки, высший сорт</h3>
+                <p class="c c2" style="font-weight: 500;">500 г</p>
+                <div><span class="pr">1 800 ₸</span> <span class="c2" style="font-size: 14px;">/ упаковка</span></div>
+                <p class="c">Сайран, контейнер 5 · 5,1 км</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic i-route sm"></span>Маршрут</a><span class="sp"></span><div class="cts"><a class="ct" href="#" aria-label="Написать в Telegram"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></a></div></div>
+          </article>
+        </main>
+      </div>
+      <div class="note">Fallback нейтрален и не имитирует товар. Плашки: «Сегодня», «Вчера», «2 дня» … «6 дней»; «7 дней» нет — карточка уже скрыта. Название обрезается после 2 строк.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B01 · Result · Loading / error</b><br>Скелетоны и восстановимая ошибка</div>
+      <div class="ph">
+        <header class="bar" style="padding: 0 12px; gap: 8px;"><div class="inp" style="border-radius: 999px; height: 44px; background: var(--sunken); border-color: transparent;"><span class="ic i-search c2"></span><span style="flex: 1;">баранина</span></div><button class="ib" aria-label="Фильтры" style="width: 44px;"><span class="ic i-filter"></span></button></header>
+        <main class="body" style="gap: 12px; padding: 12px;" aria-busy="true">
+          <div class="card" style="gap: 10px;"><div style="display: flex; gap: 12px;"><div class="sk" style="width: 112px; height: 112px; border-radius: 12px;"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 8px;"><div class="sk" style="height: 16px; width: 80%;"></div><div class="sk" style="height: 18px; width: 50%;"></div><div class="sk" style="height: 12px; width: 70%;"></div></div></div><div class="sk" style="height: 44px; width: 132px; border-radius: 22px;"></div></div>
+          <div class="banner err" role="alert" style="padding: 12px 14px; border-radius: 14px; gap: 8px;"><div style="display: flex; gap: 10px;"><span class="ic i-alert dn"></span><p class="c" style="color: var(--ink); flex: 1;">Не удалось загрузить продолжение списка.</p></div><button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-refresh sm"></span>Повторить</button></div>
+          <div class="card" style="gap: 10px;"><div style="display: flex; gap: 12px;"><div class="img m1" style="width: 112px; height: 112px; border-radius: 12px;"><span class="fresh fr0">Сегодня</span></div><div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><h3 class="h3" style="font-size: 16px;">Баранина, лопатка</h3><div><span class="pr">5 000 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div><p class="c">Зелёный базар · 1,2 км</p></div></div><div style="display: flex; gap: 4px;"><a class="ct route" href="#"><span class="ic i-route sm"></span>Маршрут</a></div></div>
+        </main>
+      </div>
+      <div class="note"><span class="tag tag-keep">Keep</span>Loading / error из Pass 3: ранее загруженные карточки не исчезают.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1256,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

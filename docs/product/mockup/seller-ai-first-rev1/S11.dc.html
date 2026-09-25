@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S11 · Данные по точкам</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1256px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S11 · Seller · per-point overrides</div>
+    <h2 class="ab-title">Данные по точкам</h2>
+    <p class="ab-desc">Общие данные — название, цена, единица, фасовка, медиа и комментарий — применяются ко всем выбранным точкам. Здесь можно переопределить цену, единицу, фасовку, медиа и комментарий для отдельной точки. Название всегда общее. У каждого переопределения есть «Вернуть общее значение»; правка одной точки не меняет другие.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S11 · Overrides · List</b><br>3 выбранные точки, одна со своей ценой</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад к карточке"><span class="ic i-left"></span></button><div class="bar-t">Данные по точкам</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="card p16" style="gap: 6px; background: var(--sunken); border: 0;">
+            <div class="ov">Общие для всех точек</div>
+            <div class="ts">Баранина, лопатка</div>
+            <div><span class="pr">5 000 ₸</span> <span class="c2">/ кг</span></div>
+            <p class="c">3 фото · комментарий</p>
+          </div>
+          <a class="card" href="#" style="flex-direction: row; align-items: center; gap: 12px; text-decoration: none; color: inherit;"><span class="ic i-pin c2"></span><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Как у всех</p></div><span class="ic i-right c2"></span></a>
+          <a class="card" href="#" style="flex-direction: row; align-items: center; gap: 12px; text-decoration: none; color: inherit;"><span class="ic i-pin c2"></span><div style="flex: 1;"><div class="ts">Алтын Орда, павильон 12</div><p class="c">Как у всех</p></div><span class="ic i-right c2"></span></a>
+          <a class="card hl" href="#" style="flex-direction: row; align-items: center; gap: 12px; text-decoration: none; color: inherit;"><span class="ic i-pin pt"></span><div style="flex: 1;"><div class="ts">Сайран, контейнер 5</div><p class="c c2"><span class="bd bd-p" style="height: 20px; vertical-align: 1px;">Своё</span> Цена <b class="num" style="color: var(--ink);">5 200 ₸</b> / кг</p></div><span class="ic i-right c2"></span></a>
+          <p class="c c2"><span class="ic i-layers xs" style="vertical-align: -3px;"></span> Будет создано 3 карточки</p>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Готово</button></div>
+      </div>
+      <div class="note">Переопределённая точка отмечена меткой «Своё» и словами — не только рамкой.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S11 · Overrides · Point edit</b><br>Своя цена для одной точки</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Сайран, контейнер 5</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="fld"><div class="fl">Название товара</div><div class="inp dis">Баранина, лопатка</div><span class="hint">Название общее для всех точек. Другой товар — отдельный черновик.</span></div>
+          <div class="fld">
+            <div style="display: flex; align-items: center; gap: 8px;"><label for="op" style="flex: 1;">Цена</label><span class="bd bd-p">Своё значение</span></div>
+            <div class="inp foc num" id="op"><span style="flex: 1;">5 200</span><span class="c2">₸</span></div>
+            <button class="btn btn-g sm" style="align-self: flex-start; padding: 0;"><span class="ic i-history sm"></span>Вернуть общее значение · 5 000 ₸</button>
+          </div>
+          <div class="fld"><div style="display: flex; align-items: center;"><div class="fl" style="flex: 1;">Цена за</div><span class="c">Общее</span></div><div class="inp"><span style="flex: 1;">кг</span><span class="ic i-down c2"></span></div></div>
+          <div class="fld"><div style="display: flex; align-items: center;"><div class="fl" style="flex: 1;">Фото и видео</div><span class="c">Общее · 3 фото</span></div><button class="btn btn-o sm" style="align-self: flex-start;">Свои фото для этой точки</button></div>
+          <div class="fld"><div style="display: flex; align-items: center;"><div class="fl" style="flex: 1;">Комментарий</div><span class="c">Общее</span></div><div class="inp ta">Молодой барашек, разделываем при вас.</div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Сохранить</button></div>
+      </div>
+      <div class="note">Изменение общего значения потом не перезаписывает переопределённое — это явно видно по метке «Своё значение».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S11 · Overrides · Result</b><br>Что получится после одобрения</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div></header>
+        <main class="body" style="gap: 12px;">
+          <h3 class="h3">Будет создано 3 карточки</h3>
+          <p class="c c2">После одобрения каждая живёт отдельно: её можно выключить или изменить, не трогая остальные.</p>
+          <div class="card" style="gap: 0; padding: 4px 12px;">
+            <div class="li"><div class="img m1" style="width: 44px; height: 44px; border-radius: 8px;"></div><div class="mid"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Контакты: телефон, WhatsApp</p></div><span class="pr" style="font-size: 16px;">5 000 ₸</span></div>
+            <div class="li"><div class="img m1" style="width: 44px; height: 44px; border-radius: 8px;"></div><div class="mid"><div class="ts">Алтын Орда, павильон 12</div><p class="c">Без контактов · маршрут</p></div><span class="pr" style="font-size: 16px;">5 000 ₸</span></div>
+            <div class="li"><div class="img m1" style="width: 44px; height: 44px; border-radius: 8px;"></div><div class="mid"><div class="ts">Сайран, контейнер 5</div><p class="c">Контакты: Telegram</p></div><div style="display: flex; flex-direction: column; align-items: flex-end;"><span class="pr" style="font-size: 16px;">5 200 ₸</span><span class="c pt">своя</span></div></div>
+          </div>
+          <p class="c">Цены — за кг. Каждая карточка берёт адрес и подтверждённые контакты своей точки.</p>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Готово</button></div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · atomicity</span>Grouped draft → N Offer и overrides требуют data / atomicity contract (gap 8).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1256,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
