@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { fillOfferFields, offerEditor } from './offer-editor-helpers';
 
 function phoneFor(projectName: string, scenario: 'cancel' | 'seller' | 'product') {
   const suffix = projectName === 'mobile' ? '1' : '2';
@@ -137,44 +138,52 @@ test('authenticated product-first flow preserves input through required setup be
     expect(actionBox).not.toBeNull();
     expect(actionBox!.height).toBeGreaterThanOrEqual(44);
 
+    // seller-offer-editor: product first; the first point (and the Seller) are created inside the same flow.
     await page.getByRole('link', { name: 'Добавить товар', exact: true }).click();
-    await expect(page).toHaveURL('/seller/offers/new');
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill(price);
-    await page.getByLabel('Единица', { exact: true }).selectOption('kg');
-    await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
+    await expect(page).toHaveURL('/seller?new=1');
+    const editor = offerEditor(page);
+    await fillOfferFields(page, { product: 'Баранина', price, unit: 'kg', comment });
 
     let changeSetMutations = 0;
     page.on('request', (request) => {
       if (request.method() === 'POST' && request.url().endsWith('/api/seller/change-sets')) changeSetMutations += 1;
     });
 
-    await page.getByRole('button', { name: 'Продолжить', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
-    await expect(page.getByText('Данные товара сохранены в этом окне.', { exact: false })).toBeVisible();
+    await editor.getByRole('button', { name: 'Далее', exact: true }).click();
+    await expect(editor.getByRole('heading', { name: 'Где продаёте?' })).toBeVisible();
+    await expect(editor.getByText('Точек пока нет — создайте первую.')).toBeVisible();
+    await expect(editor.getByText(/Товар и цена сохранены: Баранина/)).toBeVisible();
     expect(changeSetMutations).toBe(0);
     expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets cs JOIN sellers s ON s.id=cs.seller_id JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0].count)).toBe(0);
 
-    await page.getByLabel('Название торговой точки').fill(`Issue 35 ${testInfo.project.name}`);
-    await page.getByLabel('Тип торговой точки').selectOption('shop');
-    await page.getByLabel('Адрес').fill(`Алматы, Issue 35 ${testInfo.project.name}`);
-    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await editor.getByRole('textbox', { name: 'Название', exact: true }).fill(`Issue 35 ${testInfo.project.name}`);
+    await editor.getByRole('textbox', { name: 'Адрес', exact: true }).fill(`Алматы, Issue 35 ${testInfo.project.name}`);
+    await editor.getByRole('combobox', { name: 'Тип', exact: true }).selectOption('shop');
+    // Optional Seller name left blank: the first point name is disclosed as the fallback before submit.
+    await expect(editor.getByText('Если оставить пустым, покупатели увидят название первой точки.')).toBeVisible();
+    await expect(editor.getByText(`Покупатели увидят: «Issue 35 ${testInfo.project.name}»`)).toBeVisible();
 
-    await expect(page.getByText('Торговая точка готова. Введённые данные товара сохранены', { exact: false })).toBeVisible();
-    await expect(page.getByRole('textbox', { name: 'Товар', exact: true })).toHaveValue('Баранина');
-    await expect(page.getByRole('textbox', { name: 'Цена, ₸', exact: true })).toHaveValue(price);
-    await expect(page.getByLabel('Единица', { exact: true })).toHaveValue('kg');
-    await expect(page.getByRole('textbox', { name: 'Комментарий продавца', exact: true })).toHaveValue(comment);
+    // A language switch mid-flow keeps everything typed so far.
+    await editor.getByRole('button', { name: 'Қазақша' }).click();
+    await expect(editor.getByRole('heading', { name: 'Қай жерде сатасыз?' })).toBeVisible();
+    await expect(editor.getByRole('textbox', { name: 'Атауы', exact: true })).toHaveValue(`Issue 35 ${testInfo.project.name}`);
+    await editor.getByRole('button', { name: 'Артқа' }).filter({ visible: true }).first().click();
+    await expect(editor.getByRole('textbox', { name: 'Баға', exact: true })).toHaveValue(price);
+    await expect(editor.getByRole('textbox', { name: /^Пікір/ })).toHaveValue(comment);
+    await editor.getByRole('button', { name: 'Русский' }).click();
+    await editor.getByRole('button', { name: 'Далее', exact: true }).click();
+    await expect(editor.getByRole('textbox', { name: 'Название', exact: true })).toHaveValue(`Issue 35 ${testInfo.project.name}`);
     expect(changeSetMutations).toBe(0);
 
     const proposalCreated = page.waitForResponse((response) => response.url().endsWith('/api/seller/change-sets') && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Создать изменение', exact: true }).click();
+    await editor.getByRole('button', { name: 'Продолжить', exact: true }).click();
     expect((await proposalCreated).status()).toBe(201);
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
     await expect(page.getByText('Новое предложение', { exact: true })).toBeVisible();
 
-    const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
+    const sellerRow = (await pool.query('SELECT s.id, s.display_name FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
+    expect(sellerRow.display_name).toBe(`Issue 35 ${testInfo.project.name}`);
     expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(1);
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
   } finally {

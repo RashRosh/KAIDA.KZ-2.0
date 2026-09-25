@@ -1,19 +1,7 @@
-import { Suspense } from 'react';
-import { AppHeader } from '../../../_components/AppHeader';
-import { SellerCabinetFrame } from '../../_components/SellerCabinetFrame';
-import { SellerSetup } from '../../_components/SellerSetup';
-import { messages } from '@/i18n/messages';
-import { getRequestLocale } from '@/i18n/server';
-import { isSellerCommentTranslationEnabled } from '@/modules/offers/translation/seller-comment-translation.config';
+import { redirect } from 'next/navigation';
 
-export default async function Page() {
-  const locale = await getRequestLocale();
-  return (
-    <>
-      <AppHeader showAuth={false} contextLabel={messages[locale]['context.seller']} />
-      <SellerCabinetFrame active="offers">
-        <Suspense><SellerSetup commentTranslationEnabled={isSellerCommentTranslationEnabled()} /></Suspense>
-      </SellerCabinetFrame>
-    </>
-  );
+// seller-offer-editor: «Добавить товар» is the S-06 form over the offers list; this address keeps old links working.
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const from = (await searchParams).from;
+  redirect(typeof from === 'string' ? `/seller/offers?new=1&from=${encodeURIComponent(from)}` : '/seller/offers?new=1');
 }

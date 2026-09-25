@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { digestSessionToken } from '../../src/modules/identity/crypto/session-token';
 import { testDatabaseUrl } from '../integration/database';
+import { proposeNewOffer } from './offer-editor-helpers';
 
 const baseURL = 'http://127.0.0.1:3100';
 
@@ -53,15 +54,9 @@ async function makeBuyerEligible(pool: Pool, userId: string, projectName: string
 }
 
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
-  await page.goto('/seller/offers/new');
-  const create = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Добавить товар' }) });
-  await create.getByRole('textbox', { name: 'Товар', exact: true }).fill(product);
-  await create.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill(amount);
-  await create.getByLabel('Единица', { exact: true }).selectOption('kg');
-  await create.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
-  await create.getByRole('button', { name: 'Создать изменение' }).click();
+  await proposeNewOffer(page, { product, price: amount, unit: 'kg', comment });
   await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-  await expect(page).toHaveURL('/seller');
+  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 
 async function search(page: import('@playwright/test').Page, query: string) {
@@ -91,9 +86,6 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     await makeBuyerEligible(auth.pool, auth.userId, testInfo.project.name);
-    await page.goto('/seller/offers/new');
-    await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
-
     await createOffer(page, 'Баранина', '4200.00', 'S12 старая баранина');
     await createOffer(page, 'Говядина', '3500.00', 'S12 старая говядина');
 

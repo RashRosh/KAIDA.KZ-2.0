@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { proposeNewOffer } from './offer-editor-helpers';
 
 interface SearchOfferBody {
   id: string;
@@ -152,16 +153,8 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
 
     const ids = await sellerIdentity(phone);
     await makeBuyerEligible(ids, testInfo.project.name);
-    await sellerPage.goto('/seller/offers/new');
-    await expect(sellerPage.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
     const identity = { ...ids, sellerComment };
-
-    await sellerPage.getByRole('textbox', { name: 'Товар', exact: true }).fill('мясо барана');
-    await sellerPage.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4777.00');
-    await sellerPage.getByLabel('Единица', { exact: true }).selectOption('kg');
-    await sellerPage.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(sellerComment);
-    await sellerPage.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(sellerPage).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    await proposeNewOffer(sellerPage, { product: 'мясо барана', price: '4777.00', unit: 'kg', comment: sellerComment });
     await expect(sellerPage.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
     await expect(sellerPage.getByText('Баранина', { exact: true })).toBeVisible();
 
@@ -180,7 +173,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     const createBody = await createConfirm.json() as ConfirmBody;
     const offerId = createBody.changeSet.items[0]?.resultOffer?.id;
     expect(offerId).toBeTruthy();
-    await expect(sellerPage).toHaveURL('/seller');
+    await expect(sellerPage).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     const canonical = await buyerSearch(buyerPage, 'Баранина');
     const canonicalOffer = canonical.offers.find((offer) => offer.id === offerId);

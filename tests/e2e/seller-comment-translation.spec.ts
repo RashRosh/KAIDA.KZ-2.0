@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { fillOfferFields, offerEditor } from './offer-editor-helpers';
 
 // The default web server runs with the translator off; `translatorOnBaseURL` is the same build with the fake adapter.
 const translatorOnBaseURL = 'http://127.0.0.1:3101';
@@ -70,17 +71,16 @@ async function login(page: Page, phone: string) {
 }
 
 async function publishOffer(page: Page, comment: string) {
-  await page.goto('/seller/offers/new');
-  await expect(page.getByRole('heading', { name: 'Добавить товар' })).toBeVisible();
-  await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-  await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200');
-  await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
+  await page.goto('/seller/offers');
+  await page.getByRole('link', { name: 'Добавить товар' }).first().click();
+  await fillOfferFields(page, { product: 'Баранина', price: '4200', comment });
 }
 
 async function confirmOffer(page: Page) {
-  await page.getByRole('button', { name: 'Создать изменение' }).click();
+  await offerEditor(page).getByRole('button', { name: 'Далее' }).click();
+  await offerEditor(page).getByRole('button', { name: 'Продолжить' }).click();
   await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-  await expect(page).toHaveURL('/seller');
+  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 
 async function searchLamb(page: Page, query = 'баранина', label = 'Какой товар ищете?') {
@@ -102,7 +102,7 @@ test.describe('translator on', () => {
       await publishOffer(page, kkComment);
 
       // Nothing in the form asks for or assumes the comment language.
-      const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Создать изменение' }) });
+      const form = offerEditor(page);
       // offer-price-unit: the unit choice is the form's only dropdown; there is still no language picker.
       await expect(form.getByRole('combobox')).toHaveCount(1);
       await expect(form.getByRole('combobox', { name: 'Единица', exact: true })).toHaveCount(1);
@@ -111,7 +111,7 @@ test.describe('translator on', () => {
       await page.getByRole('button', { name: 'Проверить перевод' }).click();
       const preview = page.getByRole('status', { name: 'Так покупатели увидят комментарий' });
       await expect(preview).toContainText(ruTranslation);
-      await expect(page.getByRole('textbox', { name: 'Комментарий продавца', exact: true })).toHaveValue(kkComment);
+      await expect(form.getByRole('textbox', { name: /^Комментарий/ })).toHaveValue(kkComment);
       await confirmOffer(page);
 
       const card = page.getByRole('article').filter({ has: page.getByText(sellerName, { exact: true }) });

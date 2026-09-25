@@ -109,7 +109,7 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const publishes = !isBatch && (first.action === 'create_offer' || first.action === 'update_offer' || first.action === 'activate_offer');
   const back = safeBack(params.get('back'), isBatch ? '/seller/offers' : isCreate ? '/seller' : '/seller/offers');
   const editHref = isCreate
-    ? `/seller/offers/new?from=${changeSetId}`
+    ? `${back}${back.includes('?') ? '&' : '?'}new=1&from=${changeSetId}`
     : isBatch
       ? '/seller/batch'
       : first.action === 'update_offer' && targetOfferId

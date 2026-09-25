@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { proposeNewOffer } from './offer-editor-helpers';
 
 const GEO = { latitude: 43.238949, longitude: 76.889709 };
 
@@ -64,14 +65,9 @@ async function createSeller(page: Page, projectName: string, scenario: 'success'
 }
 
 async function createLambOffer(page: Page, comment: string) {
-  await page.goto('/seller/offers/new');
-  await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-  await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4100.00');
-  await page.getByLabel('Единица', { exact: true }).selectOption('kg');
-  await page.getByRole('textbox', { name: 'Комментарий продавца', exact: true }).fill(comment);
-  await page.getByRole('button', { name: 'Создать изменение' }).click();
+  await proposeNewOffer(page, { product: 'Баранина', price: '4100.00', unit: 'kg', comment });
   await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-  await expect(page).toHaveURL('/seller');
+  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 
 test('S8 Seller explicitly saves browser geolocation and public Search hides raw coordinates', async ({ page }, testInfo) => {

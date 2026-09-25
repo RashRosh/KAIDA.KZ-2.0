@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { offerEditor } from './offer-editor-helpers';
 
 function phonesFor(projectName: string) {
   return projectName === 'mobile'
@@ -45,8 +46,9 @@ async function prepareSeller(page: Page, phones: { login: string; public: string
 }
 
 async function switchLocale(page: Page, name: 'Қазақша' | 'Русский') {
-  await page.getByRole('button', { name }).click();
-  await expect(page.getByRole('button', { name })).toHaveAttribute('aria-pressed', 'true');
+  const control = page.getByRole('button', { name }).filter({ visible: true }).last();
+  await control.click();
+  await expect(control).toHaveAttribute('aria-pressed', 'true');
 }
 
 function backToEdit(page: Page, label = 'Вернуться к правке') {
@@ -60,71 +62,77 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
   try {
     await prepareSeller(page, phones, sellerName);
 
-    await page.goto('/seller/offers/new');
-    const unit = page.getByLabel('Единица', { exact: true });
+    await page.goto('/seller/offers?new=1');
+    let editor = offerEditor(page);
+    const unit = editor.getByLabel('Единица', { exact: true });
     await expect(unit.locator('option')).toHaveText(['не указана', 'кг', 'шт', 'л', 'упак.', 'другое']);
     await expect(unit).toHaveValue('');
-    await page.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
-    await page.getByRole('textbox', { name: 'Цена, ₸', exact: true }).fill('4200');
+    await editor.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
+    await editor.getByRole('textbox', { name: 'Цена', exact: true }).fill('4200');
     for (const code of ['kg', 'piece', 'liter', 'package']) {
       await unit.selectOption(code);
       await expect(unit).toHaveValue(code);
-      await expect(page.getByLabel('Своя единица')).toHaveCount(0);
+      await expect(editor.getByLabel('Своя единица')).toHaveCount(0);
     }
 
     // «другое» needs the Seller's own value; the error sits on that field.
     await unit.selectOption('other');
-    const custom = page.getByRole('textbox', { name: 'Своя единица' });
-    await expect(page.getByText('Вес или объём упаковки — не единица: «500 г» укажите в комментарии.')).toBeVisible();
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page.getByText('Укажите свою единицу или выберите другую.')).toBeVisible();
+    const custom = editor.getByRole('textbox', { name: 'Своя единица' });
+    await expect(editor.getByText('Вес или объём упаковки — не единица: «500 г» укажите в комментарии.')).toBeVisible();
+    await editor.getByRole('button', { name: 'Далее' }).click();
+    await expect(editor.getByText('Укажите свою единицу или выберите другую.')).toBeVisible();
     await expect(custom).toBeFocused();
     await expect(custom).toHaveAttribute('aria-invalid', 'true');
     await custom.fill('ведро');
 
     // Locale switch keeps both the choice and the own value; only labels change.
     await switchLocale(page, 'Қазақша');
-    const unitKk = page.getByLabel('Өлшем бірлігі', { exact: true });
+    const unitKk = editor.getByLabel('Өлшем бірлігі', { exact: true });
     await expect(unitKk).toHaveValue('other');
     await expect(unitKk.locator('option')).toHaveText(['көрсетілмеген', 'кг', 'дана', 'л', 'қапт.', 'басқа']);
-    await expect(page.getByRole('textbox', { name: 'Өз өлшем бірлігі' })).toHaveValue('ведро');
+    await expect(editor.getByRole('textbox', { name: 'Өз өлшем бірлігі' })).toHaveValue('ведро');
     await switchLocale(page, 'Русский');
     await expect(unit).toHaveValue('other');
     await expect(custom).toHaveValue('ведро');
 
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
-    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+$/);
+    await editor.getByRole('button', { name: 'Далее' }).click();
+    await editor.getByRole('button', { name: 'Продолжить' }).click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
     await expect(page.getByText(/4\s200 ₸ \/ ведро/)).toBeVisible();
 
     // Return from review keeps the draft, including the own unit.
     await backToEdit(page).click();
-    await expect(page).toHaveURL(/\/seller\/offers\/new\?from=[0-9a-f-]+$/);
+    await expect(page).toHaveURL(/\/seller\/offers\?.*new=1.*from=[0-9a-f-]+/);
+    editor = offerEditor(page);
     await expect(unit).toHaveValue('other');
     await expect(custom).toHaveValue('ведро');
-    await expect(page.getByRole('textbox', { name: 'Цена, ₸', exact: true })).toHaveValue(/^4200(\.00)?$/);
+    await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toHaveValue(/^4200(\.00)?$/);
     // An explicit canonical choice clears the own value.
     await unit.selectOption('kg');
-    await expect(page.getByLabel('Своя единица')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Создать изменение' }).click();
+    await expect(editor.getByLabel('Своя единица')).toHaveCount(0);
+    await editor.getByRole('button', { name: 'Далее' }).click();
+    await editor.getByRole('button', { name: 'Продолжить' }).click();
     await expect(page.getByText(/4\s200 ₸ \/ кг/)).toBeVisible();
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL('/seller');
+    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     // Edit the existing Offer from кг to шт, with a return from review in between.
     await page.goto('/seller/offers');
     const card = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Баранина', exact: true }) });
     await expect(card.getByText('/ кг')).toBeVisible();
-    await card.getByRole('button', { name: 'Изменить', exact: true }).click();
-    const editUnit = card.getByLabel('Единица', { exact: true });
+    await card.getByRole('link', { name: 'Изменить', exact: true }).click();
+    editor = offerEditor(page);
+    const editUnit = editor.getByLabel('Единица', { exact: true });
     await expect(editUnit).toHaveValue('kg');
     await editUnit.selectOption('piece');
-    await card.getByRole('button', { name: 'Проверить изменение' }).click();
+    await editor.getByRole('button', { name: 'Далее' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+\?/);
     await expect(page.getByText(/4\s200 ₸ \/ шт/)).toBeVisible();
     await backToEdit(page).click();
-    await expect(page).toHaveURL(/\/seller\/offers$/);
-    await expect(card.getByLabel('Единица', { exact: true })).toHaveValue('piece');
-    await card.getByRole('button', { name: 'Проверить изменение' }).click();
+    await expect(page).toHaveURL(/\/seller\/offers\?.*edit=[0-9a-f-]+.*from=[0-9a-f-]+/);
+    editor = offerEditor(page);
+    await expect(editor.getByLabel('Единица', { exact: true })).toHaveValue('piece');
+    await editor.getByRole('button', { name: 'Далее' }).click();
     await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
     // The notice query is stripped right after it is read, so either form of the list URL is fine.
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
@@ -144,11 +152,13 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
 
     // The own-value field fits a 320 px phone in the longer Kazakh copy.
     await page.setViewportSize({ width: 320, height: 800 });
-    await page.goto('/seller/offers/new');
-    await unitKk.selectOption('other');
-    await expect(page.getByRole('textbox', { name: 'Өз өлшем бірлігі' })).toBeVisible();
+    await page.goto('/seller/offers?new=1');
+    editor = offerEditor(page);
+    const narrowUnitKk = editor.getByLabel('Өлшем бірлігі', { exact: true });
+    await narrowUnitKk.selectOption('other');
+    await expect(editor.getByRole('textbox', { name: 'Өз өлшем бірлігі' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    const box = await unitKk.boundingBox();
+    const box = await narrowUnitKk.boundingBox();
     expect(box!.x + box!.width).toBeLessThanOrEqual(320);
   } finally {
     await cleanup(phones.login);
