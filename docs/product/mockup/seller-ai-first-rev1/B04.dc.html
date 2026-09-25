@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-B04 · Отзыв о точке</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1256px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-B04 · Buyer · point review</div>
+    <h2 class="ab-title">Отзыв о точке</h2>
+    <p class="ab-desc">Один отзыв о конкретной посещённой точке: 1–5 звёзд, необязательный текст и теги. Нужен вход по телефону; маршрут, контакт или близость повышают внутреннюю надёжность, но не обязательны. Повторный отзыв обновляет предыдущий. Обычный отзыв виден сразу.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-B04 · Review · Auth</b><br>Вход перед отправкой, ввод сохранён</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Отзыв</div></header>
+        <main class="body"><div class="sk" style="height: 240px; background: #fff;"></div></main>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="ra">
+          <div class="grab"></div>
+          <h2 class="h3" id="ra">Войдите, чтобы отправить отзыв</h2>
+          <p class="c c2">Отзыв и оценка сохранены. Номер не увидят ни продавец, ни другие покупатели.</p>
+          <div class="fld"><label for="rph">Номер телефона</label><div class="inp foc" id="rph"><span class="c2">+7</span><span>701 000 11 22</span></div></div>
+          <button class="btn btn-p lg w">Получить код</button>
+        </div>
+      </div>
+      <div class="note">Тот же phone / OTP шаблон, что AI-S03: ошибки кода, back без потери текста.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B04 · Review · Form</b><br>Звёзды, текст, теги</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button><div class="bar-t">Отзыв о точке</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="ic i-pin pt"></span><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Оценивается точка, а не товар</p></div></div>
+          <div class="fld"><div class="fl" id="st">Оценка</div><div style="display: flex; gap: 4px;" role="radiogroup" aria-labelledby="st"><button class="ib" role="radio" aria-checked="false" aria-label="1 звезда" style="color: var(--sun);"><span class="ic i-starf lg"></span></button><button class="ib" role="radio" aria-label="2 звезды" style="color: var(--sun);"><span class="ic i-starf lg"></span></button><button class="ib" role="radio" aria-label="3 звезды" style="color: var(--sun);"><span class="ic i-starf lg"></span></button><button class="ib" role="radio" aria-checked="true" aria-label="4 звезды" style="color: var(--sun); outline: 2px solid var(--focus); outline-offset: -2px;"><span class="ic i-starf lg"></span></button><button class="ib" role="radio" aria-label="5 звёзд" style="color: #a8a2ab;"><span class="ic i-star lg"></span></button></div><span class="hint">4 из 5</span></div>
+          <div class="fld"><div class="fl">Что понравилось <span class="req">· необязательно</span></div><div class="chips"><span class="chip on"><span class="ic i-check"></span>Товар соответствовал</span><span class="chip on"><span class="ic i-check"></span>Цена совпала</span><span class="chip">Было легко найти</span><span class="chip">Хорошее обслуживание</span></div></div>
+          <div class="fld"><label for="rt">Комментарий <span class="req">· необязательно</span></label><div class="inp ta" id="rt">Мясо свежее, но искали ряд минут десять.</div></div>
+          <a class="btn btn-g sm" href="B05.dc.html" style="align-self: flex-start; padding: 0; color: var(--ink2);"><span class="ic i-flag sm"></span>Фото не соответствует товару</a>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Отправить отзыв</button></div>
+      </div>
+      <div class="note">«Фото не соответствует товару» — не тег отзыва: ссылка открывает отдельный complaint flow AI-B05. Звёзды — радиогруппа с именами, выбор не только цветом.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-B04 · Review · Update existing</b><br>Повторный отзыв обновляет прежний</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button><div class="bar-t">Ваш отзыв</div></header>
+        <main class="body" style="gap: 18px;">
+          <div class="banner info" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-history" style="color: var(--info);"></span><p class="c" style="color: var(--ink); flex: 1;">Вы уже оценивали эту точку 3 дня назад. Новый отзыв заменит прежний.</p></div>
+          <div class="fld"><div class="fl">Оценка</div><div style="display: flex; gap: 4px;"><span class="ib" style="color: var(--sun);"><span class="ic i-starf lg"></span></span><span class="ib" style="color: var(--sun);"><span class="ic i-starf lg"></span></span><span class="ib" style="color: var(--sun);"><span class="ic i-starf lg"></span></span><span class="ib" style="color: var(--sun);"><span class="ic i-starf lg"></span></span><span class="ib" style="color: var(--sun);"><span class="ic i-starf lg"></span></span></div><span class="hint">5 из 5 · было 4</span></div>
+          <div class="fld"><label for="rt2">Комментарий</label><div class="inp ta foc" id="rt2">Теперь нашли быстро — появился ориентир. Спасибо!</div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Обновить отзыв</button></div>
+        <div class="toast" role="status" style="bottom: 96px;"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Отзыв опубликован</span></div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Open · п. 22</span>Может ли покупатель удалить отзыв или только изменить — открытое решение; кнопки «Удалить» здесь нет.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1256,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

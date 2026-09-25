@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-M03 · Жалоба и кластер</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1256px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-M03 · Moderator · wireframe</div>
+    <h2 class="ab-title">Жалоба, кластер и антифрод</h2>
+    <p class="ab-desc">Неизменяемый snapshot фото на момент жалобы, данные карточки и точки, обезличенные доказательства, объединённый кластер. Антифрод-сигналы — только внутренние подсказки, не автоматическое доказательство. Отдельная ветка — подозрительные отзывы.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-M03 · Complaint · Cluster</b><br>Snapshot и обезличенные сообщения</div>
+      <div class="wf">
+        <div class="wbar">← Курага · 500 г · Сайран</div>
+        <div class="wbody">
+          <div style="display: flex; gap: 8px;"><div class="wimg" style="width: 120px; height: 120px;">snapshot<br>фото 1 · 12.09</div><div class="wbox" style="flex: 1;"><b>Сейчас у продавца</b><span>фото 1 той же версии</span><span>цена 1 800 ₸ / упак.</span></div></div>
+          <div class="wbox"><b>Кластер · 7 сообщений</b><span>«На прилавке другой товар» × 5</span><span>«Другой сорт» × 2</span><span>фото покупателей: 2</span></div>
+          <div class="wbox"><b>Сообщение #3</b><div class="wimg" style="height: 64px;">фото покупателя</div><span>«Там изюм, а не курага»</span><span style="color: #888;">автор скрыт</span></div>
+          <div class="wbox dash"><span>Повторные сообщения одного пользователя на эту версию объединены</span></div>
+        </div>
+      </div>
+      <div class="note">Модератор не видит личность жалобщиков — только обезличенные ID внутри кластера.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M03 · Complaint · Signals</b><br>Внутренние антифрод-сигналы</div>
+      <div class="wf">
+        <div class="wbar">← Сигналы кластера</div>
+        <div class="wbody">
+          <div class="wbox dark"><b>Влияние заморожено</b><span>всплеск: 5 сообщений за 20 минут</span></div>
+          <div class="wbox"><b>Сигналы (только для модератора)</b><span>▢ новые аккаунты: 4 из 7</span><span>▢ одно устройство / сеть: 3</span><span>▢ совпадение текста: высокое</span><span>▢ связанные аккаунты: 2</span></div>
+          <div class="wbox dash"><span>Сигналы — повод проверить, а не решение. Итог определяется сравнением фото с товаром.</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn">Исключить подозрительные</span><span class="wbtn dk">К решению</span></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · antifraud</span>Точная модель сигналов и порогов — отдельные contracts (gap 15). Продавцу не показываются.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M03 · Reviews · Suspicious</b><br>Ветка подозрительных отзывов</div>
+      <div class="wf">
+        <div class="wbar">← Отзывы · Алтын Орда</div>
+        <div class="wtab"><span>Фото</span><span class="on">Подозрительные отзывы</span></div>
+        <div class="wbody">
+          <div class="wbox dark"><b>Кластер · 6 оценок «1★» за час</b><span>влияние на рейтинг заморожено</span></div>
+          <div class="wbox"><span>★☆☆☆☆ «Всё плохо» · новый аккаунт</span><span>★☆☆☆☆ «Всё плохо» · новый аккаунт</span><span>★☆☆☆☆ без текста · та же сеть</span><span>…ещё 3</span></div>
+          <div class="wbox dash"><span>Отзывы видны публично как обычные; их оценка не входит в среднее до решения</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn">Учесть сигнал</span><span class="wbtn dk">Исключить из рейтинга</span></div>
+        </div>
+      </div>
+      <div class="note">Решение меняет только rating-сигнал, без публичной метки «подозрительно».</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1256,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

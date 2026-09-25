@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S02 · Выбор способа</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1256px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S02 · Seller · bottom sheet</div>
+    <h2 class="ab-title">Выбор способа</h2>
+    <p class="ab-desc">После главного CTA — короткий bottom sheet. Три AI-способа и равноправный ручной путь. При недоступности ИИ главный CTA остаётся, AI-строки нейтрально выключены с причиной, «Заполнить вручную» активно — без тупика.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S02 · Source · Default</b><br>Bottom sheet поверх «Моя витрина»</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Моя витрина</div><div class="lang"><span class="on">РУС</span><span>ҚАЗ</span></div><button class="ib" aria-label="Уведомления"><span class="ic i-bell"></span></button></header>
+        <main class="body" style="gap: 12px;">
+          <div class="btn btn-p lg w">Сформировать карточки товаров</div>
+          <div class="sk" style="height: 88px; border-radius: 14px; background: #fff;"></div>
+          <div class="sk" style="height: 88px; border-radius: 14px; background: #fff;"></div>
+        </main>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-label="Как сформировать карточки">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center;"><h2 class="h3" style="flex: 1;">Как сформировать карточки?</h2><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button></div>
+          <div class="ov">С помощью ИИ</div>
+          <div style="display: flex; flex-direction: column;">
+            <a class="li" href="S04.dc.html" style="text-decoration: none; color: inherit;"><div class="lic p"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Покажите товары и назовите цены вслух</p></div><span class="ic i-right c2"></span></a>
+            <a class="li" href="S05.dc.html" style="text-decoration: none; color: inherit;"><div class="lic p"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div><p class="c">Можно с ценниками, голос — по желанию</p></div><span class="ic i-right c2"></span></a>
+            <a class="li" href="S06.dc.html" style="text-decoration: none; color: inherit;"><div class="lic p"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div><p class="c">Назовите товары, цены и фасовку</p></div><span class="ic i-right c2"></span></a>
+          </div>
+          <div class="ov" style="margin-top: 4px;">Без ИИ</div>
+          <a class="li" href="S09.dc.html" style="text-decoration: none; color: inherit;"><div class="lic"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div><p class="c">Пустая карточка товара</p></div><span class="ic i-right c2"></span></a>
+        </div>
+      </div>
+      <div class="note">Порядок и строки — из ТЗ п. 8.2. Нет AI/ML-жаргона. Весь ряд — зона нажатия ≥ 56 px, у строк есть pressed и focus-visible (STATES).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S02 · Source · AI outage</b><br>ИИ недоступен до записи</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Моя витрина</div><div class="lang"><span class="on">РУС</span><span>ҚАЗ</span></div><button class="ib" aria-label="Уведомления"><span class="ic i-bell"></span></button></header>
+        <main class="body" style="gap: 12px;">
+          <div class="btn btn-p lg w">Сформировать карточки товаров</div>
+          <div class="sk" style="height: 88px; border-radius: 14px; background: #fff;"></div>
+        </main>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-label="Как сформировать карточки">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center;"><h2 class="h3" style="flex: 1;">Как сформировать карточки?</h2><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button></div>
+          <div class="banner gray" role="status" style="flex-direction: row; gap: 10px; padding: 12px; border-radius: 14px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Автоматическое заполнение сейчас не работает. Карточку можно заполнить вручную — это займёт пару минут.</p></div>
+          <div class="ov">С помощью ИИ</div>
+          <div style="display: flex; flex-direction: column;" aria-disabled="true">
+            <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Временно недоступно</p></div></div>
+            <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div><p class="c">Временно недоступно</p></div></div>
+            <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div><p class="c">Временно недоступно</p></div></div>
+          </div>
+          <div class="ov" style="margin-top: 4px;">Без ИИ</div>
+          <a class="li card hl" href="S09.dc.html" style="text-decoration: none; color: inherit; padding: 8px 12px; flex-direction: row;"><div class="lic p"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div><p class="c">Пустая карточка товара</p></div><span class="ic i-right pt"></span></a>
+        </div>
+      </div>
+      <div class="note"><b>Не dead end:</b> AI-строки видны с причиной «Временно недоступно», без красного. Ручной путь визуально поднят и остаётся активным.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S02 · Showcase · AI outage</b><br>CTA на месте, материалы в очереди</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Моя витрина</div><div class="lang"><span class="on">РУС</span><span>ҚАЗ</span></div><button class="ib" aria-label="Уведомления"><span class="ic i-bell"></span></button></header>
+        <main class="body" style="gap: 12px;">
+          <a class="btn btn-p lg w" href="#"><span class="ic i-plus"></span>Сформировать карточки товаров</a>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 12px;">
+            <div class="lic"><span class="ic i-video"></span></div>
+            <div style="flex: 1;"><div class="ts">Ожидает обработки</div><p class="c">Видео 1:24 загружено и сохранено. Обработаем автоматически — держать экран открытым не нужно.</p></div>
+          </div>
+          <div style="display: flex; gap: 8px;"><a class="btn btn-o sm" href="S09.dc.html" style="flex: 1;"><span class="ic i-pencil sm"></span>Заполнить вручную</a><button class="btn btn-g sm">Удалить видео</button></div>
+          <div class="hr"></div>
+          <h3 class="h3">Карточки · 14</h3>
+          <div class="card" style="flex-direction: row; gap: 12px;">
+            <div class="img m1" style="width: 64px; height: 64px; border-radius: 10px;"></div>
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;"><div class="ts">Баранина, лопатка</div><div class="c c2"><b class="num" style="color: var(--ink);">5 000 ₸</b> / кг · 3 точки</div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div>
+          </div>
+          <div class="card" style="flex-direction: row; gap: 12px;">
+            <div class="img m3" style="width: 64px; height: 64px; border-radius: 10px;"></div>
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;"><div class="ts">Курага · 500 г</div><div class="c c2"><b class="num" style="color: var(--ink);">1 800 ₸</b> / упак.</div><span class="bd bd-info"><span class="ic i-clock"></span>На модерации</span></div>
+          </div>
+        </main>
+        <nav class="nav" aria-label="Разделы"><a class="on" href="#"><span class="ic i-store"></span>Витрина</a><a href="S12.dc.html"><span class="ic i-pin"></span>Точки</a><a href="S19.dc.html"><span class="ic i-menu"></span>Ещё</a></nav>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · late AI result</span>Если продавец заполнит вручную, а ИИ потом закончит — см. AI-S07 «Conflict»: сопоставить, «Открыть оставшиеся» или «Удалить результат».</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1256,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

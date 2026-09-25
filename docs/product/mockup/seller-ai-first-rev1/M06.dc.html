@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-M06 · Post-check feed</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1256px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-M06 · Operator · wireframe · AI off · Rev 1</div>
+    <h2 class="ab-title">Post-check feed</h2>
+    <p class="ab-desc">Первый этап без ИИ: оператор просматривает уже опубликованные карточки по факту и снимает неподходящие. Нет очередей ожидания, кластеров жалоб и апелляций.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-M06 · Feed · New since last visit</b><span class="tag tag-rev">Rev 1</span><br>Новые сверху</div>
+      <div class="wf">
+        <div class="wbar">Опубликовано недавно</div>
+        <div class="wbody">
+          <div style="display: flex; gap: 6px;"><span class="wchip on">Новые с моего последнего просмотра · 12</span><span class="wchip">Все</span></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><b>Баранина, лопатка · 600 г</b><span>3 000 ₸ / упак. · Зелёный базар, ряд 4</span><span style="color: #777;">Продавец +7 707 ··· 12 · 5 мин назад · новая</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><b>Энергетик «Ночной»</b><span>650 ₸ / шт. · Сайран, контейнер 5</span><span style="color: #777;">Продавец +7 701 ··· 44 · 18 мин назад · новая</span><span class="wbtn" style="flex: none; height: 32px; align-self: flex-start; padding: 0 10px;">Снять с витрины</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><b>Курага · 500 г</b><span>1 800 ₸ / упак. · Тастак, место 31</span><span style="color: #777;">Продавец +7 777 ··· 02 · 1 ч назад · изменена цена</span></div></div>
+        </div>
+      </div>
+      <div class="note">Карточка в ленте: обложка, название, цена, точка, продавец, время, тип события (новая / изменена).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M06 · Remove · Reason</b><span class="tag tag-rev">Rev 1</span><br>Причина и подтверждение</div>
+      <div class="wf">
+        <div class="wbar">← Снять с витрины</div>
+        <div class="wbody">
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 48px; height: 48px;">фото</div><b>Энергетик «Ночной» · Сайран</b></div>
+          <div class="wbox"><b>Причина</b><span>◉ Товар нельзя размещать</span><span>○ Фото не соответствует товару</span><span>○ Контакты или реклама в фото или тексте</span><span>○ Другое</span></div>
+          <div class="wbox"><b>Комментарий продавцу · необязательно</b><div class="wln" style="width: 80%;"></div></div>
+          <div class="wbox dash"><span>Продавец увидит: «Снято оператором» + причину обычными словами (AI-S15)</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn">Отмена</span><span class="wbtn dk">Снять с витрины</span></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-prop">Proposed</span>Короткий список причин — предложение; финальные формулировки задаёт PO.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M06 · Feed · Removed</b><span class="tag tag-rev">Rev 1</span><br>Снятая карточка остаётся в ленте</div>
+      <div class="wf">
+        <div class="wbar">Опубликовано недавно</div>
+        <div class="wbody">
+          <div class="wbox dark" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><b>Энергетик «Ночной»</b><span class="wchip on" style="align-self: flex-start;">Снята · Товар нельзя размещать</span><span style="color: #777;">Снял оператор O-03 · только что</span><span class="wbtn" style="flex: none; height: 32px; align-self: flex-start; padding: 0 10px;">Вернуть на витрину</span></div></div>
+          <div class="wbox" style="flex-direction: row; gap: 10px;"><div class="wimg" style="width: 56px; height: 56px;">фото</div><div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><b>Баранина, лопатка · 600 г</b><span>3 000 ₸ / упак.</span></div></div>
+          <div class="wbox dash"><span>«Вернуть на витрину» — сразу, продавец получает уведомление</span></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · audit</span>Кто и когда снял / вернул — в служебном журнале, продавцу не показывается.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1256,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

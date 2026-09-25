@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S10 · Выбор точек</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2056px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S10 · Seller · point selector</div>
+    <h2 class="ab-title">Выбор торговых точек</h2>
+    <p class="ab-desc">До отправки существует одна групповая карточка. Выбор N точек = после одобрения N независимых карточек с координатами и контактами своих точек. Рядом с выбором всегда «Будет создано N карточек». Одна точка выбирается автоматически и показывается явно; при нескольких ничего не выбирается молча. «Добавить торговую точку» есть всегда.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S10 · Points · None exist</b><br>У продавца нет точек</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Черновик</div></header>
+        <main class="body"><div class="sk" style="height: 120px; background: #fff;"></div></main>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="p0">
+          <div class="grab"></div>
+          <h2 class="h3" id="p0">Торговые точки</h2>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 8px; text-align: center;">
+            <div class="lic p" style="width: 56px; height: 56px; border-radius: 18px;"><span class="ic i-pin lg"></span></div>
+            <div class="ts">Пока нет ни одной точки</div>
+            <p class="c c2">Укажите, где вы торгуете, — покупатель сможет построить маршрут. Контакты можно не указывать.</p>
+          </div>
+          <a class="btn btn-p lg w" href="S12A.dc.html"><span class="ic i-plus sm"></span>Добавить торговую точку</a>
+          <button class="btn btn-g w">Позже</button>
+        </div>
+      </div>
+      <div class="note">Без точки карточка остаётся незавершённой, но сохраняется. Первая созданная точка применится ко всем черновикам текущего пакета (F5).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S10 · Points · Single</b><br>Одна точка выбрана автоматически</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Черновик</div></header>
+        <main class="body"><div class="sk" style="height: 120px; background: #fff;"></div></main>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="p1">
+          <div class="grab"></div>
+          <h2 class="h3" id="p1">Торговые точки</h2>
+          <div class="li"><span class="cb on" role="checkbox" aria-checked="true"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Мясной павильон · вход с Жибек Жолы</p></div></div>
+          <div class="banner gray" style="padding: 10px 12px; border-radius: 12px; flex-direction: row; gap: 8px;"><span class="ic i-info sm c2"></span><p class="c c2">Выбрана автоматически — это ваша единственная точка.</p></div>
+          <a class="li" href="S12A.dc.html" style="text-decoration: none; color: var(--primary-text);"><span class="ic i-plus"></span><div class="mid"><div class="ts">Добавить торговую точку</div></div></a>
+          <p class="t" style="font-weight: 500;"><span class="ic i-layers sm" style="vertical-align: -4px;"></span> Будет создана 1 карточка</p>
+          <button class="btn btn-p lg w">Готово</button>
+        </div>
+      </div>
+      <div class="note">Число склоняется: «1 карточка», «2–4 карточки», «5 карточек». Ключевая строка ТЗ — «Будет создано N карточек».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S10 · Points · Multiple · None selected</b><br>Несколько точек, выбор не сделан</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Черновик</div></header>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="p2" style="top: 64px;">
+          <div class="grab"></div>
+          <h2 class="h3" id="p2">Торговые точки</h2>
+          <p class="c c2">Выберите одну, несколько или все.</p>
+          <div style="display: flex; flex-direction: column;">
+            <div class="li" style="border-bottom: 1px solid var(--line);"><span class="cb" role="checkbox" aria-checked="false"></span><div class="mid"><div class="ts">Все точки</div></div><span class="c num">5</span></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Мясной павильон</p></div></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Алтын Орда, павильон 12</div><p class="c">Продуктовый ряд, 2 этаж</p></div></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Тастак, место 31</div><p class="c">У главного входа</p></div></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Сайран, контейнер 5</div><p class="c">Ряд с сухофруктами</p></div></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Домашняя точка, Орбита-2</div><p class="c">Самовывоз у дома 14</p></div></div>
+          </div>
+          <a class="li" href="S12A.dc.html" style="text-decoration: none; color: var(--primary-text);"><span class="ic i-plus"></span><div class="mid"><div class="ts">Добавить торговую точку</div></div></a>
+          <button class="btn btn-p lg w dis" disabled aria-describedby="why">Готово</button>
+          <p class="c" id="why" style="text-align: center;">Выберите хотя бы одну точку</p>
+        </div>
+      </div>
+      <div class="note">Disabled с причиной рядом. Выбор не угадывается по «последней использованной».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S10 · Points · Subset</b><br>3 из 5 — произвольный набор</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Черновик</div></header>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="p3" style="top: 64px;">
+          <div class="grab"></div>
+          <h2 class="h3" id="p3">Торговые точки</h2>
+          <p class="c c2">Выберите одну, несколько или все.</p>
+          <div style="display: flex; flex-direction: column;">
+            <div class="li" style="border-bottom: 1px solid var(--line);"><span class="cb" role="checkbox" aria-checked="mixed" style="border-color: var(--primary);"><span style="width: 12px; height: 2px; background: var(--primary); border-radius: 1px;"></span></span><div class="mid"><div class="ts">Все точки</div></div><span class="c num">3 из 5</span></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Мясной павильон</p></div></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Алтын Орда, павильон 12</div><p class="c">Продуктовый ряд, 2 этаж</p></div></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Тастак, место 31</div><p class="c">У главного входа</p></div></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Сайран, контейнер 5</div><p class="c">Ряд с сухофруктами</p></div></div>
+            <div class="li"><span class="cb"></span><div class="mid"><div class="ts">Домашняя точка, Орбита-2</div><p class="c">Самовывоз у дома 14</p></div></div>
+          </div>
+          <div class="banner soft" style="padding: 10px 12px; border-radius: 12px; gap: 4px;"><div class="ts"><span class="ic i-layers sm" style="vertical-align: -4px;"></span> Будет создано 3 карточки</div><p class="c c2">Одинаковые данные для всех трёх</p></div>
+          <a class="btn btn-g sm" href="S11.dc.html" style="align-self: flex-start; padding: 0;">Настроить данные по точкам</a>
+          <button class="btn btn-p lg w">Готово</button>
+        </div>
+      </div>
+      <div class="note">Проверка из п. 20, задание 4: 3 из 5 точек → понятно, что будет 3 карточки. Цена для одной точки меняется в AI-S11.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S10 · Points · All</b><br>«Все точки»</div>
+      <div class="ph">
+        <header class="bar"><div class="bar-t">Черновик</div></header>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="p4" style="top: 64px;">
+          <div class="grab"></div>
+          <h2 class="h3" id="p4">Торговые точки</h2>
+          <p class="c c2">Выберите одну, несколько или все.</p>
+          <div style="display: flex; flex-direction: column;">
+            <div class="li" style="border-bottom: 1px solid var(--line);"><span class="cb on" role="checkbox" aria-checked="true"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Все точки</div></div><span class="c num">5 из 5</span></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Мясной павильон</p></div></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Алтын Орда, павильон 12</div><p class="c">Продуктовый ряд, 2 этаж</p></div></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Тастак, место 31</div><p class="c">У главного входа</p></div></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Сайран, контейнер 5</div><p class="c">Ряд с сухофруктами</p></div></div>
+            <div class="li"><span class="cb on"><span class="ic i-check"></span></span><div class="mid"><div class="ts">Домашняя точка, Орбита-2</div><p class="c">Самовывоз у дома 14</p></div></div>
+          </div>
+          <div class="banner soft" style="padding: 10px 12px; border-radius: 12px; gap: 4px;"><div class="ts"><span class="ic i-layers sm" style="vertical-align: -4px;"></span> Будет создано 5 карточек</div><p class="c c2">По одной на каждую точку</p></div>
+          <button class="btn btn-p lg w">Готово</button>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · multi-point</span>«Все точки» — снимок на момент отправки. Автодобавление в будущие точки не обещаем (contract gap 8).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2056,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

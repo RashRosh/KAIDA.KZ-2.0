@@ -1,0 +1,583 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "B01.dc.html": {
+      "h": 1300,
+      "page": "buyer",
+      "title": "AI-B01 · Карточка в выдаче",
+      "w": 1256,
+      "x": 0,
+      "y": 0
+    },
+    "B02.dc.html": {
+      "h": 1720,
+      "page": "buyer",
+      "title": "AI-B02 · Детальная карточка",
+      "w": 1256,
+      "x": 0,
+      "y": 1420
+    },
+    "B03.dc.html": {
+      "h": 1300,
+      "page": "buyer",
+      "title": "AI-B03 · Публичный рейтинг",
+      "w": 856,
+      "x": 0,
+      "y": 3260
+    },
+    "B04.dc.html": {
+      "h": 1300,
+      "page": "buyer",
+      "title": "AI-B04 · Отзыв о точке",
+      "w": 1256,
+      "x": 0,
+      "y": 4680
+    },
+    "B05.dc.html": {
+      "h": 1300,
+      "page": "buyer",
+      "title": "AI-B05 · Жалоба на фото",
+      "w": 1256,
+      "x": 0,
+      "y": 6100
+    },
+    "B06.dc.html": {
+      "h": 1300,
+      "page": "buyer",
+      "title": "AI-B06 · Мои жалобы",
+      "w": 856,
+      "x": 0,
+      "y": 7520
+    },
+    "F1.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F1 · Видео → карточки → модерация",
+      "w": 2640,
+      "x": 0,
+      "y": 0
+    },
+    "F2.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F2 · Фото → optional voice → карточки → модерация",
+      "w": 2640,
+      "x": 0,
+      "y": 800
+    },
+    "F3.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F3 · Голос → карточки → обязательное фото",
+      "w": 2640,
+      "x": 0,
+      "y": 1600
+    },
+    "F4.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F4 · Ручной ввод → модерация",
+      "w": 2640,
+      "x": 0,
+      "y": 2400
+    },
+    "F5.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F5 · Новый продавец без точки → точка → пакет",
+      "w": 2640,
+      "x": 0,
+      "y": 3200
+    },
+    "F6.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F6 · Актуальность → массовое подтверждение",
+      "w": 2640,
+      "x": 0,
+      "y": 4000
+    },
+    "F7.dc.html": {
+      "h": 680,
+      "page": "flows",
+      "title": "F7 · Жалоба на фото → проверка → апелляция",
+      "w": 2640,
+      "x": 0,
+      "y": 4800
+    },
+    "Gaps.dc.html": {
+      "h": 1080,
+      "title": "Contract gaps и открытые решения",
+      "w": 1656,
+      "x": 0,
+      "y": 2120
+    },
+    "M01.dc.html": {
+      "h": 1300,
+      "page": "mod",
+      "title": "AI-M01 · Очередь",
+      "w": 856,
+      "x": 0,
+      "y": 0
+    },
+    "M02.dc.html": {
+      "h": 1300,
+      "page": "mod",
+      "title": "AI-M02 · Карточка и новая редакция",
+      "w": 856,
+      "x": 0,
+      "y": 1420
+    },
+    "M03.dc.html": {
+      "h": 1300,
+      "page": "mod",
+      "title": "AI-M03 · Жалоба и кластер",
+      "w": 1256,
+      "x": 0,
+      "y": 2840
+    },
+    "M04.dc.html": {
+      "h": 1300,
+      "page": "mod",
+      "title": "AI-M04 · Решение и последствия",
+      "w": 856,
+      "x": 0,
+      "y": 4260
+    },
+    "M05.dc.html": {
+      "h": 1300,
+      "page": "mod",
+      "title": "AI-M05 · Апелляция и audit trail",
+      "w": 856,
+      "x": 0,
+      "y": 5680
+    },
+    "M06.dc.html": {
+      "h": 1300,
+      "page": "mod",
+      "title": "AI-M06 · Post-check feed · Rev 1",
+      "w": 1256,
+      "x": 0,
+      "y": 7100
+    },
+    "Main.dc.html": {
+      "h": 2000,
+      "title": "Обложка · Handoff-записка",
+      "w": 1656,
+      "x": 0,
+      "y": 0
+    },
+    "Motion.dc.html": {
+      "h": 1580,
+      "page": "states",
+      "title": "States · 3 · Motion · микроанимации",
+      "w": 2200,
+      "x": 0,
+      "y": 3050
+    },
+    "OFF1.dc.html": {
+      "h": 1380,
+      "page": "seller",
+      "title": "AI off · Showcase, editor, removed by operator · Rev 1",
+      "w": 2456,
+      "x": 0,
+      "y": 36320
+    },
+    "OFF2.dc.html": {
+      "h": 1380,
+      "page": "seller",
+      "title": "Confirm · AI off · Rev 1",
+      "w": 2056,
+      "x": 0,
+      "y": 37820
+    },
+    "P1.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "proto",
+      "title": "Prototype · F1",
+      "w": 1000,
+      "x": 0,
+      "y": 0
+    },
+    "P2.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "proto",
+      "title": "Prototype · F2",
+      "w": 1000,
+      "x": 0,
+      "y": 1120
+    },
+    "P4.dc.html": {
+      "h": 1100,
+      "is_interactive": true,
+      "page": "proto",
+      "title": "Prototype · P4 · Ручной путь при выключенном ИИ · Rev 1",
+      "w": 1100,
+      "x": 0,
+      "y": 2240
+    },
+    "P5.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "proto",
+      "title": "Prototype · F5",
+      "w": 1000,
+      "x": 0,
+      "y": 3460
+    },
+    "P6.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "proto",
+      "title": "Prototype · F6",
+      "w": 1000,
+      "x": 0,
+      "y": 4580
+    },
+    "P7.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "proto",
+      "title": "Prototype · F7",
+      "w": 1000,
+      "x": 0,
+      "y": 5700
+    },
+    "S01.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S01 · Моя витрина",
+      "w": 2056,
+      "x": 0,
+      "y": 0
+    },
+    "S02.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S02 · Выбор способа",
+      "w": 1256,
+      "x": 0,
+      "y": 1420
+    },
+    "S03.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S03 · Контекстная авторизация",
+      "w": 1656,
+      "x": 0,
+      "y": 2840
+    },
+    "S04.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S04 · Видео · основной путь",
+      "w": 2456,
+      "x": 0,
+      "y": 4260
+    },
+    "S04b.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S04 · Видео · ошибки и права",
+      "w": 2456,
+      "x": 0,
+      "y": 5680
+    },
+    "S05.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S05 · Пакет фотографий",
+      "w": 1256,
+      "x": 0,
+      "y": 7100
+    },
+    "S06.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S06 · Диктовка товаров",
+      "w": 1256,
+      "x": 0,
+      "y": 8520
+    },
+    "S07.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S07 · Загрузка и обработка",
+      "w": 2856,
+      "x": 0,
+      "y": 9940
+    },
+    "S08.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S08 · Пакет AI-черновиков",
+      "w": 2056,
+      "x": 0,
+      "y": 11360
+    },
+    "S09.dc.html": {
+      "h": 1960,
+      "page": "seller",
+      "title": "AI-S09 · Единый редактор",
+      "w": 2456,
+      "x": 0,
+      "y": 12780
+    },
+    "S09b.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S09 · Editor · Points, submit, discard · Rev 1",
+      "w": 2456,
+      "x": 0,
+      "y": 14860
+    },
+    "S10.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S10 · Выбор точек",
+      "w": 2056,
+      "x": 0,
+      "y": 16280
+    },
+    "S11.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S11 · Данные по точкам",
+      "w": 1256,
+      "x": 0,
+      "y": 17700
+    },
+    "S12.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S12 · Мои точки",
+      "w": 1256,
+      "x": 0,
+      "y": 19120
+    },
+    "S12A.dc.html": {
+      "h": 1380,
+      "page": "seller",
+      "title": "AI-S12A · Создание и редактирование точки",
+      "w": 2856,
+      "x": 0,
+      "y": 20540
+    },
+    "S13.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S13 · Подтверждение контактов",
+      "w": 2056,
+      "x": 0,
+      "y": 22040
+    },
+    "S14.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S14 · Отправка и модерация",
+      "w": 2056,
+      "x": 0,
+      "y": 23460
+    },
+    "S15.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S15 · Управление карточкой",
+      "w": 1656,
+      "x": 0,
+      "y": 24880
+    },
+    "S16.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S16 · Массовая актуализация",
+      "w": 1656,
+      "x": 0,
+      "y": 26300
+    },
+    "S17.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S17 · Архив",
+      "w": 1256,
+      "x": 0,
+      "y": 27720
+    },
+    "S18.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S18 · Уведомления",
+      "w": 856,
+      "x": 0,
+      "y": 29140
+    },
+    "S19.dc.html": {
+      "h": 1380,
+      "page": "seller",
+      "title": "AI-S19 · Ещё",
+      "w": 856,
+      "x": 0,
+      "y": 30560
+    },
+    "S20.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S20 · Рейтинг и отзывы",
+      "w": 856,
+      "x": 0,
+      "y": 32060
+    },
+    "S21.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S21 · Инцидент по фото",
+      "w": 856,
+      "x": 0,
+      "y": 33480
+    },
+    "S22.dc.html": {
+      "h": 1300,
+      "page": "seller",
+      "title": "AI-S22 · Апелляция",
+      "w": 856,
+      "x": 0,
+      "y": 34900
+    },
+    "States1.dc.html": {
+      "h": 1340,
+      "page": "states",
+      "title": "Component / state matrix · 1",
+      "w": 2200,
+      "x": 0,
+      "y": 0
+    },
+    "States2.dc.html": {
+      "h": 1420,
+      "page": "states",
+      "title": "Component / state matrix · 2",
+      "w": 2200,
+      "x": 0,
+      "y": 1460
+    },
+    "B07.dc.html": {
+      "h": 1300,
+      "page": "buyer",
+      "title": "AI-B07 · Фильтры поиска · Rev 1",
+      "w": 1656,
+      "x": 0,
+      "y": 8940
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-25T01:10:00Z",
+    "v": 1
+  },
+  "designSystems": [
+    {
+      "artifact": "https://claude.ai/code/artifact/28360c15-e7d6-4dba-b157-d97bed612363",
+      "copiedAt": "2026-09-25T01:10:00Z",
+      "namespace": "kaida",
+      "title": "KAIDA",
+      "version": "1790278813-f002"
+    }
+  ],
+  "launch": {
+    "page": "handoff",
+    "view": "canvas"
+  },
+  "notes": {},
+  "order": [
+    "Main.dc.html",
+    "Gaps.dc.html",
+    "S01.dc.html",
+    "S02.dc.html",
+    "S03.dc.html",
+    "S04.dc.html",
+    "S04b.dc.html",
+    "S05.dc.html",
+    "S06.dc.html",
+    "S07.dc.html",
+    "S08.dc.html",
+    "S09.dc.html",
+    "S09b.dc.html",
+    "S10.dc.html",
+    "S11.dc.html",
+    "S12.dc.html",
+    "S12A.dc.html",
+    "S13.dc.html",
+    "S14.dc.html",
+    "S15.dc.html",
+    "S16.dc.html",
+    "S17.dc.html",
+    "S18.dc.html",
+    "S19.dc.html",
+    "S20.dc.html",
+    "S21.dc.html",
+    "S22.dc.html",
+    "OFF1.dc.html",
+    "OFF2.dc.html",
+    "B01.dc.html",
+    "B02.dc.html",
+    "B03.dc.html",
+    "B04.dc.html",
+    "B05.dc.html",
+    "B06.dc.html",
+    "B07.dc.html",
+    "M01.dc.html",
+    "M02.dc.html",
+    "M03.dc.html",
+    "M04.dc.html",
+    "M05.dc.html",
+    "M06.dc.html",
+    "F1.dc.html",
+    "F2.dc.html",
+    "F3.dc.html",
+    "F4.dc.html",
+    "F5.dc.html",
+    "F6.dc.html",
+    "F7.dc.html",
+    "P1.dc.html",
+    "P2.dc.html",
+    "P4.dc.html",
+    "P5.dc.html",
+    "P6.dc.html",
+    "P7.dc.html",
+    "States1.dc.html",
+    "States2.dc.html",
+    "Motion.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "handoff",
+      "name": "HANDOFF"
+    },
+    {
+      "id": "seller",
+      "name": "SELLER"
+    },
+    {
+      "id": "buyer",
+      "name": "BUYER"
+    },
+    {
+      "id": "mod",
+      "name": "MODERATOR WIREFLOW"
+    },
+    {
+      "id": "flows",
+      "name": "FLOWS"
+    },
+    {
+      "id": "states",
+      "name": "STATES"
+    },
+    {
+      "id": "proto",
+      "name": "PROTOTYPES"
+    }
+  ],
+  "title": "KAIDA · AI-first витрина продавца"
+}

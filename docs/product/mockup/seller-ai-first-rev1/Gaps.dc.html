@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Contract gaps и проверка ТЗ</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1656px; height: 1080px; gap: 24px;">
+  <div class="ab-head">
+    <div class="ab-id">Handoff · gaps · review</div>
+    <h2 class="ab-title">Contract gaps, открытые решения и задания проверки</h2>
+    <p class="ab-desc">Ничто из этого не закрыто визуальной аннотацией. На экранах соответствующие места отмечены тегами Gap / Open / Proposed.</p>
+  </div>
+  <div class="cols" style="grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start;">
+    <div class="doc" style="padding: 24px;">
+      <span class="tag tag-gap">п. 21 · Contract gaps</span>
+      <ul style="font-size: 14px; line-height: 21px;">
+        <li><b>1 Очередь работ</b> — пересобрать EXECUTION_PLAN</li>
+        <li><b>2 Editor</b> — manual-first ветка только как кандидат на reuse (S09)</li>
+        <li><b>3 Контакты</b> — point-owned + verification (S12A, S13)</li>
+        <li><b>4 Buyer eligibility</b> — confirmed location вместо phone + geo (B01, B02)</li>
+        <li><b>5 Медиа</b> — фото обязательно, 5 + 1, fallback (S09, B02)</li>
+        <li><b>6 Цена и фасовка</b> — обязательная единица, условная фасовка (S09)</li>
+        <li><b>7 Каталог</b> — mapping модератором (M02)</li>
+        <li><b>8 Multi-point</b> — grouped draft → N Offer (S10, S11)</li>
+        <li><b>9 Bulk atomicity</b> — смешанный итог vs S12 (S16)</li>
+        <li><b>10 Geo</b> — карта / pin только как proposed (S12A)</li>
+        <li><b>11 Persisted input / upload</b> — resumable, idempotency (S01, S03, S07)</li>
+        <li><b>12 Moderation / versioning</b> (S14, S15, M02)</li>
+        <li><b>13 Buyer detail route</b> (B02)</li>
+        <li><b>14 Lifecycle</b> — 2 / 7 / 14 / 30 дней, hard delete (S15–S17)</li>
+        <li><b>15 Ratings / complaints</b> (S20–S22, B03–B06, M03–M05)</li>
+        <li><b>16 RU / KK, responsive</b> — RU-only mobile только для концепта (S19)</li>
+      </ul>
+    </div>
+    <div class="doc" style="padding: 24px;">
+      <span class="tag tag-adapt">п. 22 · Открытые решения — показано нейтрально</span>
+      <ul style="font-size: 14px; line-height: 21px;">
+        <li>Лимит исходных фото — скролл-сетка без числа (S05)</li>
+        <li>Размер / длительность публичного видео — не печатается (S09)</li>
+        <li>Pause / resume записи — не рисуется (S04)</li>
+        <li>Срок хранения черновиков и исходных фото — не обещается</li>
+        <li>Синхронизация черновиков между устройствами — нет</li>
+        <li>Таймер актуальности у «Выключено» — Open (S15)</li>
+        <li>Сброс актуальности изменённой карточки — гипотеза п. 12.2 (S16)</li>
+        <li>«Сегодня / Вчера» и часовой пояс — не уточняется</li>
+        <li>Модерация при восстановлении без правок — Open (S17)</li>
+        <li>Изменения точки → повторная модерация — не показано</li>
+        <li>Источник копирования контактов — подписан явно (S12A)</li>
+        <li>Удаление отзыва покупателем — Open (B04)</li>
+        <li>Формула рейтинга и затухание — вне дизайна (M04)</li>
+        <li>Moderation taxonomy, SLA — placeholder причины (S14)</li>
+        <li>Audit retention — Gap (S15, M05)</li>
+        <li>Модерация price / unit-only — Open (M02)</li>
+        <li>AI / media / moderation providers — не упоминаются в UI</li>
+        <li>Кнопка «Ещё» (⋯) в галерее детальной карточки — содержимое меню не определено; оставлена до решения PO (B02)</li>
+        <li>«Пожаловаться на карточку» ведёт только в жалобу «Фото не соответствует товару»; другие причины (товар, цена, контакты) — не решено, изменение ТЗ (B02, B05, P7)</li>
+      </ul>
+    </div>
+    <div class="doc" style="padding: 24px;">
+      <span class="tag tag-keep">п. 20 · Задания product review → где пройти</span>
+      <ul style="font-size: 14px; line-height: 21px;">
+        <li><b>1</b> Новый продавец, 3 товара, точка без контактов, 2 из 3 → F5, P5</li>
+        <li><b>2</b> Шумно: перезаписать только голос → S04 No audio / Re-record voice, P1</li>
+        <li><b>3</b> Фото без голоса, связать фото → S05, S08 Photos without card, P2</li>
+        <li><b>4</b> Вручную, 3 из 5 точек, своя цена → F4, S10 Subset, S11</li>
+        <li><b>5</b> AI outage → S02 AI outage, S07 Queued</li>
+        <li><b>6</b> Правка публичной карточки → S09 Edit published, S14 Service unavailable</li>
+        <li><b>7</b> Массовое подтверждение → S16, F6, P6</li>
+        <li><b>8</b> Точка без контактов, маршрут → B01, B02 Fallback</li>
+        <li><b>9</b> Отзыв + отдельная жалоба → B04, B05</li>
+        <li><b>10</b> Всплеск жалоб → 1 инцидент → апелляция → M01–M05, S21, S22, F7, P7</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card p16" style="gap: 8px;">
+    <div class="ov">Строки п. 15 — все использованы; N в «Будет создано N карточек» склоняется по числу</div>
+    <p class="c c2">«Моя витрина» · «Сформировать карточки товаров» · «С помощью ИИ» · «Снять видео» · «Добавить фотографии» · «Надиктовать товары» · «Без ИИ» · «Заполнить вручную» · «Добавить голос» · «Перезаписать только голос» · «Фотографии без карточки» · «Прикрепить» · «Создать карточку» · «Добавить торговую точку» · «Все точки» · «Настроить данные по точкам» · «Будет создано N карточек» · «Отправить готовые на модерацию — N» · «Пора подтвердить актуальность» · «Всё актуально» · «Сохранить изменения и подтвердить всё» · «Подтвердить и восстановить» · «Фото не соответствует товару» · «Временно недоступно»</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1656,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

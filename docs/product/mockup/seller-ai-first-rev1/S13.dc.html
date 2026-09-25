@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S13 · Подтверждение контактов</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2056px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S13 · Seller · contact verification</div>
+    <h2 class="ab-title">Подтверждение контактов</h2>
+    <p class="ab-desc">Новый телефон — SMS-код. WhatsApp с тем же номером переиспользует подтверждение, с другим — код в WhatsApp. Telegram — через бота KAIDA, фиксируется стабильный ID аккаунта, а не только username. Неподтверждённый контакт сохраняется, покупателю не виден и не блокирует публикацию. Таймер повторной отправки не рисуется — нет OTP policy.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S13 · Contact · Phone · Sending</b><br>Пусто → отправка кода</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Телефон точки</div></header>
+        <main class="body" style="gap: 18px;">
+          <p class="t c2">Номер увидят покупатели этой точки. Подтвердим, что он ваш.</p>
+          <div class="fld"><label for="t1">Телефон</label><div class="inp foc" id="t1"><span class="c2">+7</span><span>777 555 01 02</span></div></div>
+          <button class="btn btn-p lg w" aria-busy="true"><span class="spin"></span>Отправляем код…</button>
+          <div class="hr"></div>
+          <div class="fld"><label for="t0">Пустое состояние</label><div class="inp ph0" id="t0"><span>+7</span><span>Номер телефона</span></div><span class="hint">Необязательно. Без телефона покупатели строят маршрут.</span></div>
+        </main>
+      </div>
+      <div class="note">Спиннер только внутри кнопки (правило DS). Кнопка сохраняет ширину — текст не прыгает.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S13 · Contact · Phone · Code error</b><br>Ожидание, неверный и истёкший код</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Код из SMS</div></header>
+        <main class="body" style="gap: 18px;">
+          <p class="t c2">Отправили на +7 777 555 01 02</p>
+          <div class="fld"><label for="k1">Код</label><div class="inp er num otp" id="k1">2077</div><div class="emsg" role="alert"><span class="ic i-alert"></span>Код не подошёл. Проверьте цифры или запросите новый.</div></div>
+          <div class="fld"><label for="k2">Код</label><div class="inp er num otp" id="k2">5513</div><div class="emsg"><span class="ic i-clock"></span>Код устарел. Запросите новый — номер сохранён.</div></div>
+          <button class="btn btn-p lg w">Подтвердить</button>
+          <button class="btn btn-g w">Отправить код ещё раз</button>
+          <button class="btn btn-g w" style="color: var(--ink2);">Подтвердить позже</button>
+        </main>
+      </div>
+      <div class="note">«Подтвердить позже» сохраняет номер в статусе «Ждёт подтверждения»: точка и карточки публикуются, телефон покупателю не показывается.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S13 · Contact · WhatsApp</b><br>Тот же номер / другой номер</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">WhatsApp точки</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="card p16" style="gap: 10px;">
+            <div class="ov">Тот же номер</div>
+            <div style="display: flex; align-items: center; gap: 10px;"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt="" style="width: 24px; height: 24px;"><div class="ts" style="flex: 1;">+7 777 555 01 02</div><span class="bd bd-ok"><span class="ic i-check"></span>Подтверждён</span></div>
+            <p class="c">Номер уже подтверждён по SMS — отдельный код не нужен.</p>
+          </div>
+          <div class="card p16" style="gap: 10px;">
+            <div class="ov">Другой номер</div>
+            <div style="display: flex; align-items: center; gap: 10px;"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt="" style="width: 24px; height: 24px;"><div class="ts" style="flex: 1;">+7 701 222 33 44</div><span class="bd bd-info"><span class="ic i-clock"></span>Ждёт кода</span></div>
+            <p class="c">Отправили код в WhatsApp на этот номер.</p>
+            <div class="fld"><label for="w1">Код из WhatsApp</label><div class="inp foc num otp" id="w1" style="color: var(--ink3);">____</div></div>
+            <button class="btn btn-p w">Подтвердить</button>
+            <button class="btn btn-g w">Отправить код ещё раз</button>
+          </div>
+        </main>
+      </div>
+      <div class="note">Иконка WhatsApp — официальная, предоставлена PO. В кабинете она всегда с подписью; без подписи — только у покупателя.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S13 · Contact · Telegram</b><br>Через бота KAIDA</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Telegram точки</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="steps">
+            <div class="step"><span class="n">1</span><p class="t">Откройте бота KAIDA в Telegram</p></div>
+            <div class="step"><span class="n">2</span><p class="t">Нажмите «Старт» — бот подтвердит ваш аккаунт</p></div>
+            <div class="step"><span class="n">3</span><p class="t">Вернитесь сюда</p></div>
+          </div>
+          <button class="btn btn-p lg w"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt="" style="width: 22px; height: 22px;">Открыть Telegram</button>
+          <div class="card" role="status" style="flex-direction: row; align-items: center; gap: 12px;"><span class="spin" style="color: var(--info);"></span><div style="flex: 1;"><div class="ts">Ждём подтверждения</div><p class="c">Контакт сохранён, покупатели его пока не видят</p></div></div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt="" style="width: 24px; height: 24px;"><div style="flex: 1;"><div class="ts">@zelenyi_bazar_4</div><p class="c">Аккаунт подтверждён</p></div><span class="bd bd-ok"><span class="ic i-check"></span>Готово</span></div>
+        </main>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · contacts</span>Привязка к стабильному ID аккаунта: смена username не ломает контакт (gap 3).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S13 · Contact · Statuses</b><br>Подтверждён / ждёт / временная ошибка</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Контакты точки</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><span class="ic i-phone c2"></span><div style="flex: 1;"><div class="ts">+7 777 555 01 02</div><p class="c">Виден покупателям</p></div><span class="bd bd-ok"><span class="ic i-check"></span>Подтверждён</span></div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt="" style="width: 24px; height: 24px;"><div style="flex: 1;"><div class="ts">+7 701 222 33 44</div><p class="c">Не виден, пока не подтвердите</p></div><span class="bd bd-info"><span class="ic i-clock"></span>Ждёт</span></div>
+          <div class="card" style="gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px;"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt="" style="width: 24px; height: 24px;"><div style="flex: 1;"><div class="ts">Telegram</div><p class="c">Не удалось связаться с ботом. Контакт сохранён.</p></div><span class="bd bd-warn"><span class="ic i-alert"></span>Сбой</span></div>
+            <button class="btn btn-o sm" style="align-self: flex-start;"><span class="ic i-refresh sm"></span>Повторить</button>
+          </div>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Статус контактов не мешает публикации точки и карточек.</p></div>
+        </main>
+      </div>
+      <div class="note">Каждый статус — слово + иконка. Временная ошибка — warning, а не danger: действие исправимо.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2056,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

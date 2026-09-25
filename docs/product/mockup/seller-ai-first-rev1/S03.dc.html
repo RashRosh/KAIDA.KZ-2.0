@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S03 · Контекстная авторизация</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1656px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S03 · Seller · auth overlay</div>
+    <h2 class="ab-title">Контекстная авторизация</h2>
+    <p class="ab-desc">Съёмку и выбор файлов можно начать без входа. Вход по телефону и SMS-коду появляется перед отправкой материала; загрузка и передача ИИ начинаются только после успешного входа. Материал и форма не теряются при overlay, неверном коде и возврате назад. Авторизованный продавец этот шаг не видит.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S03 · Auth · Phone</b><br>Overlay поверх готового видео</div>
+      <div class="ph">
+        <div class="vf" style="flex: 1;">
+          <div class="scene"><i class="blob" style="width: 90px; height: 90px; background: #d8b9a0;"></i><i class="blob" style="width: 70px; height: 70px; background: #e9c07a;"></i><i class="blob" style="width: 60px; height: 60px; background: #b7cf9c;"></i></div>
+        </div>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="t1">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center;"><h2 class="h3" id="t1" style="flex: 1;">Войдите, чтобы отправить</h2><button class="ib" aria-label="Закрыть — видео останется на телефоне"><span class="ic i-close"></span></button></div>
+          <div class="banner ok" style="flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;"><span class="ic i-check ok"></span><p class="c" style="color: var(--ink);">Видео 1:24 сохранено на телефоне</p></div>
+          <div class="fld"><label for="ph1">Номер телефона</label><div class="inp foc" id="ph1"><span class="c2">+7</span><span>707 123 45 12</span></div><span class="hint">Пришлём код в SMS. Номер не будет виден покупателям.</span></div>
+          <button class="btn btn-p lg w">Получить код</button>
+          <p class="c" style="text-align: center;">Загрузка начнётся только после входа</p>
+        </div>
+      </div>
+      <div class="note">Номер входа ≠ контакт точки. Публичные контакты задаются в точке отдельно и необязательны.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S03 · Auth · Code</b><br>Ввод SMS-кода</div>
+      <div class="ph">
+        <div class="vf" style="flex: 1;"><div class="scene"><i class="blob" style="width: 90px; height: 90px; background: #d8b9a0;"></i><i class="blob" style="width: 70px; height: 70px; background: #e9c07a;"></i></div></div>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="t2">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center; gap: 4px;"><button class="ib" aria-label="Назад к номеру"><span class="ic i-left"></span></button><h2 class="h3" id="t2" style="flex: 1;">Код из SMS</h2></div>
+          <p class="t c2">Отправили на +7 707 123 45 12. <a href="#">Изменить номер</a></p>
+          <div class="fld"><label for="c1">Код</label><div class="inp foc num otp" id="c1">481_</div></div>
+          <button class="btn btn-p lg w dis" disabled>Войти и отправить</button>
+          <button class="btn btn-g w">Отправить код ещё раз</button>
+        </div>
+      </div>
+      <div class="note">Длина кода и таймер повтора не рисуются: нет OTP policy (ТЗ п. 9.5). Кнопка неактивна до полного кода — причина видна по полю.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S03 · Auth · Wrong / expired code</b><br>Ошибка у поля, ввод сохранён</div>
+      <div class="ph">
+        <div class="vf" style="flex: 1;"><div class="scene"><i class="blob" style="width: 90px; height: 90px; background: #d8b9a0;"></i><i class="blob" style="width: 70px; height: 70px; background: #e9c07a;"></i></div></div>
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-labelledby="t3">
+          <div class="grab"></div>
+          <div style="display: flex; align-items: center; gap: 4px;"><button class="ib" aria-label="Назад к номеру"><span class="ic i-left"></span></button><h2 class="h3" id="t3" style="flex: 1;">Код из SMS</h2></div>
+          <p class="t c2">Отправили на +7 707 123 45 12. <a href="#">Изменить номер</a></p>
+          <div class="fld"><label for="c2">Код</label><div class="inp er num otp" id="c2" aria-invalid="true">4819</div><div class="emsg" role="alert"><span class="ic i-alert"></span>Код не подошёл. Проверьте цифры или запросите новый.</div></div>
+          <div class="fld"><div class="emsg"><span class="ic i-clock"></span>Вариант: «Код устарел. Запросите новый — видео по-прежнему сохранено».</div></div>
+          <button class="btn btn-p lg w">Войти и отправить</button>
+          <button class="btn btn-g w">Отправить код ещё раз</button>
+        </div>
+      </div>
+      <div class="note">Ошибка объявляется assistive technology (role=alert) без переноса фокуса. Никаких «попыток осталось» без policy.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S03 · Auth · Back without loss</b><br>Продавец закрыл вход — материал на месте</div>
+      <div class="ph">
+        <header class="bar" style="background: #100d11; border-color: #302c33; color: #fff;"><button class="ib" aria-label="Назад" style="color: #fff;"><span class="ic i-left"></span></button><div class="bar-t">Видео готово</div></header>
+        <div class="vf" style="flex: 1;">
+          <div class="scene"><i class="blob" style="width: 90px; height: 90px; background: #d8b9a0;"></i><i class="blob" style="width: 70px; height: 70px; background: #e9c07a;"></i><i class="blob" style="width: 60px; height: 60px; background: #b7cf9c;"></i></div>
+          <div class="ovl" style="bottom: 12px;"><div class="hintbox" style="flex: 1; display: flex; align-items: center; gap: 10px;"><span class="ic i-play"></span><span class="num">0:00 / 1:24</span></div></div>
+        </div>
+        <div class="foot">
+          <div class="banner gray" style="padding: 10px 12px; border-radius: 12px; flex-direction: row; gap: 10px; align-items: center;"><span class="ic i-lock c2"></span><p class="c c2" style="flex: 1;">Вход не завершён. Видео сохранено на телефоне.</p></div>
+          <button class="btn btn-p lg w">Войти и отправить</button>
+          <div style="display: flex; gap: 8px;"><button class="btn btn-o" style="flex: 1;">Перезаписать</button><button class="btn btn-g" style="flex: 1;">Заполнить вручную</button></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · persisted input</span>Восстановление после закрытия приложения — contract gap 11. В концепте материал хранится локально до входа или явного удаления.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1656,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

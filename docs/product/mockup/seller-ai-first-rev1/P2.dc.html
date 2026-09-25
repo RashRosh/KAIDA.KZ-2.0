@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Prototype · F2 · Фото</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab motion" style="width: 1000px; height: 1000px; flex-direction: row; gap: 48px; align-items: flex-start;">
+  <div class="ph">
+    <sc-if value="{{ s0 }}" hint-placeholder-val="{{ true }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div></header>
+      <main class="body"></main>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <h2 class="h3">Как сформировать карточки?</h2>
+        <div class="ov">С помощью ИИ</div>
+        <div class="li" style="opacity: 0.6;"><div class="lic p"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">См. прототип F1</p></div></div>
+        <button class="li" onClick="{{ go1 }}" style="background: none; border: 0; text-align: left; padding: 8px 0;"><div class="lic p"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div><p class="c">Можно с ценниками, голос — по желанию</p></div><span class="ic i-right c2"></span></button>
+        <div class="li" style="opacity: 0.6;"><div class="lic p"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div></div></div>
+        <div class="ov">Без ИИ</div>
+        <div class="li" style="opacity: 0.6;"><div class="lic"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div></div></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ s1 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go0 }}"><span class="ic i-left"></span></button><div class="bar-t">Добавить фотографии</div></header>
+      <main class="body" style="padding: 12px 16px; background: var(--surface);">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px;">
+          <div class="img m3" style="height: 104px; border-radius: 6px; align-items: flex-start; justify-content: flex-end; padding: 6px;"><span class="cb on"><span class="ic i-check"></span></span></div>
+          <div class="img m4" style="height: 104px; border-radius: 6px; align-items: flex-start; justify-content: flex-end; padding: 6px;"><span class="cb on"><span class="ic i-check"></span></span></div>
+          <div class="img m7" style="height: 104px; border-radius: 6px;"></div>
+          <div class="img m2" style="height: 104px; border-radius: 6px; align-items: flex-start; justify-content: flex-end; padding: 6px;"><span class="cb on"><span class="ic i-check"></span></span></div>
+          <div class="img m5" style="height: 104px; border-radius: 6px; align-items: flex-start; justify-content: flex-end; padding: 6px;"><span class="cb on"><span class="ic i-check"></span></span></div>
+          <div class="img m3" style="height: 104px; border-radius: 6px; filter: brightness(0.92); align-items: flex-start; justify-content: flex-end; padding: 6px;"><span class="cb on"><span class="ic i-check"></span></span></div>
+        </div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go2 }}">Далее · 5 фото</button></div>
+    </sc-if>
+    <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go1 }}"><span class="ic i-left"></span></button><div class="bar-t">5 фотографий</div></header>
+      <main class="body">
+        <div class="mrow"><div class="mt img m3"></div><div class="mt img m4"></div><div class="mt img m2"></div><div class="mt img m5"></div><div class="mt img m3" style="filter: brightness(0.92);"></div></div>
+        <div class="card p16" style="gap: 10px;"><div style="display: flex; align-items: center;"><h3 class="h3" style="flex: 1;">Добавить голос</h3><span class="bd bd-n">Необязательно</span></div><p class="t c2">Одной записью назовите товары, цены, фасовку.</p><button class="btn btn-o w"><span class="ic i-mic sm"></span>Добавить голос</button></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go3 }}">Сформировать карточки</button></div>
+    </sc-if>
+    <sc-if value="{{ s3 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Фото загружены</div></header>
+      <main class="body" style="justify-content: center; gap: 16px; padding: 24px;"><h1 class="h2" style="text-align: center;">Собираем карточки</h1><p class="t c2" style="text-align: center;">Экран можно закрыть — пришлём уведомление.</p><div class="assemble" aria-hidden="true"><div class="asm-row"><i class="sk"></i><span><i class="sk"></i><i class="sk"></i></span></div><div class="asm-row"><i class="sk"></i><span><i class="sk"></i><i class="sk"></i></span></div><div class="asm-row"><i class="sk"></i><span><i class="sk"></i><i class="sk"></i></span></div></div><div class="pbar ind" role="progressbar" aria-label="Обработка"><i></i></div></main>
+      <div class="toast late" style="bottom: 24px;"><span class="ic i-bell" style="color: #e29dff;"></span><span style="flex: 1;">Черновики готовы · 3</span><button class="btn btn-g" onClick="{{ go4 }}">Открыть</button></div>
+    </sc-if>
+    <sc-if value="{{ s4 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Черновики · 3</div></header>
+      <main class="body stagger" style="gap: 10px;">
+        <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="cb on"><span class="ic i-check"></span></span><div class="img m3" style="width: 52px; height: 52px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Курага · 500 г</div><p class="c"><b class="num" style="color: var(--ink);">1 800 ₸</b> / упаковка</p></div></div>
+        <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="cb on"><span class="ic i-check"></span></span><div class="img m4" style="width: 52px; height: 52px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Помидоры розовые</div><p class="c"><b class="num" style="color: var(--ink);">1 200 ₸</b> / кг</p></div></div>
+        <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="cb on"><span class="ic i-check"></span></span><div class="img m2" style="width: 52px; height: 52px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Укроп, пучок</div><p class="c"><b class="num" style="color: var(--ink);">200 ₸</b> / шт.</p></div></div>
+        <div class="card p16" style="gap: 10px; background: var(--sunken); border: 0;"><h3 class="h3">Фотографии без карточки · 1</h3><div style="display: flex; gap: 12px; align-items: center;"><div class="mt img m5"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 6px;"><button class="btn btn-o sm" onClick="{{ go5 }}">Прикрепить</button><button class="btn btn-g sm">Создать карточку</button></div></div></div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go7 }}">Отправить готовые на модерацию — 3</button></div>
+    </sc-if>
+    <sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Черновики · 3</div></header>
+      <main class="body stagger"></main>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <h2 class="h3">К какой карточке прикрепить?</h2>
+        <button class="li" onClick="{{ go6 }}" style="background: none; border: 0; text-align: left;"><div class="img m3" style="width: 44px; height: 44px; border-radius: 8px;"></div><div class="mid"><div class="ts">Курага · 500 г</div><p class="c">1 фото</p></div></button>
+        <div class="li"><div class="img m4" style="width: 44px; height: 44px; border-radius: 8px;"></div><div class="mid"><div class="ts">Помидоры розовые</div><p class="c">1 фото</p></div></div>
+        <div class="li"><div class="img m2" style="width: 44px; height: 44px; border-radius: 8px;"></div><div class="mid"><div class="ts">Укроп, пучок</div><p class="c">1 фото</p></div></div>
+        <button class="btn btn-g w" onClick="{{ go4 }}">Отмена</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ s6 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Черновики · 3</div></header>
+      <main class="body stagger" style="gap: 10px;">
+        <div class="card hl" style="flex-direction: row; gap: 10px; align-items: center;"><span class="cb on"><span class="ic i-check"></span></span><div class="img m3" style="width: 52px; height: 52px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Курага · 500 г</div><p class="c">2 фото · <b class="num" style="color: var(--ink);">1 800 ₸</b> / упаковка</p></div></div>
+        <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="cb on"><span class="ic i-check"></span></span><div class="img m4" style="width: 52px; height: 52px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Помидоры розовые</div><p class="c"><b class="num" style="color: var(--ink);">1 200 ₸</b> / кг</p></div></div>
+        <div class="card" style="flex-direction: row; gap: 10px; align-items: center;"><span class="cb on"><span class="ic i-check"></span></span><div class="img m2" style="width: 52px; height: 52px; border-radius: 8px;"></div><div style="flex: 1;"><div class="ts">Укроп, пучок</div><p class="c"><b class="num" style="color: var(--ink);">200 ₸</b> / шт.</p></div></div>
+      </main>
+      <div class="toast" role="status" style="bottom: 96px;"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Фото прикреплено к «Курага · 500 г»</span></div>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go7 }}">Отправить готовые на модерацию — 3</button></div>
+    </sc-if>
+    <sc-if value="{{ s7 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><div class="bar-t">Отправлено</div></header>
+      <main class="body" style="justify-content: center; gap: 14px; padding: 24px;"><h1 class="h2" style="text-align: center;">Карточки на модерации</h1><p class="t c2" style="text-align: center;">3 карточки. Покупатели увидят каждую после одобрения.</p></main>
+      <div class="foot bare"><button class="btn btn-p lg w" onClick="{{ reset }}">На «Мою витрину»</button></div>
+    </sc-if>
+  </div>
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding-top: 8px;">
+    <div class="ab-id">Prototype · F2</div>
+    <h2 class="ab-title" style="font-size: 28px; line-height: 34px;">Фото без голоса → связать оставшееся фото</h2>
+    <p class="ab-desc" style="font-size: 15px; line-height: 22px;">Задание п. 20.3. Голос пропускается — это полноценный путь. Одно фото ИИ не связал: «Прикрепить» → выбрать карточку.</p>
+    <div class="card p16" style="gap: 8px;">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="8">
+        <div class="step"><span class="n" style="{{ st.style }}">{{ st.n }}</span><p class="c" style="{{ st.tstyle }}">{{ st.label }}</p></div>
+      </sc-for>
+    </div>
+    <button class="btn btn-o" style="align-self: flex-start;" onClick="{{ reset }}"><span class="ic i-refresh sm"></span>Начать заново</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = (this.state && this.state.s) || 0;
+    const labels = ['AI-S02 · Выбор способа', 'AI-S05 · Выбор фото', 'AI-S05 · Пакет выбран (без голоса)', 'AI-S07 · Обработка', 'AI-S08 · Фотографии без карточки', 'AI-S08 · Прикрепить к черновику', 'AI-S08 · Все 3 готовы', 'AI-S14 · Отправлено'];
+    const v = {
+      reset: () => this.setState({ s: 0 }),
+      steps: labels.map((label, i) => ({ n: i + 1, label, style: i === s ? 'background: var(--primary); color: #fff;' : '', tstyle: i === s ? 'font-weight: 600; color: var(--ink);' : '' }))
+    };
+    for (let i = 0; i < labels.length; i++) { v['s' + i] = s === i; v['go' + i] = () => this.setState({ s: i }); }
+    return v;
+  }
+}
+</script>
+</body>
+</html>

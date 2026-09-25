@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Prototype · F6 · Актуальность</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab motion" style="width: 1000px; height: 1000px; flex-direction: row; gap: 48px; align-items: flex-start;">
+  <div class="ph">
+    <sc-if value="{{ s0 }}" hint-placeholder-val="{{ true }}">
+      <header class="bar"><div class="bar-t">Моя витрина</div><div class="lang"><span class="on">РУС</span><span>ҚАЗ</span></div><button class="ib" aria-label="Уведомления"><span class="ic i-bell"></span></button></header>
+      <main class="body" style="gap: 12px;">
+        <button class="btn btn-p lg w"><span class="ic i-plus"></span>Сформировать карточки товаров</button>
+        <div class="banner warn" style="flex-direction: row; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px;">
+          <span class="ic i-clock" style="color: var(--warning);"></span>
+          <div style="flex: 1;"><div class="ts">Пора подтвердить актуальность</div><p class="c c2">5 карточек · 1 уже скрыта</p></div>
+          <button class="btn btn-o sm" onClick="{{ go1 }}">Проверить</button>
+        </div>
+        <div class="sk" style="height: 88px; background: #fff; border: 1px solid var(--line);"></div>
+        <div class="sk" style="height: 88px; background: #fff; border: 1px solid var(--line);"></div>
+      </main>
+      <nav class="nav"><span class="on"><span class="ic i-store"></span>Витрина</span><span><span class="ic i-pin"></span>Точки</span><span><span class="ic i-menu"></span>Ещё</span></nav>
+    </sc-if>
+    <sc-if value="{{ s1 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Назад" onClick="{{ go0 }}"><span class="ic i-left"></span></button><div class="bar-t">Актуальность · 5</div></header>
+      <main class="body" style="gap: 8px; padding-top: 8px;">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+          <div class="card" style="gap: 8px; border-color: {{ r.border }};">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div class="img {{ r.img }}" style="width: 40px; height: 40px; border-radius: 8px; opacity: {{ r.op }};"></div>
+              <div style="flex: 1; min-width: 0;"><div class="ts">{{ r.name }}</div><p class="c num">{{ r.meta }}</p></div>
+              <button class="ib" aria-label="Изменить цену" onClick="{{ r.edit }}" style="width: 40px;"><span class="ic i-pencil sm"></span></button>
+              <button class="ib" aria-label="Выключить или включить" onClick="{{ r.off }}" style="width: 40px;"><span class="ic i-power sm"></span></button>
+            </div>
+            <sc-if value="{{ r.editing }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: 8px; align-items: center;"><div class="inp foc num" style="flex: 1; height: 44px;"><span style="flex: 1;">{{ r.newPrice }}</span><span class="c2">₸</span></div><span class="bd bd-p">Изменено</span></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ go2 }}">{{ cta }}</button></div>
+    </sc-if>
+    <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+      <header class="bar"><button class="ib" aria-label="Закрыть" onClick="{{ reset }}"><span class="ic i-close"></span></button><div class="bar-t">Готово</div></header>
+      <main class="body" style="gap: 14px;">
+        <div class="banner gray" style="padding: 14px 16px; border-radius: 16px; gap: 6px;"><div class="h3 num">{{ summary }}</div><p class="c c2">{{ summary2 }}</p></div>
+        <div class="card" style="gap: 0; padding: 0 12px;">
+          <div class="li"><span class="ic i-check ok"></span><div class="mid"><div class="ts">Подтверждено · {{ nConf }}</div><p class="c">Актуальность обновлена сейчас: «Сегодня»</p></div></div>
+          <sc-if value="{{ hasMod }}" hint-placeholder-val="{{ true }}"><div class="li"><span class="ic i-clock" style="color: var(--info);"></span><div class="mid"><div class="ts">На модерации · {{ nMod }}</div><p class="c">Актуальность обновится после одобрения. До этого покупатели видят прежнюю версию</p></div></div></sc-if>
+          <sc-if value="{{ hasOff }}" hint-placeholder-val="{{ true }}"><div class="li"><span class="ic i-power c2"></span><div class="mid"><div class="ts">Выключено · {{ nOff }}</div><p class="c">Скрыты с витрины до включения</p></div></div></sc-if>
+        </div>
+      </main>
+      <div class="foot"><button class="btn btn-p lg w" onClick="{{ reset }}">На «Мою витрину»</button></div>
+    </sc-if>
+  </div>
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding-top: 8px;">
+    <div class="ab-id">Prototype · F6</div>
+    <h2 class="ab-title" style="font-size: 28px; line-height: 34px;">Массовое подтверждение актуальности</h2>
+    <p class="ab-desc" style="font-size: 15px; line-height: 22px;">Нажмите «Проверить». В списке карандаш меняет цену (строка уходит на модерацию), кнопка питания выключает карточку. CTA сам меняется с «Всё актуально» на «Сохранить изменения и подтвердить всё». Итог считается от ваших действий.</p>
+    <div class="card p16" style="gap: 10px;">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+        <div class="step"><span class="n" style="{{ st.style }}">{{ st.n }}</span><p class="t" style="{{ st.tstyle }}">{{ st.label }}</p></div>
+      </sc-for>
+    </div>
+    <button class="btn btn-o" style="align-self: flex-start;" onClick="{{ reset }}"><span class="ic i-refresh sm"></span>Начать заново</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const s = st.s || 0;
+    const ed = st.ed || {};
+    const off = st.off || {};
+    const base = [
+      { id: 'a', name: 'Баранина, лопатка', price: '5 000 ₸ / кг', newPrice: '4 800', img: 'm1', age: '3 дня' },
+      { id: 'b', name: 'Курага · 500 г', price: '1 800 ₸ / упаковка', newPrice: '1 700', img: 'm3', age: '2 дня' },
+      { id: 'c', name: 'Помидоры розовые', price: '1 200 ₸ / кг', newPrice: '1 100', img: 'm4', age: '5 дней' },
+      { id: 'd', name: 'Укроп, пучок', price: '200 ₸ / шт.', newPrice: '180', img: 'm2', age: 'скрыто · 9 дней' },
+      { id: 'e', name: 'Айран · 1 л', price: '650 ₸ / шт.', newPrice: '600', img: 'm6', age: '2 дня' }
+    ];
+    const rows = base.map((r) => ({
+      ...r,
+      editing: !!ed[r.id] && !off[r.id],
+      op: off[r.id] ? 0.45 : 1,
+      border: ed[r.id] && !off[r.id] ? 'var(--primary)' : 'var(--line)',
+      meta: off[r.id] ? 'Будет выключена' : (r.price + ' · ' + r.age),
+      edit: () => this.setState({ ed: { ...ed, [r.id]: !ed[r.id] } }),
+      off: () => this.setState({ off: { ...off, [r.id]: !off[r.id] } })
+    }));
+    const nOff = base.filter((r) => off[r.id]).length;
+    const nMod = base.filter((r) => ed[r.id] && !off[r.id]).length;
+    const nConf = base.length - nOff - nMod;
+    const changed = nOff + nMod > 0;
+    const parts = [nConf + ' подтверждено'];
+    if (nMod) parts.push(nMod + ' на модерации');
+    if (nOff) parts.push(nOff + ' выключено');
+    const labels = ['Блок «Пора подтвердить актуальность»', 'Список: правка, выключение', 'Смешанный итог'];
+    const steps = labels.map((label, i) => ({
+      n: i + 1, label,
+      style: i === s ? 'background: var(--primary); color: #fff;' : '',
+      tstyle: i === s ? 'font-weight: 600;' : 'color: var(--ink2);'
+    }));
+    return {
+      s0: s === 0, s1: s === 1, s2: s === 2,
+      go0: () => this.setState({ s: 0 }),
+      go1: () => this.setState({ s: 1 }),
+      go2: () => this.setState({ s: 2 }),
+      reset: () => this.setState({ s: 0, ed: {}, off: {} }),
+      rows, steps,
+      cta: changed ? 'Сохранить изменения и подтвердить всё' : 'Всё актуально',
+      summary: parts.join(' · '),
+      summary2: nMod ? 'Изменённые карточки проверит модерация.' : 'Все карточки подтверждены без изменений.',
+      nConf, nMod, nOff, hasMod: nMod > 0, hasOff: nOff > 0
+    };
+  }
+}
+</script>
+</body>
+</html>

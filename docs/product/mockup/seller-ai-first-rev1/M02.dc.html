@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-M02 · Карточка и новая редакция</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-M02 · Moderator · wireframe</div>
+    <h2 class="ab-title">Карточка и новая редакция</h2>
+    <p class="ab-desc">Новая карточка: медиа, текст, OCR-ценники, сопоставление с каталогом. Редакция: сравнение «Сейчас на витрине» / «Новая версия», затронутые поля и последствия решения. «Нужно исправить» требует выбрать конкретное поле или медиа.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-M02 · Review · New card</b><br>Каталог и решение</div>
+      <div class="wf">
+        <div class="wbar">← Баранина · 600 г</div>
+        <div class="wbody">
+          <div style="display: flex; gap: 6px;"><div class="wimg" style="width: 96px; height: 96px;">фото 1</div><div class="wimg" style="width: 96px; height: 96px; border: 2px solid #424242;">фото 2 !</div></div>
+          <div class="wbox"><b>Автопроверка</b><span>фото 2: телефон на ценнике (OCR)</span><span>текст: ок · категория: ок</span></div>
+          <div class="wbox"><b>Каталог</b><span>Название продавца: «Баранина»</span><div style="display: flex; gap: 6px;"><span class="wchip on">Связать: «Баранина, фасованная»</span><span class="wchip">Создать позицию</span></div></div>
+          <div class="wbox"><b>Точка</b><span>Алтын Орда, павильон 12 · адрес подтверждён</span></div>
+          <div class="wbox dash"><b>Нужно исправить →</b><span>поле: фото 2 · причина: контакты в медиа</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn dk">Одобрить</span><span class="wbtn">Исправить</span><span class="wbtn">Отклонить</span></div>
+        </div>
+      </div>
+      <div class="note">Продавцу вопрос о названии уходит только если оно объективно слишком расплывчатое (п. 5.3).</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M02 · Review · Revision compare</b><br>Старая версия остаётся до решения</div>
+      <div class="wf">
+        <div class="wbar">← Баранина, лопатка · редакция</div>
+        <div class="wbody">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+            <div class="wbox dark"><b>Сейчас на витрине</b><div class="wimg" style="height: 72px;">фото</div><span>5 000 ₸ / кг</span><span>3 фото</span></div>
+            <div class="wbox"><b>Новая версия</b><div class="wimg" style="height: 72px;">фото</div><span><b>4 800 ₸ / кг</b> ●</span><span>3 фото</span></div>
+          </div>
+          <div class="wbox"><b>Изменено</b><span>● цена</span></div>
+          <div class="wbox dash"><b>Последствия</b><span>Одобрить → новая версия заменит старую, актуальность обновится</span><span>Отклонить → старая остаётся на витрине</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn dk">Одобрить</span><span class="wbtn">Исправить</span><span class="wbtn">Отклонить</span></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Open · п. 22</span>Модерируются ли изменения только цены / единицы — не решено.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

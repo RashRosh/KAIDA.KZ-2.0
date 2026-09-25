@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-M04 · Решение и последствия</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-M04 · Moderator · wireframe</div>
+    <h2 class="ab-title">Решение и последствия</h2>
+    <p class="ab-desc">«Подтвердить» / «Не подтвердить» / «Нужны данные». Перед подтверждением — preview: какое фото скроется и что будет создан ровно один инцидент на кластер, а не по одному на каждого жалобщика.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-M04 · Decision · Choose</b><br>Три исхода</div>
+      <div class="wf">
+        <div class="wbar">← Решение · Курага · Сайран</div>
+        <div class="wbody">
+          <div class="wbox"><span>◉ Подтвердить несоответствие</span><span>○ Не подтвердить</span><span>○ Нужны данные от продавца</span></div>
+          <div class="wbox"><b>Комментарий для продавца</b><div class="wln" style="width: 90%;"></div><div class="wln" style="width: 60%;"></div></div>
+          <div class="wbox dash"><span>«Нужны данные» → продавцу вопрос в AI-S21, влияние остаётся замороженным</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn dk">Предпросмотр последствий</span></div>
+        </div>
+      </div>
+      <div class="note">Комментарий видит продавец — без личности жалобщиков и числа сообщений.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M04 · Decision · Consequence preview</b><br>Один кластер = один инцидент</div>
+      <div class="wf">
+        <div class="wbar">← Последствия</div>
+        <div class="wbody">
+          <div class="wbox"><b>Скроется</b><div style="display: flex; gap: 8px; align-items: center;"><div class="wimg" style="width: 64px; height: 64px;">фото 1</div><span>версия от 12.09 · только это фото</span></div></div>
+          <div class="wbox"><b>Карточка</b><span>остаётся на витрине · следующее фото станет обложкой</span></div>
+          <div class="wbox"><b>Инцидент</b><span>1 подтверждённый · точка «Сайран» (сильнее), продавец (слабее)</span></div>
+          <div class="wbox"><b>Уведомления</b><span>продавец → AI-S21 · 7 жалобщиков → «Подтверждено»</span></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn">Назад</span><span class="wbtn dk">Подтвердить</span></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · rating formula</span>Вес инцидента и затухание — вне дизайна (п. 2.2).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

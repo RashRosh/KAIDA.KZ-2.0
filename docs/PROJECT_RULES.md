@@ -291,8 +291,9 @@ contract самостоятельно. Обязательные UI-правил�
 1. `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` — ТЗ дизайнеру (seller, buyer и moderator surfaces);
 2. `docs/product/SELLER_AI_FIRST_DESIGN_REVISION_1.md` — решения PO и правки поверх первого макета; при расхождении
    с brief побеждает ревизия;
-3. макет https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 — только после Product Owner visual acceptance ревизии 1 и
-   фиксации его устойчивого locator/copy в репозитории.
+3. макет https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 — ревизия 1 принята Product Owner 2026-09-25; рабочая
+   цель — принятая копия `docs/product/mockup/seller-ai-first-rev1/` (версия `1790326459-9c95`). Более поздние
+   изменения живого макета действуют только после новой приёмки PO.
 
 Поверхность, которой в макете ещё нет (например, экран поиска, «Рядом», избранное), остаётся в текущем реализованном
 виде, пока макет её не нарисует; к Pass 3 её не подтягивают.

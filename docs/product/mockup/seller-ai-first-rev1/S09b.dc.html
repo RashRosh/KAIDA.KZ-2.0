@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S09 · Редактор · правка по точкам и отправка</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2456px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S09 · Seller · editor · Rev 1</div>
+    <h2 class="ab-title">Редактор: цена в одной точке, отправка, выход, возврат из точки</h2>
+    <p class="ab-desc">После общей правки цену можно поправить в любой отдельной точке. Отправка показывает процесс и ошибку без потери ввода. Выход с несохранёнными изменениями требует решения. После создания точки продавец возвращается в ту же форму, а новая точка уже выбрана.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S15 · Card · Points</b><span class="tag tag-rev">Rev 1</span><br>Вход в правку одной точки</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Баранина, лопатка</div></header>
+        <main class="body" style="gap: 12px;">
+          <div class="img m1" style="height: 76px; border-radius: 16px;"><span class="fresh fr0">Сегодня</span></div>
+          <div style="display: flex; gap: 8px;"><a class="btn btn-o sm" href="S09.dc.html" style="flex: 1;"><span class="ic i-pencil sm"></span>Изменить во всех точках</a></div>
+          <div class="ov">В точках · 4</div>
+          <div class="card" style="gap: 8px;"><div style="display: flex; align-items: center; gap: 8px;"><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c num">4 800 ₸ / кг</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div><button class="btn btn-g sm" style="align-self: flex-start; padding: 0;">Изменить только в этой точке</button></div>
+          <div class="card" style="gap: 8px;"><div style="display: flex; align-items: center; gap: 8px;"><div style="flex: 1;"><div class="ts">Алтын Орда, павильон 12</div><p class="c num">4 800 ₸ / кг</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div><button class="btn btn-g sm" style="align-self: flex-start; padding: 0;">Изменить только в этой точке</button></div>
+          <div class="card" style="gap: 8px;"><div style="display: flex; align-items: center; gap: 8px;"><div style="flex: 1;"><div class="ts">Сайран, контейнер 5</div><p class="c num">4 900 ₸ / кг · своя цена</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div><button class="btn btn-g sm" style="align-self: flex-start; padding: 0;">Изменить только в этой точке</button></div>
+          <div class="card" style="gap: 8px;"><div style="display: flex; align-items: center; gap: 8px;"><div style="flex: 1;"><div class="ts">Тастак, место 31</div><p class="c num">4 800 ₸ / кг</p></div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div><button class="btn btn-g sm" style="align-self: flex-start; padding: 0;">Изменить только в этой точке</button></div>
+        </main>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.1</span>«Изменить во всех точках» открывает Edit published · All points. «Изменить только в этой точке» — правку одной карточки.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Edit published · One point</b><span class="tag tag-rev">Rev 1</span><br>Своя цена для одной точки</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Изменить в точке</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="banner soft" style="padding: 12px 14px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-pin pt"></span><p class="c" style="color: var(--ink); flex: 1;">Меняется только точка «Сайран, контейнер 5». Остальные 3 точки не изменятся.</p></div>
+          <div class="fld"><div class="fl">Название товара</div><div class="inp dis">Баранина, лопатка</div><span class="hint">Название общее для всех точек</span></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div class="fld"><div style="display: flex; align-items: center; gap: 6px;"><label for="op1" style="flex: 1;">Цена</label></div><div class="inp foc num" id="op1"><span style="flex: 1;">5 000</span><span class="c2">₸</span></div><span class="bd bd-p">Своя цена</span></div>
+            <div class="fld"><label for="ou1">Цена за</label><div class="inp" id="ou1"><span style="flex: 1;">кг</span><span class="ic i-down c2"></span></div></div>
+          </div>
+          <button class="btn btn-g sm" style="align-self: flex-start; padding: 0;"><span class="ic i-history sm"></span>Вернуть общую цену · 4 800 ₸</button>
+          <div class="fld"><div class="fl">Комментарий <span class="req">· необязательно</span></div><div class="inp ta" style="min-height: 64px;">Молодой барашек, разделываем при вас.</div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Отправить изменения на модерацию</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 2.1</span>Следующая общая правка покажет эту точку неотмеченной: «своя цена: 5 000 ₸».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Submitting</b><span class="tag tag-rev">Rev 1</span><br>Идёт отправка, повторно не нажать</div>
+      <div class="ph">
+        <header class="bar"><button class="ib dis" aria-label="Назад недоступно во время отправки" disabled style="color: var(--ink3);"><span class="ic i-left"></span></button><div class="bar-t">Новая карточка</div></header>
+        <main class="body" style="gap: 16px; opacity: 0.55;" aria-busy="true">
+          <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div></div>
+          <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;"><div class="fld"><label>Цена</label><div class="inp num">5 000 ₸</div></div><div class="fld"><label>Цена за</label><div class="inp">кг</div></div></div>
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><span class="ic i-pin c2"></span><div class="ts">Зелёный базар, ряд 4</div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w" aria-disabled="true"><span class="spin"></span>Отправляем…</button><p class="c" style="text-align: center;">Не закрывайте приложение пару секунд</p></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.5</span>Кнопка показывает процесс, поля и повторное нажатие заблокированы. aria-busy на форме.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Submit error</b><span class="tag tag-rev">Rev 1</span><br>Отправка не прошла</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Новая карточка</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="banner err" role="alert" style="padding: 12px 14px; border-radius: 14px; gap: 8px;"><div style="display: flex; gap: 10px;"><span class="ic i-alert dn"></span><div style="flex: 1;"><div class="ts">Не удалось отправить</div><p class="c c2">Всё введённое сохранено. Проверьте сеть и повторите.</p></div></div></div>
+          <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div></div>
+          <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;"><div class="fld"><label>Цена</label><div class="inp num">5 000 ₸</div></div><div class="fld"><label>Цена за</label><div class="inp">кг</div></div></div>
+          <div class="card" style="flex-direction: row; gap: 12px; align-items: center;"><span class="ic i-pin c2"></span><div class="ts">Зелёный базар, ряд 4</div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w"><span class="ic i-refresh sm"></span>Повторить</button><button class="btn btn-g w">Сохранить черновик</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.5</span>Ошибка не сбрасывает форму и не уводит с экрана. Сообщение объявляется assistive technology без переноса фокуса.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Discard confirm</b><span class="tag tag-rev">Rev 1</span><br>Закрытие формы с изменениями</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Новая карточка</div></header>
+        <main class="body" style="gap: 16px;"><div class="mrow"><div class="mt img m1"></div></div><div class="inp">Баранина, лопатка</div></main>
+        <div class="scrim"></div>
+        <div class="sheet" role="alertdialog" aria-labelledby="dc" aria-describedby="dcd">
+          <div class="grab"></div>
+          <h2 class="h3" id="dc">Закрыть без сохранения?</h2>
+          <p class="t c2" id="dcd">Вы изменили карточку. Если закрыть, изменения пропадут.</p>
+          <button class="btn btn-p lg w">Продолжить правку</button>
+          <button class="btn btn-o w">Сохранить черновик</button>
+          <button class="btn btn-g w" style="color: var(--danger);">Закрыть</button>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.5</span>Показывается на «Назад» и системном back, только если есть изменения. Default — «Продолжить правку».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S09 · Editor · Returned from point</b><span class="tag tag-rev">Rev 1</span><br>После сохранения новой точки</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Новая карточка</div></header>
+        <main class="body" style="gap: 14px;">
+          <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div></div>
+          <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;"><div class="fld"><label>Цена</label><div class="inp num"><span style="flex: 1;">3 000</span><span class="c2">₸</span></div></div><div class="fld"><label>Цена за</label><div class="inp"><span style="flex: 1;">упак.</span><span class="ic i-down c2"></span></div></div></div>
+          <div class="fld"><label>В упаковке</label><div style="display: flex; gap: 8px;"><div class="inp num" style="flex: 1;">600</div><div class="inp" style="width: 96px;">г</div></div></div>
+          <section style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="lbl">Торговые точки</span>
+            <div class="card hl" style="flex-direction: row; align-items: center; gap: 12px;"><span class="cb on"><span class="ic i-check"></span></span><div style="flex: 1;"><div class="ts">Зелёный базар, ряд 4</div><p class="c">Новая точка · выбрана</p></div></div>
+          </section>
+        </main>
+        <div class="toast" role="status" style="bottom: 96px;"><span class="ic i-check" style="color: #7ee29a;"></span><span style="flex: 1;">Точка добавлена и выбрана</span></div>
+        <div class="foot"><button class="btn btn-p lg w">Отправить на модерацию</button></div>
+      </div>
+      <div class="note"><span class="tag tag-rev">Rev 1 · п. 1.6</span>AI-S12A открывается поверх формы и возвращает в неё: фото, название, цена, «Цена за», фасовка и комментарий на месте, новая точка отмечена.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2456,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

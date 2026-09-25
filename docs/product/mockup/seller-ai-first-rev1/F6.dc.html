@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F6 · Актуальность</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F6</div>
+    <h2 class="ab-title">Актуальность → массовое подтверждение / правки / выключение / удаление</h2>
+    <p class="ab-desc">Отсчёт от последнего подтверждения или применения одобренной редакции. 48 ч — понижение tier, 168 ч — скрытие, 336 ч — архив, ещё 30 дней — исчезновение из архива. Напоминания раз в 2 дня.</p>
+  </div>
+  <div class="fl">
+    <div class="fn sys"><div class="fid">Система</div><div class="fnt">Прошло ≥ 2 дней</div><div class="fns">плашка «2 дня», ниже в выдаче</div></div>
+    <div class="fa"><span class="tr">Каждые 2 дня</span><span class="ln"></span><span class="st">in-app, push</span></div>
+    <div class="fn"><div class="fid">AI-S18 · S01</div><div class="fnt">«Пора подтвердить актуальность»</div><div class="fns">блок при входе, если push выключен</div></div>
+    <div class="fa"><span class="tr">«Проверить»</span><span class="ln"></span><span class="st">список задач</span></div>
+    <div class="fn"><div class="fid">AI-S16</div><div class="fnt">Список · 6</div><div class="fns">«Всё актуально»</div></div>
+    <div class="fa"><span class="tr">Inline: правка ×2, выкл ×1, удаление ×1</span><span class="ln"></span><span class="st">CTA меняется</span></div>
+    <div class="fn"><div class="fid">AI-S16</div><div class="fnt">«Сохранить изменения и подтвердить всё»</div><div class="fns">1 строка невалидна</div></div>
+    <div class="fa"><span class="tr">Подтвердить удаление</span><span class="ln"></span><span class="st">разные пути</span></div>
+    <div class="fn end"><div class="fid">AI-S16</div><div class="fnt">Смешанный итог</div><div class="fns">2 подтверждено · 1 на модерации · 1 требует заполнения</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Не подтвердил 7 дней</b>→ скрыта с витрины, AI-S01 «Нужно подтвердить · Скрыто»<br>↩ Одно подтверждение возвращает на витрину</div>
+    <div class="fbr"><b>Не подтвердил 14 дней</b>→ AI-S17 архив, 30 дней от переноса<br>↩ «Подтвердить и восстановить»</div>
+    <div class="fbr"><b>Изменённая карточка</b>→ AI-S14 модерация; прежняя версия остаётся с прежней актуальностью<br>↩ Сброс — после одобрения (рабочая гипотеза)</div>
+    <div class="fbr"><b>Невалидная строка</b>→ «Требует заполнения», не подтверждена<br>↩ «Заполнить» → AI-S09; остальные уже обработаны</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

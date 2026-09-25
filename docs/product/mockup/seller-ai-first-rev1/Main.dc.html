@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KAIDA · AI-first витрина продавца — handoff</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 1656px; height: 2000px; gap: 28px;">
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;">
+    <div class="ab-head">
+      <div class="ab-id">KAIDA.KZ · concept design · 25.09.2026 · RU · mobile</div>
+      <h1 style="margin: 0; font: 700 56px/60px var(--display); letter-spacing: -0.025em;">AI-first витрина продавца</h1>
+      <p class="ab-desc" style="font-size: 18px; line-height: 27px;">Целевой UX по ТЗ «SELLER_AI_FIRST_DESIGN_BRIEF». Путь от товара на прилавке до карточки на витрине: одна кнопка → видео, фото, голос или вручную → пакет черновиков → точки → модерация → витрина. Все фреймы — <b>proposed</b>, не production screens: реализация только после обновления EXECUTION_PLAN и новых Slice Contracts.</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex: none;">
+      <span class="tag tag-new">Proposed</span>
+      <span class="tag tag-gap">Нужен contract</span>
+    </div>
+  </div>
+
+  <div class="cols" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <div class="card p16" style="gap: 6px;"><div class="ov">SELLER</div><div class="h3">AI-S01 — AI-S22</div><p class="c">27 артбордов, 114 mobile-фреймов. Создание, точки, модерация, актуальность, архив, отзывы, инциденты.</p></div>
+    <div class="card p16" style="gap: 6px;"><div class="ov">BUYER</div><div class="h3">AI-B01 — AI-B07</div><p class="c">20 фреймов: карточка в выдаче, детальная, рейтинг 0 / 1–2 / 3+, отзыв, жалоба на фото, мои жалобы, фильтры поиска.</p></div>
+    <div class="card p16" style="gap: 6px;"><div class="ov">MODERATOR WIREFLOW</div><div class="h3">AI-M01 — AI-M06</div><p class="c">14 серых wireframes: очередь, сравнение версий, кластер жалоб, решение, апелляция, пост-проверка (M06).</p></div>
+    <div class="card p16" style="gap: 6px;"><div class="ov">FLOWS · STATES · PROTOTYPES</div><div class="h3">F1 — F7, 2 матрицы, Motion, 6 прототипов</div><p class="c">Прототипы (Play) для F1, F2, F5, F6, F7 — минимум по п. 19.1; P4 — ручной путь при выключенном ИИ. Микроанимации — доска Motion и живьём в прототипах.</p></div>
+  </div>
+
+
+  <div class="doc" style="border: 2px solid var(--ink); gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;"><span class="tag tag-rev" style="margin: 0;">Rev 1</span><h3 style="margin: 0;">Ревизия 1: что изменилось</h3><span class="c c2">по SELLER_AI_FIRST_DESIGN_REVISION_1 · дополняет ТЗ, ничего не удаляет</span></div>
+    <div class="cols" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start;">
+      <ul style="margin: 0;">
+        <li><a href="S09.dc.html">AI-S09</a> — «Pack fields expanded» вместо отдельного шага; «Цена за» открывает Unit sheet; раздельные ошибки цены и единицы; пустая цена без «0».</li>
+        <li><a href="S09.dc.html">Edit published · All points</a> — комментарий, «Изменить также в других точках», «своя цена», счётчик карточек, без переключателя «Скрыть прежнюю версию».</li>
+        <li><a href="S09b.dc.html">AI-S09 · Points / Submitting / Submit error / Discard confirm / Returned from point</a>, «Изменить только в этой точке» → Edit published · One point.</li>
+      </ul>
+      <ul style="margin: 0;">
+        <li><a href="S12A.dc.html">AI-S12A</a> — контакты копируются с предыдущей точки с подписью источника; первая точка — пустые необязательные поля.</li>
+        <li><a href="OFF1.dc.html">AI off</a> — витрина со статусами, ручной редактор (disabled «Надиктовать»), правка, Published, «Снято оператором» в карточке и в уведомлениях.</li>
+        <li><a href="OFF2.dc.html">Confirm · AI off</a> — сводка, счётчик, блок ответственности; публикация, ошибка, конфликт версий.</li>
+      </ul>
+      <ul style="margin: 0;">
+        <li><a href="M06.dc.html">AI-M06 · Post-check feed</a> — лента «Новые с моего последнего просмотра», снятие с причиной, «Вернуть на витрину».</li>
+        <li><a href="P4.dc.html">Prototype P4</a> — ручной путь при выключенном ИИ: от пустой витрины до «Изменить только в этой точке».</li>
+        <li><a href="S04.dc.html">AI-S04 · Permission primer</a> и <a href="S04b.dc.html">Microphone denied</a> — одно действие «видео со звуком», без «отдельного микрофона» (v2, п. 2.4).</li>
+        <li><a href="B07.dc.html">AI-B07 · Фильтры поиска</a> — сортировка, расстояние, цена; без геолокации, чипы, пустой результат (v2, п. 2.5).</li>
+        <li>Все изменённые и новые фреймы помечены тегом <span class="tag tag-rev" style="margin: 0;">Rev 1</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cols" style="grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start;">
+    <div class="doc">
+      <span class="tag tag-keep">Сохранено из Pass 3</span>
+      <ul>
+        <li>Токены KAIDA DS: #9900CC как цвет действия, Roboto + Geologica, сетка 4 px, радиусы, тени только у плавающих слоёв.</li>
+        <li>Mobile-first 360 px, один доминирующий CTA на экран, нижняя навигация.</li>
+        <li>KZT: «5 000 ₸ / кг», цены Geologica, tabular-nums.</li>
+        <li>Приватность координат, явный запрос геолокации, geo без map SDK (справочник + разбор ссылки).</li>
+        <li>Безопасные loading / offline / error, сохранение ввода при back, auth и reconnect.</li>
+        <li>Принцип «ввод продавца → изменения → явное подтверждение → Offer».</li>
+        <li>Ручной редактор как полноценный fallback.</li>
+        <li>Нет корзины, заказа, оплаты, доставки, остатков.</li>
+      </ul>
+    </div>
+    <div class="doc">
+      <span class="tag tag-adapt">Заменено / адаптировано</span>
+      <ul>
+        <li>Seller overview удалён → стартовая «Моя витрина».</li>
+        <li>«Предложения» → «Витрина»; навигация «Витрина / Точки / Ещё».</li>
+        <li>«Добавить товар» → «Сформировать карточки товаров» с AI-вариантами и ручным путём.</li>
+        <li>Seller-контакты → контакты внутри точки, все необязательны.</li>
+        <li>Offer editor → единый редактор AI-черновика и ручной формы.</li>
+        <li>Последовательный review → пакет черновиков + компактная сводка.</li>
+        <li>Фото стало обязательным (минимум 1), до 5 фото + 1 публичное видео.</li>
+        <li>«Свежесть» → «актуальность», плашки «Сегодня … 6 дней».</li>
+        <li>Контакты покупателю — иконки без подписей (официальные WhatsApp / Telegram от PO), aria-label, зона 44×44.</li>
+      </ul>
+    </div>
+    <div class="doc">
+      <span class="tag tag-gap">Нельзя реализовать без contract</span>
+      <ul>
+        <li>AI ingestion, resumable upload, persisted input, конфликт позднего AI-результата.</li>
+        <li>Media contracts: 5 фото + 1 видео, fallback после жалобы.</li>
+        <li>Moderation / versioning: immutable revisions, независимые исходы, апелляции.</li>
+        <li>Point-owned контакты и verification lifecycle.</li>
+        <li>Multi-point: grouped draft → N Offer, overrides, atomicity.</li>
+        <li>Bulk: смешанный итог против all-or-nothing S12.</li>
+        <li>Lifecycle 2 / 7 / 14 / 30 дней, reminders, hard delete.</li>
+        <li>Отзывы, рейтинг, жалобы, антифрод, audit.</li>
+        <li>AI-B02 route / deep-link; интерактивная карта — только PROPOSED GEO CONTRACT REVISION.</li>
+      </ul>
+      <p class="c">Полный список — артборд «Contract gaps» ниже.</p>
+    </div>
+  </div>
+
+  <div class="cols" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start;">
+    <div class="doc">
+      <h3 style="margin: 0;">Компоненты: существующие и предлагаемые расширения</h3>
+      <div class="cols" style="grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span class="tag tag-keep">Из KAIDA DS</span>
+          <p class="c c2">Button (primary / outline / ghost / danger), IconButton, TextField, Checkbox, Radio, Switch, Chip, Badge (success / warning / danger / info / neutral), Card, BottomNav, BottomSheet, Toast, Skeleton, Banner, Icon, иллюстрации «базарная геометрия».</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span class="tag tag-new">Предлагаемые</span>
+          <p class="c c2">CreateCTA, SourcePicker, Recorder (video / voice) + MicMeter, UploadJob, DraftBatchItem, BatchSummary, MediaTile (cover / progress / retry / limit), UnitSelect + PackSize, PointSelector (0 / 1 / many / all), PointOverrides, ContactIcon (phone / WA / TG), CardStatus (lifecycle + revision + task), ActualityPlaque, OutcomeSummary, RatingSummary, ComplaintForm.</p>
+        </div>
+      </div>
+    </div>
+    <div class="doc">
+      <h3 style="margin: 0;">Допущения этой итерации</h3>
+      <ul>
+        <li>Лимит исходных фото в AI-пакете не указан: сетка скроллится, лимит нигде не напечатан.</li>
+        <li>Таймеры повторной отправки OTP не показаны — нет OTP policy.</li>
+        <li>Источник копирования контактов: предыдущая точка, всегда подписан (Rev 1).</li>
+        <li>Сброс актуальности изменённой карточки — после одобрения (рабочая гипотеза п. 12.2), сказано в итоге явно.</li>
+        <li>Примеры товаров, цен и адресов — иллюстративные; фото — нейтральные цветные плейсхолдеры.</li>
+        <li>Расхождения с README дизайн-системы (подписи у иконок связи, Instagram, «Снято …», «свежесть») решены в пользу ТЗ как целевого UX.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card p16" style="flex-direction: row; gap: 24px; align-items: center;">
+    <div class="ov" style="flex: none;">Именование</div>
+    <p class="c c2" style="flex: 1;">Фрейм: <b style="color: var(--ink);">AI-S04 · Video · No audio</b> — подпись над каждым телефоном. Вариант компонента: <b style="color: var(--ink);">Component / State / Context</b> — на странице STATES. Теги на аннотациях: <span class="tag tag-gap">Gap</span> будущий contract, <span class="tag tag-prop">Proposed geo</span> ревизия geo-contract, <span class="tag tag-keep">Keep</span> принято в Pass 3.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1656,"height":2000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

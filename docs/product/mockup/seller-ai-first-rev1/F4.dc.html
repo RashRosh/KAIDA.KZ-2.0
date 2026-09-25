@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>F4 · Ручной ввод → модерация</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2640px; height: 680px;">
+  <div class="ab-head" style="max-width: 1600px;">
+    <div class="ab-id">Flow · F4</div>
+    <h2 class="ab-title">Ручной ввод → модерация</h2>
+    <p class="ab-desc">Полноценный путь без ИИ — работает во всех outage-состояниях. Тот же редактор AI-S09 с пустыми полями. Пример из п. 20, задание 4: 3 из 5 точек, своя цена для одной.</p>
+  </div>
+  <div class="fl">
+    <div class="fn"><div class="fid">AI-S02</div><div class="fnt">Выбор способа</div><div class="fns">«Заполнить вручную» — активно всегда</div></div>
+    <div class="fa"><span class="tr">Нажать</span><span class="ln"></span><span class="st">нужен вход?</span></div>
+    <div class="fn"><div class="fid">AI-S03</div><div class="fnt">Вход</div><div class="fns">если не авторизован</div></div>
+    <div class="fa"><span class="tr">Код верный</span><span class="ln"></span><span class="st">пустая форма</span></div>
+    <div class="fn"><div class="fid">AI-S09</div><div class="fnt">Пустой редактор</div><div class="fns">фото, название, цена, «Цена за»</div></div>
+    <div class="fa"><span class="tr">«Торговые точки»</span><span class="ln"></span><span class="st">5 точек, ничего не выбрано</span></div>
+    <div class="fn"><div class="fid">AI-S10</div><div class="fnt">3 из 5 точек</div><div class="fns">«Будет создано 3 карточки»</div></div>
+    <div class="fa"><span class="tr">«Настроить данные по точкам»</span><span class="ln"></span><span class="st">override цены</span></div>
+    <div class="fn"><div class="fid">AI-S11</div><div class="fnt">Своя цена для 1 точки</div><div class="fns">«Вернуть общее значение»</div></div>
+    <div class="fa"><span class="tr">«Отправить на модерацию»</span><span class="ln"></span><span class="st">валидация</span></div>
+    <div class="fn sys"><div class="fid">AI-S14</div><div class="fnt">На модерации</div><div class="fns">3 независимые карточки</div></div>
+    <div class="fa"><span class="tr">Одобрено</span><span class="ln"></span><span class="st">по точкам</span></div>
+    <div class="fn end"><div class="fid">AI-B01</div><div class="fnt">На витрине ×3</div><div class="fns">у каждой — адрес и контакты своей точки</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 2544px;">
+    <div class="fbr"><b>Не заполнены обязательные поля</b>→ AI-S09 · Validation<br>↩ Фокус на первое поле; «Сохранить черновик» всегда доступно</div>
+    <div class="fbr"><b>Нет ни одной точки</b>→ AI-S10 · None exist → AI-S12A<br>↩ Возврат в редактор с выбранной новой точкой</div>
+    <div class="fbr"><b>Потеря сети при отправке</b>→ форма сохранена, «Нет сети»<br>↩ Повтор без повторного ввода</div>
+    <div class="fbr"><b>Одна из 3 карточек — «Нужно исправить»</b>→ AI-S14<br>↩ Остальные 2 на витрине; исправление → AI-S09</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2640,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

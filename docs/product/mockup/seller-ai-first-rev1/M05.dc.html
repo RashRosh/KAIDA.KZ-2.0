@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-M05 · Апелляция и audit trail</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-M05 · Moderator · wireframe</div>
+    <h2 class="ab-title">Апелляция и audit trail</h2>
+    <p class="ab-desc">Апелляцию рассматривает другой модератор: автор исходного решения её не открывает. Каждое действие попадает в неизменяемый журнал.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-M05 · Appeal · Review</b><br>Решение другого модератора</div>
+      <div class="wf">
+        <div class="wbar">← Апелляция · Курага · Сайран</div>
+        <div class="wbody">
+          <div class="wbox dark"><b>Вы принимали исходное решение</b><span>Эту апелляцию рассмотрит другой модератор. Кнопки решения недоступны.</span></div>
+          <div class="wbox"><b>Исходное решение</b><span>Подтверждено · модератор M-12 · 22.09</span></div>
+          <div class="wbox"><b>Продавец пишет</b><span>«На фото именно этот сорт…»</span><div style="display: flex; gap: 6px;"><div class="wimg" style="width: 56px; height: 56px;">док 1</div><div class="wimg" style="width: 56px; height: 56px;">док 2</div></div></div>
+          <div style="display: flex; gap: 6px;"><span class="wbtn" style="color: #aaa; border-color: #ddd;">Оставить</span><span class="wbtn" style="color: #aaa; border-color: #ddd;">Отменить</span></div>
+        </div>
+      </div>
+      <div class="note">Для другого модератора те же кнопки активны: «Оставить решение» / «Отменить решение».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-M05 · Appeal · Audit trail</b><br>Журнал случая</div>
+      <div class="wf">
+        <div class="wbar">← Журнал</div>
+        <div class="wbody">
+          <div class="wbox"><span>24.09 · 10:40 · M-07 · апелляция: решение отменено</span></div>
+          <div class="wbox"><span>23.09 · 09:12 · продавец · апелляция подана</span></div>
+          <div class="wbox"><span>22.09 · 18:05 · M-12 · подтверждено · инцидент #1 · фото 1 скрыто</span></div>
+          <div class="wbox"><span>22.09 · 17:40 · система · всплеск · влияние заморожено</span></div>
+          <div class="wbox"><span>22.09 · 17:20 · кластер создан · 7 сообщений</span></div>
+          <div class="wbox dash"><span>Журнал неизменяем и не виден продавцу и покупателям</span></div>
+        </div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · audit</span>Срок хранения и состав журнала — security / compliance contract.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

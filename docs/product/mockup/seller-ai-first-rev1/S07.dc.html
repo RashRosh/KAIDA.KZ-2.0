@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AI-S07 · Загрузка и обработка</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2856px; height: 1300px;">
+  <div class="ab-head">
+    <div class="ab-id">AI-S07 · Seller · upload job</div>
+    <h2 class="ab-title">Загрузка и фоновая обработка</h2>
+    <p class="ab-desc">Семь отдельных состояний. После загрузки продавец может уйти: статус живёт на «Моей витрине», по готовности — in-app уведомление и push, если разрешён. Исходные видео и аудио приватны: хранятся во время обработки и 7 дней после формирования черновиков, затем удаляются; удалить можно раньше. Фото и публичное видео, подтверждённые в карточке, не удаляются вместе с исходником.</p>
+  </div>
+  <div class="row">
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Upload · Progress</b><br>Идёт загрузка</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Отправляем видео</div></header>
+        <main class="body" style="justify-content: center; gap: 20px; padding: 16px 24px;">
+          <div class="lic p" style="width: 72px; height: 72px; border-radius: 24px; align-self: center;"><span class="ic i-upload lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Загружаем видео</h1>
+          <div style="display: flex; flex-direction: column; gap: 8px;" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="Загрузка видео">
+            <div class="pbar" style="height: 8px;"><i style="width: 38%;"></i></div>
+            <div style="display: flex; justify-content: space-between;"><span class="c">Видео 1:24</span><span class="c num">38%</span></div>
+          </div>
+          <p class="t c2" style="text-align: center;">Дождитесь окончания загрузки. Дальше карточки соберутся без вас — экран можно будет закрыть.</p>
+        </main>
+        <div class="foot bare"><button class="btn btn-o w">Отменить загрузку</button></div>
+      </div>
+      <div class="note">Прогресс — полоса + число + aria-valuenow. Отмена не удаляет видео с телефона.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Upload · Slow connection</b><br>Медленная сеть</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Отправляем видео</div></header>
+        <main class="body" style="justify-content: center; gap: 20px; padding: 16px 24px;">
+          <div class="lic p" style="width: 72px; height: 72px; border-radius: 24px; align-self: center;"><span class="ic i-upload lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Загружаем видео</h1>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="pbar w" style="height: 8px;"><i style="width: 12%;"></i></div>
+            <div style="display: flex; justify-content: space-between;"><span class="c">Видео 1:24</span><span class="c num">12%</span></div>
+          </div>
+          <div class="banner warn" role="status" style="flex-direction: row; gap: 10px; padding: 12px; border-radius: 14px;"><span class="ic i-clock" style="color: var(--warning);"></span><p class="c" style="color: var(--ink); flex: 1;">Медленная сеть — загрузка займёт больше времени. Можно подождать здесь или вернуться позже: видео сохранено.</p></div>
+        </main>
+        <div class="foot bare"><button class="btn btn-o w">Отменить загрузку</button></div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · resumable upload</span>Продолжение загрузки после ухода с экрана — contract gap 11.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Upload · Offline</b><br>Сеть пропала — повтор без переснятия</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Отправляем видео</div></header>
+        <main class="body" style="justify-content: center; gap: 20px; padding: 16px 24px;">
+          <div class="lic" style="width: 72px; height: 72px; border-radius: 24px; align-self: center;"><span class="ic i-offline lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Нет сети</h1>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="pbar" style="height: 8px;"><i style="width: 38%; background: var(--line-control);"></i></div>
+            <div style="display: flex; justify-content: space-between;"><span class="c">На паузе</span><span class="c num">38%</span></div>
+          </div>
+          <p class="t c2" style="text-align: center;">Видео сохранено на телефоне — переснимать не нужно. Загрузка продолжится, когда появится сеть.</p>
+        </main>
+        <div class="foot bare"><button class="btn btn-p lg w"><span class="ic i-refresh sm"></span>Повторить сейчас</button><a class="btn btn-g w" href="S01.dc.html">На «Мою витрину»</a></div>
+      </div>
+      <div class="note">В очереди на S01: «Ждут сети — отправятся сами».</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Processing · Background</b><br>Загружено, обработка идёт в фоне</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Закрыть"><span class="ic i-close"></span></button><div class="bar-t">Видео загружено</div></header>
+        <main class="body" style="justify-content: center; gap: 20px; padding: 16px 24px;">
+          <div class="lic" style="width: 72px; height: 72px; border-radius: 24px; align-self: center; background: var(--success-soft); color: var(--success);"><span class="ic i-check lg"></span></div>
+          <h1 class="h2" style="text-align: center;">Собираем карточки</h1>
+          <p class="t c2" style="text-align: center;">Это может занять несколько минут. Экран можно закрыть — когда черновики будут готовы, пришлём уведомление.</p>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><span class="ic i-bell pt"></span><p class="c c2" style="flex: 1;">Разрешите уведомления, чтобы узнать о готовности сразу</p><button class="btn btn-o sm">Разрешить</button></div>
+        </main>
+        <div class="foot bare"><a class="btn btn-p lg w" href="S01.dc.html">На «Мою витрину»</a></div>
+      </div>
+      <div class="note">Без push статус всё равно виден на S01 и в «Уведомлениях». Длительность не обещаем цифрой — нет SLA.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Processing · Queued</b><br>«Ожидает обработки»: ИИ недоступен</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Видео 1:24</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="card p16" style="gap: 10px;">
+            <span class="bd bd-n"><span class="ic i-clock"></span>Ожидает обработки</span>
+            <p class="t">Видео загружено и сохранено. Сервис распознавания временно не отвечает — мы повторим автоматически. Держать экран открытым не нужно.</p>
+          </div>
+          <div class="card p16" style="gap: 6px;">
+            <div class="ts">Не хотите ждать?</div>
+            <p class="c c2">Заполните карточки сами. Если распознавание закончится позже, мы сверим результат с вашими карточками и ничего не создадим молча.</p>
+          </div>
+          <div class="sp"></div>
+          <div class="banner gray" style="padding: 12px; border-radius: 14px; flex-direction: row; gap: 10px;"><span class="ic i-lock c2"></span><p class="c c2" style="flex: 1;">Видео видите только вы. Оно удалится через 7 дней после того, как черновики будут готовы.</p></div>
+        </main>
+        <div class="foot"><a class="btn btn-p lg w" href="S09.dc.html">Заполнить вручную</a><button class="btn btn-g w" style="color: var(--danger);"><span class="ic i-trash sm"></span>Удалить видео</button></div>
+      </div>
+      <div class="note">Главное действие здесь — ручной путь: ожидание не требует действия продавца.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Processing · Error</b><br>«Ошибка обработки»</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Видео 1:24</div></header>
+        <main class="body" style="gap: 16px;">
+          <div class="card p16" style="gap: 10px;">
+            <span class="bd bd-err"><span class="ic i-alert"></span>Ошибка обработки</span>
+            <p class="t">Не получилось собрать карточки из этого видео. Видео сохранено — можно повторить обработку без новой съёмки.</p>
+          </div>
+          <button class="btn btn-p lg w"><span class="ic i-refresh sm"></span>Повторить обработку</button>
+          <a class="btn btn-o w" href="S09.dc.html">Заполнить вручную</a>
+          <div class="sp"></div>
+          <div class="hr"></div>
+          <div class="li"><div class="lic"><span class="ic i-lock"></span></div><div class="mid"><div class="ts">Исходное видео</div><p class="c">Хранится до 7 дней после готовности черновиков</p></div><button class="btn btn-g sm" style="color: var(--danger);">Удалить</button></div>
+        </main>
+      </div>
+      <div class="note">Удаление исходника — сразу, с подтверждением. Не трогает фото и видео, уже подтверждённые внутри карточек.</div>
+    </div>
+
+    <div class="shot">
+      <div class="cap"><b>AI-S07 · Processing · Late result conflict</b><br>ИИ закончил после ручного заполнения</div>
+      <div class="ph">
+        <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновики готовы</div></header>
+        <main class="body" style="gap: 12px;">
+          <p class="t">Из видео 1:24 получилось 4 черновика. 2 похожи на карточки, которые вы уже создали вручную.</p>
+          <div class="ov">Похожи на ваши карточки</div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 10px;"><div class="img m1" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1; min-width: 0;"><div class="ts">Баранина, лопатка</div><p class="c">Уже есть · На модерации</p></div><span class="bd bd-n">Не создадим</span></div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 10px;"><div class="img m3" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1; min-width: 0;"><div class="ts">Курага · 500 г</div><p class="c">Уже есть · Черновик</p></div><span class="bd bd-n">Не создадим</span></div>
+          <div class="ov" style="margin-top: 4px;">Новые</div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 10px;"><div class="img m2" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1; min-width: 0;"><div class="ts">Укроп, пучок</div><p class="c">200 ₸ / шт.</p></div></div>
+          <div class="card" style="flex-direction: row; align-items: center; gap: 10px;"><div class="img m6" style="width: 48px; height: 48px; border-radius: 8px;"></div><div style="flex: 1; min-width: 0;"><div class="ts">Сыр курт</div><p class="c">Цена не распознана</p></div></div>
+        </main>
+        <div class="foot"><button class="btn btn-p lg w">Открыть оставшиеся — 2</button><button class="btn btn-g w" style="color: var(--danger);">Удалить результат</button></div>
+      </div>
+      <div class="note"><span class="tag tag-gap">Gap · idempotency</span>Правило сопоставления и дубликатов — contract gap 11. UI гарантирует: поздний результат не создаёт скрытых дубликатов.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2856,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
