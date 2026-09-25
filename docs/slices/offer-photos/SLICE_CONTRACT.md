@@ -1,7 +1,6 @@
 # Offer photos: upload, storage, buyer offer page — Slice Contract
 
-**Status:** APPROVED — Product Owner, 2026-09-25, with the changes recorded in §8. Open before implementation of the
-reminder copy only: wording O1 in §8.
+**Status:** APPROVED — Product Owner, 2026-09-25, with the changes recorded in §8.
 
 **Stage 1, item 1** of `docs/product/EXECUTION_PLAN.md` (seller without AI). This is M1, moved ahead of the frozen
 queue.
@@ -25,7 +24,7 @@ the cover in results, opens the card and looks through all its photos and detail
   through a confirmed SellerChangeSet and increments the Offer revision.
 - **Photos are optional** (`FEATURE_MAP.md` «Seller AI-first model» п. 4, PO decision 2026-09-25, overriding the
   brief and the mockup's «Добавьте хотя бы одно фото товара»). A card without photos is published; before confirm the
-  Seller sees a neutral reminder (wording O1, §8) with `Добавить фото` and `Опубликовать без фото`. Not an error, not red, no checkbox. The full
+  Seller sees a neutral reminder `Карточки с фото выбирают чаще` / `Сфотографируйте товар — это займёт минуту` with `Добавить фото` and `Опубликовать без фото`. Not an error, not red, no checkbox. The full
   incomplete-card reminder (photo, comment) belongs to stage 1 item 3; this slice owns the photo part.
 - The absence of photos never changes buyer ranking or visibility; buyers see the neutral fallback.
 - `deactivate_offer` / `activate_offer` do not touch photos and do not require them.
@@ -170,5 +169,4 @@ cover — the card page opens; swipe through three photos, go back — the same 
 6. Defaults taken without a separate decision: limits 5 photos / 15 MB / 300 px / 50 unattached; originals are not
    kept.
 
-**O1 — open:** wording of the no-photo reminder («Без фото карточка проигрывает конкурентам» — PO asked to rethink).
-Implementation may start; the final string is set before the UI part is merged.
+7. No-photo reminder wording: `Карточки с фото выбирают чаще` / `Сфотографируйте товар — это займёт минуту`.
