@@ -25,11 +25,11 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.31-offer-price-unit`;
-- checkpoint commit: `4d30e7c6b9c6e6be349701ee5d41f052fa603dab`;
+- tag: `v0.0.32-seller-offer-editor`;
+- checkpoint commit: `ac29955` (merge PR #50, merged-main CI green);
 - после Pass 3 закрыты: `localization-foundation` (`v0.0.27`), `catalog-localization` (`v0.0.28`),
   `seller-comment-translation` (`v0.0.29`, переводчик выключен до переезда на свой сервер), `seller-cabinet-overview`
-  (`v0.0.30`), `offer-price-unit` (`v0.0.31`);
+  (`v0.0.30`), `offer-price-unit` (`v0.0.31`), `seller-offer-editor` (`v0.0.32`, единый ручной редактор);
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading
   Points Workspace (#36), Buyer interest guest visibility (`v0.0.26`).
 
@@ -79,11 +79,11 @@ Feature freeze сохраняется: новые product capabilities вне э
 Каждый пункт затрагивает закрытые contracts (S3, S5, S10, S12, #36, `seller-cabinet-overview`, `offer-price-unit`) и
 проходит contract revision по `PROJECT_RULES.md` §4.
 
-### PR #50 `seller-offer-editor` — довести и слить (решение PO, 2026-09-25)
+### PR #50 `seller-offer-editor` — слит (`v0.0.32`, 2026-09-25)
 
-Ветка `slice/seller-offer-editor` (PR #50) реализует единый ручной редактор и заменяет старые формы. Доводка перед
-слиянием: E2E на ошибки полей, закрытие с изменениями и двойное нажатие. Редактор становится основой ручного пути
-этапа 1; приведение к виду AI-S09 — в контракте пункта 3.
+По решению PO доведён (E2E на ошибки полей, закрытие с изменениями, двойное нажатие, казахский на 320 px) и слит.
+Ручная приёмка PO не проводилась — PO решил сливать без неё. Редактор — основа ручного пути этапа 1; приведение к
+виду AI-S09 — в контракте пункта 3.
 
 ### Название товара — свободное до формирования каталога (решение PO, 2026-09-25)
 
@@ -113,8 +113,8 @@ Feature freeze сохраняется: новые product capabilities вне э
 | 2 | Актуальность `2 / 7 / 14` (бывш. Freshness Policy) | Issue #31 |
 | 3 | Напоминания об актуальности | Issue #32 |
 | 4 | Nearby result-first correction | Issue #34 |
-| 5 | Search Sorting A — freshness / proximity | Issue #12 |
-| 6 | Search Sorting B — price | Issue #12 |
+| 5 | Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние | Issue #12, `FEATURE_MAP.md` |
+| 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
@@ -150,9 +150,8 @@ Insertion candidate не имеет жёсткого номера. Он расс
 
 ## Additional Search filters
 
-- earliest: после Sorting A/B и появления достаточно плотной выдачи;
-- trigger: реальные result sets показывают, что одной сортировки недостаточно;
-- default without trigger: не добавлять giant filter drawer.
+Состав фильтра у строки поиска решён PO (2026-09-25): сортировка, расстояние, цена от–до — они вошли в stages 5–6.
+Другие фильтры (тип точки, наличие фото, контактов и т. п.) не добавляются без нового решения PO.
 
 ## M2 — публичное видео предложения
 
