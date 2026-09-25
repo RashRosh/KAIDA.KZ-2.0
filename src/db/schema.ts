@@ -11,3 +11,6 @@ export { authSessions } from '../modules/identity/db/auth-sessions.table';
 export { sellerChangeSets } from '../modules/seller-input/db/seller-change-sets.table';
 export { sellerChangeItems } from '../modules/seller-input/db/seller-change-items.table';
 export { buyerInterests } from '../modules/interests/db/buyer-interests.table';
+export { photos } from '../modules/media/db/photos.table';
+export { offerPhotos } from '../modules/offers/db/offer-photos.table';
+export { sellerChangeItemPhotos } from '../modules/seller-input/db/seller-change-item-photos.table';

@@ -8,6 +8,8 @@ export type SellerOfferView = {
   // unit is the display label in the requested locale; unitChoice is the stored structured value for edit forms.
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
   sellerComment: string | null;
+  // Ordered photos, first = cover; present only when the Offer has photos.
+  photos?: { id: string }[];
   status: OfferStatus;
   lastConfirmedAt: string;
   // Whether Search and Nearby currently show this Offer, by the same policy as the buyer read.

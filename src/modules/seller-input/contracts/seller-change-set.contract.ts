@@ -17,6 +17,10 @@ const requiredCommentSchema = z.string().trim().max(500)
   .transform((value) => value === '' ? null : value)
   .nullable();
 
+// Ordered photo ids, first = cover. Uniqueness keeps positions meaningful; ownership is checked by the use case.
+const photoIdsSchema = z.array(z.uuid()).max(5)
+  .refine((ids) => new Set(ids).size === ids.length, 'Photo ids must be unique');
+
 const priceSchema = z.object({
   amount: z.string().trim().regex(SELLER_INPUT_PRICE_AMOUNT_PATTERN),
   unit: priceUnitInputSchema,
@@ -27,6 +31,7 @@ export const sellerChangeSetCreateBodySchema = z.object({
   locationId: z.string().uuid(),
   price: priceSchema,
   sellerComment: optionalCommentSchema,
+  photoIds: photoIdsSchema.optional().transform((value) => value ?? []),
 }).strict();
 
 export const sellerOfferChangeBodySchema = z.discriminatedUnion('action', [
@@ -34,6 +39,8 @@ export const sellerOfferChangeBodySchema = z.discriminatedUnion('action', [
     action: z.literal('update_offer'),
     price: priceSchema,
     sellerComment: requiredCommentSchema,
+    // Omitted = photos unchanged; an array (possibly empty) replaces the Offer photo list.
+    photoIds: photoIdsSchema.optional(),
   }).strict(),
   z.object({ action: z.literal('deactivate_offer') }).strict(),
   z.object({ action: z.literal('activate_offer') }).strict(),
@@ -82,6 +89,8 @@ export type SellerChangeSetItemView = {
   location: { id: string; name: string; addressText: string; type: LocationType };
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
   sellerComment: string | null;
+  // Present only when the item sets a photo list: a create_offer with photos, or an update_offer that replaces them.
+  photos?: { id: string }[];
   resultOffer: { id: string; status: OfferStatus; lastConfirmedAt: string } | null;
 };
 
@@ -123,6 +132,14 @@ export class LocationNotFoundError extends Error {
   constructor() {
     super('Точка продавца не найдена.');
     this.name = 'LocationNotFoundError';
+  }
+}
+
+export class PhotoNotFoundError extends Error {
+  readonly code = 'PHOTO_NOT_FOUND' as const;
+  constructor() {
+    super('Фото не найдено. Загрузите его ещё раз.');
+    this.name = 'PhotoNotFoundError';
   }
 }
 

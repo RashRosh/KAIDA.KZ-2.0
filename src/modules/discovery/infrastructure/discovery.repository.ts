@@ -4,6 +4,7 @@ import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
+import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
 import {
@@ -44,6 +45,7 @@ export async function findVisibleDiscoveryCandidates(
     priceUnitCode: offers.priceUnitCode,
     priceUnitValue: offers.priceUnitValue,
     sellerComment: offers.sellerComment,
+    coverPhotoId: offerCoverPhotoIdSelection,
     ...currentCommentTranslationSelection,
     lastConfirmedAt: offers.lastConfirmedAt,
     locationLatitude: locations.latitude,
@@ -74,6 +76,7 @@ export async function findVisibleDiscoveryCandidates(
     commentTranslationStatus,
     commentTranslationText,
     commentTranslationSourceLanguage,
+    coverPhotoId,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
@@ -97,6 +100,7 @@ export async function findVisibleDiscoveryCandidates(
         }),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
+      ...(coverPhotoId ? { coverPhotoId } : {}),
     };
     const sellerCommentTranslation = projectBuyerCommentTranslation({
       enabled: commentTranslationEnabled,

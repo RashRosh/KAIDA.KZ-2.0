@@ -1,8 +1,9 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { sellers } from '../../sellers/db/sellers.table';
+import { offerPhotos } from '../db/offer-photos.table';
 import { offers } from '../db/offers.table';
 import { priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../price-unit/price-unit';
 
@@ -176,4 +177,28 @@ export async function applyOfferActivation(database: OfferWriteDb, values: {
     revision: sql`${offers.revision} + 1`,
   }).where(and(eq(offers.id, values.offerId), eq(offers.revision, values.expectedRevision)))
     .returning(managementUpdateReturning);
+}
+
+export async function findOfferPhotoIds(database: OfferWriteDb, offerId: string): Promise<string[]> {
+  const rows = await database.select({ photoId: offerPhotos.photoId }).from(offerPhotos)
+    .where(eq(offerPhotos.offerId, offerId))
+    .orderBy(asc(offerPhotos.position));
+  return rows.map((row) => row.photoId);
+}
+
+export async function findOfferPhotoIdsByOffer(database: OfferWriteDb, offerIds: string[]): Promise<Map<string, string[]>> {
+  const result = new Map<string, string[]>();
+  if (offerIds.length === 0) return result;
+  const rows = await database.select({ offerId: offerPhotos.offerId, photoId: offerPhotos.photoId }).from(offerPhotos)
+    .where(inArray(offerPhotos.offerId, offerIds))
+    .orderBy(asc(offerPhotos.offerId), asc(offerPhotos.position));
+  for (const row of rows) result.set(row.offerId, [...(result.get(row.offerId) ?? []), row.photoId]);
+  return result;
+}
+
+// Replaces the whole ordered list inside the caller's transaction; position 0 is the cover.
+export async function replaceOfferPhotos(database: OfferWriteDb & Pick<Database, 'delete'>, offerId: string, photoIds: string[]) {
+  await database.delete(offerPhotos).where(eq(offerPhotos.offerId, offerId));
+  if (photoIds.length === 0) return;
+  await database.insert(offerPhotos).values(photoIds.map((photoId, position) => ({ offerId, photoId, position })));
 }

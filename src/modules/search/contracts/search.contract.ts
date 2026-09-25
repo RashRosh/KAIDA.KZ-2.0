@@ -22,6 +22,8 @@ export const searchOfferSchema = z.object({
     unit: z.string().nullable(),
   }),
   sellerComment: z.string().nullable(),
+  // Present only when the Offer has photos; the thumbnail URL is built from it.
+  coverPhotoId: z.uuid().optional(),
   // Present only while the translator is enabled and the comment is not already in the interface locale.
   sellerCommentTranslation: z.discriminatedUnion('status', [
     z.object({

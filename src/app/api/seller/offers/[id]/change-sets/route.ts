@@ -7,6 +7,7 @@ import {
   OfferNotFoundError,
   OfferPriceRequiredError,
   OfferUpdateNoChangesError,
+  PhotoNotFoundError,
   SellerRequiredError,
   sellerOfferChangeBodySchema,
   sellerOfferIdSchema,
@@ -45,6 +46,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   } catch (error) {
     if (error instanceof SellerRequiredError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
+    }
+    if (error instanceof PhotoNotFoundError) {
+      return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 422, headers: noStore });
     }
     if (error instanceof OfferNotFoundError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });

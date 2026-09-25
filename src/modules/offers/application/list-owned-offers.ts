@@ -7,7 +7,7 @@ import {
   SellerOffersSellerRequiredError,
   type SellerOfferView,
 } from '../contracts/seller-offer.contract';
-import { listOffersBySeller } from '../infrastructure/offers.repository';
+import { findOfferPhotoIdsByOffer, listOffersBySeller } from '../infrastructure/offers.repository';
 import { calculateOfferCutoff, systemClock, type Clock } from '../lifecycle/offer-lifecycle';
 import { formatPriceUnit } from '../price-unit/price-unit';
 
@@ -26,6 +26,7 @@ export async function listOwnedOffers(
   const locale = dependencies.locale ?? 'ru';
 
   const rows = await listOffersBySeller(database, seller.id, locale);
+  const photosByOffer = await findOfferPhotoIdsByOffer(database, rows.map((row) => row.id));
   return rows.map((row) => {
     if (row.locationSellerId !== seller.id) {
       throw new SellerOfferInvariantError('Location предложения больше не принадлежит Seller.');
@@ -53,6 +54,7 @@ export async function listOwnedOffers(
         unitChoice: row.priceUnit,
       },
       sellerComment: row.sellerComment,
+      ...(photosByOffer.has(row.id) ? { photos: photosByOffer.get(row.id)!.map((id) => ({ id })) } : {}),
       status: row.status,
       lastConfirmedAt: row.lastConfirmedAt.toISOString(),
       buyerVisible,

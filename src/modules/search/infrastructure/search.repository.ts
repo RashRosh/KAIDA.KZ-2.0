@@ -6,6 +6,7 @@ import { projectSellerPublicContactProperty } from '../../sellers/contact/projec
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
+import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
 import {
@@ -25,6 +26,28 @@ export async function findOffersByProductId(
   cutoff: Date,
   locale: 'ru' | 'kk' = 'ru',
   commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
+): Promise<SearchRankingCandidate[]> {
+  return findBuyerVisibleOffers(db, { productId }, cutoff, locale, commentTranslationEnabled);
+}
+
+// The same buyer projection for the buyer Offer page: one Offer, same visibility policy, never a hidden one.
+export async function findBuyerVisibleOfferById(
+  db: Database,
+  offerId: string,
+  cutoff: Date,
+  locale: 'ru' | 'kk' = 'ru',
+  commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
+): Promise<SearchRankingCandidate | null> {
+  const rows = await findBuyerVisibleOffers(db, { offerId }, cutoff, locale, commentTranslationEnabled);
+  return rows[0] ?? null;
+}
+
+async function findBuyerVisibleOffers(
+  db: Database,
+  filter: { productId: string } | { offerId: string },
+  cutoff: Date,
+  locale: 'ru' | 'kk',
+  commentTranslationEnabled: boolean,
 ): Promise<SearchRankingCandidate[]> {
   const rows = await db.select({
     id: offers.id,
@@ -46,6 +69,7 @@ export async function findOffersByProductId(
     priceUnitCode: offers.priceUnitCode,
     priceUnitValue: offers.priceUnitValue,
     sellerComment: offers.sellerComment,
+    coverPhotoId: offerCoverPhotoIdSelection,
     ...currentCommentTranslationSelection,
     lastConfirmedAt: offers.lastConfirmedAt,
     locationLatitude: locations.latitude,
@@ -56,7 +80,7 @@ export async function findOffersByProductId(
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
     .where(and(
-      eq(products.id, productId),
+      'productId' in filter ? eq(products.id, filter.productId) : eq(offers.id, filter.offerId),
       buyerVisibleOffersPredicate(cutoff),
     ))
     .orderBy(asc(offers.id));
@@ -79,6 +103,7 @@ export async function findOffersByProductId(
     commentTranslationStatus,
     commentTranslationText,
     commentTranslationSourceLanguage,
+    coverPhotoId,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
@@ -102,6 +127,7 @@ export async function findOffersByProductId(
         }),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
+      ...(coverPhotoId ? { coverPhotoId } : {}),
     };
     const sellerCommentTranslation = projectBuyerCommentTranslation({
       enabled: commentTranslationEnabled,
