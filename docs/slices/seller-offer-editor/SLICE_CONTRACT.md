@@ -3,6 +3,11 @@
 **Status:** APPROVED — Product Owner, 2026-09-23. Decisions are recorded in §8; implementation remains gated by
 the prerequisites below and `PROJECT_RULES.md`.
 
+> **2026-09-25:** implemented in PR #50 (not merged). The target editor is now AI-S09 of the AI-first mockup
+> (`PROJECT_RULES.md` §18.1); whether PR #50 is finished and merged as the base of the manual editor or frozen is an
+> open Product Owner question in `EXECUTION_PLAN.md`. Part 3 (`seller-points-contacts`) was cancelled.
+> `DESIGN_SYSTEM.md` references read as `PROJECT_RULES.md` §18.4.
+
 **Part 2 of 3** seller UI contracts (list in `docs/slices/seller-cabinet-overview/SLICE_CONTRACT.md`). Starts after
 part 1 and the approved `offer-price-unit` prerequisite are merged.
 

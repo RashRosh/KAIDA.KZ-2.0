@@ -9,9 +9,14 @@
 > Desktop и отдельный комплект казахских экранов в эту итерацию не входят.
 >
 > **Визуальная база:** существующий
-> [Claude artifact](https://claude.ai/artifact/VEioj7KKfjKfhD1RZpivdQ), принятый Pass 3, предложенный
-> non-blocking Media Pass и [`DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md). Media Pass остаётся future M1 design input,
-> а не принятой implementation authority.
+> [Claude artifact](https://claude.ai/artifact/VEioj7KKfjKfhD1RZpivdQ) (Pass 3 + Media Pass) и дизайн-система, на
+> которой он собран. Отдельный `DESIGN_SYSTEM.md` удалён 2026-09-25; обязательные UI-правила —
+> [`PROJECT_RULES.md`](../PROJECT_RULES.md) §18.4.
+>
+> **Результат и решения после него:** первый макет — https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4. Решения PO,
+> принятые по нему, — [`SELLER_AI_FIRST_DESIGN_REVISION_1.md`](./SELLER_AI_FIRST_DESIGN_REVISION_1.md); при
+> расхождении с этим документом побеждает ревизия (модерация при недоступном ИИ, контакты от предыдущей точки,
+> цена во всех точках, предупреждение об ответственности).
 >
 > **Продуктовая база:** [`PROJECT_RULES.md`](../PROJECT_RULES.md),
 > [`FEATURE_MAP.md`](./FEATURE_MAP.md), [`UX_REFERENCE_INDEX.md`](./UX_REFERENCE_INDEX.md) и закрытые Slice
@@ -859,8 +864,8 @@ SMS, WhatsApp и Telegram-рассылки для этих напоминани�
 
 ### 16.1. Визуальная система
 
-- использовать существующие palette, typography, spacing, radius, elevation и component patterns из
-  [`DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md);
+- использовать существующие palette, typography, spacing, radius, elevation и component patterns визуальной базы
+  (см. шапку документа);
 - не создавать параллельный AI-brand или новую палитру;
 - на экране один явно доминирующий primary CTA;
 - AI-функции выделять иерархией, композицией и copy, а не декоративным «магическим» шумом;
@@ -1026,8 +1031,7 @@ Component variant: `Component / State / Context`, например:
 Ниже не вопросы дизайнеру и не повод останавливать макеты. Это обязательные решения для последующих Product Owner /
 architecture / Slice Contract этапов:
 
-1. **Очередь работ.** AI Input, Offer video, Reviews/Rating и Moderation сейчас находятся позже текущего core в
-   каноническом плане; план нужно явно пересобрать.
+1. **Очередь работ.** Пересобрана 2026-09-25: `EXECUTION_PLAN.md`, этап 1 (продавец без ИИ).
 2. **Текущая ветка editor.** Незакрытый manual-first `seller-offer-editor` — только кандидат на выборочное
    переиспользование как fallback/component base после отдельного diff и UX review; он не является checkpoint,
    принятой authority или автоматической главной IA.

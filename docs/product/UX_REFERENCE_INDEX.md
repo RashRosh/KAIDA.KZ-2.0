@@ -17,7 +17,7 @@ https://drive.google.com/drive/folders/1y0IGHOKeGmOcgr7fMeO_ZITSDJyUozUa
 For a UI/UX Slice Contract or implementation:
 
 1. establish current repository state and closed contracts;
-2. read `docs/DESIGN_SYSTEM.md`;
+2. read `docs/PROJECT_RULES.md` §18.1 (current mockup) and §18.4 (mandatory UI rules);
 3. use this index to select only the references relevant to the user task;
 4. compare reference guidance with KAIDA product semantics;
 5. classify findings as `KEEP`, `ADAPT`, `REJECT`, or `GAP`;

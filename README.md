@@ -54,7 +54,7 @@ UI → API → business logic → DB → tests → manual acceptance
 - [`docs/PROJECT_RULES.md`](docs/PROJECT_RULES.md) — процесс разработки, verification и устойчивые архитектурные/product boundaries;
 - [`docs/product/EXECUTION_PLAN.md`](docs/product/EXECUTION_PLAN.md) — текущий checkpoint, NEXT и committed/insertion-candidate очередь;
 - [`docs/product/FEATURE_MAP.md`](docs/product/FEATURE_MAP.md) — долгосрочная capability/dependency map;
-- [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — visual/presentation rules;
+- [`docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md`](docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md) и ревизия 1 — целевой UX продавца; какой макет главный — `PROJECT_RULES.md` §18.1;
 - [`docs/product/UX_REFERENCE_INDEX.md`](docs/product/UX_REFERENCE_INDEX.md) — маршрутизация по внешним UX references;
 - `docs/slices/**/SLICE_CONTRACT.md` — точное поведение отдельного slice и историческое evidence закрытых contracts;
 - GitHub Issues — подробные требования к ещё не закрытой работе.

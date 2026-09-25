@@ -4,6 +4,10 @@
 > **Purpose:** первый обязательный артефакт UI redesign stabilization gate из `EXECUTION_PLAN.md`.
 > **Source:** bundled wireframe set `1a`–`5e` (`wf.pdf`), `WIREFRAME_BRIEF.md`, закрытые core contracts и фактические routes.
 > **This document is not:** новый roadmap, разрешение на production implementation или замена Slice Contract.
+>
+> **2026-09-25:** действует для покупателя. Seller-поверхности, seller-навигация и цепочки продавца заменены AI-first
+> макетом (`PROJECT_RULES.md` §18.1). `wf.pdf`, `WIREFRAME_BRIEF.md` и `DESIGN_SYSTEM.md` удалены (история в Git);
+> правила переключателя языка — `PROJECT_RULES.md` §18.4.
 
 ## 1. Вывод ревизии
 

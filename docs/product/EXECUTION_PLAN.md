@@ -13,10 +13,11 @@
 
 ## Source ownership
 
-- process / verification / stable boundaries → `docs/PROJECT_RULES.md`;
+- process / verification / stable boundaries, включая обязательные UI-правила → `docs/PROJECT_RULES.md`;
 - current execution order → этот файл;
-- long-range capability/dependency map → `docs/product/FEATURE_MAP.md`;
-- visual/presentation rules → `docs/DESIGN_SYSTEM.md`;
+- long-range capability/dependency map и продуктовые решения PO → `docs/product/FEATURE_MAP.md`;
+- целевой UX продавца → `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` + `SELLER_AI_FIRST_DESIGN_REVISION_1.md` + макет
+  (`PROJECT_RULES.md` §18.1);
 - exact slice behavior → `docs/slices/**/SLICE_CONTRACT.md`;
 - unresolved detailed requirements → GitHub Issues.
 
@@ -24,93 +25,113 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.26-buyer-interest-guest-visibility`;
-- checkpoint commit: `f7e4b08c06f97dd8878666f726a5aadd93240d48`;
-- Buyer interest ("heart") visibility for guests — CLOSED: anonymous buyers see the same interest control as authenticated buyers, click opens the shared Auth modal with context, interest is applied automatically after successful auth, no anonymous Interests API call; folded in the same checkpoint after manual acceptance surfaced three adjacent fixes — header identity indicator (logout icon button instead of raw phone number), Auth modal phone input live-formatting, Nearby dropping its redundant intro block once real results load in favor of a results header + refresh control;
-- ранее закрыты `S0–S13`, `UX1A`, `UX1A.1`, `UX1A.2`, `UX1B`, `UX1C`, `UX1D`, `UX2`, `UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading Points Workspace (#36).
+- tag: `v0.0.31-offer-price-unit`;
+- checkpoint commit: `4d30e7c6b9c6e6be349701ee5d41f052fa603dab`;
+- после Pass 3 закрыты: `localization-foundation` (`v0.0.27`), `catalog-localization` (`v0.0.28`),
+  `seller-comment-translation` (`v0.0.29`, переводчик выключен до переезда на свой сервер), `seller-cabinet-overview`
+  (`v0.0.30`), `offer-price-unit` (`v0.0.31`);
+- ранее закрыты `S0–S13`, `UX1A`–`UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading
+  Points Workspace (#36), Buyer interest guest visibility (`v0.0.26`).
 
 Текущий `main` может содержать более поздние docs/tooling maintenance commits без нового product checkpoint.
-
-До Seller Entry был выполнен docs-only maintenance Issue #37: UX reference audit, Design System reconciliation и source-of-truth normalization. Он не создавал отдельный product checkpoint/tag. Evidence хранится в Issue #37 и PR #40.
 
 ---
 
 # NEXT
 
-## UI redesign stabilization gate — feature freeze
+## Разворот продавца к AI-first (Product Owner decision, 2026-09-24/25)
 
-Статус: **UX target accepted; feature freeze remains until implementation gates close** — Product Owner accepted Pass 3 on 2026-09-23.
+Product Owner признал направление seller UI по Pass 3 неверным: ввод данных продавцом должен быть максимально
+простым, главный вход — одна кнопка `Сформировать карточки товаров` с ИИ-способами (видео, фото, голос), ручной ввод —
+полноценный путь на время, пока ИИ выключен или недоступен. Продуктовые решения записаны в `FEATURE_MAP.md`
+(«Seller AI-first model»), целевой UX — в `SELLER_AI_FIRST_DESIGN_BRIEF.md` и `SELLER_AI_FIRST_DESIGN_REVISION_1.md`.
 
-Текущий UX признан неудовлетворительным. До закрытия этого gate новые product capabilities из очереди ниже не начинаются.
+Pass 3 остаётся принятым UX target **для покупательских поверхностей**; для продавца он заменён.
 
-Ветка `slice/seller-offer-workspace` / `3b029d3` **не допускается к PR/merge/checkpoint**. Её локальные automated results не являются UX acceptance, её page composition не является базой нового UI.
+Feature freeze сохраняется: новые product capabilities вне этого раздела не начинаются.
 
-**Судьба ветки (Product Owner decision, 2026-09-23): удалить после переноса полезного.** Ревью показало, что переносить нечего: единственная независимая находка — исправление перехвата фокуса в overlay — относится к компонентам `Modal.tsx` и `BottomSheet.tsx`, которых на `main` не существует (созданы коммитами `4818261` и `f5c2dfb` самой ветки). Патч применять не к чему, поэтому сохранено правило, а не код: `DESIGN_SYSTEM.md` §13.1. История коммитов остаётся в Git; сама ветка удаляется, чтобы будущий агент не принял её за актуальное направление разработки.
+### Шаги
 
-Обязательная последовательность gate:
+| # | Шаг | Статус на 2026-09-25 |
+|---|---|---|
+| 1 | ТЗ дизайнеру AI-first витрины продавца | Сделано: `SELLER_AI_FIRST_DESIGN_BRIEF.md` |
+| 2 | Первый макет | Сдан: https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 |
+| 3 | Ревизия 1: правки редактора, решения PO, экраны «ИИ выключен», прототип ручного пути | ТЗ готово: `SELLER_AI_FIRST_DESIGN_REVISION_1.md`; передаётся дизайнеру |
+| 4 | Visual acceptance макета после ревизии 1 | Ждёт шага 3 |
+| 5 | Slice Contracts этапа 1 (ИИ выключен) | После шага 4 |
+| 6 | Реализация этапа 1 по контрактам | После шага 5 |
 
-1. преобразовать исходные wireframes в compact navigation/state/action/data specification для ключевых buyer/seller flows;
-2. включить в specification обязательный глобальный switch русского/казахского языка и полное покрытие обоих языков для всех KAIDA-owned strings, system states, accessibility copy и catalog-owned display data; responsive presentation следует `DESIGN_SYSTEM.md`;
-3. определить responsive rules для desktop без попытки дорисовать 42 независимых desktop-экрана;
-4. подготовить статический либо fixture-driven prototype ключевых flows поверх нового UI shell и показать каждый core flow на русском и казахском;
-5. получить Product Owner UX acceptance композиции, переходов, состояний и обеих языковых версий;
-6. подготовить localization Slice Contract (locale persistence/fallback, catalog representation, bilingual Search proof, единая модель перевода seller-authored content; решением Product Owner 2026-09-23 переводится только комментарий продавца) и переписать Slice Contract #27 либо заменить его несколькими компактными UI slice contracts;
-7. реализовать принятый UI поверх существующих domain modules, API, DB и closed core contracts;
-8. для каждого vertical slice выполнить targeted proof в обеих локалях, full branch CI, manual acceptance, diff audit, merge, merged-main CI и checkpoint по `PROJECT_RULES.md` §19.
+### Этап 1 — продавец без ИИ (черновой состав, порядок утверждает PO на шаге 5)
 
-Принятая navigation/state specification для шагов 1–3: `docs/product/UX_NAVIGATION_STATE_SPEC.md`. Принятие UX target разрешает подготовку Slice Contracts и UI branch; production changes выполняются только по утверждённым контрактам.
+Цель: продавец проходит ручной путь целевого макета от пустой витрины до опубликованной и изменённой карточки.
 
-### Ход gate
+1. **Фото предложения** — загрузка, хранение, показ покупателю; минимум одно фото у новой карточки. Это M1,
+   перенесённый вперёд из замороженной очереди.
+2. **Контакты у точки** — телефон / WhatsApp / Telegram принадлежат точке; новая точка получает контакты предыдущей;
+   показ Offer покупателю требует подтверждённой точки, контакты необязательны.
+3. **«Моя витрина» и ручной редактор** — навигация `Витрина / Точки / Ещё`, редактор AI-S09 в режиме «ИИ выключен»,
+   фасовка, несколько точек с общей ценой и своей ценой точки, подтверждение с предупреждением об ответственности.
+4. **Пост-проверка оператором** — лента новых карточек и снятие с витрины; статус «Снято оператором» у продавца. Это
+   часть S16, перенесённая вперёд.
 
-| Шаг | Статус на 2026-09-23 |
-|---|---|
-| 1–3 | Выполнены и приняты как UX target: `UX_NAVIGATION_STATE_SPEC.md` (12 поверхностей, ~28 состояний, три цепочки F1–F3, responsive rules) |
-| 4 | **Прототип проверен; замечания закрыты.** Locator: https://claude.ai/artifact/B5PDSyednY4pNtmhAtC9tN. `S-07__zero-create → address-selected` совпадает по адресу в `ru`/`kk`; до выбора `aria-selected="false"`. Остальные исправления приняты ранее. Evidence и вердикт — `WIREFRAME_PASS3_REVIEW.md` §12 |
-| 5 | **ACCEPTED 2026-09-23.** Product Owner: «принимаю Pass 3». Решение записано в `WIREFRAME_PASS3_REVIEW.md` §13 |
-| 6 | **Контракты подготовлены и APPROVED Product Owner 2026-09-23.** Точный порядок реализации: `localization-foundation` → `catalog-localization` → `seller-comment-translation` → `seller-cabinet-overview` → `offer-price-unit` → `seller-offer-editor` → `seller-points-contacts`. Решения по unit, optional Seller name with disclosed point-name fallback и глобальным Inter/Pass 3 tokens приняты; exact Pass 3 palette записана в `DESIGN_SYSTEM.md`. GitHub Issue #27 ещё содержит устаревшее направление «без отдельной страницы подтверждения»; buyer surfaces `S-01`–`S-03` пока без контрактов |
-| 7–8 | Не начаты |
+Каждый пункт затрагивает закрытые contracts (S3, S5, S10, S12, #36, `seller-cabinet-overview`, `offer-price-unit`) и
+проходит contract revision по `PROJECT_RULES.md` §4.
 
-Решения Product Owner, принятые 2026-09-23 по итогам ревью прохода 3 (каждое зафиксировано в файле-владельце):
+### Открытый вопрос PO: PR #50 `seller-offer-editor`
 
-- внешние зависимости — `PROJECT_RULES.md` §10.1;
-- подсказки адреса из собственного справочника, без внешнего геокодера и без обязательной карты — `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` §9, `FEATURE_MAP.md`;
-- единица измерения — controlled choice + `Другое` — `FEATURE_MAP.md`;
-- модель локализации каталога и правила автоперевода seller-контента — `FEATURE_MAP.md`;
-- текст ошибки без декоративного технического кода — `DESIGN_SYSTEM.md` §7.1;
-- поведение фокуса в overlay — `DESIGN_SYSTEM.md` §13.1.
+Ветка `slice/seller-offer-editor` (PR #50, head `62025de`, branch CI зелёный) реализует ручной редактор по Pass 3 и
+заменяет старые формы. Контроль показал: реализация соответствует контракту, но не хватает E2E на ошибки полей,
+закрытие с изменениями и двойное нажатие; ручная приёмка PO не проведена. Решение PO: довести и слить как основу
+ручного редактора этапа 1 **или** заморозить до контрактов этапа 1.
 
-Граница redesign: presentation layer можно пересобирать с нуля; изменения auth/ownership/privacy/persistence/pricing/Offer lifecycle/ChangeSet/public API проходят отдельную contract revision по `PROJECT_RULES.md` §4 и §18.2.
+### Открытый вопрос PO: название товара без модерации
 
-Подробности и исторический rejected pass: GitHub Issue #27, `docs/slices/seller-offer-workspace/SLICE_CONTRACT.md` §10–11.
+Целевой макет разрешает свободное название, которое потом сопоставляет с каталогом модератор (brief §5.3, gap 7).
+На этапе 1 модерации до публикации нет. Нужно решение: название на этапе 1 только из каталога KAIDA (как сейчас —
+ошибка «такого товара нет в каталоге») **или** свободное, и тогда кто и когда сопоставляет его с каталогом, чтобы
+товар находился в поиске. Ответ влияет на макет (состояние «товар не найден») и на контракт редактора.
+
+### Отменено
+
+- `seller-points-contacts` (часть 3 контрактов Pass 3) — отменён: строил контакты на уровне продавца и отдельный
+  экран контактов, которые новая модель отвергает. Заменяется пунктом 2 этапа 1.
+- Ветка `slice/seller-offer-workspace` и контракт Issue #27 — отклонены ранее; контракт удалён из репозитория, история
+  в Git и Issue #27.
 
 ---
 
-# FROZEN COMMITTED QUEUE — после UI redesign checkpoint
+# FROZEN COMMITTED QUEUE — после этапа 1
 
-Эти stages сохраняют порядок, но ни один из них не стартует до закрытия UI redesign stabilization gate. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
+Эти stages сохраняют порядок, но ни один из них не стартует до закрытия этапа 1. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
 |---|---|---|
 | 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
 | 1a | KAIDA address directory на открытых данных (подсказки адреса) | `FEATURE_MAP.md` / future Slice Contract |
-| 2 | Seller Freshness Policy `2 / 7 / 14` | Issue #31 |
-| 3 | Seller Freshness Reminder | Issue #32 |
+| 2 | Актуальность `2 / 7 / 14` (бывш. Freshness Policy) | Issue #31 |
+| 3 | Напоминания об актуальности | Issue #32 |
 | 4 | Nearby result-first correction | Issue #34 |
 | 5 | Search Sorting A — freshness / proximity | Issue #12 |
 | 6 | Search Sorting B — price | Issue #12 |
-| 7 | M1 — real Offer media | Feature Map / future Slice Contract |
-| 8 | S14 — Discovery / `Для вас` | Feature Map |
-| 9 | S15 — Search learning | Feature Map |
-| 10 | S16 — Operations + MVP boundary review | Feature Map |
+| 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
+| 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
+| 9 | S14 — Discovery / `Для вас` | Feature Map |
+| 10 | S15 — Search learning | Feature Map |
+| 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review | Feature Map |
+
+M1 (фото) и первая часть S16 (снятие карточки оператором) перенесены в этап 1.
 
 ### Ключевые dependencies
 
-- Seller Entry и Trading Points Workspace закрыты и остаются проверенным product core; их текущая presentation не обязана сохраняться в redesign.
-- Geo fallback остаётся первым product stage после redesign checkpoint: contract утверждён (2026-09-22, S8 revision), но feature freeze запрещает начинать его раньше.
-- Address directory (stage 1a) идёт **после** geo fallback, а не вместо него: подсказки адреса — улучшение поверх пути, который обязан работать без них (`PROJECT_RULES.md` §10.1). Ручной ввод адреса и действие «я на точке» доступны в initial UI; вставка ссылки активируется только на stage 1, подсказки — только на stage 1a. Принятый prototype может показывать целевую композицию с явной маркировкой future data source, но UI implementation не имеет права молча реализовать stages 1/1a внутри redesign slice. Первый шаг stage 1a — проверка покрытия адресов Алматы, licence/attribution requirements и operational модели выбранного открытого источника.
-- Freshness Policy и Reminder идут после redesign checkpoint и geo fallback, потому что reconfirmation должен жить в принятом seller UX.
-- Search Sorting выполняется после Freshness Policy, чтобы sorting не закрепил устаревшую ranking semantics.
-- M1 вводит настоящие seller-provided Offer media end-to-end; временные pre-MVP visuals M1 не заменяют.
+- Geo fallback остаётся первым stage после этапа 1: contract утверждён (2026-09-22, S8 revision).
+- Address directory (1a) идёт **после** geo fallback: подсказки адреса — улучшение поверх пути, который обязан
+  работать без них (`PROJECT_RULES.md` §10.1). Макет может показывать поиск адреса и ссылку на карту с пометкой future
+  data source; UI slice не реализует stages 1/1a молча. Первый шаг 1a — проверка покрытия адресов Алматы,
+  licence/attribution и operational модели источника.
+- Актуальность и напоминания идут после этапа 1, потому что подтверждение актуальности живёт на «Моей витрине».
+- Search Sorting выполняется после политики актуальности.
+- AI Input и AI-модерация по `PROJECT_RULES.md` §10.1 — улучшения поверх ручного пути; ручной путь и публикация без
+  предварительной модерации обязаны работать при недоступном ИИ.
 
 ---
 
@@ -120,7 +141,7 @@ Insertion candidate не имеет жёсткого номера. Он расс
 
 ## Market internal navigation — Issue #10
 
-- earliest sensible point: после ближайшего seller workspace/freshness contour;
+- earliest sensible point: после этапа 1 и актуальности;
 - trigger: пилот на крупных рынках показывает, что обычного route до Location недостаточно;
 - direction: Market directory → scheme/MarketPlaces → Location binding → buyer internal navigation;
 - default without trigger: остаётся unscheduled.
@@ -129,47 +150,48 @@ Insertion candidate не имеет жёсткого номера. Он расс
 
 - earliest: после Sorting A/B и появления достаточно плотной выдачи;
 - trigger: реальные result sets показывают, что одной сортировки недостаточно;
-- возможные направления: radius, price range, later media/rating/location-type filters только при наличии соответствующих данных/contracts;
 - default without trigger: не добавлять giant filter drawer.
 
-## M2 — Offer video
+## M2 — публичное видео предложения
 
-- earliest: после M1;
-- trigger: фото недостаточно для подтверждённого seller/buyer use case;
-- default without trigger: defer/skip.
+- earliest: после фото этапа 1;
+- целевой макет предусматривает до 5 фото + 1 публичное видео;
+- trigger: Product Owner подтверждает, что видео нужно покупателю, а не только как вход для ИИ.
 
-## Reviews / Rating
+## Отзывы, рейтинг, жалобы на фото
 
-Capability известна, но отдельный committed slice ещё не определён.
+В целевом макете (AI-S20–S22, AI-B03–B06, AI-M03–M05). Отдельный committed slice не определён.
 
-- trigger: Product Owner утверждает конкретный trust/review use case и moderation/media semantics;
-- до этого нельзя показывать fake rating/reviews;
-- если необходимость появится до MVP boundary — оформить Issue и insertion decision.
+- trigger: Product Owner утверждает trust/review use case, antifraud и moderation semantics;
+- до этого нельзя показывать fake rating/reviews.
+
+## Архив и удаление карточек
+
+В целевом макете (AI-S15–S17): архив с восстановлением и сроком хранения. Требует точной temporal semantics и server
+jobs; рассматривается вместе с актуальностью.
 
 ## OTP resend + timer
 
-Capability из второго follow-up spot-check (`docs/product/UX_REFERENCE_INDEX.md`, 2026-09-21): `AuthModal.tsx` не имеет вообще никакого resend-механизма. UX-паттерн (кнопка + короткий таймер + одинаковый код при повторе) задокументирован в корпусе, но `S2-auth/FEATURE_SPEC.md` explicitly выносит `OTP resend throttling` / `resend policy` / `delivery failure/retry policy` за scope S2.
+`AuthModal.tsx` не имеет resend-механизма; `S2-auth/FEATURE_SPEC.md` выносит resend/throttling за scope S2.
 
-- earliest: unscheduled — требует explicit product/security решения, не только UI;
-- trigger: Product Owner выбирает между (a) naive resend поверх существующего `/api/auth/otp/request` без throttling — тот же класс принятого pre-launch допущения, что и видимый test OTP код, или (b) отдельный slice с реальной resend/throttling policy ближе к launch;
-- default without trigger: остаётся unscheduled.
+- earliest: unscheduled — требует product/security решения;
+- trigger: Product Owner выбирает naive resend или отдельный slice с throttling ближе к launch.
 
 ## Unify buyer Search entry points
 
-Capability из того же follow-up spot-check: `HeaderSearch` (full-page GET) и `SearchForm` (client-side fetch) на `/` ведут себя по-разному, что совпадает с именованным антипаттерном из UX-референса. Не задевает closed UX2A/App Shell acceptance criteria (те фиксируют только visual submit pattern).
+`HeaderSearch` (full-page GET) и `SearchForm` (client-side fetch) на `/` ведут себя по-разному.
 
-- earliest: unscheduled — не в COMMITTED очереди;
-- trigger: Product Owner decision о приоритете этой чистки относительно текущей COMMITTED очереди;
-- direction: унифицировать submission behavior (вероятно — оба поля через client-side fetch), не меняя closed Search semantics (S0/S6/S7/S9) или UX2A visual submit pattern;
-- default without trigger: остаётся unscheduled UNPLACED GAP.
+- earliest: unscheduled;
+- direction: унифицировать submission behavior, не меняя closed Search semantics (S0/S6/S7/S9).
 
 ---
 
 # LATER / dependency-gated
 
-AI-input и последующие automation/monetization/promotion/recommendation capabilities не участвуют в ближайшем выборе только потому, что имеют следующий номер в Feature Map.
+Монетизация, продвижение, рекомендации, Telegram-канал ввода и аналитика продавца не участвуют в ближайшем выборе
+только потому, что имеют номер в Feature Map.
 
-AI остаётся способом сформировать Seller Change Set, а не способом обойти Offer core.
+AI остаётся способом сформировать черновики карточек (Seller Change Set), а не способом обойти Offer core.
 
 ---
 
@@ -177,9 +199,9 @@ AI остаётся способом сформировать Seller Change Set,
 
 Проверять insertion candidates и новые approved requirements:
 
-- после seller workspace + freshness contour;
-- после Search Sorting;
-- после M1;
+- после этапа 1;
+- после актуальности + Search Sorting;
+- после AI Input;
 - после S16 перед решением о MVP/public beta.
 
 Если утверждённое требование не имеет места ни в COMMITTED, ни в INSERTION CANDIDATES, ни в Feature Map, оно получает статус **UNPLACED GAP** и разбирается явно.
@@ -192,8 +214,8 @@ AI остаётся способом сформировать Seller Change Set,
 
 1. проверить `main`, latest verified checkpoint/tag и CI;
 2. прочитать этот файл;
-3. взять первый незакрытый COMMITTED stage;
-4. открыть owning Issue / Feature Map entry;
+3. взять первый незакрытый шаг из NEXT;
+4. открыть owning Issue / Feature Map entry / целевой макет;
 5. проверить relevant closed contracts;
 6. подготовить compact Slice Contract;
 7. не менять очередь по старому чату, UX backlog или numeric `Sxx` без Product Owner decision.
