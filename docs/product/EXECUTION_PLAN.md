@@ -163,7 +163,10 @@ Insertion candidate не имеет жёсткого номера. Он расс
 В целевом макете (AI-S20–S22, AI-B03–B06, AI-M03–M05). Отдельный committed slice не определён.
 
 - trigger: Product Owner утверждает trust/review use case, antifraud и moderation semantics;
-- до этого нельзя показывать fake rating/reviews.
+- до этого нельзя показывать fake rating/reviews;
+- решение PO (2026-09-25): жалоба — **на карточку целиком**, не только на фото; причина выбирается после нажатия
+  (`FEATURE_MAP.md`, «Seller AI-first model», п. 9). Макет AI-B05 / AI-B06 / AI-M03 и brief §14.3 перерабатываются
+  при подготовке этого этапа.
 
 ## Архив и удаление карточек
 
