@@ -99,7 +99,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await makeBuyerEligible(phone, testInfo.project.name);
     await proposeNewOffer(page, { product: 'Баранина', price: '4200.00', unit: 'kg', comment: 'S5 старая партия' });
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     await search(page);
@@ -127,7 +127,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
 
     await page.goto(updateReviewUrl);
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL('/seller/offers');
     await expect(page.getByRole('status').filter({ hasText: 'Изменения сохранены' })).toBeVisible();
 
@@ -155,7 +155,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.goto('/seller/offers');
     await page.getByRole('button', { name: 'Включить' }).click();
     await expect(page.getByText('Включение предложения', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Предложение включено' })).toBeVisible();
 
     await search(page);
@@ -168,7 +168,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByText('Активно', { exact: true }).first()).toBeVisible();
 
     await proposeNewOffer(page, { product: 'Баранина', price: '4700.00', comment: 'S5 второй Offer' });
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     await page.goto('/');

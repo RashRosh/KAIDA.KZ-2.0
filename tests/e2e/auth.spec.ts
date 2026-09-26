@@ -89,7 +89,8 @@ test('anonymous search, modal login, persistence, search after login and logout'
     await dialog.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode);
     await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(dialog).toBeHidden();
-    await expect(page).toHaveURL('/');
+    // The search query is kept in the address (offer-photos: Back from an Offer page returns to the same results).
+    await expect(page).toHaveURL(`/?${new URLSearchParams({ q: 'баранина' })}`);
     const loggedInButton = page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) });
     await expect(loggedInButton).toBeVisible();
 

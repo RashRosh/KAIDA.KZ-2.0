@@ -66,7 +66,7 @@ async function createSeller(page: Page, projectName: string, scenario: 'success'
 
 async function createLambOffer(page: Page, comment: string) {
   await proposeNewOffer(page, { product: 'Баранина', price: '4100.00', unit: 'kg', comment });
-  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
   await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 

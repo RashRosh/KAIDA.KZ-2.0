@@ -86,7 +86,7 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
     await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
 
     await proposeNewOffer(page, { product: 'Баранина', price: '5432.10', unit: 'kg', comment: `S10 ${project} contacts offer` });
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     await page.goto('/');

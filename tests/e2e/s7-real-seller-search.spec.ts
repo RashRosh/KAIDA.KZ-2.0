@@ -167,7 +167,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
       && response.url().endsWith('/confirm')
       && response.request().method() === 'POST'
     ));
-    await sellerPage.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await sellerPage.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     const createConfirm = await createConfirmResponse;
     expect(createConfirm.status()).toBe(200);
     const createBody = await createConfirm.json() as ConfirmBody;

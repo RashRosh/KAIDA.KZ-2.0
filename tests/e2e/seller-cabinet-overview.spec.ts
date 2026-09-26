@@ -145,7 +145,7 @@ test('Seller cabinet: navigation, first run, overview counts, filters, switch of
     await expect(offCard.getByText('Выключено', { exact: true })).toBeVisible();
     await offCard.getByRole('button', { name: 'Включить' }).click();
     await expect(page.getByText('Включение предложения')).toBeVisible();
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers\?status=inactive$/);
     await expect(page.getByRole('status').filter({ hasText: 'Предложение включено и видно покупателям' })).toBeVisible();
 
@@ -192,7 +192,7 @@ test('Confirm conflict from a second device applies nothing and offers a safe re
       await other.close();
     }
 
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     const alert = page.getByRole('alert').filter({ hasText: 'Предложение уже изменилось' });
     await expect(alert).toContainText('Мы ничего не применили');
     await expect(page.getByText('Сейчас в предложении')).toBeVisible();
@@ -205,7 +205,7 @@ test('Confirm conflict from a second device applies nothing and offers a safe re
     await page.getByRole('button', { name: 'Обновить и проверить заново' }).click();
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
     await expect(page.getByText('Предложение уже изменилось')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Изменения сохранены' })).toBeVisible();
     await expect(card(page, 'Баранина', `${sellerName} лавка`)).toContainText(/3\s400 ₸/);
   } finally {

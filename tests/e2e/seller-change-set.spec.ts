@@ -111,7 +111,7 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await expect(page.getByText('Новое предложение', { exact: true })).toBeVisible();
     await expect(page.getByText('Баранина', { exact: true })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     // The confirmation page replaces itself with the overview that started the change.
     await expect(page).toHaveURL('/seller');
     await expect(page.getByRole('status').filter({ hasText: 'Опубликовано — предложение видно покупателям' })).toBeVisible();

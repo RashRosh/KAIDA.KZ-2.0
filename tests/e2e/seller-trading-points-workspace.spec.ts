@@ -99,7 +99,7 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await editor.getByRole('button', { name: 'Продолжить' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
     await expect(page.getByText(editedName).first()).toBeVisible();
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     const search = await page.request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');

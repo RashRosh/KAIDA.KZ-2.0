@@ -55,7 +55,7 @@ async function makeBuyerEligible(pool: Pool, userId: string, projectName: string
 
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
   await proposeNewOffer(page, { product, price: amount, unit: 'kg', comment });
-  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
   await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 

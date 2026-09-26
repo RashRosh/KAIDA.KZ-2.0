@@ -113,7 +113,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     await editor.getByRole('button', { name: 'Далее' }).click();
     await editor.getByRole('button', { name: 'Продолжить' }).click();
     await expect(page.getByText(/4\s200 ₸ \/ кг/)).toBeVisible();
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
     // Edit the existing Offer from кг to шт, with a return from review in between.
@@ -133,7 +133,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     editor = offerEditor(page);
     await expect(editor.getByLabel('Единица', { exact: true })).toHaveValue('piece');
     await editor.getByRole('button', { name: 'Далее' }).click();
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     // The notice query is stripped right after it is read, so either form of the list URL is fine.
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
     await expect(card.getByText('/ шт')).toBeVisible();

@@ -101,7 +101,7 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     const itemBefore = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemBefore).toEqual({ product_id: seedIds.lambProduct, result_offer_id: null });
 
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
     const itemAfter = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemAfter.product_id).toBe(seedIds.lambProduct);
