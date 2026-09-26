@@ -53,6 +53,7 @@ export function OfferEditorHost({ seller, offers, commentTranslationEnabled }: {
             amount: item.price.amount,
             unit: priceUnitDraftFrom(item.price.unitChoice),
             comment: item.sellerComment ?? '',
+            ...(item.photos ? { photoIds: item.photos.map((photo) => photo.id) } : {}),
           };
         }
       } catch {

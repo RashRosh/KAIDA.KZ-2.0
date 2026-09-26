@@ -14,6 +14,7 @@ import styles from './offer-editor.module.css';
 import { CabinetIcon } from './SellerCabinetFrame';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PriceUnitField, emptyPriceUnitDraft, priceUnitDraftFrom } from './PriceUnitField';
+import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';
 import {
   automaticLocationId,
   derivedSellerName,
@@ -26,7 +27,7 @@ import {
 } from './offer-editor-state';
 
 export type EditorMode = { kind: 'create' } | { kind: 'edit'; offer: SellerOfferView };
-export type EditorInitial = Partial<EditorValues> & { locationId?: string };
+export type EditorInitial = Partial<EditorValues> & { locationId?: string; photoIds?: string[] };
 
 type ApiResult = { changeSet?: SellerChangeSetView; seller?: SellerView; location?: LocationView; error?: { code?: string } };
 type NewPoint = { name: string; addressText: string; type: LocationType; sellerName: string };
@@ -66,6 +67,9 @@ export function OfferEditor({ mode, seller: initialSeller, initial, returnPath, 
   const isEdit = mode.kind === 'edit';
   const [start] = useState(() => initialValues(mode, initial));
   const [values, setValues] = useState<EditorValues>(start);
+  const [startPhotoIds] = useState<string[]>(() => initial?.photoIds ?? (mode.kind === 'edit' ? mode.offer.photos?.map((photo) => photo.id) ?? [] : []));
+  const [photos, setPhotos] = useState<PhotoTile[]>(() => readyTiles(startPhotoIds));
+  const [photoBlock, setPhotoBlock] = useState<'photos.waitUpload' | 'photos.fixFailed' | null>(null);
   const [step, setStep] = useState<'form' | 'point'>('form');
   const [errors, setErrors] = useState<EditorErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -86,7 +90,9 @@ export function OfferEditor({ mode, seller: initialSeller, initial, returnPath, 
   const discardOpenRef = useRef(false);
   const submittingRef = useRef(false);
 
-  const dirty = !sameValues(values, start) || newPoint.name !== '' || newPoint.addressText !== '' || newPoint.sellerName !== '';
+  const currentPhotoIds = readyPhotoIds(photos);
+  const photosChanged = photos.length !== startPhotoIds.length || currentPhotoIds.some((id, index) => id !== startPhotoIds[index]);
+  const dirty = !sameValues(values, start) || photosChanged || newPoint.name !== '' || newPoint.addressText !== '' || newPoint.sellerName !== '';
   const creatingPoint = !isEdit && (addingPoint || locations.length === 0);
 
   function requestClose() {
@@ -183,6 +189,14 @@ export function OfferEditor({ mode, seller: initialSeller, initial, returnPath, 
       focusFirstError(found);
       return;
     }
+    // Photos are optional, but a card is never sent while one is still uploading or has failed unnoticed.
+    const pending = photos.some((tile) => tile.status === 'uploading') ? 'photos.waitUpload'
+      : photos.some((tile) => tile.status === 'error') ? 'photos.fixFailed' : null;
+    setPhotoBlock(pending);
+    if (pending) {
+      requestAnimationFrame(() => document.getElementById(`${ids}-photos`)?.scrollIntoView({ block: 'center' }));
+      return;
+    }
     if (mode.kind === 'create') {
       goToStep('point');
       return;
@@ -195,6 +209,7 @@ export function OfferEditor({ mode, seller: initialSeller, initial, returnPath, 
         action: 'update_offer',
         price: payload,
         sellerComment: values.comment,
+        photoIds: currentPhotoIds,
       });
       if (ok && data.changeSet) {
         openReview(data.changeSet.id);
@@ -257,6 +272,7 @@ export function OfferEditor({ mode, seller: initialSeller, initial, returnPath, 
         locationId,
         price: payload,
         sellerComment: values.comment,
+        photoIds: currentPhotoIds,
       });
       if (ok && data.changeSet) {
         openReview(data.changeSet.id);
@@ -323,6 +339,15 @@ export function OfferEditor({ mode, seller: initialSeller, initial, returnPath, 
                   {errorCount === 1 ? t('editor.summaryOne') : t('editor.summaryMany', { count: errorCount })}
                 </p>
               )}
+              <div id={`${ids}-photos`} className={styles.field}>
+                <PhotoField
+                  tiles={photos}
+                  setTiles={(next) => { setPhotos(next); setPhotoBlock(null); setSubmitFailed(false); }}
+                  disabled={submitting}
+                  blockedMessage={photoBlock ?? undefined}
+                />
+              </div>
+
               <div className={styles.field}>
                 <label htmlFor={`${ids}-product`}>{t('editor.product')}</label>
                 {isEdit ? (

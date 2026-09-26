@@ -163,6 +163,10 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
       if (!response.ok) throw new Error('Search unavailable');
       const result = searchResponseSchema.parse(await response.json());
       setState({ kind: 'success', result });
+      // Keep the query in the address so Back from an Offer page returns to the same results.
+      if (window.location.pathname === '/') {
+        window.history.replaceState(null, '', `/?${new URLSearchParams({ q: parsed.data })}`);
+      }
     } catch {
       setState({ kind: 'error' });
     } finally {

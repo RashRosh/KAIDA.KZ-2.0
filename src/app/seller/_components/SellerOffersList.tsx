@@ -11,6 +11,7 @@ import { CabinetIcon } from './SellerCabinetFrame';
 import { CabinetLoadError, CabinetLoginRequired, CabinetNotice, CabinetSkeleton, useConfirmedNotice } from './CabinetStates';
 import { OfferEditorHost, useEditorHrefs } from './OfferEditorHost';
 import { formatConfirmed, formatOfferPrice, useCabinetData } from './cabinet-data';
+import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 
 type Filter = 'all' | 'active' | 'inactive';
 type ChangeResponse = { changeSet?: SellerChangeSetView };
@@ -168,6 +169,12 @@ export function SellerOffersList({ commentTranslationEnabled = false }: { commen
                   {isActive ? t('offers.statusActive') : t('offers.statusInactive')}
                 </span>
                 <div className={styles.offerTop}>
+                  {offer.photos?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- owner-only photo route
+                    <img className={styles.offerThumb} src={photoUrl(offer.photos[0].id, 'thumb')} alt="" />
+                  ) : (
+                    <span className={`${styles.offerThumb} ${styles.offerThumbEmpty}`} aria-hidden="true" />
+                  )}
                   <h2 id={`offer-${offer.id}`} lang={offer.product.nameLocale}>{offer.product.name}</h2>
                   <span className={styles.offerPrice}>
                     {price ? <>{price.amount}{price.unit && <span className={styles.offerUnit}> / {price.unit}</span>}</> : t('offerManage.priceRequired')}

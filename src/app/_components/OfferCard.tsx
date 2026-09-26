@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { photoUrl } from '@/modules/media/contracts/photo.contract';
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
 import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';
@@ -144,21 +146,36 @@ export function OfferCard({
   offer,
   distanceMeters,
   interest,
+  linked = true,
 }: {
   offer: SearchOffer;
   distanceMeters?: number;
   interest?: InterestControl;
+  // false on the Offer page itself: no cover and no self-link.
+  linked?: boolean;
 }) {
   const { t } = useI18n();
   const contactActions = offer.seller.contacts ? buildContactActions(offer.seller.contacts) : [];
   const phoneAction = contactActions.find((action) => action.label === 'Позвонить');
   const socialActions = contactActions.filter((action) => action.label !== 'Позвонить');
+  const offerHref = `/offers/${offer.id}`;
 
   return (
     <article className={styles.offer} aria-labelledby={`offer-${offer.id}`}>
       <div className={styles.offerTop}>
+        {linked && (
+          // The cover opens the Offer page; the name link below is the same destination for assistive technology.
+          <Link href={offerHref} className={styles.offerCover} tabIndex={-1} aria-hidden="true">
+            {offer.coverPhotoId ? (
+              // eslint-disable-next-line @next/next/no-img-element -- public, immutable photo route
+              <img src={photoUrl(offer.coverPhotoId, 'thumb')} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} />
+            ) : null}
+          </Link>
+        )}
         <div className={styles.offerTitleBlock}>
-          <h2 id={`offer-${offer.id}`} lang={offer.product.nameLocale}>{offer.product.name}</h2>
+          <h2 id={`offer-${offer.id}`} lang={offer.product.nameLocale}>
+            {linked ? <Link href={offerHref} className={styles.offerNameLink}>{offer.product.name}</Link> : offer.product.name}
+          </h2>
           <p className={styles.price}>
             {formatAmount(offer.price.amount)} ₸
             {offer.price.unit && <span className={styles.priceUnit}> / {offer.price.unit}</span>}
