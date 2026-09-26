@@ -92,19 +92,20 @@ test('Seller cabinet: navigation, first run, overview counts, filters, switch of
     await expect(page.getByRole('heading', { name: 'Последние изменения' })).toBeVisible();
     await expectNoTechnicalWords(page);
 
-    // Navigation: mobile has three items plus «Ещё»; desktop has all four destinations and logout.
+    // Navigation: mobile has three items plus «Ещё»; desktop has all three destinations and logout.
+    // point-contacts-hours removed the separate «Контакты» section.
     const nav = page.getByRole('navigation', { name: 'Разделы кабинета' }).filter({ visible: true });
     if (mobile) {
       await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Предложения', 'Точки']);
       await nav.getByRole('button', { name: 'Ещё' }).click();
       const sheet = page.getByRole('dialog', { name: 'Ещё' });
-      await expect(sheet.getByRole('link', { name: 'Контакты' })).toBeFocused();
-      await expect(sheet.getByRole('button', { name: 'Выйти' })).toBeVisible();
+      await expect(sheet.getByRole('link', { name: 'Контакты' })).toHaveCount(0);
+      await expect(sheet.getByRole('button', { name: 'Выйти' })).toBeFocused();
       await page.keyboard.press('Escape');
       await expect(sheet).toHaveCount(0);
       await expect(nav.getByRole('button', { name: 'Ещё' })).toBeFocused();
     } else {
-      await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Предложения', 'Точки', 'Контакты']);
+      await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Предложения', 'Точки']);
       await expect(nav.getByRole('button', { name: 'Выйти' })).toBeVisible();
     }
     await expect(page.locator('[aria-disabled="true"], nav button:disabled')).toHaveCount(0);

@@ -270,12 +270,12 @@ test('public Nearby API is anonymous, strict, radius-filtered and does not expos
   const body = await response.json();
   expect(body.offers.map((offer: { id: string }) => offer.id)).toEqual([insideOfferId, boundaryOfferId]);
   expect(body.offers.map((offer: { distanceMeters: number }) => offer.distanceMeters)).toEqual([1000, NEARBY_RADIUS_METERS_DEFAULT]);
-  expect(body.offers[0].seller.contacts).toEqual({
+  // point-contacts-hours: verified point contacts, nothing on the seller.
+  expect(body.offers[0].location.contacts).toEqual({
     phoneE164: '+77015550101',
     whatsappPhoneE164: '+77015550102',
-    telegramUsername: 's11_e2e',
-    instagramUsername: 's11.e2e',
   });
+  expect(body.offers[0].seller).not.toHaveProperty('contacts');
   assertDiscoveryPrivacy(body);
 
   const invalidPayloads: unknown[] = [
