@@ -25,6 +25,7 @@ async function cleanup() {
   const sellerIds = [sellerId, noPhoneSellerId, noGeoSellerId].filter(Boolean);
   if (productId) await connection.pool.query('DELETE FROM offers WHERE product_id=$1', [productId]);
   if (sellerIds.length > 0) {
+    await connection.pool.query('DELETE FROM seller_verified_phones WHERE seller_id = ANY($1::uuid[])', [sellerIds]);
     await connection.pool.query('DELETE FROM locations WHERE seller_id = ANY($1::uuid[])', [sellerIds]);
     await connection.pool.query('DELETE FROM sellers WHERE id = ANY($1::uuid[])', [sellerIds]);
   }
@@ -76,6 +77,9 @@ test.beforeAll(async ({}, workerInfo) => {
     destination.longitude,
     noGeoSellerId,
   ]);
+  // point-contacts-hours: contacts live on the point and are public only when verified.
+  await connection.pool.query("UPDATE locations SET phone_e164='+77015551901', whatsapp_phone_e164='+77015551902' WHERE id=$1", [locationId]);
+  await connection.pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+77015551901',now()),($1,'+77015551902',now())", [sellerId]);
   const now = new Date();
   await connection.pool.query(`INSERT INTO offers
     (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at) VALUES
@@ -138,10 +142,14 @@ async function assertEqualSocialRow(card: Locator, names: string[]) {
   if (names.length === 1) expect(Math.abs(boxes[0]!.width - rowBox!.width)).toBeLessThan(2);
 }
 
-test('UX1D OfferCard exposes Call+Route and keeps optional social actions in equal icon-only 3/2/1 rows without overflow', async ({ page, request }, testInfo) => {
+test('UX1D OfferCard exposes Call+Route, WhatsApp as an icon-only row, and Route alone for a point without contacts', async ({ page, request }, testInfo) => {
   let card = await runSearch(page);
-  await expect(page.getByText(/UX1D no phone seller/)).toHaveCount(0);
   await expect(page.getByText(/UX1D no geo seller/)).toHaveCount(0);
+  // point-contacts-hours: a point without contacts is visible with Route only, never empty or grey contact icons.
+  const noPhoneCard = page.getByRole('article').filter({ hasText: 'UX1D no phone point' });
+  await expect(noPhoneCard.locator('[aria-label="Основные действия"]').getByRole('link')).toHaveCount(1);
+  await expect(noPhoneCard.getByRole('link', { name: 'Маршрут', exact: true })).toBeVisible();
+  await expect(noPhoneCard.getByRole('link', { name: 'Позвонить', exact: true })).toHaveCount(0);
 
   const primary = card.locator('[aria-label="Основные действия"]');
   await expect(primary.getByRole('link')).toHaveCount(2);
@@ -158,16 +166,11 @@ test('UX1D OfferCard exposes Call+Route and keeps optional social actions in equ
   expect(redirect.status()).toBe(302);
   expect(redirect.headers().location).toBe('dgis://2gis.ru/routeSearch/rsType/car/to/76.889709,43.238949');
 
-  await assertEqualSocialRow(card, ['WhatsApp', 'Telegram', 'Instagram']);
-  await connection.pool.query('UPDATE sellers SET instagram_username=NULL WHERE id=$1', [sellerId]);
-  card = await runSearch(page);
-  await expect(card.getByRole('link', { name: 'Instagram', exact: true })).toHaveCount(0);
-  await assertEqualSocialRow(card, ['WhatsApp', 'Telegram']);
-
-  await connection.pool.query('UPDATE sellers SET telegram_username=NULL WHERE id=$1', [sellerId]);
-  card = await runSearch(page);
-  await expect(card.getByRole('link', { name: 'Telegram', exact: true })).toHaveCount(0);
   await assertEqualSocialRow(card, ['WhatsApp']);
+  await connection.pool.query('UPDATE locations SET whatsapp_phone_e164=NULL WHERE id=$1', [locationId]);
+  card = await runSearch(page);
+  await expect(card.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveCount(0);
+  await expect(card.getByRole('link', { name: 'Позвонить', exact: true })).toBeVisible();
 
   if (testInfo.project.name === 'desktop') {
     for (const width of [320, 360, 390, 768, 1024, 1440]) {
@@ -181,8 +184,9 @@ test('UX1D OfferCard exposes Call+Route and keeps optional social actions in equ
   }
 });
 
-test('UX1D route action returns the same non-disclosing 404 for phone-less, geo-less and unknown Offers', async ({ request }) => {
-  for (const id of [noPhoneOfferId, noGeoOfferId, randomUUID()]) {
+test('UX1D route action returns the same non-disclosing 404 for geo-less and unknown Offers', async ({ request }) => {
+  expect((await request.get(`/api/offers/${noPhoneOfferId}/route`, { maxRedirects: 0 })).status()).toBe(302);
+  for (const id of [noGeoOfferId, randomUUID()]) {
     const response = await request.get(`/api/offers/${id}/route`, { maxRedirects: 0 });
     expect(response.status()).toBe(404);
     const body = await response.json();

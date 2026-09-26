@@ -47,7 +47,8 @@ async function prepareSeller(page: Page, phone: string, label: string) {
   return withPool(async (pool) => {
     const user = await pool.query('SELECT id FROM users WHERE phone_e164=$1', [phone]);
     const seller = await pool.query('INSERT INTO sellers (owner_user_id, display_name, contact_phone_e164) VALUES ($1,$2,$3) RETURNING id', [user.rows[0].id, `Фото ${label}`, phone]);
-    await pool.query("INSERT INTO locations (seller_id,name,address_text,type,latitude,longitude) VALUES ($1,$2,'Алматы, фото','shop',43.25,76.95)", [seller.rows[0].id, `Фото точка ${label}`]);
+    // The login phone on the point is verified without a code (point-contacts-hours).
+    await pool.query("INSERT INTO locations (seller_id,name,address_text,type,latitude,longitude,phone_e164) VALUES ($1,$2,'Алматы, фото','shop',43.25,76.95,$3)", [seller.rows[0].id, `Фото точка ${label}`, phone]);
     return seller.rows[0].id as string;
   });
 }

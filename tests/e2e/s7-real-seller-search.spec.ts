@@ -146,10 +146,6 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     await sellerPage.getByLabel('Адрес').fill(`Алматы, S7 E2E адрес ${suffix}`);
     await sellerPage.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(sellerPage.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
-    await sellerPage.goto('/seller/contacts');
-    await sellerPage.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
-    await sellerPage.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(sellerPage.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     const ids = await sellerIdentity(phone);
     await makeBuyerEligible(ids, testInfo.project.name);

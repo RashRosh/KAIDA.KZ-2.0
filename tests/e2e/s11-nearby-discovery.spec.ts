@@ -38,6 +38,7 @@ let geolessLocationName: string;
 async function cleanup() {
   if (!connection) return;
   await connection.pool.query('DELETE FROM offers WHERE product_id=$1', [productId]);
+  await connection.pool.query('DELETE FROM seller_verified_phones WHERE seller_id=$1', [sellerId]);
   await connection.pool.query('DELETE FROM locations WHERE seller_id=$1', [sellerId]);
   await connection.pool.query('DELETE FROM sellers WHERE id=$1', [sellerId]);
   await connection.pool.query('DELETE FROM products WHERE id=$1', [productId]);
@@ -92,6 +93,8 @@ test.beforeAll(async ({}, workerInfo) => {
       [id, sellerId, name, address, latitude, longitude],
     );
   }
+  await connection.pool.query("UPDATE locations SET phone_e164='+77015550101', whatsapp_phone_e164='+77015550102' WHERE seller_id=$1", [sellerId]);
+  await connection.pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+77015550101',now()),($1,'+77015550102',now())", [sellerId]);
   await connection.pool.query(
     'INSERT INTO locations (id,seller_id,name,address_text,type,latitude,longitude) VALUES ($1,$2,$3,$4,\'shop\',NULL,NULL)',
     [geolessLocationId, sellerId, geolessLocationName, 'S11 geoless address'],
@@ -212,7 +215,7 @@ test('Buyer clicks Nearby once, gets only nearby buyer-eligible Offers, keeps ac
   await expect(page.getByText(geolessLocationName)).toHaveCount(0);
 
   const firstCard = cards.nth(0);
-  for (const label of ['Позвонить', 'Маршрут', 'WhatsApp', 'Telegram', 'Instagram']) {
+  for (const label of ['Позвонить', 'Маршрут', 'WhatsApp']) {
     await expect(firstCard.getByRole('link', { name: label, exact: true })).toBeVisible();
   }
 

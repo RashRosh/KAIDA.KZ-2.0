@@ -93,10 +93,6 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByLabel('Адрес').fill('Алматы, S5 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
-    await page.goto('/seller/contacts');
-    await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await makeBuyerEligible(phone, testInfo.project.name);
     await proposeNewOffer(page, { product: 'Баранина', price: '4200.00', unit: 'kg', comment: 'S5 старая партия' });
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();

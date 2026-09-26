@@ -28,7 +28,8 @@ describe('opening hours validation', () => {
     expect(openingHoursSchema.safeParse(hours({ mon: iv(['09:00', '09:00']) })).success).toBe(false);
     expect(openingHoursSchema.safeParse(hours({ mon: iv(['24:00', '09:00']) })).success).toBe(false);
     expect(openingHoursSchema.safeParse(hours({ mon: iv(['01:00', '02:00'], ['03:00', '04:00'], ['05:00', '06:00'], ['07:00', '08:00']) })).success).toBe(false);
-    const { mon: _mon, ...days } = templateOpeningHours().days;
+    const days: Partial<OpeningHours['days']> = { ...templateOpeningHours().days };
+    delete days.mon;
     expect(openingHoursSchema.safeParse({ timeZone: 'Asia/Almaty', days }).success).toBe(false);
   });
 });

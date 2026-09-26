@@ -8,9 +8,6 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000971' : '+77000000972';
 }
 
-function publicPhoneFor(projectName: string) {
-  return projectName === 'mobile' ? '+77000000973' : '+77000000974';
-}
 
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
@@ -86,10 +83,6 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     await page.getByLabel('Адрес').fill('Алматы, S6 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
-    await page.goto('/seller/contacts');
-    await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
     await proposeNewOffer(page, { product: 'мясо барана', price: '1' });
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
