@@ -12,7 +12,8 @@ import {
   sellerOfferChangeBodySchema,
 } from '../../src/modules/seller-input/contracts/seller-change-set.contract';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
-import { updateOwnedSellerContacts } from '../../src/modules/sellers/application/update-owned-seller-contacts';
+import { replaceOwnedPointDetails } from '../../src/modules/locations/details/point-details.application';
+import { templateOpeningHours } from '../../src/modules/locations/hours/opening-hours';
 import { connectTestDatabase } from './database';
 
 let db: Database;
@@ -72,12 +73,8 @@ describe.sequential('S7 real Seller-created Offer through UX1D buyer-eligible Se
     }, { database: db });
     const locationId = seller.locations[0]!.id;
     const identity = { sellerId: seller.id, locationId, sellerComment };
-    await updateOwnedSellerContacts(userId, {
-      phoneE164: '+77000000772',
-      whatsappPhoneE164: null,
-      telegramUsername: null,
-      instagramUsername: null,
-    }, { database: db });
+    // point-contacts-hours: the owner's login phone on the point is verified without a code.
+    await replaceOwnedPointDetails(userId, locationId, { phone, whatsapp: null, openingHours: templateOpeningHours() }, { database: db });
     await setOwnedLocationGeo(
       userId,
       locationId,
@@ -116,8 +113,8 @@ describe.sequential('S7 real Seller-created Offer through UX1D buyer-eligible Se
       expect(canonicalOffer).toMatchObject({
         id: offerId,
         product: { id: seedIds.lambProduct, name: 'Баранина' },
-        seller: { id: seller.id, displayName: sellerName, contacts: { phoneE164: '+77000000772' } },
-        location: { id: locationId, name: locationName },
+        seller: { id: seller.id, displayName: sellerName },
+        location: { id: locationId, name: locationName, contacts: { phoneE164: phone }, openingHours: templateOpeningHours() },
         sellerComment,
       });
       expect(aliasOffer).toEqual(canonicalOffer);

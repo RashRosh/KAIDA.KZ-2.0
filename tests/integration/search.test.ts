@@ -1,3 +1,4 @@
+import { WEEKDAYS } from '../../src/modules/locations/hours/opening-hours';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { seedIds, seedDatabase } from '../../src/db/seed';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
@@ -19,9 +20,15 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
         seller: {
           id: seedIds.seller,
           displayName: 'Асыл Ет, тестовый продавец',
-          contacts: { phoneE164: '+77000000001' },
         },
-        location: { id: seedIds.location, name: 'Тестовая мясная точка', addressText: 'Алматы, Зелёный базар, тестовый павильон 12' },
+        location: {
+          id: seedIds.location,
+          name: 'Тестовая мясная точка',
+          addressText: 'Алматы, Зелёный базар, тестовый павильон 12',
+          // point-contacts-hours: the seed point has a verified phone and is open around the clock.
+          contacts: { phoneE164: '+77000000001' },
+          openingHours: { timeZone: 'Asia/Almaty', days: Object.fromEntries(WEEKDAYS.map((day) => [day, { kind: '24h' }])) },
+        },
         price: { amount: '4200.00', currency: 'KZT', unit: 'кг' },
         sellerComment: 'Свежий привоз.',
       }],
