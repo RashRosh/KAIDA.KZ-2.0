@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { sellerPublicContactsSchema } from '../../sellers/contracts/seller-contact.contract';
+import { openingHoursSchema } from '../../locations/hours/opening-hours';
+import { pointPublicContactsSchema } from '../../locations/details/point-public-contacts';
 
 export const searchQuerySchema = z.string().trim().min(1, 'Введите название товара.');
 
@@ -13,9 +14,15 @@ export const searchOfferSchema = z.object({
   seller: z.object({
     id: z.uuid(),
     displayName: z.string(),
-    contacts: sellerPublicContactsSchema.optional(),
   }),
-  location: z.object({ id: z.uuid(), name: z.string(), addressText: z.string() }),
+  // point-contacts-hours: contacts belong to the point and are public only when verified; hours are always present.
+  location: z.object({
+    id: z.uuid(),
+    name: z.string(),
+    addressText: z.string(),
+    contacts: pointPublicContactsSchema.optional(),
+    openingHours: openingHoursSchema,
+  }),
   price: z.object({
     amount: z.string().regex(/^\d+(?:\.\d+)?$/),
     currency: z.literal('KZT'),

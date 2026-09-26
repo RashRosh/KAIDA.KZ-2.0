@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { photoUrl } from '../../modules/media/contracts/photo.contract';
+import { OpeningHoursLine } from './OpeningHoursLine';
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
 import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';
@@ -82,30 +83,6 @@ function SocialIcon({ label }: { label: ContactAction['label'] }) {
       />
     );
   }
-  if (label === 'Telegram') {
-    return (
-      <Image
-        className={`${styles.serviceIcon} ${styles.telegramIcon}`}
-        src="/brand/telegram.svg"
-        alt=""
-        width={18}
-        height={18}
-        aria-hidden="true"
-      />
-    );
-  }
-  if (label === 'Instagram') {
-    return (
-      <Image
-        className={`${styles.serviceIcon} ${styles.instagramIcon}`}
-        src="/brand/instagram.svg"
-        alt=""
-        width={18}
-        height={18}
-        aria-hidden="true"
-      />
-    );
-  }
   return null;
 }
 
@@ -155,7 +132,7 @@ export function OfferCard({
   linked?: boolean;
 }) {
   const { t } = useI18n();
-  const contactActions = offer.seller.contacts ? buildContactActions(offer.seller.contacts) : [];
+  const contactActions = offer.location.contacts ? buildContactActions(offer.location.contacts) : [];
   const phoneAction = contactActions.find((action) => action.label === 'Позвонить');
   const socialActions = contactActions.filter((action) => action.label !== 'Позвонить');
   const offerHref = `/offers/${offer.id}`;
@@ -204,6 +181,7 @@ export function OfferCard({
             {distanceMeters !== undefined && <span className={styles.distance}>{t('offer.distanceMeters', { count: distanceMeters })}</span>}
           </div>
           <span className={styles.address}>{offer.location.addressText}</span>
+          <OpeningHoursLine hours={offer.location.openingHours} />
         </div>
       </div>
 
@@ -217,46 +195,47 @@ export function OfferCard({
         <span>{offer.seller.displayName}</span>
       </div>
 
-      {phoneAction && (
-        <div className={styles.offerActions}>
-          <div className={styles.primaryActions} aria-label={t('offer.primaryActions')}>
+      {/* Route is always available; only verified contacts of the point appear (point-contacts-hours §2). */}
+      <div className={styles.offerActions}>
+        <div className={styles.primaryActions} aria-label={t('offer.primaryActions')}>
+          {phoneAction && (
             <a className={`${styles.contactAction} ${styles.contactActionPrimary}`} href={phoneAction.href}>
               <PhoneIcon />
               <span>{t('offer.call')}</span>
             </a>
-            <a
-              className={`${styles.contactAction} ${styles.routeAction}`}
-              href={`/api/offers/${offer.id}/route`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <RouteIcon />
-              <span>{t('offer.route')}</span>
-            </a>
-          </div>
-
-          {socialActions.length > 0 && (
-            <div
-              className={styles.secondaryActions}
-              data-count={socialActions.length}
-              aria-label={t('offer.moreContacts')}
-            >
-              {socialActions.map((action) => (
-                <a
-                  className={`${styles.contactAction} ${styles.contactActionSecondary}`}
-                  href={action.href}
-                  key={action.label}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={action.label}
-                >
-                  <SocialIcon label={action.label} />
-                </a>
-              ))}
-            </div>
           )}
+          <a
+            className={`${styles.contactAction} ${styles.routeAction}`}
+            href={`/api/offers/${offer.id}/route`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <RouteIcon />
+            <span>{t('offer.route')}</span>
+          </a>
         </div>
-      )}
+
+        {socialActions.length > 0 && (
+          <div
+            className={styles.secondaryActions}
+            data-count={socialActions.length}
+            aria-label={t('offer.moreContacts')}
+          >
+            {socialActions.map((action) => (
+              <a
+                className={`${styles.contactAction} ${styles.contactActionSecondary}`}
+                href={action.href}
+                key={action.label}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={action.label}
+              >
+                <SocialIcon label={action.label} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
     </article>
   );
 }

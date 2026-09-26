@@ -1,9 +1,12 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
+import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
+import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
 import { ClearableInput } from './ClearableInput';
+import { OpeningHoursFields, PointContactStatus, PointContactsFields, type ContactsDraft } from './PointDetailsFields';
 import styles from '../page.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
@@ -43,6 +46,34 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [geoBusyId, setGeoBusyId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  const [details, setDetails] = useState<Map<string, PointDetailsView>>(new Map());
+  const [contacts, setContacts] = useState<ContactsDraft>({ phone: '', whatsapp: '' });
+  const [hours, setHours] = useState<OpeningHours>(templateOpeningHours);
+  const [hoursNeedsReview, setHoursNeedsReview] = useState(true);
+  const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
+
+  const loadDetails = useCallback(async () => {
+    try {
+      const response = await fetch('/api/seller/points/details', { cache: 'no-store' });
+      if (!response.ok) return;
+      const data = await response.json() as { points: PointDetailsView[] };
+      setDetails(new Map(data.points.map((point) => [point.locationId, point])));
+    } catch {
+      // The cards still work without contacts and hours; the form falls back to the template.
+    }
+  }, []);
+  const locationCount = locations.length;
+  useEffect(() => {
+    if (!seller) return;
+    const timer = window.setTimeout(() => void loadDetails(), 0);
+    return () => window.clearTimeout(timer);
+  }, [seller, locationCount, loadDetails]);
+
+  function fillDetails(source: PointDetailsView | undefined) {
+    setContacts({ phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' });
+    setHours(source?.openingHours ?? templateOpeningHours());
+    setHoursNeedsReview(source ? source.openingHoursNeedsReview : true);
+  }
 
   function resetForm() {
     setName('');
@@ -54,6 +85,10 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
 
   function beginAdd() {
     resetForm();
+    // point-contacts-hours §2: a new point starts with the latest point's contacts and hours.
+    const latest = locations.at(-1);
+    fillDetails(latest ? details.get(latest.id) : undefined);
+    setCopiedFrom(latest && details.has(latest.id) ? latest.name : null);
     setStatus('');
     setMode('add');
   }
@@ -63,6 +98,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setType(location.type);
     setAddressText(location.addressText);
     setEditingId(location.id);
+    fillDetails(details.get(location.id));
+    setCopiedFrom(null);
     setError('');
     setStatus('');
     setMode('edit');
@@ -85,6 +122,10 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     }
     if (!normalizedAddress) {
       setError(t('points.addressRequired'));
+      return;
+    }
+    if (!openingHoursSchema.safeParse(hours).success) {
+      setError(t('pointDetails.hoursInvalid'));
       return;
     }
 
@@ -113,6 +154,20 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
           ? locations.map((location) => location.id === savedLocation.id ? savedLocation : location)
           : [...locations, savedLocation],
       };
+      const detailsResponse = await fetch(`/api/seller/locations/${savedLocation.id}/details`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: contacts.phone.trim() || null, whatsapp: contacts.whatsapp.trim() || null, openingHours: hours }),
+      });
+      if (!detailsResponse.ok) {
+        const detailsError = await detailsResponse.json().catch(() => ({})) as { error?: { code?: string } };
+        onSellerChange(nextSeller);
+        if (mode === 'add') { setMode('edit'); setEditingId(savedLocation.id); }
+        setError(detailsError.error?.code === 'INVALID_PHONE' ? t('error.INVALID_PHONE') : t('points.saveError'));
+        return;
+      }
+      const savedDetails = (await detailsResponse.json() as { point: PointDetailsView }).point;
+      setDetails((current) => new Map(current).set(savedLocation.id, savedDetails));
       onSellerChange(nextSeller);
       const addressChangedWithGeo = Boolean(previous?.geo && previous.addressText !== savedLocation.addressText);
       setStatus(addressChangedWithGeo
@@ -189,7 +244,15 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
               <span>{t(typeLabelKeys[location.type])}</span>
               <span>{location.addressText}</span>
               <span className={styles.geoBadge}>{location.geo ? t('points.geoSaved') : t('points.geoNotSet')}</span>
+              {details.get(location.id)?.openingHoursNeedsReview && <span className={styles.reviewBadge}>{t('pointDetails.hoursReviewBadge')}</span>}
             </button>
+            {(['phone', 'whatsapp'] as const).map((channel) => {
+              const contact = details.get(location.id)?.contacts[channel];
+              return contact ? (
+                <PointContactStatus key={channel} label={channel === 'phone' ? t('pointDetails.phone') : 'WhatsApp'} contact={contact}
+                  onVerified={() => { setStatus(t('pointDetails.verifiedStatus')); void loadDetails(); }} />
+              ) : null;
+            })}
             <div className={styles.tradingPointActions}>
               <button type="button" className={styles.secondaryButton} disabled={geoBusyId === location.id} onClick={() => requestGeo(location.id)}>
                 {geoBusyId === location.id ? t('points.locating') : location.geo ? t('points.geoUpdate') : t('points.geoUseMine')}
@@ -232,6 +295,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
               <label htmlFor="trading-location-address">{t('points.address')} <span aria-hidden="true">*</span></label>
               <ClearableInput id="trading-location-address" value={addressText} onValueChange={setAddressText} clearLabel={t('points.address')} maxLength={500} disabled={submitting} autoComplete="street-address" required />
             </div>
+            <PointContactsFields value={contacts} onChange={setContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} />
+            <OpeningHoursFields value={hours} onChange={setHours} disabled={submitting} needsReview={hoursNeedsReview} />
           </div>
           {error && <p className={styles.error} role="alert">{error}</p>}
           <div className={styles.actions}>

@@ -34,10 +34,9 @@ export async function listOwnedOffers(
     if (row.priceAmount !== null && row.priceCurrency !== 'KZT') {
       throw new SellerOfferInvariantError('Цена предложения имеет неподдерживаемую валюту.');
     }
-    // Mirrors buyerVisibleOffersPredicate: active, confirmed within the validity period, public phone, point geo.
+    // Mirrors buyerVisibleOffersPredicate: active, confirmed within the validity period, point geo.
     const buyerVisible = row.status === 'active'
       && row.lastConfirmedAt > cutoff
-      && row.sellerHasPublicPhone
       && row.locationHasGeo;
     return {
       id: row.id,

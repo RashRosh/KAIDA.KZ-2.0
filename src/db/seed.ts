@@ -2,6 +2,8 @@ import 'dotenv/config';
 import { pathToFileURL } from 'node:url';
 import { createDatabase, type Database } from './client';
 import { productAliases, productLocalizedNames, products, sellers, locations, offers } from './schema';
+import { WEEKDAYS, type OpeningHours } from '../modules/locations/hours/opening-hours';
+import { sellerVerifiedPhones } from '../modules/sellers/db/seller-verified-phones.table';
 
 export const seedIds = {
   lambProduct: '10000000-0000-4000-8000-000000000001',
@@ -55,8 +57,17 @@ export async function seedDatabase(db: Database, seedNow: Date = new Date()) {
       type: 'pavilion',
       latitude: 43.2636,
       longitude: 76.9568,
+      // point-contacts-hours: the demo point carries the verified phone and round-the-clock hours (deterministic state).
+      phoneE164: '+77000000001',
+      openingHours: {
+        timeZone: 'Asia/Almaty' as const,
+        days: Object.fromEntries(WEEKDAYS.map((day) => [day, { kind: '24h' as const }])) as OpeningHours['days'],
+      },
+      openingHoursNeedsReview: false,
     };
     await tx.insert(locations).values(location).onConflictDoUpdate({ target: locations.id, set: location });
+    await tx.insert(sellerVerifiedPhones).values({ sellerId: seedIds.seller, phoneE164: '+77000000001', verifiedAt: new Date('2026-09-11T00:00:00Z') })
+      .onConflictDoNothing();
     const timestamps = { createdAt: new Date('2026-09-11T00:00:00Z'), updatedAt: new Date('2026-09-11T00:00:00Z') };
     for (const offer of [
       { id: seedIds.lambOffer, productId: seedIds.lambProduct, priceAmount: '4200.00', priceCurrency: 'KZT', priceUnitCode: 'kg' as const, priceUnitValue: null, sellerComment: 'Свежий привоз.' },

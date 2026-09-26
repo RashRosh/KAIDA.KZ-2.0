@@ -1,29 +1,14 @@
-import {
-  sellerContactPhoneE164Schema,
-  sellerInstagramUsernameSchema,
-  sellerTelegramUsernameSchema,
-  type SellerPublicContacts,
-} from '../contracts/seller-contact.contract';
+import type { PointPublicContacts } from '../../locations/details/point-public-contacts';
 
 export type ContactAction = {
-  label: 'Позвонить' | 'WhatsApp' | 'Telegram' | 'Instagram';
+  label: 'Позвонить' | 'WhatsApp';
   href: string;
 };
 
-export function buildContactActions(contacts: SellerPublicContacts): ContactAction[] {
+// KAIDA builds the targets from verified structured numbers (S10 rule, point-contacts-hours revision).
+export function buildContactActions(contacts: PointPublicContacts): ContactAction[] {
   const actions: ContactAction[] = [];
-
-  const phone = sellerContactPhoneE164Schema.safeParse(contacts.phoneE164);
-  if (phone.success) actions.push({ label: 'Позвонить', href: `tel:${phone.data}` });
-
-  const whatsapp = sellerContactPhoneE164Schema.safeParse(contacts.whatsappPhoneE164);
-  if (whatsapp.success) actions.push({ label: 'WhatsApp', href: `https://wa.me/${whatsapp.data.slice(1)}` });
-
-  const telegram = sellerTelegramUsernameSchema.safeParse(contacts.telegramUsername);
-  if (telegram.success) actions.push({ label: 'Telegram', href: `https://t.me/${encodeURIComponent(telegram.data)}` });
-
-  const instagram = sellerInstagramUsernameSchema.safeParse(contacts.instagramUsername);
-  if (instagram.success) actions.push({ label: 'Instagram', href: `https://www.instagram.com/${encodeURIComponent(instagram.data)}/` });
-
+  if (contacts.phoneE164) actions.push({ label: 'Позвонить', href: `tel:${contacts.phoneE164}` });
+  if (contacts.whatsappPhoneE164) actions.push({ label: 'WhatsApp', href: `https://wa.me/${contacts.whatsappPhoneE164.slice(1)}` });
   return actions;
 }

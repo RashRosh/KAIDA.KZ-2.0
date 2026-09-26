@@ -13,7 +13,8 @@ import {
   projectBuyerCommentTranslation,
 } from '../../offers/translation/buyer-comment-translation.projection';
 import { isSellerCommentTranslationEnabled } from '../../offers/translation/seller-comment-translation.config';
-import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
+import { findVerifiedPhonesBySellers } from '../../locations/details/point-details.repository';
+import { projectPointPublicContacts } from '../../locations/details/point-public-contacts';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SearchOffer } from '../../search/contracts/search.contract';
 import type { NearbyDiscoveryCandidate } from '../ranking/nearby-discovery';
@@ -35,11 +36,9 @@ export async function findVisibleDiscoveryCandidates(
       ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
       : sql<'ru'>`'ru'`,
     seller: { id: sellers.id, displayName: sellers.displayName },
-    sellerContactPhoneE164: sellers.contactPhoneE164,
-    sellerWhatsappPhoneE164: sellers.whatsappPhoneE164,
-    sellerTelegramUsername: sellers.telegramUsername,
-    sellerInstagramUsername: sellers.instagramUsername,
-    location: { id: locations.id, name: locations.name, addressText: locations.addressText },
+    location: { id: locations.id, name: locations.name, addressText: locations.addressText, openingHours: locations.openingHours },
+    locationPhoneE164: locations.phoneE164,
+    locationWhatsappPhoneE164: locations.whatsappPhoneE164,
     priceAmount: offers.priceAmount,
     priceCurrency: offers.priceCurrency,
     priceUnitCode: offers.priceUnitCode,
@@ -58,15 +57,15 @@ export async function findVisibleDiscoveryCandidates(
     .where(buyerVisibleOffersPredicate(cutoff))
     .orderBy(asc(offers.id));
 
+  const verifiedBySeller = await findVerifiedPhonesBySellers(db, [...new Set(rows.map((row) => row.seller.id))]);
+
   return rows.map(({
     priceAmount,
     priceCurrency,
     priceUnitCode,
     priceUnitValue,
-    sellerContactPhoneE164,
-    sellerWhatsappPhoneE164,
-    sellerTelegramUsername,
-    sellerInstagramUsername,
+    locationPhoneE164,
+    locationWhatsappPhoneE164,
     lastConfirmedAt,
     locationLatitude,
     locationLongitude,
@@ -90,14 +89,9 @@ export async function findVisibleDiscoveryCandidates(
         name: productName,
         ...(locale === 'kk' ? { nameLocale: productNameLocale } : {}),
       },
-      seller: {
-        ...rest.seller,
-        ...projectSellerPublicContactProperty({
-          phoneE164: sellerContactPhoneE164,
-          whatsappPhoneE164: sellerWhatsappPhoneE164,
-          telegramUsername: sellerTelegramUsername,
-          instagramUsername: sellerInstagramUsername,
-        }),
+      location: {
+        ...rest.location,
+        ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
       ...(coverPhotoId ? { coverPhotoId } : {}),

@@ -107,7 +107,6 @@ export async function listOffersBySeller(database: OfferWriteDb, sellerId: strin
     locationAddressText: locations.addressText,
     locationSellerId: locations.sellerId,
     locationHasGeo: sql<boolean>`${locations.latitude} is not null and ${locations.longitude} is not null`,
-    sellerHasPublicPhone: sql<boolean>`${sellers.contactPhoneE164} is not null`,
   }).from(offers)
     .innerJoin(products, eq(offers.productId, products.id))
     .innerJoin(locations, eq(offers.locationId, locations.id))

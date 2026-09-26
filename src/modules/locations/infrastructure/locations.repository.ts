@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { locations } from '../db/locations.table';
+import type { OpeningHours } from '../hours/opening-hours';
 import type { LocationGeo, LocationIdentityInput, LocationType, LocationView } from '../contracts/location.contract';
 
 export type LocationDb = Pick<Database, 'insert' | 'select' | 'update'>;
@@ -43,11 +44,18 @@ function toLocationView(row: LocationRow): LocationView {
 
 export async function createLocation(
   database: LocationDb,
-  values: { sellerId: string; name: string; addressText: string; type: LocationType },
+  values: {
+    sellerId: string;
+    name: string;
+    addressText: string;
+    type: LocationType;
+    // Omitted: the database template hours, marked for review; no contacts.
+    details?: { phoneE164: string | null; whatsappPhoneE164: string | null; openingHours: OpeningHours; openingHoursNeedsReview: boolean };
+  },
 ): Promise<LocationView> {
   const rows = await database
     .insert(locations)
-    .values(values)
+    .values({ sellerId: values.sellerId, name: values.name, addressText: values.addressText, type: values.type, ...values.details })
     .returning(locationSelection);
   const location = rows[0];
   if (!location) throw new Error('Location insert did not return a row');

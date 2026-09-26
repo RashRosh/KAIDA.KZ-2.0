@@ -761,3 +761,22 @@
   margin: 0;
   line-height: 1.45;
 }
+
+/* point-contacts-hours: contacts status on the point card and the opening-hours editor. */
+.contactStatus { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: 0.875rem; }
+.codeForm { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); width: 100%; }
+.codeForm input { width: 8rem; }
+.hoursGrid { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.hoursRow { display: grid; grid-template-columns: 2.5rem minmax(0, 10rem) 1fr; align-items: start; gap: var(--space-2); }
+.hoursDay { padding-top: 10px; font-weight: 600; }
+.hoursIntervals { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
+.hoursInterval { display: inline-flex; align-items: center; gap: var(--space-1); }
+.hoursInterval input { width: 7rem; min-height: 44px; }
+.linkButton { min-height: 44px; min-width: 44px; padding: 0 var(--space-2); border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+.linkButton:focus-visible { outline: 2px solid var(--k-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.reviewBadge { display: inline-flex; padding: 2px var(--space-2); border-radius: var(--radius-full); background: var(--k-attn-tint); color: var(--k-attn-ink); font-size: 0.8125rem; font-weight: 600; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 30rem) {
+  .hoursRow { grid-template-columns: 2.5rem 1fr; }
+  .hoursIntervals { grid-column: 1 / -1; }
+}

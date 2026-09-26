@@ -7,13 +7,12 @@ import styles from '../cabinet.module.css';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 
-export type CabinetSection = 'overview' | 'offers' | 'points' | 'contacts';
+export type CabinetSection = 'overview' | 'offers' | 'points';
 
 const destinations: { section: CabinetSection; href: string; label: MessageKey; icon: 'home' | 'tag' | 'store' | 'contacts' }[] = [
   { section: 'overview', href: '/seller', label: 'cabinet.overview', icon: 'home' },
   { section: 'offers', href: '/seller/offers', label: 'cabinet.offers', icon: 'tag' },
   { section: 'points', href: '/seller/points', label: 'cabinet.points', icon: 'store' },
-  { section: 'contacts', href: '/seller/contacts', label: 'cabinet.contacts', icon: 'contacts' },
 ];
 
 export function CabinetIcon({ name }: { name: 'home' | 'tag' | 'store' | 'contacts' | 'more' | 'logout' | 'plus' | 'clock' | 'check' | 'pause' | 'dots' | 'alert' | 'retry' | 'back' }) {
@@ -60,7 +59,7 @@ function useLogout() {
 
 // Bottom sheet for the less frequent destinations. Focus moves in once on open, is not re-captured while open,
 // and returns to the trigger on close (DESIGN_SYSTEM.md §13.1).
-function MoreSheet({ open, onClose, active }: { open: boolean; onClose: () => void; active: CabinetSection | null }) {
+function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useI18n();
   const { loggingOut, logout } = useLogout();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -100,9 +99,6 @@ function MoreSheet({ open, onClose, active }: { open: boolean; onClose: () => vo
     <div className={styles.sheetBackdrop} onClick={onClose}>
       <div ref={sheetRef} className={styles.sheet} role="dialog" aria-modal="true" aria-label={t('cabinet.more')} onClick={(event) => event.stopPropagation()}>
         <span className={styles.sheetHandle} aria-hidden="true" />
-        <Link className={styles.sheetItem} href="/seller/contacts" aria-current={active === 'contacts' ? 'page' : undefined} onClick={onClose}>
-          <CabinetIcon name="contacts" />{t('cabinet.contacts')}
-        </Link>
         <button type="button" className={styles.sheetItem} onClick={() => void logout()} disabled={loggingOut}>
           <CabinetIcon name="logout" />{loggingOut ? t('cabinet.loggingOut') : t('cabinet.logout')}
         </button>
@@ -161,13 +157,12 @@ export function SellerCabinetFrame({ active, children, mobileNav = true }: { act
               className={styles.bottomLink}
               aria-haspopup="dialog"
               aria-expanded={moreOpen}
-              data-active={active === 'contacts' ? 'true' : undefined}
               onClick={() => setMoreOpen(true)}
             >
               <CabinetIcon name="more" /><span>{t('cabinet.more')}</span>
             </button>
           </nav>
-          <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} active={active} />
+          <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} />
         </>
       )}
     </div>

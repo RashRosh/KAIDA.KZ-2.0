@@ -14,3 +14,5 @@ export { buyerInterests } from '../modules/interests/db/buyer-interests.table';
 export { photos } from '../modules/media/db/photos.table';
 export { offerPhotos } from '../modules/offers/db/offer-photos.table';
 export { sellerChangeItemPhotos } from '../modules/seller-input/db/seller-change-item-photos.table';
+export { sellerVerifiedPhones } from '../modules/sellers/db/seller-verified-phones.table';
+export { contactVerificationChallenges } from '../modules/identity/db/contact-verification-challenges.table';

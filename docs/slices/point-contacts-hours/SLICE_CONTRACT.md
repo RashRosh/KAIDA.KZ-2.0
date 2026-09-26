@@ -1,6 +1,6 @@
 # Point contacts and opening hours — Slice Contract
 
-**Status:** DRAFT — awaiting Product Owner approval. Decisions already taken are in §8.
+**Status:** APPROVED — Product Owner, 2026-09-26 (migration rule and first-point hours template approved as written).
 
 **Stage 1, item 2** of `docs/product/EXECUTION_PLAN.md`.
 
