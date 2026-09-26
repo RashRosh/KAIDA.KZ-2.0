@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { photoUrl } from '@/modules/media/contracts/photo.contract';
+import { photoUrl } from '../../modules/media/contracts/photo.contract';
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
 import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';

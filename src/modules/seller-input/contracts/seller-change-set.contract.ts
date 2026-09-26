@@ -31,7 +31,7 @@ export const sellerChangeSetCreateBodySchema = z.object({
   locationId: z.string().uuid(),
   price: priceSchema,
   sellerComment: optionalCommentSchema,
-  photoIds: photoIdsSchema.optional().transform((value) => value ?? []),
+  photoIds: photoIdsSchema.optional(),
 }).strict();
 
 export const sellerOfferChangeBodySchema = z.discriminatedUnion('action', [
