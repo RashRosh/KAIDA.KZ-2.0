@@ -68,7 +68,7 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await locationType.selectOption('shop');
     await address.fill(`Алматы, UX2 ${testInfo.project.name} address`);
     const save = page.getByRole('button', { name: 'Сохранить точку' });
-    expect((await save.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect(Math.round((await save.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
     await save.click();
 
     const tradingPointCard = page.locator('[data-testid^="trading-point-"]');

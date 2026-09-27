@@ -57,7 +57,8 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
 
     const add = page.getByRole('button', { name: 'Добавить торговую точку' });
     await expect(add).toBeVisible();
-    expect((await add.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // The mockup button is exactly 44 px; Chromium can report it a few 1/1000 px short.
+    expect(Math.round((await add.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
     await add.click();
     await page.getByRole('textbox', { name: 'Название для покупателей', exact: true }).fill(secondName);
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
