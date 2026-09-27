@@ -1,6 +1,6 @@
 # «Моя витрина» and the manual editor — Slice Contract
 
-**Status:** DRAFT — awaiting Product Owner approval.
+**Status:** APPROVED — Product Owner, 2026-09-27 (mixed product name and decisions a–g in §8).
 
 **Stage 1, item 3** of `docs/product/EXECUTION_PLAN.md`.
 
@@ -69,9 +69,17 @@ rules). Sections in order: photos → name → price and `Цена за` → pac
 actions.
 
 - **Photos:** unchanged from `offer-photos` (optional, up to 5, cover, reminder).
-- **Name** `Название товара` — required, free text in the Seller's words (`FEATURE_MAP.md` п. 10), 2–80 characters
-  after trimming, one line. No catalog choice and no «not in catalog» state. Placeholder `Например, баранина,
-  лопатка`.
+- **Name** `Название товара` — required, 2–80 characters after trimming, one line, placeholder `Например, баранина,
+  лопатка`. **Mixed input** (PO decision 2026-09-27, §8):
+  - while the Seller types (from 2 letters), up to 5 catalog suggestions appear under the field, matched by the same
+    word-prefix rule as search against catalog names and aliases in the interface language;
+  - choosing a suggestion puts its name into the field and links the card to that catalog product; the Seller may then
+    add words (`Баранина` → `Баранина, лопатка`) and the link stays;
+  - clearing the field or replacing the text so it no longer starts with the chosen name drops the link;
+  - with no suggestion chosen the card is published under the Seller's own words, without waiting and without a
+    «not in catalog» state or error;
+  - suggestions are a help, never a requirement; the keyboard and screen readers can reach them (listbox pattern).
+  Matching own-name cards to the catalog later (by an operator) is out of scope.
 - **Price** — required, a number greater than 0 (`S09 · Validation`: `Укажите цену больше 0 ₸`; tightens Mandatory
   Offer Price, which today accepts 0), up to 2 decimals, placeholder `Сумма`, `₸`.
 - **`Цена за`** — required; tap opens the unit sheet (`S09 · Unit sheet`): `кг`, `л`, `шт.`, `упак.`, `Другое`, each
@@ -152,8 +160,9 @@ actions.
   `лопатка` finds it too; `говядина` does not.
 - The catalog stays: when the whole query resolves to a catalog product through its names and aliases (S6), offers
   linked to that product are found as well, even without the words in their name.
-- A new card is linked to a catalog product automatically, invisibly to the Seller, only when its whole name resolves
-  to exactly one catalog product; otherwise it has no product. The link never changes what the Seller or Buyer sees.
+- A card is linked to a catalog product when the Seller chose a suggestion, or — if no suggestion was chosen — when
+  its whole name resolves to exactly one catalog product; otherwise it has no product. The link never changes the
+  name the Seller or Buyer sees.
 - Word matching starts from 2 letters in a query word; a 1-letter word is ignored by word matching (catalog resolution
   of the whole query still applies).
 - Result order, visibility, freshness, distance and the rest of S9 ranking are unchanged.
@@ -177,6 +186,8 @@ actions.
 - Buyer interests (S13) and Nearby / discovery (S11) for cards without a catalog product: such cards do not trigger
   interests; Nearby shows them as any other offer.
 - Merging or splitting cards after migration.
+- Operator tools to link own-name cards to the catalog or add catalog products from them; the starter catalog
+  list of common market products in `ru` and `kk` (separate work, it does not block this slice).
 
 ## 4. Closed contracts revised
 
@@ -211,6 +222,8 @@ actions.
 2. The source sheet shows the AI ways disabled with `Временно недоступно` and `Заполнить вручную` active.
 3. A Seller publishes a card with a free name, price, unit and pack; the confirm shows the responsibility text verbatim;
    the card is on top of the showcase and a buyer finds it by a word of its name.
+   Typing `бар` shows the catalog suggestion `Баранина`; choosing it and adding `, лопатка` links the card to the
+   catalog, and a buyer query through a catalog alias finds it.
 4. With 3 points the Seller publishes one draft into 2 of them with one own price: exactly 2 offers, correct prices.
 5. `Изменить во всех точках` changes name/comment/photos everywhere and price only in checked points; a point with its
    own price stays unchanged unless checked.
@@ -228,7 +241,7 @@ actions.
 
 ## 7. Verification and manual acceptance
 
-- Unit: name word-prefix matching and normalization; unit/pack/`Другое` validation; editor state (dirty, required
+- Unit: name word-prefix matching and normalization; suggestion link kept or dropped as the text changes; unit/pack/`Другое` validation; editor state (dirty, required
   fields, per-point prices, checked points on edit); plural `карточка/карточки/карточек` in `ru` and `kk`.
 - Integration: multi-point create and edit atomicity and revisions; own-price protection; one-point edit; adding a point
   to a card; drafts CRUD and ownership; search by words plus aliases; migration on a fixture of old offers.
@@ -247,17 +260,20 @@ and `курага`.
 1. Free name search — by words of the name plus catalog aliases (2026-09-27).
 2. Drafts — in this slice, with `Сохранить черновик` and the `Черновики` tab (2026-09-27).
 3. Seller screens take the mockup look now; buyer screens later (2026-09-27).
-4. Earlier (`FEATURE_MAP.md` «Seller AI-first model»): sections `Витрина / Точки / Ещё`; name, price, `Цена за` and a
+4. Product name — mixed: catalog suggestions while typing, own words allowed without waiting (2026-09-27). A complete
+   list of all products cannot be prepared in advance; the catalog grows from real cards.
+5. Earlier (`FEATURE_MAP.md` «Seller AI-first model»): sections `Витрина / Точки / Ещё`; name, price, `Цена за` and a
    point are required, photo and comment optional with a reminder; only price differs per point; a new point is not
    added to existing cards; no pre-moderation while AI is off, responsibility text on every publish; `Другое` is one
    word; dictation disabled `Временно недоступно`.
 
-Open for approval (proposed defaults, written into §2):
+Approved defaults (2026-09-27, written into §2):
 
 - a. Existing offers become one-point cards each, without automatic merging.
 - b. Name length 2–80; `Своя единица` 1–20 letters.
 - c. Drafts only for new cards, not for edits of published cards.
 - d. Batch text input moves to `Ещё → Добавить списком`.
-- e. A new card is silently linked to a catalog product when its whole name matches exactly one.
+- e. A card without a chosen suggestion is silently linked to a catalog product when its whole name matches exactly
+  one.
 - f. Price must be greater than 0 (today 0 is accepted); existing offers with price 0 stay until edited.
 - g. Word matching ignores 1-letter query words.
