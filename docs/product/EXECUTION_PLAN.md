@@ -59,8 +59,8 @@ Feature freeze сохраняется: новые product capabilities вне э
 | 2 | Первый макет | Сдан: https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 |
 | 3 | Ревизия 1: правки редактора, решения PO, экраны «ИИ выключен», прототип ручного пути | Сдана в тот же макет (кадры `Rev 1`); сверка с §5 ТЗ ревизии — все 13 пунктов закрыты |
 | 4 | Visual acceptance макета после ревизии 1 | Принят PO 2026-09-25; копия — `docs/product/mockup/seller-ai-first-rev1/` |
-| 5 | Slice Contracts этапа 1 (ИИ выключен) | **Следующий шаг** |
-| 6 | Реализация этапа 1 по контрактам | После шага 5 |
+| 5 | Slice Contracts этапа 1 (ИИ выключен) | Пункты 1–3 утверждены (`offer-photos`, `point-contacts-hours`, `seller-showcase-editor`) |
+| 6 | Реализация этапа 1 по контрактам | Пункты 1–2 слиты (PR #53, 2026-09-27, без checkpoint tag); пункт 3 — в работе, см. `docs/agents/CURRENT_STATE.md` |
 
 ### Этап 1 — продавец без ИИ (черновой состав, порядок утверждает PO на шаге 5)
 

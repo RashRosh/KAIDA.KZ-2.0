@@ -10,7 +10,8 @@
 
 1. `docs/PROJECT_RULES.md` — процесс, verification и устойчивые product/architecture boundaries;
 2. `docs/product/EXECUTION_PLAN.md` — единственный канонический текущий порядок работ;
-3. `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости.
+3. `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости;
+4. `docs/agents/CURRENT_STATE.md` — операционный снимок текущей задачи (сверь с git/GitHub, он может устареть).
 
 Не используй chat memory, старый README, historical status line или номер следующего `Sxx` как замену актуальному `EXECUTION_PLAN.md`.
 
@@ -32,14 +33,16 @@ Slice Contract определяет точное поведение и acceptanc
 - для продавца — `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md`, `SELLER_AI_FIRST_DESIGN_REVISION_1.md` и сам макет;
 - `docs/product/UX_REFERENCE_INDEX.md` и только релевантные внешние UX references для текущей user task.
 
-Отдельного документа дизайн-системы нет: визуальный стиль задаёт принятый макет.
+Отдельного документа дизайн-системы нет: визуальный стиль задаёт принятый макет. Внешние references — advisory
+(`KEEP / ADAPT / REJECT / GAP`, `PROJECT_RULES.md` §18).
 
-Внешние references — advisory evidence, не источник нового contract. Findings классифицируются как:
+Экраны продавца собираются из разметки и классов макета, а не из своих стилей:
 
-- `KEEP` — текущее KAIDA rule уже подходит;
-- `ADAPT` — принцип полезен после адаптации под KAIDA;
-- `REJECT` — конфликтует с продуктовой моделью/closed contract;
-- `GAP` — требует отдельного Product Owner decision.
+- `src/app/seller/kaida.css` — механический порт `docs/product/mockup/seller-ai-first-rev1/kaida.css` (всё под `.kaida`,
+  `/_blob/<id>` → `/kaida/icons/<id>.svg`); вручную не править — пере-генерировать из макета;
+- `src/app/seller/kaida-app.css` — только рамка экрана и реальные контролы (input/select/checkbox);
+- `src/app/seller/_kaida/ui.tsx` — общие блоки (`Phone`, `Bar`, `Nav`, `Sheet`, `Toast`, `Check`, …);
+- иконки берутся из макета (`public/kaida/icons`), новые рисованные иконки не добавляются.
 
 Если `EXECUTION_PLAN.md` содержит незакрытый обязательный UX/design maintenance gate, следующий UI/UX product slice не начинается до закрытия этого gate.
 
@@ -60,9 +63,19 @@ Controller не проектирует и не реализует slice. Он п
 - долгосрочная capability map → `FEATURE_MAP.md`;
 - визуальный стиль и композиция → принятый макет (`PROJECT_RULES.md` §18.1); обязательные UI-правила → `PROJECT_RULES.md` §18.4;
 - unresolved detailed work → GitHub Issues;
-- exact slice behavior → Slice Contract.
+- exact slice behavior → Slice Contract;
+- текущее состояние работы → `docs/agents/CURRENT_STATE.md` (коротко, без истории).
 
 Не создавай параллельный roadmap или второй набор инструкций без объективной необходимости.
+
+## Git и среда
+
+- Product Owner — нетехнический, пишет по-русски. Commit, push, PR, merge, tag — только по его прямому поручению.
+- Никогда не коммитить личные файлы PO: `docs/reviews/localization-foundation-kk-review.docx`, `scripts/`, `tmp/`,
+  `.vscode/`. Идентификаторы моделей в коммиты и документы не писать.
+- Облачный контейнер: `dockerd` запускать вручную, затем `docker compose up -d --wait`; `pnpm db:migrate`,
+  `pnpm db:seed`, `pnpm db:test:prepare` (пересоздаёт тестовую БД). E2E идёт на production build
+  (`pnpm build`, затем `pnpm test:e2e`; серверы 3100/3101). Integration с `ECONNREFUSED 5432` = БД не запущена.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
