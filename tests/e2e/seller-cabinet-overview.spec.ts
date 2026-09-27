@@ -92,19 +92,20 @@ test('Seller cabinet: navigation, first run, overview counts, filters, switch of
     await expect(page.getByRole('heading', { name: 'Последние изменения' })).toBeVisible();
     await expectNoTechnicalWords(page);
 
-    // Navigation: mobile has three items plus «Ещё»; desktop has all four destinations and logout.
+    // Navigation: mobile has three items plus «Ещё»; desktop has all three destinations and logout.
+    // point-contacts-hours removed the separate «Контакты» section.
     const nav = page.getByRole('navigation', { name: 'Разделы кабинета' }).filter({ visible: true });
     if (mobile) {
       await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Предложения', 'Точки']);
       await nav.getByRole('button', { name: 'Ещё' }).click();
       const sheet = page.getByRole('dialog', { name: 'Ещё' });
-      await expect(sheet.getByRole('link', { name: 'Контакты' })).toBeFocused();
-      await expect(sheet.getByRole('button', { name: 'Выйти' })).toBeVisible();
+      await expect(sheet.getByRole('link', { name: 'Контакты' })).toHaveCount(0);
+      await expect(sheet.getByRole('button', { name: 'Выйти' })).toBeFocused();
       await page.keyboard.press('Escape');
       await expect(sheet).toHaveCount(0);
       await expect(nav.getByRole('button', { name: 'Ещё' })).toBeFocused();
     } else {
-      await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Предложения', 'Точки', 'Контакты']);
+      await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Предложения', 'Точки']);
       await expect(nav.getByRole('button', { name: 'Выйти' })).toBeVisible();
     }
     await expect(page.locator('[aria-disabled="true"], nav button:disabled')).toHaveCount(0);
@@ -145,7 +146,7 @@ test('Seller cabinet: navigation, first run, overview counts, filters, switch of
     await expect(offCard.getByText('Выключено', { exact: true })).toBeVisible();
     await offCard.getByRole('button', { name: 'Включить' }).click();
     await expect(page.getByText('Включение предложения')).toBeVisible();
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers\?status=inactive$/);
     await expect(page.getByRole('status').filter({ hasText: 'Предложение включено и видно покупателям' })).toBeVisible();
 
@@ -192,7 +193,7 @@ test('Confirm conflict from a second device applies nothing and offers a safe re
       await other.close();
     }
 
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     const alert = page.getByRole('alert').filter({ hasText: 'Предложение уже изменилось' });
     await expect(alert).toContainText('Мы ничего не применили');
     await expect(page.getByText('Сейчас в предложении')).toBeVisible();
@@ -205,7 +206,7 @@ test('Confirm conflict from a second device applies nothing and offers a safe re
     await page.getByRole('button', { name: 'Обновить и проверить заново' }).click();
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
     await expect(page.getByText('Предложение уже изменилось')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Изменения сохранены' })).toBeVisible();
     await expect(card(page, 'Баранина', `${sellerName} лавка`)).toContainText(/3\s400 ₸/);
   } finally {

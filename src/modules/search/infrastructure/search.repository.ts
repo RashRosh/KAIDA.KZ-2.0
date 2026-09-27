@@ -2,10 +2,12 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
-import { projectSellerPublicContactProperty } from '../../sellers/contact/project-seller-public-contacts';
+import { findVerifiedPhonesBySellers } from '../../locations/details/point-details.repository';
+import { projectPointPublicContacts } from '../../locations/details/point-public-contacts';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
+import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
 import {
@@ -26,6 +28,28 @@ export async function findOffersByProductId(
   locale: 'ru' | 'kk' = 'ru',
   commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
 ): Promise<SearchRankingCandidate[]> {
+  return findBuyerVisibleOffers(db, { productId }, cutoff, locale, commentTranslationEnabled);
+}
+
+// The same buyer projection for the buyer Offer page: one Offer, same visibility policy, never a hidden one.
+export async function findBuyerVisibleOfferById(
+  db: Database,
+  offerId: string,
+  cutoff: Date,
+  locale: 'ru' | 'kk' = 'ru',
+  commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
+): Promise<SearchRankingCandidate | null> {
+  const rows = await findBuyerVisibleOffers(db, { offerId }, cutoff, locale, commentTranslationEnabled);
+  return rows[0] ?? null;
+}
+
+async function findBuyerVisibleOffers(
+  db: Database,
+  filter: { productId: string } | { offerId: string },
+  cutoff: Date,
+  locale: 'ru' | 'kk',
+  commentTranslationEnabled: boolean,
+): Promise<SearchRankingCandidate[]> {
   const rows = await db.select({
     id: offers.id,
     productId: products.id,
@@ -36,16 +60,15 @@ export async function findOffersByProductId(
       ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
       : sql<'ru'>`'ru'`,
     seller: { id: sellers.id, displayName: sellers.displayName },
-    sellerContactPhoneE164: sellers.contactPhoneE164,
-    sellerWhatsappPhoneE164: sellers.whatsappPhoneE164,
-    sellerTelegramUsername: sellers.telegramUsername,
-    sellerInstagramUsername: sellers.instagramUsername,
-    location: { id: locations.id, name: locations.name, addressText: locations.addressText },
+    location: { id: locations.id, name: locations.name, addressText: locations.addressText, openingHours: locations.openingHours },
+    locationPhoneE164: locations.phoneE164,
+    locationWhatsappPhoneE164: locations.whatsappPhoneE164,
     priceAmount: offers.priceAmount,
     priceCurrency: offers.priceCurrency,
     priceUnitCode: offers.priceUnitCode,
     priceUnitValue: offers.priceUnitValue,
     sellerComment: offers.sellerComment,
+    coverPhotoId: offerCoverPhotoIdSelection,
     ...currentCommentTranslationSelection,
     lastConfirmedAt: offers.lastConfirmedAt,
     locationLatitude: locations.latitude,
@@ -56,20 +79,20 @@ export async function findOffersByProductId(
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
     .where(and(
-      eq(products.id, productId),
+      'productId' in filter ? eq(products.id, filter.productId) : eq(offers.id, filter.offerId),
       buyerVisibleOffersPredicate(cutoff),
     ))
     .orderBy(asc(offers.id));
+
+  const verifiedBySeller = await findVerifiedPhonesBySellers(db, [...new Set(rows.map((row) => row.seller.id))]);
 
   return rows.map(({
     priceAmount,
     priceCurrency,
     priceUnitCode,
     priceUnitValue,
-    sellerContactPhoneE164,
-    sellerWhatsappPhoneE164,
-    sellerTelegramUsername,
-    sellerInstagramUsername,
+    locationPhoneE164,
+    locationWhatsappPhoneE164,
     lastConfirmedAt,
     locationLatitude,
     locationLongitude,
@@ -79,6 +102,7 @@ export async function findOffersByProductId(
     commentTranslationStatus,
     commentTranslationText,
     commentTranslationSourceLanguage,
+    coverPhotoId,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
@@ -92,16 +116,12 @@ export async function findOffersByProductId(
         name: productName,
         ...(locale === 'kk' ? { nameLocale: productNameLocale } : {}),
       },
-      seller: {
-        ...rest.seller,
-        ...projectSellerPublicContactProperty({
-          phoneE164: sellerContactPhoneE164,
-          whatsappPhoneE164: sellerWhatsappPhoneE164,
-          telegramUsername: sellerTelegramUsername,
-          instagramUsername: sellerInstagramUsername,
-        }),
+      location: {
+        ...rest.location,
+        ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
+      ...(coverPhotoId ? { coverPhotoId } : {}),
     };
     const sellerCommentTranslation = projectBuyerCommentTranslation({
       enabled: commentTranslationEnabled,

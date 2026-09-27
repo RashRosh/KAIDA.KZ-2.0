@@ -19,7 +19,9 @@ async function cleanup(phone: string) {
       await pool.query('DELETE FROM seller_change_items WHERE change_set_id IN (SELECT cs.id FROM seller_change_sets cs JOIN sellers s ON s.id=cs.seller_id WHERE s.owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM seller_change_sets WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM offers WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      await pool.query('DELETE FROM seller_verified_phones WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM locations WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      await pool.query('DELETE FROM contact_verification_challenges WHERE owner_user_id=$1', [row.id]);
       await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [row.id]);
       await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [row.id]);
     }
@@ -47,12 +49,14 @@ async function setSellerLocationGeo(phone: string) {
   }
 }
 
-test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel disappears', async ({ page }, testInfo) => {
+// S10 as revised by point-contacts-hours: contacts and hours live on the point; a number reaches buyers only after
+// its code; the buyer card shows the hours line with the state icon.
+test('point contacts are verified by code and reach the buyer card with the hours line', async ({ page }, testInfo) => {
   const project = testInfo.project.name;
   const phone = phoneFor(project);
+  const pointPhone = project === 'mobile' ? '+77000001993' : '+77000001994';
   const sellerName = `S10 ${project} seller`;
-  const telegram = `kaida_s10_${project}`;
-  const instagram = `kaida.s10.${project}`;
+  const pointName = `S10 ${project} point`;
   await cleanup(phone);
   try {
     await page.goto('/seller');
@@ -65,59 +69,67 @@ test('S10 Seller contacts reach buyer-eligible OfferCard and one cleared channel
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(page).toHaveURL('/');
 
-    // Seller cabinet: point, contacts and «Добавить товар» are separate destinations (seller-cabinet-overview).
+    // First point: a new number for calls, the login number for WhatsApp, Sunday around the clock.
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await page.getByLabel('Название торговой точки').fill(`S10 ${project} point`);
+    await page.getByLabel('Название торговой точки').fill(pointName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill(`Алматы, S10 ${project} address`);
+    await page.getByLabel('Телефон', { exact: true }).fill(pointPhone);
+    await page.getByLabel('WhatsApp', { exact: true }).fill(phone);
+    await page.getByLabel('ВС: режим').selectOption('24h');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
-    await expect(page.getByText(`S10 ${project} point`, { exact: true }).first()).toBeVisible();
-    await page.goto('/seller/contacts');
-    await page.getByLabel('Телефон', { exact: true }).fill('+12025550123');
-    await page.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
-    await page.getByLabel('Telegram', { exact: true }).fill(telegram);
-    await page.getByLabel('Instagram', { exact: true }).fill(instagram);
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+
+    const card = page.locator('[data-testid^="trading-point-"]').filter({ hasText: pointName });
+    await expect(card.getByText(`WhatsApp: ${phone}`)).toBeVisible();
+    await expect(card.getByText('Подтверждён', { exact: true })).toBeVisible();
+    await expect(card.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
 
     await setSellerLocationGeo(phone);
-    await page.reload();
-    await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
-
     await proposeNewOffer(page, { product: 'Баранина', price: '5432.10', unit: 'kg', comment: `S10 ${project} contacts offer` });
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 
-    await page.goto('/');
-    await page.getByLabel('Какой товар ищете?').fill('баранина');
-    await page.getByLabel('Какой товар ищете?').press('Enter');
-    const card = page.locator('article').filter({ hasText: sellerName }).first();
-    await expect(card).toBeVisible();
-    await expect(card.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', 'tel:+12025550123');
-    await expect(card.getByRole('link', { name: 'Маршрут', exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
-    await expect(card.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', 'https://wa.me/447911123456');
-    await expect(card.getByRole('link', { name: 'Telegram', exact: true })).toHaveAttribute('href', `https://t.me/${telegram}`);
-    await expect(card.getByRole('link', { name: 'Instagram', exact: true })).toHaveAttribute('href', `https://www.instagram.com/${instagram}/`);
+    // Monday 17:30 in Almaty: open, closing within the hour.
+    await page.clock.setFixedTime(new Date('2026-09-21T12:30:00Z'));
+    const search = async () => {
+      await page.goto('/');
+      await page.getByLabel('Какой товар ищете?').fill('баранина');
+      await page.getByLabel('Какой товар ищете?').press('Enter');
+      const offer = page.locator('article').filter({ hasText: pointName }).first();
+      await expect(offer).toBeVisible();
+      return offer;
+    };
+    let offer = await search();
+    await expect(offer.getByRole('link', { name: 'Позвонить', exact: true })).toHaveCount(0);
+    await expect(offer.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', `https://wa.me/${phone.slice(1)}`);
+    await expect(offer.getByRole('link', { name: 'Маршрут', exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
+    const hours = offer.getByTestId('opening-hours');
+    await expect(hours).toContainText('9.00–18.00');
+    await expect(hours).toContainText('ВС Круглосуточно');
+    await expect(hours.locator('s')).toHaveText('СБ');
+    await expect(hours.getByRole('img', { name: 'Закрывается в 18:00' })).toBeVisible();
+    await expect(hours).toHaveAttribute('data-state', 'closing');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-    await page.goto('/seller/contacts');
-    await expect(page.getByRole('heading', { name: 'Контакты для покупателей' })).toBeVisible();
-    await page.getByLabel('Telegram', { exact: true }).fill('');
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+    // Confirm the call number with the code shown on screen (test delivery).
+    await page.goto('/seller/points');
+    await card.getByRole('button', { name: 'Подтвердить' }).click();
+    const testCode = (await card.getByText(/Тестовый код: \d{6}/).textContent())!.match(/\d{6}/)![0];
+    await card.getByLabel('Код из 6 цифр').fill(testCode);
+    await card.getByRole('button', { name: 'Подтвердить номер' }).click();
+    await expect(page.getByText('Номер подтверждён. Покупатели его видят.')).toBeVisible();
+    await expect(card.getByText('Подтверждён', { exact: true })).toHaveCount(2);
 
-    await page.goto('/');
-    await page.getByLabel('Какой товар ищете?').fill('баранина');
-    await page.getByLabel('Какой товар ищете?').press('Enter');
-    const updatedCard = page.locator('article').filter({ hasText: sellerName }).first();
-    await expect(updatedCard).toBeVisible();
-    await expect(updatedCard.getByRole('link', { name: 'Telegram', exact: true })).toHaveCount(0);
-    await expect(updatedCard.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', 'tel:+12025550123');
-    await expect(updatedCard.getByRole('link', { name: 'Маршрут', exact: true })).toBeVisible();
-    await expect(updatedCard.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', 'https://wa.me/447911123456');
-    await expect(updatedCard.getByRole('link', { name: 'Instagram', exact: true })).toHaveAttribute('href', `https://www.instagram.com/${instagram}/`);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    offer = await search();
+    await expect(offer.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', `tel:${pointPhone}`);
+
+    // A second point starts with the first point's contacts and hours.
+    await page.goto('/seller/points');
+    await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
+    await expect(page.getByText(`Контакты и режим работы как у точки «${pointName}» — можно изменить до сохранения.`)).toBeVisible();
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(pointPhone);
+    await expect(page.getByLabel('ВС: режим')).toHaveValue('24h');
   } finally {
     await cleanup(phone);
   }

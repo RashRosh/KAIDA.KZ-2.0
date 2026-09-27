@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { products } from '../../catalog/db/products.table';
 import type { LocationType } from '../../locations/contracts/location.contract';
@@ -9,10 +9,27 @@ import { formatPriceUnit, priceUnitFromColumns, priceUnitToColumns, type PriceUn
 import type { Locale } from '../../../i18n/config';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SellerChangeSetView } from '../contracts/seller-change-set.contract';
+import { sellerChangeItemPhotos } from '../db/seller-change-item-photos.table';
 import { sellerChangeItems, type SellerOfferManagementAction } from '../db/seller-change-items.table';
 import { sellerChangeSets } from '../db/seller-change-sets.table';
 
 export type SellerInputDb = Pick<Database, 'insert' | 'select' | 'update'>;
+
+export async function insertItemPhotos(database: SellerInputDb, itemId: string, photoIds: string[]) {
+  if (photoIds.length === 0) return;
+  await database.insert(sellerChangeItemPhotos).values(photoIds.map((photoId, position) => ({ itemId, photoId, position })));
+}
+
+export async function findItemPhotoIds(database: SellerInputDb, itemIds: string[]): Promise<Map<string, string[]>> {
+  const result = new Map<string, string[]>();
+  if (itemIds.length === 0) return result;
+  const rows = await database.select({ itemId: sellerChangeItemPhotos.itemId, photoId: sellerChangeItemPhotos.photoId })
+    .from(sellerChangeItemPhotos)
+    .where(inArray(sellerChangeItemPhotos.itemId, itemIds))
+    .orderBy(asc(sellerChangeItemPhotos.itemId), asc(sellerChangeItemPhotos.position));
+  for (const row of rows) result.set(row.itemId, [...(result.get(row.itemId) ?? []), row.photoId]);
+  return result;
+}
 
 export async function findOwnedLocation(database: SellerInputDb, locationId: string, sellerId: string) {
   const rows = await database.select({
@@ -75,6 +92,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
   sellerComment: string | null;
   targetOfferId: string;
   expectedOfferRevision: number;
+  photosSpecified?: boolean;
 }) {
   const rows = await database.insert(sellerChangeItems).values({
     changeSetId: values.changeSetId,
@@ -87,6 +105,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
     sellerComment: values.sellerComment,
     targetOfferId: values.targetOfferId,
     expectedOfferRevision: values.expectedOfferRevision,
+    photosSpecified: values.photosSpecified ?? false,
   }).returning({ id: sellerChangeItems.id });
   const item = rows[0];
   if (!item) throw new Error('Seller offer management item insert did not return a row');
@@ -122,6 +141,7 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     priceUnitCode: sellerChangeItems.priceUnitCode,
     priceUnitValue: sellerChangeItems.priceUnitValue,
     sellerComment: sellerChangeItems.sellerComment,
+    photosSpecified: sellerChangeItems.photosSpecified,
     resultOfferId: offers.id,
     resultOfferStatus: offers.status,
     resultOfferLastConfirmedAt: offers.lastConfirmedAt,
@@ -131,6 +151,8 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     .leftJoin(offers, eq(sellerChangeItems.resultOfferId, offers.id))
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id));
+
+  const itemPhotos = await findItemPhotoIds(database, rows.map((row) => row.id));
 
   return {
     id: header.id,
@@ -152,6 +174,7 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
         unitChoice: unit,
       },
       sellerComment: row.sellerComment,
+      ...itemPhotosView(row.action, row.photosSpecified, itemPhotos.get(row.id) ?? []),
       resultOffer: row.resultOfferId && row.resultOfferStatus && row.resultOfferLastConfirmedAt ? {
         id: row.resultOfferId,
         status: row.resultOfferStatus as OfferStatus,
@@ -160,6 +183,11 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
       };
     }),
   };
+}
+
+function itemPhotosView(action: string, photosSpecified: boolean, photoIds: string[]) {
+  const setsPhotos = action === 'update_offer' ? photosSpecified : action === 'create_offer' && photoIds.length > 0;
+  return setsPhotos ? { photos: photoIds.map((id) => ({ id })) } : {};
 }
 
 export async function lockChangeSetByIdAndSeller(database: SellerInputDb, changeSetId: string, sellerId: string) {
@@ -189,6 +217,7 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     targetOfferId: sellerChangeItems.targetOfferId,
     expectedOfferRevision: sellerChangeItems.expectedOfferRevision,
     resultOfferId: sellerChangeItems.resultOfferId,
+    photosSpecified: sellerChangeItems.photosSpecified,
   }).from(sellerChangeItems)
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id))

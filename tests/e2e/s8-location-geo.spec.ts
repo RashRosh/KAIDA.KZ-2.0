@@ -10,10 +10,6 @@ function phoneFor(projectName: string, scenario: 'success' | 'failure') {
   return projectName === 'mobile' ? '+77000000993' : '+77000000994';
 }
 
-function publicPhoneFor(projectName: string, scenario: 'success' | 'failure') {
-  if (scenario === 'success') return projectName === 'mobile' ? '+77000000981' : '+77000000982';
-  return projectName === 'mobile' ? '+77000000983' : '+77000000984';
-}
 
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
@@ -57,16 +53,12 @@ async function createSeller(page: Page, projectName: string, scenario: 'success'
   await page.getByLabel('Адрес').fill(`Алматы, S8 E2E address ${projectName}-${scenario}`);
   await page.getByRole('button', { name: 'Сохранить точку' }).click();
   await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
-  await page.goto('/seller/contacts');
-  await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(projectName, scenario));
-  await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-  await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
   await page.goto('/seller/points');
 }
 
 async function createLambOffer(page: Page, comment: string) {
   await proposeNewOffer(page, { product: 'Баранина', price: '4100.00', unit: 'kg', comment });
-  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
   await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 

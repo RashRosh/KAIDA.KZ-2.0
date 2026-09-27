@@ -1,8 +1,9 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
-import { findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
+import { findOfferPhotoIds, findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
+import { assertPhotosOwnedBy } from './assert-photos-owned';
 import {
   OfferAlreadyInactiveError,
   OfferNotFoundError,
@@ -17,6 +18,7 @@ import {
   createChangeSet,
   createOfferManagementChangeItem,
   findChangeSetViewByIdAndSeller,
+  insertItemPhotos,
 } from '../infrastructure/seller-change-sets.repository';
 
 function normalizeNullableText(value: string | null): string | null {
@@ -40,13 +42,17 @@ export function offerUpdateIsNoOp(
     sellerComment: string | null;
   },
   input: Extract<SellerOfferChangeInput, { action: 'update_offer' }>,
+  currentPhotoIds: string[] = [],
 ): boolean {
   const currentComment = normalizeNullableText(offer.sellerComment);
   if (offer.priceAmount === null || offer.priceCurrency !== 'KZT') return false;
+  const samePhotos = input.photoIds === undefined
+    || (input.photoIds.length === currentPhotoIds.length && input.photoIds.every((id, index) => id === currentPhotoIds[index]));
 
   return canonicalDecimal(offer.priceAmount) === canonicalDecimal(input.price.amount)
     && samePriceUnit(offer.priceUnit, input.price.unit)
-    && currentComment === input.sellerComment;
+    && currentComment === input.sellerComment
+    && samePhotos;
 }
 
 function normalizedCurrentPrice(offer: {
@@ -94,9 +100,12 @@ export async function createOfferManagementChangeSet(
     let priceAmount: string;
     let priceUnit: PriceUnit | null;
     let sellerComment: string | null;
+    let photoIds: string[] | undefined;
 
     if (input.action === 'update_offer') {
-      if (offerUpdateIsNoOp(offer, input)) throw new OfferUpdateNoChangesError();
+      if (offerUpdateIsNoOp(offer, input, await findOfferPhotoIds(tx, offer.id))) throw new OfferUpdateNoChangesError();
+      photoIds = input.photoIds;
+      if (photoIds) await assertPhotosOwnedBy(tx, photoIds, ownerUserId);
       priceAmount = input.price.amount;
       priceUnit = input.price.unit;
       sellerComment = input.sellerComment;
@@ -112,7 +121,7 @@ export async function createOfferManagementChangeSet(
     }
 
     const changeSet = await createChangeSet(tx, seller.id);
-    await createOfferManagementChangeItem(tx, {
+    const item = await createOfferManagementChangeItem(tx, {
       changeSetId: changeSet.id,
       action: input.action,
       productId: offer.productId,
@@ -123,7 +132,9 @@ export async function createOfferManagementChangeSet(
       sellerComment,
       targetOfferId: offer.id,
       expectedOfferRevision: offer.revision,
+      photosSpecified: photoIds !== undefined,
     });
+    if (photoIds) await insertItemPhotos(tx, item.id, photoIds);
 
     const view = await findChangeSetViewByIdAndSeller(tx, changeSet.id, seller.id);
     if (!view || view.items.length !== 1 || view.items[0]?.resultOffer !== null) {

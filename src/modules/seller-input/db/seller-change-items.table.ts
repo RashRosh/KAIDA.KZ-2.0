@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { char, check, index, integer, numeric, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { boolean, char, check, index, integer, numeric, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
@@ -23,6 +23,8 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   targetOfferId: uuid('target_offer_id').references(() => offers.id),
   expectedOfferRevision: integer('expected_offer_revision'),
   resultOfferId: uuid('result_offer_id').references(() => offers.id),
+  // update_offer only: true replaces the Offer photo list with the item photos (possibly none); false keeps it.
+  photosSpecified: boolean('photos_specified').notNull().default(false),
 }, (table) => [
   index('seller_change_items_change_set_id_idx').on(table.changeSetId),
   check('seller_change_items_action_allowed', sql`${table.action} IN ('create_offer', 'update_offer', 'deactivate_offer', 'activate_offer')`),
@@ -57,5 +59,6 @@ export const sellerChangeItems = pgTable('seller_change_items', {
     AND ${table.targetOfferId} IS NOT NULL
     AND ${table.expectedOfferRevision} IS NOT NULL
   )`),
+  check('seller_change_items_photos_specified_scope', sql`${table.photosSpecified} = false OR ${table.action} = 'update_offer'`),
   check('seller_change_items_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
 ]);

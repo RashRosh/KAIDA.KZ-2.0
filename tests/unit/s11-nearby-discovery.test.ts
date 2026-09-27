@@ -7,6 +7,7 @@ import {
 import type { NearbyDiscoveryCandidate } from '../../src/modules/discovery/ranking/nearby-discovery';
 import { selectNearbyOffers } from '../../src/modules/discovery/ranking/nearby-discovery';
 import type { SearchOffer } from '../../src/modules/search/contracts/search.contract';
+import { templateOpeningHours } from '../../src/modules/locations/hours/opening-hours';
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
 const buyerLocation = { latitude: 0, longitude: 0 };
@@ -23,7 +24,7 @@ function offer(id: string): SearchOffer {
     id,
     product: { id: '10000000-0000-4000-8000-000000011000', name: 'S11 unit product' },
     seller: { id: '20000000-0000-4000-8000-000000011000', displayName: 'S11 unit seller' },
-    location: { id: '30000000-0000-4000-8000-000000011000', name: 'S11 unit location', addressText: 'S11 unit address' },
+    location: { id: '30000000-0000-4000-8000-000000011000', name: 'S11 unit location', addressText: 'S11 unit address', openingHours: templateOpeningHours() },
     price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
   };

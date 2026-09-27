@@ -1,0 +1,32 @@
+/* offer-photos: buyer Offer page (AI-B02 subset). Tokens only. */
+.page { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 40rem; margin: 0 auto; }
+
+.back { display: inline-flex; align-items: center; gap: var(--space-1); align-self: flex-start; min-height: 44px; padding: 0 var(--space-2) 0 0; color: var(--text); font-weight: 600; text-decoration: none; }
+.back:focus-visible { outline: 2px solid var(--k-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+.gallery { position: relative; overflow: hidden; border-radius: var(--radius-lg); background: var(--surface-sunken); }
+.track { display: flex; margin: 0; padding: 0; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.track::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; aspect-ratio: 4 / 3; scroll-snap-align: start; }
+.slide img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.fallback { aspect-ratio: 4 / 3; border-radius: var(--radius-lg); background: var(--surface-sunken) url('/brand/photo-fallback.svg') center / 64px no-repeat; }
+
+.photoFailed { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); height: 100%; color: var(--muted); }
+.photoFailed button { min-height: 44px; padding: 0 var(--space-4); border: 1px solid var(--border-strong); border-radius: var(--radius-full); background: var(--surface); color: var(--text); font: inherit; font-weight: 600; }
+
+.nav { position: absolute; top: 50%; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-top: -22px; border: 0; border-radius: var(--radius-full); background: rgba(255, 255, 255, 0.9); color: var(--text); box-shadow: var(--shadow-card); cursor: pointer; }
+.nav:disabled { opacity: 0; pointer-events: none; }
+.nav:focus-visible { outline: 2px solid var(--k-focus); outline-offset: 2px; }
+.prev { left: var(--space-2); }
+.next { right: var(--space-2); }
+
+.counter { position: absolute; right: var(--space-2); bottom: var(--space-2); margin: 0; padding: 2px var(--space-2); border-radius: var(--radius-full); background: var(--text); color: var(--surface); font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.unavailable { display: flex; flex-direction: column; gap: var(--space-3); max-width: 32rem; margin: var(--space-8) auto; text-align: center; }
+.unavailable h1 { margin: 0; font-size: 1.375rem; }
+.unavailable p { margin: 0; color: var(--muted); }
+.toSearch { align-self: center; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-5); border-radius: var(--radius-full); background: var(--primary); color: var(--k-on-action); font-weight: 600; text-decoration: none; }
+.toSearch:focus-visible { outline: 2px solid var(--k-focus); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .track { scroll-behavior: auto; } }

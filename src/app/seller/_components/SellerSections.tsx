@@ -1,9 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
-import { SellerContactSettings } from './SellerContactSettings';
 import { SellerTradingPoints } from './SellerTradingPoints';
 import { CabinetLoadError, CabinetLoginRequired, CabinetSkeleton } from './CabinetStates';
 import styles from '../cabinet.module.css';
@@ -52,26 +50,6 @@ export function SellerPointsSection() {
     <>
       <div className={styles.pageHead}><h1>{t('cabinet.points')}</h1></div>
       <SellerTradingPoints seller={state.seller} onSellerChange={setSeller} autoOpenAdd={state.seller === null} />
-    </>
-  );
-}
-
-// Seller contacts (S10) inside the cabinet frame; behavior unchanged until seller-points-contacts.
-export function SellerContactsSection() {
-  const { t } = useI18n();
-  const { state, retry } = useOwnedSeller();
-  if (state.kind === 'loading') return <CabinetSkeleton rows={2} />;
-  if (state.kind === 'anonymous') return <CabinetLoginRequired />;
-  if (state.kind === 'error') return <CabinetLoadError title={t('seller.loadError')} onRetry={retry} />;
-  return (
-    <>
-      <div className={styles.pageHead}><h1>{t('cabinet.contacts')}</h1></div>
-      {state.seller ? <SellerContactSettings /> : (
-        <section className={styles.panel}>
-          <p className={styles.lead}>{t('batch.setupFirst')}</p>
-          <Link className={styles.secondary} href="/seller/points">{t('batch.setupSeller')}</Link>
-        </section>
-      )}
     </>
   );
 }

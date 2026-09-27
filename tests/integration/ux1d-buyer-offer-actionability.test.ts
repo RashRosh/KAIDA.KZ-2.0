@@ -107,13 +107,15 @@ afterAll(async () => {
 });
 
 describe('UX1D buyer Offer actionability on PostgreSQL 18', () => {
-  it('uses the same phone+geo+lifecycle eligibility for Search and Nearby without deleting incomplete records', async () => {
+  // point-contacts-hours revised UX1D: a public phone is no longer required, only point geo and lifecycle.
+  it('uses the same geo+lifecycle eligibility for Search and Nearby without deleting incomplete records', async () => {
+    const expected = [offerIds.eligible, offerIds.noPhone].sort();
     const search = await searchOffers(productName, db, options);
-    expect(search.offers.map(({ id }) => id)).toEqual([offerIds.eligible]);
+    expect(search.offers.map(({ id }) => id).sort()).toEqual(expected);
 
     const nearby = await findNearbyOffers(point, db, { ...options, nearbyRadiusMeters: 5000 });
-    expect(nearby.offers.map(({ id }) => id)).toEqual([offerIds.eligible]);
-    expect(nearby.offers[0]?.distanceMeters).toBe(0);
+    expect(nearby.offers.map(({ id }) => id).sort()).toEqual(expected);
+    expect(nearby.offers.map(({ distanceMeters }) => distanceMeters)).toEqual([0, 0]);
 
     const stored = await pool.query('SELECT id,status FROM offers WHERE product_id=$1 ORDER BY id', [productId]);
     expect(stored.rows).toHaveLength(6);
@@ -133,7 +135,8 @@ describe('UX1D buyer Offer actionability on PostgreSQL 18', () => {
 
   it('resolves a route only for a currently buyer-eligible Offer and returns no destination for all ineligible states', async () => {
     await expect(resolveBuyerOfferRoute(offerIds.eligible, { database: db, ...options })).resolves.toEqual(point);
-    for (const offerId of [offerIds.noPhone, offerIds.noGeo, offerIds.neither, offerIds.inactive, offerIds.stale]) {
+    await expect(resolveBuyerOfferRoute(offerIds.noPhone, { database: db, ...options })).resolves.toEqual(point);
+    for (const offerId of [offerIds.noGeo, offerIds.neither, offerIds.inactive, offerIds.stale]) {
       await expect(resolveBuyerOfferRoute(offerId, { database: db, ...options })).resolves.toBeNull();
     }
     await expect(resolveBuyerOfferRoute('40000000-0000-4000-8000-000000019099', { database: db, ...options })).resolves.toBeNull();

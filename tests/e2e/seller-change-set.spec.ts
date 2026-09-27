@@ -8,9 +8,6 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000941' : '+77000000942';
 }
 
-function publicPhoneFor(projectName: string) {
-  return projectName === 'mobile' ? '+77000000943' : '+77000000944';
-}
 
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
@@ -77,10 +74,6 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
-    await page.goto('/seller/contacts');
-    await page.getByLabel('Телефон', { exact: true }).fill(publicPhoneFor(testInfo.project.name));
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await completeOnboardingGeo(pool, phone);
     // seller-offer-editor: «Добавить товар» on the overview opens the form in place.
     await page.goto('/seller');
@@ -111,7 +104,7 @@ test('Seller must price a proposal, confirms it once and buyer sees KZT amount w
     await expect(page.getByText('Новое предложение', { exact: true })).toBeVisible();
     await expect(page.getByText('Баранина', { exact: true })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
     // The confirmation page replaces itself with the overview that started the change.
     await expect(page).toHaveURL('/seller');
     await expect(page.getByRole('status').filter({ hasText: 'Опубликовано — предложение видно покупателям' })).toBeVisible();

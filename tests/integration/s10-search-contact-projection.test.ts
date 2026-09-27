@@ -31,6 +31,7 @@ let pool: Awaited<ReturnType<typeof connectTestDatabase>>['pool'];
 async function cleanup() {
   await pool.query('DELETE FROM offers WHERE product_id=$1', [productId]);
   await pool.query('DELETE FROM product_aliases WHERE product_id=$1', [productId]);
+  await pool.query('DELETE FROM seller_verified_phones WHERE seller_id=$1', [sellerId]);
   await pool.query('DELETE FROM locations WHERE seller_id=$1', [sellerId]);
   await pool.query('DELETE FROM sellers WHERE id=$1', [sellerId]);
   await pool.query('DELETE FROM users WHERE id=$1 OR phone_e164=$2', [userId, identityPhone]);
@@ -87,31 +88,25 @@ afterAll(async () => {
   await pool.end();
 });
 
-describe('S10 Search Seller contacts projection on PostgreSQL 18 after UX1D eligibility', () => {
-  it('keeps a Seller with no contact phone valid seller-side but excludes its Offers from buyer Search', async () => {
+// S10 as revised by point-contacts-hours: contacts belong to the point, only verified numbers are public, and a
+// point without contacts is still buyer-visible.
+describe('S10 point contacts projection on PostgreSQL 18', () => {
+  it('shows Offers of a point without contacts, with no contacts field at all', async () => {
     const result = await searchOffers(productName, db, options);
-    expect(result.offers).toEqual([]);
-    const stored = await pool.query('SELECT id,contact_phone_e164 FROM sellers WHERE id=$1', [sellerId]);
-    expect(stored.rows).toEqual([{ id: sellerId, contact_phone_e164: null }]);
+    expect(ids(result)).toEqual([offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld]);
+    for (const offer of result.offers) expect(offer.location).not.toHaveProperty('contacts');
+    expect(sellerObject(result)).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
   });
 
-  it('projects only structured public contacts and leaks no private Seller/Identity/geo/ranking data', async () => {
-    await pool.query(`UPDATE sellers SET
-      contact_phone_e164=$2, whatsapp_phone_e164=$3, telegram_username=$4, instagram_username=$5
-      WHERE id=$1`, [sellerId, '+12025550123', '+447911123456', 'kaida_shop', 'kaida.shop']);
+  it('projects only verified point numbers and leaks no private Seller/Identity/geo/ranking data', async () => {
+    await pool.query('UPDATE locations SET phone_e164=$2, whatsapp_phone_e164=$3 WHERE id=$1', [nearLocationId, '+12025550123', '+447911123456']);
+    await pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+12025550123',$2)", [sellerId, now]);
 
     const result = await searchOffers(productName, db, { ...options, buyerLocation });
     expect(ids(result)).toEqual([offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer]);
-    expect(sellerObject(result)).toEqual({
-      id: sellerId,
-      displayName: 'S10 Search Seller',
-      contacts: {
-        phoneE164: '+12025550123',
-        whatsappPhoneE164: '+447911123456',
-        telegramUsername: 'kaida_shop',
-        instagramUsername: 'kaida.shop',
-      },
-    });
+    expect(result.offers[0]!.location.contacts).toEqual({ phoneE164: '+12025550123' });
+    expect(result.offers[2]!.location).not.toHaveProperty('contacts');
+    expect(sellerObject(result)).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
     const serialized = JSON.stringify(result);
     expect(serialized).not.toContain(identityPhone);
     for (const forbidden of [
@@ -137,9 +132,7 @@ describe('S10 Search Seller contacts projection on PostgreSQL 18 after UX1D elig
     expect(ids(alias)).toEqual(expectedWithGeo);
     expect(new Set(alias.offers.map((offer) => offer.product.id))).toEqual(new Set([productId]));
 
-    await pool.query(`UPDATE sellers SET
-      contact_phone_e164=$2, whatsapp_phone_e164=$3, telegram_username=$4, instagram_username=$5
-      WHERE id=$1`, [sellerId, '+77001234567', null, 'changed_shop', null]);
+    await pool.query('UPDATE locations SET phone_e164=$2, whatsapp_phone_e164=NULL WHERE id=$1', [nearLocationId, '+77001234567']);
 
     expect(ids(await searchOffers(productName, db, { ...options, buyerLocation }))).toEqual(expectedWithGeo);
     expect(ids(await searchOffers(productName, db, options))).toEqual(expectedWithoutGeo);

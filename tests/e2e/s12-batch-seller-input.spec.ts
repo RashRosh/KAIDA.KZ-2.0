@@ -55,7 +55,7 @@ async function makeBuyerEligible(pool: Pool, userId: string, projectName: string
 
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
   await proposeNewOffer(page, { product, price: amount, unit: 'kg', comment });
-  await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
   await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
 }
 
@@ -80,10 +80,6 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
-    await page.goto('/seller/contacts');
-    await page.getByLabel('Телефон', { exact: true }).fill(testInfo.project.name === 'mobile' ? '+77000001263' : '+77000001264');
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
 
     await makeBuyerEligible(auth.pool, auth.userId, testInfo.project.name);
     await createOffer(page, 'Баранина', '4200.00', 'S12 старая баранина');

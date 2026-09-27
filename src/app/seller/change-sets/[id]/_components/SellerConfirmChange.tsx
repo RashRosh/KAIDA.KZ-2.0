@@ -11,6 +11,7 @@ import type { MessageKey } from '../../../../../i18n/messages';
 import { CabinetIcon } from '../../../_components/SellerCabinetFrame';
 import { CabinetLoadError, CabinetLoginRequired, CabinetSkeleton } from '../../../_components/CabinetStates';
 import { formatOfferPrice } from '../../../_components/cabinet-data';
+import { photoUrl } from '../../../../../modules/media/contracts/photo.contract';
 
 type ApiResponse = { changeSet?: SellerChangeSetView; error?: { code?: string } };
 type Phase = 'pending' | 'confirming' | 'failed' | 'conflict';
@@ -38,6 +39,19 @@ function safeBack(value: string | null, fallback: string) {
 function priceText(price: SellerChangeSetItemView['price']) {
   const formatted = formatOfferPrice(price);
   return formatted ? `${formatted.amount}${formatted.unit ? ` / ${formatted.unit}` : ''}` : null;
+}
+
+function PhotosRow({ label, photoIds, text }: { label: string; photoIds: string[]; text: string }) {
+  return (
+    <div className={styles.summaryRow}>
+      <dt>{label}</dt>
+      <dd className={styles.photosValue}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- owner-only photo route */}
+        {photoIds[0] && <img src={photoUrl(photoIds[0], 'thumb')} alt="" className={styles.coverThumb} />}
+        <span>{text}</span>
+      </dd>
+    </div>
+  );
 }
 
 function Row({ label, value, old }: { label: string; value: string; old?: string | null }) {
@@ -116,6 +130,13 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
         ? `${back}${back.includes('?') ? '&' : '?'}edit=${targetOfferId}&from=${changeSetId}`
         : back;
   const current = targetOfferId ? owned?.find((offer) => offer.id === targetOfferId) : undefined;
+  // The photo list the card will have after confirm: the proposed one, or the current one when the item keeps it.
+  const resultingPhotoIds = (item: SellerChangeSetItemView) => item.photos
+    ? item.photos.map((photo) => photo.id)
+    : item.action === 'create_offer' ? [] : (current?.photos ?? []).map((photo) => photo.id);
+  const withoutPhotos = !isBatch && (first.action === 'create_offer' || first.action === 'update_offer')
+    && (first.action === 'create_offer' || first.photos !== undefined || current !== undefined)
+    && resultingPhotoIds(first).length === 0;
 
   async function confirm() {
     setPhase('confirming');
@@ -150,7 +171,12 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
       return;
     }
     const body = first.action === 'update_offer'
-      ? { action: 'update_offer', price: { amount: first.price?.amount ?? '', unit: first.price?.unitChoice ?? null }, sellerComment: first.sellerComment ?? '' }
+      ? {
+        action: 'update_offer',
+        price: { amount: first.price?.amount ?? '', unit: first.price?.unitChoice ?? null },
+        sellerComment: first.sellerComment ?? '',
+        ...(first.photos ? { photoIds: first.photos.map((photo) => photo.id) } : {}),
+      }
       : { action: first.action };
     setPhase('confirming');
     try {
@@ -181,6 +207,16 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
         {(item.action === 'create_offer' || item.action === 'update_offer') && (
           <Row label={t('confirm.comment')} value={item.sellerComment ?? t('confirm.noComment')} old={old ? old.sellerComment ?? t('confirm.noComment') : null} />
         )}
+        {(item.action === 'create_offer' || item.action === 'update_offer') && (() => {
+          const photoIds = resultingPhotoIds(item);
+          return (
+            <PhotosRow
+              label={t('confirm.photos')}
+              photoIds={photoIds}
+              text={photoIds.length > 0 ? t('confirm.photosCount', { count: photoIds.length }) : t('confirm.noPhotos')}
+            />
+          );
+        })()}
       </dl>
     );
   }
@@ -206,7 +242,8 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const primaryLabel = phase === 'failed'
     ? t('cabinet.retry')
     : busy ? (publishes ? t('confirm.publishing') : t('confirm.confirming'))
-      : publishes ? t('confirm.publish') : t('confirm.confirm');
+      : withoutPhotos ? t('confirm.publishWithoutPhoto')
+        : publishes ? t('confirm.publish') : t('confirm.confirm');
 
   return (
     <section aria-labelledby="confirm-heading">
@@ -229,7 +266,17 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
               <div><strong>{t('confirm.conflictTitle')}</strong><p>{t('confirm.conflictText')}</p></div>
             </div>
           )}
-          <div className={phase === 'failed' || phase === 'conflict' ? `${styles.panel} ${styles.spaceTop}` : styles.panel}>
+          {withoutPhotos && phase === 'pending' && (
+            <div className={styles.infoNotice}>
+              <CabinetIcon name="alert" />
+              <div>
+                <strong>{t('confirm.noPhotoTitle')}</strong>
+                <p>{t('confirm.noPhotoText')}</p>
+                <Link className={styles.textLink} href={editHref}>{t('confirm.addPhoto')}</Link>
+              </div>
+            </div>
+          )}
+          <div className={phase === 'failed' || phase === 'conflict' || (withoutPhotos && phase === 'pending') ? `${styles.panel} ${styles.spaceTop}` : styles.panel}>
             {phase === 'conflict' ? items.map((item) => {
               const now = current;
               const showsStatus = item.action === 'activate_offer' || item.action === 'deactivate_offer';

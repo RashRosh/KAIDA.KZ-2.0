@@ -3,6 +3,7 @@ import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
 import { formatPriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
+import { assertPhotosOwnedBy } from './assert-photos-owned';
 import {
   LocationNotFoundError,
   ProductAmbiguousError,
@@ -11,7 +12,7 @@ import {
   type SellerChangeSetCreateInput,
   type SellerChangeSetView,
 } from '../contracts/seller-change-set.contract';
-import { createChangeItem, createChangeSet, findOwnedLocation } from '../infrastructure/seller-change-sets.repository';
+import { createChangeItem, createChangeSet, findOwnedLocation, insertItemPhotos } from '../infrastructure/seller-change-sets.repository';
 
 export async function createSellerChangeSet(
   ownerUserId: string,
@@ -34,6 +35,8 @@ export async function createSellerChangeSet(
     const priceAmount = input.price.amount;
     const priceUnit = input.price.unit;
     const sellerComment = input.sellerComment ?? null;
+    const photoIds = input.photoIds ?? [];
+    await assertPhotosOwnedBy(tx, photoIds, ownerUserId);
 
     const changeSet = await createChangeSet(tx, seller.id);
     const item = await createChangeItem(tx, {
@@ -45,6 +48,7 @@ export async function createSellerChangeSet(
       priceUnit,
       sellerComment,
     });
+    await insertItemPhotos(tx, item.id, photoIds);
 
     return {
       id: changeSet.id,
@@ -59,6 +63,7 @@ export async function createSellerChangeSet(
         location: { id: location.id, name: location.name, addressText: location.addressText, type: location.type },
         price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnit), unitChoice: priceUnit },
         sellerComment,
+        ...(photoIds.length > 0 ? { photos: photoIds.map((id) => ({ id })) } : {}),
         resultOffer: null,
       }],
     };

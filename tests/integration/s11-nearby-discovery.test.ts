@@ -42,6 +42,7 @@ let pool: Awaited<ReturnType<typeof connectTestDatabase>>['pool'];
 
 async function cleanup() {
   await pool.query('DELETE FROM offers WHERE product_id=$1', [productId]);
+  await pool.query('DELETE FROM seller_verified_phones WHERE seller_id=$1', [sellerId]);
   await pool.query('DELETE FROM locations WHERE seller_id=$1', [sellerId]);
   await pool.query('DELETE FROM sellers WHERE id=$1', [sellerId]);
   await pool.query('DELETE FROM products WHERE id=$1 OR name=$2', [productId, productName]);
@@ -161,14 +162,16 @@ describe('S11 Nearby Discovery on PostgreSQL 18 after UX1D eligibility', () => {
     expect(ids(result)).not.toContain(offerIds.expired);
   });
 
-  it('returns the S10 public contacts projection plus distance without raw geo or private ranking metadata', async () => {
+  it('returns the verified point contacts plus distance without raw geo or private ranking metadata', async () => {
+    // point-contacts-hours: contacts live on the point and only verified numbers are public.
+    await pool.query('UPDATE locations SET phone_e164=$2, whatsapp_phone_e164=$3 WHERE seller_id=$1', [sellerId, '+77010000001', '+77010000002']);
+    await pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+77010000001',now()),($1,'+77010000002',now()) ON CONFLICT DO NOTHING", [sellerId]);
     const result = await findNearbyOffers(buyerLocation, db, nearbyOptions);
-    expect(result.offers[0]?.seller.contacts).toEqual({
+    expect(result.offers[0]?.location.contacts).toEqual({
       phoneE164: '+77010000001',
       whatsappPhoneE164: '+77010000002',
-      telegramUsername: 's11seller',
-      instagramUsername: 's11.seller',
     });
+    expect(result.offers[0]?.seller).not.toHaveProperty('contacts');
 
     const serialized = JSON.stringify(result);
     expect(serialized).toContain('"distanceMeters"');

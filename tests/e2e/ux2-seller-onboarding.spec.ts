@@ -13,7 +13,7 @@ function fixture(projectName: string) {
     phone: `+770000020${suffix}`,
     sessionId: `51000000-0000-4000-8000-0000000020${suffix}`,
     token: `ux2-browser-session-${projectName}`,
-    publicPhone: projectName === 'mobile' ? '+12025550771' : '+12025550772',
+    publicPhone: projectName === 'mobile' ? '+77000002771' : '+77000002772',
   };
 }
 
@@ -76,16 +76,15 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
-    await page.goto('/seller/contacts');
+    // point-contacts-hours: contacts live in the point form; a new number stays unverified until its code.
+    await page.getByRole('button', { name: `Изменить торговую точку ${pointName}` }).click();
     await page.getByLabel('Телефон', { exact: true }).fill(auth.publicPhone);
-    await page.getByLabel('WhatsApp', { exact: true }).fill('+447911123456');
-    await page.getByLabel('Telegram', { exact: true }).fill(`ux2_${testInfo.project.name}`);
-    await page.getByLabel('Instagram', { exact: true }).fill(`ux2.${testInfo.project.name}`);
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByText('Торговая точка сохранена.', { exact: true })).toBeVisible();
+    await expect(tradingPointCard.getByText(`Телефон: ${auth.publicPhone}`)).toBeVisible();
+    await expect(tradingPointCard.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
 
     await page.reload();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(auth.publicPhone);
     await page.goto('/seller/points');
     await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();

@@ -7,7 +7,9 @@ import {
   createOffer,
   findOfferById,
   lockOfferById,
+  replaceOfferPhotos,
 } from '../../offers/infrastructure/offers.repository';
+import { assertPhotosOwnedBy } from './assert-photos-owned';
 import { systemClock, type Clock } from '../../offers/lifecycle/offer-lifecycle';
 import {
   disabledSellerCommentTranslationScheduler,
@@ -25,6 +27,7 @@ import {
 } from '../contracts/seller-change-set.contract';
 import {
   findChangeSetViewByIdAndSeller,
+  findItemPhotoIds,
   findOwnedLocation,
   linkResultOffer,
   lockChangeItems,
@@ -172,6 +175,15 @@ export async function confirmSellerChangeSet(
       }
     }
 
+    // Photos are re-checked at confirm: ownership is part of the proposal's validity, like its Location.
+    const itemPhotos = await findItemPhotoIds(tx, items.map((item) => item.id));
+    for (const item of items) {
+      if (item.photosSpecified && item.action !== 'update_offer') {
+        throw new SellerInputInvariantError('photos_specified допустим только у update_offer Item.');
+      }
+      await assertPhotosOwnedBy(tx, itemPhotos.get(item.id) ?? [], ownerUserId);
+    }
+
     const confirmationTime = clock();
     const comments: PublishedSellerComment[] = [];
 
@@ -195,6 +207,7 @@ export async function confirmSellerChangeSet(
             comment: offer.sellerComment,
           });
         }
+        await replaceOfferPhotos(tx, offer.id, itemPhotos.get(item.id) ?? []);
         const linked = await linkResultOffer(tx, item.id, offer.id);
         if (linked.length !== 1) throw new SellerInputInvariantError('Result Offer не удалось связать с create_offer Item.');
         continue;
@@ -230,6 +243,10 @@ export async function confirmSellerChangeSet(
 
       if (applied.length !== 1) {
         throw new OfferChangedError();
+      }
+
+      if (item.action === 'update_offer' && item.photosSpecified) {
+        await replaceOfferPhotos(tx, targetOffer.id, itemPhotos.get(item.id) ?? []);
       }
 
       const appliedOffer = applied[0]!;

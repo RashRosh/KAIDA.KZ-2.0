@@ -5,6 +5,7 @@ import { createSellerChangeSet } from '@/modules/seller-input/application/create
 import {
   LocationNotFoundError,
   ProductAmbiguousError,
+  PhotoNotFoundError,
   ProductNotFoundError,
   SellerRequiredError,
   sellerChangeSetCreateBodySchema,
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   } catch (error) {
     if (error instanceof SellerRequiredError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     if (error instanceof LocationNotFoundError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
+    if (error instanceof PhotoNotFoundError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 422, headers: noStore });
     if (error instanceof ProductNotFoundError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
     if (error instanceof ProductAmbiguousError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     console.error('Seller change set creation failed');

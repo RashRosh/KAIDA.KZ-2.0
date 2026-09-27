@@ -401,6 +401,19 @@
   color: var(--k-attn-ink);
 }
 .notice strong { display: block; margin-bottom: 2px; }
+/* offer-photos: the no-photo reminder is information, not an error. */
+.infoNotice {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+.infoNotice strong { display: block; margin-bottom: 2px; }
+.infoNotice p { margin: 0 0 var(--space-2); color: var(--muted); }
+.photosValue { display: inline-flex; align-items: center; gap: var(--space-2); }
+.coverThumb { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; }
 .notice p { margin: 0; }
 .confirmBar {
   position: sticky;
@@ -445,3 +458,16 @@
 }
 
 .spaceTop { margin-top: var(--space-4); }
+
+/* offer-photos: cover in the seller list; the empty tile is a neutral fallback, not a product imitation. */
+.offerThumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  background: var(--surface-sunken);
+}
+.offerThumbEmpty { display: block; border: 1px dashed var(--border-strong); }
+.offerTop:has(.offerThumb) { align-items: center; }
+.offerTop:has(.offerThumb) h2 { flex: 1; min-width: 0; }

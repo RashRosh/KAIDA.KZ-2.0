@@ -1,0 +1,12 @@
+/* point-contacts-hours: buyer opening-hours line. Green open, orange closing within an hour, red closed. */
+.line { display: flex; flex-wrap: wrap; align-items: center; gap: 0 2px; margin: 0; font-size: 0.875rem; line-height: 1.45; font-variant-numeric: tabular-nums; color: var(--text); }
+.line[data-state='open'] { color: var(--fresh); }
+.line[data-state='closing'] { color: var(--stale); }
+.line[data-state='closed'] { color: var(--error); }
+.state { display: inline-flex; width: 16px; height: 16px; margin-right: 6px; flex: none; }
+.state svg { width: 16px; height: 16px; }
+.part { white-space: nowrap; }
+.days { font-weight: 600; }
+.divider { color: var(--muted); }
+.closed { text-decoration-thickness: 1.5px; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

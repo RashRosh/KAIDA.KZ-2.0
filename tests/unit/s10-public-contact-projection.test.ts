@@ -1,121 +1,33 @@
 import { describe, expect, it } from 'vitest';
+import { projectPointPublicContacts } from '../../src/modules/locations/details/point-public-contacts';
 import { searchOfferSchema } from '../../src/modules/search/contracts/search.contract';
+import { templateOpeningHours } from '../../src/modules/locations/hours/opening-hours';
 
-type RawPersistedContacts = {
-  phoneE164: string | null;
-  whatsappPhoneE164: string | null;
-  telegramUsername: string | null;
-  instagramUsername: string | null;
-};
+// point-contacts-hours §2: only verified numbers of the point are public; an empty set is omitted.
+describe('public point contact projection', () => {
+  const verified = new Set(['+77001112233']);
 
-type PublicContactProperty = {
-  contacts?: {
-    phoneE164?: string;
-    whatsappPhoneE164?: string;
-    telegramUsername?: string;
-    instagramUsername?: string;
-  };
-};
-
-type ProjectionModule = {
-  projectSellerPublicContactProperty(input: RawPersistedContacts): PublicContactProperty;
-};
-
-async function loadProjector(): Promise<ProjectionModule> {
-  const modulePath = '../../src/modules/sellers/contact/project-seller-public-contacts';
-  return import(modulePath) as Promise<ProjectionModule>;
-}
-
-function raw(overrides: Partial<RawPersistedContacts> = {}): RawPersistedContacts {
-  return {
-    phoneE164: null,
-    whatsappPhoneE164: null,
-    telegramUsername: null,
-    instagramUsername: null,
-    ...overrides,
-  };
-}
-
-function baseOffer() {
-  return {
-    id: '40000000-0000-4000-8000-000000001010',
-    product: { id: '10000000-0000-4000-8000-000000001010', name: 'Баранина' },
-    seller: { id: '20000000-0000-4000-8000-000000001010', displayName: 'Seller 1010' },
-    location: { id: '30000000-0000-4000-8000-000000001010', name: 'Point 1010', addressText: 'Алматы' },
-    price: { amount: '0', currency: 'KZT', unit: null },
-    sellerComment: null,
-  };
-}
-
-describe('S10 safe public Seller contact projection', () => {
-  it('drops a malformed channel independently while preserving valid channels', async () => {
-    const { projectSellerPublicContactProperty } = await loadProjector();
-    expect(projectSellerPublicContactProperty(raw({
-      phoneE164: '+77001234567',
-      whatsappPhoneE164: '+447911123456',
-      telegramUsername: 'https://t.me/evil',
-      instagramUsername: 'kaida.shop',
-    }))).toEqual({
-      contacts: {
-        phoneE164: '+77001234567',
-        whatsappPhoneE164: '+447911123456',
-        instagramUsername: 'kaida.shop',
-      },
-    });
+  it('publishes only verified numbers', () => {
+    expect(projectPointPublicContacts({ phoneE164: '+77001112233', whatsappPhoneE164: '+77009998877' }, verified))
+      .toEqual({ contacts: { phoneE164: '+77001112233' } });
   });
 
-  it('does not normalize malformed persisted friendly values on the read path', async () => {
-    const { projectSellerPublicContactProperty } = await loadProjector();
-    expect(projectSellerPublicContactProperty(raw({
-      phoneE164: '8 (700) 123-45-67',
-      telegramUsername: '@kaida_shop',
-      instagramUsername: 'KAIDA.SHOP',
-    }))).toEqual({});
+  it('omits contacts entirely when nothing is verified or set', () => {
+    expect(projectPointPublicContacts({ phoneE164: '+77009998877', whatsappPhoneE164: null }, verified)).toEqual({});
+    expect(projectPointPublicContacts({ phoneE164: null, whatsappPhoneE164: null }, undefined)).toEqual({});
   });
 
-  it('physically omits contacts when every channel is null or invalid', async () => {
-    const { projectSellerPublicContactProperty } = await loadProjector();
-    const result = projectSellerPublicContactProperty(raw({ telegramUsername: 'bad/path' }));
-    expect(result).toEqual({});
-    expect(Object.hasOwn(result, 'contacts')).toBe(false);
-    expect(Object.prototype.hasOwnProperty.call(result, 'contacts')).toBe(false);
-    expect(JSON.stringify(result)).not.toContain('contacts');
-  });
-
-  it('emits a non-empty contacts object when at least one channel is valid', async () => {
-    const { projectSellerPublicContactProperty } = await loadProjector();
-    const result = projectSellerPublicContactProperty(raw({ telegramUsername: 'kaida_shop' }));
-    expect(Object.hasOwn(result, 'contacts')).toBe(true);
-    expect(result.contacts).toEqual({ telegramUsername: 'kaida_shop' });
-    expect(Object.keys(result.contacts ?? {})).toHaveLength(1);
-  });
-
-  it('Search contract preserves a valid structured contacts projection', () => {
-    const parsed = searchOfferSchema.parse({
-      ...baseOffer(),
-      seller: {
-        ...baseOffer().seller,
-        contacts: {
-          phoneE164: '+77001234567',
-          whatsappPhoneE164: '+447911123456',
-          telegramUsername: 'kaida_shop',
-          instagramUsername: 'kaida.shop',
-        },
-      },
-    });
-    expect(parsed.seller).toHaveProperty('contacts');
-    expect((parsed.seller as unknown as { contacts?: unknown }).contacts).toEqual({
-      phoneE164: '+77001234567',
-      whatsappPhoneE164: '+447911123456',
-      telegramUsername: 'kaida_shop',
-      instagramUsername: 'kaida.shop',
-    });
-  });
-
-  it('Search contract rejects an explicitly empty contacts object', () => {
-    expect(searchOfferSchema.safeParse({
-      ...baseOffer(),
-      seller: { ...baseOffer().seller, contacts: {} },
-    }).success).toBe(false);
+  it('Search contract accepts point contacts and rejects an empty contacts object', () => {
+    const offer = {
+      id: '10000000-0000-4000-8000-000000000101',
+      product: { id: '10000000-0000-4000-8000-000000000102', name: 'Баранина' },
+      seller: { id: '10000000-0000-4000-8000-000000000103', displayName: 'Продавец' },
+      location: { id: '10000000-0000-4000-8000-000000000104', name: 'Точка', addressText: 'Алматы', openingHours: templateOpeningHours() },
+      price: { amount: '100', currency: 'KZT', unit: null },
+      sellerComment: null,
+    };
+    expect(searchOfferSchema.safeParse({ ...offer, location: { ...offer.location, contacts: { phoneE164: '+77001112233' } } }).success).toBe(true);
+    expect(searchOfferSchema.safeParse({ ...offer, location: { ...offer.location, contacts: {} } }).success).toBe(false);
+    expect(searchOfferSchema.safeParse({ ...offer, seller: { ...offer.seller, contacts: { phoneE164: '+77001112233' } } }).data?.seller).not.toHaveProperty('contacts');
   });
 });

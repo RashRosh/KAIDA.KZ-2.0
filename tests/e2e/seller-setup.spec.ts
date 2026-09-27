@@ -6,9 +6,6 @@ function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000931' : '+77000000932';
 }
 
-function contactPhoneFor(projectName: string) {
-  return projectName === 'mobile' ? '+12025550931' : '+12025550932';
-}
 
 function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
@@ -42,7 +39,6 @@ async function ownedSellerOfferCount(pool: Pool, phone: string) {
 
 test('authenticated User creates Seller + first Location and persists after reload', async ({ page }, testInfo) => {
   const phone = phoneFor(testInfo.project.name);
-  const contactPhone = contactPhoneFor(testInfo.project.name);
   await cleanup(phone);
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
@@ -74,10 +70,6 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
 
-    await page.goto('/seller/contacts');
-    await page.getByLabel('Телефон', { exact: true }).fill(contactPhone);
-    await page.getByRole('button', { name: 'Сохранить контакты' }).click();
-    await expect(page.getByText('Контакты сохранены.', { exact: true })).toBeVisible();
     await page.goto('/seller/points');
 
     await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();

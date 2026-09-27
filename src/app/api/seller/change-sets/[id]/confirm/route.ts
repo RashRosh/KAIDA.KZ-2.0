@@ -7,6 +7,7 @@ import {
   ChangeSetNotFoundError,
   OfferChangedError,
   OfferPriceRequiredError,
+  PhotoNotFoundError,
   SellerRequiredError,
   sellerChangeSetIdSchema,
 } from '@/modules/seller-input/contracts/seller-change-set.contract';
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   } catch (error) {
     if (error instanceof SellerRequiredError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     if (error instanceof ChangeSetNotFoundError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
-    if (error instanceof OfferChangedError || error instanceof OfferPriceRequiredError) {
+    if (error instanceof OfferChangedError || error instanceof OfferPriceRequiredError || error instanceof PhotoNotFoundError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }
     console.error('Seller change set confirmation failed');

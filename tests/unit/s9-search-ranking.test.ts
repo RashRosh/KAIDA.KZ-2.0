@@ -1,3 +1,4 @@
+import { templateOpeningHours } from '../../src/modules/locations/hours/opening-hours';
 import { describe, expect, it } from 'vitest';
 import type { SearchOffer } from '../../src/modules/search/contracts/search.contract';
 import {
@@ -12,7 +13,7 @@ function offer(id: string): SearchOffer {
     id,
     product: { id: '10000000-0000-4000-8000-000000000001', name: 'S9 unit product' },
     seller: { id: '20000000-0000-4000-8000-000000000001', displayName: 'S9 unit seller' },
-    location: { id: '30000000-0000-4000-8000-000000000001', name: 'S9 unit location', addressText: 'S9 unit address' },
+    location: { id: '30000000-0000-4000-8000-000000000001', name: 'S9 unit location', addressText: 'S9 unit address', openingHours: templateOpeningHours() },
     price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
   };
