@@ -79,6 +79,8 @@ test('a new card in two of three points with an own price is published after the
     // The AI ways are visible but off; the manual way is active.
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).first().click();
     const source = page.getByRole('dialog', { name: 'Как сформировать карточки?' });
+    await expect(source.getByText('С помощью KAIDA AI', { exact: true })).toBeVisible();
+    await expect(source.getByRole('separator')).toBeVisible();
     await expect(source.getByRole('button', { name: /Снять видео/ })).toBeDisabled();
     await expect(source.getByRole('button', { name: /Надиктовать товары/ })).toBeDisabled();
     await source.getByRole('button', { name: /^Заполнить вручную/ }).click();

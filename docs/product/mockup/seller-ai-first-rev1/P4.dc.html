@@ -35,12 +35,12 @@
         <div class="grab"></div>
         <div style="display: flex; align-items: center;"><h2 class="h3" style="flex: 1;">Как сформировать карточки?</h2><button class="ib" aria-label="Закрыть" onClick="{{ go0 }}"><span class="ic i-close"></span></button></div>
         <div class="banner gray" style="flex-direction: row; gap: 10px; padding: 12px; border-radius: 14px;"><span class="ic i-info c2"></span><p class="c c2" style="flex: 1;">Автоматическое заполнение пока не работает. Карточку можно заполнить вручную.</p></div>
-        <div class="ov">С помощью ИИ</div>
-        <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Временно недоступно</p></div></div>
-        <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div><p class="c">Временно недоступно</p></div></div>
-        <div class="li" style="color: var(--ink3);"><div class="lic"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div><p class="c">Временно недоступно</p></div></div>
-        <div class="ov">Без ИИ</div>
-        <button class="li card hl" onClick="{{ go2 }}" style="padding: 8px 12px; flex-direction: row; text-align: left;"><div class="lic p"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div><p class="c">Пустая карточка товара</p></div><span class="ic i-right pt"></span></button>
+        <div class="ov">С помощью KAIDA AI</div>
+        <div class="li" style="color: var(--ink3);"><div class="lic ai" title="С помощью KAIDA AI"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Временно недоступно</p></div></div>
+        <div class="li" style="color: var(--ink3);"><div class="lic ai" title="С помощью KAIDA AI"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div><p class="c">Временно недоступно</p></div></div>
+        <div class="li" style="color: var(--ink3);"><div class="lic ai" title="С помощью KAIDA AI"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div><p class="c">Временно недоступно</p></div></div>
+        <div class="hr" role="separator" style="margin: 4px 0;"></div>
+        <button class="li card hl" onClick="{{ go2 }}" style="padding: 8px 12px; flex-direction: row; text-align: left;"><div class="lic p"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div></div><span class="ic i-right pt"></span></button>
       </div>
     </sc-if>
 

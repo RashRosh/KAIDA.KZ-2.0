@@ -27,11 +27,11 @@
       <header class="bar"><div class="bar-t">Моя витрина</div></header>
       <main class="body"></main>
       <div class="scrim"></div>
-      <div class="sheet"><div class="grab"></div><h2 class="h3">Как сформировать карточки?</h2><div class="ov">С помощью ИИ</div>
-        <button class="li" onClick="{{ go2 }}" style="background: none; border: 0; text-align: left; padding: 8px 0;"><div class="lic p"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Покажите товары и назовите цены вслух</p></div><span class="ic i-right c2"></span></button>
-        <div class="li" style="opacity: 0.6;"><div class="lic p"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div></div></div>
-        <div class="li" style="opacity: 0.6;"><div class="lic p"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div></div></div>
-        <div class="ov">Без ИИ</div><div class="li" style="opacity: 0.6;"><div class="lic"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div></div></div>
+      <div class="sheet"><div class="grab"></div><h2 class="h3">Как сформировать карточки?</h2><div class="ov">С помощью KAIDA AI</div>
+        <button class="li" onClick="{{ go2 }}" style="background: none; border: 0; text-align: left; padding: 8px 0;"><div class="lic p ai" title="С помощью KAIDA AI"><span class="ic i-video"></span></div><div class="mid"><div class="ts">Снять видео</div><p class="c">Покажите товары и назовите цены вслух</p></div><span class="ic i-right c2"></span></button>
+        <div class="li" style="opacity: 0.6;"><div class="lic p ai" title="С помощью KAIDA AI"><span class="ic i-image"></span></div><div class="mid"><div class="ts">Добавить фотографии</div></div></div>
+        <div class="li" style="opacity: 0.6;"><div class="lic p ai" title="С помощью KAIDA AI"><span class="ic i-mic"></span></div><div class="mid"><div class="ts">Надиктовать товары</div></div></div>
+        <div class="hr" role="separator" style="margin: 4px 0;"></div><div class="li" style="opacity: 0.6;"><div class="lic"><span class="ic i-pencil"></span></div><div class="mid"><div class="ts">Заполнить вручную</div></div></div>
       </div>
     </sc-if>
     <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">

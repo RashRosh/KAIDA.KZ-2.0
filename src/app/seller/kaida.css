@@ -349,3 +349,8 @@
 @media (prefers-reduced-motion:reduce){.kaida.motion *, .kaida.motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0ms!important;transition-duration:.01ms!important}}
 /* SMS code: large, centred, tabular (comment b079eb70) */
 .kaida .inp.otp{height:64px;justify-content:center;text-align:center;font:600 30px/38px var(--display);letter-spacing:.35em;text-indent:.35em;font-variant-numeric:tabular-nums}
+/* AI source marker: sparkle badge on video / photo / voice icons (comment 19f65cd6) */
+.kaida .lic.ai{position:relative}
+.kaida .lic.ai::after{content:"";position:absolute;right:-4px;top:-4px;width:18px;height:18px;border-radius:9px;box-shadow:0 0 0 2px var(--surface);
+  background:var(--primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 2c.8 5.5 4.5 9.2 10 10-5.5.8-9.2 4.5-10 10-.8-5.5-4.5-9.2-10-10 5.5-.8 9.2-4.5 10-10z'/%3E%3C/svg%3E") center/11px 11px no-repeat}
+.kaida .lic.ai:not(.p)::after{background-color:var(--ink3);opacity:.7}
