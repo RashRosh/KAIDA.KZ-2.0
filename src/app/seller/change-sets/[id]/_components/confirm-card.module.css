@@ -1,0 +1,44 @@
+/* seller-showcase-editor: Confirm · AI off (OFF2) — compact card summary and the responsibility note. */
+
+.page { display: flex; flex-direction: column; gap: var(--space-4); max-width: 36rem; }
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.name { margin: 0; font-family: var(--font-display, inherit); font-size: 1.25rem; font-weight: 700; overflow-wrap: anywhere; }
+.name span { color: var(--muted); font-weight: 500; }
+.price { margin: 0; font-size: 1.125rem; font-weight: 700; }
+.price span { font-weight: 400; color: var(--muted); }
+.was { font-size: 0.9375rem; }
+
+.pointsBlock { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.pointsLabel { margin: 0; color: var(--muted); font-size: 0.875rem; }
+.points { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+.points li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-3); overflow-wrap: anywhere; }
+.points li span:last-child { font-weight: 600; white-space: nowrap; }
+
+.count { margin: 0; font-weight: 600; }
+
+.responsibility {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--k-info-soft, var(--surface-sunken));
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.actions { display: flex; flex-direction: column; gap: var(--space-2); }
+.actions > * { width: 100%; }
+
+@media (min-width: 64rem) {
+  .actions { flex-direction: row-reverse; justify-content: flex-start; }
+  .actions > * { width: auto; }
+}

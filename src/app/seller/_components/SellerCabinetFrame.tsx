@@ -4,14 +4,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import styles from '../cabinet.module.css';
+import theme from '../seller-theme.module.css';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
+import { LanguageSwitch } from '../../_components/LanguageSwitch';
 
-export type CabinetSection = 'overview' | 'offers' | 'points';
+// seller-showcase-editor: sections «Витрина / Точки / Ещё» (FEATURE_MAP «Seller AI-first model» п. 3).
+export type CabinetSection = 'showcase' | 'points';
 
 const destinations: { section: CabinetSection; href: string; label: MessageKey; icon: 'home' | 'tag' | 'store' | 'contacts' }[] = [
-  { section: 'overview', href: '/seller', label: 'cabinet.overview', icon: 'home' },
-  { section: 'offers', href: '/seller/offers', label: 'cabinet.offers', icon: 'tag' },
+  { section: 'showcase', href: '/seller', label: 'cabinet.showcase', icon: 'tag' },
   { section: 'points', href: '/seller/points', label: 'cabinet.points', icon: 'store' },
 ];
 
@@ -99,6 +101,8 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
     <div className={styles.sheetBackdrop} onClick={onClose}>
       <div ref={sheetRef} className={styles.sheet} role="dialog" aria-modal="true" aria-label={t('cabinet.more')} onClick={(event) => event.stopPropagation()}>
         <span className={styles.sheetHandle} aria-hidden="true" />
+        <div className={styles.sheetItem}><LanguageSwitch /></div>
+        <Link href="/seller/batch" className={styles.sheetItem} onClick={onClose}><CabinetIcon name="plus" />{t('cabinet.batch')}</Link>
         <button type="button" className={styles.sheetItem} onClick={() => void logout()} disabled={loggingOut}>
           <CabinetIcon name="logout" />{loggingOut ? t('cabinet.loggingOut') : t('cabinet.logout')}
         </button>
@@ -126,7 +130,7 @@ export function SellerCabinetFrame({ active, children, mobileNav = true }: { act
 
   const showNav = signedIn !== false;
   return (
-    <div className={showNav ? styles.frame : styles.frameBare} data-mobile-nav={showNav && mobileNav ? 'true' : 'false'}>
+    <div className={`${showNav ? styles.frame : styles.frameBare} ${theme.seller}`} data-mobile-nav={showNav && mobileNav ? 'true' : 'false'}>
       {showNav && (
         <nav className={styles.sidebar} aria-label={t('cabinet.nav')}>
           <ul>
@@ -137,6 +141,9 @@ export function SellerCabinetFrame({ active, children, mobileNav = true }: { act
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/seller/batch" className={styles.sideLink}><CabinetIcon name="plus" />{t('cabinet.batch')}</Link>
+            </li>
           </ul>
           <button type="button" className={styles.sideLogout} onClick={() => void logout()} disabled={loggingOut}>
             <CabinetIcon name="logout" />{loggingOut ? t('cabinet.loggingOut') : t('cabinet.logout')}
@@ -147,7 +154,7 @@ export function SellerCabinetFrame({ active, children, mobileNav = true }: { act
       {showNav && mobileNav && (
         <>
           <nav className={styles.bottomNav} aria-label={t('cabinet.nav')}>
-            {destinations.slice(0, 3).map((destination) => (
+            {destinations.map((destination) => (
               <Link key={destination.section} href={destination.href} className={styles.bottomLink} aria-current={active === destination.section ? 'page' : undefined}>
                 <CabinetIcon name={destination.icon} /><span>{t(destination.label)}</span>
               </Link>

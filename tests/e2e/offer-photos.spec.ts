@@ -65,17 +65,16 @@ async function offerPhotoIds(sellerId: string) {
 }
 
 async function openCreate(page: Page) {
-  await page.goto('/seller/offers?new=1');
+  await page.goto('/seller?new=1');
   const editor = offerEditor(page);
   await expect(editor).toBeVisible();
   return editor;
 }
 
+// seller-showcase-editor: the only point is chosen automatically; the editor goes straight to the review.
 async function toConfirm(page: Page) {
   const editor = offerEditor(page);
-  await editor.getByRole('button', { name: 'Далее', exact: true }).click();
-  await expect(editor.getByRole('heading', { name: 'Где продаёте?' })).toBeVisible();
-  await editor.getByRole('button', { name: 'Продолжить', exact: true }).click();
+  await editor.getByRole('button', { name: /^Проверить и (опубликовать|сохранить)$/ }).click();
   await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+/);
 }
 
@@ -104,8 +103,8 @@ test('Seller adds photos, makes the second the cover and publishes; Buyer opens 
     await toConfirm(page);
     await expect(page.getByText('3 шт.')).toBeVisible();
     await expect(page.getByText('Карточки с фото выбирают чаще')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL(/notice=created/);
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать)$/ }).click();
+    await expect(page.getByRole('status').filter({ hasText: /Опубликовано|Предложение создано|Жарияланды/ })).toBeVisible();
 
     const photoIds = await offerPhotoIds(sellerId);
     expect(photoIds).toHaveLength(3);
@@ -157,7 +156,7 @@ test('a card without photos is published after the reminder; in Kazakh the remin
     await page.reload();
     await expect(page.getByText('Фотосы бар карточкаларды жиі таңдайды')).toBeVisible();
     await page.getByRole('button', { name: 'Фотосыз жариялау' }).click();
-    await expect(page).toHaveURL(/notice=created/);
+    await expect(page.getByRole('status').filter({ hasText: /Опубликовано|Предложение создано|Жарияланды/ })).toBeVisible();
     expect(await offerPhotoIds(sellerId)).toEqual([]);
   } finally {
     await cleanup(phone);
@@ -177,28 +176,29 @@ test('a rejected file stays at its tile and blocks sending until it is removed; 
     await expect(editor.getByText('Фото слишком маленькое')).toBeVisible();
 
     await fillOfferFields(page, { product: 'Баранина', price: '4800', unit: 'kg' });
-    await editor.getByRole('button', { name: 'Далее', exact: true }).click();
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(editor.getByText('Одно из фото не загрузилось — повторите или удалите его')).toBeVisible();
-    await expect(editor.getByRole('heading', { name: 'Где продаёте?' })).toHaveCount(0);
+    await expect(page).not.toHaveURL(/change-sets/);
 
     await editor.getByText('Фото слишком маленькое').locator('..').getByRole('button', { name: 'Удалить' }).click();
     await expect(editor.getByText('1 из 5')).toBeVisible();
     await toConfirm(page);
-    await page.getByRole('button', { name: 'Подтвердить и опубликовать' }).click();
-    await expect(page).toHaveURL(/notice=created/);
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать)$/ }).click();
+    await expect(page.getByRole('status').filter({ hasText: /Опубликовано|Предложение создано|Жарияланды/ })).toBeVisible();
     expect(await offerPhotoIds(sellerId)).toHaveLength(1);
 
     // Edit: remove the only photo; the review shows «Без фото» and the reminder.
-    await page.getByRole('article').getByRole('link', { name: 'Изменить', exact: true }).first().click();
+    await page.getByRole('article').getByRole('button').first().click();
+    await page.getByRole('button', { name: 'Изменить', exact: true }).click();
     const edit = offerEditor(page);
     await edit.getByRole('button', { name: 'Фото 1, обложка' }).click();
     await edit.getByRole('button', { name: 'Удалить' }).click();
     await expect(edit.getByText('0 из 5')).toBeVisible();
-    await edit.getByRole('button', { name: 'Далее', exact: true }).click();
+    await edit.getByRole('button', { name: 'Проверить и сохранить' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\//);
     await expect(page.getByText('Карточки с фото выбирают чаще')).toBeVisible();
     await page.getByRole('button', { name: 'Опубликовать без фото' }).click();
-    await expect(page).toHaveURL(/notice=updated/);
+    await expect(page.getByRole('status').filter({ hasText: /Изменения опубликованы|Өзгерістер жарияланды/ })).toBeVisible();
     expect(await offerPhotoIds(sellerId)).toEqual([]);
   } finally {
     await cleanup(phone);

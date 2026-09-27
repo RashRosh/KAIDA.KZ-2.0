@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { createOfferManagementChangeSet } from '@/modules/seller-input/application/create-offer-management-change-set';
+import { CardSharedFieldsError } from '@/modules/seller-input/contracts/seller-card.contract';
 import {
   OfferAlreadyInactiveError,
   OfferNotFoundError,
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       error instanceof OfferUpdateNoChangesError
       || error instanceof OfferAlreadyInactiveError
       || error instanceof OfferPriceRequiredError
+      || error instanceof CardSharedFieldsError
     ) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }

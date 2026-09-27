@@ -55,8 +55,8 @@ async function makeBuyerEligible(pool: Pool, userId: string, projectName: string
 
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
   await proposeNewOffer(page, { product, price: amount, unit: 'kg', comment });
-  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+  await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 }
 
 async function search(page: import('@playwright/test').Page, query: string) {
@@ -118,7 +118,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
 
     await page.goto(reviewUrl);
     await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
-    await expect(page).toHaveURL('/seller/offers');
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
     await expect(page.getByRole('status').filter({ hasText: 'Изменения применены' })).toBeVisible();
 
     await search(page, 'баранина');

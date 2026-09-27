@@ -21,16 +21,6 @@ import type { SearchRankingCandidate } from '../ranking/search-ranking';
 
 // A read projection across the four owning modules; lifecycle and buyer-visibility semantics stay outside Search.
 // S9 private ranking metadata remains beside, never inside, the public SearchOffer payload.
-export async function findOffersByProductId(
-  db: Database,
-  productId: string,
-  cutoff: Date,
-  locale: 'ru' | 'kk' = 'ru',
-  commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
-): Promise<SearchRankingCandidate[]> {
-  return findBuyerVisibleOffers(db, { productId, words: [] }, cutoff, locale, commentTranslationEnabled);
-}
-
 // seller-showcase-editor: Offers linked to the resolved catalog product, or whose own title has every query word as
 // the start of one of its words (words are already normalized: letters and digits only).
 export async function findOffersByProductOrTitleWords(

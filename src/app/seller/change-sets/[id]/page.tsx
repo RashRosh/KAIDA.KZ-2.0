@@ -11,7 +11,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   return (
     <>
       <AppHeader showAuth={false} contextLabel={messages[locale]['context.seller']} />
-      <SellerCabinetFrame active="offers" mobileNav={false}>
+      <SellerCabinetFrame active="showcase" mobileNav={false}>
         <Suspense><SellerConfirmChange changeSetId={id} /></Suspense>
       </SellerCabinetFrame>
     </>

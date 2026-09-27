@@ -1,7 +1,7 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
-import { currentCardFields, newCatalogCard } from './card-fields';
+import { currentCardFields, newCatalogCard, perOfferUpdateCardFields } from './card-fields';
 import { findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
 import type { PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
@@ -127,7 +127,9 @@ async function prepareItem(
     if (offerUpdateIsNoOp(offer, input)) throw new OfferUpdateNoChangesError();
     return {
       action: input.action,
-      card: currentCardFields(offer),
+      card: await perOfferUpdateCardFields(database, offer, {
+        price: input.price.amount, unit: input.price.unit, sellerComment: input.sellerComment, photosChanged: false,
+      }),
       locationId: offer.locationId,
       priceAmount: input.price.amount,
       priceCurrency: 'KZT',

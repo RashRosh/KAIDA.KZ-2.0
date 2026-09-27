@@ -17,13 +17,15 @@ import {
   updateCardChangeSet,
 } from '../../src/modules/seller-input/application/card-change-sets';
 import { confirmSellerChangeSet } from '../../src/modules/seller-input/application/confirm-seller-change-set';
+import { createOfferManagementChangeSet } from '../../src/modules/seller-input/application/create-offer-management-change-set';
 import {
   CardPointAlreadyAddedError,
+  CardSharedFieldsError,
   cardCreateBodySchema,
   cardUpdateBodySchema,
   pointPriceBodySchema,
 } from '../../src/modules/seller-input/contracts/seller-card.contract';
-import { OfferChangedError, OfferUpdateNoChangesError } from '../../src/modules/seller-input/contracts/seller-change-set.contract';
+import { OfferChangedError, OfferUpdateNoChangesError, sellerOfferChangeBodySchema } from '../../src/modules/seller-input/contracts/seller-change-set.contract';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
 import { connectTestDatabase } from './database';
 import { withMigrationTestDatabase } from './migration-test-database';
@@ -213,6 +215,21 @@ describe('cards in several points', () => {
     await confirmSellerChangeSet(OWNER.id, other.id, { database: db, clock });
     await expect(confirmSellerChangeSet(OWNER.id, proposal.id, { database: db, clock })).rejects.toBeInstanceOf(OfferChangedError);
     expect((await cardOffers(OWNER.id)).map((offer) => offer.product.name)).toEqual(['Мёд', 'Мёд']);
+  });
+
+  it('a per-Offer change (S5 / S12) on a multi-point card may change only the price, which becomes that point\'s own', async () => {
+    const [a, b] = await sellerWithPoints(OWNER, 'legacy');
+    await publish(OWNER.id, { ...base, title: 'Орехи', price: '3000', points: [{ locationId: a }, { locationId: b }] });
+    const [offerA] = await cardOffers(OWNER.id);
+    await expect(createOfferManagementChangeSet(OWNER.id, offerA!.id, sellerOfferChangeBodySchema.parse({
+      action: 'update_offer', price: { amount: '3000', unit: { code: 'kg' } }, sellerComment: 'Другой комментарий',
+    }), { database: db })).rejects.toBeInstanceOf(CardSharedFieldsError);
+    const priceOnly = await createOfferManagementChangeSet(OWNER.id, offerA!.id, sellerOfferChangeBodySchema.parse({
+      action: 'update_offer', price: { amount: '3100', unit: { code: 'kg' } }, sellerComment: 'Свежая',
+    }), { database: db });
+    await confirmSellerChangeSet(OWNER.id, priceOnly.id, { database: db, clock });
+    const after = await cardOffers(OWNER.id);
+    expect(after.map((offer) => [offer.price?.amount, offer.priceOwn, offer.sellerComment])).toEqual([['3100', true, 'Свежая'], ['3000', false, 'Свежая']]);
   });
 
   it('rejects price 0, a multi-word custom unit and a pack for kilograms', () => {

@@ -58,8 +58,8 @@ async function createSeller(page: Page, projectName: string, scenario: 'success'
 
 async function createLambOffer(page: Page, comment: string) {
   await proposeNewOffer(page, { product: 'Баранина', price: '4100.00', unit: 'kg', comment });
-  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+  await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 }
 
 test('S8 Seller explicitly saves browser geolocation and public Search hides raw coordinates', async ({ page }, testInfo) => {

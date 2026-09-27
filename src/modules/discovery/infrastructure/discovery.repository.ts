@@ -1,4 +1,4 @@
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';

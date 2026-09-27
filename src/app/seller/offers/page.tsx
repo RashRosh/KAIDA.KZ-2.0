@@ -1,19 +1,13 @@
-import { Suspense } from 'react';
-import { AppHeader } from '../../_components/AppHeader';
-import { SellerCabinetFrame } from '../_components/SellerCabinetFrame';
-import { SellerOffersList } from '../_components/SellerOffersList';
-import { messages } from '@/i18n/messages';
-import { getRequestLocale } from '@/i18n/server';
-import { isSellerCommentTranslationEnabled } from '@/modules/offers/translation/seller-comment-translation.config';
+import { redirect } from 'next/navigation';
 
-export default async function Page() {
-  const locale = await getRequestLocale();
-  return (
-    <>
-      <AppHeader showAuth={false} contextLabel={messages[locale]['context.seller']} />
-      <SellerCabinetFrame active="offers">
-        <Suspense><SellerOffersList commentTranslationEnabled={isSellerCommentTranslationEnabled()} /></Suspense>
-      </SellerCabinetFrame>
-    </>
-  );
+// seller-showcase-editor: the offers list is part of «Моя витрина»; old links keep working (`new=1` opens the editor,
+// `edit=<offer>` opens the card of that offer).
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+  if (params.new === '1') query.set('new', '1');
+  if (typeof params.edit === 'string') query.set('edit', params.edit);
+  if (typeof params.notice === 'string') query.set('notice', params.notice);
+  if (typeof params.offer === 'string') query.set('offer', params.offer);
+  redirect(query.size > 0 ? `/seller?${query.toString()}` : '/seller');
 }

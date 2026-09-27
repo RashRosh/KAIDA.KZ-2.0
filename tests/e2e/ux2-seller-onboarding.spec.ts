@@ -98,10 +98,10 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
 
     await page.reload();
     await expect(page.getByText('Местоположение сохранено', { exact: false }).first()).toBeVisible();
-    // With a point, contacts and geo but no Offers yet, the overview is the first-run state with one action.
+    // With a point but no cards yet, «Моя витрина» is the empty state with one action (seller-showcase-editor).
     await page.goto('/seller');
-    await expect(page.getByRole('heading', { name: 'Начните с первого предложения', level: 1 })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Добавить товар' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Покажите товары покупателям рядом' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Сформировать карточки товаров' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(auth.pool, auth.userId, auth.phone);

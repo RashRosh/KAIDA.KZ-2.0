@@ -12,6 +12,9 @@ import { CabinetIcon } from '../../../_components/SellerCabinetFrame';
 import { CabinetLoadError, CabinetLoginRequired, CabinetSkeleton } from '../../../_components/CabinetStates';
 import { formatOfferPrice } from '../../../_components/cabinet-data';
 import { photoUrl } from '../../../../../modules/media/contracts/photo.contract';
+import { formatAmount } from '../../../../_components/OfferCard';
+import { pluralKey } from '../../../_components/card-model';
+import card from './confirm-card.module.css';
 
 type ApiResponse = { changeSet?: SellerChangeSetView; error?: { code?: string } };
 type Phase = 'pending' | 'confirming' | 'failed' | 'conflict';
@@ -122,7 +125,13 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const isCreate = !isBatch && first.action === 'create_offer';
   const publishes = !isBatch && (first.action === 'create_offer' || first.action === 'update_offer' || first.action === 'activate_offer');
   const back = safeBack(params.get('back'), isBatch ? '/seller/offers' : isCreate ? '/seller' : '/seller/offers');
-  const editHref = isCreate
+  // seller-showcase-editor: the card editor passes the query that reopens it with this proposal's values.
+  const reopen = params.get('reopen');
+  const cardMode = items.every((item) => (item.action === 'create_offer' || item.action === 'update_offer') && item.cardId === first.cardId)
+    && (reopen !== null || !isBatch);
+  const editHref = reopen && /^[a-z]+=[0-9a-f-]+$|^new=1$/.test(reopen)
+    ? `/seller?${reopen}&from=${changeSetId}`
+    : isCreate
     ? `${back}${back.includes('?') ? '&' : '?'}new=1&from=${changeSetId}`
     : isBatch
       ? '/seller/batch'
@@ -138,6 +147,10 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
     && (first.action === 'create_offer' || first.photos !== undefined || current !== undefined)
     && resultingPhotoIds(first).length === 0;
 
+  // A new card without photos has no photo list in the proposal; an edit without one keeps its photos unchanged.
+  const cardPhotoIds = first.photos?.map((photo) => photo.id) ?? (first.action === 'create_offer' ? [] : undefined);
+  const cardWithoutPhotos = cardMode && cardPhotoIds !== undefined && cardPhotoIds.length === 0;
+
   async function confirm() {
     setPhase('confirming');
     try {
@@ -145,8 +158,12 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
       const data = await response.json() as ApiResponse;
       if (response.ok && data.changeSet) {
         const resultId = data.changeSet.items[0]?.resultOffer?.id ?? targetOfferId;
-        const query = new URLSearchParams({ notice: isBatch ? 'batch' : noticeFor[first.action] });
-        if (resultId && !isBatch) query.set('offer', resultId);
+        // A card in several points is one publish for the Seller, not a batch.
+        const kind = cardMode
+          ? (items.every((item) => item.action === 'create_offer') ? 'created' : 'updated')
+          : isBatch ? 'batch' : noticeFor[first.action];
+        const query = new URLSearchParams({ notice: kind });
+        if (resultId && (cardMode || !isBatch)) query.set('offer', resultId);
         // Replace, not push: Back from the list must not reopen an actionable review.
         router.replace(`${back}${back.includes('?') ? '&' : '?'}${query.toString()}`);
         return;
@@ -239,6 +256,96 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   }
 
   const busy = phase === 'confirming';
+  if (cardMode) {
+    const creates = items.filter((item) => item.action === 'create_offer').length;
+    const updates = items.length - creates;
+    const commonItem = items.find((item) => !item.priceOwn) ?? first;
+    const amount = (value: string) => `${formatAmount(value)} ₸`;
+    return (
+      <section aria-labelledby="confirm-heading" className={card.page}>
+        <h1 id="confirm-heading" className={styles.title}>{updates > 0 ? t('confirm.changesTitle') : t('confirm.cardTitle')}</h1>
+        {phase === 'failed' && (
+          <div className={styles.notice} role="alert">
+            <CabinetIcon name="alert" />
+            <div><strong>{t('confirm.cardFailed')}</strong><p>{t('card.sendErrorText')}</p></div>
+          </div>
+        )}
+        {phase === 'conflict' && (
+          <div className={styles.notice} role="alert">
+            <CabinetIcon name="alert" />
+            <div><strong>{t('card.changedElsewhere')}</strong><p>{t('confirm.conflictText')}</p></div>
+          </div>
+        )}
+        {cardWithoutPhotos && phase === 'pending' && (
+          <div className={styles.infoNotice}>
+            <CabinetIcon name="alert" />
+            <div>
+              <strong>{t('confirm.noPhotoTitle')}</strong>
+              <p>{t('confirm.noPhotoText')}</p>
+              <Link className={styles.textLink} href={editHref}>{t('confirm.addPhoto')}</Link>
+            </div>
+          </div>
+        )}
+        <div className={card.summary}>
+          <p className={card.name}>{first.product.name}{first.packLabel ? <span> · {first.packLabel}</span> : null}</p>
+          {commonItem.price && (
+            <p className={card.price}>
+              {amount(commonItem.price.amount)}{commonItem.price.unit && <span> / {commonItem.price.unit}</span>}
+              {commonItem.previousPriceAmount && Number(commonItem.previousPriceAmount) !== Number(commonItem.price.amount) && (
+                <span className={card.was}> · {t('card.pricePrevious', { price: amount(commonItem.previousPriceAmount) })}</span>
+              )}
+            </p>
+          )}
+          <div className={card.pointsBlock}>
+            <p className={card.pointsLabel}>{items.length > 1 ? t('confirm.points') : t('confirm.point')}</p>
+                <ul className={card.points}>
+                  {items.map((item) => {
+                    const now = item.price?.amount ?? '';
+                    const before = item.previousPriceAmount;
+                    return (
+                      <li key={item.id}>
+                        <span>{item.location.name}</span>
+                        <span>
+                          {before && Number(before) !== Number(now) ? `${formatAmount(before)} → ${amount(now)}` : amount(now)}
+                          {item.priceOwn ? ` · ${t('cardScreen.own')}` : ''}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+          </div>
+          <dl className={styles.summaryRows}>
+            {cardPhotoIds !== undefined && (
+              <PhotosRow
+                label={t('confirm.photos')}
+                photoIds={cardPhotoIds}
+                text={cardPhotoIds.length > 0 ? t('confirm.photosCount', { count: cardPhotoIds.length }) : t('confirm.noPhotos')}
+              />
+            )}
+            {cardPhotoIds !== undefined && <Row label={t('confirm.comment')} value={first.sellerComment ?? t('confirm.noComment')} />}
+          </dl>
+        </div>
+        <p className={card.count}>
+          {updates === 0
+            ? t(pluralKey('confirm.willPublish', creates), { count: creates })
+            : <>{t(pluralKey('card.willChange', updates), { count: updates })}{creates > 0 && <> · {t(pluralKey('card.willCreate', creates), { count: creates })}</>}</>}
+        </p>
+        <p className={card.responsibility}>{t('confirm.responsibility')}</p>
+        <div className={card.actions}>
+          {phase === 'conflict' ? (
+            <Link className={`${styles.primary} ${styles.large}`} href={editHref} replace><CabinetIcon name="retry" />{t('card.reload')}</Link>
+          ) : (
+            <button type="button" className={`${styles.primary} ${styles.large}`} onClick={() => void confirm()} disabled={busy} aria-busy={busy}>
+              {phase === 'failed' && <CabinetIcon name="retry" />}
+              {phase === 'failed' ? t('cabinet.retry') : busy ? t('confirm.publishing') : cardWithoutPhotos ? t('confirm.publishWithoutPhoto') : t('confirm.publishCard')}
+            </button>
+          )}
+          <Link className={styles.secondary} href={editHref}>{t('confirm.backToEdit')}</Link>
+        </div>
+      </section>
+    );
+  }
+
   const primaryLabel = phase === 'failed'
     ? t('cabinet.retry')
     : busy ? (publishes ? t('confirm.publishing') : t('confirm.confirming'))

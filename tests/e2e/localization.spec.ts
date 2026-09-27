@@ -43,7 +43,7 @@ test('API ignores Accept-Language and keeps legacy Russian errors', async ({ req
   expect((await request.get('/api/interests?locale=kk')).status()).not.toBe(400);
 });
 
-test('Russian and Kazakh catalog terms find the same Offer and locale controls its Product name', async ({ page, request }) => {
+test('Russian and Kazakh catalog terms find the same Offer; the card title stays the Seller text', async ({ page, request }) => {
   const ru = await request.get('/api/search?q=%D2%9B%D0%BE%D0%B9%20%D0%B5%D1%82%D1%96');
   const kk = await request.get('/api/search?q=%D0%B1%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0&locale=kk');
   expect(ru.status()).toBe(200);
@@ -52,7 +52,8 @@ test('Russian and Kazakh catalog terms find the same Offer and locale controls i
   const kkBody = await kk.json();
   expect(ruBody.offers.map((offer: { id: string }) => offer.id)).toEqual(kkBody.offers.map((offer: { id: string }) => offer.id));
   expect(ruBody.offers[0].product).toEqual({ id: ruBody.offers[0].product.id, name: 'Баранина' });
-  expect(kkBody.offers[0].product).toEqual({ id: ruBody.offers[0].product.id, name: 'Қой еті, жауырын', nameLocale: 'kk' });
+  // seller-showcase-editor: the card title is the Seller's text in every language; the catalog finds the same Offer.
+  expect(kkBody.offers[0].product).toEqual({ id: ruBody.offers[0].product.id, name: 'Баранина' });
 
   await page.goto('/');
   await page.getByLabel('Какой товар ищете?').fill('қой еті');
@@ -60,5 +61,6 @@ test('Russian and Kazakh catalog terms find the same Offer and locale controls i
   await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Қазақша' }).click();
   await expect(page.getByLabel('Қандай тауар іздейсіз?')).toHaveValue('қой еті');
-  await expect(page.getByRole('heading', { name: 'Қой еті, жауырын', exact: true })).toHaveAttribute('lang', 'kk');
+  // The title stays as the Seller wrote it after the language switch.
+  await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 });

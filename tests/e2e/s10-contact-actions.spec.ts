@@ -87,8 +87,8 @@ test('point contacts are verified by code and reach the buyer card with the hour
 
     await setSellerLocationGeo(phone);
     await proposeNewOffer(page, { product: 'Баранина', price: '5432.10', unit: 'kg', comment: `S10 ${project} contacts offer` });
-    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 
     // Monday 17:30 in Almaty: open, closing within the hour.
     await page.clock.setFixedTime(new Date('2026-09-21T12:30:00Z'));

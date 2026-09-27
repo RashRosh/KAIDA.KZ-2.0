@@ -49,7 +49,7 @@ export default function SellerBatchPage() {
   return (
     <>
       <AppHeader showAuth={false} contextLabel={t('context.seller')} />
-      <SellerCabinetFrame active="offers">
+      <SellerCabinetFrame active="showcase">
           <div className={styles.intro}>
             <p className={styles.eyebrow}>{t('batch.eyebrow')}</p>
             <h1>{t('batch.pageTitle')}</h1>

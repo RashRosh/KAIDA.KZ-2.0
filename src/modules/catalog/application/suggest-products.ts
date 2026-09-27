@@ -1,4 +1,4 @@
-import type { Database } from '../../../db/client';
+import { getDatabase, type Database } from '../../../db/client';
 import { offerTitleSearchText, queryWords, titleMatchesQuery } from '../../offers/title/offer-title';
 import { findCatalogNamesContaining } from '../infrastructure/products.repository';
 
@@ -8,7 +8,7 @@ export type ProductSuggestion = { id: string; name: string };
 
 // seller-showcase-editor «Name · mixed input»: catalog products whose name or alias has every typed word as a word start.
 export async function suggestCatalogProducts(
-  database: Pick<Database, 'execute'>,
+  database: Pick<Database, 'execute'> = getDatabase(),
   input: string,
   locale: 'ru' | 'kk',
 ): Promise<ProductSuggestion[]> {

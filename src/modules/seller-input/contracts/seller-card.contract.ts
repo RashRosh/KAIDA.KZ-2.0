@@ -97,3 +97,11 @@ export class CommonPriceMissingError extends Error {
     this.name = 'CommonPriceMissingError';
   }
 }
+
+export class CardSharedFieldsError extends Error {
+  readonly code = 'CARD_SHARED_FIELDS' as const;
+  constructor() {
+    super('Этот товар продаётся в нескольких точках — «Цену за», фото и комментарий меняйте на «Моей витрине».');
+    this.name = 'CardSharedFieldsError';
+  }
+}
