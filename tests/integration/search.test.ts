@@ -42,7 +42,7 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
     expect(result.offers.map((offer) => offer.product.id)).toEqual([seedIds.lambProduct]);
   });
 
-  it.each(['единорог', 'баран', 'баранина свежая', '%', '_', "' OR TRUE --"] )('returns no offers for an unmatched exact name: %s', async (query) => {
+  it.each(['единорог', 'аранина', 'баранина свежая', 'б', '%', '_', "' OR TRUE --"] )('returns no offers for an unmatched name: %s', async (query) => {
     expect((await searchOffers(query, connection.db)).offers).toEqual([]);
   });
 
@@ -91,8 +91,8 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
       await client.query('BEGIN');
       await expect(client.query(
         `INSERT INTO offers (
-          product_id, seller_id, location_id, price_amount, price_currency, status, last_confirmed_at
-        ) VALUES ($1,$2,$3,$4,$5,'active',$6)`,
+          product_id, seller_id, location_id, price_amount, price_currency, status, last_confirmed_at, title, title_search, card_id
+        ) VALUES ($1,$2,$3,$4,$5,'active',$6,(SELECT name FROM products WHERE id=$1::uuid),lower((SELECT name FROM products WHERE id=$1::uuid)),gen_random_uuid())`,
         [seedIds.lambProduct, seedIds.seller, seedIds.location, amount, currency, new Date('2026-09-11T12:00:00.000Z')],
       )).rejects.toMatchObject({ code: '23514' });
     } finally {
@@ -103,8 +103,8 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
 
   it('rejects a priced offer pointing at a nonexistent product', async () => {
     await expect(connection.pool.query(
-      `INSERT INTO offers (product_id, seller_id, location_id, price_amount, price_currency, status, last_confirmed_at)
-       VALUES ($1,$2,$3,'1','KZT','active',$4)`,
+      `INSERT INTO offers (product_id, seller_id, location_id, price_amount, price_currency, status, last_confirmed_at, title, title_search, card_id)
+       VALUES ($1,$2,$3,'1','KZT','active',$4,'Нет товара','нет товара',gen_random_uuid())`,
       ['10000000-0000-4000-8000-000000000099', seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
     )).rejects.toMatchObject({ code: '23503' });
   });
@@ -119,8 +119,8 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
       await client.query('BEGIN');
       const result = await client.query(
         `INSERT INTO offers (
-          product_id, seller_id, location_id, price_amount, price_currency, price_unit_code, seller_comment, status, last_confirmed_at
-        ) VALUES ($1,$2,$3,0,'KZT',NULL,NULL,'active',$4) RETURNING price_amount, price_unit_code, seller_comment`,
+          product_id, seller_id, location_id, price_amount, price_currency, price_unit_code, seller_comment, status, last_confirmed_at, title, title_search, card_id
+        ) VALUES ($1,$2,$3,0,'KZT',NULL,NULL,'active',$4,(SELECT name FROM products WHERE id=$1::uuid),lower((SELECT name FROM products WHERE id=$1::uuid)),gen_random_uuid()) RETURNING price_amount, price_unit_code, seller_comment`,
         [seedIds.lambProduct, seedIds.seller, seedIds.location, new Date('2026-09-11T12:00:00.000Z')],
       );
       expect(result.rows[0]).toEqual({ price_amount: '0', price_unit_code: null, seller_comment: null });

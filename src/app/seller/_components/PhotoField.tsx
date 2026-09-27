@@ -4,7 +4,6 @@ import { useEffect, useId, useRef, useState, type Dispatch, type PointerEvent as
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
-import styles from './photo-field.module.css';
 
 export const PHOTO_LIMIT = 5;
 const LONG_PRESS_MS = 350;
@@ -187,28 +186,26 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
   const selectedIndex = tiles.findIndex((tile) => tile.key === selectedKey);
   const selected = selectedIndex >= 0 ? tiles[selectedIndex] : undefined;
   const full = tiles.length >= PHOTO_LIMIT;
+  const failed = tiles.map((tile, index) => ({ tile, index })).filter(({ tile }) => tile.status === 'error');
 
+  // AI-S09 · Editor · Media: 72 px tiles, the cover marked with a star, progress and error on the tile itself.
   return (
-    <fieldset className={styles.section} aria-describedby={`${ids}-hint`}>
-      <legend className={styles.legend}>
-        <span>{t('photos.title')}</span>
-        <span className={styles.counter}>{t('photos.counter', { count: tiles.length, limit: PHOTO_LIMIT })}</span>
-      </legend>
+    <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }} aria-labelledby={`${ids}-title`}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span className="lbl" id={`${ids}-title`}>{t('photos.title')}</span>
+        <span className="c num">{full ? `${tiles.length} из ${PHOTO_LIMIT} — максимум` : t('photos.counter', { count: tiles.length, limit: PHOTO_LIMIT })}</span>
+      </div>
 
-      <ul ref={gridRef} className={styles.grid} onPointerMove={onPointerMove} onPointerUp={endPress} onPointerCancel={endPress}>
+      <ul ref={gridRef} className="mrow" style={{ margin: 0, padding: 0, listStyle: 'none' }} onPointerMove={onPointerMove} onPointerUp={endPress} onPointerCancel={endPress}>
         {tiles.map((tile, index) => (
-          <li
-            key={tile.key}
-            data-photo-key={tile.key}
-            className={styles.tile}
-            data-selected={tile.key === selectedKey || undefined}
-            data-dragging={tile.key === draggingKey || undefined}
-          >
+          <li key={tile.key} data-photo-key={tile.key} style={{ opacity: tile.key === draggingKey ? 0.6 : 1 }}>
             <button
               type="button"
-              className={styles.tileButton}
+              className={`mt img${tile.status === 'uploading' ? ' up' : ''}${tile.status === 'error' ? ' er' : ''}`}
+              style={{ padding: 0, border: 0, cursor: 'pointer', outline: tile.key === selectedKey ? '2px solid var(--primary)' : undefined, outlineOffset: tile.key === selectedKey ? 2 : undefined }}
               onClick={() => {
                 if (suppressClick.current) { suppressClick.current = false; return; }
+                if (tile.status === 'error' && tile.file && tile.error === 'photos.errorUpload') { retry(tile); return; }
                 setSelectedKey((current) => (current === tile.key ? null : tile.key));
               }}
               onPointerDown={(event) => onPointerDown(event, tile.key)}
@@ -219,59 +216,72 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- local object URLs and owner-only photo routes */}
               <img src={tile.previewUrl} alt="" draggable={false} />
-              {index === 0 && <span className={styles.cover}>{t('photos.cover')}</span>}
+              {index === 0 && <span className="cv star" role="img" aria-label={t('photos.cover')} title={t('photos.cover')}><span className="ic i-starf" /></span>}
               {tile.status === 'uploading' && (
-                <span className={styles.progress} role="progressbar" aria-label={t('photos.uploading')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(tile.progress * 100)}>
-                  <span style={{ width: `${Math.round(tile.progress * 100)}%` }} />
-                </span>
+                <div className="pb" role="progressbar" aria-label={t('photos.uploading')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(tile.progress * 100)}>
+                  <i style={{ width: `${Math.round(tile.progress * 100)}%` }} />
+                </div>
+              )}
+              {tile.status === 'error' && (
+                <div className="erl"><span className="ic i-refresh sm" />{tile.file && tile.error === 'photos.errorUpload' ? t('photos.retry') : t('photos.remove')}</div>
               )}
             </button>
-            {tile.status === 'error' && (
-              <div className={styles.tileError}>
-                <span>{t(tile.error ?? 'photos.errorUpload')}</span>
-                {tile.file && tile.error === 'photos.errorUpload' ? (
-                  <button type="button" onClick={() => retry(tile)} disabled={disabled}>{t('photos.retry')}</button>
-                ) : (
-                  <button type="button" onClick={() => remove(tile.key)} disabled={disabled}>{t('photos.remove')}</button>
-                )}
-              </div>
-            )}
           </li>
         ))}
-        <li className={styles.tile}>
-          <label className={styles.add} data-disabled={full || disabled || undefined}>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className={styles.fileInput}
-              disabled={full || disabled}
-              onChange={(event) => { addFiles(event.target.files); event.target.value = ''; }}
-            />
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-            <span>{full ? t('photos.limit') : t('photos.add')}</span>
-          </label>
+        <li>
+          {full ? (
+            <div className="mt add" style={{ color: 'var(--ink3)', borderColor: 'var(--line)' }} aria-disabled="true"><span className="ic i-plus" />Лимит</div>
+          ) : (
+            <label className="mt add" style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="vh"
+                aria-label={t('photos.add')}
+                disabled={disabled}
+                onChange={(event) => { addFiles(event.target.files); event.target.value = ''; }}
+              />
+              <span className="ic i-camera" />Фото
+            </label>
+          )}
         </li>
       </ul>
 
+      {failed.map(({ tile, index }) => (
+        <div key={tile.key} className="fld">
+          <div className="emsg">
+            <span className="ic i-alert" />
+            <span style={{ flex: 1 }}>{t(tile.error ?? 'photos.errorUpload')}</span>
+            {!(tile.file && tile.error === 'photos.errorUpload') && (
+              <button type="button" className="btn btn-g sm" style={{ height: 20, padding: 0 }} onClick={() => remove(tile.key)} disabled={disabled} aria-label={`${t('photos.remove')}: ${t('photos.tile', { position: index + 1 })}`}>{t('photos.remove')}</button>
+            )}
+          </div>
+        </div>
+      ))}
+
       {selected && (
-        <div className={styles.actions} role="group" aria-label={t('photos.actionsFor', { position: selectedIndex + 1 })}>
+        <div className="card p16" style={{ gap: 4, boxShadow: 'var(--shadow-md)' }} role="group" aria-label={t('photos.actionsFor', { position: selectedIndex + 1 })}>
+          <div className="ov" style={{ padding: '4px 0 8px' }}>{t('photos.tile', { position: selectedIndex + 1 })}</div>
           {selectedIndex > 0 && (
-            <button type="button" className={styles.action} onClick={() => reorder(selected.key, 0)} disabled={disabled}>{t('photos.makeCover')}</button>
+            <button type="button" className="li" style={{ minHeight: 48, border: 0, background: 'none', padding: '8px 0' }} onClick={() => reorder(selected.key, 0)} disabled={disabled}>
+              <span className="ic i-cover c2" /><div className="mid"><div className="ts">{t('photos.makeCover')}</div></div>
+            </button>
           )}
-          <button type="button" className={styles.actionIcon} onClick={() => reorder(selected.key, selectedIndex - 1)} disabled={disabled || selectedIndex === 0} aria-label={t('photos.moveLeft')}>
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+          <div className="li" style={{ minHeight: 48 }}>
+            <span className="ic i-drag c2" /><div className="mid"><div className="ts">Переместить</div></div>
+            <button type="button" className="ib" style={{ width: 40, height: 40 }} onClick={() => reorder(selected.key, selectedIndex - 1)} disabled={disabled || selectedIndex === 0} aria-label={t('photos.moveLeft')}><span className="ic i-left sm" /></button>
+            <button type="button" className="ib" style={{ width: 40, height: 40 }} onClick={() => reorder(selected.key, selectedIndex + 1)} disabled={disabled || selectedIndex === tiles.length - 1} aria-label={t('photos.moveRight')}><span className="ic i-right sm" /></button>
+          </div>
+          <button type="button" className="li" style={{ minHeight: 48, color: 'var(--danger)', border: 0, borderTop: '1px solid var(--line)', background: 'none', padding: '8px 0' }} onClick={() => remove(selected.key)} disabled={disabled}>
+            <span className="ic i-trash" /><div className="mid"><div className="ts">{t('photos.remove')}</div></div>
           </button>
-          <button type="button" className={styles.actionIcon} onClick={() => reorder(selected.key, selectedIndex + 1)} disabled={disabled || selectedIndex === tiles.length - 1} aria-label={t('photos.moveRight')}>
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-          </button>
-          <button type="button" className={styles.actionDanger} onClick={() => remove(selected.key)} disabled={disabled}>{t('photos.remove')}</button>
         </div>
       )}
 
-      <p id={`${ids}-hint`} className={styles.hint}>{tiles.length === 0 ? t('photos.emptyHint') : t('photos.orderHint')}</p>
-      {blockedMessage && <p className={styles.blocked} role="alert">{t(blockedMessage)}</p>}
-      <p className={styles.srOnly} aria-live="polite">{announcement}</p>
-    </fieldset>
+      <p className="c">{tiles.length === 0 ? t('photos.emptyHint') : 'Удерживайте фото, чтобы изменить порядок.'}</p>
+      {blockedMessage && <div className="fld" role="alert"><div className="emsg"><span className="ic i-alert" />{t(blockedMessage)}</div></div>}
+      <p className="vh" aria-live="polite">{announcement}</p>
+    </section>
   );
 }

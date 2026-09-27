@@ -61,16 +61,16 @@ beforeAll(async () => {
   ]);
 
   await pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at)
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at, title, title_search, card_id)
     VALUES
-    ($1,$9,$10,$11,1000,'KZT','active',$14,$14,$14),
-    ($2,$9,$10,$11,1000,'KZT','active',$14,$14,$14),
-    ($3,$9,$10,$11,1000,'KZT','active',$15,$15,$15),
-    ($4,$9,$10,$12,1000,'KZT','active',$16,$16,$16),
-    ($5,$9,$10,$13,1000,'KZT','active',$17,$17,$17),
-    ($6,$9,$10,$13,1000,'KZT','active',$18,$18,$18),
-    ($7,$9,$10,$11,1000,'KZT','inactive',$19,$19,$19),
-    ($8,$9,$10,$11,1000,'KZT','active',$20,$20,$20)`, [
+    ($1,$9,$10,$11,1000,'KZT','active',$14,$14,$14,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($2,$9,$10,$11,1000,'KZT','active',$14,$14,$14,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($3,$9,$10,$11,1000,'KZT','active',$15,$15,$15,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($4,$9,$10,$12,1000,'KZT','active',$16,$16,$16,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($5,$9,$10,$13,1000,'KZT','active',$17,$17,$17,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($6,$9,$10,$13,1000,'KZT','active',$18,$18,$18,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($7,$9,$10,$11,1000,'KZT','inactive',$19,$19,$19,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid()),
+    ($8,$9,$10,$11,1000,'KZT','active',$20,$20,$20,(SELECT name FROM products WHERE id=$9::uuid),lower((SELECT name FROM products WHERE id=$9::uuid)),gen_random_uuid())`, [
     offerIds.nearFreshA,
     offerIds.nearFreshB,
     offerIds.nearOld,

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
-import { fillOfferFields, offerEditor } from './offer-editor-helpers';
+import { fillOfferFields, offerEditor, openNewCard } from './offer-editor-helpers';
 
 // The default web server runs with the translator off; `translatorOnBaseURL` is the same build with the fake adapter.
 const translatorOnBaseURL = 'http://127.0.0.1:3101';
@@ -71,16 +71,14 @@ async function login(page: Page, phone: string) {
 }
 
 async function publishOffer(page: Page, comment: string) {
-  await page.goto('/seller/offers');
-  await page.getByRole('link', { name: 'Добавить товар' }).first().click();
-  await fillOfferFields(page, { product: 'Баранина', price: '4200', comment });
+  await openNewCard(page);
+  await fillOfferFields(page, { product: 'Баранина', price: '4200', unit: 'kg', comment });
 }
 
 async function confirmOffer(page: Page) {
-  await offerEditor(page).getByRole('button', { name: 'Далее' }).click();
-  await offerEditor(page).getByRole('button', { name: 'Продолжить' }).click();
-  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+  await offerEditor(page).getByRole('button', { name: 'Проверить и опубликовать' }).click();
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+  await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 }
 
 async function searchLamb(page: Page, query = 'баранина', label = 'Какой товар ищете?') {
@@ -103,9 +101,9 @@ test.describe('translator on', () => {
 
       // Nothing in the form asks for or assumes the comment language.
       const form = offerEditor(page);
-      // offer-price-unit: the unit choice is the form's only dropdown; there is still no language picker.
+      // seller-showcase-editor: the only combobox is the product name with catalog suggestions; no language picker.
       await expect(form.getByRole('combobox')).toHaveCount(1);
-      await expect(form.getByRole('combobox', { name: 'Единица', exact: true })).toHaveCount(1);
+      await expect(form.getByRole('combobox', { name: 'Название товара', exact: true })).toHaveCount(1);
       await expect(form.getByRole('radio')).toHaveCount(0);
       await expect(page.getByText('Покупатели увидят комментарий на своём языке — это автоперевод.')).toBeVisible();
       await page.getByRole('button', { name: 'Проверить перевод' }).click();

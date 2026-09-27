@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
-import { fillOfferFields, offerEditor } from './offer-editor-helpers';
+import { choosePoints, fillOfferFields, offerEditor, publishButton } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000367' : '+77000000368';
@@ -45,9 +45,9 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
   try {
     await authenticate(page, phone);
     await page.goto('/seller/points');
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
     await page.getByLabel('Имя', { exact: true }).fill(`Seller 36 ${testInfo.project.name}`);
-    await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(firstName);
+    await page.getByRole('textbox', { name: 'Название для покупателей', exact: true }).fill(firstName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, адрес A');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -57,9 +57,10 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
 
     const add = page.getByRole('button', { name: 'Добавить торговую точку' });
     await expect(add).toBeVisible();
-    expect((await add.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // The mockup button is exactly 44 px; Chromium can report it a few 1/1000 px short.
+    expect(Math.round((await add.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
     await add.click();
-    await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(secondName);
+    await page.getByRole('textbox', { name: 'Название для покупателей', exact: true }).fill(secondName);
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
     await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, адрес B');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -69,8 +70,8 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
     await secondCard.focus();
     await expect(secondCard).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page.getByRole('heading', { name: 'Изменить торговую точку' })).toBeVisible();
-    await page.getByRole('textbox', { name: 'Название торговой точки', exact: true }).fill(editedName);
+    await expect(page.getByRole('heading', { name: secondName, level: 1 })).toBeVisible();
+    await page.getByRole('textbox', { name: 'Название для покупателей', exact: true }).fill(editedName);
     await page.getByLabel('Тип торговой точки').selectOption('market');
     await page.getByRole('textbox', { name: 'Адрес', exact: true }).fill('Алматы, изменённый адрес B');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -85,22 +86,19 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
 
     await page.reload();
     await expect(page.getByText(editedName, { exact: true })).toBeVisible();
-    // seller-offer-editor: with two points the point step pre-selects nothing and waits for an explicit choice.
+    // seller-showcase-editor: with two points nothing is pre-selected and publishing needs an explicit choice.
     await page.goto('/seller/offers?new=1');
     const editor = offerEditor(page);
-    await fillOfferFields(page, { product: 'Баранина', price: '4360' });
-    await editor.getByRole('button', { name: 'Далее' }).click();
-    await expect(editor.getByText('Выберите точку для этого предложения')).toBeVisible();
-    await expect(editor.getByRole('radio')).toHaveCount(2);
-    await expect(editor.getByRole('radio', { checked: true })).toHaveCount(0);
-    await expect(editor.getByText('Сначала выберите точку')).toBeVisible();
-    await expect(editor.getByRole('button', { name: 'Продолжить' })).toBeDisabled();
-    await editor.getByRole('radio', { name: new RegExp(editedName) }).check();
-    await editor.getByRole('button', { name: 'Продолжить' }).click();
+    await fillOfferFields(page, { product: 'Баранина', price: '4360', unit: 'kg' });
+    await expect(editor.getByRole('checkbox', { checked: true })).toHaveCount(0);
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
+    await expect(editor.getByText('Выберите хотя бы одну точку')).toBeVisible();
+    await choosePoints(page, [editedName]);
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
     await expect(page.getByText(editedName).first()).toBeVisible();
-    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+    await page.getByRole('button', { name: publishButton }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 
     const search = await page.request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
     expect(search.status()).toBe(200);

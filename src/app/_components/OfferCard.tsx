@@ -152,6 +152,7 @@ export function OfferCard({
         <div className={styles.offerTitleBlock}>
           <h2 id={`offer-${offer.id}`} lang={offer.product.nameLocale}>
             {linked ? <Link href={offerHref} className={styles.offerNameLink}>{offer.product.name}</Link> : offer.product.name}
+            {offer.pack && <span className={styles.priceUnit}> · {offer.pack}</span>}
           </h2>
           <p className={styles.price}>
             {formatAmount(offer.price.amount)} ₸

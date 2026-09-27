@@ -92,7 +92,7 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
       .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
       .then((localized) => {
         if (!active || !localized) return;
-        const names = new Map(localized.offers.map((offer) => [offer.product.id, offer.product]));
+        const packs = new Map(localized.offers.map((offer) => [offer.id, offer.pack]));
         const comments = new Map(localized.offers.map((offer) => [offer.id, offer.sellerCommentTranslation]));
         const prices = new Map(localized.offers.map((offer) => [offer.id, offer.price]));
         setState({
@@ -101,7 +101,8 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
             ...current,
             offers: current.offers.map((offer) => ({
               ...offer,
-              product: names.get(offer.product.id) ?? offer.product,
+              // Titles are the Seller's own text; only the pack label follows the interface locale.
+              pack: packs.has(offer.id) ? packs.get(offer.id) : offer.pack,
               // Canonical unit labels follow the interface locale; custom units come back unchanged.
               price: prices.get(offer.id) ?? offer.price,
               // The comment variant is per interface locale; an Offer missing from the refetch keeps no stale translation.
@@ -401,17 +402,21 @@ export function SearchForm({ initialQuery = '' }: SearchFormProps) {
             </div>
             <ul className={styles.offerList} aria-label={t('search.offers')}>
               {state.result.offers.map((offer) => {
-                const interest = interestsState.kind === 'ready'
+                // Interests follow catalog products: a card without a catalog link has no interest action.
+                const productId = offer.product.id;
+                const interest = productId === null
+                  ? undefined
+                  : interestsState.kind === 'ready'
                   ? {
-                    active: interestsState.productIds.has(offer.product.id),
-                    pending: pendingInterestIds.has(offer.product.id),
-                    onToggle: () => toggleInterest(offer.product.id),
+                    active: interestsState.productIds.has(productId),
+                    pending: pendingInterestIds.has(productId),
+                    onToggle: () => toggleInterest(productId),
                   }
                   : interestsState.kind === 'anonymous'
                     ? {
                       active: false,
-                      pending: pendingInterestIds.has(offer.product.id),
-                      onToggle: (event?: ReactMouseEvent<HTMLElement>) => requestInterestAuth(offer.product.id, event),
+                      pending: pendingInterestIds.has(productId),
+                      onToggle: (event?: ReactMouseEvent<HTMLElement>) => requestInterestAuth(productId, event),
                     }
                     : undefined;
                 return <li key={offer.id}><OfferCard offer={offer} interest={interest} /></li>;

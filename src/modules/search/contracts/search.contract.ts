@@ -6,11 +6,14 @@ export const searchQuerySchema = z.string().trim().min(1, 'Введите наз
 
 export const searchOfferSchema = z.object({
   id: z.uuid(),
+  // name is the Seller's own title; id is the catalog link when the card has one (seller-showcase-editor).
   product: z.object({
-    id: z.uuid(),
+    id: z.uuid().nullable(),
     name: z.string(),
     nameLocale: z.enum(['ru', 'kk']).optional(),
   }),
+  // Weight or volume of one package or piece, shown after the name: «Курага · 500 г».
+  pack: z.string().optional(),
   seller: z.object({
     id: z.uuid(),
     displayName: z.string(),

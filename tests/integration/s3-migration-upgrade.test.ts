@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
-import { withMigrationTestDatabase, withStructuredPriceUnit } from './migration-test-database';
+import { withMigrationTestDatabase, withStructuredPriceUnit, withShowcaseCardOffer } from './migration-test-database';
 
 async function createS2MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s2-migrations-'));
@@ -62,7 +62,7 @@ describe('S3 migration upgrade path on PostgreSQL 18', () => {
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
       const afterOffer = (await pool.query('SELECT * FROM offers WHERE id=$1', [legacyOffer])).rows[0];
       const { revision, seller_comment_version: sellerCommentVersion, ...preservedAfterOffer } = afterOffer;
-      expect(preservedAfterOffer).toEqual(withStructuredPriceUnit(beforeOffer, 'kg'));
+      expect(preservedAfterOffer).toEqual(withShowcaseCardOffer(withStructuredPriceUnit(beforeOffer, 'kg'), 'S3 upgrade fixture'));
       expect(revision).toBe(1);
       expect(sellerCommentVersion).toBe(1);
 
@@ -77,7 +77,7 @@ describe('S3 migration upgrade path on PostgreSQL 18', () => {
         .rejects.toMatchObject({ code: '23514' });
 
       const offerColumns = (await pool.query("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='offers' ORDER BY ordinal_position")).rows.map((row) => row.column_name);
-      expect(offerColumns).toEqual(['id', 'product_id', 'seller_id', 'location_id', 'price_amount', 'price_currency', 'seller_comment', 'created_at', 'updated_at', 'status', 'last_confirmed_at', 'revision', 'seller_comment_version', 'price_unit_code', 'price_unit_value']);
+      expect(offerColumns).toEqual(['id', 'product_id', 'seller_id', 'location_id', 'price_amount', 'price_currency', 'seller_comment', 'created_at', 'updated_at', 'status', 'last_confirmed_at', 'revision', 'seller_comment_version', 'price_unit_code', 'price_unit_value', 'title', 'title_search', 'card_id', 'price_own', 'pack_amount', 'pack_unit']);
     });
   });
 

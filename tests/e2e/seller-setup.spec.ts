@@ -63,8 +63,8 @@ test('authenticated User creates Seller + first Location and persists after relo
 
     // Seller cabinet: trading points and contacts are separate destinations (seller-cabinet-overview).
     await page.goto('/seller/points');
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
-    await page.getByLabel('Название торговой точки').fill('S3 тестовая точка');
+    await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
+    await page.getByLabel('Название для покупателей').fill('S3 тестовая точка');
     await page.getByLabel('Тип торговой точки').selectOption('pavilion');
     await page.getByLabel('Адрес').fill('Алматы, тестовый адрес S3');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -73,8 +73,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.goto('/seller/points');
 
     await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Павильон', { exact: true })).toBeVisible();
-    await expect(page.getByText('Алматы, тестовый адрес S3', { exact: true })).toBeVisible();
+    await expect(page.getByText('Павильон · Алматы, тестовый адрес S3', { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     expect(await ownedSellerOfferCount(pool, phone)).toBe(0);
 
@@ -86,8 +85,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     expect(meBody.seller.locations).toHaveLength(1);
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Точки', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Мои точки', level: 1 })).toBeVisible();
     await expect(page.getByText('S3 тестовая точка', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     expect(await ownedSellerOfferCount(pool, phone)).toBe(0);

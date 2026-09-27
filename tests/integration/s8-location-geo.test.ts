@@ -182,8 +182,8 @@ describe('S8 Location geo on PostgreSQL 18', () => {
 
       await pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, productName]);
       const now = new Date();
-      await pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at)
-        VALUES ($1,$2,$3,$4,1000,'KZT','active',$5,$5,$5),($6,$2,$7,$8,1000,'KZT','active',$5,$5,$5)`, [
+      await pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at, title, title_search, card_id)
+        VALUES ($1,$2,$3,$4,1000,'KZT','active',$5,$5,$5,(SELECT name FROM products WHERE id=$2::uuid),lower((SELECT name FROM products WHERE id=$2::uuid)),gen_random_uuid()),($6,$2,$7,$8,1000,'KZT','active',$5,$5,$5,(SELECT name FROM products WHERE id=$2::uuid),lower((SELECT name FROM products WHERE id=$2::uuid)),gen_random_uuid())`, [
         '40000000-0000-4000-8000-000000000906', productId, shop.id, shop.locations[0]!.id, now,
         '40000000-0000-4000-8000-000000000907', home.id, home.locations[0]!.id,
       ]);

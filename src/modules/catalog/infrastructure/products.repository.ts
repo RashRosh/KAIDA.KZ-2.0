@@ -41,3 +41,36 @@ export async function findProductCandidatesByNormalizedTerm(database: ProductRea
 
   return [...canonicalMatches, ...localizedNameMatches, ...aliasMatches];
 }
+
+export async function findCatalogProductById(database: ProductReadDb, id: string) {
+  const rows = await database.select({ id: products.id, name: products.name }).from(products).where(eq(products.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+// seller-showcase-editor: catalog names, localized names and aliases that contain a word, with the product's name in
+// the interface language. The caller applies the exact word-start rule.
+export async function findCatalogNamesContaining(
+  database: Pick<Database, 'execute'>,
+  word: string,
+  locale: 'ru' | 'kk',
+  limit: number,
+) {
+  const pattern = `%${word.replace(/[\\%_]/g, (character) => `\\${character}`)}%`;
+  const result = await database.execute<{ id: string; name: string; matched: string }>(sql`
+    select p.id,
+      case when ${locale} = 'kk'
+        then coalesce((select pln.name from product_localized_names pln where pln.product_id = p.id and pln.locale = 'kk'), p.name)
+        else p.name end as name,
+      n.matched
+    from (
+      select id as product_id, name as matched from products
+      union all select product_id, name from product_localized_names
+      union all select product_id, name from product_aliases
+    ) n
+    inner join products p on p.id = n.product_id
+    where replace(lower(n.matched), 'ё', 'е') like ${pattern}
+    order by p.name, p.id
+    limit ${limit}
+  `);
+  return result.rows;
+}

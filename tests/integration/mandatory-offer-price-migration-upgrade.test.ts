@@ -146,19 +146,19 @@ describe('Mandatory Offer Price migration upgrade on PostgreSQL 18', () => {
       ]);
 
       await expect(pool.query(
-        `INSERT INTO offers (product_id,seller_id,location_id,status,last_confirmed_at)
-         VALUES ($1,$2,$3,'active',$4)`,
+        `INSERT INTO offers (product_id,seller_id,location_id,status,last_confirmed_at,title,title_search,card_id)
+         VALUES ($1,$2,$3,'active',$4,'Без цены','без цены',gen_random_uuid())`,
         [productId, sellerId, locationId, beforeTime],
       )).rejects.toMatchObject({ code: '23514' });
       await expect(pool.query(
-        `INSERT INTO offers (product_id,seller_id,location_id,status,last_confirmed_at)
-         VALUES ($1,$2,$3,'inactive',$4)`,
+        `INSERT INTO offers (product_id,seller_id,location_id,status,last_confirmed_at,title,title_search,card_id)
+         VALUES ($1,$2,$3,'inactive',$4,'Без цены','без цены',gen_random_uuid())`,
         [productId, sellerId, locationId, beforeTime],
       )).rejects.toMatchObject({ code: '23514' });
 
       const zero = await pool.query(
-        `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,price_unit_code,status,last_confirmed_at)
-         VALUES ($1,$2,$3,'0','KZT',NULL,'inactive',$4) RETURNING price_amount,price_currency,price_unit_code`,
+        `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,price_unit_code,status,last_confirmed_at,title,title_search,card_id)
+         VALUES ($1,$2,$3,'0','KZT',NULL,'inactive',$4,'Ноль','ноль',gen_random_uuid()) RETURNING price_amount,price_currency,price_unit_code`,
         [productId, sellerId, locationId, beforeTime],
       );
       expect(zero.rows[0]).toEqual({ price_amount: '0', price_currency: 'KZT', price_unit_code: null });

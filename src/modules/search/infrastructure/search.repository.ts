@@ -1,12 +1,12 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, or, sql, type SQL } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
-import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import { findVerifiedPhonesBySellers } from '../../locations/details/point-details.repository';
 import { projectPointPublicContacts } from '../../locations/details/point-public-contacts';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
+import { formatPack, packFromColumns } from '../../offers/pack/pack';
 import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
@@ -21,14 +21,33 @@ import type { SearchRankingCandidate } from '../ranking/search-ranking';
 
 // A read projection across the four owning modules; lifecycle and buyer-visibility semantics stay outside Search.
 // S9 private ranking metadata remains beside, never inside, the public SearchOffer payload.
-export async function findOffersByProductId(
+// seller-showcase-editor: Offers linked to the resolved catalog product, or whose own title has every query word as
+// the start of one of its words (words are already normalized: letters and digits only).
+export async function findOffersByProductOrTitleWords(
   db: Database,
-  productId: string,
+  match: { productId: string | null; words: string[] },
   cutoff: Date,
   locale: 'ru' | 'kk' = 'ru',
   commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
 ): Promise<SearchRankingCandidate[]> {
-  return findBuyerVisibleOffers(db, { productId }, cutoff, locale, commentTranslationEnabled);
+  return findBuyerVisibleOffers(db, match, cutoff, locale, commentTranslationEnabled);
+}
+
+function withPack(pack: string | null) {
+  return pack === null ? {} : { pack };
+}
+
+function titleWordsMatch(words: string[]): SQL | undefined {
+  if (words.length === 0) return undefined;
+  return and(...words.map((word) => sql`(' ' || ${offers.titleSearch}) like ${`% ${word}%`}`));
+}
+
+function productOrWords(filter: { productId: string | null; words: string[] }): SQL {
+  const conditions = [
+    filter.productId === null ? undefined : eq(offers.productId, filter.productId),
+    titleWordsMatch(filter.words),
+  ].filter((condition): condition is SQL => condition !== undefined);
+  return conditions.length === 0 ? sql`false` : or(...conditions)!;
 }
 
 // The same buyer projection for the buyer Offer page: one Offer, same visibility policy, never a hidden one.
@@ -45,20 +64,17 @@ export async function findBuyerVisibleOfferById(
 
 async function findBuyerVisibleOffers(
   db: Database,
-  filter: { productId: string } | { offerId: string },
+  filter: { productId: string | null; words: string[] } | { offerId: string },
   cutoff: Date,
   locale: 'ru' | 'kk',
   commentTranslationEnabled: boolean,
 ): Promise<SearchRankingCandidate[]> {
   const rows = await db.select({
     id: offers.id,
-    productId: products.id,
-    productName: locale === 'kk'
-      ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
-      : products.name,
-    productNameLocale: locale === 'kk'
-      ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
-      : sql<'ru'>`'ru'`,
+    productId: offers.productId,
+    title: offers.title,
+    packAmount: offers.packAmount,
+    packUnit: offers.packUnit,
     seller: { id: sellers.id, displayName: sellers.displayName },
     location: { id: locations.id, name: locations.name, addressText: locations.addressText, openingHours: locations.openingHours },
     locationPhoneE164: locations.phoneE164,
@@ -73,13 +89,12 @@ async function findBuyerVisibleOffers(
     lastConfirmedAt: offers.lastConfirmedAt,
     locationLatitude: locations.latitude,
     locationLongitude: locations.longitude,
-  }).from(products)
-    .innerJoin(offers, eq(offers.productId, products.id))
+  }).from(offers)
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
     .where(and(
-      'productId' in filter ? eq(products.id, filter.productId) : eq(offers.id, filter.offerId),
+      'offerId' in filter ? eq(offers.id, filter.offerId) : productOrWords(filter),
       buyerVisibleOffersPredicate(cutoff),
     ))
     .orderBy(asc(offers.id));
@@ -97,8 +112,9 @@ async function findBuyerVisibleOffers(
     locationLatitude,
     locationLongitude,
     productId: selectedProductId,
-    productName,
-    productNameLocale,
+    title,
+    packAmount,
+    packUnit,
     commentTranslationStatus,
     commentTranslationText,
     commentTranslationSourceLanguage,
@@ -111,11 +127,9 @@ async function findBuyerVisibleOffers(
 
     const offer: SearchOffer = {
       ...rest,
-      product: {
-        id: selectedProductId,
-        name: productName,
-        ...(locale === 'kk' ? { nameLocale: productNameLocale } : {}),
-      },
+      // The card title is the Seller's own text in every interface language; id is the optional catalog link.
+      product: { id: selectedProductId, name: title },
+      ...withPack(formatPack(packFromColumns(packAmount, packUnit), locale)),
       location: {
         ...rest.location,
         ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),

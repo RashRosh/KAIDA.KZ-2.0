@@ -45,8 +45,9 @@ async function prepareSeller(page: Page, phones: { login: string; public: string
   });
 }
 
-async function switchLocale(page: Page, name: 'Қазақша' | 'Русский') {
-  const control = page.getByRole('button', { name }).filter({ visible: true }).last();
+// The mockup's РУС / ҚАЗ switch in the header of the seller screens.
+async function switchLocale(page: Page, name: 'ҚАЗ' | 'РУС') {
+  const control = page.getByRole('button', { name, exact: true }).filter({ visible: true }).last();
   await control.click();
   await expect(control).toHaveAttribute('aria-pressed', 'true');
 }
@@ -62,86 +63,74 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
   try {
     await prepareSeller(page, phones, sellerName);
 
-    await page.goto('/seller/offers?new=1');
+    // seller-showcase-editor: «Цена за» opens a sheet with the canonical units and «Другое».
+    await page.goto('/seller?new=1');
     let editor = offerEditor(page);
-    const unit = editor.getByLabel('Единица', { exact: true });
-    await expect(unit.locator('option')).toHaveText(['не указана', 'кг', 'шт', 'л', 'упак.', 'другое']);
-    await expect(unit).toHaveValue('');
-    await editor.getByRole('textbox', { name: 'Товар', exact: true }).fill('Баранина');
+    const unitButton = () => offerEditor(page).getByRole('button', { name: /^(Цена за|Баға бірлігі)/ });
+    await expect(unitButton()).toHaveText('Выберите');
+    await unitButton().click();
+    const sheet = page.getByRole('dialog', { name: 'Цена за' });
+    await expect(sheet.getByRole('radio')).toHaveText([/^кг/, /^л/, /^шт/, /^упак\./, /^Другое/]);
+    await sheet.getByRole('radio', { name: /^Другое/ }).click();
+    await expect(sheet).toHaveCount(0);
+    await editor.getByRole('combobox', { name: 'Название товара' }).fill('Баранина');
     await editor.getByRole('textbox', { name: 'Цена', exact: true }).fill('4200');
-    for (const code of ['kg', 'piece', 'liter', 'package']) {
-      await unit.selectOption(code);
-      await expect(unit).toHaveValue(code);
-      await expect(editor.getByLabel('Своя единица')).toHaveCount(0);
-    }
 
-    // «другое» needs the Seller's own value; the error sits on that field.
-    await unit.selectOption('other');
+    // «Другое» is one word of letters; the error sits on that field.
     const custom = editor.getByRole('textbox', { name: 'Своя единица' });
-    await expect(editor.getByText('Вес или объём упаковки — не единица: «500 г» укажите в комментарии.')).toBeVisible();
-    await editor.getByRole('button', { name: 'Далее' }).click();
-    await expect(editor.getByText('Укажите свою единицу или выберите другую.')).toBeVisible();
+    await custom.fill('два ведра');
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
+    await expect(editor.getByText('Напишите одно слово без цифр и пробелов')).toBeVisible();
     await expect(custom).toBeFocused();
     await expect(custom).toHaveAttribute('aria-invalid', 'true');
     await custom.fill('ведро');
 
-    // Locale switch keeps both the choice and the own value; only labels change.
-    await switchLocale(page, 'Қазақша');
-    const unitKk = editor.getByLabel('Өлшем бірлігі', { exact: true });
-    await expect(unitKk).toHaveValue('other');
-    await expect(unitKk.locator('option')).toHaveText(['көрсетілмеген', 'кг', 'дана', 'л', 'қапт.', 'басқа']);
-    await expect(editor.getByRole('textbox', { name: 'Өз өлшем бірлігі' })).toHaveValue('ведро');
-    await switchLocale(page, 'Русский');
-    await expect(unit).toHaveValue('other');
-    await expect(custom).toHaveValue('ведро');
+    // The editor has no language switch (accepted mockup: РУС / ҚАЗ lives in the header of the top screens).
+    await expect(page.getByRole('button', { name: 'ҚАЗ', exact: true })).toHaveCount(0);
 
-    await editor.getByRole('button', { name: 'Далее' }).click();
-    await editor.getByRole('button', { name: 'Продолжить' }).click();
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
-    await expect(page.getByText(/4\s200 ₸ \/ ведро/)).toBeVisible();
+    await expect(page.getByText(/4\s200 ₸ \/ ведро/).first()).toBeVisible();
 
     // Return from review keeps the draft, including the own unit.
     await backToEdit(page).click();
-    await expect(page).toHaveURL(/\/seller\/offers\?.*new=1.*from=[0-9a-f-]+/);
+    await expect(page).toHaveURL(/\/seller\?.*new=1.*from=[0-9a-f-]+/);
     editor = offerEditor(page);
-    await expect(unit).toHaveValue('other');
-    await expect(custom).toHaveValue('ведро');
+    await expect(unitButton()).toHaveText('ведро');
+    await expect(editor.getByRole('textbox', { name: 'Своя единица' })).toHaveValue('ведро');
     await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toHaveValue(/^4200(\.00)?$/);
     // An explicit canonical choice clears the own value.
-    await unit.selectOption('kg');
-    await expect(editor.getByLabel('Своя единица')).toHaveCount(0);
-    await editor.getByRole('button', { name: 'Далее' }).click();
-    await editor.getByRole('button', { name: 'Продолжить' }).click();
-    await expect(page.getByText(/4\s200 ₸ \/ кг/)).toBeVisible();
-    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+    await unitButton().click();
+    await page.getByRole('dialog', { name: 'Цена за' }).getByRole('radio', { name: /^кг/ }).click();
+    await expect(editor.getByRole('textbox', { name: 'Своя единица' })).toHaveCount(0);
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
+    await expect(page.getByText(/4\s200 ₸ \/ кг/).first()).toBeVisible();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 
-    // Edit the existing Offer from кг to шт, with a return from review in between.
-    await page.goto('/seller/offers');
-    const card = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Баранина', exact: true }) });
+    // Edit the card from кг to шт, with a return from review in between.
+    const card = page.getByRole('article').filter({ hasText: 'Баранина' });
     await expect(card.getByText('/ кг')).toBeVisible();
-    await card.getByRole('link', { name: 'Изменить', exact: true }).click();
+    await card.getByRole('button').first().click();
+    await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
     editor = offerEditor(page);
-    const editUnit = editor.getByLabel('Единица', { exact: true });
-    await expect(editUnit).toHaveValue('kg');
-    await editUnit.selectOption('piece');
-    await editor.getByRole('button', { name: 'Далее' }).click();
+    await expect(unitButton()).toHaveText('кг');
+    await unitButton().click();
+    await page.getByRole('dialog', { name: 'Цена за' }).getByRole('radio', { name: /^шт/ }).click();
+    await editor.getByRole('button', { name: 'Проверить и сохранить' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+\?/);
-    await expect(page.getByText(/4\s200 ₸ \/ шт/)).toBeVisible();
+    await expect(page.getByText(/4\s200 ₸ \/ шт/).first()).toBeVisible();
     await backToEdit(page).click();
-    await expect(page).toHaveURL(/\/seller\/offers\?.*edit=[0-9a-f-]+.*from=[0-9a-f-]+/);
-    editor = offerEditor(page);
-    await expect(editor.getByLabel('Единица', { exact: true })).toHaveValue('piece');
-    await editor.getByRole('button', { name: 'Далее' }).click();
-    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-    // The notice query is stripped right after it is read, so either form of the list URL is fine.
-    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+    await expect(page).toHaveURL(/\/seller\?.*edit=[0-9a-f-]+.*from=[0-9a-f-]+/);
+    await expect(unitButton()).toHaveText('шт.');
+    await offerEditor(page).getByRole('button', { name: 'Проверить и сохранить' }).click();
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
     await expect(card.getByText('/ шт')).toBeVisible();
 
     // Canonical labels follow the interface language in the cabinet and in buyer reads.
-    // The product name is localized too, so the card is found by its stable id.
     const cardTestId = (await card.getAttribute('data-testid'))!;
-    await switchLocale(page, 'Қазақша');
+    await switchLocale(page, 'ҚАЗ');
     await expect(page.getByTestId(cardTestId).getByText('/ дана')).toBeVisible();
     const lamb = async (locale: 'ru' | 'kk') => {
       const body = await (await page.request.get(`/api/search?q=${encodeURIComponent('баранина')}&locale=${locale}`)).json();
@@ -152,13 +141,13 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
 
     // The own-value field fits a 320 px phone in the longer Kazakh copy.
     await page.setViewportSize({ width: 320, height: 800 });
-    await page.goto('/seller/offers?new=1');
-    editor = offerEditor(page);
-    const narrowUnitKk = editor.getByLabel('Өлшем бірлігі', { exact: true });
-    await narrowUnitKk.selectOption('other');
-    await expect(editor.getByRole('textbox', { name: 'Өз өлшем бірлігі' })).toBeVisible();
+    await page.goto('/seller?new=1');
+    await unitButton().click();
+    await page.getByRole('dialog', { name: 'Баға бірлігі' }).getByRole('radio', { name: /^Басқа/ }).click();
+    const narrowCustom = offerEditor(page).getByRole('textbox', { name: 'Өз бірлігіңіз' });
+    await expect(narrowCustom).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    const box = await narrowUnitKk.boundingBox();
+    const box = await narrowCustom.boundingBox();
     expect(box!.x + box!.width).toBeLessThanOrEqual(320);
   } finally {
     await cleanup(phones.login);

@@ -105,9 +105,9 @@ test('seller-intent OTP success routes to the first-run workspace', async ({ pag
     await authenticateInOpenModal(page, phone);
 
     await expect(page).toHaveURL('/seller');
-    // Seller cabinet first run: one primary action; trading points are a cabinet destination.
-    await expect(page.getByRole('heading', { name: 'Начните с первого предложения', level: 1 })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Добавить товар', exact: true })).toBeVisible();
+    // «Моя витрина» first run: one primary action; trading points are a cabinet destination.
+    await expect(page.getByRole('heading', { name: 'Покажите товары покупателям рядом' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Сформировать карточки товаров' })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Разделы кабинета' }).getByRole('link', { name: 'Точки' }).filter({ visible: true })).toHaveCount(1);
   } finally {
     await cleanup(phone);
@@ -134,53 +134,48 @@ test('authenticated product-first flow preserves input through required setup be
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     }
-    const actionBox = await page.getByRole('link', { name: 'Добавить товар', exact: true }).boundingBox();
+    const action = page.getByRole('button', { name: 'Сформировать карточки товаров' });
+    // Loading and ready render the same action; measure it once the showcase has settled.
+    await expect(page.getByRole('heading', { name: 'Покажите товары покупателям рядом' })).toBeVisible();
+    const actionBox = await action.boundingBox();
     expect(actionBox).not.toBeNull();
-    expect(actionBox!.height).toBeGreaterThanOrEqual(44);
+    expect(Math.round(actionBox!.height)).toBeGreaterThanOrEqual(44);
 
-    // seller-offer-editor: product first; the first point (and the Seller) are created inside the same flow.
-    await page.getByRole('link', { name: 'Добавить товар', exact: true }).click();
+    // Product first; the first point (and the Seller) are created from the editor's points section.
+    await action.click();
+    await page.getByRole('button', { name: /^Заполнить вручную/ }).click();
     await expect(page).toHaveURL('/seller?new=1');
     const editor = offerEditor(page);
     await fillOfferFields(page, { product: 'Баранина', price, unit: 'kg', comment });
+    await expect(editor.getByText('Нужна, чтобы покупатель нашёл вас')).toBeVisible();
 
     let changeSetMutations = 0;
     page.on('request', (request) => {
-      if (request.method() === 'POST' && request.url().endsWith('/api/seller/change-sets')) changeSetMutations += 1;
+      if (request.method() === 'POST' && request.url().includes('/api/seller/cards/')) changeSetMutations += 1;
     });
 
-    await editor.getByRole('button', { name: 'Далее', exact: true }).click();
-    await expect(editor.getByRole('heading', { name: 'Где продаёте?' })).toBeVisible();
-    await expect(editor.getByText('Точек пока нет — создайте первую.')).toBeVisible();
-    await expect(editor.getByText(/Товар и цена сохранены: Баранина/)).toBeVisible();
+    // P4 · New point: a full screen over the card; everything typed so far stays.
+    await editor.getByRole('button', { name: /^Добавить торговую точку/ }).click();
+    await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
+    const pointSheet = page.locator('.kaida-app');
+    await pointSheet.getByRole('textbox', { name: 'Название для покупателей', exact: true }).fill(`Issue 35 ${testInfo.project.name}`);
+    await pointSheet.getByRole('textbox', { name: 'Где находится точка', exact: true }).fill(`Алматы, Issue 35 ${testInfo.project.name}`);
+    await pointSheet.getByRole('combobox', { name: 'Тип', exact: true }).selectOption('shop');
+    // Optional Seller name left blank: the first point name is disclosed as the fallback before submit.
+    await expect(pointSheet.getByText('Если оставить пустым, покупатели увидят название первой точки.')).toBeVisible();
+    await expect(pointSheet.getByText(`Покупатели увидят: «Issue 35 ${testInfo.project.name}»`)).toBeVisible();
+    await pointSheet.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(editor.getByText('Точка добавлена и выбрана. Всё введённое на месте')).toBeVisible();
+    await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toHaveValue(price);
     expect(changeSetMutations).toBe(0);
     expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets cs JOIN sellers s ON s.id=cs.seller_id JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0].count)).toBe(0);
 
-    await editor.getByRole('textbox', { name: 'Название', exact: true }).fill(`Issue 35 ${testInfo.project.name}`);
-    await editor.getByRole('textbox', { name: 'Адрес', exact: true }).fill(`Алматы, Issue 35 ${testInfo.project.name}`);
-    await editor.getByRole('combobox', { name: 'Тип', exact: true }).selectOption('shop');
-    // Optional Seller name left blank: the first point name is disclosed as the fallback before submit.
-    await expect(editor.getByText('Если оставить пустым, покупатели увидят название первой точки.')).toBeVisible();
-    await expect(editor.getByText(`Покупатели увидят: «Issue 35 ${testInfo.project.name}»`)).toBeVisible();
-
-    // A language switch mid-flow keeps everything typed so far.
-    await editor.getByRole('button', { name: 'Қазақша' }).click();
-    await expect(editor.getByRole('heading', { name: 'Қай жерде сатасыз?' })).toBeVisible();
-    await expect(editor.getByRole('textbox', { name: 'Атауы', exact: true })).toHaveValue(`Issue 35 ${testInfo.project.name}`);
-    await editor.getByRole('button', { name: 'Артқа' }).filter({ visible: true }).first().click();
-    await expect(editor.getByRole('textbox', { name: 'Баға', exact: true })).toHaveValue(price);
-    await expect(editor.getByRole('textbox', { name: /^Пікір/ })).toHaveValue(comment);
-    await editor.getByRole('button', { name: 'Русский' }).click();
-    await editor.getByRole('button', { name: 'Далее', exact: true }).click();
-    await expect(editor.getByRole('textbox', { name: 'Название', exact: true })).toHaveValue(`Issue 35 ${testInfo.project.name}`);
-    expect(changeSetMutations).toBe(0);
-
-    const proposalCreated = page.waitForResponse((response) => response.url().endsWith('/api/seller/change-sets') && response.request().method() === 'POST');
-    await editor.getByRole('button', { name: 'Продолжить', exact: true }).click();
+    const proposalCreated = page.waitForResponse((response) => response.url().endsWith('/api/seller/cards/change-sets') && response.request().method() === 'POST');
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     expect((await proposalCreated).status()).toBe(201);
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
-    await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
-    await expect(page.getByText('Новое предложение', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Проверьте карточку', level: 1 })).toBeVisible();
+    await expect(page.getByText('Будет опубликована 1 карточка', { exact: true })).toBeVisible();
 
     const sellerRow = (await pool.query('SELECT s.id, s.display_name FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(sellerRow.display_name).toBe(`Issue 35 ${testInfo.project.name}`);

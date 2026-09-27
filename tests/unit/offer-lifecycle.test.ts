@@ -3,7 +3,7 @@ import type { Database } from '../../src/db/client';
 import { resolveProduct } from '../../src/modules/catalog/application/resolve-product';
 import { calculateOfferCutoff } from '../../src/modules/offers/lifecycle/offer-lifecycle';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
-import { findOffersByProductId } from '../../src/modules/search/infrastructure/search.repository';
+import { findOffersByProductOrTitleWords } from '../../src/modules/search/infrastructure/search.repository';
 
 const PRODUCT = {
   id: '10000000-0000-4000-8000-000000000001',
@@ -21,11 +21,11 @@ vi.mock('../../src/modules/catalog/application/resolve-product', () => ({
 }));
 
 vi.mock('../../src/modules/search/infrastructure/search.repository', () => ({
-  findOffersByProductId: vi.fn().mockResolvedValue([]),
+  findOffersByProductOrTitleWords: vi.fn().mockResolvedValue([]),
 }));
 
 const mockedResolveProduct = vi.mocked(resolveProduct);
-const mockedFindOffers = vi.mocked(findOffersByProductId);
+const mockedFindOffers = vi.mocked(findOffersByProductOrTitleWords);
 
 describe('S1 offer lifecycle', () => {
   beforeEach(() => {
@@ -54,7 +54,7 @@ describe('S1 offer lifecycle', () => {
     expect(mockedFindOffers).toHaveBeenCalledTimes(1);
     expect(mockedFindOffers).toHaveBeenCalledWith(
       database,
-      PRODUCT.id,
+      { productId: PRODUCT.id, words: ['баранина'] },
       new Date('2026-09-04T12:00:00.000Z'),
     );
   });

@@ -45,8 +45,8 @@ describe.sequential('S6 Search through Catalog aliases on PostgreSQL 18', () => 
     const inactiveId = '48000000-0000-4000-8000-000000000002';
     const expiredId = '48000000-0000-4000-8000-000000000003';
     try {
-      await connection.pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at)
-        VALUES ($1,$2,$3,$4,1000,'KZT','active',$5),($6,$2,$3,$4,1000,'KZT','inactive',$5),($7,$2,$3,$4,1000,'KZT','active',$8)`, [
+      await connection.pool.query(`INSERT INTO offers (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at, title, title_search, card_id)
+        VALUES ($1,$2,$3,$4,1000,'KZT','active',$5,(SELECT name FROM products WHERE id=$2::uuid),lower((SELECT name FROM products WHERE id=$2::uuid)),gen_random_uuid()),($6,$2,$3,$4,1000,'KZT','inactive',$5,(SELECT name FROM products WHERE id=$2::uuid),lower((SELECT name FROM products WHERE id=$2::uuid)),gen_random_uuid()),($7,$2,$3,$4,1000,'KZT','active',$8,(SELECT name FROM products WHERE id=$2::uuid),lower((SELECT name FROM products WHERE id=$2::uuid)),gen_random_uuid())`, [
         freshId, seedIds.lambProduct, seedIds.seller, seedIds.location, NOW,
         inactiveId, expiredId, new Date('2026-09-05T06:29:59.000Z'),
       ]);

@@ -55,8 +55,8 @@ async function makeBuyerEligible(pool: Pool, userId: string, projectName: string
 
 async function createOffer(page: import('@playwright/test').Page, product: string, amount: string, comment: string) {
   await proposeNewOffer(page, { product, price: amount, unit: 'kg', comment });
-  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-  await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+  await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+  await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 }
 
 async function search(page: import('@playwright/test').Page, query: string) {
@@ -75,7 +75,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
   try {
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
+    await page.getByLabel('Название для покупателей').fill('S12 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -118,7 +118,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
 
     await page.goto(reviewUrl);
     await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
-    await expect(page).toHaveURL('/seller/offers');
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
     await expect(page.getByRole('status').filter({ hasText: 'Изменения применены' })).toBeVisible();
 
     await search(page, 'баранина');

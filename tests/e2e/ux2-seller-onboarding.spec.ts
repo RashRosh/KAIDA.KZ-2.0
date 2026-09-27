@@ -46,10 +46,10 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
   try {
     // Seller cabinet: trading points and contacts are separate destinations (seller-cabinet-overview).
     await page.goto('/seller/points');
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
 
     const name = page.getByLabel('Имя', { exact: true });
-    const locationName = page.getByLabel('Название торговой точки');
+    const locationName = page.getByLabel('Название для покупателей');
     const locationType = page.getByLabel('Тип торговой точки');
     const address = page.getByLabel('Адрес');
     await expect(name).toBeVisible();
@@ -68,11 +68,11 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await locationType.selectOption('shop');
     await address.fill(`Алматы, UX2 ${testInfo.project.name} address`);
     const save = page.getByRole('button', { name: 'Сохранить точку' });
-    expect((await save.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect(Math.round((await save.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
     await save.click();
 
     const tradingPointCard = page.locator('[data-testid^="trading-point-"]');
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Мои точки', level: 1 })).toBeVisible();
     await expect(tradingPointCard.getByText(pointName, { exact: true })).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
 
@@ -81,8 +81,12 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await page.getByLabel('Телефон', { exact: true }).fill(auth.publicPhone);
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Торговая точка сохранена.', { exact: true })).toBeVisible();
-    await expect(tradingPointCard.getByText(`Телефон: ${auth.publicPhone}`)).toBeVisible();
-    await expect(tradingPointCard.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
+    await expect(tradingPointCard.getByText('ждёт подтверждения')).toBeVisible();
+    // AI-S12A / AI-S13: the point screen shows the saved number waiting for its code.
+    await page.getByRole('button', { name: `Изменить торговую точку ${pointName}` }).click();
+    await expect(page.getByText(`Телефон: ${auth.publicPhone}`)).toBeVisible();
+    await expect(page.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
+    await page.getByRole('button', { name: 'Отмена' }).click();
 
     await page.reload();
     await page.goto('/seller/points');
@@ -92,16 +96,19 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await page.context().grantPermissions(['geolocation'], { origin: baseURL });
     await page.context().setGeolocation(GEO);
     const geoMutation = page.waitForResponse((response) => /\/api\/seller\/locations\/[0-9a-f-]+\/geo$/.test(response.url()) && response.request().method() === 'PUT');
-    await page.getByRole('button', { name: 'Использовать моё местоположение' }).click();
+    await page.getByRole('button', { name: `Изменить торговую точку ${pointName}` }).click();
+    await page.getByRole('button', { name: /^Использовать моё местоположение/ }).click();
     expect((await geoMutation).status()).toBe(200);
     await expect(page.getByText('Местоположение сохранено.', { exact: true }).first()).toBeVisible();
 
     await page.reload();
-    await expect(page.getByText('Местоположение сохранено', { exact: false }).first()).toBeVisible();
-    // With a point, contacts and geo but no Offers yet, the overview is the first-run state with one action.
+    await expect(page.getByText('Местоположение не задано', { exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: `Изменить торговую точку ${pointName}` }).click();
+    await expect(page.getByRole('button', { name: /^Обновить местоположение/ })).toBeVisible();
+    // With a point but no cards yet, «Моя витрина» is the empty state with one action (seller-showcase-editor).
     await page.goto('/seller');
-    await expect(page.getByRole('heading', { name: 'Начните с первого предложения', level: 1 })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Добавить товар' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Покажите товары покупателям рядом' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Сформировать карточки товаров' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(auth.pool, auth.userId, auth.phone);

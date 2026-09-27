@@ -1,11 +1,12 @@
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
-import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import { offerPhotos } from '../db/offer-photos.table';
 import { offers } from '../db/offers.table';
 import { priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../price-unit/price-unit';
+import { packFromColumns, type Pack } from '../pack/pack';
+import { offerTitleSearchText } from '../title/offer-title';
 
 export type OfferWriteDb = Pick<Database, 'insert' | 'select' | 'update'>;
 
@@ -13,6 +14,11 @@ const managementOfferSelection = {
   id: offers.id,
   sellerId: offers.sellerId,
   productId: offers.productId,
+  title: offers.title,
+  cardId: offers.cardId,
+  priceOwn: offers.priceOwn,
+  packAmount: offers.packAmount,
+  packUnit: offers.packUnit,
   locationId: offers.locationId,
   priceAmount: offers.priceAmount,
   priceCurrency: offers.priceCurrency,
@@ -27,13 +33,33 @@ const managementOfferSelection = {
   updatedAt: offers.updatedAt,
 };
 
-function withPriceUnit<T extends { priceUnitCode: string | null; priceUnitValue: string | null }>(row: T) {
-  const { priceUnitCode, priceUnitValue, ...rest } = row;
-  return { ...rest, priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue) };
+function withPriceUnit<T extends { priceUnitCode: string | null; priceUnitValue: string | null; packAmount: string | null; packUnit: string | null }>(row: T) {
+  const { priceUnitCode, priceUnitValue, packAmount, packUnit, ...rest } = row;
+  return { ...rest, priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue), pack: packFromColumns(packAmount, packUnit) };
+}
+
+// seller-showcase-editor: shared card fields written together on every Offer of a card.
+export type OfferCardFields = {
+  title: string;
+  productId: string | null;
+  cardId: string;
+  priceOwn: boolean;
+  pack: Pack | null;
+};
+
+function sharedCardColumns(card: Omit<OfferCardFields, 'cardId'>) {
+  return {
+    title: card.title,
+    titleSearch: offerTitleSearchText(card.title),
+    productId: card.productId,
+    priceOwn: card.priceOwn,
+    packAmount: card.pack?.amount ?? null,
+    packUnit: card.pack?.unit ?? null,
+  };
 }
 
 export async function createOffer(database: OfferWriteDb, values: {
-  productId: string;
+  card: OfferCardFields;
   sellerId: string;
   locationId: string;
   priceAmount: string;
@@ -43,7 +69,8 @@ export async function createOffer(database: OfferWriteDb, values: {
   confirmedAt: Date;
 }) {
   const rows = await database.insert(offers).values({
-    productId: values.productId,
+    ...sharedCardColumns(values.card),
+    cardId: values.card.cardId,
     sellerId: values.sellerId,
     locationId: values.locationId,
     priceAmount: values.priceAmount,
@@ -94,21 +121,14 @@ export async function lockOfferById(database: OfferWriteDb, id: string) {
   return rows[0] ? withPriceUnit(rows[0]) : null;
 }
 
-export async function listOffersBySeller(database: OfferWriteDb, sellerId: string, locale: 'ru' | 'kk' = 'ru') {
+export async function listOffersBySeller(database: OfferWriteDb, sellerId: string) {
   const rows = await database.select({
     ...managementOfferSelection,
-    productName: locale === 'kk'
-      ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
-      : products.name,
-    productNameLocale: locale === 'kk'
-      ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
-      : sql<'ru'>`'ru'`,
     locationName: locations.name,
     locationAddressText: locations.addressText,
     locationSellerId: locations.sellerId,
     locationHasGeo: sql<boolean>`${locations.latitude} is not null and ${locations.longitude} is not null`,
   }).from(offers)
-    .innerJoin(products, eq(offers.productId, products.id))
     .innerJoin(locations, eq(offers.locationId, locations.id))
     .innerJoin(sellers, eq(offers.sellerId, sellers.id))
     .where(eq(offers.sellerId, sellerId))
@@ -128,6 +148,7 @@ const managementUpdateReturning = {
 
 export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   offerId: string;
+  card: Omit<OfferCardFields, 'cardId'>;
   expectedRevision: number;
   priceAmount: string;
   priceCurrency: 'KZT';
@@ -137,6 +158,7 @@ export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   confirmationTime: Date;
 }) {
   return database.update(offers).set({
+    ...sharedCardColumns(values.card),
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
     ...priceUnitToColumns(values.priceUnit),
@@ -176,6 +198,15 @@ export async function applyOfferActivation(database: OfferWriteDb, values: {
     revision: sql`${offers.revision} + 1`,
   }).where(and(eq(offers.id, values.offerId), eq(offers.revision, values.expectedRevision)))
     .returning(managementUpdateReturning);
+}
+
+// All Offers of one card of this Seller, locked for a card-wide change.
+export async function lockCardOffers(database: OfferWriteDb, cardId: string, sellerId: string) {
+  const rows = await database.select(managementOfferSelection).from(offers)
+    .where(and(eq(offers.cardId, cardId), eq(offers.sellerId, sellerId)))
+    .orderBy(asc(offers.id))
+    .for('update');
+  return rows.map(withPriceUnit);
 }
 
 export async function findOfferPhotoIds(database: OfferWriteDb, offerId: string): Promise<string[]> {

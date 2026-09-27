@@ -78,15 +78,16 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
 
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('S6 E2E продавец');
-    await page.getByLabel('Название торговой точки').fill('S6 E2E точка');
+    await page.getByLabel('Название для покупателей').fill('S6 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S6 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
     await expect(page.getByText('Местоположение не задано', { exact: true }).first()).toBeVisible();
     await completeOnboardingGeo(pool, phone);
     await proposeNewOffer(page, { product: 'мясо барана', price: '1' });
-    await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
-    await expect(page.getByText('Баранина', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Проверьте карточку', level: 1 })).toBeVisible();
+    // seller-showcase-editor: the card keeps the Seller's words; the alias links it to the catalog product silently.
+    await expect(page.getByText('мясо барана', { exact: true })).toBeVisible();
 
     const sellerRow = (await pool.query('SELECT s.id FROM sellers s JOIN users u ON u.id=s.owner_user_id WHERE u.phone_e164=$1', [phone])).rows[0];
     expect(Number((await pool.query('SELECT count(*) FROM offers WHERE seller_id=$1', [sellerRow.id])).rows[0].count)).toBe(0);
@@ -94,8 +95,8 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     const itemBefore = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemBefore).toEqual({ product_id: seedIds.lambProduct, result_offer_id: null });
 
-    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
     const itemAfter = (await pool.query('SELECT product_id,result_offer_id FROM seller_change_items WHERE change_set_id=$1', [changeSetId])).rows[0];
     expect(itemAfter.product_id).toBe(seedIds.lambProduct);
     expect(itemAfter.result_offer_id).not.toBeNull();

@@ -14,6 +14,12 @@ importers:
       '@fontsource-variable/plus-jakarta-sans':
         specifier: 5.3.0
         version: 5.3.0
+      '@fontsource/geologica':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/roboto':
+        specifier: ^5.3.0
+        version: 5.3.0
       dotenv:
         specifier: 17.4.2
         version: 17.4.2
@@ -658,6 +664,12 @@ packages:
 
   '@fontsource-variable/plus-jakarta-sans@5.3.0':
     resolution: {integrity: sha512-/l/4r0yyWK9JzAlmA0LiYgGgmJe/Gswt4jTJEzr5QhJfwMbvJZDmYWyW0M4X7yCK69BajMVlV/Lx8g7WDc1+sw==}
+
+  '@fontsource/geologica@5.3.0':
+    resolution: {integrity: sha512-a8QzhXXHGedNmVm4/VKY3JZGBR2wGEYyIP3lbsExwxROmnN5kidT9eJrptrb8BfVSkoHZiAi03zZB6p6X2VMQg==}
+
+  '@fontsource/roboto@5.3.0':
+    resolution: {integrity: sha512-BapRJOWYP+LZ21zp+wBQjfpPYKRoxc4LspJ/RLuI+HSMBD5u/X4O+ESDrSvEqDSy0rAl7GwBJ+09mdc16cVQ1Q==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3286,6 +3298,10 @@ snapshots:
   '@fontsource-variable/inter@5.2.8': {}
 
   '@fontsource-variable/plus-jakarta-sans@5.3.0': {}
+
+  '@fontsource/geologica@5.3.0': {}
+
+  '@fontsource/roboto@5.3.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

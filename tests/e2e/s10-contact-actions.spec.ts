@@ -72,7 +72,7 @@ test('point contacts are verified by code and reach the buyer card with the hour
     // First point: a new number for calls, the login number for WhatsApp, Sunday around the clock.
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await page.getByLabel('Название торговой точки').fill(pointName);
+    await page.getByLabel('Название для покупателей').fill(pointName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill(`Алматы, S10 ${project} address`);
     await page.getByLabel('Телефон', { exact: true }).fill(pointPhone);
@@ -81,14 +81,19 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
     const card = page.locator('[data-testid^="trading-point-"]').filter({ hasText: pointName });
-    await expect(card.getByText(`WhatsApp: ${phone}`)).toBeVisible();
-    await expect(card.getByText('Подтверждён', { exact: true })).toBeVisible();
-    await expect(card.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
+    await expect(card.getByText('Телефон, WhatsApp', { exact: true })).toBeVisible();
+    await expect(card.getByText('ждёт подтверждения')).toBeVisible();
+    // AI-S12A: the login number is confirmed at once; the new call number waits for its code (AI-S13).
+    await card.click();
+    const callNumber = page.locator('div.card').filter({ hasText: `Телефон: ${pointPhone}` });
+    await expect(callNumber.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
+    await expect(page.getByText('Подтверждён', { exact: true })).toHaveCount(1);
+    await page.getByRole('button', { name: 'Отмена' }).click();
 
     await setSellerLocationGeo(phone);
     await proposeNewOffer(page, { product: 'Баранина', price: '5432.10', unit: 'kg', comment: `S10 ${project} contacts offer` });
-    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать без фото)$/ }).click();
-    await expect(page).toHaveURL(/\/seller\/offers(\?.*)?$/);
+    await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 
     // Monday 17:30 in Almaty: open, closing within the hour.
     await page.clock.setFixedTime(new Date('2026-09-21T12:30:00Z'));
@@ -114,12 +119,13 @@ test('point contacts are verified by code and reach the buyer card with the hour
 
     // Confirm the call number with the code shown on screen (test delivery).
     await page.goto('/seller/points');
-    await card.getByRole('button', { name: 'Подтвердить' }).click();
-    const testCode = (await card.getByText(/Тестовый код: \d{6}/).textContent())!.match(/\d{6}/)![0];
-    await card.getByLabel('Код из 6 цифр').fill(testCode);
-    await card.getByRole('button', { name: 'Подтвердить номер' }).click();
+    await card.click();
+    await callNumber.getByRole('button', { name: 'Подтвердить' }).click();
+    const testCode = (await callNumber.getByText(/Тестовый код: \d{6}/).textContent())!.match(/\d{6}/)![0];
+    await callNumber.getByLabel('Код из 6 цифр').fill(testCode);
+    await callNumber.getByRole('button', { name: 'Подтвердить номер' }).click();
     await expect(page.getByText('Номер подтверждён. Покупатели его видят.')).toBeVisible();
-    await expect(card.getByText('Подтверждён', { exact: true })).toHaveCount(2);
+    await expect(page.getByText('Подтверждён', { exact: true })).toHaveCount(2);
 
     offer = await search();
     await expect(offer.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', `tel:${pointPhone}`);

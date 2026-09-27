@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import styles from '../page.module.css';
 import { useI18n } from '../../../i18n/I18nProvider';
 
 type Preview = { locale: 'ru' | 'kk'; text: string }[];
@@ -43,23 +42,24 @@ export function CommentTranslationAssist({ enabled, comment }: { enabled: boolea
 
   const currentPreview = preview?.source === text ? preview.translations : null;
   return (
-    <div className={styles.translationAssist}>
-      <p className={styles.muted}>{t('offerCreate.translationHint')}</p>
-      <button type="button" className={styles.secondaryButton} onClick={() => void check()} disabled={loading}>
+    <div className="banner gray" style={{ padding: 12, borderRadius: 14, gap: 8 }}>
+      <p className="c c2">{t('offerCreate.translationHint')}</p>
+      <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }} onClick={() => void check()} disabled={loading} aria-busy={loading}>
+        {loading && <span className="spin" style={{ width: 14, height: 14, borderWidth: 2 }} />}
         {loading ? t('offerCreate.checkingTranslation') : t('offerCreate.checkTranslation')}
       </button>
       {currentPreview && (
-        <div className={styles.translationPreview} role="status" aria-label={t('offerCreate.translationPreview')}>
-          <p className={styles.eyebrow}>{t('offerCreate.translationPreview')}</p>
+        <div role="status" aria-label={t('offerCreate.translationPreview')} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="ov">{t('offerCreate.translationPreview')}</div>
           {currentPreview.map((entry) => (
-            <p key={entry.locale}>
-              <span className={styles.muted}>{t(entry.locale === 'ru' ? 'language.ru' : 'language.kk')}: </span>
+            <p key={entry.locale} className="t">
+              <span className="c2">{t(entry.locale === 'ru' ? 'language.ru' : 'language.kk')}: </span>
               <span lang={entry.locale}>{entry.text}</span>
             </p>
           ))}
         </div>
       )}
-      {failedFor === text && <p className={styles.muted} role="status">{t('offerCreate.translationPreviewError')}</p>}
+      {failedFor === text && <p className="c c2" role="status">{t('offerCreate.translationPreviewError')}</p>}
     </div>
   );
 }

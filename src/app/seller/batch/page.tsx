@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
-import { AppHeader } from '../../_components/AppHeader';
 import { SellerBatchChangeSetCreate } from '../_components/SellerBatchChangeSetCreate';
-import { SellerCabinetFrame } from '../_components/SellerCabinetFrame';
-import styles from '../page.module.css';
+import { Bar, Ic, LoginRequired, Phone } from '../_kaida/ui';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type ApiError = { error?: { message?: string } };
@@ -14,6 +13,7 @@ type SellerResponse = { seller: SellerView | null } & ApiError;
 
 export default function SellerBatchPage() {
   const { locale, t } = useI18n();
+  const router = useRouter();
   const [state, setState] = useState<'loading' | 'anonymous' | 'ready'>('loading');
   const [seller, setSeller] = useState<SellerView | null>(null);
   const [error, setError] = useState('');
@@ -46,22 +46,28 @@ export default function SellerBatchPage() {
     return () => { active = false; };
   }, [locale, t]);
 
+  // «Добавить списком» (no frame in the mockup): the mockup shell around the batch form.
   return (
-    <>
-      <AppHeader showAuth={false} contextLabel={t('context.seller')} />
-      <SellerCabinetFrame active="offers">
-          <div className={styles.intro}>
-            <p className={styles.eyebrow}>{t('batch.eyebrow')}</p>
-            <h1>{t('batch.pageTitle')}</h1>
-            <p>{t('batch.pageDescription')}</p>
-          </div>
-
-          {state === 'loading' && <section className={styles.card}><p>{t('seller.loading')}</p></section>}
-          {state === 'anonymous' && <section className={styles.card}><h2>{t('seller.loginRequired')}</h2><Link className={styles.primaryLink} href="/login">{t('auth.signIn')}</Link></section>}
-          {state === 'ready' && error && <section className={styles.card}><p className={styles.error} role="alert">{error}</p></section>}
-          {state === 'ready' && !error && !seller && <section className={styles.card}><p>{t('batch.setupFirst')}</p><Link className={styles.secondaryLink} href="/seller">{t('batch.setupSeller')}</Link></section>}
+    <Phone>
+      <Bar title={t('cabinet.batch')} onBack={() => router.push('/seller/more')} />
+      {state === 'anonymous' ? <LoginRequired /> : (
+        <main className="body" style={{ gap: 14 }}>
+          <p className="t c2">{t('batch.pageDescription')}</p>
+          {state === 'loading' && <div className="sk" style={{ height: 160, borderRadius: 14 }} aria-label={t('seller.loading')} />}
+          {state === 'ready' && error && (
+            <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12, flexDirection: 'row', gap: 10 }}>
+              <Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{error}</p>
+            </div>
+          )}
+          {state === 'ready' && !error && !seller && (
+            <div className="card p16" style={{ gap: 10 }}>
+              <p className="t">{t('batch.setupFirst')}</p>
+              <Link className="btn btn-o sm" style={{ alignSelf: 'flex-start' }} href="/seller/points">{t('batch.setupSeller')}</Link>
+            </div>
+          )}
           {state === 'ready' && seller && <SellerBatchChangeSetCreate seller={seller} />}
-      </SellerCabinetFrame>
-    </>
+        </main>
+      )}
+    </Phone>
   );
 }

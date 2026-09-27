@@ -11,7 +11,8 @@ import {
 } from '../../offers/lifecycle/offer-lifecycle';
 import type { BuyerLocation } from '../contracts/buyer-location.contract';
 import { searchQuerySchema, type SearchResponse } from '../contracts/search.contract';
-import { findOffersByProductId } from '../infrastructure/search.repository';
+import { findOffersByProductOrTitleWords } from '../infrastructure/search.repository';
+import { queryWords } from '../../offers/title/offer-title';
 import { rankSearchOfferCandidates } from '../ranking/search-ranking';
 import type { Locale } from '../../../i18n/config';
 
@@ -35,13 +36,18 @@ export async function searchOffers(
     : validateOfferValidityPeriodHours(lifecycleOptions.validityPeriodHours);
   const cutoff = calculateOfferCutoff(now, validityPeriodHours);
   const db = database ?? getDatabase();
+  // seller-showcase-editor: the catalog (names and aliases) and the words of the Seller's own titles both find Offers.
   const resolution = await resolveProduct(db, query);
-  if (resolution.status !== 'resolved') return { query, offers: [] };
+  const match = {
+    productId: resolution.status === 'resolved' ? resolution.product.id : null,
+    words: queryWords(query),
+  };
+  if (match.productId === null && match.words.length === 0) return { query, offers: [] };
 
   const { locale, commentTranslationEnabled } = lifecycleOptions;
   const candidates = locale === undefined && commentTranslationEnabled === undefined
-    ? await findOffersByProductId(db, resolution.product.id, cutoff)
-    : await findOffersByProductId(db, resolution.product.id, cutoff, locale, commentTranslationEnabled);
+    ? await findOffersByProductOrTitleWords(db, match, cutoff)
+    : await findOffersByProductOrTitleWords(db, match, cutoff, locale, commentTranslationEnabled);
   const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation)
     .map(({ offer }) => offer);
   return { query, offers };

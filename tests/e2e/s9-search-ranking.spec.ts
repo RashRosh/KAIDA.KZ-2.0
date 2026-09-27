@@ -70,11 +70,11 @@ test.beforeAll(async ({}, workerInfo) => {
     76.989709,
   ]);
   await connection.pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at)
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at, title, title_search, card_id)
     VALUES
-    ($1,$4,$5,$6,1000,'KZT','active',$9,$9,$9),
-    ($2,$4,$5,$7,1000,'KZT','active',$10,$10,$10),
-    ($3,$4,$5,$8,1000,'KZT','active',$11,$11,$11)`, [
+    ($1,$4,$5,$6,1000,'KZT','active',$9,$9,$9,(SELECT name FROM products WHERE id=$4::uuid),lower((SELECT name FROM products WHERE id=$4::uuid)),gen_random_uuid()),
+    ($2,$4,$5,$7,1000,'KZT','active',$10,$10,$10,(SELECT name FROM products WHERE id=$4::uuid),lower((SELECT name FROM products WHERE id=$4::uuid)),gen_random_uuid()),
+    ($3,$4,$5,$8,1000,'KZT','active',$11,$11,$11,(SELECT name FROM products WHERE id=$4::uuid),lower((SELECT name FROM products WHERE id=$4::uuid)),gen_random_uuid())`, [
     nearOfferId,
     farOfferId,
     geolessOfferId,

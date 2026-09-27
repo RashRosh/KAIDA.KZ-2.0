@@ -1,15 +1,26 @@
 import { sql } from 'drizzle-orm';
-import { char, check, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, char, check, index, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { products } from '../../catalog/db/products.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import { locations } from '../../locations/db/locations.table';
 import type { PriceUnitCode } from '../price-unit/price-unit';
+import type { PackUnit } from '../pack/pack';
 
 export type OfferStatus = 'active' | 'inactive';
 
 export const offers = pgTable('offers', {
   id: uuid('id').defaultRandom().primaryKey(),
-  productId: uuid('product_id').notNull().references(() => products.id),
+  // Optional catalog link (seller-showcase-editor): search by catalog names and aliases; never changes the title.
+  productId: uuid('product_id').references(() => products.id),
+  // The Seller's own product name and its normalized words for search.
+  title: text('title').notNull(),
+  titleSearch: text('title_search').notNull(),
+  // Offers of one product in several points share card_id and title, unit, pack, comment and photos.
+  cardId: uuid('card_id').notNull(),
+  // true = this point keeps its own price; a common price change skips it unless the Seller chose it.
+  priceOwn: boolean('price_own').notNull().default(false),
+  packAmount: numeric('pack_amount'),
+  packUnit: text('pack_unit').$type<PackUnit>(),
   sellerId: uuid('seller_id').notNull().references(() => sellers.id),
   locationId: uuid('location_id').notNull().references(() => locations.id),
   priceAmount: numeric('price_amount'),
@@ -24,6 +35,10 @@ export const offers = pgTable('offers', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
+  index('offers_card_id_idx').on(table.cardId),
+  check('offers_title_valid', sql`char_length(btrim(${table.title})) BETWEEN 1 AND 80 AND ${table.title} = btrim(${table.title})`),
+  check('offers_pack_valid', sql`(${table.packAmount} IS NULL AND ${table.packUnit} IS NULL)
+  OR (${table.packAmount} > 0 AND ${table.packUnit} IN ('g', 'kg', 'ml', 'l') AND ${table.priceUnitCode} IN ('package', 'piece'))`),
   check('offers_price_non_negative_finite', sql`${table.priceAmount} IS NULL OR (
     ${table.priceAmount} >= 0 AND ${table.priceAmount} NOT IN ('NaN'::numeric, 'Infinity'::numeric)
   )`),

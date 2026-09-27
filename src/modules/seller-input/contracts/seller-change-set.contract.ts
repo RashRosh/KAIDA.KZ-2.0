@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { LocationType } from '../../locations/contracts/location.contract';
 import type { OfferStatus } from '../../offers/db/offers.table';
 import { priceUnitInputSchema, type PriceUnit } from '../../offers/price-unit/price-unit';
+import type { Pack } from '../../offers/pack/pack';
 import type { SellerChangeAction } from '../db/seller-change-items.table';
 import type { SellerChangeSetStatus } from '../db/seller-change-sets.table';
 
@@ -85,7 +86,14 @@ export type SellerBatchChangeItemInput = SellerBatchChangeSetCreateInput['items'
 export type SellerChangeSetItemView = {
   id: string;
   action: SellerChangeAction;
-  product: { id: string; name: string };
+  // name is the card title (the Seller's own words); id is the optional catalog link.
+  product: { id: string | null; name: string };
+  cardId: string;
+  priceOwn: boolean;
+  pack: Pack | null;
+  packLabel: string | null;
+  // Proposed updates only: the target Offer's price before this change.
+  previousPriceAmount?: string;
   location: { id: string; name: string; addressText: string; type: LocationType };
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
   sellerComment: string | null;
