@@ -36,6 +36,7 @@ export default defineConfig({
       IDENTITY_OTP_HMAC_SECRET_HEX: identityTestSecret,
       IDENTITY_COOKIE_SECURE: 'false',
       NEXT_TELEMETRY_DISABLED: '1',
+      OPERATOR_PHONES: '+77000038001,+77000039001',
     },
   })),
 });

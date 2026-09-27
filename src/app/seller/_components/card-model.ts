@@ -14,6 +14,8 @@ export type SellerCard = {
   // Lowest price when every point has its own price.
   lowestPrice: string | null;
   live: boolean;
+  // operator-post-check: the whole card is off the showcase until the Seller fixes and republishes it.
+  removal: SellerOfferView['removal'];
   updatedAt: string;
 };
 
@@ -31,6 +33,7 @@ export function groupCards(offers: SellerOfferView[]): SellerCard[] {
       commonPrice: common,
       lowestPrice: common === null && prices.length > 0 ? String(Math.min(...prices)) : null,
       live: sorted.some((offer) => offer.status === 'active'),
+      removal: sorted[0]!.removal,
       updatedAt: sorted.map((offer) => offer.updatedAt).sort().at(-1)!,
     };
   });

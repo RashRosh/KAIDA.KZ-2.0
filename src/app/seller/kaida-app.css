@@ -31,3 +31,4 @@
 .kaida .cbx{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);margin:0;opacity:0;cursor:pointer}
 .kaida .cbx:disabled{cursor:default}
 .kaida span:has(>.cbx:focus-visible)>.cb{outline:2px solid var(--focus);outline-offset:2px}
+.kaida label.li:has(>.cbx:focus-visible){outline:2px solid var(--focus);outline-offset:2px;border-radius:10px}

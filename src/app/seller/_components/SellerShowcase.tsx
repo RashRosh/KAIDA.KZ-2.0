@@ -214,13 +214,19 @@ function CardRow({ card, highlighted, onOpen, onComplete }: { card: SellerCard; 
   if (!cover) missing.push('showcase.noPhoto');
   if (!lead.sellerComment) missing.push('showcase.noComment');
   return (
-    <article className={`card${highlighted ? ' hl is-new' : ''}`} aria-labelledby={`card-${card.cardId}`} data-testid={`seller-card-${card.cardId}`}>
+    <article className={`card${highlighted ? ' hl is-new' : ''}`} aria-labelledby={`card-${card.cardId}`} data-testid={`seller-card-${card.cardId}`}
+      style={card.removal ? { border: '1.5px solid var(--danger)' } : undefined}>
       <button type="button" className="rowbtn" onClick={onOpen} aria-labelledby={`card-${card.cardId}`}>
         <Thumb photoUrl={cover ? photoUrl(cover.id, 'thumb') : null} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div className="ts" id={`card-${card.cardId}`}>{lead.product.name}{lead.packLabel ? ` · ${lead.packLabel}` : ''}</div>
           {priceLine(card, t)}
-          {card.live
+          {card.removal ? (
+            <>
+              <span className="bd bd-err"><Ic name="eyeoff" />{t('removal.status')}</span>
+              <p className="c">{t('removal.rowHint', { reason: t(`removal.short.${card.removal.reason}`) })}</p>
+            </>
+          ) : card.live
             ? <span className="bd bd-ok"><Ic name="check" />{t('showcase.statusLive')}{highlighted ? ` · ${t('showcase.statusNow')}` : ''}</span>
             : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>}
         </div>
@@ -359,6 +365,37 @@ function Overlays({ cards, drafts, seller, commentTranslationEnabled, override, 
   return null;
 }
 
+// AI-S15 · Card · Removed by operator: the reason in plain words, no on/off switches; the only way back is to fix
+// the card and publish it again (operator-post-check §2 «Seller side»).
+function RemovedCardScreen({ card, title, onClose, go }: { card: SellerCard; title: string; onClose: () => void; go: (query: string) => void }) {
+  const { locale, t } = useI18n();
+  const removal = card.removal!;
+  const cover = card.lead.photos?.[0];
+  const date = new Intl.DateTimeFormat(locale === 'kk' ? 'kk-KZ' : 'ru-KZ', { day: 'numeric', month: 'long' }).format(new Date(removal.removedAt));
+  return (
+    <Phone>
+      <Bar title={title} onBack={onClose} />
+      <main className="body" style={{ gap: 14 }}>
+        <div className={`img${cover ? '' : ' fb'}`} style={{ height: 150, borderRadius: 20, opacity: 0.6, flex: 'none' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- owner-only photo route */}
+          {cover ? <img src={photoUrl(cover.id, 'display')} alt="" /> : <Ic name="logo" />}
+        </div>
+        <span className="bd bd-err" style={{ alignSelf: 'flex-start' }}><Ic name="eyeoff" />{t('removal.status')}</span>
+        <div className="card p16" style={{ gap: 6 }}>
+          <h2 className="ov">{t('removal.why')}</h2>
+          <p className="t">{t(`removal.text.${removal.reason}`)} {t('removal.hidden')}</p>
+          {removal.comment && <p className="t">{t('removal.comment', { comment: removal.comment })}</p>}
+          <p className="c">{t('removal.removedOn', { date })}</p>
+        </div>
+        <p className="c c2">{t('removal.hint')}</p>
+      </main>
+      <div className="foot">
+        <button type="button" className="btn btn-p lg w" onClick={() => go(`edit=${card.cardId}`)}>{t('removal.fix')}</button>
+      </div>
+    </Phone>
+  );
+}
+
 // AI-S15 · Card: one point — photo, status, price and actions (Published / Off); several points — every point with its
 // price and state (Points); change everywhere, in one point, or switch a point on or off.
 function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => void; go: (query: string) => void }) {
@@ -395,6 +432,8 @@ function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => vo
   const errorBanner = error && (
     <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12 }}><p className="c" style={{ color: 'var(--ink)' }}>{t('offers.actionError')}</p></div>
   );
+
+  if (card.removal) return <RemovedCardScreen card={card} title={title} onClose={onClose} go={go} />;
 
   if (card.offers.length === 1) {
     const offer = card.offers[0]!;
