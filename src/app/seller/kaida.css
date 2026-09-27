@@ -1,0 +1,351 @@
+/* Ported verbatim from the accepted mockup (docs/product/mockup/seller-ai-first-rev1/kaida.css), scoped to .kaida;
+   icons are the mockup's own files under /kaida/icons. Do not restyle here: change the mockup first. */
+/* KAIDA · AI-first seller concept — shared styles. Tokens = KAIDA design system (light theme). */
+.kaida{
+  --bg:#faf8fb;--surface:#ffffff;--raised:#ffffff;--sunken:#f4f1f6;--line:#e8e4eb;--line-control:#8b858e;
+  --ink:#19161b;--ink2:#615b64;--ink3:#6e6871;
+  --primary:#9900cc;--primary-hover:#7a06a3;--primary-pressed:#5b0a7a;--on-primary:#ffffff;--primary-text:#9900cc;--primary-soft:#f8e5ff;--focus:#9900cc;
+  --sun:#fec92f;--on-sun:#100d11;
+  --success:#007b2a;--success-soft:#eefbf0;--warning:#9c5a00;--warning-soft:#fff5e9;--danger:#c2272d;--danger-soft:#fff1ef;--info:#006ebf;--info-soft:#edf8ff;
+  --scrim:#19161b8f;
+  --shadow-md:0 4px 12px #5b0a7a1a,0 2px 4px #19161b0f;--shadow-lg:0 12px 32px #5b0a7a24,0 4px 8px #19161b14;
+  --sans:Roboto,Geologica,system-ui,-apple-system,"Segoe UI",sans-serif;--display:Geologica,Roboto,system-ui,sans-serif;
+}
+.kaida, .kaida *{box-sizing:border-box}
+.kaida{margin:0;font-family:var(--sans);color:var(--ink);background:#e9e5ec;-webkit-font-smoothing:antialiased}
+.kaida button, .kaida input, .kaida textarea, .kaida select{font:inherit;color:inherit}
+.kaida a{color:var(--primary-text)}
+.kaida a:hover{color:var(--primary-hover)}
+/* ---------- phone ---------- */
+.kaida .ph{width:360px;height:760px;background:var(--bg);border-radius:28px;border:1px solid #d7d2da;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px #19161b14}
+.kaida .ph.tall{height:1180px}
+.kaida .bar{height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 4px 0 4px;background:var(--surface);border-bottom:1px solid var(--line)}
+.kaida .bar.flat{background:var(--bg);border-bottom:0}
+.kaida .bar-t{flex:1;min-width:0;font:600 17px/24px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:8px}
+.kaida .bar-t.c{text-align:center;padding-left:0}
+.kaida .body{flex:1;min-height:0;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:16px}
+.kaida .body.np{padding:0}
+.kaida .foot{flex:none;padding:12px 16px 16px;background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.kaida .foot.bare{background:transparent;border-top:0}
+.kaida .sp{flex:1}
+.kaida .body>*, .kaida .sheet>*, .kaida .foot>*, .kaida .wbody>*{flex-shrink:0}
+/* bottom nav */
+.kaida .nav{height:64px;flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line)}
+.kaida .nav>a, .kaida .nav>span, .kaida .nav>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:500 12px/16px var(--sans);color:var(--ink2);text-decoration:none;position:relative}
+.kaida .nav .on{color:var(--primary-text)}
+.kaida .nav .on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
+.kaida .dot{position:absolute;top:10px;margin-left:22px;min-width:16px;height:16px;border-radius:8px;background:var(--danger);color:#fff;font:600 10px/16px var(--sans);text-align:center;padding:0 4px}
+/* type */
+.kaida .ov{font:500 12px/16px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.kaida .h1{margin:0;font:700 26px/32px var(--display);letter-spacing:-.015em;text-wrap:balance}
+.kaida .h2{margin:0;font:600 21px/28px var(--display);letter-spacing:-.01em;text-wrap:balance}
+.kaida .h3{margin:0;font:600 17px/24px var(--display)}
+.kaida .t{margin:0;font:400 15px/22px var(--sans)}
+.kaida .tl{margin:0;font:400 17px/24px var(--sans)}
+.kaida .ts{margin:0;font:500 15px/22px var(--sans)}
+.kaida .c{margin:0;font:400 13px/18px var(--sans);color:var(--ink3)}
+.kaida .c2{color:var(--ink2)}
+.kaida .lbl{font:500 14px/20px var(--sans)}
+.kaida .pr{font:700 18px/22px var(--display);font-variant-numeric:tabular-nums}
+.kaida .pr-lg{font:700 26px/30px var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kaida .num{font-variant-numeric:tabular-nums}
+.kaida .clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kaida .pt{color:var(--primary-text)}
+.kaida .dn{color:var(--danger)}
+.kaida .ok{color:var(--success)}
+/* buttons */
+.kaida .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:14px;border:0;font:500 14px/20px var(--sans);letter-spacing:.005em;text-decoration:none;cursor:pointer;white-space:nowrap}
+.kaida .btn-p{background:var(--primary);color:var(--on-primary)}
+.kaida .btn-p.lg{height:auto;min-height:52px;font-size:15px;white-space:normal;text-align:center;padding:8px 16px}
+.kaida .btn-o{background:var(--surface);color:var(--ink);border:1.5px solid var(--line-control)}
+.kaida .btn-g{background:transparent;color:var(--primary-text);padding:0 12px}
+.kaida .btn-d{background:var(--danger);color:#fff}
+.kaida .btn-do{background:var(--surface);color:var(--danger);border:1.5px solid var(--danger)}
+.kaida .btn.w{width:100%;white-space:normal;text-align:center;height:auto;min-height:44px}
+.kaida .btn.sm{height:36px;padding:0 12px;border-radius:10px}
+.kaida .btn[disabled], .kaida .btn.dis{background:var(--sunken);color:var(--ink3);border-color:transparent;cursor:not-allowed}
+.kaida .btn.pressed{background:var(--primary-pressed)}
+.kaida .btn.focus{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .ib{width:48px;height:48px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:24px;color:var(--ink);cursor:pointer;padding:0}
+.kaida .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;display:inline-block;flex:none}
+/* icons (mask) */
+.kaida .ic{display:inline-block;width:24px;height:24px;flex:none;background-color:currentColor;-webkit-mask-image:var(--m);mask-image:var(--m);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+.kaida .ic.sm{width:20px;height:20px}
+.kaida .ic.xs{width:16px;height:16px}
+.kaida .ic.lg{width:32px;height:32px}
+.kaida .i-alert{--m:url(/kaida/icons/4783fc386ea77a9f60fbffd8e5ddac0a.svg)}
+.kaida .i-archive{--m:url(/kaida/icons/ad57f3a7c78f527f814ad4f84db0bbc5.svg)}
+.kaida .i-bell{--m:url(/kaida/icons/d35054f86fed18ae4b08d0e0c6aadd6b.svg)}
+.kaida .i-bolt{--m:url(/kaida/icons/91fd527ea53047517c2d007027c45d27.svg)}
+.kaida .i-box{--m:url(/kaida/icons/4511562b4af8255cf2d9bbd27f7da797.svg)}
+.kaida .i-camera{--m:url(/kaida/icons/95d51883083971531ed12cd20a22946e.svg)}
+.kaida .i-check{--m:url(/kaida/icons/8808f89b5bb5cd6a347ca65d21a96608.svg)}
+.kaida .i-down{--m:url(/kaida/icons/c30fa90aa6f3f4cef093a5372a76ed7e.svg)}
+.kaida .i-left{--m:url(/kaida/icons/237178255fd24f2a13301c74d63a54e3.svg)}
+.kaida .i-right{--m:url(/kaida/icons/9ca8118e917302f2c0a01c49f89c1766.svg)}
+.kaida .i-clock{--m:url(/kaida/icons/669b413ea606a58488974cb83e659c24.svg)}
+.kaida .i-close{--m:url(/kaida/icons/8ddcd2f4e5b5f4eb0ae29662a26baea9.svg)}
+.kaida .i-copy{--m:url(/kaida/icons/bf25adb29f9669b336da95d20a29425f.svg)}
+.kaida .i-cover{--m:url(/kaida/icons/0cdefda6b049459ba4914112a455c264.svg)}
+.kaida .i-drag{--m:url(/kaida/icons/96782b5530230fc3366989a84850a153.svg)}
+.kaida .i-eyeoff{--m:url(/kaida/icons/8cbf6a617a28cccd77657f4183664c12.svg)}
+.kaida .i-filter{--m:url(/kaida/icons/1f5b8c3573d55c3c7073d4eefb56bf1d.svg)}
+.kaida .i-flag{--m:url(/kaida/icons/101d8630c045ba81c37df08b091a32c2.svg)}
+.kaida .i-globe{--m:url(/kaida/icons/0f525eca9f7114616516e172788fcb2c.svg)}
+.kaida .i-history{--m:url(/kaida/icons/cfeb731d0f84f09e46e9302394279f09.svg)}
+.kaida .i-image{--m:url(/kaida/icons/ab41320b50f7f3915e9f64ac583571a5.svg)}
+.kaida .i-info{--m:url(/kaida/icons/5a8d69aeabfd5acbd83b79808dede9d5.svg)}
+.kaida .i-layers{--m:url(/kaida/icons/1b8ec0d1d819b0499143333826a377f3.svg)}
+.kaida .i-link{--m:url(/kaida/icons/bf64e9ca5dcecaf13b51e6faabbce0ee.svg)}
+.kaida .i-locate{--m:url(/kaida/icons/6270c337865940d7b5198a023697b24c.svg)}
+.kaida .i-lock{--m:url(/kaida/icons/e6439247dee499eeb742c0cf0da70eb4.svg)}
+.kaida .i-menu{--m:url(/kaida/icons/67a905cecb7b967b1e951ed9108addf4.svg)}
+.kaida .i-msg{--m:url(/kaida/icons/bf7d43d948522d210c936915dbb449a1.svg)}
+.kaida .i-mic{--m:url(/kaida/icons/0e82e54d566e0ae7f14efecaa6bb601c.svg)}
+.kaida .i-more{--m:url(/kaida/icons/fd21de209bc17d1812618473443a6514.svg)}
+.kaida .i-offline{--m:url(/kaida/icons/3f5a5bce08391330d834455f127743ac.svg)}
+.kaida .i-pencil{--m:url(/kaida/icons/8049e64bc17725914a4d27cf238a6151.svg)}
+.kaida .i-phone{--m:url(/kaida/icons/a22cc527391c8609bedff8004f345884.svg)}
+.kaida .i-pin{--m:url(/kaida/icons/fee61d6851587103198e3fdb06ce0cf3.svg)}
+.kaida .i-play{--m:url(/kaida/icons/daf65208dfadaf582f3fe42babfdacbb.svg)}
+.kaida .i-plus{--m:url(/kaida/icons/60ee476757c9f695e6f79fad80a43cec.svg)}
+.kaida .i-power{--m:url(/kaida/icons/d68e1064e62d9ddc9211b1f3988d6332.svg)}
+.kaida .i-refresh{--m:url(/kaida/icons/c7d08dac0721ba4e50a21785a7ee7a3c.svg)}
+.kaida .i-route{--m:url(/kaida/icons/5c510fed7be350c809364b39716df968.svg)}
+.kaida .i-scale{--m:url(/kaida/icons/138a6a051fdbbcbbb494fa0f57c3f282.svg)}
+.kaida .i-search{--m:url(/kaida/icons/55454bcbd1c1d91afe960d948b7011bc.svg)}
+.kaida .i-send{--m:url(/kaida/icons/718b8e4f5c6b0efc134b81a4e1cb7053.svg)}
+.kaida .i-shield{--m:url(/kaida/icons/eb61bb777b8a97e2b6ccd555a098d401.svg)}
+.kaida .i-starf{--m:url(/kaida/icons/b6af771aab65d566a5107b1411ecace1.svg)}
+.kaida .i-star{--m:url(/kaida/icons/62cb217d4d00eea31c5c11de32323fae.svg)}
+.kaida .i-stop{--m:url(/kaida/icons/57e1f4f05078271e790c28fe45ecf667.svg)}
+.kaida .i-store{--m:url(/kaida/icons/7d25740b57d8291ccdd43e7e18788b6b.svg)}
+.kaida .i-trash{--m:url(/kaida/icons/854e247462e7572c596c42bc197bbe35.svg)}
+.kaida .i-upload{--m:url(/kaida/icons/2c0963589d9de9d1f9d57d710785792c.svg)}
+.kaida .i-user{--m:url(/kaida/icons/7892d6ff26acd7b339a16fa8992a77c1.svg)}
+.kaida .i-video{--m:url(/kaida/icons/db30279d67a882950a08f67e82d246c0.svg)}
+.kaida .i-wave{--m:url(/kaida/icons/5e69662528b84badf50a12db8a09bc99.svg)}
+/* contact icon-only buttons (brand icons supplied by PO) */
+.kaida .cts{display:flex;gap:4px;align-items:center}
+.kaida .ct{text-decoration:none;width:44px;height:44px;border-radius:22px;border:1.5px solid var(--line-control);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;flex:none;padding:0;color:var(--ink);cursor:pointer}
+.kaida .ct img{width:24px;height:24px;display:block}
+.kaida .ct.route{background:var(--primary);border-color:var(--primary);color:#fff;width:auto;padding:0 14px;gap:6px;font:500 14px/20px var(--sans)}
+.kaida .ct.focus{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .ct.pressed{background:var(--primary-soft)}
+.kaida .ct.dis{opacity:1;background:var(--sunken);border-color:transparent}
+.kaida .ct.dis img{filter:grayscale(1);opacity:.45}
+/* surfaces */
+.kaida .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.kaida .card.p16{padding:16px}
+.kaida .card.hl{border:1.5px solid var(--primary);background:#fdf8ff}
+.kaida .banner{border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.kaida .banner.soft{background:var(--primary-soft)}
+.kaida .banner.warn{background:var(--warning-soft);color:var(--ink)}
+.kaida .banner.info{background:var(--info-soft)}
+.kaida .banner.err{background:var(--danger-soft)}
+.kaida .banner.ok{background:var(--success-soft)}
+.kaida .banner.gray{background:var(--sunken)}
+.kaida .hr{height:1px;background:var(--line);flex:none}
+.kaida .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--raised);border-radius:28px 28px 0 0;box-shadow:var(--shadow-lg);padding:8px 16px 20px;display:flex;flex-direction:column;gap:12px;z-index:3}
+.kaida .sheet .grab{width:36px;height:4px;border-radius:2px;background:#d7d2da;align-self:center;margin-bottom:4px}
+.kaida .scrim{position:absolute;inset:0;background:var(--scrim);z-index:2}
+.kaida .toast{position:absolute;left:12px;right:12px;bottom:80px;background:#302c33;color:#fff;border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;font:400 14px/20px var(--sans);box-shadow:var(--shadow-lg);z-index:4}
+.kaida .toast .btn-g{color:#e29dff;height:32px;padding:0 6px}
+/* list rows */
+.kaida .li{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0}
+.kaida .li+.li{border-top:1px solid var(--line)}
+.kaida .li .mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.kaida .li .mid .ts{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kaida .lic{width:40px;height:40px;border-radius:12px;background:var(--sunken);display:flex;align-items:center;justify-content:center;flex:none;color:var(--ink2)}
+.kaida .lic.p{background:var(--primary-soft);color:var(--primary-text)}
+/* badges */
+.kaida .bd{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:6px;font:500 12px/16px var(--sans);white-space:nowrap;flex:none;align-self:flex-start}
+.kaida .bd .ic{width:14px;height:14px}
+.kaida .bd-ok{background:var(--success-soft);color:var(--success)}
+.kaida .bd-warn{background:var(--warning-soft);color:var(--warning)}
+.kaida .bd-err{background:var(--danger-soft);color:var(--danger)}
+.kaida .bd-info{background:var(--info-soft);color:var(--info)}
+.kaida .bd-n{background:var(--sunken);color:var(--ink2)}
+.kaida .bd-p{background:var(--primary-soft);color:var(--primary-text)}
+.kaida .bd-line{background:var(--surface);color:var(--ink2);border:1px solid var(--line-control)}
+.kaida .fresh{position:absolute;left:8px;top:8px;height:24px;padding:0 8px;border-radius:6px;background:#19161bc7;color:#fff;font:500 12px/24px var(--sans)}
+/* media */
+.kaida .img{position:relative;border-radius:14px;overflow:hidden;flex:none;display:flex;align-items:flex-end;justify-content:flex-start}
+.kaida .img span.ph-l{font:500 10px/12px var(--sans);color:#19161b99;padding:6px;letter-spacing:.02em}
+.kaida .m1{background:#d8b9a0}
+.kaida .m2{background:#b7cf9c}
+.kaida .m3{background:#e9c07a}
+.kaida .m4{background:#e3aaa0}
+.kaida .m5{background:#c9b7de}
+.kaida .m6{background:#a9c9d6}
+.kaida .m7{background:#d9d0b5}
+.kaida .m8{background:#c4d9b4}
+.kaida .fb{background:var(--sunken);color:var(--ink3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;font:400 12px/16px var(--sans)}
+.kaida .mt{width:72px;height:72px;border-radius:10px;position:relative;flex:none;overflow:hidden}
+.kaida .mt .cv{position:absolute;left:4px;top:4px;height:18px;padding:0 5px;border-radius:5px;background:var(--primary);color:#fff;font:500 10px/18px var(--sans)}
+.kaida .mt .x{position:absolute;right:3px;top:3px;width:22px;height:22px;border-radius:11px;background:#19161bb3;color:#fff;display:flex;align-items:center;justify-content:center}
+.kaida .mt .x .ic{width:14px;height:14px}
+.kaida .mt.add{border:1.5px dashed var(--line-control);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;color:var(--primary-text);font:500 11px/14px var(--sans)}
+.kaida .mt.up::after{content:"";position:absolute;inset:0;background:#faf8fbb3}
+.kaida .mt .pb{position:absolute;left:6px;right:6px;bottom:6px;height:4px;border-radius:2px;background:#ffffff;z-index:1;overflow:hidden}
+.kaida .mt .pb i{display:block;height:100%;background:var(--primary)}
+.kaida .mt.er{outline:2px solid var(--danger);outline-offset:-2px}
+.kaida .mt .erl{position:absolute;inset:0;background:#fff1efe6;color:var(--danger);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:500 11px/14px var(--sans);z-index:1}
+.kaida .mrow{display:flex;gap:8px;flex-wrap:wrap}
+/* forms */
+.kaida .fld{display:flex;flex-direction:column;gap:6px}
+.kaida .fld label, .kaida .fld .fl{font:500 14px/20px var(--sans);color:var(--ink)}
+.kaida .fld .req{color:var(--ink3);font-weight:400}
+.kaida .inp{height:48px;border:1.5px solid var(--line-control);border-radius:10px;background:var(--surface);padding:0 12px;display:flex;align-items:center;gap:8px;font:400 16px/22px var(--sans);color:var(--ink);width:100%}
+.kaida .inp.ph0{color:var(--ink3)}
+.kaida .inp.foc{border:2px solid var(--primary);outline:2px solid var(--primary-soft)}
+.kaida .inp.er{border:2px solid var(--danger)}
+.kaida .inp.dis{background:var(--sunken);border-color:transparent;color:var(--ink3)}
+.kaida .inp.ta{height:auto;min-height:88px;align-items:flex-start;padding:12px}
+.kaida .fld .hint{font:400 13px/18px var(--sans);color:var(--ink3)}
+.kaida .fld .emsg{font:400 13px/18px var(--sans);color:var(--danger);display:flex;gap:6px;align-items:flex-start}
+.kaida .fld .emsg .ic{width:16px;height:16px;margin-top:1px}
+.kaida input.inp{outline:none}
+.kaida .cb{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--line-control);background:var(--surface);flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.kaida .cb.on{background:var(--primary);border-color:var(--primary)}
+.kaida .cb .ic{width:18px;height:18px}
+.kaida .rd{width:24px;height:24px;border-radius:12px;border:1.5px solid var(--line-control);flex:none;background:var(--surface);position:relative}
+.kaida .rd.on{border:2px solid var(--primary)}
+.kaida .rd.on::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--primary)}
+.kaida .sw{width:44px;height:26px;border-radius:13px;background:#d7d2da;position:relative;flex:none}
+.kaida .sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:10px;background:#fff;box-shadow:0 1px 2px #19161b33}
+.kaida .sw.on{background:var(--primary)}
+.kaida .sw.on::after{left:21px}
+.kaida .chips{display:flex;gap:8px;flex-wrap:wrap}
+.kaida .chip{height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line-control);background:var(--surface);display:inline-flex;align-items:center;gap:6px;font:500 14px/20px var(--sans);color:var(--ink);white-space:nowrap}
+.kaida .chip.on{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-text)}
+.kaida .chip .ic{width:18px;height:18px}
+.kaida .seg{display:flex;background:var(--sunken);border-radius:12px;padding:3px;gap:3px}
+.kaida .seg span{flex:1;height:36px;display:flex;align-items:center;justify-content:center;border-radius:9px;font:500 14px/20px var(--sans);color:var(--ink2)}
+.kaida .seg span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px #19161b1f}
+.kaida .lang{display:inline-flex;border:1.5px solid var(--line-control);border-radius:999px;overflow:hidden;height:32px;flex:none}
+.kaida .lang span{padding:0 10px;display:flex;align-items:center;font:500 12px/16px var(--sans);color:var(--ink2)}
+.kaida .lang span.on{background:var(--primary-soft);color:var(--primary-text)}
+/* progress & meters */
+.kaida .pbar{height:6px;border-radius:3px;background:var(--sunken);overflow:hidden;flex:none}
+.kaida .pbar i{display:block;height:100%;border-radius:3px;background:var(--primary)}
+.kaida .pbar.w i{background:var(--warning)}
+.kaida .meter{display:flex;align-items:center;gap:3px;height:32px}
+.kaida .meter i{display:block;width:4px;border-radius:2px;background:var(--primary)}
+.kaida .meter i.off{background:#d7d2da}
+.kaida .sk{background:var(--sunken);border-radius:8px}
+/* camera viewfinder */
+.kaida .vf{background:#100d11;color:#fff;position:relative;flex:1;display:flex;flex-direction:column;overflow:hidden}
+.kaida .vf .scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px}
+.kaida .vf .blob{border-radius:50%}
+.kaida .vf .ovl{position:absolute;left:0;right:0;display:flex;align-items:center;gap:8px;padding:12px 12px}
+.kaida .vf .hintbox{background:#19161bcc;border-radius:14px;padding:10px 12px;font:400 14px/20px var(--sans);color:#fff}
+.kaida .recdot{width:10px;height:10px;border-radius:5px;background:#ff5a5f;flex:none}
+.kaida .shutter{width:72px;height:72px;border-radius:36px;border:4px solid #fff;display:flex;align-items:center;justify-content:center;background:transparent}
+.kaida .shutter i{display:block;width:28px;height:28px;border-radius:7px;background:#ff5a5f}
+.kaida .shutter.idle i{width:56px;height:56px;border-radius:28px}
+.kaida .vfbtn{width:48px;height:48px;border-radius:24px;background:#ffffff26;display:flex;align-items:center;justify-content:center;color:#fff}
+/* stats row */
+.kaida .kv{display:flex;justify-content:space-between;gap:12px;font:400 15px/22px var(--sans)}
+.kaida .kv span:first-child{color:var(--ink2)}
+.kaida .steps{display:flex;flex-direction:column;gap:10px}
+.kaida .step{display:flex;gap:10px;align-items:flex-start}
+.kaida .step .n{width:24px;height:24px;border-radius:12px;background:var(--primary-soft);color:var(--primary-text);font:600 12px/24px var(--sans);text-align:center;flex:none}
+/* illustration (bazaar geometry) */
+.kaida .ill{width:200px;height:150px;position:relative;align-self:center;flex:none}
+.kaida .ill i{position:absolute;display:block}
+/* freshness gradation (comment 21ea0a59): colour doubles the text, never replaces it */
+.kaida .fresh.fr0{background:#007b2af2}.kaida .fresh.fr1{background:#3a7d12f2}.kaida .fresh.fr2{background:#5c7a00f2}
+.kaida .fresh.fr3{background:#7a6a00f2}.kaida .fresh.fr4{background:#9c5a00f2}.kaida .fresh.fr5{background:#8a5536f2}.kaida .fresh.fr6{background:#615b64f2}
+/* cover marker = star only (comment 3e4cf6b9) */
+.kaida .mt .cv.star{width:22px;height:22px;padding:0;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--primary)}
+.kaida .mt .cv.star .ic{width:14px;height:14px;color:var(--sun)}
+.kaida button.li:not(.card){appearance:none;background:none;border:0;width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.kaida button.li:not(.card)+.li{border-top:1px solid var(--line)}
+/* no-photo fallback = translucent KAIDA sign (comment 045a8fb4) */
+.kaida .i-logo{--m:url(/kaida/icons/85c2c17019d66712fb6de7f93aab0ca5.svg)}
+.kaida .fb .ic.i-logo{color:var(--ink3);opacity:.22;height:40%;width:auto;aspect-ratio:87/105;max-height:120px;min-height:24px}
+/* numeric counter badge: centred in row (comment 33b369c3) */
+.kaida .bd.cnt{align-self:center;min-width:24px;justify-content:center;padding:0 7px;border-radius:12px;font-variant-numeric:tabular-nums}
+/* ================= MOTION (Proposed) =================
+   Durations = KAIDA DS tokens duration-fast/base/slow (120/200/320 ms).
+   Easing = proposed extension: the DS has no easing tokens yet.
+   Mount animations are scoped to .motion (prototypes) and .mo (Motion board);
+   static frames stay still so canvas thumbnails never catch a mid-frame. */
+.kaida{
+  --dur-fast:120ms;--dur-base:200ms;--dur-slow:320ms;
+  --ease-out:cubic-bezier(.33,1,.68,1);
+  --ease-out-soft:cubic-bezier(.16,1,.3,1);
+  --ease-in:cubic-bezier(.32,0,.67,0);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --stagger:60ms;
+}
+@keyframes m-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes m-fade{from{opacity:0}to{opacity:1}}
+@keyframes m-sheet{from{transform:translateY(100%)}to{transform:none}}
+@keyframes m-toast{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes m-pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes m-shake{0%,100%{transform:none}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes m-spin{to{transform:rotate(360deg)}}
+@keyframes m-pulse{0%,100%{opacity:1;transform:none}50%{opacity:.35;transform:scale(.85)}}
+@keyframes m-shimmer{from{background-position:-160px 0}to{background-position:160px 0}}
+@keyframes m-grow{from{transform:scaleX(0)}to{transform:none}}
+@keyframes m-ind{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@keyframes m-glow{0%{box-shadow:0 0 0 0 #9900cc55}40%{box-shadow:0 0 0 6px #9900cc22}100%{box-shadow:0 0 0 0 #9900cc00}}
+/* press feedback: on pointer-down, instant, no delay */
+.kaida.motion :is(.btn,.ib,.ct,button.li,a.li,.chip,.nav a,.nav button){transition:transform 100ms var(--ease-out),background-color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.kaida.motion :is(.btn,.ib,.ct,button.li,a.li,.chip,.nav a,.nav button):active{transform:scale(.97)}
+.kaida.motion .btn.dis:active, .kaida.motion .btn[disabled]:active{transform:none}
+/* screen change: content rises 8px; header and nav stay put so chrome never flickers */
+.kaida.motion .ph>main.body, .kaida.motion .ph>.foot, .kaida.motion .ph>.vf{animation:m-enter var(--dur-base) var(--ease-out) both}
+/* overlays: scrim fades, sheet slides from its edge, content follows 60ms later */
+.kaida.motion .ph>.scrim{animation:m-fade var(--dur-base) var(--ease-out) both}
+.kaida.motion .ph>.sheet{animation:m-sheet var(--dur-slow) var(--ease-out-soft) both}
+.kaida.motion .ph>.sheet>*{animation:m-fade var(--dur-base) var(--ease-out) 60ms both}
+/* toast: small overshoot in; icon pops 80ms after its container */
+.kaida.motion .toast{animation:m-toast var(--dur-slow) var(--spring) both}
+.kaida.motion .toast>.ic:first-child{animation:m-pop var(--dur-base) var(--spring) 80ms both}
+.kaida.motion .toast.late{animation-delay:1.5s}
+.kaida.motion .toast.late>.ic:first-child{animation-delay:1.58s}
+/* selection controls */
+.kaida.motion .cb{transition:background-color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.kaida.motion .cb.on .ic{animation:m-pop var(--dur-base) var(--spring) both}
+.kaida.motion .rd.on::after{animation:m-pop var(--dur-base) var(--spring) both}
+.kaida .sw.on::after{left:3px;transform:translateX(18px)}
+.kaida.motion .sw{transition:background-color var(--dur-base) var(--ease-out)}
+.kaida.motion .sw::after{transition:transform var(--dur-base) var(--spring)}
+/* errors: message shakes once, ±4px, 300ms */
+.kaida.motion .emsg, .kaida.motion .banner.err{animation:m-shake 300ms var(--ease-out) both}
+/* counters bump when they appear */
+.kaida.motion .dot, .kaida.motion .bd.cnt{animation:m-pop var(--dur-slow) var(--spring) both}
+/* loops: the only place for linear */
+.kaida.motion .spin{animation:m-spin 800ms linear infinite}
+.kaida.motion .recdot{animation:m-pulse 1200ms var(--ease-in-out) infinite}
+.kaida.motion .sk{background:linear-gradient(90deg,var(--sunken) 0,#fbf9fc 50%,var(--sunken) 100%) var(--sunken);background-size:320px 100%;animation:m-shimmer 1400ms linear infinite}
+.kaida.motion .pbar i{transform-origin:left;animation:m-grow 600ms var(--ease-out) both}
+.kaida .pbar.ind{position:relative}
+.kaida .pbar.ind i{width:40%}
+.kaida.motion .pbar.ind i{animation:m-ind 1200ms var(--ease-in-out) infinite}
+/* lists: stagger 60ms in reading order, capped at 6 steps */
+.kaida.motion .stagger>*{animation:m-enter var(--dur-base) var(--ease-out) both}
+.kaida.motion .stagger>:nth-child(2){animation-delay:60ms}
+.kaida.motion .stagger>:nth-child(3){animation-delay:120ms}
+.kaida.motion .stagger>:nth-child(4){animation-delay:180ms}
+.kaida.motion .stagger>:nth-child(5){animation-delay:240ms}
+.kaida.motion .stagger>:nth-child(n+6){animation-delay:300ms}
+/* AI assembly: draft rows materialise one by one while processing */
+.kaida .assemble{display:flex;flex-direction:column;gap:10px}
+.kaida .asm-row{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
+.kaida .asm-row>.sk{width:44px;height:44px;border-radius:8px;flex:none}
+.kaida .asm-row>span{flex:1;display:flex;flex-direction:column;gap:6px}
+.kaida .asm-row>span>.sk{height:10px;border-radius:5px}
+.kaida .asm-row>span>.sk+.sk{width:55%}
+.kaida.motion .asm-row{animation:m-enter var(--dur-slow) var(--ease-out) both}
+.kaida.motion .asm-row:nth-child(2){animation-delay:400ms}
+.kaida.motion .asm-row:nth-child(3){animation-delay:800ms}
+/* reward: a newly published card lands and gets one soft ring */
+.kaida.motion .is-new{animation:m-enter var(--dur-slow) var(--ease-out) 120ms both,m-glow 1200ms var(--ease-out) 440ms both}
+@media (prefers-reduced-motion:reduce){.kaida.motion *, .kaida.motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0ms!important;transition-duration:.01ms!important}}
+/* SMS code: large, centred, tabular (comment b079eb70) */
+.kaida .inp.otp{height:64px;justify-content:center;text-align:center;font:600 30px/38px var(--display);letter-spacing:.35em;text-indent:.35em;font-variant-numeric:tabular-nums}

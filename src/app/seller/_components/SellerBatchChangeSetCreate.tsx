@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
-import styles from '../page.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
+import { Ic } from '../_kaida/ui';
 import { PriceUnitField, emptyPriceUnitDraft, priceUnitDraftFrom, priceUnitFromDraft, type PriceUnitDraft } from './PriceUnitField';
 
 type Action = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
@@ -167,27 +167,26 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
 
   if (seller.locations.length === 0) {
     return (
-      <section className={styles.card} aria-labelledby="seller-batch-heading">
-        <h2 id="seller-batch-heading">{t('batch.changeSeveral')}</h2>
-        <p className={styles.muted}>{t('batch.addPointFirst')}</p>
-        <Link className={styles.secondaryLinkButton} href="/seller">{t('batch.openPoints')}</Link>
-      </section>
+      <div className="card p16" style={{ gap: 10 }}>
+        <h2 className="h3">{t('batch.changeSeveral')}</h2>
+        <p className="c c2">{t('batch.addPointFirst')}</p>
+        <Link className="btn btn-o sm" style={{ alignSelf: 'flex-start' }} href="/seller/points">{t('batch.openPoints')}</Link>
+      </div>
     );
   }
 
   return (
-    <section className={styles.card} aria-labelledby="seller-batch-heading">
-      <p className={styles.eyebrow}>{t('batch.eyebrow')}</p>
-      <h2 id="seller-batch-heading">{t('batch.changeSeveral')}</h2>
-      <p className={styles.muted}>{t('batch.description')}</p>
-
-      <form className={styles.form} onSubmit={submit} noValidate>
-        {items.map((item, index) => (
-          <article key={item.key} className={styles.itemCard} data-testid={`batch-item-${index}`}>
-            <h3>{t('batch.changeNumber', { number: index + 1 })}</h3>
+    <form style={{ display: 'flex', flexDirection: 'column', gap: 14 }} onSubmit={submit} noValidate aria-labelledby="seller-batch-heading">
+      <h2 id="seller-batch-heading" className="h3">{t('batch.changeSeveral')}</h2>
+      <p className="c c2">{t('batch.description')}</p>
+      {items.map((item, index) => (
+        <article key={item.key} className="card p16" style={{ gap: 12 }} data-testid={`batch-item-${index}`}>
+          <h3 className="ts">{t('batch.changeNumber', { number: index + 1 })}</h3>
+          <div className="fld">
             <label htmlFor={`batch-action-${item.key}`}>{t('batch.action')}</label>
             <select
               id={`batch-action-${item.key}`}
+              className="inp"
               value={item.action}
               disabled={submitting}
               onChange={(event) => {
@@ -200,48 +199,57 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
               <option value="deactivate_offer">{t('batch.deactivateOffer')}</option>
               <option value="activate_offer">{t('batch.activateOffer')}</option>
             </select>
+          </div>
 
-            {item.action === 'create_offer' ? (
-              <>
+          {item.action === 'create_offer' ? (
+            <>
+              <div className="fld">
                 <label htmlFor={`batch-product-${item.key}`}>{t('batch.catalogProduct')}</label>
-                <input id={`batch-product-${item.key}`} value={item.productName} onChange={(event) => updateItem(item.key, { productName: event.target.value })} disabled={submitting} />
-
+                <input id={`batch-product-${item.key}`} className="inp" value={item.productName} onChange={(event) => updateItem(item.key, { productName: event.target.value })} disabled={submitting} />
+              </div>
+              <div className="fld">
                 <label htmlFor={`batch-location-${item.key}`}>{t('review.point')}</label>
-                <select id={`batch-location-${item.key}`} value={item.locationId} onChange={(event) => updateItem(item.key, { locationId: event.target.value })} disabled={submitting} required>
+                <select id={`batch-location-${item.key}`} className="inp" value={item.locationId} onChange={(event) => updateItem(item.key, { locationId: event.target.value })} disabled={submitting} required>
                   {seller.locations.length > 1 && <option value="">{t('offerCreate.chooseLocation')}</option>}
                   {seller.locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
                 </select>
-              </>
-            ) : (
-              <>
-                <label htmlFor={`batch-offer-${item.key}`}>{t('cabinet.offerField')}</label>
-                <select id={`batch-offer-${item.key}`} value={item.offerId} onChange={(event) => selectOffer(item, event.target.value)} disabled={submitting || loadingOffers}>
-                  <option value="">{t('batch.chooseOffer')}</option>
-                  {offers.map((offer) => <option key={offer.id} value={offer.id}>{offer.product.name} · {offer.status === 'active' ? t('batch.active') : t('batch.inactive')}</option>)}
-                </select>
-              </>
-            )}
+              </div>
+            </>
+          ) : (
+            <div className="fld">
+              <label htmlFor={`batch-offer-${item.key}`}>{t('cabinet.offerField')}</label>
+              <select id={`batch-offer-${item.key}`} className="inp" value={item.offerId} onChange={(event) => selectOffer(item, event.target.value)} disabled={submitting || loadingOffers}>
+                <option value="">{t('batch.chooseOffer')}</option>
+                {offers.map((offer) => <option key={offer.id} value={offer.id}>{offer.product.name} · {offer.status === 'active' ? t('batch.active') : t('batch.inactive')}</option>)}
+              </select>
+            </div>
+          )}
 
-            {(item.action === 'create_offer' || item.action === 'update_offer') && (
-              <>
+          {(item.action === 'create_offer' || item.action === 'update_offer') && (
+            <>
+              <div className="fld">
                 <label htmlFor={`batch-price-${item.key}`}>{t('offerCreate.price')}</label>
-                <input id={`batch-price-${item.key}`} value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
-                <PriceUnitField id={`batch-unit-${item.key}`} draft={item.priceUnit} onChange={(priceUnit) => updateItem(item.key, { priceUnit })} disabled={submitting} showError={unitChecked} />
+                <input id={`batch-price-${item.key}`} className="inp num" value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
+              </div>
+              <PriceUnitField id={`batch-unit-${item.key}`} draft={item.priceUnit} onChange={(priceUnit) => updateItem(item.key, { priceUnit })} disabled={submitting} showError={unitChecked} />
+              <div className="fld">
                 <label htmlFor={`batch-comment-${item.key}`}>{t('offerCreate.comment')}</label>
-                <textarea id={`batch-comment-${item.key}`} value={item.sellerComment} onChange={(event) => updateItem(item.key, { sellerComment: event.target.value })} maxLength={500} rows={2} disabled={submitting} placeholder={t('batch.noComment')} />
-              </>
-            )}
+                <textarea id={`batch-comment-${item.key}`} className="inp ta" value={item.sellerComment} onChange={(event) => updateItem(item.key, { sellerComment: event.target.value })} maxLength={500} rows={2} disabled={submitting} placeholder={t('batch.noComment')} />
+              </div>
+            </>
+          )}
 
-            {items.length > 2 && <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => current.filter((candidate) => candidate.key !== item.key))} disabled={submitting}>{t('batch.remove')}</button>}
-          </article>
-        ))}
+          {items.length > 2 && <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0, color: 'var(--danger)' }} onClick={() => setItems((current) => current.filter((candidate) => candidate.key !== item.key))} disabled={submitting}>{t('batch.remove')}</button>}
+        </article>
+      ))}
 
-        <div className={styles.actions}>
-          <button type="button" className={styles.secondaryButton} onClick={() => setItems((current) => [...current, newDraft(automaticLocationId)])} disabled={submitting}>{t('batch.addChange')}</button>
-          <button type="submit" disabled={submitting}>{submitting ? t('batch.creating') : t('batch.review')}</button>
+      <button type="button" className="btn btn-o w" onClick={() => setItems((current) => [...current, newDraft(automaticLocationId)])} disabled={submitting}><Ic name="plus" className="sm" />{t('batch.addChange')}</button>
+      {error && (
+        <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12, flexDirection: 'row', gap: 10 }}>
+          <Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{error}</p>
         </div>
-        {error && <p className={styles.error} role="alert">{error}</p>}
-      </form>
-    </section>
+      )}
+      <button type="submit" className="btn btn-p lg w" disabled={submitting} aria-busy={submitting}>{submitting && <span className="spin" />}{submitting ? t('batch.creating') : t('batch.review')}</button>
+    </form>
   );
 }

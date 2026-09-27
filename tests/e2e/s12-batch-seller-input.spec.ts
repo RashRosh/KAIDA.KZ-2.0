@@ -75,7 +75,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
   try {
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await page.getByLabel('Название торговой точки').fill('S12 E2E точка');
+    await page.getByLabel('Название для покупателей').fill('S12 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();

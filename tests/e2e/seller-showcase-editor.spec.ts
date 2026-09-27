@@ -1,7 +1,7 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
-import { chooseUnit, fillOfferFields, offerEditor, openNewCard, publishButton, showcaseCard } from './offer-editor-helpers';
+import { choosePoints, chooseUnit, fillOfferFields, offerEditor, openNewCard, publishButton, showcaseCard } from './offer-editor-helpers';
 
 // seller-showcase-editor §7: «Моя витрина» and the manual editor end to end, on a phone and on desktop.
 
@@ -103,12 +103,18 @@ test('a new card in two of three points with an own price is published after the
     await chooseUnit(page, 'package');
     await editor.getByRole('textbox', { name: 'Вес или объём' }).fill('600');
     await expect(editor.getByText('Покупатель увидит: «Баранина, лопатка · 600 г»')).toBeVisible();
-    await editor.getByRole('checkbox', { name: new RegExp(points[0]!) }).check();
-    await editor.getByRole('checkbox', { name: new RegExp(points[2]!) }).check();
-    await expect(editor.getByText('Будет создано 2 карточки')).toBeVisible();
-    await editor.getByRole('button', { name: 'Настроить цены по точкам' }).click();
-    await editor.getByRole('button', { name: 'Своя цена' }).last().click();
-    await editor.getByRole('textbox', { name: `Своя цена: ${points[2]}` }).fill('5200');
+    // AI-S10: the points sheet; AI-S11: an own price for one of them.
+    await editor.getByRole('button', { name: /^Выбрать торговые точки/ }).click();
+    const pointsSheet = page.getByRole('dialog', { name: 'Торговые точки' });
+    await pointsSheet.getByRole('checkbox', { name: points[0]! }).check();
+    await pointsSheet.getByRole('checkbox', { name: points[2]! }).check();
+    await expect(pointsSheet.getByText('Будет создано 2 карточки')).toBeVisible();
+    await pointsSheet.getByRole('button', { name: 'Настроить цены по точкам' }).click();
+    await page.getByRole('button', { name: new RegExp(`^${points[2]}`) }).click();
+    await page.getByRole('textbox', { name: 'Цена', exact: true }).fill('5200');
+    await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
+    await expect(page.getByRole('button', { name: new RegExp(`^${points[2]}`) })).toContainText('Своё');
+    await page.getByRole('button', { name: 'Готово' }).click();
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
 
     await expect(page).toHaveURL(/\/seller\/change-sets\//);
@@ -147,19 +153,18 @@ test('a change in all points keeps an own price unless chosen; one point gets it
     await openNewCard(page);
     await fillOfferFields(page, { product: 'Курага', price: '1800', unit: 'kg' });
     const editor = offerEditor(page);
-    await editor.getByRole('checkbox', { name: new RegExp(points[0]!) }).check();
-    await editor.getByRole('checkbox', { name: new RegExp(points[1]!) }).check();
+    await choosePoints(page, [points[0]!, points[1]!]);
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await page.getByRole('button', { name: publishButton }).click();
     await expect(showcaseCard(page, /Курага/)).toBeVisible();
 
     // One point gets its own price.
     await showcaseCard(page, /Курага/).getByRole('button').first().click();
-    const screen = page.getByRole('dialog', { name: 'Курага' });
-    await screen.getByRole('listitem').filter({ hasText: points[1]! }).getByRole('button', { name: 'Изменить только в этой точке' }).click();
+    await expect(page.getByRole('heading', { name: 'Курага', level: 1 })).toBeVisible();
+    await page.locator('div.card').filter({ hasText: points[1]! }).getByRole('button', { name: 'Изменить только в этой точке' }).click();
     const pointEditor = offerEditor(page);
     await expect(pointEditor.getByText(`Меняется только точка «${points[1]}»`)).toBeVisible();
-    await pointEditor.getByRole('textbox', { name: new RegExp(`^Цена · ${points[1]}`) }).fill('2000');
+    await pointEditor.getByRole('textbox', { name: 'Цена', exact: true }).fill('2000');
     await pointEditor.getByRole('button', { name: 'Проверить и сохранить' }).click();
     await page.getByRole('button', { name: publishButton }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Изменения опубликованы' })).toBeVisible();
@@ -175,7 +180,7 @@ test('a change in all points keeps an own price unless chosen; one point gets it
     await all.getByRole('checkbox', { name: new RegExp(points[2]!) }).check();
     await all.getByRole('button', { name: 'Проверить и сохранить' }).click();
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
-    await expect(page.getByText(/1\s800 → 1\s700 ₸/)).toBeVisible();
+    await expect(page.getByText(/1\s800 → 1\s700/).first()).toBeVisible();
     await page.getByRole('button', { name: publishButton }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Изменения опубликованы' })).toBeVisible();
 
@@ -224,7 +229,9 @@ test('an unfinished card is kept as a draft, resumed and published; closing with
     await resumed.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await page.getByRole('button', { name: publishButton }).click();
     await expect(showcaseCard(page, /Черешня/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Черновики · 0' })).toBeVisible();
+    // With no drafts left the tabs give way to «Карточки · N».
+    await expect(page.getByRole('link', { name: /^Черновики/ })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Карточки · 1' })).toBeVisible();
   } finally {
     await cleanup(phone);
   }
@@ -242,7 +249,7 @@ test('a change made on another device is caught at review; «Обновить» 
     await expect(showcaseCard(page, /Мёд/)).toBeVisible();
 
     await showcaseCard(page, /Мёд/).getByRole('button').first().click();
-    await page.getByRole('button', { name: 'Изменить', exact: true }).click();
+    await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
     await fillOfferFields(page, { price: '4200' });
     await offerEditor(page).getByRole('button', { name: 'Проверить и сохранить' }).click();
     await expect(page.getByRole('heading', { name: 'Проверьте изменения', level: 1 })).toBeVisible();
@@ -298,7 +305,7 @@ test('in Kazakh at 320 px the showcase and the editor fit; old addresses lead to
 
     if (testInfo.project.name === 'mobile') {
       await page.goto('/seller');
-      await page.getByRole('button', { name: 'Тағы' }).click();
+      await page.getByRole('link', { name: 'Тағы' }).click();
       await expect(page.getByRole('link', { name: 'Тізіммен қосу' })).toBeVisible();
     }
   } finally {

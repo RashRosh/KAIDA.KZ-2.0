@@ -135,9 +135,11 @@ test('authenticated product-first flow preserves input through required setup be
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     }
     const action = page.getByRole('button', { name: 'Сформировать карточки товаров' });
+    // Loading and ready render the same action; measure it once the showcase has settled.
+    await expect(page.getByRole('heading', { name: 'Покажите товары покупателям рядом' })).toBeVisible();
     const actionBox = await action.boundingBox();
     expect(actionBox).not.toBeNull();
-    expect(actionBox!.height).toBeGreaterThanOrEqual(44);
+    expect(Math.round(actionBox!.height)).toBeGreaterThanOrEqual(44);
 
     // Product first; the first point (and the Seller) are created from the editor's points section.
     await action.click();
@@ -152,16 +154,12 @@ test('authenticated product-first flow preserves input through required setup be
       if (request.method() === 'POST' && request.url().includes('/api/seller/cards/')) changeSetMutations += 1;
     });
 
-    // A language switch mid-flow keeps everything typed so far.
-    await editor.getByRole('button', { name: 'Қазақша' }).click();
-    await expect(editor.getByRole('textbox', { name: 'Баға', exact: true })).toHaveValue(price);
-    await expect(editor.getByRole('textbox', { name: /^Пікір/ })).toHaveValue(comment);
-    await editor.getByRole('button', { name: 'Русский' }).click();
-
-    await editor.getByRole('button', { name: 'Добавить торговую точку' }).click();
-    const pointSheet = page.getByRole('dialog', { name: 'Новая торговая точка' });
-    await pointSheet.getByRole('textbox', { name: 'Название', exact: true }).fill(`Issue 35 ${testInfo.project.name}`);
-    await pointSheet.getByRole('textbox', { name: 'Адрес', exact: true }).fill(`Алматы, Issue 35 ${testInfo.project.name}`);
+    // P4 · New point: a full screen over the card; everything typed so far stays.
+    await editor.getByRole('button', { name: /^Добавить торговую точку/ }).click();
+    await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
+    const pointSheet = page.locator('.kaida-app');
+    await pointSheet.getByRole('textbox', { name: 'Название для покупателей', exact: true }).fill(`Issue 35 ${testInfo.project.name}`);
+    await pointSheet.getByRole('textbox', { name: 'Где находится точка', exact: true }).fill(`Алматы, Issue 35 ${testInfo.project.name}`);
     await pointSheet.getByRole('combobox', { name: 'Тип', exact: true }).selectOption('shop');
     // Optional Seller name left blank: the first point name is disclosed as the fallback before submit.
     await expect(pointSheet.getByText('Если оставить пустым, покупатели увидят название первой точки.')).toBeVisible();

@@ -45,8 +45,9 @@ async function prepareSeller(page: Page, phones: { login: string; public: string
   });
 }
 
-async function switchLocale(page: Page, name: 'Қазақша' | 'Русский') {
-  const control = page.getByRole('button', { name }).filter({ visible: true }).last();
+// The mockup's РУС / ҚАЗ switch in the header of the seller screens.
+async function switchLocale(page: Page, name: 'ҚАЗ' | 'РУС') {
+  const control = page.getByRole('button', { name, exact: true }).filter({ visible: true }).last();
   await control.click();
   await expect(control).toHaveAttribute('aria-pressed', 'true');
 }
@@ -69,8 +70,8 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     await expect(unitButton()).toHaveText('Выберите');
     await unitButton().click();
     const sheet = page.getByRole('dialog', { name: 'Цена за' });
-    await expect(sheet.getByRole('button')).toHaveText([/^кг/, /^л/, /^шт/, /^упак\./, /^Другое/]);
-    await sheet.getByRole('button', { name: /^Другое/ }).click();
+    await expect(sheet.getByRole('radio')).toHaveText([/^кг/, /^л/, /^шт/, /^упак\./, /^Другое/]);
+    await sheet.getByRole('radio', { name: /^Другое/ }).click();
     await expect(sheet).toHaveCount(0);
     await editor.getByRole('combobox', { name: 'Название товара' }).fill('Баранина');
     await editor.getByRole('textbox', { name: 'Цена', exact: true }).fill('4200');
@@ -84,12 +85,8 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     await expect(custom).toHaveAttribute('aria-invalid', 'true');
     await custom.fill('ведро');
 
-    // Locale switch keeps both the choice and the own value; only labels change.
-    await switchLocale(page, 'Қазақша');
-    await expect(unitButton()).toHaveText('ведро');
-    await expect(editor.getByRole('textbox', { name: 'Өз бірлігіңіз' })).toHaveValue('ведро');
-    await switchLocale(page, 'Русский');
-    await expect(custom).toHaveValue('ведро');
+    // The editor has no language switch (accepted mockup: РУС / ҚАЗ lives in the header of the top screens).
+    await expect(page.getByRole('button', { name: 'ҚАЗ', exact: true })).toHaveCount(0);
 
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
@@ -104,7 +101,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toHaveValue(/^4200(\.00)?$/);
     // An explicit canonical choice clears the own value.
     await unitButton().click();
-    await page.getByRole('dialog', { name: 'Цена за' }).getByRole('button', { name: /^кг/ }).click();
+    await page.getByRole('dialog', { name: 'Цена за' }).getByRole('radio', { name: /^кг/ }).click();
     await expect(editor.getByRole('textbox', { name: 'Своя единица' })).toHaveCount(0);
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(page.getByText(/4\s200 ₸ \/ кг/).first()).toBeVisible();
@@ -115,17 +112,17 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     const card = page.getByRole('article').filter({ hasText: 'Баранина' });
     await expect(card.getByText('/ кг')).toBeVisible();
     await card.getByRole('button').first().click();
-    await page.getByRole('button', { name: 'Изменить', exact: true }).click();
+    await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
     editor = offerEditor(page);
     await expect(unitButton()).toHaveText('кг');
     await unitButton().click();
-    await page.getByRole('dialog', { name: 'Цена за' }).getByRole('button', { name: /^шт/ }).click();
+    await page.getByRole('dialog', { name: 'Цена за' }).getByRole('radio', { name: /^шт/ }).click();
     await editor.getByRole('button', { name: 'Проверить и сохранить' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+\?/);
     await expect(page.getByText(/4\s200 ₸ \/ шт/).first()).toBeVisible();
     await backToEdit(page).click();
     await expect(page).toHaveURL(/\/seller\?.*edit=[0-9a-f-]+.*from=[0-9a-f-]+/);
-    await expect(unitButton()).toHaveText('шт');
+    await expect(unitButton()).toHaveText('шт.');
     await offerEditor(page).getByRole('button', { name: 'Проверить и сохранить' }).click();
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller(\?.*)?$/);
@@ -133,7 +130,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
 
     // Canonical labels follow the interface language in the cabinet and in buyer reads.
     const cardTestId = (await card.getAttribute('data-testid'))!;
-    await switchLocale(page, 'Қазақша');
+    await switchLocale(page, 'ҚАЗ');
     await expect(page.getByTestId(cardTestId).getByText('/ дана')).toBeVisible();
     const lamb = async (locale: 'ru' | 'kk') => {
       const body = await (await page.request.get(`/api/search?q=${encodeURIComponent('баранина')}&locale=${locale}`)).json();
@@ -146,7 +143,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto('/seller?new=1');
     await unitButton().click();
-    await page.getByRole('dialog', { name: 'Баға бірлігі' }).getByRole('button', { name: /^Басқа/ }).click();
+    await page.getByRole('dialog', { name: 'Баға бірлігі' }).getByRole('radio', { name: /^Басқа/ }).click();
     const narrowCustom = offerEditor(page).getByRole('textbox', { name: 'Өз бірлігіңіз' });
     await expect(narrowCustom).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

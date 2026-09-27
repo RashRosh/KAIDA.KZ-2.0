@@ -141,7 +141,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
 
     await sellerPage.goto('/seller/points');
     await sellerPage.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await sellerPage.getByLabel('Название торговой точки').fill(locationName);
+    await sellerPage.getByLabel('Название для покупателей').fill(locationName);
     await sellerPage.getByLabel('Тип торговой точки').selectOption('shop');
     await sellerPage.getByLabel('Адрес').fill(`Алматы, S7 E2E адрес ${suffix}`);
     await sellerPage.getByRole('button', { name: 'Сохранить точку' }).click();

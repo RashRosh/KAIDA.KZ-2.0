@@ -101,7 +101,7 @@ test('Seller adds photos, makes the second the cover and publishes; Buyer opens 
 
     await fillOfferFields(page, { product: 'Баранина', price: '5100', unit: 'kg' });
     await toConfirm(page);
-    await expect(page.getByText('3 шт.')).toBeVisible();
+    await expect(page.locator('.kv').filter({ has: page.getByText('Фото', { exact: true }) })).toHaveText(/Фото\s*3$/);
     await expect(page.getByText('Карточки с фото выбирают чаще')).toHaveCount(0);
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать)$/ }).click();
     await expect(page.getByRole('status').filter({ hasText: /Опубликовано|Предложение создано|Жарияланды/ })).toBeVisible();
@@ -189,7 +189,7 @@ test('a rejected file stays at its tile and blocks sending until it is removed; 
 
     // Edit: remove the only photo; the review shows «Без фото» and the reminder.
     await page.getByRole('article').getByRole('button').first().click();
-    await page.getByRole('button', { name: 'Изменить', exact: true }).click();
+    await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
     const edit = offerEditor(page);
     await edit.getByRole('button', { name: 'Фото 1, обложка' }).click();
     await edit.getByRole('button', { name: 'Удалить' }).click();

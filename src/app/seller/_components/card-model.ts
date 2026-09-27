@@ -43,7 +43,7 @@ export function findCard(cards: SellerCard[], id: string | null): SellerCard | u
   return cards.find((card) => card.cardId === id || card.offers.some((offer) => offer.id === id));
 }
 
-export function pluralKey<K extends 'showcase.points' | 'card.willCreate' | 'card.willChange' | 'card.summary' | 'confirm.willPublish'>(
+export function pluralKey<K extends 'showcase.points' | 'points.cards' | 'card.willCreate' | 'card.willChange' | 'card.summary' | 'confirm.willPublish'>(
   base: K,
   count: number,
 ): MessageKey {

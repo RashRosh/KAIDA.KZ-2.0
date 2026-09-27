@@ -8,7 +8,6 @@ import {
   type PriceUnitCode,
 } from '../../../modules/offers/price-unit/price-unit';
 import { useI18n } from '../../../i18n/I18nProvider';
-import styles from '../page.module.css';
 
 // offer-price-unit: one controlled choice (none + five codes); «другое» reveals the Seller's own value.
 export type PriceUnitDraft = { code: PriceUnitCode | ''; custom: string };
@@ -48,25 +47,29 @@ export function PriceUnitField({
 
   return (
     <>
-      <label htmlFor={id}>{t('offerCreate.unit')}</label>
-      <select
-        id={id}
-        value={draft.code}
-        disabled={disabled}
-        onChange={(event) => {
-          const code = event.target.value as PriceUnitDraft['code'];
-          // The custom draft survives until another choice is explicitly made.
-          onChange({ code, custom: code === 'other' ? draft.custom : '' });
-        }}
-      >
-        <option value="">{t('unit.none')}</option>
-        {PRICE_UNIT_CODES.map((code) => <option key={code} value={code}>{PRICE_UNIT_LABELS[locale][code]}</option>)}
-      </select>
+      <div className="fld">
+        <label htmlFor={id}>{t('offerCreate.unit')}</label>
+        <select
+          id={id}
+          className="inp"
+          value={draft.code}
+          disabled={disabled}
+          onChange={(event) => {
+            const code = event.target.value as PriceUnitDraft['code'];
+            // The custom draft survives until another choice is explicitly made.
+            onChange({ code, custom: code === 'other' ? draft.custom : '' });
+          }}
+        >
+          <option value="">{t('unit.none')}</option>
+          {PRICE_UNIT_CODES.map((code) => <option key={code} value={code}>{PRICE_UNIT_LABELS[locale][code]}</option>)}
+        </select>
+      </div>
       {draft.code === 'other' && (
-        <>
+        <div className="fld">
           <label htmlFor={customId}>{t('unit.customLabel')}</label>
           <input
             id={customId}
+            className={`inp${invalid ? ' er' : ''}`}
             value={draft.custom}
             onChange={(event) => onChange({ code: 'other', custom: event.target.value })}
             maxLength={PRICE_UNIT_CUSTOM_MAX_LENGTH}
@@ -76,9 +79,9 @@ export function PriceUnitField({
             aria-describedby={invalid ? `${errorId} ${customId}-hint` : `${customId}-hint`}
             aria-required="true"
           />
-          <p id={`${customId}-hint`} className={styles.muted}>{t('unit.customHint')}</p>
-          {invalid && <p id={errorId} className={styles.error}>{t('unit.customRequired')}</p>}
-        </>
+          <span id={`${customId}-hint`} className="hint">{t('unit.customHint')}</span>
+          {invalid && <div id={errorId} className="emsg"><span className="ic i-alert" aria-hidden="true" />{t('unit.customRequired')}</div>}
+        </div>
       )}
     </>
   );

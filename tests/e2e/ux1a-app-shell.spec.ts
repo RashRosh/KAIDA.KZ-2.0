@@ -44,7 +44,7 @@ test('current main areas share the composed shell without horizontal overflow', 
   const navGeometry: Array<{ x: number; width: number }> = [];
   const expectedPrimaryRowHeight = testInfo.project.name === 'mobile' ? 84 : 104;
 
-  for (const path of ['/', '/nearby', '/login', '/seller']) {
+  for (const path of ['/', '/nearby', '/login']) {
     await page.goto(path);
     await expectSharedShell(page, testInfo.project.name);
 
@@ -104,7 +104,6 @@ test('active navigation state follows the current product area', async ({ page }
   for (const [path, activeLabel] of [
     ['/', 'Поиск'],
     ['/nearby', 'Рядом'],
-    ['/seller', 'Продавцу'],
   ] as const) {
     await page.goto(path);
     const nav = await openPrimaryNav(page);
@@ -112,6 +111,15 @@ test('active navigation state follows the current product area', async ({ page }
     await expect(activeLink).toHaveAttribute('aria-current', 'page');
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   }
+});
+
+// The seller area is the accepted seller mockup (PROJECT_RULES §18.1): its own header and bottom navigation, no site shell.
+test('seller area uses the seller app shell without horizontal overflow', async ({ page }) => {
+  await page.goto('/seller');
+  await expect(page.getByRole('heading', { name: 'Моя витрина', level: 1 })).toBeVisible();
+  await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Войти' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
 test('desktop shell uses logo-search-auth top row and stable left navigation row', async ({ page }, testInfo) => {

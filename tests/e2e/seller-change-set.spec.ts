@@ -69,7 +69,7 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
     // Seller cabinet: point, contacts and «Добавить товар» are separate destinations (seller-cabinet-overview).
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(`S4 E2E продавец ${testInfo.project.name}`);
-    await page.getByLabel('Название торговой точки').fill('S4 E2E точка');
+    await page.getByLabel('Название для покупателей').fill('S4 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -89,7 +89,7 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
 
     await fillOfferFields(page, { price: '4321.50', comment: 'S4 E2E свежий привоз' });
     // One point: chosen automatically and shown as such.
-    await expect(editor.getByText('Выбрана автоматически — это ваша единственная точка.')).toBeVisible();
+    await expect(editor.getByText('Выбрана автоматически', { exact: true })).toBeVisible();
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+(\?.*)?$/);
     await expect(page.getByRole('heading', { name: 'Проверьте карточку', level: 1 })).toBeVisible();

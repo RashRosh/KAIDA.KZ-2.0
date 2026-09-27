@@ -78,7 +78,7 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
 
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('S6 E2E продавец');
-    await page.getByLabel('Название торговой точки').fill('S6 E2E точка');
+    await page.getByLabel('Название для покупателей').fill('S6 E2E точка');
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S6 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();

@@ -48,7 +48,7 @@ async function login(page: Page, phone: string) {
 
 async function createSeller(page: Page, projectName: string, scenario: 'success' | 'failure') {
   await page.goto('/seller/points');
-  await page.getByLabel('Название торговой точки').fill(`S8 E2E seller ${projectName}-${scenario}`);
+  await page.getByLabel('Название для покупателей').fill(`S8 E2E seller ${projectName}-${scenario}`);
   await page.getByLabel('Тип торговой точки').selectOption('shop');
   await page.getByLabel('Адрес').fill(`Алматы, S8 E2E address ${projectName}-${scenario}`);
   await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -81,15 +81,16 @@ test('S8 Seller explicitly saves browser geolocation and public Search hides raw
       /\/api\/seller\/locations\/[0-9a-f-]+\/geo$/.test(response.url())
       && response.request().method() === 'PUT'
     ));
-    await page.getByRole('button', { name: 'Использовать моё местоположение' }).click();
+    await page.getByRole('button', { name: /^Изменить торговую точку/ }).click();
+    await page.getByRole('button', { name: /^Использовать моё местоположение/ }).click();
     const saved = await saveResponse;
     expect(saved.status()).toBe(200);
     expect((await saved.json()).location.geo).toEqual(GEO);
-    await expect(page.getByRole('region', { name: 'Торговые точки' }).getByRole('status'))
-      .toHaveText('Местоположение сохранено.');
+    await expect(page.getByRole('status').filter({ hasText: 'Местоположение сохранено.' })).toBeVisible();
 
     await page.reload();
-    await expect(page.getByRole('button', { name: 'Обновить местоположение' })).toBeVisible();
+    await page.getByRole('button', { name: /^Изменить торговую точку/ }).click();
+    await expect(page.getByRole('button', { name: /^Обновить местоположение/ })).toBeVisible();
     await createLambOffer(page, comment);
 
     const search = await page.context().request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
@@ -136,7 +137,8 @@ test('S8 browser geolocation denial stays client-side and keeps onboarding resum
   try {
     await login(page, phone);
     await createSeller(page, testInfo.project.name, 'failure');
-    await page.getByRole('button', { name: 'Использовать моё местоположение' }).click();
+    await page.getByRole('button', { name: /^Изменить торговую точку/ }).click();
+    await page.getByRole('button', { name: /^Использовать моё местоположение/ }).click();
     await expect(page.getByText('Доступ к геопозиции запрещён.', { exact: false })).toBeVisible();
     expect(mutationRequests).toBe(0);
 
@@ -145,8 +147,7 @@ test('S8 browser geolocation denial stays client-side and keeps onboarding resum
     expect((await me.json()).seller.locations[0].geo).toBeNull();
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Точки', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Торговые точки', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Мои точки', level: 1 })).toBeVisible();
     await expect(page.getByText(`S8 E2E seller ${testInfo.project.name}-failure`, { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Местоположение не задано', { exact: true })).toBeVisible();
     expect(mutationRequests).toBe(0);

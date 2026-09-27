@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { SellerTradingPoints } from './SellerTradingPoints';
-import { CabinetLoadError, CabinetLoginRequired, CabinetSkeleton } from './CabinetStates';
-import styles from '../cabinet.module.css';
+import { Bar, LoadError, LoginRequired, Nav, Phone } from '../_kaida/ui';
 import { useI18n } from '../../../i18n/I18nProvider';
 
 type SellerState = { kind: 'loading' } | { kind: 'anonymous' } | { kind: 'error' } | { kind: 'ready'; seller: SellerView | null };
@@ -39,17 +38,32 @@ function useOwnedSeller() {
   };
 }
 
-// Trading points (#36) inside the cabinet frame; behavior unchanged until seller-points-contacts.
+// AI-S12 «Мои точки»: loading, sign-in and error states around the list and the point screen.
 export function SellerPointsSection() {
   const { t } = useI18n();
   const { state, setSeller, retry } = useOwnedSeller();
-  if (state.kind === 'loading') return <CabinetSkeleton rows={2} />;
-  if (state.kind === 'anonymous') return <CabinetLoginRequired />;
-  if (state.kind === 'error') return <CabinetLoadError title={t('seller.loadError')} onRetry={retry} />;
+  if (state.kind === 'ready') return <SellerTradingPoints seller={state.seller} onSellerChange={setSeller} autoOpenAdd={state.seller === null} />;
   return (
-    <>
-      <div className={styles.pageHead}><h1>{t('cabinet.points')}</h1></div>
-      <SellerTradingPoints seller={state.seller} onSellerChange={setSeller} autoOpenAdd={state.seller === null} />
-    </>
+    <Phone>
+      <Bar title={t('points.title')} lang />
+      {state.kind === 'anonymous' ? <LoginRequired /> : (
+        <main className="body" style={{ gap: 10 }} aria-busy={state.kind === 'loading' || undefined}>
+          {state.kind === 'error' ? <LoadError title={t('seller.loadError')} onRetry={retry} /> : (
+            <>
+              <span className="vh" role="status">{t('cabinet.loading')}</span>
+              {[0, 1].map((index) => (
+                <div key={index} className="card" style={{ flexDirection: 'row', gap: 12 }} aria-hidden="true">
+                  <div className="sk" style={{ width: 40, height: 40, borderRadius: 12 }} />
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div className="sk" style={{ height: 14, width: '70%' }} /><div className="sk" style={{ height: 14, width: '45%' }} />
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </main>
+      )}
+      <Nav active="points" />
+    </Phone>
   );
 }

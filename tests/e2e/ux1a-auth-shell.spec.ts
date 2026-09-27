@@ -58,27 +58,19 @@ test('authenticated seller shell exposes logout and logout clears private seller
     });
     expect(setup.status()).toBe(201);
 
-    // Seller cabinet: logout sits in the desktop navigation and in «Ещё» on mobile (seller-cabinet-overview).
-    const mobile = testInfo.project.name === 'mobile';
+    // AI-S19: «Выйти» sits on the «Ещё» screen of the seller navigation.
     const logout = async () => {
-      if (mobile) {
-        await page.getByRole('button', { name: 'Ещё' }).click();
-        return page.getByRole('dialog', { name: 'Ещё' }).getByRole('button', { name: 'Выйти' });
-      }
-      return page.getByRole('navigation', { name: 'Разделы кабинета' }).getByRole('button', { name: 'Выйти' });
+      await page.getByRole('navigation', { name: 'Разделы кабинета' }).getByRole('link', { name: 'Ещё' }).click();
+      await expect(page).toHaveURL('/seller/more');
+      return page.getByRole('button', { name: 'Выйти' });
     };
 
     await page.goto('/seller/points');
-    await expect(await logout()).toBeVisible();
-    if (mobile) await page.keyboard.press('Escape');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-
     const tradingPointCard = page.locator('[data-testid^="trading-point-"]');
     await expect(tradingPointCard.getByText(locationName, { exact: true })).toBeVisible();
-
-    await page.goto('/seller/batch');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await expect(await logout()).toBeVisible();
-    if (mobile) await page.keyboard.press('Escape');
+    await expect(page.getByText('Вход по этому номеру')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.goto('/seller/points');

@@ -1,0 +1,33 @@
+/* The mockup draws a 360×760 phone; in the app the same phone is the whole screen (mobile first; on wide screens the
+   same column is centred — desktop has no frames in the mockup yet). Only frame, scrolling and real-control rules
+   live here; every visual rule comes from kaida.css. */
+.kaida.kaida-app{min-height:100dvh;background:var(--bg)}
+.kaida.kaida-app>.ph{width:100%;max-width:480px;height:100dvh;margin:0 auto;border:0;border-radius:0;box-shadow:none}
+.kaida.kaida-app>.ph>main.body{overflow-y:auto}
+.kaida button.card,.kaida button.li,.kaida button.inp{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+.kaida button.card{background:var(--surface)}
+.kaida button.card.hl{background:#fdf8ff}
+.kaida input.inp,.kaida textarea.inp{outline:none}
+.kaida textarea.inp{resize:none;display:block;font:400 16px/22px var(--sans)}
+.kaida .inp:focus-visible,.kaida .inp:focus-within,.kaida input.inp:focus,.kaida textarea.inp:focus{border:2px solid var(--primary);outline:2px solid var(--primary-soft)}
+.kaida .inp.er,.kaida .inp.er:focus{border:2px solid var(--danger)}
+.kaida .inp>input,.kaida .inp>textarea{flex:1;min-width:0;border:0;outline:0;background:transparent;padding:0;font:inherit;color:inherit}
+.kaida .inp>input::placeholder,.kaida .inp>textarea::placeholder,.kaida input.inp::placeholder{color:var(--ink3)}
+.kaida .btn:focus-visible,.kaida .ib:focus-visible,.kaida .li:focus-visible,.kaida .card:focus-visible,.kaida .nav a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .lang button{appearance:none;border:0;background:transparent;padding:0 10px;display:flex;align-items:center;font:500 12px/16px var(--sans);color:var(--ink2);cursor:pointer}
+.kaida .lang button[aria-pressed="true"]{background:var(--primary-soft);color:var(--primary-text)}
+.kaida .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.kaida label.cbw{display:contents}
+.kaida .img>img,.kaida .mt>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.kaida .sheet{max-height:92%;overflow-y:auto}
+.kaida .rowbtn{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;gap:12px;width:100%;border-radius:10px}
+.kaida .rowbtn:focus-visible{outline:2px solid var(--focus);outline-offset:4px}
+.kaida a.chip{text-decoration:none}
+.kaida .chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .li:disabled{opacity:1}
+/* A native select drawn as the mockup's «.inp + i-down c2» control. */
+.kaida select.inp{appearance:none;font:400 16px/22px var(--sans);cursor:pointer;padding-right:40px;background:var(--surface) url(/kaida/select-down.svg) no-repeat right 12px center/24px 24px}
+.kaida select.inp:disabled{background-color:var(--sunken)}
+.kaida .cbx{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);margin:0;opacity:0;cursor:pointer}
+.kaida .cbx:disabled{cursor:default}
+.kaida span:has(>.cbx:focus-visible)>.cb{outline:2px solid var(--focus);outline-offset:2px}
