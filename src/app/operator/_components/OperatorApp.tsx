@@ -19,7 +19,7 @@ import {
 const REASON_LABELS: Record<RemovalReason, string> = {
   prohibited_item: 'Товар нельзя размещать',
   photo_mismatch: 'Фото не соответствует товару',
-  contacts_or_ads: 'Контакты или реклама в фото или тексте',
+  contacts_or_ads: 'Контакты или реклама',
   other: 'Другое',
 };
 
@@ -228,7 +228,10 @@ export function OperatorApp() {
 function RemovedLine({ removal }: { removal: OperatorRemovalView }) {
   return (
     <>
-      <span className="bd bd-err" style={{ alignSelf: 'flex-start' }}><Ic name="eyeoff" />Снята · {REASON_LABELS[removal.reason]}</span>
+      {/* A long reason wraps inside the card instead of running past its edge (the mockup badge never wraps). */}
+      <span className="bd bd-err" style={{ alignSelf: 'flex-start', whiteSpace: 'normal', height: 'auto', minHeight: 24, padding: '4px 8px', maxWidth: '100%' }}>
+        <Ic name="eyeoff" /><span>Снята · {REASON_LABELS[removal.reason]}</span>
+      </span>
       <p className="c">Снял оператор · {ago(removal.removedAt)}</p>
     </>
   );
