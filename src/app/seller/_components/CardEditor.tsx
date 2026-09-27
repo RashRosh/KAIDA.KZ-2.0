@@ -190,11 +190,19 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
     setSuggestDismissed(false);
   }
 
+  // Focus moves after React has committed the change: an effect of this render runs after the closing sheet has
+  // returned focus to its opener, so the requested field wins on a slow device as well.
+  const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
+  const focusField = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
+  useEffect(() => {
+    if (focusRequest) document.getElementById(focusRequest.id)?.focus();
+  }, [focusRequest]);
+
   function chooseSuggestion(suggestion: Suggestion) {
     update({ title: suggestion.name, productId: suggestion.id, linkedName: suggestion.name });
     setSuggestDismissed(true);
     setSuggestions([]);
-    requestAnimationFrame(() => document.getElementById(`${ids}-title`)?.focus());
+    focusField(`${ids}-title`);
   }
 
   function onTitleKey(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -210,7 +218,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
     // Changing the unit away from a package or piece clears the pack.
     update({ unit, ...(packAllowed(code) ? { packOpen: code === 'package' ? true : values.packOpen } : { packOpen: false, packAmount: '' }) });
     setOverlay(null);
-    requestAnimationFrame(() => (code === 'other' ? document.getElementById(`${ids}-custom`) : document.getElementById(`${ids}-unit`))?.focus());
+    focusField(code === 'other' ? `${ids}-custom` : `${ids}-unit`);
   }
 
   function togglePoint(locationId: string, selected: boolean) {
@@ -226,7 +234,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
   function focusFirstError(found: CardErrors) {
     const field = FIELD_ORDER.find((key) => found[key]);
     const target = field === 'unit' && values.unit.code === 'other' ? `${ids}-custom` : field ? `${ids}-${field}` : null;
-    requestAnimationFrame(() => { if (target) document.getElementById(target)?.focus(); });
+    if (target) focusField(target);
   }
 
   async function post(url: string, body: unknown, method = 'POST'): Promise<{ ok: boolean; data: ApiResult }> {
