@@ -1,6 +1,6 @@
 # Operator post-check — Slice Contract
 
-**Status:** DRAFT — awaiting Product Owner approval. Decisions already taken by PO on 2026-09-27 are in §8.
+**Status:** APPROVED — Product Owner, 2026-09-27 (decisions a–d in §8; the self-made choices of the draft accepted as written).
 
 **Stage 1, item 4** of `docs/product/EXECUTION_PLAN.md` (the first part of S16, moved forward).
 
