@@ -270,15 +270,15 @@ function SourceSheet({ onClose, onManual }: { onClose: () => void; onManual: () 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {ai.map((item) => (
           <button key={item.key} type="button" className="li" disabled style={{ color: 'var(--ink3)', background: 'transparent', border: 0, cursor: 'default' }}>
-            <div className="lic"><Ic name={item.icon} /></div>
+            <div className="lic ai" title={t('source.ai')}><Ic name={item.icon} /></div>
             <div className="mid"><div className="ts">{t(item.key)}</div><p className="c">{t('source.unavailable')}</p></div>
           </button>
         ))}
       </div>
-      <div className="ov" style={{ marginTop: 4 }}>{t('source.noAi')}</div>
+      <div className="hr" role="separator" style={{ margin: '4px 0' }} />
       <button type="button" className="li card hl" onClick={onManual} data-autofocus style={{ padding: '8px 12px', flexDirection: 'row' }}>
         <div className="lic p"><Ic name="pencil" /></div>
-        <div className="mid"><div className="ts">{t('source.manual')}</div><p className="c">{t('source.manualHint')}</p></div>
+        <div className="mid"><div className="ts">{t('source.manual')}</div></div>
         <Ic name="right" className="pt" />
       </button>
     </Sheet>
