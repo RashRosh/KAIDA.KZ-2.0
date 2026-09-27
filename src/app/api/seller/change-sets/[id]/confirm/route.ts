@@ -1,6 +1,7 @@
 import { after, NextRequest, NextResponse } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
+import { CardRemovedByOperatorError } from '@/modules/moderation/contracts/moderation.contract';
 import { getSellerCommentTranslationScheduler } from '@/modules/offers/translation/seller-comment-translation.runtime';
 import { confirmSellerChangeSet } from '@/modules/seller-input/application/confirm-seller-change-set';
 import {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   } catch (error) {
     if (error instanceof SellerRequiredError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     if (error instanceof ChangeSetNotFoundError) return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
-    if (error instanceof OfferChangedError || error instanceof OfferPriceRequiredError || error instanceof PhotoNotFoundError) {
+    if (error instanceof OfferChangedError || error instanceof CardRemovedByOperatorError || error instanceof OfferPriceRequiredError || error instanceof PhotoNotFoundError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }
     console.error('Seller change set confirmation failed');

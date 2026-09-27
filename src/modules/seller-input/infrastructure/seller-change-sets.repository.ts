@@ -230,6 +230,7 @@ export async function lockChangeSetByIdAndSeller(database: SellerInputDb, change
     id: sellerChangeSets.id,
     sellerId: sellerChangeSets.sellerId,
     status: sellerChangeSets.status,
+    createdAt: sellerChangeSets.createdAt,
     confirmedAt: sellerChangeSets.confirmedAt,
     draftId: sellerChangeSets.draftId,
   }).from(sellerChangeSets)

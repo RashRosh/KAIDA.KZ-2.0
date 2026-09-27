@@ -116,7 +116,7 @@ describe('card editor state', () => {
 
 describe('showcase', () => {
   const offer = (id: string, cardId: string, point: string, amount: string, own: boolean, updatedAt: string): SellerOfferView => ({
-    id, cardId, revision: 1, priceOwn: own, pack: null, packLabel: null,
+    id, cardId, revision: 1, priceOwn: own, pack: null, packLabel: null, removal: null,
     product: { id: null, name: 'Курага' },
     location: { id: point, name: point, addressText: '' },
     price: { amount, currency: 'KZT', unit: 'кг', unitChoice: { code: 'kg' } },

@@ -80,11 +80,11 @@ export async function findSellerOfCard(database: Db, cardId: string): Promise<st
 // A feed event = one confirmed ChangeSet's create/update Items of one card. «new» = the first such event of the card;
 // «republished» = the ChangeSet that cleared a removal.
 const feedEvents = sql`
-  select cs.id as change_set_id, i.card_id, cs.confirmed_at
+  select cs.id as change_set_id, i.card_id, cs.confirmed_at, cs.created_at
   from seller_change_sets cs
   join seller_change_items i on i.change_set_id = cs.id
   where cs.status = 'confirmed' and i.action in ('create_offer', 'update_offer')
-  group by cs.id, i.card_id, cs.confirmed_at`;
+  group by cs.id, i.card_id, cs.confirmed_at, cs.created_at`;
 
 export type FeedEventRow = { change_set_id: string; card_id: string; confirmed_at: Date; is_first: boolean; republished: boolean };
 
@@ -95,14 +95,14 @@ export async function listFeedEvents(database: Db, values: { since: Date | null;
       not exists (
         select 1 from seller_change_sets cs2 join seller_change_items i2 on i2.change_set_id = cs2.id
         where cs2.status = 'confirmed' and i2.card_id = ev.card_id and i2.action in ('create_offer', 'update_offer')
-          and (cs2.confirmed_at, cs2.id) < (ev.confirmed_at, ev.change_set_id)
+          and (cs2.confirmed_at, cs2.created_at, cs2.id) < (ev.confirmed_at, ev.created_at, ev.change_set_id)
       ) as is_first,
       exists (
         select 1 from offer_card_removals r where r.cleared_by_change_set_id = ev.change_set_id and r.card_id = ev.card_id
       ) as republished
     from ev
     where ${values.since === null ? sql`true` : sql`ev.confirmed_at > ${values.since}`}
-    order by ev.confirmed_at desc, ev.change_set_id desc, ev.card_id
+    order by ev.confirmed_at desc, ev.created_at desc, ev.change_set_id desc, ev.card_id
     limit ${values.limit} offset ${values.offset}`);
   return result.rows.map((row) => ({ ...row, confirmed_at: new Date(row.confirmed_at) }));
 }
