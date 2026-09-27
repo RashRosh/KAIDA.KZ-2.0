@@ -1,9 +1,17 @@
 import type { OfferStatus } from '../db/offers.table';
 import type { PriceUnit } from '../price-unit/price-unit';
+import type { Pack } from '../pack/pack';
 
 export type SellerOfferView = {
   id: string;
-  product: { id: string; name: string; nameLocale?: 'ru' | 'kk' };
+  // name is the Seller's own title; id is the optional catalog link.
+  product: { id: string | null; name: string; nameLocale?: 'ru' | 'kk' };
+  // Offers of one product in several points share cardId and title, unit, pack, comment and photos.
+  cardId: string;
+  revision: number;
+  priceOwn: boolean;
+  pack: Pack | null;
+  packLabel: string | null;
   location: { id: string; name: string; addressText: string };
   // unit is the display label in the requested locale; unitChoice is the stored structured value for edit forms.
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
@@ -12,6 +20,7 @@ export type SellerOfferView = {
   photos?: { id: string }[];
   status: OfferStatus;
   lastConfirmedAt: string;
+  updatedAt: string;
   // Whether Search and Nearby currently show this Offer, by the same policy as the buyer read.
   buyerVisible: boolean;
 };

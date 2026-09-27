@@ -1,9 +1,9 @@
 import { asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
-import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
+import { formatPack, packFromColumns } from '../../offers/pack/pack';
 import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
@@ -28,13 +28,10 @@ export async function findVisibleDiscoveryCandidates(
 ): Promise<NearbyDiscoveryCandidate[]> {
   const rows = await db.select({
     id: offers.id,
-    productId: products.id,
-    productName: locale === 'kk'
-      ? sql<string>`coalesce((select pln.name from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk'), ${products.name})`
-      : products.name,
-    productNameLocale: locale === 'kk'
-      ? sql<'ru' | 'kk'>`case when exists (select 1 from product_localized_names pln where pln.product_id = ${products.id} and pln.locale = 'kk') then 'kk' else 'ru' end`
-      : sql<'ru'>`'ru'`,
+    productId: offers.productId,
+    title: offers.title,
+    packAmount: offers.packAmount,
+    packUnit: offers.packUnit,
     seller: { id: sellers.id, displayName: sellers.displayName },
     location: { id: locations.id, name: locations.name, addressText: locations.addressText, openingHours: locations.openingHours },
     locationPhoneE164: locations.phoneE164,
@@ -50,7 +47,6 @@ export async function findVisibleDiscoveryCandidates(
     locationLatitude: locations.latitude,
     locationLongitude: locations.longitude,
   }).from(offers)
-    .innerJoin(products, eq(products.id, offers.productId))
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
@@ -70,8 +66,9 @@ export async function findVisibleDiscoveryCandidates(
     locationLatitude,
     locationLongitude,
     productId,
-    productName,
-    productNameLocale,
+    title,
+    packAmount,
+    packUnit,
     commentTranslationStatus,
     commentTranslationText,
     commentTranslationSourceLanguage,
@@ -81,14 +78,13 @@ export async function findVisibleDiscoveryCandidates(
     if (priceAmount === null || priceCurrency !== 'KZT') {
       throw new Error('Buyer-visible Offer has invalid price');
     }
+    const pack = formatPack(packFromColumns(packAmount, packUnit), locale);
 
     const offer: SearchOffer = {
       ...rest,
-      product: {
-        id: productId,
-        name: productName,
-        ...(locale === 'kk' ? { nameLocale: productNameLocale } : {}),
-      },
+      // seller-showcase-editor: the Seller's own title; free-name cards appear in Nearby like any other Offer.
+      product: { id: productId, name: title },
+      ...(pack === null ? {} : { pack }),
       location: {
         ...rest.location,
         ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),

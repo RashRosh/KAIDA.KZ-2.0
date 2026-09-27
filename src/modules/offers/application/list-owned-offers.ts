@@ -10,6 +10,7 @@ import {
 import { findOfferPhotoIdsByOffer, listOffersBySeller } from '../infrastructure/offers.repository';
 import { calculateOfferCutoff, systemClock, type Clock } from '../lifecycle/offer-lifecycle';
 import { formatPriceUnit } from '../price-unit/price-unit';
+import { formatPack } from '../pack/pack';
 
 export async function listOwnedOffers(
   ownerUserId: string,
@@ -25,7 +26,7 @@ export async function listOwnedOffers(
   const cutoff = calculateOfferCutoff((dependencies.clock ?? systemClock)(), validityPeriodHours);
   const locale = dependencies.locale ?? 'ru';
 
-  const rows = await listOffersBySeller(database, seller.id, locale);
+  const rows = await listOffersBySeller(database, seller.id);
   const photosByOffer = await findOfferPhotoIdsByOffer(database, rows.map((row) => row.id));
   return rows.map((row) => {
     if (row.locationSellerId !== seller.id) {
@@ -40,11 +41,12 @@ export async function listOwnedOffers(
       && row.locationHasGeo;
     return {
       id: row.id,
-      product: {
-        id: row.productId,
-        name: row.productName,
-        ...(locale === 'kk' ? { nameLocale: row.productNameLocale } : {}),
-      },
+      product: { id: row.productId, name: row.title },
+      cardId: row.cardId,
+      revision: row.revision,
+      priceOwn: row.priceOwn,
+      pack: row.pack,
+      packLabel: formatPack(row.pack, locale),
       location: { id: row.locationId, name: row.locationName, addressText: row.locationAddressText },
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,
@@ -56,6 +58,7 @@ export async function listOwnedOffers(
       ...(photosByOffer.has(row.id) ? { photos: photosByOffer.get(row.id)!.map((id) => ({ id })) } : {}),
       status: row.status,
       lastConfirmedAt: row.lastConfirmedAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
       buyerVisible,
     };
   });

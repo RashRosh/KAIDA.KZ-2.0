@@ -4,6 +4,7 @@ import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import type { PriceUnitCode } from '../../offers/price-unit/price-unit';
+import type { PackUnit } from '../../offers/pack/pack';
 import { sellerChangeSets } from './seller-change-sets.table';
 
 export type SellerChangeAction = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
@@ -13,7 +14,13 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   id: uuid('id').defaultRandom().primaryKey(),
   changeSetId: uuid('change_set_id').notNull().references(() => sellerChangeSets.id),
   action: text('action').$type<SellerChangeAction>().notNull(),
-  productId: uuid('product_id').notNull().references(() => products.id),
+  productId: uuid('product_id').references(() => products.id),
+  title: text('title').notNull(),
+  // create_offer: the card the new Offer joins (new or existing); update: the target Offer's card.
+  cardId: uuid('card_id').notNull(),
+  priceOwn: boolean('price_own').notNull().default(false),
+  packAmount: numeric('pack_amount'),
+  packUnit: text('pack_unit').$type<PackUnit>(),
   locationId: uuid('location_id').notNull().references(() => locations.id),
   priceAmount: numeric('price_amount'),
   priceCurrency: char('price_currency', { length: 3 }),
@@ -27,6 +34,8 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   photosSpecified: boolean('photos_specified').notNull().default(false),
 }, (table) => [
   index('seller_change_items_change_set_id_idx').on(table.changeSetId),
+  check('seller_change_items_pack_valid', sql`(${table.packAmount} IS NULL AND ${table.packUnit} IS NULL)
+  OR (${table.packAmount} > 0 AND ${table.packUnit} IN ('g', 'kg', 'ml', 'l') AND ${table.priceUnitCode} IN ('package', 'piece'))`),
   check('seller_change_items_action_allowed', sql`${table.action} IN ('create_offer', 'update_offer', 'deactivate_offer', 'activate_offer')`),
   check('seller_change_items_price_valid', sql`${table.priceAmount} IS NULL OR (
     ${table.priceAmount} >= 0

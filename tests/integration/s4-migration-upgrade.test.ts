@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { describe, expect, it } from 'vitest';
-import { withMigrationTestDatabase, withStructuredPriceUnit } from './migration-test-database';
+import { withMigrationTestDatabase, withStructuredPriceUnit, withShowcaseCardOffer } from './migration-test-database';
 
 async function createS3MigrationsFolder() {
   const folder = await mkdtemp(join(tmpdir(), 'kaida-s3-migrations-'));
@@ -59,7 +59,7 @@ describe('S4 migration upgrade path on PostgreSQL 18', () => {
       expect((await pool.query('SELECT latitude,longitude FROM locations WHERE id=$1', [locationId])).rows[0]).toEqual({ latitude: null, longitude: null });
       const afterOffer = (await pool.query('SELECT * FROM offers WHERE id=$1', [offerId])).rows[0];
       const { revision, seller_comment_version: sellerCommentVersion, ...preservedAfterOffer } = afterOffer;
-      expect(preservedAfterOffer).toEqual(withStructuredPriceUnit(before.offer, 'kg'));
+      expect(preservedAfterOffer).toEqual(withShowcaseCardOffer(withStructuredPriceUnit(before.offer, 'kg'), 'S4 upgrade product'));
       expect(revision).toBe(1);
       expect(sellerCommentVersion).toBe(1);
       expect(Number((await pool.query('SELECT count(*) FROM seller_change_sets')).rows[0].count)).toBe(0);
@@ -71,11 +71,11 @@ describe('S4 migration upgrade path on PostgreSQL 18', () => {
       await expect(pool.query('INSERT INTO seller_change_sets (seller_id,status,confirmed_at) VALUES ($1,$2,$3)', [sellerId, 'confirmed', null])).rejects.toMatchObject({ code: '23514' });
       await expect(pool.query('INSERT INTO seller_change_sets (seller_id,status) VALUES ($1,$2)', ['99999999-9999-4999-8999-999999999999', 'proposed'])).rejects.toMatchObject({ code: '23503' });
 
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency) VALUES ($1,$2,$3,$4,$5,$6)', [changeSetId, 'update_offer', productId, locationId, '1', 'KZT'])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency) VALUES ($1,$2,$3,$4,$5,$6)', ['60000000-0000-4000-8000-000000000799', 'create_offer', productId, locationId, '1', 'KZT'])).rejects.toMatchObject({ code: '23503' });
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency) VALUES ($1,$2,$3,$4,$5,$6)', [changeSetId, 'create_offer', productId, locationId, '1.234', 'KZT'])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_currency) VALUES ($1,$2,$3,$4,$5)', [changeSetId, 'create_offer', productId, locationId, 'KZT'])).rejects.toMatchObject({ code: '23514' });
-      await expect(pool.query('INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,result_offer_id) VALUES ($1,$2,$3,$4,$5,$6,$7)', [changeSetId, 'create_offer', productId, locationId, '1', 'KZT', '40000000-0000-4000-8000-000000000799'])).rejects.toMatchObject({ code: '23503' });
+      await expect(pool.query("INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,title,card_id) VALUES ($1,$2,$3,$4,$5,$6,'S4',gen_random_uuid())", [changeSetId, 'update_offer', productId, locationId, '1', 'KZT'])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query("INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,title,card_id) VALUES ($1,$2,$3,$4,$5,$6,'S4',gen_random_uuid())", ['60000000-0000-4000-8000-000000000799', 'create_offer', productId, locationId, '1', 'KZT'])).rejects.toMatchObject({ code: '23503' });
+      await expect(pool.query("INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,title,card_id) VALUES ($1,$2,$3,$4,$5,$6,'S4',gen_random_uuid())", [changeSetId, 'create_offer', productId, locationId, '1.234', 'KZT'])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query("INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_currency,title,card_id) VALUES ($1,$2,$3,$4,$5,'S4',gen_random_uuid())", [changeSetId, 'create_offer', productId, locationId, 'KZT'])).rejects.toMatchObject({ code: '23514' });
+      await expect(pool.query("INSERT INTO seller_change_items (change_set_id,action,product_id,location_id,price_amount,price_currency,result_offer_id,title,card_id) VALUES ($1,$2,$3,$4,$5,$6,$7,'S4',gen_random_uuid())", [changeSetId, 'create_offer', productId, locationId, '1', 'KZT', '40000000-0000-4000-8000-000000000799'])).rejects.toMatchObject({ code: '23503' });
 
       const index = await pool.query("SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename='seller_change_items' AND indexname='seller_change_items_change_set_id_idx'");
       expect(index.rowCount).toBe(1);

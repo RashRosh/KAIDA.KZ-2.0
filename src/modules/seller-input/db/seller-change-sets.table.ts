@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { check, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { sellers } from '../../sellers/db/sellers.table';
+import { offerDrafts } from '../../offers/db/offer-drafts.table';
 
 export type SellerChangeSetStatus = 'proposed' | 'confirmed';
 
@@ -10,6 +11,8 @@ export const sellerChangeSets = pgTable('seller_change_sets', {
   status: text('status').$type<SellerChangeSetStatus>().notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+  // seller-showcase-editor: the draft this new card was published from; deleted on confirmation.
+  draftId: uuid('draft_id').references(() => offerDrafts.id, { onDelete: 'set null' }),
 }, (table) => [
   check('seller_change_sets_status_allowed', sql`${table.status} IN ('proposed', 'confirmed')`),
   check('seller_change_sets_confirmation_consistent', sql`(

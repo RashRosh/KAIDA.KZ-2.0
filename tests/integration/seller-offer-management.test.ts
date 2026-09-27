@@ -96,7 +96,7 @@ beforeAll(async () => {
 afterAll(async () => { await pool.end(); });
 
 describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () => {
-  it('keeps S4 create public flow and DB default revision, then lists the owned Offer without exposing revision', async () => {
+  it('keeps S4 create public flow and DB default revision, then lists the owned Offer with its card and revision', async () => {
     const userId = '50000000-0000-4000-8000-000000000801';
     const phone = '+77000000801';
     const seller = await createFixture(userId, phone, '801');
@@ -109,14 +109,20 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
       expect(owned[0]).toEqual({
         id: offerId,
         product: { id: seedIds.lambProduct, name: 'Баранина' },
+        // seller-showcase-editor: the card fields and the revision the card editor sends back for conflict detection.
+        cardId: expect.any(String),
+        revision: 1,
+        priceOwn: false,
+        pack: null,
+        packLabel: null,
         location: { id: seller.locations[0]!.id, name: seller.locations[0]!.name, addressText: seller.locations[0]!.addressText },
         price: { amount: '4200.00', currency: 'KZT', unit: 'кг', unitChoice: { code: 'kg' } },
         sellerComment: 'Исходная партия',
         status: 'active',
         lastConfirmedAt: T0.toISOString(),
+        updatedAt: T0.toISOString(),
         buyerVisible: true,
       });
-      expect('revision' in owned[0]!).toBe(false);
     } finally {
       await cleanupUser(userId, phone);
     }

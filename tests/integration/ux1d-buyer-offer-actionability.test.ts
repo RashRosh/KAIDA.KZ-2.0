@@ -74,13 +74,13 @@ beforeAll(async () => {
   ]);
 
   await pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at) VALUES
-    ($1,$7,$8,$12,1000,'KZT','active',$16,$16,$16),
-    ($2,$7,$9,$13,1000,'KZT','active',$16,$16,$16),
-    ($3,$7,$10,$14,1000,'KZT','active',$16,$16,$16),
-    ($4,$7,$11,$15,1000,'KZT','active',$16,$16,$16),
-    ($5,$7,$8,$12,1000,'KZT','inactive',$16,$16,$16),
-    ($6,$7,$8,$12,1000,'KZT','active',$17,$17,$17)`, [
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at, title, title_search, card_id) VALUES
+    ($1,$7,$8,$12,1000,'KZT','active',$16,$16,$16,(SELECT name FROM products WHERE id=$7::uuid),lower((SELECT name FROM products WHERE id=$7::uuid)),gen_random_uuid()),
+    ($2,$7,$9,$13,1000,'KZT','active',$16,$16,$16,(SELECT name FROM products WHERE id=$7::uuid),lower((SELECT name FROM products WHERE id=$7::uuid)),gen_random_uuid()),
+    ($3,$7,$10,$14,1000,'KZT','active',$16,$16,$16,(SELECT name FROM products WHERE id=$7::uuid),lower((SELECT name FROM products WHERE id=$7::uuid)),gen_random_uuid()),
+    ($4,$7,$11,$15,1000,'KZT','active',$16,$16,$16,(SELECT name FROM products WHERE id=$7::uuid),lower((SELECT name FROM products WHERE id=$7::uuid)),gen_random_uuid()),
+    ($5,$7,$8,$12,1000,'KZT','inactive',$16,$16,$16,(SELECT name FROM products WHERE id=$7::uuid),lower((SELECT name FROM products WHERE id=$7::uuid)),gen_random_uuid()),
+    ($6,$7,$8,$12,1000,'KZT','active',$17,$17,$17,(SELECT name FROM products WHERE id=$7::uuid),lower((SELECT name FROM products WHERE id=$7::uuid)),gen_random_uuid())`, [
     offerIds.eligible,
     offerIds.noPhone,
     offerIds.noGeo,

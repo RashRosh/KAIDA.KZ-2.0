@@ -4,6 +4,7 @@ import { findOfferPhotoIds, findOwnedOfferForManagement } from '../../offers/inf
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import { assertPhotosOwnedBy } from './assert-photos-owned';
+import { currentCardFields } from './card-fields';
 import {
   OfferAlreadyInactiveError,
   OfferNotFoundError,
@@ -124,7 +125,7 @@ export async function createOfferManagementChangeSet(
     const item = await createOfferManagementChangeItem(tx, {
       changeSetId: changeSet.id,
       action: input.action,
-      productId: offer.productId,
+      card: currentCardFields(offer),
       locationId: offer.locationId,
       priceAmount,
       priceCurrency: 'KZT',

@@ -20,7 +20,7 @@ describe.sequential('Catalog localization on PostgreSQL 18', () => {
     await connection.pool.end();
   });
 
-  it('resolves Russian and Kazakh catalog terms to one Product and localizes display only', async () => {
+  it('resolves Russian and Kazakh catalog terms to one Product; the card title stays the Seller text (seller-showcase-editor)', async () => {
     await expect(resolveProduct(connection.db, 'қой еті')).resolves.toEqual({
       status: 'resolved',
       product: { id: seedIds.lambProduct, name: 'Баранина' },
@@ -30,24 +30,24 @@ describe.sequential('Catalog localization on PostgreSQL 18', () => {
     const kk = await searchOffers('қой еті', connection.db, { locale: 'kk' });
     expect(kk.offers.map((offer) => offer.id)).toEqual(ru.offers.map((offer) => offer.id));
     expect(ru.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
-    expect(kk.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: 'Қой еті, жауырын', nameLocale: 'kk' });
+    expect(kk.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
   });
 
-  it('falls back to the legacy Russian name and marks its language in kk', async () => {
+  it('finds an Offer through a Kazakh alias and shows its title as written', async () => {
     const productId = randomUUID();
     productIds.push(productId);
     await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, 'Тестовый продукт без перевода']);
     await connection.pool.query('INSERT INTO product_aliases (product_id,name,locale) VALUES ($1,$2,$3)', [productId, 'аудармасыз өнім', 'kk']);
     await connection.pool.query(
-      `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at)
-       VALUES ($1,$2,$3,'100','KZT','active',$4)`,
+      `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at, title, title_search, card_id)
+       VALUES ($1,$2,$3,'100','KZT','active',$4,(SELECT name FROM products WHERE id=$1::uuid),lower((SELECT name FROM products WHERE id=$1::uuid)),gen_random_uuid())`,
       [productId, seedIds.seller, seedIds.location, new Date()],
     );
 
     const resolution = await resolveProduct(connection.db, 'аудармасыз өнім');
     expect(resolution).toEqual({ status: 'resolved', product: { id: productId, name: 'Тестовый продукт без перевода' } });
     const result = await searchOffers('аудармасыз өнім', connection.db, { locale: 'kk' });
-    expect(result.offers[0]?.product).toEqual({ id: productId, name: 'Тестовый продукт без перевода', nameLocale: 'ru' });
+    expect(result.offers[0]?.product).toEqual({ id: productId, name: 'Тестовый продукт без перевода' });
   });
 
   it('rejects duplicate normalized names per locale and detects cross-language ambiguity', async () => {

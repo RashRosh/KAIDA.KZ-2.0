@@ -28,8 +28,8 @@ test('fresh active is visible; expired and inactive are hidden without lifecycle
     await pool.query(
       `INSERT INTO offers (
         id, product_id, seller_id, location_id, price_amount, price_currency, price_unit_code,
-        seller_comment, status, last_confirmed_at
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        seller_comment, status, last_confirmed_at, title, title_search, card_id
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,(SELECT name FROM products WHERE id=$2::uuid),lower((SELECT name FROM products WHERE id=$2::uuid)),gen_random_uuid())`,
       [
         fixture.offerId,
         fixture.productId,

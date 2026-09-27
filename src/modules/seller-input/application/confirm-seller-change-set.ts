@@ -10,6 +10,7 @@ import {
   replaceOfferPhotos,
 } from '../../offers/infrastructure/offers.repository';
 import { assertPhotosOwnedBy } from './assert-photos-owned';
+import { removeDraftById } from '../../offers/drafts/offer-drafts';
 import { systemClock, type Clock } from '../../offers/lifecycle/offer-lifecycle';
 import {
   disabledSellerCommentTranslationScheduler,
@@ -156,8 +157,8 @@ export async function confirmSellerChangeSet(
       if (targetOffer.sellerId !== seller.id) {
         throw new SellerInputInvariantError('Target Offer больше не принадлежит Seller.');
       }
-      if (targetOffer.productId !== item.productId || targetOffer.locationId !== item.locationId) {
-        throw new SellerInputInvariantError('Product или Location target Offer не совпадает с сохранённым proposal.');
+      if (targetOffer.cardId !== item.cardId || targetOffer.locationId !== item.locationId) {
+        throw new SellerInputInvariantError('Карточка или Location target Offer не совпадает с сохранённым proposal.');
       }
       const location = await findOwnedLocation(tx, targetOffer.locationId, seller.id);
       if (!location) {
@@ -191,7 +192,7 @@ export async function confirmSellerChangeSet(
       assertPricedItem(item);
       if (item.action === 'create_offer') {
         const offer = await createOffer(tx, {
-          productId: item.productId,
+          card: { title: item.title, productId: item.productId, cardId: item.cardId, priceOwn: item.priceOwn, pack: item.pack },
           sellerId: seller.id,
           locationId: item.locationId,
           priceAmount: item.priceAmount,
@@ -219,6 +220,7 @@ export async function confirmSellerChangeSet(
       if (item.action === 'update_offer') {
         applied = await applyOfferUpdateSnapshot(tx, {
           offerId: targetOffer.id,
+          card: { title: item.title, productId: item.productId, priceOwn: item.priceOwn, pack: item.pack },
           expectedRevision: item.expectedOfferRevision!,
           priceAmount: item.priceAmount,
           priceCurrency: 'KZT',
@@ -264,6 +266,7 @@ export async function confirmSellerChangeSet(
 
     const confirmed = await markChangeSetConfirmed(tx, changeSet.id, confirmationTime);
     if (confirmed.length !== 1) throw new SellerInputInvariantError('Change Set не удалось перевести в confirmed.');
+    if (changeSet.draftId) await removeDraftById(tx, changeSet.draftId, seller.id);
 
     return { view: await loadFinalView(tx, changeSet.id, seller.id), comments };
   });

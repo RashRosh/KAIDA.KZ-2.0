@@ -4,6 +4,7 @@ import { resolveProduct } from '../../catalog/application/resolve-product';
 import { formatPriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import { assertPhotosOwnedBy } from './assert-photos-owned';
+import { newCatalogCard } from './card-fields';
 import {
   LocationNotFoundError,
   ProductAmbiguousError,
@@ -38,10 +39,11 @@ export async function createSellerChangeSet(
     const photoIds = input.photoIds ?? [];
     await assertPhotosOwnedBy(tx, photoIds, ownerUserId);
 
+    const card = newCatalogCard(product);
     const changeSet = await createChangeSet(tx, seller.id);
     const item = await createChangeItem(tx, {
       changeSetId: changeSet.id,
-      productId: product.id,
+      card,
       locationId: location.id,
       priceAmount,
       priceCurrency: 'KZT',
@@ -60,6 +62,10 @@ export async function createSellerChangeSet(
         id: item.id,
         action: 'create_offer',
         product,
+        cardId: card.cardId,
+        priceOwn: false,
+        pack: null,
+        packLabel: null,
         location: { id: location.id, name: location.name, addressText: location.addressText, type: location.type },
         price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnit), unitChoice: priceUnit },
         sellerComment,

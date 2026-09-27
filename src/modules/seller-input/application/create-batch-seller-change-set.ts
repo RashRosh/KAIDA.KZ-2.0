@@ -1,6 +1,7 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
+import { currentCardFields, newCatalogCard } from './card-fields';
 import { findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
 import type { PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
@@ -22,6 +23,7 @@ import {
 } from '../contracts/seller-change-set.contract';
 import {
   createChangeItem,
+  type ChangeItemCardFields,
   createChangeSet,
   createOfferManagementChangeItem,
   findChangeSetViewByIdAndSeller,
@@ -66,7 +68,7 @@ export function assertNoBatchOfferConflicts(items: SellerBatchChangeItemInput[])
 
 type PreparedCreateItem = {
   action: 'create_offer';
-  productId: string;
+  card: ChangeItemCardFields;
   locationId: string;
   priceAmount: string;
   priceCurrency: 'KZT';
@@ -76,7 +78,7 @@ type PreparedCreateItem = {
 
 type PreparedManagementItem = {
   action: 'update_offer' | 'deactivate_offer' | 'activate_offer';
-  productId: string;
+  card: ChangeItemCardFields;
   locationId: string;
   priceAmount: string;
   priceCurrency: 'KZT';
@@ -103,7 +105,7 @@ async function prepareItem(
 
     return {
       action: 'create_offer',
-      productId: resolution.product.id,
+      card: newCatalogCard(resolution.product),
       locationId: location.id,
       priceAmount: input.price.amount,
       priceCurrency: 'KZT',
@@ -125,7 +127,7 @@ async function prepareItem(
     if (offerUpdateIsNoOp(offer, input)) throw new OfferUpdateNoChangesError();
     return {
       action: input.action,
-      productId: offer.productId,
+      card: currentCardFields(offer),
       locationId: offer.locationId,
       priceAmount: input.price.amount,
       priceCurrency: 'KZT',
@@ -145,7 +147,7 @@ async function prepareItem(
 
   return {
     action: input.action,
-    productId: offer.productId,
+    card: currentCardFields(offer),
     locationId: offer.locationId,
     priceAmount: currentPrice.amount,
     priceCurrency: 'KZT',
@@ -178,7 +180,7 @@ export async function createBatchSellerChangeSet(
       if (item.action === 'create_offer') {
         await createChangeItem(tx, {
           changeSetId: changeSet.id,
-          productId: item.productId,
+          card: item.card,
           locationId: item.locationId,
           priceAmount: item.priceAmount,
           priceCurrency: item.priceCurrency,
@@ -191,7 +193,7 @@ export async function createBatchSellerChangeSet(
       await createOfferManagementChangeItem(tx, {
         changeSetId: changeSet.id,
         action: item.action,
-        productId: item.productId,
+        card: item.card,
         locationId: item.locationId,
         priceAmount: item.priceAmount,
         priceCurrency: item.priceCurrency,

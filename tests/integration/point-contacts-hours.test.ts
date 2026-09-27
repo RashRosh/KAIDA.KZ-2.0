@@ -138,8 +138,8 @@ describe('point contacts and verification', () => {
     await pool.query('UPDATE locations SET latitude=43.2, longitude=76.9 WHERE id=$1', [pointId]);
     await replaceOwnedPointDetails(OWNER.id, pointId, { phone: POINT_PHONE, whatsapp: OWNER.phone, openingHours: lunchBreak }, { database: db });
     const product = (await pool.query("SELECT id FROM products WHERE name='Баранина'")).rows[0].id;
-    await pool.query(`INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at)
-      VALUES ($1,$2,$3,'100','KZT','active',now())`, [product, seller.id, pointId]);
+    await pool.query(`INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at, title, title_search, card_id)
+      VALUES ($1,$2,$3,'100','KZT','active',now(),(SELECT name FROM products WHERE id=$1::uuid),lower((SELECT name FROM products WHERE id=$1::uuid)),gen_random_uuid())`, [product, seller.id, pointId]);
 
     const offer = (await searchOffers('Баранина', db)).offers.find((item) => item.location.id === pointId)!;
     expect(offer.location.contacts).toEqual({ whatsappPhoneE164: OWNER.phone });

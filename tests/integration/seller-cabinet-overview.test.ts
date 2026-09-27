@@ -39,7 +39,7 @@ afterAll(async () => {
 });
 
 describe.sequential('Seller cabinet owned-offers read', () => {
-  it('reports buyer visibility by the same rules as Search and localizes the Product name', async () => {
+  it('reports buyer visibility by the same rules as Search and keeps the card title in every language', async () => {
     await cleanup();
     await pool.query('INSERT INTO users (id, phone_e164, created_at) VALUES ($1,$2,$3)', [userId, phone, T0]);
     const seller = await setupSeller(userId, {
@@ -75,7 +75,7 @@ describe.sequential('Seller cabinet owned-offers read', () => {
     expect(await read(hours(3))).toMatchObject({ status: 'inactive', buyerVisible: false });
     expect(await buyerSees(hours(3))).toBe(false);
 
-    expect((await read(hours(3), 'kk')).product).toEqual({ id: seedIds.lambProduct, name: 'Қой еті, жауырын', nameLocale: 'kk' });
+    expect((await read(hours(3), 'kk')).product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
     expect((await read(hours(3))).product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
   });
 });

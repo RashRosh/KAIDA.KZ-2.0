@@ -82,10 +82,10 @@ test.beforeAll(async ({}, workerInfo) => {
   await connection.pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+77015551901',now()),($1,'+77015551902',now())", [sellerId]);
   const now = new Date();
   await connection.pool.query(`INSERT INTO offers
-    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at) VALUES
-    ($1,$4,$5,$6,1000,'KZT','active',$10,$10,$10),
-    ($2,$4,$7,$8,1000,'KZT','active',$10,$10,$10),
-    ($3,$4,$9,$11,1000,'KZT','active',$10,$10,$10)`, [
+    (id,product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,created_at,updated_at, title, title_search, card_id) VALUES
+    ($1,$4,$5,$6,1000,'KZT','active',$10,$10,$10,(SELECT name FROM products WHERE id=$4::uuid),lower((SELECT name FROM products WHERE id=$4::uuid)),gen_random_uuid()),
+    ($2,$4,$7,$8,1000,'KZT','active',$10,$10,$10,(SELECT name FROM products WHERE id=$4::uuid),lower((SELECT name FROM products WHERE id=$4::uuid)),gen_random_uuid()),
+    ($3,$4,$9,$11,1000,'KZT','active',$10,$10,$10,(SELECT name FROM products WHERE id=$4::uuid),lower((SELECT name FROM products WHERE id=$4::uuid)),gen_random_uuid())`, [
     offerId,
     noPhoneOfferId,
     noGeoOfferId,

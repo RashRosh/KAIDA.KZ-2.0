@@ -107,3 +107,21 @@ export function withStructuredPriceUnit<T extends Record<string, unknown>>(legac
   void _legacy;
   return { ...rest, price_unit_code: code, price_unit_value: value };
 }
+
+// seller-showcase-editor (0016): an upgraded Offer takes its catalog name as the title and becomes its own card.
+export function withShowcaseCardOffer<T extends Record<string, unknown>>(row: T, title: string) {
+  return {
+    ...row,
+    title,
+    title_search: title.toLocaleLowerCase('ru').replace(/ё/g, 'е').split(/[^\p{L}\p{N}]+/u).filter(Boolean).join(' '),
+    card_id: row.id,
+    price_own: false,
+    pack_amount: null,
+    pack_unit: null,
+  };
+}
+
+// An upgraded ChangeSet item takes the catalog name and the card of the Offer it created or targets.
+export function withShowcaseCardItem<T extends Record<string, unknown>>(row: T, title: string, cardId: string) {
+  return { ...row, title, card_id: cardId, price_own: false, pack_amount: null, pack_unit: null };
+}

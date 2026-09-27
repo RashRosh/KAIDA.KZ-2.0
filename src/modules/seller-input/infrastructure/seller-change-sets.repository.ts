@@ -1,11 +1,11 @@
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
-import { products } from '../../catalog/db/products.table';
 import type { LocationType } from '../../locations/contracts/location.contract';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
 import type { OfferStatus } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../../offers/price-unit/price-unit';
+import { formatPack, packFromColumns, type Pack } from '../../offers/pack/pack';
 import type { Locale } from '../../../i18n/config';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SellerChangeSetView } from '../contracts/seller-change-set.contract';
@@ -14,6 +14,26 @@ import { sellerChangeItems, type SellerOfferManagementAction } from '../db/selle
 import { sellerChangeSets } from '../db/seller-change-sets.table';
 
 export type SellerInputDb = Pick<Database, 'insert' | 'select' | 'update'>;
+
+// seller-showcase-editor: the card fields every item carries; shared by all Offers of one card except priceOwn.
+export type ChangeItemCardFields = {
+  title: string;
+  productId: string | null;
+  cardId: string;
+  priceOwn: boolean;
+  pack: Pack | null;
+};
+
+function cardColumns(card: ChangeItemCardFields) {
+  return {
+    title: card.title,
+    productId: card.productId,
+    cardId: card.cardId,
+    priceOwn: card.priceOwn,
+    packAmount: card.pack?.amount ?? null,
+    packUnit: card.pack?.unit ?? null,
+  };
+}
 
 export async function insertItemPhotos(database: SellerInputDb, itemId: string, photoIds: string[]) {
   if (photoIds.length === 0) return;
@@ -43,8 +63,8 @@ export async function findOwnedLocation(database: SellerInputDb, locationId: str
   return row ? { ...row, type: row.type as LocationType } : null;
 }
 
-export async function createChangeSet(database: SellerInputDb, sellerId: string) {
-  const rows = await database.insert(sellerChangeSets).values({ sellerId, status: 'proposed' }).returning({
+export async function createChangeSet(database: SellerInputDb, sellerId: string, draftId: string | null = null) {
+  const rows = await database.insert(sellerChangeSets).values({ sellerId, status: 'proposed', draftId }).returning({
     id: sellerChangeSets.id,
     status: sellerChangeSets.status,
     createdAt: sellerChangeSets.createdAt,
@@ -57,7 +77,7 @@ export async function createChangeSet(database: SellerInputDb, sellerId: string)
 
 export async function createChangeItem(database: SellerInputDb, values: {
   changeSetId: string;
-  productId: string;
+  card: ChangeItemCardFields;
   locationId: string;
   priceAmount: string | null;
   priceCurrency: 'KZT' | null;
@@ -67,7 +87,7 @@ export async function createChangeItem(database: SellerInputDb, values: {
   const rows = await database.insert(sellerChangeItems).values({
     changeSetId: values.changeSetId,
     action: 'create_offer',
-    productId: values.productId,
+    ...cardColumns(values.card),
     locationId: values.locationId,
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
@@ -84,7 +104,7 @@ export async function createChangeItem(database: SellerInputDb, values: {
 export async function createOfferManagementChangeItem(database: SellerInputDb, values: {
   changeSetId: string;
   action: SellerOfferManagementAction;
-  productId: string;
+  card: ChangeItemCardFields;
   locationId: string;
   priceAmount: string | null;
   priceCurrency: 'KZT' | null;
@@ -97,7 +117,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
   const rows = await database.insert(sellerChangeItems).values({
     changeSetId: values.changeSetId,
     action: values.action,
-    productId: values.productId,
+    ...cardColumns(values.card),
     locationId: values.locationId,
     priceAmount: values.priceAmount,
     priceCurrency: values.priceCurrency,
@@ -130,8 +150,13 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
   const rows = await database.select({
     id: sellerChangeItems.id,
     action: sellerChangeItems.action,
-    productId: products.id,
-    productName: products.name,
+    productId: sellerChangeItems.productId,
+    title: sellerChangeItems.title,
+    cardId: sellerChangeItems.cardId,
+    priceOwn: sellerChangeItems.priceOwn,
+    packAmount: sellerChangeItems.packAmount,
+    packUnit: sellerChangeItems.packUnit,
+    targetOfferId: sellerChangeItems.targetOfferId,
     locationId: locations.id,
     locationName: locations.name,
     locationAddressText: locations.addressText,
@@ -146,13 +171,18 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     resultOfferStatus: offers.status,
     resultOfferLastConfirmedAt: offers.lastConfirmedAt,
   }).from(sellerChangeItems)
-    .innerJoin(products, eq(sellerChangeItems.productId, products.id))
     .innerJoin(locations, eq(sellerChangeItems.locationId, locations.id))
     .leftJoin(offers, eq(sellerChangeItems.resultOfferId, offers.id))
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id));
 
   const itemPhotos = await findItemPhotoIds(database, rows.map((row) => row.id));
+  // Before confirmation an update shows «было → стало»: the target Offer still holds the previous price.
+  const targetIds = rows.flatMap((row) => row.targetOfferId ? [row.targetOfferId] : []);
+  const previous = header.status === 'proposed' && targetIds.length > 0
+    ? new Map((await database.select({ id: offers.id, priceAmount: offers.priceAmount }).from(offers).where(inArray(offers.id, targetIds)))
+      .map((row) => [row.id, row.priceAmount]))
+    : new Map<string, string | null>();
 
   return {
     id: header.id,
@@ -165,7 +195,12 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
       return {
       id: row.id,
       action: row.action,
-      product: { id: row.productId, name: row.productName },
+      product: { id: row.productId, name: row.title },
+      cardId: row.cardId,
+      priceOwn: row.priceOwn,
+      pack: packFromColumns(row.packAmount, row.packUnit),
+      packLabel: formatPack(packFromColumns(row.packAmount, row.packUnit), locale),
+      ...(row.targetOfferId && previous.get(row.targetOfferId) ? { previousPriceAmount: previous.get(row.targetOfferId)! } : {}),
       location: { id: row.locationId, name: row.locationName, addressText: row.locationAddressText, type: row.locationType as LocationType },
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,
@@ -196,6 +231,7 @@ export async function lockChangeSetByIdAndSeller(database: SellerInputDb, change
     sellerId: sellerChangeSets.sellerId,
     status: sellerChangeSets.status,
     confirmedAt: sellerChangeSets.confirmedAt,
+    draftId: sellerChangeSets.draftId,
   }).from(sellerChangeSets)
     .where(and(eq(sellerChangeSets.id, changeSetId), eq(sellerChangeSets.sellerId, sellerId)))
     .for('update')
@@ -208,6 +244,11 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     id: sellerChangeItems.id,
     action: sellerChangeItems.action,
     productId: sellerChangeItems.productId,
+    title: sellerChangeItems.title,
+    cardId: sellerChangeItems.cardId,
+    priceOwn: sellerChangeItems.priceOwn,
+    packAmount: sellerChangeItems.packAmount,
+    packUnit: sellerChangeItems.packUnit,
     locationId: sellerChangeItems.locationId,
     priceAmount: sellerChangeItems.priceAmount,
     priceCurrency: sellerChangeItems.priceCurrency,
@@ -222,7 +263,11 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id))
     .for('update');
-  return rows.map(({ priceUnitCode, priceUnitValue, ...row }) => ({ ...row, priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue) }));
+  return rows.map(({ priceUnitCode, priceUnitValue, packAmount, packUnit, ...row }) => ({
+    ...row,
+    priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue),
+    pack: packFromColumns(packAmount, packUnit),
+  }));
 }
 
 export async function linkResultOffer(database: SellerInputDb, itemId: string, offerId: string) {
