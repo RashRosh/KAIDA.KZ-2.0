@@ -10,6 +10,8 @@ import {
   replaceOfferPhotos,
 } from '../../offers/infrastructure/offers.repository';
 import { assertPhotosOwnedBy } from './assert-photos-owned';
+import { CardRemovedByOperatorError } from '../../moderation/contracts/moderation.contract';
+import { clearRemovals, lockActiveRemovals } from '../../moderation/infrastructure/moderation.repository';
 import { removeDraftById } from '../../offers/drafts/offer-drafts';
 import { systemClock, type Clock } from '../../offers/lifecycle/offer-lifecycle';
 import {
@@ -185,8 +187,24 @@ export async function confirmSellerChangeSet(
       await assertPhotosOwnedBy(tx, itemPhotos.get(item.id) ?? [], ownerUserId);
     }
 
+    // operator-post-check: an operator removal of a touched card. A ChangeSet proposed before the removal is stale;
+    // one proposed after it republishes the card (clears the removal); switching a removed card on is refused.
+    const removals = await lockActiveRemovals(tx, items.map((item) => item.cardId));
+    const removedCards = new Set(removals.map((removal) => removal.cardId));
+    if (items.some((item) => item.action === 'activate_offer' && removedCards.has(item.cardId))) {
+      throw new CardRemovedByOperatorError();
+    }
+    const republishedCards = new Set(items
+      .filter((item) => item.action === 'create_offer' || item.action === 'update_offer')
+      .map((item) => item.cardId));
+    const clearing = removals.filter((removal) => republishedCards.has(removal.cardId));
+    if (clearing.some((removal) => changeSet.createdAt <= removal.removedAt)) {
+      throw new OfferChangedError();
+    }
+
     const confirmationTime = clock();
     const comments: PublishedSellerComment[] = [];
+    await clearRemovals(tx, clearing.map((removal) => removal.id), changeSet.id, confirmationTime);
 
     for (const item of items) {
       assertPricedItem(item);

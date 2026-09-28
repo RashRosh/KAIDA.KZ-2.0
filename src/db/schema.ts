@@ -17,3 +17,5 @@ export { sellerChangeItemPhotos } from '../modules/seller-input/db/seller-change
 export { sellerVerifiedPhones } from '../modules/sellers/db/seller-verified-phones.table';
 export { contactVerificationChallenges } from '../modules/identity/db/contact-verification-challenges.table';
 export { offerDrafts } from '../modules/offers/db/offer-drafts.table';
+export { offerCardRemovals } from '../modules/moderation/db/offer-card-removals.table';
+export { operatorFeedMarks } from '../modules/moderation/db/operator-feed-marks.table';

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { readPhoto } from '@/modules/media/application/read-photo';
+import { isOperator } from '@/modules/moderation/application/resolve-operator';
 import { photoIdSchema, photoVariantSchema } from '@/modules/media/contracts/photo.contract';
 
 export const runtime = 'nodejs';
@@ -22,7 +23,7 @@ export async function GET(
   try {
     const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
     const viewer = sessionToken ? await resolveCurrentUser(sessionToken).catch(() => null) : null;
-    const result = await readPhoto(id.data, variant.data, viewer?.id ?? null);
+    const result = await readPhoto(id.data, variant.data, viewer?.id ?? null, { viewerIsOperator: isOperator(viewer) });
     if (result.status === 'not_found') return notFound();
     return new Response(new Uint8Array(result.data), {
       status: 200,

@@ -11,6 +11,7 @@ import { findOfferPhotoIdsByOffer, listOffersBySeller } from '../infrastructure/
 import { calculateOfferCutoff, systemClock, type Clock } from '../lifecycle/offer-lifecycle';
 import { formatPriceUnit } from '../price-unit/price-unit';
 import { formatPack } from '../pack/pack';
+import { findActiveRemovalsBySeller } from '../../moderation/infrastructure/moderation.repository';
 
 export async function listOwnedOffers(
   ownerUserId: string,
@@ -28,6 +29,7 @@ export async function listOwnedOffers(
 
   const rows = await listOffersBySeller(database, seller.id);
   const photosByOffer = await findOfferPhotoIdsByOffer(database, rows.map((row) => row.id));
+  const removals = await findActiveRemovalsBySeller(database, seller.id);
   return rows.map((row) => {
     if (row.locationSellerId !== seller.id) {
       throw new SellerOfferInvariantError('Location предложения больше не принадлежит Seller.');
@@ -35,10 +37,12 @@ export async function listOwnedOffers(
     if (row.priceAmount !== null && row.priceCurrency !== 'KZT') {
       throw new SellerOfferInvariantError('Цена предложения имеет неподдерживаемую валюту.');
     }
-    // Mirrors buyerVisibleOffersPredicate: active, confirmed within the validity period, point geo.
+    const removal = removals.get(row.cardId);
+    // Mirrors buyerVisibleOffersPredicate: active, confirmed within the validity period, point geo, not removed.
     const buyerVisible = row.status === 'active'
       && row.lastConfirmedAt > cutoff
-      && row.locationHasGeo;
+      && row.locationHasGeo
+      && !removal;
     return {
       id: row.id,
       product: { id: row.productId, name: row.title },
@@ -60,6 +64,7 @@ export async function listOwnedOffers(
       lastConfirmedAt: row.lastConfirmedAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
       buyerVisible,
+      removal: removal ? { reason: removal.reason, comment: removal.comment, removedAt: removal.removedAt.toISOString() } : null,
     };
   });
 }

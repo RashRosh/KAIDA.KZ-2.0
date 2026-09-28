@@ -1,6 +1,8 @@
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { findOfferPhotoIds, findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
+import { CardRemovedByOperatorError } from '../../moderation/contracts/moderation.contract';
+import { findActiveRemovals } from '../../moderation/infrastructure/moderation.repository';
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import { assertPhotosOwnedBy } from './assert-photos-owned';
@@ -113,6 +115,10 @@ export async function createOfferManagementChangeSet(
     } else {
       if (input.action === 'deactivate_offer' && offer.status === 'inactive') {
         throw new OfferAlreadyInactiveError();
+      }
+      // operator-post-check: a removed card comes back only through «Исправить и опубликовать снова».
+      if (input.action === 'activate_offer' && (await findActiveRemovals(tx, [offer.cardId])).size > 0) {
+        throw new CardRemovedByOperatorError();
       }
       const currentPrice = normalizedCurrentPrice(offer);
       if (!currentPrice) throw new OfferPriceRequiredError();

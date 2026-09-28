@@ -7,19 +7,22 @@ export type PhotoReadResult =
   | { status: 'ok'; data: Buffer; visibility: 'public' | 'owner' }
   | { status: 'not_found' };
 
-// A photo is public while it is attached to an active Offer; otherwise only its owner may fetch it.
+// A photo is public while it is attached to an active Offer of a card not removed by an operator; otherwise only its
+// owner may fetch it, and an operator any photo of a published card (operator-post-check).
 // Everything else answers not_found, so a guessed id reveals nothing.
 export async function readPhoto(
   photoId: string,
   variant: PhotoVariant,
   viewerUserId: string | null,
-  dependencies: { database?: Database; storage?: PhotoStorage } = {},
+  dependencies: { database?: Database; storage?: PhotoStorage; viewerIsOperator?: boolean } = {},
 ): Promise<PhotoReadResult> {
   const database = dependencies.database ?? getDatabase();
   const storage = dependencies.storage ?? getPhotoStorage();
   const access = await findPhotoAccess(database, photoId);
   if (!access) return { status: 'not_found' };
-  const visibility = access.publicViaActiveOffer ? 'public' : access.ownerUserId === viewerUserId ? 'owner' : null;
+  const visibility = access.publicViaActiveOffer ? 'public'
+    : access.ownerUserId === viewerUserId || (dependencies.viewerIsOperator && access.attachedToOffer) ? 'owner'
+      : null;
   if (!visibility) return { status: 'not_found' };
   const data = await storage.read(photoId, variant);
   return data ? { status: 'ok', data, visibility } : { status: 'not_found' };

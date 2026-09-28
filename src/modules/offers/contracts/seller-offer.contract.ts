@@ -1,6 +1,7 @@
 import type { OfferStatus } from '../db/offers.table';
 import type { PriceUnit } from '../price-unit/price-unit';
 import type { Pack } from '../pack/pack';
+import type { SellerRemovalView } from '../../moderation/contracts/moderation.contract';
 
 export type SellerOfferView = {
   id: string;
@@ -23,6 +24,8 @@ export type SellerOfferView = {
   updatedAt: string;
   // Whether Search and Nearby currently show this Offer, by the same policy as the buyer read.
   buyerVisible: boolean;
+  // operator-post-check: set while an operator has the whole card removed from the showcase.
+  removal: SellerRemovalView | null;
 };
 
 export class SellerOffersSellerRequiredError extends Error {

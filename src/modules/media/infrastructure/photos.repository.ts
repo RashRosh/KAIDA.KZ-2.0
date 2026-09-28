@@ -30,7 +30,12 @@ export async function findPhotoAccess(database: PhotoDb, photoId: string) {
     publicViaActiveOffer: sql<boolean>`exists (
       select 1 from offer_photos op inner join offers o on o.id = op.offer_id
       where op.photo_id = "photos"."id" and o.status = 'active'
+        and not exists (
+          select 1 from offer_card_removals r
+          where r.card_id = o.card_id and r.restored_at is null and r.cleared_at is null
+        )
     )`,
+    attachedToOffer: sql<boolean>`exists (select 1 from offer_photos op2 where op2.photo_id = "photos"."id")`,
   }).from(photos).where(eq(photos.id, photoId)).limit(1);
   return rows[0] ?? null;
 }
