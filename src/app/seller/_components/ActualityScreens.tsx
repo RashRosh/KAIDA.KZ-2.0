@@ -117,7 +117,8 @@ export function ActualityScreen({ due, onClose, onDone, go }: {
           <h2 className="ov">{t('actuality.how')}</h2>
           {steps.map(([n, background, color, key]) => (
             <div key={n} className="step">
-              <span className="n" style={{ background, color }}>{n}</span>
+              {/* The 24 px circle is centred on the first 18 px text line, not on its top edge. */}
+              <span className="n" style={{ background, color, marginTop: -3 }}>{n}</span>
               <p className="c c2"><b style={{ color: 'var(--ink)' }}>{t(key as 'actuality.how0')}</b> {t(`${key}Text` as 'actuality.how0Text')}</p>
             </div>
           ))}
