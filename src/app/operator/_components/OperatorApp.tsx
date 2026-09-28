@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatAmount } from '../../_components/OfferCard';
-import { Bar, Ic, LoadError, Phone, Radio, SkeletonRows, Thumb, Toast } from '../../seller/_kaida/ui';
+import { Bar, Ic, LoadError, Phone, Radio, SkeletonRows, Thumb, Toast, TOAST_MS } from '../../seller/_kaida/ui';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import {
   REMOVAL_REASONS,
@@ -92,7 +92,7 @@ export function OperatorApp() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 3000);
+    const timer = window.setTimeout(() => setToast(null), TOAST_MS);
     return () => window.clearTimeout(timer);
   }, [toast]);
 

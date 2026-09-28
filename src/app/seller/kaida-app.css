@@ -32,3 +32,15 @@
 .kaida .cbx:disabled{cursor:default}
 .kaida span:has(>.cbx:focus-visible)>.cb{outline:2px solid var(--focus);outline-offset:2px}
 .kaida label.li:has(>.cbx:focus-visible){outline:2px solid var(--focus);outline-offset:2px;border-radius:10px}
+/* Motion page, app side: a loading placeholder does not play the screen entrance, so the real screen enters exactly
+   once (when the busy flag goes away or the real screen mounts). */
+.kaida.motion .ph>main.body[aria-busy="true"]{animation:none}
+/* Motion page «out: 200 ms · ease-in»: inert copies of a closed sheet, its scrim and a toast (useLeaveAnimation). */
+@keyframes m-sheet-out{from{transform:none}to{transform:translateY(100%)}}
+@keyframes m-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes m-toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(16px)}}
+.kaida .leaving{pointer-events:none}
+.kaida.motion .ph>.sheet.leaving{animation:m-sheet-out var(--dur-base) var(--ease-in) both}
+.kaida.motion .ph>.sheet.leaving>*, .kaida.motion .toast.leaving>*{animation:none}
+.kaida.motion .ph>.scrim.leaving{animation:m-fade-out var(--dur-base) var(--ease-in) both}
+.kaida.motion .toast.leaving{animation:m-toast-out var(--dur-base) var(--ease-in) both}

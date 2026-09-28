@@ -11,7 +11,7 @@ import type { SellerView } from '../../../modules/sellers/contracts/seller.contr
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/OfferCard';
-import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, Sheet, SkeletonRows, Thumb, Toast } from '../_kaida/ui';
+import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
 import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardEditor';
 import { valuesFromChangeSet, type CardValues } from './card-editor-state';
 import { findCard, groupCards, missingDraftFields, pluralKey, showcaseEntries, type SellerCard } from './card-model';
@@ -97,11 +97,13 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
 
   useEffect(() => {
     if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 6000);
+    const timer = window.setTimeout(() => setNotice(null), TOAST_MS);
     return () => window.clearTimeout(timer);
   }, [notice]);
 
   const go = useCallback((query: string) => {
+    // Leaving the showcase ends its toast; it must not pop up again on the way back.
+    setNotice(null);
     router.push(query ? `/seller?${query}` : '/seller', { scroll: false });
   }, [router]);
   const closeOverlay = useCallback(() => {
