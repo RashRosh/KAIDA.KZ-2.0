@@ -4,6 +4,7 @@ import {
   validateOfferValidityPeriodHours,
 } from '../../offers/config/offer-lifecycle.config';
 import { findOfferPhotoIds } from '../../offers/infrastructure/offers.repository';
+import { buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import { calculateOfferCutoff, systemClock, type Clock } from '../../offers/lifecycle/offer-lifecycle';
 import type { Locale } from '../../../i18n/config';
 import type { SearchOffer } from '../contracts/search.contract';
@@ -23,12 +24,14 @@ export async function getBuyerOffer(
   const validityPeriodHours = options.validityPeriodHours === undefined
     ? readOfferValidityPeriodHours()
     : validateOfferValidityPeriodHours(options.validityPeriodHours);
-  const cutoff = calculateOfferCutoff((options.clock ?? systemClock)(), validityPeriodHours);
+  const now = (options.clock ?? systemClock)();
+  const cutoff = calculateOfferCutoff(now, validityPeriodHours);
   const candidate = await findBuyerVisibleOfferById(database, offerId, cutoff, options.locale ?? 'ru');
   if (!candidate) return null;
   const photoIds = await findOfferPhotoIds(database, offerId);
   return {
     ...candidate.offer,
+    actuality: buyerActuality(candidate.lastConfirmedAt, now, readActualityPolicy()),
     photos: photoIds.map((id) => ({ id })),
     lastConfirmedAt: candidate.lastConfirmedAt.toISOString(),
   };

@@ -14,10 +14,35 @@ export type SellerCard = {
   // Lowest price when every point has its own price.
   lowestPrice: string | null;
   live: boolean;
+  // offer-actuality: the card's oldest switched-on point decides its age; archived only when every such point is.
+  // null for a removed or fully switched-off card (outside actuality).
+  actuality: CardActuality | null;
   // operator-post-check: the whole card is off the showcase until the Seller fixes and republishes it.
   removal: SellerOfferView['removal'];
   updatedAt: string;
 };
+
+export type CardActuality = {
+  days: number;
+  stage: SellerOfferView['actuality']['stage'];
+  due: boolean;
+  archived: boolean;
+  lastConfirmedAt: string;
+};
+
+export function cardActuality(offers: SellerOfferView[]): CardActuality | null {
+  if (offers.some((offer) => offer.removal)) return null;
+  const active = offers.filter((offer) => offer.status === 'active');
+  if (active.length === 0) return null;
+  const oldest = active.reduce((a, b) => (b.lastConfirmedAt < a.lastConfirmedAt ? b : a));
+  return {
+    days: oldest.actuality.days,
+    stage: oldest.actuality.stage,
+    due: oldest.actuality.due,
+    archived: active.every((offer) => offer.actuality.stage === 'archived'),
+    lastConfirmedAt: oldest.lastConfirmedAt,
+  };
+}
 
 export function groupCards(offers: SellerOfferView[]): SellerCard[] {
   const byCard = new Map<string, SellerOfferView[]>();
@@ -34,6 +59,7 @@ export function groupCards(offers: SellerOfferView[]): SellerCard[] {
       lowestPrice: common === null && prices.length > 0 ? String(Math.min(...prices)) : null,
       live: sorted.some((offer) => offer.status === 'active'),
       removal: sorted[0]!.removal,
+      actuality: cardActuality(sorted),
       updatedAt: sorted.map((offer) => offer.updatedAt).sort().at(-1)!,
     };
   });
@@ -46,7 +72,7 @@ export function findCard(cards: SellerCard[], id: string | null): SellerCard | u
   return cards.find((card) => card.cardId === id || card.offers.some((offer) => offer.id === id));
 }
 
-export function pluralKey<K extends 'showcase.points' | 'points.cards' | 'card.willCreate' | 'card.willChange' | 'card.summary' | 'confirm.willPublish'>(
+export function pluralKey<K extends 'showcase.points' | 'points.cards' | 'card.willCreate' | 'card.willChange' | 'card.summary' | 'confirm.willPublish' | 'actuality.days' | 'actuality.taskCount' | 'actuality.taskHidden'>(
   base: K,
   count: number,
 ): MessageKey {

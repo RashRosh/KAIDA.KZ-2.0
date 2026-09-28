@@ -16,6 +16,8 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
       query: 'баранина',
       offers: [{
         id: seedIds.lambOffer,
+        // offer-actuality: the seed confirms the offer when the test database is prepared.
+        actuality: { days: 0, ageing: false },
         product: { id: seedIds.lambProduct, name: 'Баранина' },
         seller: {
           id: seedIds.seller,

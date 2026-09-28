@@ -6,6 +6,7 @@ import { OpeningHoursLine } from './OpeningHoursLine';
 import type { SearchOffer } from '@/modules/search/contracts/search.contract';
 import { buildContactActions, type ContactAction } from '../../modules/sellers/contact/build-contact-actions';
 import styles from '../page.module.css';
+import { ActualityBadge } from './ActualityBadge';
 import { useI18n } from '../../i18n/I18nProvider';
 
 // Keep the decimal as a string throughout formatting, including large amounts.
@@ -158,6 +159,7 @@ export function OfferCard({
             {formatAmount(offer.price.amount)} ₸
             {offer.price.unit && <span className={styles.priceUnit}> / {offer.price.unit}</span>}
           </p>
+          {offer.actuality && <ActualityBadge days={offer.actuality.days} />}
         </div>
 
         {interest && (

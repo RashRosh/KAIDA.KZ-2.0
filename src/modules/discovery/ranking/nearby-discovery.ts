@@ -1,6 +1,6 @@
 import type { BuyerLocation } from '../../search/contracts/buyer-location.contract';
 import type { SearchOffer } from '../../search/contracts/search.contract';
-import { distanceMetersForRanking } from '../../search/ranking/search-ranking';
+import { compareActualityTier, distanceMetersForRanking } from '../../search/ranking/search-ranking';
 import type { DiscoveryOffer } from '../contracts/discovery.contract';
 import { validateNearbyRadiusMeters } from '../config/discovery.config';
 
@@ -16,7 +16,9 @@ type RankedNearbyOffer = {
   distanceMeters: number;
 };
 
-function compareNearbyOffers(a: RankedNearbyOffer, b: RankedNearbyOffer): number {
+function compareNearbyOffers(a: RankedNearbyOffer, b: RankedNearbyOffer, ageingSince?: Date): number {
+  const tier = compareActualityTier(a, b, ageingSince);
+  if (tier !== 0) return tier;
   if (a.distanceMeters !== b.distanceMeters) return a.distanceMeters - b.distanceMeters;
 
   const aTime = a.lastConfirmedAt.getTime();
@@ -31,6 +33,7 @@ export function selectNearbyOffers(
   candidates: readonly NearbyDiscoveryCandidate[],
   buyerLocation: BuyerLocation,
   nearbyRadiusMeters: number,
+  ageingSince?: Date,
 ): DiscoveryOffer[] {
   const radius = validateNearbyRadiusMeters(nearbyRadiusMeters);
 
@@ -45,6 +48,6 @@ export function selectNearbyOffers(
         distanceMeters,
       }];
     })
-    .sort(compareNearbyOffers)
+    .sort((a, b) => compareNearbyOffers(a, b, ageingSince))
     .map(({ offer, distanceMeters }) => ({ ...offer, distanceMeters }));
 }

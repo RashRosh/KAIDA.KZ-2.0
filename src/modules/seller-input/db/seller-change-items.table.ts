@@ -7,7 +7,7 @@ import type { PriceUnitCode } from '../../offers/price-unit/price-unit';
 import type { PackUnit } from '../../offers/pack/pack';
 import { sellerChangeSets } from './seller-change-sets.table';
 
-export type SellerChangeAction = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
+export type SellerChangeAction = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer' | 'reconfirm_offer';
 export type SellerOfferManagementAction = Exclude<SellerChangeAction, 'create_offer'>;
 
 export const sellerChangeItems = pgTable('seller_change_items', {
@@ -36,7 +36,7 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   index('seller_change_items_change_set_id_idx').on(table.changeSetId),
   check('seller_change_items_pack_valid', sql`(${table.packAmount} IS NULL AND ${table.packUnit} IS NULL)
   OR (${table.packAmount} > 0 AND ${table.packUnit} IN ('g', 'kg', 'ml', 'l') AND ${table.priceUnitCode} IN ('package', 'piece'))`),
-  check('seller_change_items_action_allowed', sql`${table.action} IN ('create_offer', 'update_offer', 'deactivate_offer', 'activate_offer')`),
+  check('seller_change_items_action_allowed', sql`${table.action} IN ('create_offer', 'update_offer', 'deactivate_offer', 'activate_offer', 'reconfirm_offer')`),
   check('seller_change_items_price_valid', sql`${table.priceAmount} IS NULL OR (
     ${table.priceAmount} >= 0
     AND ${table.priceAmount} NOT IN ('NaN'::numeric, 'Infinity'::numeric)
@@ -64,7 +64,7 @@ export const sellerChangeItems = pgTable('seller_change_items', {
     AND ${table.targetOfferId} IS NULL
     AND ${table.expectedOfferRevision} IS NULL
   ) OR (
-    ${table.action} IN ('update_offer', 'deactivate_offer', 'activate_offer')
+    ${table.action} IN ('update_offer', 'deactivate_offer', 'activate_offer', 'reconfirm_offer')
     AND ${table.targetOfferId} IS NOT NULL
     AND ${table.expectedOfferRevision} IS NOT NULL
   )`),

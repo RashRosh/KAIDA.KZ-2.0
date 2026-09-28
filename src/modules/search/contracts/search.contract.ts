@@ -34,6 +34,8 @@ export const searchOfferSchema = z.object({
   sellerComment: z.string().nullable(),
   // Present only when the Offer has photos; the thumbnail URL is built from it.
   coverPhotoId: z.uuid().optional(),
+  // offer-actuality: whole days since the Seller's last confirmation (badge «Сегодня» … «6 дней») and the tier.
+  actuality: z.object({ days: z.number().int().min(0), ageing: z.boolean() }).optional(),
   // Present only while the translator is enabled and the comment is not already in the interface locale.
   sellerCommentTranslation: z.discriminatedUnion('status', [
     z.object({
