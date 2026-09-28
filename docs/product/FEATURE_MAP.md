@@ -89,7 +89,10 @@ Seller Input
 - moderation: ИИ до публикации, пост-проверка оператором при недоступном ИИ;
 - reviews / rating / photo complaints (целевой макет, не запланировано);
 - archive / restore / delete карточек;
-- complete Russian/Kazakh localization with a global language switch;
+- complete Russian/Kazakh localization; language chosen at the first visit and changed in «Ещё» (PO, 2026-09-29);
+- **buyer promo banner above the search field** (PO, 2026-09-29): место над строкой поиска для акций, новинок и
+  другой информирующей и вовлекающей маркетинговой информации KAIDA; кто и как управляет содержимым, частота смены,
+  метки рекламы и связь с платным продвижением (S28–S29) решает отдельный контракт;
 - KAIDA-owned address directory built on open data (OpenStreetMap) for Location address suggestions;
 - Market internal navigation as future spatial capability.
 
