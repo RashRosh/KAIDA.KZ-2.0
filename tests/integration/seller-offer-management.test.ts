@@ -123,6 +123,7 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
         updatedAt: T0.toISOString(),
         buyerVisible: true,
         removal: null,
+        actuality: { days: 0, stage: 'fresh', due: false },
       });
     } finally {
       await cleanupUser(userId, phone);

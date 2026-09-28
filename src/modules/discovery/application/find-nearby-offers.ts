@@ -16,6 +16,7 @@ import {
 import type { NearbyResponse } from '../contracts/discovery.contract';
 import { findVisibleDiscoveryCandidates } from '../infrastructure/discovery.repository';
 import { selectNearbyOffers } from '../ranking/nearby-discovery';
+import { ageingSince, buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import type { Locale } from '../../../i18n/config';
 
 type NearbyDiscoveryOptions = {
@@ -45,7 +46,10 @@ export async function findNearbyOffers(
     ? await findVisibleDiscoveryCandidates(db, cutoff)
     : await findVisibleDiscoveryCandidates(db, cutoff, options.locale, options.commentTranslationEnabled);
 
+  const policy = readActualityPolicy();
+  const actualityByOffer = new Map(candidates.map((candidate) => [candidate.offer.id, buyerActuality(candidate.lastConfirmedAt, now, policy)]));
   return {
-    offers: selectNearbyOffers(candidates, buyerLocation, nearbyRadiusMeters),
+    offers: selectNearbyOffers(candidates, buyerLocation, nearbyRadiusMeters, ageingSince(now, policy))
+      .map((offer) => ({ ...offer, actuality: actualityByOffer.get(offer.id) })),
   };
 }

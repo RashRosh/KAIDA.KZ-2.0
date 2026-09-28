@@ -200,6 +200,20 @@ export async function applyOfferActivation(database: OfferWriteDb, values: {
     .returning(managementUpdateReturning);
 }
 
+// offer-actuality: «Подтвердить актуальность» — only the confirmation time moves; the offer must still be on.
+export async function applyOfferReconfirmation(database: OfferWriteDb, values: {
+  offerId: string;
+  expectedRevision: number;
+  confirmationTime: Date;
+}) {
+  return database.update(offers).set({
+    lastConfirmedAt: values.confirmationTime,
+    updatedAt: values.confirmationTime,
+    revision: sql`${offers.revision} + 1`,
+  }).where(and(eq(offers.id, values.offerId), eq(offers.revision, values.expectedRevision), eq(offers.status, 'active')))
+    .returning(managementUpdateReturning);
+}
+
 // All Offers of one card of this Seller, locked for a card-wide change.
 export async function lockCardOffers(database: OfferWriteDb, cardId: string, sellerId: string) {
   const rows = await database.select(managementOfferSelection).from(offers)

@@ -2,6 +2,7 @@ import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import {
   applyOfferActivation,
+  applyOfferReconfirmation,
   applyOfferDeactivation,
   applyOfferUpdateSnapshot,
   createOffer,
@@ -22,6 +23,7 @@ import {
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   ChangeSetNotFoundError,
+  OfferAlreadyInactiveError,
   OfferChangedError,
   OfferPriceRequiredError,
   SellerInputInvariantError,
@@ -172,6 +174,10 @@ export async function confirmSellerChangeSet(
       if (item.action === 'deactivate_offer' && targetOffer.status !== 'active') {
         throw new SellerInputInvariantError('Deactivate proposal ожидает active target Offer на своей revision.');
       }
+      // offer-actuality: a switched-off offer is confirmed by switching it on, not by «Подтвердить актуальность».
+      if (item.action === 'reconfirm_offer' && targetOffer.status !== 'active') {
+        throw new OfferAlreadyInactiveError();
+      }
       assertPricedItem(item);
       if (item.action === 'activate_offer' && (targetOffer.priceAmount === null || targetOffer.priceCurrency !== 'KZT')) {
         throw new OfferPriceRequiredError();
@@ -191,7 +197,7 @@ export async function confirmSellerChangeSet(
     // one proposed after it republishes the card (clears the removal); switching a removed card on is refused.
     const removals = await lockActiveRemovals(tx, items.map((item) => item.cardId));
     const removedCards = new Set(removals.map((removal) => removal.cardId));
-    if (items.some((item) => item.action === 'activate_offer' && removedCards.has(item.cardId))) {
+    if (items.some((item) => (item.action === 'activate_offer' || item.action === 'reconfirm_offer') && removedCards.has(item.cardId))) {
       throw new CardRemovedByOperatorError();
     }
     const republishedCards = new Set(items
@@ -249,6 +255,12 @@ export async function confirmSellerChangeSet(
         });
       } else if (item.action === 'deactivate_offer') {
         applied = await applyOfferDeactivation(tx, {
+          offerId: targetOffer.id,
+          expectedRevision: item.expectedOfferRevision!,
+          confirmationTime,
+        });
+      } else if (item.action === 'reconfirm_offer') {
+        applied = await applyOfferReconfirmation(tx, {
           offerId: targetOffer.id,
           expectedRevision: item.expectedOfferRevision!,
           confirmationTime,

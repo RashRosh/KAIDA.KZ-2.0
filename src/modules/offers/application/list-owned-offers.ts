@@ -12,10 +12,17 @@ import { calculateOfferCutoff, systemClock, type Clock } from '../lifecycle/offe
 import { formatPriceUnit } from '../price-unit/price-unit';
 import { formatPack } from '../pack/pack';
 import { findActiveRemovalsBySeller } from '../../moderation/infrastructure/moderation.repository';
+import { actualityView, readActualityPolicy, validateActualityPolicy, type ActualityPolicy } from '../actuality/actuality';
 
 export async function listOwnedOffers(
   ownerUserId: string,
-  dependencies: { database?: Database; clock?: Clock; validityPeriodHours?: number; locale?: 'ru' | 'kk' } = {},
+  dependencies: {
+    database?: Database;
+    clock?: Clock;
+    validityPeriodHours?: number;
+    actualityPolicy?: ActualityPolicy;
+    locale?: 'ru' | 'kk';
+  } = {},
 ): Promise<SellerOfferView[]> {
   const database = dependencies.database ?? getDatabase();
   const seller = await findSellerByOwner(database, ownerUserId);
@@ -24,7 +31,11 @@ export async function listOwnedOffers(
   const validityPeriodHours = dependencies.validityPeriodHours === undefined
     ? readOfferValidityPeriodHours()
     : validateOfferValidityPeriodHours(dependencies.validityPeriodHours);
-  const cutoff = calculateOfferCutoff((dependencies.clock ?? systemClock)(), validityPeriodHours);
+  const now = (dependencies.clock ?? systemClock)();
+  const cutoff = calculateOfferCutoff(now, validityPeriodHours);
+  const policy = dependencies.actualityPolicy
+    ? validateActualityPolicy(dependencies.actualityPolicy)
+    : { ...readActualityPolicy(), hiddenHours: validityPeriodHours };
   const locale = dependencies.locale ?? 'ru';
 
   const rows = await listOffersBySeller(database, seller.id);
@@ -64,6 +75,7 @@ export async function listOwnedOffers(
       lastConfirmedAt: row.lastConfirmedAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
       buyerVisible,
+      actuality: actualityView(row.lastConfirmedAt, now, policy),
       removal: removal ? { reason: removal.reason, comment: removal.comment, removedAt: removal.removedAt.toISOString() } : null,
     };
   });

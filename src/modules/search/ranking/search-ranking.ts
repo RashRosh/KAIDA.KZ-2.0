@@ -38,12 +38,21 @@ function compareFreshnessThenId(a: SearchRankingCandidate, b: SearchRankingCandi
   return a.offer.id < b.offer.id ? -1 : 1;
 }
 
+// offer-actuality: offers confirmed at or before `ageingSince` form the ageing tier, ranked after every fresh offer.
+export function compareActualityTier(a: { lastConfirmedAt: Date }, b: { lastConfirmedAt: Date }, ageingSince?: Date): number {
+  if (!ageingSince) return 0;
+  const aAgeing = a.lastConfirmedAt.getTime() <= ageingSince.getTime();
+  const bAgeing = b.lastConfirmedAt.getTime() <= ageingSince.getTime();
+  return aAgeing === bAgeing ? 0 : aAgeing ? 1 : -1;
+}
+
 export function rankSearchOfferCandidates(
   candidates: readonly SearchRankingCandidate[],
   buyerLocation?: BuyerLocation,
+  ageingSince?: Date,
 ): SearchRankingCandidate[] {
   if (!buyerLocation) {
-    return [...candidates].sort(compareFreshnessThenId);
+    return [...candidates].sort((a, b) => compareActualityTier(a, b, ageingSince) || compareFreshnessThenId(a, b));
   }
 
   const ranked = candidates.map((candidate) => ({
@@ -54,6 +63,8 @@ export function rankSearchOfferCandidates(
   }));
 
   ranked.sort((a, b) => {
+    const tier = compareActualityTier(a.candidate, b.candidate, ageingSince);
+    if (tier !== 0) return tier;
     if (a.distanceMeters === null && b.distanceMeters !== null) return 1;
     if (a.distanceMeters !== null && b.distanceMeters === null) return -1;
     if (a.distanceMeters !== null && b.distanceMeters !== null && a.distanceMeters !== b.distanceMeters) {

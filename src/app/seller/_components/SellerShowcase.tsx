@@ -12,6 +12,7 @@ import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/OfferCard';
 import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
+import { ActualityScreen, ActualityTask, ArchiveScreen, daysLabel, FreshPlaque, useReconfirm } from './ActualityScreens';
 import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardEditor';
 import { valuesFromChangeSet, type CardValues } from './card-editor-state';
 import { findCard, groupCards, missingDraftFields, pluralKey, showcaseEntries, type SellerCard } from './card-model';
@@ -60,6 +61,7 @@ const noticeText: Record<string, MessageKey> = {
   disabled: 'notice.disabled',
   batch: 'notice.batch',
   draftSaved: 'card.draftSaved',
+  reconfirmed: 'actuality.confirmed',
 };
 
 // AI-S01 «Моя витрина» · AI off (seller-showcase-editor §2): one primary action, cards grouped by product across
@@ -131,9 +133,16 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   if (data.kind === 'error') return screen(<main className="body" style={{ gap: 12 }}>{cta}<LoadError title={t('offers.loadError')} onRetry={reload} /></main>);
 
   const cards = groupCards(data.offers);
+  // offer-actuality: archived cards live only in «Архив»; due ones (oldest first) feed the task and «Актуальность».
+  const archivedCards = cards.filter((card) => card.actuality?.archived);
+  const liveCards = cards.filter((card) => !card.actuality?.archived);
+  const dueCards = liveCards.filter((card) => card.actuality?.due)
+    .sort((a, b) => a.actuality!.lastConfirmedAt.localeCompare(b.actuality!.lastConfirmedAt));
   const overlay = (
     <Overlays
       cards={cards}
+      dueCards={dueCards}
+      archivedCards={archivedCards}
       drafts={data.drafts}
       seller={data.seller}
       commentTranslationEnabled={commentTranslationEnabled}
@@ -141,6 +150,12 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
       onClose={closeOverlay}
       onSaved={(kind) => {
         if (kind === 'draftSaved') setNotice({ text: 'card.draftSaved', offerId: null });
+        reload();
+        closeOverlay();
+      }}
+      onRefresh={reload}
+      onReconfirmed={() => {
+        setNotice({ text: 'actuality.confirmed', offerId: null });
         reload();
         closeOverlay();
       }}
@@ -153,7 +168,7 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   );
   if (isOverlayOpen(params, cards, data.drafts)) return overlay;
 
-  const entries = showcaseEntries(cards, data.drafts).filter((entry) => tab === 'all' || entry.kind === 'draft');
+  const entries = showcaseEntries(liveCards, data.drafts).filter((entry) => tab === 'all' || entry.kind === 'draft');
   const empty = cards.length === 0 && data.drafts.length === 0;
   const toast = notice && <Toast>{t(notice.text)}</Toast>;
 
@@ -171,13 +186,15 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   return screen(
     <main className="body" style={{ gap: 12 }}>
       {cta}
-      {data.drafts.length > 0 ? (
+      <ActualityTask due={dueCards} onCheck={() => go('actuality=1')} />
+      {data.drafts.length > 0 || archivedCards.length > 0 ? (
         <nav className="chips" aria-label={t('showcase.tabs')}>
-          <Link href="/seller" scroll={false} className={`chip${tab === 'all' ? ' on' : ''}`} aria-current={tab === 'all' ? 'page' : undefined}>{t('showcase.tabAll', { count: cards.length + data.drafts.length })}</Link>
-          <Link href="/seller?tab=drafts" scroll={false} className={`chip${tab === 'drafts' ? ' on' : ''}`} aria-current={tab === 'drafts' ? 'page' : undefined}>{t('showcase.tabDrafts', { count: data.drafts.length })}</Link>
+          <Link href="/seller" scroll={false} className={`chip${tab === 'all' ? ' on' : ''}`} aria-current={tab === 'all' ? 'page' : undefined}>{t('showcase.tabAll', { count: liveCards.length + data.drafts.length })}</Link>
+          {data.drafts.length > 0 && <Link href="/seller?tab=drafts" scroll={false} className={`chip${tab === 'drafts' ? ' on' : ''}`} aria-current={tab === 'drafts' ? 'page' : undefined}>{t('showcase.tabDrafts', { count: data.drafts.length })}</Link>}
+          {archivedCards.length > 0 && <Link href="/seller?tab=archive" scroll={false} className="chip">{t('archive.chip', { count: archivedCards.length })}</Link>}
         </nav>
       ) : (
-        <h2 className="h3">{t('showcase.cardsCount', { count: cards.length })}</h2>
+        <h2 className="h3">{t('showcase.cardsCount', { count: liveCards.length })}</h2>
       )}
       {entries.length === 0 && <p className="t c2">{t('showcase.draftsEmpty')}</p>}
       {entries.map((entry) => entry.kind === 'card'
@@ -189,6 +206,7 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
 }
 
 function isOverlayOpen(params: URLSearchParams, cards: SellerCard[], drafts: OfferDraftView[]) {
+  if (params.get('actuality') === '1' || params.get('tab') === 'archive') return true;
   if (params.get('new') === '1') return true;
   if (drafts.some((draft) => draft.id === params.get('draft'))) return true;
   return Boolean(findCard(cards, params.get('edit')) || findCard(cards, params.get('point')) || findCard(cards, params.get('card')));
@@ -228,9 +246,17 @@ function CardRow({ card, highlighted, onOpen, onComplete }: { card: SellerCard; 
               <span className="bd bd-err"><Ic name="eyeoff" />{t('removal.status')}</span>
               <p className="c">{t('removal.rowHint', { reason: t(`removal.short.${card.removal.reason}`) })}</p>
             </>
-          ) : card.live
-            ? <span className="bd bd-ok"><Ic name="check" />{t('showcase.statusLive')}{highlighted ? ` · ${t('showcase.statusNow')}` : ''}</span>
-            : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>}
+          ) : card.actuality?.stage === 'hidden' ? (
+            <>
+              <span className="bd bd-warn"><Ic name="eyeoff" />{t('actuality.needConfirm')}</span>
+              <p className="c">{t('actuality.hiddenFor', { days: daysLabel(card.actuality.days, t) })}</p>
+            </>
+          ) : card.live ? (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <span className="bd bd-ok"><Ic name="check" />{t('showcase.statusLive')}{highlighted ? ` · ${t('showcase.statusNow')}` : ''}</span>
+              {card.actuality?.due && <span className="bd bd-warn"><Ic name="clock" />{t('actuality.confirmDue')}</span>}
+            </div>
+          ) : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>}
         </div>
       </button>
       {missing.length > 0 && (
@@ -295,14 +321,18 @@ function SourceSheet({ onClose, onManual }: { onClose: () => void; onManual: () 
 
 // The editor and the card screen, opened from the address: `new=1`, `draft=`, `edit=`, `point=`, `card=`; `from=` a
 // proposed ChangeSet when the Seller returns from the review page.
-function Overlays({ cards, drafts, seller, commentTranslationEnabled, override, onClose, onSaved, onReload, go }: {
+function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTranslationEnabled, override, onClose, onSaved, onReconfirmed, onRefresh, onReload, go }: {
   cards: SellerCard[];
+  dueCards: SellerCard[];
+  archivedCards: SellerCard[];
   drafts: OfferDraftView[];
   seller: SellerView | null;
   commentTranslationEnabled: boolean;
   override: { key: string; initial: CardEditorInitial } | null;
   onClose: () => void;
   onSaved: (kind: 'draftSaved' | 'draftDeleted') => void;
+  onReconfirmed: () => void;
+  onRefresh: () => void;
   onReload: (values: CardValues, photoIds: string[]) => void;
   go: (query: string) => void;
 }) {
@@ -363,7 +393,9 @@ function Overlays({ cards, drafts, seller, commentTranslationEnabled, override, 
       />
     );
   }
-  if (screenCard) return <CardScreen card={screenCard} onClose={onClose} go={go} />;
+  if (screenCard) return <CardScreen card={screenCard} onClose={onClose} go={go} onRefresh={onRefresh} />;
+  if (params.get('actuality') === '1') return <ActualityScreen due={dueCards} onClose={onClose} onDone={onReconfirmed} go={go} />;
+  if (params.get('tab') === 'archive') return <ArchiveScreen cards={archivedCards} onClose={onClose} go={go} />;
   return null;
 }
 
@@ -400,9 +432,16 @@ function RemovedCardScreen({ card, title, onClose, go }: { card: SellerCard; tit
 
 // AI-S15 · Card: one point — photo, status, price and actions (Published / Off); several points — every point with its
 // price and state (Points); change everywhere, in one point, or switch a point on or off.
-function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => void; go: (query: string) => void }) {
-  const { t } = useI18n();
+function CardScreen({ card, onClose, go, onRefresh }: { card: SellerCard; onClose: () => void; go: (query: string) => void; onRefresh: () => void }) {
+  const { locale, t } = useI18n();
   const router = useRouter();
+  const reconfirm = useReconfirm();
+  const [reconfirmed, setReconfirmed] = useState(false);
+  useEffect(() => {
+    if (!reconfirmed) return;
+    const timer = window.setTimeout(() => setReconfirmed(false), TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [reconfirmed]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
@@ -437,6 +476,30 @@ function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => vo
 
   if (card.removal) return <RemovedCardScreen card={card} title={title} onClose={onClose} go={go} />;
 
+  // offer-actuality (S15): the task badge or the hidden / archived state, and «Подтвердить актуальность».
+  const actuality = card.actuality;
+  const actualityStatus = actuality && (actuality.archived ? (
+    <>
+      <span className="bd bd-n"><Ic name="clock" />{t('archive.status')}</span>
+      <p className="c">{t('archive.since', { date: new Intl.DateTimeFormat(locale === 'kk' ? 'kk-KZ' : 'ru-KZ', { day: 'numeric', month: 'long' }).format(new Date(actuality.lastConfirmedAt)) })}</p>
+    </>
+  ) : actuality.stage === 'hidden' ? (
+    <>
+      <span className="bd bd-warn"><Ic name="eyeoff" />{t('actuality.needConfirm')}</span>
+      <p className="c">{t('actuality.hiddenFor', { days: daysLabel(actuality.days, t) })}</p>
+    </>
+  ) : actuality.due ? <span className="bd bd-warn"><Ic name="clock" />{t('actuality.confirmDue')}</span> : null);
+  async function confirmActuality() {
+    if (await reconfirm.confirm([card.cardId])) {
+      setReconfirmed(true);
+      onRefresh();
+    }
+  }
+  const reconfirmError = reconfirm.error && (
+    <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12 }}><p className="c" style={{ color: 'var(--ink)' }}>{t('actuality.confirmError')}</p></div>
+  );
+  const reconfirmToast = reconfirmed && <Toast>{t('actuality.confirmed')}</Toast>;
+
   if (card.offers.length === 1) {
     const offer = card.offers[0]!;
     const off = offer.status !== 'active';
@@ -447,11 +510,16 @@ function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => vo
           <div className={`img${cover ? '' : ' fb'}`} style={{ height: 170, borderRadius: 20, opacity: off ? 0.55 : undefined }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- owner-only photo route */}
             {cover ? <img src={photoUrl(cover.id, 'display')} alt="" /> : <Ic name="logo" />}
+            <FreshPlaque card={card} />
           </div>
-          {badge(offer)}
+          {actuality?.archived || actuality?.stage === 'hidden'
+            // Hidden or archived: the actuality state replaces «На витрине» (buyers do not see the card).
+            ? actualityStatus
+            : <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{badge(offer)}{actuality?.due && actualityStatus}</div>}
           {offer.price && <div><span className="pr-lg">{formatAmount(offer.price.amount)} ₸</span>{offer.price.unit && <> <span className="c2">/ {offer.price.unit}</span></>}</div>}
           <p className="c">{offer.location.name}</p>
           {errorBanner}
+          {reconfirmError}
           {off ? (
             <>
               <div className="banner gray" style={{ padding: 12, borderRadius: 14 }}><p className="c c2">{t('cardScreen.offText')}</p></div>
@@ -460,7 +528,10 @@ function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => vo
             </>
           ) : (
             <div className="card" style={{ gap: 0, padding: '0 12px' }}>
-              <button type="button" className="li" onClick={() => go(`edit=${card.cardId}`)} style={{ background: 'transparent', border: 0 }}>
+              <button type="button" className="li" onClick={() => void confirmActuality()} disabled={reconfirm.busy} style={{ background: 'transparent', border: 0 }}>
+                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t('actuality.confirm')}</div><p className="c">{t('actuality.confirmHint')}</p></div>
+              </button>
+              <button type="button" className="li" onClick={() => go(`edit=${card.cardId}`)} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
                 <Ic name="pencil" className="c2" /><div className="mid"><div className="ts">{t('cardScreen.edit')}</div></div>
               </button>
               <button type="button" className="li" onClick={() => void toggle(offer)} disabled={busyId !== null} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
@@ -469,6 +540,7 @@ function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => vo
             </div>
           )}
         </main>
+        {reconfirmToast}
       </Phone>
     );
   }
@@ -480,11 +552,19 @@ function CardScreen({ card, onClose, go }: { card: SellerCard; onClose: () => vo
         <div className={`img${cover ? '' : ' fb'}`} style={{ height: 76, borderRadius: 16, flex: 'none' }}>
           {/* eslint-disable-next-line @next/next/no-img-element -- owner-only photo route */}
           {cover ? <img src={photoUrl(cover.id, 'display')} alt="" /> : <Ic name="logo" />}
+          <FreshPlaque card={card} />
         </div>
+        {actualityStatus}
+        {actuality && (
+          <button type="button" className="btn btn-p w" onClick={() => void confirmActuality()} disabled={reconfirm.busy}>
+            <Ic name="check" className="sm" />{t('actuality.confirm')}
+          </button>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="button" className="btn btn-o sm" style={{ flex: 1 }} onClick={() => go(`edit=${card.cardId}`)}><Ic name="pencil" className="sm" />{t('cardScreen.editAll')}</button>
         </div>
         {errorBanner}
+        {reconfirmError}
         <h2 className="ov">{t('cardScreen.inPoints', { count: card.offers.length })}</h2>
         {card.offers.map((offer) => (
           <div key={offer.id} className="card" style={{ gap: 8 }}>

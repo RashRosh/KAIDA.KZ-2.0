@@ -14,6 +14,7 @@ import { searchQuerySchema, type SearchResponse } from '../contracts/search.cont
 import { findOffersByProductOrTitleWords } from '../infrastructure/search.repository';
 import { queryWords } from '../../offers/title/offer-title';
 import { rankSearchOfferCandidates } from '../ranking/search-ranking';
+import { ageingSince, buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import type { Locale } from '../../../i18n/config';
 
 type SearchLifecycleOptions = {
@@ -48,7 +49,8 @@ export async function searchOffers(
   const candidates = locale === undefined && commentTranslationEnabled === undefined
     ? await findOffersByProductOrTitleWords(db, match, cutoff)
     : await findOffersByProductOrTitleWords(db, match, cutoff, locale, commentTranslationEnabled);
-  const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation)
-    .map(({ offer }) => offer);
+  const policy = readActualityPolicy();
+  const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation, ageingSince(now, policy))
+    .map(({ offer, lastConfirmedAt }) => ({ ...offer, actuality: buyerActuality(lastConfirmedAt, now, policy) }));
   return { query, offers };
 }
