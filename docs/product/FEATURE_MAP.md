@@ -62,11 +62,11 @@ Seller Input
 | S22 | Auth | Test OTP заменяется real SMS delivery | S2 | До публичного запуска | PLANNED |
 | S23 | Notifications | Buyer получает уведомление о новом Offer интересующего Product | S14 | После MVP | PLANNED |
 | S24 | Recommendations | Детерминированная personalized feed без ML | S14 + data | После MVP | PLANNED |
-| S25 | Monetization | Policy ограничивает active Offers | S5 | После MVP | PLANNED |
-| S26 | Subscription | Subscription меняет лимиты/возможности Seller | S25 | После MVP | PLANNED |
-| S27 | Convenience | Paid plan открывает ускоренный bulk input | S20, S26 | После MVP | PLANNED |
-| S28 | Promotion | Seller создаёт promotion для Offer | S9 | После MVP | PLANNED |
-| S29 | Promotion | Promoted Offer получает маркированный дополнительный охват | S28 | После MVP | PLANNED |
+| S25 | Monetization | Policy ограничивает active Offers | S5 | Сразу после MVP (stage 12) | PLANNED |
+| S26 | Subscription | Subscription меняет лимиты/возможности Seller | S25 | Сразу после MVP (stage 12) | PLANNED |
+| S27 | Convenience | Paid plan открывает ускоренный bulk input | S20, S26 | Сразу после MVP (stage 12) | PLANNED |
+| S28 | Promotion | Seller создаёт promotion для Offer | S9 | Сразу после MVP (stage 12) | PLANNED |
+| S29 | Promotion | Promoted Offer получает маркированный дополнительный охват | S28 | Сразу после MVP (stage 12) | PLANNED |
 | S30 | Recommendations | Behavioral ranking учитывает реальные interactions | S24 + data | Позднее | PLANNED |
 | S31 | Discovery | Редкость товара влияет на показ | data | Позднее | PLANNED |
 | S32 | Trust | ИИ-модерация проверяет новые карточки и правки до публикации; спорное — человеку | S17 | После AI Input | PLANNED |
