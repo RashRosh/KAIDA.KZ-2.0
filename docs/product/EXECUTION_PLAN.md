@@ -25,13 +25,13 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.33-seller-showcase-editor`;
-- checkpoint commit: `cd59bfb` (merge PR #56, merged-main CI green); в него входят пункты 1–3 этапа 1
-  (`offer-photos`, `point-contacts-hours` — PR #53; `seller-showcase-editor` — PR #56);
+- tag: `v0.0.34-operator-post-check`;
+- checkpoint commit: `f87ccb4` (merge PR #58, merged-main CI green); в него входят пункты 1–4 этапа 1
+  (`offer-photos`, `point-contacts-hours` — PR #53; `seller-showcase-editor` — PR #56; `operator-post-check` — PR #58);
 - после Pass 3 закрыты: `localization-foundation` (`v0.0.27`), `catalog-localization` (`v0.0.28`),
   `seller-comment-translation` (`v0.0.29`, переводчик выключен до переезда на свой сервер), `seller-cabinet-overview`
   (`v0.0.30`), `offer-price-unit` (`v0.0.31`), `seller-offer-editor` (`v0.0.32`, единый ручной редактор),
-  этап 1 пункты 1–3 (`v0.0.33`);
+  этап 1 пункты 1–3 (`v0.0.33`), пункт 4 `operator-post-check` (`v0.0.34`);
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading
   Points Workspace (#36), Buyer interest guest visibility (`v0.0.26`).
 
