@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 
 // Building blocks of the accepted mockup (docs/product/mockup/seller-ai-first-rev1): the same class names as its
@@ -214,13 +214,21 @@ export function Thumb({ photoUrl, size = 56, radius = 10 }: { photoUrl?: string 
 // Signed-out seller page (no frame in the mockup): the empty-state composition of AI-S01 with the sign-in action.
 export function LoginRequired() {
   const { t } = useI18n();
+  // actuality-reminders: the reminder link survives sign-in; see the login page.
+  const [loginHref, setLoginHref] = useState('/login');
+  useEffect(() => {
+    const here = `${window.location.pathname}${window.location.search}`;
+    if (here !== '/seller?actuality=1') return;
+    const timer = window.setTimeout(() => setLoginHref(`/login?next=${encodeURIComponent(here)}`), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   return (
     <main className="body" style={{ justifyContent: 'center', gap: 20, padding: '24px 20px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'center' }}>
         <h2 className="h1">{t('seller.loginRequired')}</h2>
         <p className="t c2">{t('seller.loginHelp')}</p>
       </div>
-      <Link className="btn btn-p lg w" href="/login">{t('auth.signIn')}</Link>
+      <Link className="btn btn-p lg w" href={loginHref}>{t('auth.signIn')}</Link>
     </main>
   );
 }
