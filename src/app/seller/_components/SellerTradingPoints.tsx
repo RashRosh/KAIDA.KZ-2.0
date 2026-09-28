@@ -53,16 +53,31 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [hoursNeedsReview, setHoursNeedsReview] = useState(true);
   const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
 
-  const loadDetails = useCallback(async () => {
-    try {
-      const response = await fetch('/api/seller/points/details', { cache: 'no-store' });
-      if (!response.ok) return;
-      const data = await response.json() as { points: PointDetailsView[] };
-      setDetails(new Map(data.points.map((point) => [point.locationId, point])));
-    } catch {
-      // The cards still work without contacts and hours; the form falls back to the template.
-    }
+  // Whether contacts and hours have arrived: a form opened before that loads them itself instead of the template.
+  const [detailsLoaded, setDetailsLoaded] = useState(false);
+  const loadDetails = useCallback(() => {
+    const load = (async () => {
+      try {
+        const response = await fetch('/api/seller/points/details', { cache: 'no-store' });
+        if (!response.ok) return null;
+        const data = await response.json() as { points: PointDetailsView[] };
+        const loaded = new Map(data.points.map((point) => [point.locationId, point]));
+        setDetails(loaded);
+        setDetailsLoaded(true);
+        return loaded;
+      } catch {
+        // The cards still work without contacts and hours; the form falls back to the template.
+        return null;
+      }
+    })();
+    return load;
   }, []);
+
+  async function detailsOf(locationId: string | undefined) {
+    if (!locationId) return undefined;
+    if (details.has(locationId) || detailsLoaded) return details.get(locationId);
+    return (await loadDetails())?.get(locationId);
+  }
   // AI-S12 · Points · List: how many cards each point shows («· 8 карточек»).
   const [cardCounts, setCardCounts] = useState<Map<string, number>>(new Map());
   const loadCardCounts = useCallback(async () => {
@@ -104,22 +119,23 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setError('');
   }
 
-  function beginAdd() {
+  async function beginAdd() {
     resetForm();
     // point-contacts-hours §2: a new point starts with the latest point's contacts and hours.
     const latest = locations.at(-1);
-    fillDetails(latest ? details.get(latest.id) : undefined);
-    setCopiedFrom(latest && details.has(latest.id) ? latest.name : null);
+    const source = await detailsOf(latest?.id);
+    fillDetails(source);
+    setCopiedFrom(latest && source ? latest.name : null);
     setStatus('');
     setMode('add');
   }
 
-  function beginEdit(location: LocationView) {
+  async function beginEdit(location: LocationView) {
     setName(location.name);
     setType(location.type);
     setAddressText(location.addressText);
     setEditingId(location.id);
-    fillDetails(details.get(location.id));
+    fillDetails(await detailsOf(location.id));
     setCopiedFrom(null);
     setError('');
     setStatus('');
