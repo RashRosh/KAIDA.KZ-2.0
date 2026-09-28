@@ -6,7 +6,7 @@ import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
 import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
 import { OpeningHoursFields, PointContactStatus, PointContactsFields, type ContactsDraft } from './PointDetailsFields';
-import { Bar, Ic, Nav, Phone, Toast } from '../_kaida/ui';
+import { Bar, Ic, Nav, Phone, shakeErrors, Toast, TOAST_MS } from '../_kaida/ui';
 import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
@@ -84,6 +84,12 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     return () => window.clearTimeout(timer);
   }, [seller, locationCount, loadDetails, loadCardCounts]);
 
+  useEffect(() => {
+    if (!status) return;
+    const timer = window.setTimeout(() => setStatus(''), TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [status]);
+
   function fillDetails(source: PointDetailsView | undefined) {
     setContacts({ phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' });
     setHours(source?.openingHours ?? templateOpeningHours());
@@ -127,6 +133,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    shakeErrors();
     setError('');
     setStatus('');
     const normalizedName = name.trim();

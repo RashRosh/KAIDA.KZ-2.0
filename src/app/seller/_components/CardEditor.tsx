@@ -11,7 +11,7 @@ import type { SellerChangeSetView } from '../../../modules/seller-input/contract
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { formatAmount } from '../../_components/OfferCard';
-import { Bar, Check, ErrorLine, Ic, Phone, Radio, Sheet, Toast } from '../_kaida/ui';
+import { Bar, Check, ErrorLine, Ic, Phone, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';
 import { pluralKey, type SellerCard } from './card-model';
@@ -259,6 +259,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
 
   async function send(resetPrice = false) {
     if (busyRef.current) return;
+    shakeErrors();
     setAttempted(true);
     const { errors: found, payload } = validateCard(values, mode.kind, locations.length);
     const pointPriceProblem = isPoint && !resetPrice ? priceError(values.amount) : null;
@@ -358,7 +359,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
       setNewPoint({ name: '', addressText: '', type: 'shop', sellerName: '' });
       setView('form');
       setPointAdded(true);
-      window.setTimeout(() => setPointAdded(false), 4000);
+      window.setTimeout(() => setPointAdded(false), TOAST_MS);
     } catch {
       busyRef.current = false;
       setBusy(null);

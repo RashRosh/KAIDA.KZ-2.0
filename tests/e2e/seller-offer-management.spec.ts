@@ -79,6 +79,8 @@ async function search(page: import('@playwright/test').Page) {
 }
 
 test('Seller manages an existing Offer only after explicit confirmation and buyer Search follows committed state', async ({ page }, testInfo) => {
+  // A long end-to-end flow (create, edit, off, on, search after each step): ~25 s alone, so the default 30 s is too tight.
+  test.setTimeout(60_000);
   const phone = phoneFor(testInfo.project.name);
   const sellerName = `S5 E2E ${testInfo.project.name}`;
   const sellerOfferCard = page.getByRole('article').filter({ has: page.getByText(sellerName, { exact: true }) });

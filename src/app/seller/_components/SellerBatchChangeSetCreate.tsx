@@ -7,7 +7,7 @@ import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.co
 import type { SellerChangeSetView } from '@/modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { useI18n } from '@/i18n/I18nProvider';
-import { Ic } from '../_kaida/ui';
+import { Ic, shakeErrors } from '../_kaida/ui';
 import { PriceUnitField, emptyPriceUnitDraft, priceUnitDraftFrom, priceUnitFromDraft, type PriceUnitDraft } from './PriceUnitField';
 
 type Action = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
@@ -116,6 +116,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    shakeErrors();
     setError('');
     const missingPrice = items.some((item) =>
       (item.action === 'create_offer' || item.action === 'update_offer') && item.priceAmount.trim() === '');

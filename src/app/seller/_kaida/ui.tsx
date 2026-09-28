@@ -2,11 +2,44 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 
 // Building blocks of the accepted mockup (docs/product/mockup/seller-ai-first-rev1): the same class names as its
 // kaida.css, so every screen renders exactly as its frame.
+
+// Motion page · «out: 200 ms · ease-in»: React removes a closed sheet or toast at once, so an inert copy stays in its
+// place for the exit animation (.leaving in kaida-app.css). Works for every caller, whatever closes the element.
+const LEAVE_MS = 200;
+function useLeaveAnimation(ref: React.RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const node = ref.current;
+    const parent = node?.parentElement;
+    return () => {
+      if (!node || !parent?.isConnected) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const ghost = node.cloneNode(true) as HTMLElement;
+      ghost.classList.add('leaving');
+      ghost.removeAttribute('id');
+      ghost.removeAttribute('role');
+      ghost.setAttribute('aria-hidden', 'true');
+      ghost.setAttribute('inert', '');
+      parent.insertBefore(ghost, node.nextSibling);
+      ghost.scrollTop = node.scrollTop;
+      window.setTimeout(() => ghost.remove(), LEAVE_MS);
+    };
+  }, [ref]);
+}
+
+// Motion page · «Ошибка поля … Повторяется при каждой новой попытке отправить»: call at the start of a submit attempt;
+// messages already on screen shake again, new ones shake as they appear.
+export function shakeErrors() {
+  for (const element of document.querySelectorAll<HTMLElement>('.kaida .emsg, .kaida .banner.err')) {
+    element.style.animation = 'none';
+    void element.offsetWidth;
+    element.style.animation = '';
+  }
+}
 
 export function Ic({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
   return <span className={`ic i-${name}${className ? ` ${className}` : ''}`} style={style} aria-hidden="true" />;
@@ -73,9 +106,14 @@ export function Nav({ active }: { active: NavSection }) {
   );
 }
 
+// Motion page · «авто через 4 с»: callers hide a toast after TOAST_MS.
+export const TOAST_MS = 4000;
+
 export function Toast({ children, bottom }: { children: React.ReactNode; bottom?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLeaveAnimation(ref);
   return (
-    <div className="toast" role="status" style={bottom ? { bottom } : undefined}>
+    <div ref={ref} className="toast" role="status" style={bottom ? { bottom } : undefined}>
       <Ic name="check" style={{ color: '#7ee29a' }} /><span style={{ flex: 1 }}>{children}</span>
     </div>
   );
@@ -94,6 +132,9 @@ export function Sheet({ title, onClose, role = 'dialog', closeButton = true, chi
 }) {
   const ids = useId();
   const ref = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
+  useLeaveAnimation(ref);
+  useLeaveAnimation(scrimRef);
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; });
   useEffect(() => {
@@ -114,7 +155,7 @@ export function Sheet({ title, onClose, role = 'dialog', closeButton = true, chi
   }, []);
   return (
     <>
-      <div className="scrim" onClick={onClose} />
+      <div ref={scrimRef} className="scrim" onClick={onClose} />
       <div ref={ref} className="sheet" role={role} aria-modal="true" aria-labelledby={`${ids}-t`} aria-describedby={describedBy}>
         <div className="grab" />
         {closeButton ? (
