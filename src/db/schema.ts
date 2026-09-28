@@ -19,3 +19,5 @@ export { contactVerificationChallenges } from '../modules/identity/db/contact-ve
 export { offerDrafts } from '../modules/offers/db/offer-drafts.table';
 export { offerCardRemovals } from '../modules/moderation/db/offer-card-removals.table';
 export { operatorFeedMarks } from '../modules/moderation/db/operator-feed-marks.table';
+export { pushSubscriptions } from '../modules/reminders/db/push-subscriptions.table';
+export { actualityRemindersSent } from '../modules/reminders/db/actuality-reminders-sent.table';

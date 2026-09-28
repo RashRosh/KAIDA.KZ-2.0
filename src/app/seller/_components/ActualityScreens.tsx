@@ -7,6 +7,7 @@ import { actualityText } from '../../_components/ActualityBadge';
 import { formatAmount } from '../../_components/OfferCard';
 import { Bar, Ic, Phone, Thumb } from '../_kaida/ui';
 import { pluralKey, type SellerCard } from './card-model';
+import { PushToggle } from './PushToggle';
 
 // offer-actuality (S01 task block, S15 plaque, S16 «Актуальность», S17 «Архив»): the Seller confirms that cards are
 // still true; one request confirms one or many cards and applies at once (no review page).
@@ -56,12 +57,13 @@ export function ActualityTask({ due, onCheck }: { due: SellerCard[]; onCheck: ()
   return (
     <div className="banner warn" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14 }} data-testid="actuality-task">
       <Ic name="clock" style={{ color: 'var(--warning)' }} />
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div className="ts">{t('actuality.taskTitle')}</div>
         <p className="c c2">
           {t(pluralKey('actuality.taskCount', due.length), { count: due.length })}
           {hidden > 0 ? ` · ${t(pluralKey('actuality.taskHidden', hidden), { count: hidden })}` : ''}
         </p>
+        <PushToggle variant="task" />
       </div>
       <button type="button" className="btn btn-o sm" onClick={onCheck}>{t('actuality.check')}</button>
     </div>

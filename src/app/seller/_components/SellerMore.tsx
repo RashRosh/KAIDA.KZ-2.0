@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { Bar, Ic, LoginRequired, Nav, Phone, Radio, Sheet } from '../_kaida/ui';
+import { forgetPushOnThisDevice } from '../../_components/push-client';
+import { PushToggle } from './PushToggle';
 
 function formatPhone(e164: string) {
   const digits = e164.replace(/\D/g, '');
@@ -33,6 +35,7 @@ export function SellerMore() {
   async function logout() {
     setLoggingOut(true);
     try {
+      await forgetPushOnThisDevice();
       const response = await fetch('/api/auth/logout', { method: 'POST' });
       if (response.ok) {
         router.push('/');
@@ -61,6 +64,7 @@ export function SellerMore() {
               <Ic name="layers" className="c2" /><div className="mid"><div className="ts">{t('cabinet.batch')}</div></div><Ic name="right" className="c2" />
             </Link>
           </div>
+          <PushToggle variant="row" />
           <div className="card" style={{ gap: 0, padding: '0 12px' }}>
             <button type="button" className="li" onClick={() => { setChoice(locale); setLanguageOpen(true); }} aria-haspopup="dialog">
               <Ic name="globe" className="c2" /><div className="mid"><div className="ts">{t('more.language')}</div><p className="c">{t(locale === 'ru' ? 'language.ru' : 'language.kk')}</p></div><Ic name="right" className="c2" />

@@ -20,6 +20,7 @@
     { "idx": 15, "version": "7", "when": 1789833600000, "tag": "0015_point_contacts_hours", "breakpoints": true },
     { "idx": 16, "version": "7", "when": 1789920000000, "tag": "0016_seller_showcase_cards", "breakpoints": true },
     { "idx": 17, "version": "7", "when": 1790006400000, "tag": "0017_operator_post_check", "breakpoints": true },
-    { "idx": 18, "version": "7", "when": 1790092800000, "tag": "0018_offer_actuality", "breakpoints": true }
+    { "idx": 18, "version": "7", "when": 1790092800000, "tag": "0018_offer_actuality", "breakpoints": true },
+    { "idx": 19, "version": "7", "when": 1790179200000, "tag": "0019_actuality_reminders", "breakpoints": true }
   ]
 }

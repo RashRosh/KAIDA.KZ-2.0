@@ -3,6 +3,7 @@
 import { RefObject, useState } from 'react';
 import styles from './AuthStatus.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
+import { forgetPushOnThisDevice } from './push-client';
 
 type User = { id: string; phone: string };
 
@@ -37,6 +38,7 @@ export function AuthStatus({ user, loginOpen, loginTriggerRef, onLogin, onLogged
   async function handleLogout() {
     setLoggingOut(true);
     try {
+      await forgetPushOnThisDevice();
       const response = await fetch('/api/auth/logout', { method: 'POST' });
       if (response.ok) onLoggedOut();
     } finally {

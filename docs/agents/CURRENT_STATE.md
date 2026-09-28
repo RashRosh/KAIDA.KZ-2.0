@@ -4,39 +4,42 @@
 `docs/product/EXECUTION_PLAN.md`. Перед работой перепроверь git/GitHub: этот файл может устареть.
 
 - Проверено: 2026-09-28.
-- `main`: `8017693` (merge PR #59 — анимации продавца по странице Motion макета).
-- Последний checkpoint tag: `v0.0.34-operator-post-check` на `f87ccb4` (пункты 1–4 этапа 1).
-- Текущий slice: этап 1, пункт 5а «Актуальность 2 / 7 / 14» — `docs/slices/offer-actuality/SLICE_CONTRACT.md`
-  (APPROVED 2026-09-28), ветка `claude/offer-actuality`. Пункт 5б (напоминания) —
-  `docs/slices/actuality-reminders/SLICE_CONTRACT.md`, APPROVED, начинать после 5а.
-- Миграции: последняя `0018_offer_actuality` (действие `reconfirm_offer` в двух CHECK таблицы `seller_change_items`).
+- `main`: `4f9b1df` (merge PR #60 — этап 1, пункт 5а `offer-actuality`); merged-main CI ✓.
+- Последний checkpoint tag: `v0.0.35-offer-actuality` на `4f9b1df` (пункты 1–4 и 5а этапа 1, анимации PR #59).
+- Текущий slice: этап 1, пункт 5б «Напоминания об актуальности» —
+  `docs/slices/actuality-reminders/SLICE_CONTRACT.md` (APPROVED 2026-09-28), ветка `claude/actuality-reminders`.
+- Миграции: последняя `0019_actuality_reminders` (таблицы `push_subscriptions`, `actuality_reminders_sent`).
 - Настройки сервера: `OPERATOR_PHONES`; `ACTUALITY_DUE_HOURS` 24, `ACTUALITY_AGEING_HOURS` 48,
-  `OFFER_VALIDITY_PERIOD_HOURS` 168, `ACTUALITY_ARCHIVE_HOURS` 336.
+  `OFFER_VALIDITY_PERIOD_HOURS` 168, `ACTUALITY_ARCHIVE_HOURS` 336; `ACTUALITY_REMINDER_HOURS` `24,144`;
+  `WEB_PUSH_VAPID_PUBLIC_KEY` / `WEB_PUSH_VAPID_PRIVATE_KEY` / `WEB_PUSH_SUBJECT` (пусто = push выключен);
+  `INTERNAL_JOB_SECRET` (ручной запуск рассылки).
 
 # Current contract (только текущая задача)
 
-Возраст точки = now − `last_confirmed_at`: < 48 ч свежая, 48–168 ч стареет (ниже в выдаче), ≥ 168 ч скрыта от
-покупателей, ≥ 336 ч в архиве (вычисляется, ничего не удаляется). Покупатель: плашка «Сегодня» … «6 дней», свежие выше
-в поиске и «Рядом». Продавец: блок «Пора подтвердить актуальность» (≥ 24 ч), «Нужно подтвердить», экран
-«Актуальность» с «Всё актуально», «Подтвердить актуальность» на карточке, «Архив · N». Подтверждение — ChangeSet
-`reconfirm_offer`, применяется сразу, без экрана проверки.
+Два push-напоминания продавцу: на 24 ч («Подтвердите актуальность, иначе завтра карточки опустятся в поиске») и на
+144 ч («Завтра карточки пропадут из поиска»), одно уведомление на продавца и момент, один раз за цикл подтверждения
+(журнал `actuality_reminders_sent`), без отправки 21:00–09:00 по Алматы. Канал — push браузера; без него остаётся блок
+на «Моей витрине». Кнопка «Включить уведомления» — в блоке задачи и на «Ещё»; разрешение браузер спрашивает только
+после нажатия. Нажатие на уведомление открывает `/seller?actuality=1`; без входа — вход, затем список.
 
-Отступление от текста контракта: из архива карточка открывается на своём экране («Подтвердить актуальность» и
-«Изменить»), потому что редактор без правок отвечает «Изменений нет».
+Решение по ходу работы: возврат после входа сделан только для `/seller?actuality=1` — остальные входы по-прежнему
+ведут на главную (закрытые контракты входа продавца и 8 E2E-тестов опираются на это).
 
-# Completed (ветка `claude/offer-actuality`)
+# Completed (ветка `claude/actuality-reminders`)
 
-- Правило возраста — `src/modules/offers/actuality/actuality.ts` (пороги из настроек).
-- Покупатель: `actuality` в выдаче, «Рядом» и на странице карточки; ярус «свежие выше» в `search-ranking` и
-  `nearby-discovery`; плашка `src/app/_components/ActualityBadge.tsx` (цвета `fr0…fr6` макета).
-- Продавец: `actuality` в `/api/seller/offers`, `POST /api/seller/actuality/confirm`, экраны в
-  `src/app/seller/_components/ActualityScreens.tsx`, статусы в `SellerShowcase`.
-- Тесты: unit `offer-actuality` (5), integration `offer-actuality` (3), E2E `offer-actuality` (mobile).
+- Модуль `src/modules/reminders`: настройки, журнал и подписки, задача `runActualityReminders` (блокировка на время
+  запуска, группировка по продавцу, удаление «мёртвых» подписок, повтор при сбое), отправка через `web-push`.
+- Запуск: каждые 15 минут из `src/instrumentation.ts` (только при ключах); вручную — `POST
+  /api/internal/actuality-reminders/run` с `Authorization: Bearer <INTERNAL_JOB_SECRET>`.
+- Браузер: `public/sw.js`, `src/app/_components/push-client.ts`, кнопка `PushToggle` (блок задачи и «Ещё»), выход
+  удаляет подписку устройства (`SellerMore`, `AuthStatus`).
+- Тесты: unit `actuality-reminders` (5), integration `actuality-reminders` (4), E2E `actuality-reminders` (mobile +
+  desktop, тестовая пара ключей в `playwright.config.ts`). Настоящая доставка — только ручная приёмка.
 
 # Remaining
 
-1. Полный `pnpm verify`, PR по поручению PO, CI, ручная приёмка PO, merge (делает PO), checkpoint tag.
-2. Пункт 5б — напоминания (push + блок).
+1. Полный `pnpm verify`, PR по поручению PO, CI, ручная приёмка PO (нужны ключи push в `.env`), merge (PO), tag.
+2. Этап 1 закрыт после 5б — следующий шаг по `EXECUTION_PLAN.md`.
 
 # Known problems / conflicts
 
@@ -53,7 +56,7 @@
 
 # Next action
 
-Полный verify пункта 5а; спросить PO про PR.
+Полный verify пункта 5б; спросить PO про PR.
 
 # Do not regress
 
