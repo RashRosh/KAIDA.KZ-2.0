@@ -50,13 +50,63 @@ body{margin:0}
 .mo .d-row{animation:lp-row 3.2s var(--ease-out) infinite both}
 .mo .d-row:nth-child(2){animation-delay:.4s}.mo .d-row:nth-child(3){animation-delay:.8s}
 .mo .d-new{animation:lp-new 3.2s var(--ease-out) infinite}
+
+/* drag-to-reorder demo: 4.8s cycle */
+.dr-row{position:relative;width:286px;height:80px}
+.dr-t{position:absolute;top:8px;width:64px;height:64px;border-radius:10px}
+.dr-t .cv.star{position:absolute;left:4px;top:4px}
+@keyframes dr-row{0%{opacity:0}4%,90%{opacity:1}96%,100%{opacity:0}}
+@keyframes dr-c{0%,14%{transform:none;box-shadow:0 0 0 0 #19161b00}20%,24%{transform:scale(1.08);box-shadow:0 12px 24px -6px #19161b55;animation-timing-function:cubic-bezier(.65,0,.35,1)}52%{transform:translate(-148px,-4px) scale(1.08);box-shadow:0 12px 24px -6px #19161b55;animation-timing-function:cubic-bezier(.33,1,.68,1)}58%,100%{transform:translate(-148px,0);box-shadow:0 0 0 0 #19161b00}}
+@keyframes dr-f{0%,8%{opacity:0;transform:scale(.8)}11%{opacity:1;transform:scale(1)}20%,24%{opacity:1;transform:scale(1);animation-timing-function:cubic-bezier(.65,0,.35,1)}52%{opacity:1;transform:translate(-148px,-4px)}57%,100%{opacity:0;transform:translate(-148px,-4px)}}
+@keyframes dr-ring{0%,10%{transform:scale(.4);opacity:0}12%{opacity:.9}20%{transform:scale(1);opacity:.9}24%,100%{transform:scale(1.3);opacity:0}}
+@keyframes dr-b{0%,36%{transform:none;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}42%,100%{transform:translateX(74px)}}
+@keyframes dr-a{0%,44%{transform:none;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}50%,100%{transform:translateX(74px)}}
+@keyframes dr-sa{0%,54%{opacity:1;transform:none}58%,100%{opacity:0;transform:scale(.6)}}
+@keyframes dr-sc{0%,58%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}64%,100%{opacity:1;transform:none}}
+.mo .d-drow{animation:dr-row 4.8s linear infinite}
+.mo .d-dc{z-index:2;animation:dr-c 4.8s linear infinite}
+.mo .d-db{animation:dr-b 4.8s linear infinite}
+.mo .d-da{animation:dr-a 4.8s linear infinite}
+.mo .d-dsa{animation:dr-sa 4.8s var(--ease-out) infinite}
+.mo .d-dsc{animation:dr-sc 4.8s linear infinite}
+.mo .d-df{position:absolute;left:161px;top:22px;width:36px;height:36px;border-radius:18px;background:#19161b40;border:2px solid #fff;z-index:3;pointer-events:none;animation:dr-f 4.8s linear infinite}
+.mo .d-df::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--primary);animation:dr-ring 4.8s linear infinite}
+
+/* tap micro-menu demo: 5.2s cycle */
+.mm-row{position:relative;width:286px;height:136px}
+.mm-pop{position:absolute;top:84px;left:133.5px;display:inline-flex;background:#302c33;border-radius:12px;box-shadow:var(--shadow-md);padding:2px;transform-origin:50% 0}
+.mm-pop::before{content:"";position:absolute;top:-6px;left:50%;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom-color:#302c33}
+.mm-pop i{width:44px;height:36px;display:flex;align-items:center;justify-content:center;color:#fff;border-radius:10px}
+.mm-pop .sep{width:1px;background:#ffffff26;margin:6px 0}
+@keyframes mm-row{0%{opacity:0}3%,90%{opacity:1}96%,100%{opacity:0}}
+@keyframes mm-c{0%,15%{transform:none;box-shadow:0 0 0 0 #9900cc00}18%,38%{transform:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}46%,62%{transform:translateX(-74px);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}70%,80%{transform:translateX(-148px);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary)}84%,100%{transform:translateX(-148px);box-shadow:0 0 0 0 #9900cc00}}
+@keyframes mm-b{0%,38%{transform:none;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}46%,100%{transform:translateX(74px)}}
+@keyframes mm-a{0%,62%{transform:none;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}70%,100%{transform:translateX(74px)}}
+@keyframes mm-pop{0%,16%{opacity:0;transform:translateY(-4px) scale(.9);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}22%,38%{opacity:1;transform:none;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}46%,62%{opacity:1;transform:translateX(-74px);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}70%,80%{opacity:1;transform:translateX(-148px);animation-timing-function:cubic-bezier(.32,0,.67,0)}84%,100%{opacity:0;transform:translateX(-148px) scale(.96)}}
+@keyframes mm-left{0%,33%{background:#ffffff00;opacity:1}35%,38%{background:#ffffff33}40%,57%{background:#ffffff00}59%,62%{background:#ffffff33}64%,69%{background:#ffffff00;opacity:1}72%,100%{opacity:.35}}
+@keyframes mm-f{0%,8%{opacity:0;transform:scale(.8)}10%{opacity:1;transform:none}13%{transform:scale(.85)}16%{transform:none;animation-timing-function:cubic-bezier(.65,0,.35,1)}28%,33%{transform:translate(-22px,59px)}35%{transform:translate(-22px,59px) scale(.85)}38%{transform:translate(-22px,59px);animation-timing-function:cubic-bezier(.65,0,.35,1)}50%,57%{transform:translate(-96px,59px)}59%{transform:translate(-96px,59px) scale(.85)}62%{transform:translate(-96px,59px);animation-timing-function:cubic-bezier(.65,0,.35,1)}74%,78%{opacity:1;transform:translate(84px,59px)}80%{opacity:1;transform:translate(84px,59px) scale(.85)}84%,100%{opacity:0;transform:translate(84px,59px)}}
+@keyframes mm-sa{0%,70%{opacity:1;transform:none}74%,100%{opacity:0;transform:scale(.6)}}
+@keyframes mm-sc{0%,72%{opacity:0;transform:scale(.6);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}78%,100%{opacity:1;transform:none}}
+@keyframes mm-cvb{0%,72%{opacity:1}74%,100%{opacity:0}}
+.mo .d-mrow{animation:mm-row 5.2s linear infinite}
+.mo .d-mc{z-index:2;animation:mm-c 5.2s linear infinite}
+.mo .d-mb{animation:mm-b 5.2s linear infinite}
+.mo .d-ma{animation:mm-a 5.2s linear infinite}
+.mo .d-mpop{z-index:3;animation:mm-pop 5.2s linear infinite}
+.mo .d-mleft{animation:mm-left 5.2s linear infinite}
+.mo .d-msa{animation:mm-sa 5.2s var(--ease-out) infinite}
+.mo .d-msc{animation:mm-sc 5.2s linear infinite}
+.mo .d-mcvb{animation:mm-cvb 5.2s linear infinite}
+@keyframes mm-cvb2{0%,72%{opacity:0}76%,100%{opacity:1}}
+.mo .d-mcvb2{animation:mm-cvb2 5.2s linear infinite}
+.mo .d-mf{position:absolute;left:162px;top:22px;width:36px;height:36px;border-radius:18px;background:#19161b40;border:2px solid #fff;z-index:4;pointer-events:none;animation:mm-f 5.2s linear infinite}
 .tok{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .curve{display:flex;gap:12px;align-items:center}
 .curve svg{flex:none;background:var(--bg);border-radius:10px}
-@media (prefers-reduced-motion:reduce){.mo [class*="d-"],.mo [class*="d-"]::after,.mo [class*="d-"] .ic{animation:none!important;opacity:1!important}}
+@media (prefers-reduced-motion:reduce){.mo .d-df,.mo .d-mf{display:none}.mo [class*="d-"],.mo [class*="d-"]::after,.mo [class*="d-"] .ic{animation:none!important;opacity:1!important}}
 </style>
 </helmet>
-<div class="ab mo" style="width: 2200px; height: 1580px; gap: 28px;">
+<div class="ab mo" style="width: 2200px; height: 1840px; gap: 28px;">
   <div class="ab-head">
     <div class="ab-id">STATES · 3 · MOTION · Proposed</div>
     <h2 class="ab-title">Микроанимации</h2>
@@ -100,7 +150,28 @@ body{margin:0}
         <div class="card hl d-new" style="flex-direction: row; gap: 12px; width: 100%;"><div class="img m1" style="width: 56px; height: 56px; border-radius: 10px;"></div><div style="flex: 1; display: flex; flex-direction: column; gap: 4px;"><div class="ts">Баранина, лопатка · 600 г</div><div class="c c2"><b class="num" style="color: var(--ink);">3 000 ₸</b> / упаковка · 1 точка</div><span class="bd bd-ok"><span class="ic i-check"></span>На витрине</span></div></div></div>
       <div class="mo-meta"><b>Опубликовано</b><code>карточка: translateY 8 px · 320 ms · ease-out · +120 ms<br>кольцо primary 0→6 px→0 · 1200 ms · один раз</code><span class="c">Единственный «праздничный» момент: первая публикация и сохранение правки. Показывает, где именно на витрине оказалась карточка.</span><span class="tag tag-keep why">Характер</span></div></div>
 
-    <div class="mo-tile" style="grid-column: span 4; padding: 16px 20px; gap: 10px;">
+    <div class="mo-tile" style="grid-column: span 2;"><div class="mo-stage">
+        <div class="dr-row d-drow" aria-hidden="true">
+          <div class="dr-t mt img m1 d-da" style="left: 0;"><span class="d-dsa" style="position: absolute; inset: 0;"><span class="cv star" role="img" aria-label="Обложка"><span class="ic i-starf"></span></span></span></div>
+          <div class="dr-t mt img m7 d-db" style="left: 74px;"></div>
+          <div class="dr-t mt img m3 d-dc" style="left: 148px;"><span class="d-dsc" style="position: absolute; inset: 0;"><span class="cv star" role="img" aria-label="Обложка"><span class="ic i-starf"></span></span></span></div>
+          <div class="dr-t mt img m5" style="left: 222px;"></div>
+          <span class="d-df"></span>
+        </div></div>
+      <div class="mo-meta"><b>Перестановка фото · долгий тап</b><code>удержание 300 ms → подъём: scale 1.08 + тень · 150 ms<br>фото идёт за пальцем 1:1, без easing и задержки · соседи расступаются 200 ms spring<br>отпустил → встаёт в слот 200 ms ease-out · на 1-м месте → звезда обложки переезжает</code><span class="c">Фото не «телепортируется»: его видно в руке на всём пути, место, куда оно встанет, открывается заранее. Отпустил вне ряда — возвращается на своё место тем же путём. Загружающиеся и ошибочные плитки не поднимаются. Альтернатива без жеста — микроменю ← → по тапу на фото (соседняя плитка).</span><span class="tag tag-keep why">Связь</span></div></div>
+
+    <div class="mo-tile" style="grid-column: span 2;"><div class="mo-stage">
+        <div class="mm-row d-mrow" aria-hidden="true">
+          <div class="dr-t mt img m1 d-ma" style="left: 0;"><span class="d-msa" style="position: absolute; inset: 0;"><span class="cv star" role="img" aria-label="Обложка"><span class="ic i-starf"></span></span></span><span class="d-mcvb2" style="position: absolute; inset: 0;"><span class="cvb"><span class="ic i-star"></span></span></span><span class="del"><span class="ic i-close"></span></span></div>
+          <div class="dr-t mt img m7 d-mb" style="left: 74px;"><span class="cvb"><span class="ic i-star"></span></span><span class="del"><span class="ic i-close"></span></span></div>
+          <div class="dr-t mt img m3 d-mc" style="left: 148px; overflow: visible;"><span class="d-mcvb" style="position: absolute; inset: 0;"><span class="cvb"><span class="ic i-star"></span></span></span><span class="d-msc" style="position: absolute; inset: 0;"><span class="cv star" role="img" aria-label="Обложка"><span class="ic i-starf"></span></span></span><span class="del"><span class="ic i-close"></span></span></div>
+          <div class="dr-t mt img m5" style="left: 222px;"><span class="cvb"><span class="ic i-star"></span></span><span class="del"><span class="ic i-close"></span></span></div>
+          <div class="mm-pop d-mpop"><i class="d-mleft"><span class="ic i-left sm"></span></i><span class="sep"></span><i><span class="ic i-right sm"></span></i></div>
+          <span class="d-mf"></span>
+        </div></div>
+      <div class="mo-meta"><b>Микроменю ← → · тап по фото</b><code>тап → рамка primary + меню под фото: fade + scale .9→1 · 200 ms spring, от «хвостика» к плитке<br>тап ← / → → фото и сосед меняются местами · 200 ms spring · меню едет вместе с фото<br>на краю ряда стрелка гаснет · 1-е место = обложка · тап мимо → меню уходит 150 ms ease-in</code><span class="c">Альтернатива перетаскиванию без жеста. Меню привязано к выбранному фото и переезжает вместе с ним, чтобы следующий тап был там же, где палец. ☆ и × на плитке работают сразу, без меню.</span><span class="tag tag-keep why">Отклик</span></div></div>
+
+    <div class="mo-tile" style="grid-column: span 6; padding: 16px 20px; gap: 10px;">
       <b style="font: 600 15px/20px var(--sans);">Чего не анимируем</b>
       <ul style="margin: 0; padding-left: 18px; font: 400 13px/19px var(--sans); color: var(--ink2); display: flex; flex-direction: column; gap: 4px;">
         <li>Шапку и нижнюю навигацию при переходах.</li>
@@ -129,7 +200,7 @@ body{margin:0}
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2200,"height":1580}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2200,"height":1840}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

@@ -29,9 +29,9 @@
           <section style="display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;"><span class="lbl">Фото и видео</span><span class="c num">3 из 5 фото · видео 0 из 1</span></div>
             <div class="mrow">
-              <div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div>
-              <div class="mt img m1" style="filter: brightness(0.94);"></div>
-              <div class="mt img m7"></div>
+              <div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div>
+              <div class="mt img m1" style="filter: brightness(0.94);"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div>
+              <div class="mt img m7"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div>
               <button class="mt add" aria-label="Добавить фото"><span class="ic i-camera"></span>Фото</button>
             </div>
             <button class="mt add" style="width: 100%; height: 48px; flex-direction: row; gap: 8px;"><span class="ic i-video sm"></span>Добавить видео · необязательно</button>
@@ -91,7 +91,7 @@
       <div class="ph tall">
         <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div></header>
         <main class="body" style="gap: 20px;">
-          <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div></div>
+          <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div><div class="mt img m7"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div></div>
           <div class="fld"><label>Название товара</label><div class="inp">Баранина, лопатка</div></div>
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
             <div class="fld"><label>Цена</label><div class="inp num"><span style="flex: 1;">3 000</span><span class="c2">₸</span></div></div>
@@ -122,7 +122,7 @@
         <main class="body" style="gap: 20px;">
           <section style="display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото и видео</span><span class="c num">2 из 5 фото</span></div>
-            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div>
+            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div><div class="mt img m7"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div>
           </section>
           <div class="fld"><label for="n4">Название товара</label><div class="inp" id="n4">Баранина, лопатка</div></div>
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
@@ -152,19 +152,20 @@
 
     <!-- 3 Media states -->
     <div class="shot">
-      <div class="cap"><b>AI-S09 · Editor · Media</b><br>Прогресс, повтор, лимит 5 + 1, обложка, порядок</div>
+      <div class="cap"><b>AI-S09 · Editor · Media</b><span class="tag tag-rev">Rev 1</span><br>Прогресс, повтор, лимит 5 + 1, обложка, порядок</div>
       <div class="ph tall">
         <header class="bar"><button class="ib" aria-label="Назад"><span class="ic i-left"></span></button><div class="bar-t">Черновик</div></header>
         <main class="body" style="gap: 20px;">
           <section style="display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото</span><span class="c num">5 из 5 — максимум</span></div>
             <div class="mrow">
-              <div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div>
-              <div class="mt img m7"><span class="x" style="background: #19161bb3;"><span class="ic i-drag"></span></span></div>
+              <div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div>
+              <div class="mt img m7 sel" aria-selected="true"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div>
               <div class="mt img m1 up" role="progressbar" aria-valuenow="64" aria-label="Загрузка фото 3"><div class="pb"><i style="width: 64%;"></i></div></div>
               <div class="mt img m3 er"><div class="erl"><span class="ic i-refresh sm"></span>Повторить</div></div>
             </div>
-            <div class="mrow"><div class="mt img m8"></div><div class="mt add" style="color: var(--ink3); border-color: var(--line);" aria-disabled="true"><span class="ic i-plus"></span>Лимит</div></div>
+            <div class="mpop-wrap" role="toolbar" aria-label="Фото 2 из 5: порядок"><div class="mpop" style="left: 70px;"><button aria-label="Переместить фото влево"><span class="ic i-left sm"></span></button><span class="sep"></span><button aria-label="Переместить фото вправо"><span class="ic i-right sm"></span></button></div></div>
+            <div class="mrow"><div class="mt img m8"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div><div class="mt add" style="color: var(--ink3); border-color: var(--line);" aria-disabled="true"><span class="ic i-plus"></span>Лимит</div></div>
             <div class="fld"><div class="emsg"><span class="ic i-alert"></span>Фото 4 не загрузилось. Остальные сохранены — нажмите, чтобы повторить.</div></div>
           </section>
           <section style="display: flex; flex-direction: column; gap: 10px;">
@@ -172,16 +173,9 @@
             <div class="card" style="flex-direction: row; align-items: center; gap: 12px;"><div class="mt img m2" style="display: flex; align-items: center; justify-content: center; width: 64px; height: 64px;"><span class="ic i-play" style="color: #fff;"></span></div><div style="flex: 1;"><div class="ts">Видео товара</div><p class="c num">0:18 · видно покупателям</p></div><button class="ib" aria-label="Действия с видео"><span class="ic i-more"></span></button></div>
             <p class="c">Видео, из которого собраны черновики, сюда не подставляется — оно приватное.</p>
           </section>
-          <div class="card p16" style="gap: 4px; box-shadow: var(--shadow-md);">
-            <div class="ov" style="padding: 4px 0 8px;">Фото 2</div>
-            <div class="li" style="min-height: 48px;"><span class="ic i-cover c2"></span><div class="mid"><div class="ts">Сделать обложкой</div></div></div>
-            <div class="li" style="min-height: 48px;"><span class="ic i-camera c2"></span><div class="mid"><div class="ts">Заменить</div></div></div>
-            <div class="li" style="min-height: 48px;"><span class="ic i-drag c2"></span><div class="mid"><div class="ts">Переместить</div></div><span class="c">← →</span></div>
-            <div class="li" style="min-height: 48px; color: var(--danger);"><span class="ic i-trash"></span><div class="mid"><div class="ts">Удалить</div></div></div>
-          </div>
         </main>
       </div>
-      <div class="note">Порядок меняется и без жеста: пункт «Переместить» + кнопки влево/вправо (доступность). Прогресс и ошибка — по каждому файлу отдельно.</div>
+      <div class="note">На каждой плитке: ☆ — сделать обложкой (у обложки ★), × — удалить. Тап по плитке выделяет её и открывает под ней микроменю ← → — для тех, кому неудобно тащить долгим тапом (Motion · «Перестановка фото»). Крайние стрелки неактивны на краях ряда. Прогресс и ошибка — по каждому файлу отдельно; у загружающейся и ошибочной плитки только «Повторить».</div>
     </div>
 
     <!-- 5 Edit published · All points -->
@@ -196,7 +190,7 @@
           </div>
           <section style="display: flex; flex-direction: column; gap: 8px;">
             <span class="lbl">Фото и видео</span>
-            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div><div class="mt img m7"></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div>
+            <div class="mrow"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div><div class="mt img m7"><button class="cvb" aria-label="Сделать обложкой"><span class="ic i-star"></span></button><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div><button class="mt add"><span class="ic i-camera"></span>Фото</button></div>
           </section>
           <div class="fld"><label for="n5">Название товара</label><div class="inp" id="n5">Баранина, лопатка</div></div>
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">

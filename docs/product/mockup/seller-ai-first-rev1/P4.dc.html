@@ -52,7 +52,7 @@
         <div class="fld">
           <div style="display: flex; justify-content: space-between;"><span class="lbl">Фото</span><span class="c">{{ photoCount }}</span></div>
           <div class="mrow">
-            <sc-if value="{{ photo }}" hint-placeholder-val="{{ false }}"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span></div></sc-if>
+            <sc-if value="{{ photo }}" hint-placeholder-val="{{ false }}"><div class="mt img m1"><span class="cv star" role="img" aria-label="Обложка" title="Обложка"><span class="ic i-starf"></span></span><button class="del" aria-label="Удалить фото"><span class="ic i-close"></span></button></div></sc-if>
             <button class="mt add" onClick="{{ addPhoto }}" style="{{ photoStyle }}"><span class="ic i-camera"></span>Фото</button>
           </div>
           <sc-if value="{{ errPhoto }}" hint-placeholder-val="{{ false }}"><div class="emsg"><span class="ic i-alert"></span>Добавьте хотя бы одно фото товара</div></sc-if>
