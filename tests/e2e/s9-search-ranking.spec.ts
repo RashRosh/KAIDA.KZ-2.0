@@ -152,7 +152,8 @@ test('Buyer location is explicit, transient, disableable and changes only the ne
   });
 
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toBeVisible();
+  // First Entry: the start page has no location control; it is on the results screen.
+  await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { __s9GeoCalls: number }).__s9GeoCalls)).toBe(0);
 
   const input = page.getByLabel('Какой товар ищете?');
@@ -210,12 +211,15 @@ test('browser geolocation failure is non-blocking and ordinary Search remains GE
   });
 
   await page.goto('/');
+  const input = page.getByLabel('Какой товар ищете?');
+  await input.fill(productName);
+  await input.press('Enter');
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
+
   await page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true }).click();
   await expect(page.getByText('Не удалось определить местоположение. Поиск работает без учёта расстояния.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Попробовать снова', exact: true })).toBeVisible();
 
-  const input = page.getByLabel('Какой товар ищете?');
-  await input.fill(productName);
   const requestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await input.press('Enter');
   expect((await requestPromise).method()).toBe('GET');

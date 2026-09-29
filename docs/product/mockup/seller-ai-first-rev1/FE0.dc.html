@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>First Entry · handoff</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+<link rel="stylesheet" href="fe.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.fe-spec{width:100%;border-collapse:collapse;font:400 13px/19px var(--sans);color:var(--ink2)}.fe-spec th{text-align:left;font:600 12px/16px var(--sans);color:var(--ink3);padding:6px 8px;border-bottom:1px solid var(--line)}.fe-spec td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}.fe-spec td:first-child{white-space:nowrap;color:var(--ink);font-weight:500}.doc code{font:400 12px/16px ui-monospace,Menlo,monospace;background:var(--sunken);padding:1px 4px;border-radius:4px}</style>
+</helmet>
+<div class="ab" style="width: 1656px; height: 1200px; gap: 28px;">
+  <div class="ab-head">
+    <div class="ab-id">FIRST ENTRY · HANDOFF</div>
+    <h2 class="ab-title">Главный экран — один концепт, раскладка по ширине</h2>
+    <p class="ab-desc">По ТЗ «First Entry v2». Всё, что нужно для вёрстки, — на этой доске; макеты и живые демо — по ссылкам.</p>
+  </div>
+<div class="cols" style="grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start;">
+  <div class="doc" style="gap: 10px;">
+    <h3 style="margin: 0;">1. Концепт — один</h3>
+    <p class="c c2" style="font-size: 14px; line-height: 21px;">Главный экран: заголовок, настоящее поле поиска и <b style="color: var(--ink);">пример выдачи по запросу «баранина»</b>. Смысл: один запрос — несколько точек, сразу видно, где ближе и свежее. Раскладка зависит только от ширины окна:</p>
+    <table class="fe-spec">
+      <tr><th>Ширина</th><th>Раскладка</th><th>Макеты</th></tr>
+      <tr><td>&lt; 1280</td><td>Колонка: поле, под ним 2 карточки-пример. Макет 390; на 360 те же поля 20 px; от 600 px — колонка max-width 560 по центру.</td><td><a href="FEA1.dc.html">FE-M</a> · <a href="FEA3.dc.html">motion</a> · <a href="FEPA.dc.html">live</a></td></tr>
+      <tr><td>≥ 1280</td><td>Орбита: поле в центре, ближайшее предложение — полной карточкой под полем, 4 предложения вокруг. Предложения позиционируются <b>от центра экрана</b>, не от краёв: левый верх −570, левый низ −480, правый верх +570, правый низ +600 px (внешний край карточки). Проверено без наложений на 1280 и 1440.</td><td><a href="FEB2.dc.html">FE-D</a> · <a href="FEB3.dc.html">motion</a> · <a href="FEPB.dc.html">live</a></td></tr>
+    </table>
+    <p class="c c2" style="font-size: 13px; line-height: 19px;">На ширине меньше 1280 крайние предложения уходят за экран, поэтому до 1280 — колонка. Тёмной темы нет.</p>
+  </div>
+  <div class="doc" style="gap: 10px;">
+    <h3 style="margin: 0;">2. Демо-анимация</h3>
+    <table class="fe-spec">
+      <tr><th>ms</th><th>Mobile</th><th>Desktop</th></tr>
+      <tr><td>0–680</td><td colspan="2">Строки заголовка из-под маски (шаг 80 ms), подзаголовок проявляется</td></tr>
+      <tr><td>700–1300</td><td colspan="2">В плейсхолдере печатается «баранина», мигает курсор; значение поля пустое</td></tr>
+      <tr><td>1350–1870</td><td colspan="2">Волна по нижнему краю поля</td></tr>
+      <tr><td>1500–2280</td><td>—</td><td>4 предложения от дальних к ближним, шаг 120 ms</td></tr>
+      <tr><td>1800–2680</td><td>Карточка 1, через 350 ms карточка 2</td><td>2100: ближайшее выходит вперёд</td></tr>
+      <tr><td>2900–3510</td><td>Плашка «Сегодня», через 250 ms «2 дня»</td><td>дуга расстояния до 2970</td></tr>
+      <tr><td>стоп</td><td>≈3,5 s</td><td>≈3 s</td></tr>
+    </table>
+    <p class="c c2" style="font-size: 13px; line-height: 19px;">Кривые и длительности — токены kaida.css (--ease-out-soft, --spring…), keyframes — fe.css, блок <code>.fe-live</code>. Меньше 5 s — кнопка паузы не нужна (WCAG 2.2.2).</p>
+  </div>
+  <div class="doc" style="gap: 10px;">
+    <h3 style="margin: 0;">3. Поведение</h3>
+    <ul>
+      <li><b>Первый визит</b> — демо один раз. Флаг в localStorage (например <code>kaida_fe_demo_seen</code>) ставится при старте демо. Нет доступа к localStorage — демо не играет.</li>
+      <li><b>Повторные визиты и prefers-reduced-motion</b> — сразу итоговый кадр без движения, плейсхолдер «Что ищете?» (<a href="FEA1.dc.html">FE-M · 5</a>).</li>
+      <li><b>Прерывание</b>: pointerdown / focus / keydown в поле или тап по любой карточке-примеру → демо стоп, пример скрывается, фокус в поле, значение пустое. Вкладка ушла в фон во время демо → сразу итоговый кадр.</li>
+      <li><b>Ввод</b>: кнопка → только при непустом значении (trim). Enter или → — выдача AI-B01 по запросу; пустой запрос не отправляется.</li>
+      <li><b>РУС / ҚАЗ</b> — переход на /ru или /kk, выбор запоминается; «/» → сохранённый язык или язык браузера. После смены языка демо не повторяется.</li>
+      <li><b>«Разместить товар»</b> — вторичная ссылка во вход продавца (AI-S03). «Без регистрации» — статичный текст.</li>
+      <li><b>Геолокация</b> на этом экране не запрашивается; расстояния в примере — часть фикстуры.</li>
+    </ul>
+  </div>
+  <div class="doc" style="gap: 10px;">
+    <h3 style="margin: 0;">4. Данные, доступность, открытые вопросы</h3>
+    <ul>
+      <li><b>Пример — статичная фикстура во фронтенде</b>, не запрос к API; одинаков для всех. Mobile: лавка «Береке» (лопатка, 4 200 ₸, 850 м, «Сегодня») и Зелёный базар, место 35А (рёбра, 3 900 ₸, 1,4 км, «2 дня»). Desktop: та же лопатка впереди + 4 предложения вокруг, рёбра — среди них.</li>
+      <li>Карточки — компонент AI-B01 в состоянии «Пример»: контакты и «Маршрут» неактивны. Плашки свежести — из текущей шкалы.</li>
+      <li><b>Доступность</b>: у поля aria-label «Поиск товара»; анимированный плейсхолдер не озвучивается (без aria-live). Блок примера — aria-hidden и вне Tab-порядка: с клавиатуры сразу поле.</li>
+    </ul>
+    <div class="ov" style="margin-top: 4px;">Открыто — не блокирует вёрстку</div>
+    <ul>
+      <li>Заголовок рабочий, финальный слоган подставится позже.</li>
+      <li>Казахские строки — черновик, нужна вычитка носителем.</li>
+      <li>Фото товаров — заглушки; до релиза нужны 5 реальных фото (лопатка, рёбра, окорок, фарш, корейка).</li>
+      <li>Недавние запросы на повторном визите — не спроектированы, отдельная задача.</li>
+    </ul>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1656,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

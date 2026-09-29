@@ -1,0 +1,145 @@
+/* ================= FIRST ENTRY (FE) · stage 1 concepts =================
+   Builds on kaida.css tokens and components (card, fresh, ct, lang, bd).
+   Live demo keyframes apply only inside .fe-live (prototypes). */
+
+/* ---- phone 390 ---- */
+.fe-ph{width:390px;height:844px;background:var(--bg);border-radius:40px;border:1px solid #d7d2da;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px #19161b14;flex:none;color:var(--ink)}
+.fe-hdr{height:60px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.fe-logo{display:flex;align-items:center;gap:8px;font:700 20px/24px var(--display);letter-spacing:.02em;color:var(--ink)}
+.fe-logo .ic{width:22px;height:27px;color:var(--primary)}
+.fe-body{flex:1;display:flex;flex-direction:column;gap:18px;padding:12px 20px 0;min-height:0}
+.fe-h1{margin:0;font:700 34px/38px var(--display);letter-spacing:-.025em;color:var(--ink);text-wrap:balance}
+.fe-h1 .ln{display:block;overflow:hidden;padding-bottom:2px}
+.fe-h1 .ln>span{display:block}
+.fe-sub{margin:0;font:400 16px/23px var(--sans);color:var(--ink2);max-width:330px}
+
+/* ---- search (real input) ---- */
+.fe-search{height:60px;border-radius:16px;border:1.5px solid var(--line-control);background:var(--surface);display:flex;align-items:center;gap:10px;padding:0 8px 0 16px;flex:none;position:relative;overflow:hidden}
+.fe-search>.ic{color:var(--ink2);flex:none}
+.fe-search .ph-t{flex:1;min-width:0;font:400 17px/24px var(--sans);color:var(--ink3);white-space:nowrap;overflow:hidden;display:flex;align-items:center}
+.fe-search .val{flex:1;min-width:0;font:400 17px/24px var(--sans);color:var(--ink);display:flex;align-items:center}
+.fe-search input{flex:1;min-width:0;border:0;outline:0;background:none;font:400 17px/24px var(--sans);color:var(--ink);padding:0}
+.fe-search input::placeholder{color:var(--ink3)}
+.fe-caret{display:inline-block;width:2px;height:22px;background:var(--primary);margin-left:1px;border-radius:1px;flex:none}
+.fe-search .go{width:44px;height:44px;border-radius:12px;border:0;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
+.fe-search.foc{border:2px solid var(--primary);box-shadow:0 0 0 4px var(--primary-soft)}
+.fe-wave{position:absolute;left:0;bottom:0;height:3px;width:40%;background:linear-gradient(90deg,#9900cc00,#9900cc,#9900cc00);border-radius:2px;opacity:0;pointer-events:none}
+.fe-note{display:flex;align-items:center;gap:6px;font:500 13px/18px var(--sans);color:var(--ink2);margin-top:-8px}
+.fe-note .ic{width:16px;height:16px;color:var(--success)}
+.fe-seller{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px;height:56px;flex:none;border-top:1px solid var(--line);font:500 15px/20px var(--sans);color:var(--primary-text);background:none;border-left:0;border-right:0;border-bottom:0;width:100%}
+.fe-seller .ic{width:20px;height:20px}
+
+/* ---- demo offer (= AI-B01 card, example state) ---- */
+.fe-offer{position:relative}
+.fe-offer .ex{position:absolute;right:10px;top:10px;height:22px;padding:0 8px;border-radius:6px;background:var(--sunken);color:var(--ink2);font:500 11px/22px var(--sans);letter-spacing:.02em;z-index:2}
+.fe-photo{width:108px;height:108px;border-radius:12px;overflow:hidden;position:relative;flex:none}
+.fe-photo svg{display:block;width:100%;height:100%;position:absolute;inset:0}
+.fe-photo .fresh{z-index:2}
+.fe-dist{display:flex;align-items:center;gap:6px;font:500 14px/20px var(--sans);color:var(--ink)}
+.fe-dist svg{flex:none}
+.fe-dist .c2{font-weight:400}
+.fe-offer .ct{pointer-events:none}
+
+/* ---- keyboard (focused state) ---- */
+.fe-kb{height:270px;flex:none;background:#d3d0d7;display:flex;flex-direction:column;gap:9px;padding:10px 4px;margin-top:auto}
+.fe-kb div{display:flex;gap:5px;justify-content:center}
+.fe-kb i{width:31px;height:42px;border-radius:6px;background:#fff;box-shadow:0 1px 0 #19161b40}
+.fe-kb i.w{width:180px}.fe-kb i.s{width:44px;background:#aba7b0}
+.fe-tag-kz{display:inline-block;height:20px;padding:0 6px;border-radius:5px;background:var(--warning-soft);color:var(--warning);font:600 10px/20px var(--sans);letter-spacing:.04em;vertical-align:1px}
+
+/* ---- dark hero ---- */
+.fe-dark{--bg:#121014;--surface:#1e1b21;--sunken:#29252d;--line:#2f2b33;--line-control:#5b5560;--ink:#f4f1f6;--ink2:#b9b2bd;--ink3:#8e8792;--primary-soft:#3a1a48;--primary-text:#e29dff;background:var(--bg);color:var(--ink);border-color:#2f2b33}
+.fe-dark .card{background:var(--surface);border-color:var(--line)}
+.fe-dark .ct{background:var(--surface);border-color:var(--line-control);color:var(--ink)}
+.fe-dark .ct.route{background:var(--primary);border-color:var(--primary);color:#fff}
+.fe-dark .lang{border-color:var(--line-control)}
+.fe-dark .lang span{color:var(--ink2)}.fe-dark .lang span.on{background:#3a1a48;color:#e29dff}
+.fe-dark .fe-kb{background:#2a262e}.fe-dark .fe-kb i{background:#4a4550}
+
+/* ---- desktop 1440 ---- */
+.fe-dt{width:1440px;height:900px;background:var(--bg);border-radius:14px;border:1px solid #d7d2da;overflow:hidden;position:relative;display:flex;flex-direction:column;flex:none;box-shadow:0 1px 2px #19161b14;color:var(--ink)}
+.fe-dt .fe-hdr{height:76px;padding:0 64px}
+.fe-dt .fe-h1{font-size:64px;line-height:68px;letter-spacing:-.03em}
+.fe-dt .fe-sub{font-size:19px;line-height:28px;max-width:470px}
+.fe-dt .fe-search{height:68px;width:100%;max-width:560px;border-radius:18px}
+.fe-dt .fe-search .ph-t,.fe-dt .fe-search .val{font-size:19px}
+.fe-browser{height:40px;flex:none;background:#efedf1;border-bottom:1px solid #dcd8df;display:flex;align-items:center;gap:8px;padding:0 16px}
+.fe-browser i{width:11px;height:11px;border-radius:6px;background:#d2ced6}
+.fe-browser span{margin-left:16px;height:26px;flex:0 1 420px;border-radius:13px;background:#fff;font:400 12px/26px var(--sans);color:var(--ink2);padding:0 12px}
+.fe-dt .fe-seller-d{display:inline-flex;align-items:center;gap:8px;font:500 15px/20px var(--sans);color:var(--primary-text)}
+
+/* ---- concept B: offers around search ---- */
+.fe-orb{position:absolute;display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 12px 8px 8px;box-shadow:var(--shadow-md);transform-origin:center}
+.fe-orb .th{width:48px;height:48px;border-radius:10px;overflow:hidden;position:relative;flex:none}
+.fe-orb .th svg{width:100%;height:100%;display:block}
+.fe-orb b{font:600 14px/18px var(--sans);display:block}
+.fe-orb small{font:400 12px/16px var(--sans);color:var(--ink2);display:block}
+.fe-orb .fr{display:inline-block;height:18px;padding:0 5px;border-radius:4px;color:#fff;font:500 10px/18px var(--sans)}
+.fe-deck{position:relative;height:250px}
+.fe-deck .card{position:absolute;left:0;right:0}
+
+/* ---- storyboard ---- */
+.fe-sb{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+.fe-step{background:#fff;border:1px solid #d7d2da;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.fe-step .st-stage{height:420px;background:var(--bg);padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line);overflow:hidden;position:relative}
+.fe-step .st-meta{padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.fe-step .st-meta b{font:600 14px/19px var(--sans)}
+.fe-step .st-meta code{font:400 11px/16px ui-monospace,Menlo,monospace;color:var(--ink3)}
+.fe-step .st-meta .t{font:400 13px/18px var(--sans);color:var(--ink2)}
+.fe-tl{position:relative;height:74px;background:#fff;border:1px solid #d7d2da;border-radius:14px}
+.fe-tl .bar{position:absolute;height:12px;border-radius:6px;background:var(--primary-soft);border:1px solid #e29dff}
+.fe-tl .bar.k{background:#dff3e5;border-color:#9fd6ad}
+.fe-tl .lab{position:absolute;font:500 11px/14px var(--sans);color:var(--ink2);white-space:nowrap}
+.fe-tl .tick{position:absolute;bottom:6px;font:400 10px/12px ui-monospace,Menlo,monospace;color:var(--ink3)}
+
+/* ================= live demo timeline (≈4.8 s, then stops) ================= */
+@keyframes fe-line{from{transform:translateY(105%)}to{transform:none}}
+@keyframes fe-type{from{width:0}to{width:var(--w)}}
+@keyframes fe-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes fe-wave{0%{opacity:1;transform:translateX(-100%)}99%{opacity:1;transform:translateX(250%)}100%{opacity:0;transform:translateX(250%)}}
+@keyframes fe-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fe-fadein{from{opacity:0}to{opacity:1}}
+@keyframes fe-mask{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes fe-stamp{0%{opacity:0;transform:scale(.6) rotate(-6deg)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:none}}
+@keyframes fe-draw{from{stroke-dashoffset:64}to{stroke-dashoffset:0}}
+@keyframes fe-out{from{opacity:1}to{opacity:0}}
+@keyframes fe-gone{from{opacity:1}to{opacity:0;width:0}}
+@keyframes fe-roll{from{transform:none}to{transform:translateY(-22px)}}
+@keyframes fe-fwd{from{opacity:.0;transform:translateY(24px) scale(.9)}to{opacity:1;transform:none}}
+.fe-live .fe-h1 .ln>span{animation:fe-line 520ms var(--ease-out-soft) both}
+.fe-live .fe-h1 .ln:nth-child(2)>span{animation-delay:80ms}
+.fe-live .fe-h1 .ln:nth-child(3)>span{animation-delay:160ms}
+.fe-live .fe-sub{animation:fe-in 400ms var(--ease-out) 200ms both}
+.fe-live .tp{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;width:0;animation:fe-type 600ms steps(8,end) 700ms forwards}
+.fe-live .ph-rest{animation:fe-out 1ms linear 700ms forwards}
+.fe-live .ph-t{position:relative}
+.fe-live .ph-t .ph-rest{position:absolute;left:0}
+.fe-live .fe-caret{animation:fe-blink 1s steps(1) infinite}
+.fe-live .fe-wave{animation:fe-wave 520ms var(--ease-in-out) 1350ms both}
+/* concept A: two result cards fly in one by one, then freshness badges one by one */
+@keyframes fe-fly{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
+.fe-live .fe-res .fe-offer{animation:fe-fly 420ms var(--ease-out-soft) both}
+.fe-live .fe-res .k1{animation-delay:1800ms}.fe-live .fe-res .k2{animation-delay:2150ms}
+.fe-live .fe-res .fe-photo svg{animation:fe-mask 420ms var(--ease-out-soft) both}
+.fe-live .fe-res .k1 .fe-photo svg{animation-delay:1850ms}.fe-live .fe-res .k2 .fe-photo svg{animation-delay:2200ms}
+.fe-live .fe-res .o-t,.fe-live .fe-res .o-p,.fe-live .fe-res .o-l,.fe-live .fe-res .fe-cts{animation:fe-in 260ms var(--ease-out) both}
+.fe-live .fe-res .k1 .o-t{animation-delay:1950ms}.fe-live .fe-res .k1 .o-p{animation-delay:2010ms}.fe-live .fe-res .k1 .o-l{animation-delay:2070ms}.fe-live .fe-res .k1 .fe-cts{animation-delay:2130ms}
+.fe-live .fe-res .k2 .o-t{animation-delay:2300ms}.fe-live .fe-res .k2 .o-p{animation-delay:2360ms}.fe-live .fe-res .k2 .o-l{animation-delay:2420ms}.fe-live .fe-res .k2 .fe-cts{animation-delay:2480ms}
+.fe-live .fe-dist path.arc{stroke-dasharray:64;animation:fe-draw 520ms var(--ease-out) 2450ms both}
+.fe-live .fe-res .k1 .fe-dist path.arc{animation-delay:2250ms}.fe-live .fe-res .k2 .fe-dist path.arc{animation-delay:2600ms}
+.fe-live .fe-res .fresh{animation:fe-stamp 360ms var(--spring) both}
+.fe-live .fe-res .k1 .fresh{animation-delay:2900ms}.fe-live .fe-res .k2 .fresh{animation-delay:3150ms}
+.fe-live .fe-sell{animation:fe-fadein 300ms var(--ease-out) 600ms both}
+/* concept B live: offers appear far→near, nearest steps forward */
+.fe-live .orb{animation:fe-fwd 420ms var(--ease-out-soft) both}
+.fe-live .orb.o1{animation-delay:1500ms}.fe-live .orb.o2{animation-delay:1620ms}.fe-live .orb.o3{animation-delay:1740ms}.fe-live .orb.o4{animation-delay:1860ms}
+.fe-live .orb.near{animation:fe-fwd 480ms var(--spring) 2100ms both}
+.fe-live .fe-deck .d3{animation:fe-fwd 380ms var(--ease-out-soft) 1500ms both}
+.fe-live .fe-deck .d2{animation:fe-fwd 380ms var(--ease-out-soft) 1620ms both}
+.fe-live .fe-deck .d1{animation:fe-fwd 460ms var(--spring) 1800ms both}
+@media (prefers-reduced-motion:reduce){.fe-live *,.fe-live *::before,.fe-live *::after{animation:none!important}.fe-live .tp{width:var(--w)}.fe-live .ph-rest{display:none}}
+.shot.w390{width:390px}.shot.w1440{width:1440px}
+.fe-live .orb{cursor:pointer}
+/* two-card demo result on 390: compact photo, tighter rhythm so both cards clear the seller bar */
+.fe-ph .fe-res .fe-photo{width:92px;height:92px}
+.fe-ph .fe-body{gap:14px}

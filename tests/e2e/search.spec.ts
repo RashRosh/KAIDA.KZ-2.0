@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-test('lamb: search by button, full offer, responsive layout and refresh', async ({ page }, testInfo) => {
+test('lamb: search by the arrow, full offer, responsive layout and refresh', async ({ page }, testInfo) => {
   await page.goto('/');
   await expect(page.getByText('По вашему запросу ничего не найдено.')).toHaveCount(0);
   const searchRegion = page.getByRole('search', { name: 'Поиск предложений' });
+  // The arrow appears only while there is text in the field (First Entry).
+  await expect(searchRegion.getByRole('button', { name: 'Искать', exact: true })).toHaveCount(0);
   await page.getByLabel('Какой товар ищете?').fill('баранина');
   const responsePromise = page.waitForResponse((response) => response.url().includes('/api/search?'));
   await searchRegion.getByRole('button', { name: 'Искать', exact: true }).click();
@@ -48,8 +50,12 @@ test('lamb: search by button, full offer, responsive layout and refresh', async 
   await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 });
 
-test('popular shortcut executes the same real Search flow', async ({ page }) => {
+test('popular shortcut under an empty result executes the same real Search flow', async ({ page }) => {
   await page.goto('/');
+  // The start page carries the example instead of the shortcuts; they wait under a result with nothing in it.
+  await page.getByLabel('Какой товар ищете?').fill('единорог');
+  await page.getByLabel('Какой товар ищете?').press('Enter');
+  await expect(page.getByRole('status')).toHaveText('По вашему запросу ничего не найдено.');
   const responsePromise = page.waitForResponse((response) => response.url().includes('/api/search?'));
   await page.getByRole('group', { name: 'Популярные запросы' }).getByRole('button', { name: 'Баранина', exact: true }).click();
   const response = await responsePromise;
@@ -108,12 +114,11 @@ test('loading blocks a second submit while the real request is pending', async (
     await route.continue();
   });
   await page.goto('/');
-  const searchRegion = page.getByRole('search', { name: 'Поиск предложений' });
   const input = page.getByLabel('Какой товар ищете?');
   const searchForm = input.locator('xpath=ancestor::form');
   await input.fill('баранина');
-  await searchRegion.getByRole('button', { name: 'Искать', exact: true }).click();
-  await expect(searchRegion.getByRole('button', { name: 'Ищем…', exact: true })).toBeDisabled();
+  await input.press('Enter');
+  await expect(input).toHaveAttribute('readonly', '');
   await expect(page.getByRole('status')).toHaveText('Ищем предложения…');
   await searchForm.evaluate((form: HTMLFormElement) => form.requestSubmit());
   releaseRequest();

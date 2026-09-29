@@ -7,6 +7,7 @@ import '@fontsource/geologica/600.css';
 import '@fontsource/geologica/700.css';
 import '../seller/kaida.css';
 import '../seller/kaida-app.css';
+import './_ui/first-entry.css';
 import { LanguageGate } from '../seller/_kaida/language-gate';
 
 // buyer-screens-mockup: the buyer screens are built from the accepted mockup (B01, B02) and its classes, in the same

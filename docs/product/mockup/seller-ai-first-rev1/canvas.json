@@ -111,7 +111,7 @@
       "title": "Contract gaps и открытые решения",
       "w": 1656,
       "x": 0,
-      "y": 2120
+      "y": 2240
     },
     "M01.dc.html": {
       "h": 1300,
@@ -162,7 +162,7 @@
       "y": 7100
     },
     "Main.dc.html": {
-      "h": 2000,
+      "h": 2120,
       "title": "Обложка · Handoff-записка",
       "w": 1656,
       "x": 0,
@@ -469,6 +469,64 @@
       "w": 1656,
       "x": 0,
       "y": 8940
+    },
+    "FE0.dc.html": {
+      "h": 1200,
+      "page": "first",
+      "title": "First Entry · handoff (читать первым)",
+      "w": 1656,
+      "x": 0,
+      "y": 0
+    },
+    "FEA1.dc.html": {
+      "h": 1320,
+      "page": "first",
+      "title": "FE-M · Mobile < 1280 · экраны",
+      "w": 2740,
+      "x": 0,
+      "y": 1320
+    },
+    "FEA3.dc.html": {
+      "h": 1160,
+      "page": "first",
+      "title": "FE-M · Mobile · раскадровка и тайминг",
+      "w": 2440,
+      "x": 0,
+      "y": 2760
+    },
+    "FEPA.dc.html": {
+      "h": 1040,
+      "page": "first",
+      "title": "FE-PM · Mobile · живое демо",
+      "w": 1000,
+      "x": 0,
+      "y": 4040,
+      "is_interactive": true
+    },
+    "FEB2.dc.html": {
+      "h": 1280,
+      "page": "first",
+      "title": "FE-D · Desktop ≥ 1280 · экраны RU/KZ",
+      "w": 3020,
+      "x": 0,
+      "y": 5200
+    },
+    "FEB3.dc.html": {
+      "h": 820,
+      "page": "first",
+      "title": "FE-D · Desktop · раскадровка и тайминг",
+      "w": 2040,
+      "x": 0,
+      "y": 6600
+    },
+    "FEPB.dc.html": {
+      "h": 1160,
+      "page": "first",
+      "title": "FE-PD · Desktop · живое демо",
+      "w": 1540,
+      "x": 0,
+      "y": 7540,
+      "is_interactive": true
     }
   },
   "createdOnFiles": {
@@ -547,12 +605,23 @@
     "P7.dc.html",
     "States1.dc.html",
     "States2.dc.html",
-    "Motion.dc.html"
+    "Motion.dc.html",
+    "FE0.dc.html",
+    "FEA1.dc.html",
+    "FEA3.dc.html",
+    "FEPA.dc.html",
+    "FEB2.dc.html",
+    "FEB3.dc.html",
+    "FEPB.dc.html"
   ],
   "pages": [
     {
       "id": "handoff",
       "name": "HANDOFF"
+    },
+    {
+      "id": "first",
+      "name": "FIRST ENTRY"
     },
     {
       "id": "seller",
