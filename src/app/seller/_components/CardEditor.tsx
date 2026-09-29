@@ -11,7 +11,7 @@ import type { SellerChangeSetView } from '../../../modules/seller-input/contract
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { formatAmount } from '../../_components/format-amount';
-import { Bar, Check, ErrorLine, Ic, Phone, PointEditLabel, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
+import { Bar, Check, ErrorLine, focusPointEditLabel, Ic, Phone, PointEditLabel, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';
 import { SellerTradingPoints } from './SellerTradingPoints';
@@ -130,12 +130,16 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const requestCloseRef = useRef<() => void>(() => undefined);
   const busyRef = useRef(false);
+  const [pointReturn, setPointReturn] = useState<{ focusKey: string; overlay: 'points' | null; n: number } | null>(null);
 
   const isCreate = mode.kind === 'create';
   const isPoint = mode.kind === 'point';
   // A point edited from the card shows its new name at once (the card data of the showcase is read later).
   const pointName = (locationId: string, fallback: string) => locations.find((location) => location.id === locationId)?.name ?? fallback;
-  const editPoint = (locationId: string) => setView({ editPoint: locationId });
+  const editPoint = (locationId: string, focusKey: string, returnOverlay: 'points' | null = null) => {
+    setPointReturn((current) => ({ focusKey, overlay: returnOverlay, n: (current?.n ?? 0) + 1 }));
+    setView({ editPoint: locationId });
+  };
   const editLabel = (locationId: string, fallback: string) => t('points.editNamed', { name: pointName(locationId, fallback) });
   const draftId = mode.kind === 'create' ? mode.draft?.id ?? null : null;
   const currentPhotoIds = readyPhotoIds(photos);
@@ -148,6 +152,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
 
   function requestClose() {
     if (busyRef.current) return;
+    // SellerTradingPoints owns Back/Escape and its point-only discard confirmation while embedded here.
+    if (typeof view === 'object' && 'editPoint' in view) return;
     if (overlay) setOverlay(null);
     else if (view !== 'form') setView('form');
     else if (dirty) setOverlay('discard');
@@ -203,6 +209,16 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
   useEffect(() => {
     if (focusRequest) document.getElementById(focusRequest.id)?.focus();
   }, [focusRequest]);
+
+  useEffect(() => {
+    if (view === 'form' && pointReturn) focusPointEditLabel(pointReturn.focusKey);
+  }, [view, overlay, pointReturn]);
+
+  useEffect(() => {
+    if (!pointSaved) return;
+    const timer = window.setTimeout(() => setPointSaved(false), TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [pointSaved]);
 
   function chooseSuggestion(suggestion: Suggestion) {
     update({ title: suggestion.name, productId: suggestion.id, linkedName: suggestion.name });
@@ -483,9 +499,9 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
         editLocationId={view.editPoint}
         onClose={(result) => {
           setView('form');
+          if (pointReturn?.overlay) setOverlay(pointReturn.overlay);
           if (result === 'saved') {
             setPointSaved(true);
-            window.setTimeout(() => setPointSaved(false), TOAST_MS);
           }
         }}
       />
@@ -556,7 +572,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
             <div className="banner soft" style={{ padding: '12px 14px', borderRadius: 14, flexDirection: 'row', gap: 10 }}>
               <Ic name="pin" className="pt" />
               <p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('card.pointOnly', { name: pointName(pointOffer.location.id, pointOffer.location.name), count: cardOffers.length - 1 })}</p>
-              <PointEditLabel label={editLabel(pointOffer.location.id, pointOffer.location.name)} onClick={() => editPoint(pointOffer.location.id)} disabled={disabled} />
+              <PointEditLabel label={editLabel(pointOffer.location.id, pointOffer.location.name)} focusKey={`point-only:${pointOffer.location.id}`} onClick={() => editPoint(pointOffer.location.id, `point-only:${pointOffer.location.id}`)} disabled={disabled} />
             </div>
             <div className="fld"><div className="fl">Название товара</div><div className="inp dis">{lead.product.name}{lead.packLabel ? ` · ${lead.packLabel}` : ''}</div><span className="hint">Название общее для всех точек</span></div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
@@ -718,7 +734,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                     </div>
                     <Ic name="right" className="c2" />
                   </button>
-                  {selectedPoints.length === 1 && <PointEditLabel label={editLabel(selectedPoints[0]![0], '')} onClick={() => editPoint(selectedPoints[0]![0])} disabled={disabled} style={{ position: 'absolute', right: 44, top: '50%', transform: 'translateY(-50%)', margin: 0 }} />}
+                  {selectedPoints.length === 1 && <PointEditLabel label={editLabel(selectedPoints[0]![0], '')} focusKey={`selected:${selectedPoints[0]![0]}`} onClick={() => editPoint(selectedPoints[0]![0], `selected:${selectedPoints[0]![0]}`)} disabled={disabled} style={{ position: 'absolute', right: 44, top: '50%', transform: 'translateY(-50%)', margin: 0 }} />}
                   </div>
                 )}
                 {errors.points && <div className="fld"><ErrorLine id={err('points')}>{t(errors.points)}</ErrorLine></div>}
@@ -750,7 +766,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                           ? <p className="c num"><span className="bd bd-p" style={{ height: 20 }}>{t('card.ownPriceKept', { price: price(now) })}</span> не меняется</p>
                           : <p className="c num">{changing ? `${formatAmount(now!)} → ${price(commonAmount)}` : price(now)}</p>}
                       </div>
-                      <PointEditLabel label={editLabel(offer.location.id, offer.location.name)} onClick={() => editPoint(offer.location.id)} disabled={disabled} />
+                      <PointEditLabel label={editLabel(offer.location.id, offer.location.name)} focusKey={`offer:${offer.id}`} onClick={() => editPoint(offer.location.id, `offer:${offer.id}`)} disabled={disabled} />
                     </label>
                   );
                 })}
@@ -761,7 +777,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                       <label key={location.id} className="li" style={{ minHeight: 48, cursor: 'pointer' }}>
                         <Check checked={values.points[location.id]?.selected ?? false} onChange={(next) => togglePoint(location.id, next)} label={location.name} disabled={disabled} />
                         <div className="mid"><div className="ts">{location.name}</div><p className="c">{location.addressText}</p></div>
-                        <PointEditLabel label={t('points.editNamed', { name: location.name })} onClick={() => editPoint(location.id)} disabled={disabled} />
+                        <PointEditLabel label={t('points.editNamed', { name: location.name })} focusKey={`location:${location.id}`} onClick={() => editPoint(location.id, `location:${location.id}`)} disabled={disabled} />
                       </label>
                     ))}
                   </>
@@ -834,7 +850,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
               <label key={location.id} className="li" style={{ cursor: 'pointer' }}>
                 <Check checked={values.points[location.id]?.selected ?? false} onChange={(next) => togglePoint(location.id, next)} label={location.name} />
                 <div className="mid"><div className="ts">{location.name}</div><p className="c">{location.addressText}</p></div>
-                <PointEditLabel label={t('points.editNamed', { name: location.name })} onClick={() => { setOverlay(null); editPoint(location.id); }} />
+                <PointEditLabel label={t('points.editNamed', { name: location.name })} focusKey={`point-sheet:${location.id}`} onClick={() => editPoint(location.id, `point-sheet:${location.id}`, 'points')} />
               </label>
             ))}
           </div>

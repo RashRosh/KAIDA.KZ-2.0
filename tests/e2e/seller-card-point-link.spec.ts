@@ -48,8 +48,10 @@ async function prepareSeller(page: Page, phone: string) {
 }
 
 const pointName = (sellerId: string) => withPool(async (pool) => (await pool.query('SELECT name FROM locations WHERE seller_id=$1', [sellerId])).rows[0].name as string);
+const changeSetCount = (sellerId: string) => withPool(async (pool) => Number((await pool.query('SELECT COUNT(*) FROM seller_change_sets WHERE seller_id=$1', [sellerId])).rows[0].count));
 
 test('a point opens from the card, saves for all its cards and the card keeps what was typed; going back asks only for the point', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'The contract covers the phone flow; desktop is deferred.');
   const phone = phoneFor(testInfo.project.name);
   await cleanup(phone);
   try {
@@ -58,16 +60,26 @@ test('a point opens from the card, saves for all its cards and the card keeps wh
     const editor = offerEditor(page);
     await expect(editor).toBeVisible();
     await fillOfferFields(page, { product: 'Баранина', price: '5100', unit: 'kg', comment: 'Свежая, утренняя' });
+    const editPoint = editor.getByRole('button', { name: 'Изменить торговую точку Ссылка точка' });
+
+    // Details must load before Save is enabled: fallback empties must never overwrite real contacts or hours.
+    await page.route('**/api/seller/points/details', (route) => route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }));
+    await editPoint.click();
+    await expect(page.getByText('Не удалось загрузить данные продавца.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Сохранить точку' })).toBeDisabled();
+    await page.getByRole('button', { name: 'Назад к карточке' }).click();
+    await expect(editPoint).toBeFocused();
+    await page.unroute('**/api/seller/points/details');
 
     // The pencil label next to the point opens the point editor over the card.
-    await editor.getByRole('button', { name: 'Изменить торговую точку Ссылка точка' }).click();
+    await editPoint.click();
     await expect(page.getByText('Изменения точки действуют для всех её карточек.')).toBeVisible();
     const name = page.locator('#trading-location-name');
     await expect(name).toHaveValue('Ссылка точка');
 
     // Going back with a changed point asks; keeping the edit stays on the point, closing returns to the card.
     await name.fill('Точка не сохранена');
-    await page.getByRole('button', { name: 'Назад к карточке' }).click();
+    await page.keyboard.press('Escape');
     const sheet = page.getByRole('alertdialog', { name: 'Закрыть без сохранения?' });
     await expect(sheet).toBeVisible();
     await sheet.getByRole('button', { name: 'Продолжить правку' }).click();
@@ -75,6 +87,7 @@ test('a point opens from the card, saves for all its cards and the card keeps wh
     await page.getByRole('button', { name: 'Назад к карточке' }).click();
     await page.getByRole('alertdialog', { name: 'Закрыть без сохранения?' }).getByRole('button', { name: 'Закрыть' }).click();
     await expect(editor.getByRole('combobox', { name: 'Название товара' })).toHaveValue('Баранина');
+    await expect(editPoint).toBeFocused();
     expect(await pointName(sellerId)).toBe('Ссылка точка');
 
     // Save: back on the same card, everything typed is in place, the point has its new name, nothing was sent.
@@ -86,7 +99,9 @@ test('a point opens from the card, saves for all its cards and the card keeps wh
     await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toHaveValue('5100');
     await expect(editor.getByRole('textbox', { name: /^Комментарий/ })).toHaveValue('Свежая, утренняя');
     await expect(editor.getByText('Точка сохранена', { exact: true }).first()).toBeVisible();
+    await expect(editor.getByRole('button', { name: 'Изменить торговую точку Точка сохранена' })).toBeFocused();
     expect(await pointName(sellerId)).toBe('Точка сохранена');
+    expect(await changeSetCount(sellerId)).toBe(0);
     await expect(page).toHaveURL(/\/seller\?new=1$/);
   } finally {
     await cleanup(phone);

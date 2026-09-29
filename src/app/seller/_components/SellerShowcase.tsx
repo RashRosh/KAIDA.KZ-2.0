@@ -11,7 +11,7 @@ import type { SellerView } from '../../../modules/sellers/contracts/seller.contr
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/format-amount';
-import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, PointEditLabel, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
+import { Bar, focusPointEditLabel, Ic, LoadError, LoginRequired, Nav, Phone, PointEditLabel, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
 import { ActualityScreen, ActualityTask, ArchiveScreen, daysLabel, FreshPlaque, useReconfirm } from './ActualityScreens';
 import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardEditor';
 import { SellerTradingPoints } from './SellerTradingPoints';
@@ -447,12 +447,21 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
   const [error, setError] = useState(false);
   // seller-card-point-link: one of the card's points opens for editing over the card screen.
   const [editingPoint, setEditingPoint] = useState<string | null>(null);
+  const [pointReturn, setPointReturn] = useState<{ focusKey: string; n: number } | null>(null);
   const [pointSaved, setPointSaved] = useState(false);
   useEffect(() => {
     if (!pointSaved) return;
     const timer = window.setTimeout(() => setPointSaved(false), TOAST_MS);
     return () => window.clearTimeout(timer);
   }, [pointSaved]);
+  useEffect(() => {
+    if (!editingPoint && pointReturn) focusPointEditLabel(pointReturn.focusKey);
+  }, [editingPoint, pointReturn]);
+
+  function editPoint(locationId: string, focusKey: string) {
+    setPointReturn((current) => ({ focusKey, n: (current?.n ?? 0) + 1 }));
+    setEditingPoint(locationId);
+  }
 
   async function toggle(offer: SellerOfferView) {
     setBusyId(offer.id);
@@ -597,7 +606,7 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
                 <p className="c num">{priceText(offer)}{offer.priceOwn ? ` · ${t('cardScreen.own')}` : ''}</p>
               </div>
               {badge(offer)}
-              <PointEditLabel label={t('points.editNamed', { name: offer.location.name })} onClick={() => setEditingPoint(offer.location.id)} />
+              <PointEditLabel label={t('points.editNamed', { name: offer.location.name })} focusKey={`card:${offer.id}`} onClick={() => editPoint(offer.location.id, `card:${offer.id}`)} />
             </div>
             <div style={{ display: 'flex', gap: 16 }}>
               <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => go(`point=${offer.id}`)}>{t('cardScreen.editPoint')}</button>

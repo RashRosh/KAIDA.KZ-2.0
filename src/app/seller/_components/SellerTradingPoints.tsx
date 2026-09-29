@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useId, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
@@ -103,10 +103,10 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   }, []);
   const locationCount = locations.length;
   useEffect(() => {
-    if (!seller) return;
+    if (!seller || embedded) return;
     const timer = window.setTimeout(() => { void loadDetails(); void loadCardCounts(); }, 0);
     return () => window.clearTimeout(timer);
-  }, [seller, locationCount, loadDetails, loadCardCounts]);
+  }, [seller, embedded, locationCount, loadDetails, loadCardCounts]);
 
   useEffect(() => {
     if (!status) return;
@@ -163,12 +163,32 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     if (dirty) setConfirmDiscard(true);
     else closeForm();
   }
+  const goBackRef = useRef(goBack);
+  useEffect(() => { goBackRef.current = goBack; });
+
+  // The parent card also listens for Escape. Capture it here first so a dirty point always gets its own confirmation.
+  useEffect(() => {
+    if (!embedded) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      goBackRef.current();
+    }
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [embedded]);
 
   useEffect(() => {
     if (!editLocationId || !embeddedLocation) return;
     let alive = true;
     void loadDetails().then((loaded) => {
       if (!alive) return;
+      // Never enable saving with fallback empties: that could erase the point's real contacts and hours.
+      if (!loaded) {
+        setError(t('seller.loadError'));
+        return;
+      }
       const source = loaded?.get(editLocationId);
       fillDetails(source);
       setBaseline(JSON.stringify({
