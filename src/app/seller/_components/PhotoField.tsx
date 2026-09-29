@@ -23,6 +23,17 @@ export type PhotoTile = {
   file?: File;
 };
 
+type PhotoDrag = {
+  key: string;
+  li: HTMLElement;
+  tile: HTMLElement;
+  grabX: number;
+  grabY: number;
+  pointerX: number;
+  pointerY: number;
+  reduceMotion: boolean;
+};
+
 const uploadErrorKey: Record<string, MessageKey> = {
   PHOTO_UNSUPPORTED_TYPE: 'photos.errorType',
   PHOTO_TOO_LARGE: 'photos.errorLarge',
@@ -66,7 +77,7 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
   const [rowSize, setRowSize] = useState(4);
   const gridRef = useRef<HTMLUListElement>(null);
   const press = useRef<{ key: string; x: number; y: number; timer: number } | null>(null);
-  const drag = useRef<{ key: string; li: HTMLElement; tile: HTMLElement; grabX: number; grabY: number } | null>(null);
+  const drag = useRef<PhotoDrag | null>(null);
   const draggingRef = useRef<string | null>(null);
   const suppressClick = useRef(false);
   const requests = useRef(new Map<string, XMLHttpRequest>());
@@ -133,6 +144,8 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
       if (dx !== 0 || dy !== 0) li.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: SETTLE_MS, easing: SPRING });
     }
     layout.current = next;
+    const held = drag.current;
+    if (held) positionDraggedTile(held, held.pointerX, held.pointerY);
   });
 
   function patch(key: string, change: Partial<PhotoTile>) {
@@ -224,9 +237,20 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
     const tile = li?.querySelector<HTMLElement>('.mt');
     if (!current || !li || !tile) return;
     const rect = tile.getBoundingClientRect();
-    drag.current = { key, li, tile, grabX: current.x - rect.left, grabY: current.y - rect.top };
-    if (reducedMotion()) {
-      tile.style.transform = `scale(${LIFT_SCALE})`;
+    const reduceMotion = reducedMotion();
+    drag.current = {
+      key,
+      li,
+      tile,
+      grabX: current.x - rect.left,
+      grabY: current.y - rect.top,
+      pointerX: current.x,
+      pointerY: current.y,
+      reduceMotion,
+    };
+    if (reduceMotion) {
+      tile.style.transition = 'none';
+      tile.style.transform = '';
     } else {
       tile.style.transition = `transform ${LIFT_MS}ms ease-out`;
       tile.style.transform = `scale(${LIFT_SCALE})`;
@@ -235,6 +259,21 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
     setDraggingKey(key);
     setSelectedKey(null);
     navigator.vibrate?.(10);
+  }
+
+  function positionDraggedTile(held: PhotoDrag, clientX: number, clientY: number) {
+    held.pointerX = clientX;
+    held.pointerY = clientY;
+    if (held.reduceMotion) {
+      held.tile.style.transform = '';
+      return;
+    }
+    const grid = gridRef.current;
+    if (!grid) return;
+    const box = grid.getBoundingClientRect();
+    const x = clientX - box.left;
+    const y = clientY - box.top;
+    held.tile.style.transform = `translate(${x - held.grabX - held.li.offsetLeft}px, ${y - held.grabY - held.li.offsetTop}px) scale(${LIFT_SCALE})`;
   }
 
   function onPointerMove(event: ReactPointerEvent) {
@@ -253,7 +292,7 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
     const box = grid.getBoundingClientRect();
     const x = event.clientX - box.left;
     const y = event.clientY - box.top;
-    held.tile.style.transform = `translate(${x - held.grabX - held.li.offsetLeft}px, ${y - held.grabY - held.li.offsetTop}px) scale(${LIFT_SCALE})`;
+    positionDraggedTile(held, event.clientX, event.clientY);
     // The slot under the finger (by layout, so slots that are still settling do not flip back and forth).
     for (const li of grid.querySelectorAll<HTMLElement>('[data-photo-key]')) {
       const key = li.dataset.photoKey!;
@@ -277,7 +316,7 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
       const from = held.tile.style.transform;
       held.tile.style.transition = '';
       held.tile.style.transform = '';
-      if (!reducedMotion() && from) held.tile.animate([{ transform: from }, { transform: 'none' }], { duration: SETTLE_MS, easing: 'ease-out' });
+      if (!held.reduceMotion && from) held.tile.animate([{ transform: from }, { transform: 'none' }], { duration: SETTLE_MS, easing: 'ease-out' });
     }
     setDraggingKey(null);
   }

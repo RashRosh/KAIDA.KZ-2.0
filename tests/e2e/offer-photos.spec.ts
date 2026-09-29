@@ -204,7 +204,7 @@ test('a rejected file stays at its tile and blocks sending until it is removed; 
   }
 });
 
-test('photo tiles: tap opens the ← → menu that follows the photo, edges are disabled, × deletes, a long press lifts the tile', async ({ page }, testInfo) => {
+test('photo tiles: arrows follow the photo, × deletes, drag stays under the pointer and reduced motion does not travel', async ({ page }, testInfo) => {
   const phone = phoneFor(testInfo.project.name, 4);
   await cleanup(phone);
   try {
@@ -242,15 +242,41 @@ test('photo tiles: tap opens the ← → menu that follows the photo, edges are 
     await expect(editor.getByText('2 из 5')).toBeVisible();
     expect(await srcs()).toEqual([two, three]);
 
-    // Long press lifts the tile (seller-photo-tiles §2); the feel of the drag itself is checked on a phone.
-    const tile = editor.getByRole('button', { name: 'Фото 2', exact: true });
+    // One pointer move into the neighbour's slot reorders without letting the lifted tile jump away from the pointer.
+    const draggedLi = editor.locator('li[data-photo-key]').nth(1);
+    const draggedKey = await draggedLi.getAttribute('data-photo-key');
+    const tile = draggedLi.getByRole('button', { name: 'Фото 2', exact: true });
     const box = (await tile.boundingBox())!;
+    const firstBox = (await editor.locator('li[data-photo-key]').first().boundingBox())!;
+    const target = { x: firstBox.x + firstBox.width / 2, y: firstBox.y + 60 };
     await page.mouse.move(box.x + box.width / 2, box.y + 60);
     await page.mouse.down();
     await expect(editor.locator('.mt.lift')).toHaveCount(1);
+    await page.mouse.move(target.x, target.y);
+    await expect.poll(srcs).toEqual([three, two]);
+    const movedBox = (await editor.locator(`li[data-photo-key="${draggedKey}"] .mt`).boundingBox())!;
+    expect(target.x).toBeGreaterThanOrEqual(movedBox.x);
+    expect(target.x).toBeLessThanOrEqual(movedBox.x + movedBox.width);
+    expect(target.y).toBeGreaterThanOrEqual(movedBox.y);
+    expect(target.y).toBeLessThanOrEqual(movedBox.y + movedBox.height);
     await page.mouse.up();
     await expect(editor.locator('.mt.lift')).toHaveCount(0);
-    expect(await srcs()).toEqual([two, three]);
+
+    // Reduced motion still changes the order immediately, but the held tile neither scales nor travels.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const reducedLi = editor.locator('li[data-photo-key]').nth(1);
+    const reducedKey = await reducedLi.getAttribute('data-photo-key');
+    const reducedTile = reducedLi.getByRole('button', { name: 'Фото 2', exact: true });
+    const reducedBox = (await reducedTile.boundingBox())!;
+    const reducedTargetBox = (await editor.locator('li[data-photo-key]').first().boundingBox())!;
+    await page.mouse.move(reducedBox.x + reducedBox.width / 2, reducedBox.y + 60);
+    await page.mouse.down();
+    await expect(editor.locator('.mt.lift')).toHaveCount(1);
+    await page.mouse.move(reducedTargetBox.x + reducedTargetBox.width / 2, reducedTargetBox.y + 60);
+    await expect.poll(srcs).toEqual([two, three]);
+    await expect(editor.locator(`li[data-photo-key="${reducedKey}"] .mt`)).toHaveCSS('transform', 'none');
+    await page.mouse.up();
+    await expect(editor.locator('.mt.lift')).toHaveCount(0);
   } finally {
     await cleanup(phone);
   }
