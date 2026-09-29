@@ -26,6 +26,22 @@
 .kaida a.chip{text-decoration:none}
 .kaida .chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .kaida .li:disabled{opacity:1}
+/* Photo tiles (seller-photo-tiles §6, PO 2026-09-29): the drawn look stays, only the invisible hit area reaches 44 × 44. */
+/* The tile clips (overflow:hidden) and is 72 px wide: two 44 px targets do not fit side by side, so each takes its half
+   of the top edge — 36 × 44 inside the tile — without changing the drawn 22 px buttons. */
+.kaida .mt .cvb::before{inset:-4px -10px -18px -4px}
+.kaida .mt .del::before{inset:-4px -4px -18px -10px}
+.kaida .mpop button::before{content:"";position:absolute;inset:-4px 0}
+.kaida .mpop button{position:relative}
+.kaida .mt .tap{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:inherit;background:none;color:inherit;cursor:pointer}
+.kaida .mt .pb,.kaida .mt .erl{pointer-events:none}
+.kaida .mt .tap:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .mt.sel>img{border-radius:inherit}
+.kaida .mt.lift{z-index:3;box-shadow:0 12px 24px -6px #19161b55}
+.kaida .mrow>li{position:relative;list-style:none}
+.kaida .mpop-wrap{flex-basis:100%;width:100%;list-style:none}
+.kaida .mpop{transition:left 200ms cubic-bezier(.34,1.56,.64,1)}
+@media (prefers-reduced-motion:reduce){.kaida .mpop{transition:none}}
 /* A native select drawn as the mockup's «.inp + i-down c2» control. */
 .kaida select.inp{appearance:none;font:400 16px/22px var(--sans);cursor:pointer;padding-right:40px;background:var(--surface) url(/kaida/select-down.svg) no-repeat right 12px center/24px 24px}
 .kaida select.inp:disabled{background-color:var(--sunken)}

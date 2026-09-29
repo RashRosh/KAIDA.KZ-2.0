@@ -260,6 +260,19 @@
 /* cover marker = star only (comment 3e4cf6b9) */
 .kaida .mt .cv.star{width:22px;height:22px;padding:0;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--primary)}
 .kaida .mt .cv.star .ic{width:14px;height:14px;color:var(--sun)}
+/* photo tile controls: cover + delete on every tile, tap → micro-menu ← → (comment 47b46211) */
+.kaida .mt .cvb{position:absolute;left:4px;top:4px;width:22px;height:22px;padding:0;border:0;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#19161b8c;color:#fff;cursor:pointer}
+.kaida .mt .cvb .ic{width:14px;height:14px}
+.kaida .mt .del{position:absolute;right:4px;top:4px;width:22px;height:22px;padding:0;border:0;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#19161b8c;color:#fff;cursor:pointer;z-index:1}
+.kaida .mt .del .ic{width:14px;height:14px}
+.kaida .mt .cvb::before,.kaida .mt .del::before{content:"";position:absolute;inset:-8px}
+.kaida .mt.sel{overflow:visible;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary)}
+.kaida .mpop-wrap{position:relative;height:48px;margin-top:-2px}
+.kaida .mpop{position:absolute;top:8px;display:inline-flex;background:#302c33;border-radius:12px;box-shadow:var(--shadow-md);padding:2px}
+.kaida .mpop::before{content:"";position:absolute;top:-6px;left:50%;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom-color:#302c33}
+.kaida .mpop button{width:44px;height:36px;border:0;background:none;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer}
+.kaida .mpop button[disabled]{color:#ffffff59}
+.kaida .mpop .sep{width:1px;background:#ffffff26;margin:6px 0}
 .kaida button.li:not(.card){appearance:none;background:none;border:0;width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .kaida button.li:not(.card)+.li{border-top:1px solid var(--line)}
 /* no-photo fallback = translucent KAIDA sign (comment 045a8fb4) */
