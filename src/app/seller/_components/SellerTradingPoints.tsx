@@ -6,7 +6,7 @@ import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
 import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
 import { OpeningHoursFields, PointContactStatus, PointContactsFields, type ContactsDraft } from './PointDetailsFields';
-import { Bar, Ic, Nav, Phone, shakeErrors, Toast, TOAST_MS } from '../_kaida/ui';
+import { Bar, Ic, Nav, Phone, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
@@ -31,18 +31,23 @@ type Props = {
   onSellerChange: (seller: SellerView) => void;
   autoOpenAdd?: boolean;
   onLocationCreated?: () => void;
+  // seller-card-point-link: the editor of one existing point opens at once (from a card) and hands back to the caller.
+  editLocationId?: string;
+  onClose?: (result: 'saved' | 'cancelled') => void;
 };
 
-export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = false, onLocationCreated }: Props) {
+export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = false, onLocationCreated, editLocationId, onClose }: Props) {
   const { t } = useI18n();
   const ids = useId();
   const locations = seller?.locations ?? [];
-  const [mode, setMode] = useState<'closed' | 'add' | 'edit'>(() => autoOpenAdd && locations.length === 0 ? 'add' : 'closed');
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const embeddedLocation = editLocationId ? locations.find((location) => location.id === editLocationId) : undefined;
+  const embedded = Boolean(editLocationId);
+  const [mode, setMode] = useState<'closed' | 'add' | 'edit'>(() => embeddedLocation ? 'edit' : autoOpenAdd && locations.length === 0 ? 'add' : 'closed');
+  const [editingId, setEditingId] = useState<string | null>(embeddedLocation?.id ?? null);
   const [sellerDisplayName, setSellerDisplayName] = useState('');
-  const [name, setName] = useState('');
-  const [type, setType] = useState<LocationType>('shop');
-  const [addressText, setAddressText] = useState('');
+  const [name, setName] = useState(embeddedLocation?.name ?? '');
+  const [type, setType] = useState<LocationType>(embeddedLocation?.type ?? 'shop');
+  const [addressText, setAddressText] = useState(embeddedLocation?.addressText ?? '');
   const [submitting, setSubmitting] = useState(false);
   const [geoBusyId, setGeoBusyId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -52,6 +57,10 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [hours, setHours] = useState<OpeningHours>(templateOpeningHours);
   const [hoursNeedsReview, setHoursNeedsReview] = useState(true);
   const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
+  // Embedded in a card: contacts and hours must arrive before the point can be saved, and going back asks when changed.
+  const [formReady, setFormReady] = useState(!embedded);
+  const [baseline, setBaseline] = useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   // Whether contacts and hours have arrived: a form opened before that loads them itself instead of the template.
   const [detailsLoaded, setDetailsLoaded] = useState(false);
@@ -142,10 +151,39 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setMode('edit');
   }
 
-  function closeForm() {
+  function closeForm(result: 'saved' | 'cancelled' = 'cancelled') {
     resetForm();
     setMode('closed');
+    onClose?.(result);
   }
+
+  const snapshot = () => JSON.stringify({ name: name.trim(), type, addressText: addressText.trim(), contacts, hours });
+  const dirty = embedded && formReady && baseline !== null && snapshot() !== baseline;
+  function goBack() {
+    if (dirty) setConfirmDiscard(true);
+    else closeForm();
+  }
+
+  useEffect(() => {
+    if (!editLocationId || !embeddedLocation) return;
+    let alive = true;
+    void loadDetails().then((loaded) => {
+      if (!alive) return;
+      const source = loaded?.get(editLocationId);
+      fillDetails(source);
+      setBaseline(JSON.stringify({
+        name: embeddedLocation.name.trim(),
+        type: embeddedLocation.type,
+        addressText: embeddedLocation.addressText.trim(),
+        contacts: { phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' },
+        hours: source?.openingHours ?? templateOpeningHours(),
+      }));
+      setFormReady(true);
+    });
+    return () => { alive = false; };
+    // The point is read once when the card opens its editor.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -212,7 +250,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         ? t('points.addressGeoWarning')
         : mode === 'edit' ? t('points.saved') : t('points.added'));
       const created = mode === 'add';
-      closeForm();
+      closeForm('saved');
       if (created) onLocationCreated?.();
     } catch {
       setError(t('points.saveError'));
@@ -277,9 +315,10 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     const saved = editing ? details.get(editing.id)?.contacts : undefined;
     return (
       <Phone>
-        <Bar title={editing?.name ?? t('points.new')} onBack={closeForm} backDisabled={submitting} />
+        <Bar title={editing?.name ?? t('points.new')} onBack={goBack} backDisabled={submitting} backLabel={embedded ? t('points.backToCard') : undefined} />
         <form id={`${ids}-form`} className="body" style={{ gap: 18, overflowY: 'auto' }} onSubmit={submit} noValidate aria-label={mode === 'edit' ? t('points.edit') : t('points.new')}>
           {errorBanner}
+          {embedded && <p className="c c2">{t('points.sharedHint')}</p>}
           {!seller && (
             <div className="fld">
               <label htmlFor="seller-display-name">{t('points.sellerName')}</label>
@@ -330,15 +369,25 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
           <OpeningHoursFields value={hours} onChange={setHours} disabled={submitting} needsReview={hoursNeedsReview} />
         </form>
         <div className="foot">
-          <button type="submit" form={`${ids}-form`} className="btn btn-p lg w" disabled={submitting} aria-busy={submitting}>
+          <button type="submit" form={`${ids}-form`} className="btn btn-p lg w" disabled={submitting || !formReady} aria-busy={submitting}>
             {submitting && <span className="spin" />}{submitting ? t('points.saving') : t('points.save')}
           </button>
-          <button type="button" className="btn btn-g w" onClick={closeForm} disabled={submitting}>{t('offerManage.cancel')}</button>
+          <button type="button" className="btn btn-g w" onClick={goBack} disabled={submitting}>{t('offerManage.cancel')}</button>
         </div>
         {status && <Toast bottom={140}>{status}</Toast>}
+        {confirmDiscard && (
+          <Sheet title={t('card.discardTitle')} onClose={() => setConfirmDiscard(false)} role="alertdialog" closeButton={false} describedBy={`${ids}-discard`}>
+            <p className="t c2" id={`${ids}-discard`}>{t('points.discardText')}</p>
+            <button type="button" className="btn btn-p lg w" onClick={() => setConfirmDiscard(false)} data-autofocus>{t('card.keep')}</button>
+            <button type="button" className="btn btn-g w" style={{ color: 'var(--danger)' }} onClick={() => { setConfirmDiscard(false); closeForm(); }}>{t('card.close')}</button>
+          </Sheet>
+        )}
       </Phone>
     );
   }
+
+  // Embedded in a card, a closed form means «back to the card»: the list of points is not shown.
+  if (embedded) return null;
 
   // AI-S12 · Points: empty state or the list of points with their contacts.
   return (

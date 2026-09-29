@@ -11,9 +11,10 @@ import type { SellerView } from '../../../modules/sellers/contracts/seller.contr
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/format-amount';
-import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
+import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, PointEditLabel, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
 import { ActualityScreen, ActualityTask, ArchiveScreen, daysLabel, FreshPlaque, useReconfirm } from './ActualityScreens';
 import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardEditor';
+import { SellerTradingPoints } from './SellerTradingPoints';
 import { valuesFromChangeSet, type CardValues } from './card-editor-state';
 import { findCard, groupCards, missingDraftFields, pluralKey, showcaseEntries, type SellerCard } from './card-model';
 
@@ -393,7 +394,7 @@ function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTrans
       />
     );
   }
-  if (screenCard) return <CardScreen card={screenCard} onClose={onClose} go={go} onRefresh={onRefresh} />;
+  if (screenCard) return <CardScreen card={screenCard} seller={seller} onClose={onClose} go={go} onRefresh={onRefresh} />;
   if (params.get('actuality') === '1') return <ActualityScreen due={dueCards} onClose={onClose} onDone={onReconfirmed} go={go} />;
   if (params.get('tab') === 'archive') return <ArchiveScreen cards={archivedCards} onClose={onClose} go={go} />;
   return null;
@@ -432,7 +433,7 @@ function RemovedCardScreen({ card, title, onClose, go }: { card: SellerCard; tit
 
 // AI-S15 · Card: one point — photo, status, price and actions (Published / Off); several points — every point with its
 // price and state (Points); change everywhere, in one point, or switch a point on or off.
-function CardScreen({ card, onClose, go, onRefresh }: { card: SellerCard; onClose: () => void; go: (query: string) => void; onRefresh: () => void }) {
+function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard; seller: SellerView | null; onClose: () => void; go: (query: string) => void; onRefresh: () => void }) {
   const { locale, t } = useI18n();
   const router = useRouter();
   const reconfirm = useReconfirm();
@@ -444,6 +445,14 @@ function CardScreen({ card, onClose, go, onRefresh }: { card: SellerCard; onClos
   }, [reconfirmed]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  // seller-card-point-link: one of the card's points opens for editing over the card screen.
+  const [editingPoint, setEditingPoint] = useState<string | null>(null);
+  const [pointSaved, setPointSaved] = useState(false);
+  useEffect(() => {
+    if (!pointSaved) return;
+    const timer = window.setTimeout(() => setPointSaved(false), TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [pointSaved]);
 
   async function toggle(offer: SellerOfferView) {
     setBusyId(offer.id);
@@ -545,6 +554,20 @@ function CardScreen({ card, onClose, go, onRefresh }: { card: SellerCard; onClos
     );
   }
 
+  if (editingPoint) {
+    return (
+      <SellerTradingPoints
+        seller={seller}
+        onSellerChange={() => onRefresh()}
+        editLocationId={editingPoint}
+        onClose={(result) => {
+          setEditingPoint(null);
+          if (result === 'saved') { setPointSaved(true); onRefresh(); }
+        }}
+      />
+    );
+  }
+
   return (
     <Phone>
       <Bar title={title} onBack={onClose} />
@@ -574,6 +597,7 @@ function CardScreen({ card, onClose, go, onRefresh }: { card: SellerCard; onClos
                 <p className="c num">{priceText(offer)}{offer.priceOwn ? ` · ${t('cardScreen.own')}` : ''}</p>
               </div>
               {badge(offer)}
+              <PointEditLabel label={t('points.editNamed', { name: offer.location.name })} onClick={() => setEditingPoint(offer.location.id)} />
             </div>
             <div style={{ display: 'flex', gap: 16 }}>
               <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => go(`point=${offer.id}`)}>{t('cardScreen.editPoint')}</button>
@@ -584,6 +608,7 @@ function CardScreen({ card, onClose, go, onRefresh }: { card: SellerCard; onClos
           </div>
         ))}
       </main>
+      {pointSaved && <Toast>{t('points.saved')}</Toast>}
     </Phone>
   );
 }

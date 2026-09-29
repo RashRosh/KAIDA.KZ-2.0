@@ -103,7 +103,18 @@ export function Toast({ children, bottom }: { children: React.ReactNode; bottom?
   );
 }
 
-const FOCUSABLE = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)';
+// seller-card-point-link: just a pencil on a trading point of the Seller — opens that point for editing. The touch
+// area is 44 × 44, the row loses only the width of the icon.
+export function PointEditLabel({ label, onClick, disabled, style }: { label: string; onClick: () => void; disabled?: boolean; style?: React.CSSProperties }) {
+  return (
+    <button type="button" className="ib" style={{ width: 44, height: 44, margin: '-10px -10px -10px -4px', flex: 'none', color: 'var(--primary-text)', ...style }} aria-label={label} title={label} disabled={disabled}
+      onClick={(event) => { event.preventDefault(); event.stopPropagation(); onClick(); }}>
+      <Ic name="pencil" className="sm" />
+    </button>
+  );
+}
+
+const FOCUSABLE ='a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)';
 
 // Scrim + bottom sheet (kaida .scrim/.sheet); focus moves in, stays in, and returns to the opener on close.
 export function Sheet({ title, onClose, role = 'dialog', closeButton = true, children, describedBy }: {

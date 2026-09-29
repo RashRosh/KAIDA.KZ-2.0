@@ -11,9 +11,10 @@ import type { SellerChangeSetView } from '../../../modules/seller-input/contract
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { formatAmount } from '../../_components/format-amount';
-import { Bar, Check, ErrorLine, Ic, Phone, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
+import { Bar, Check, ErrorLine, Ic, Phone, PointEditLabel, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';
+import { SellerTradingPoints } from './SellerTradingPoints';
 import { pluralKey, type SellerCard } from './card-model';
 import {
   createBody,
@@ -118,8 +119,9 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
   const [failure, setFailure] = useState<'send' | 'draft' | 'conflict' | 'noChanges' | null>(null);
   const [overlay, setOverlay] = useState<'discard' | 'deleteDraft' | 'unit' | 'points' | null>(null);
   // Full-screen steps of the editor: the form, the per-point prices (AI-S11), one point's price, a new point.
-  const [view, setView] = useState<'form' | 'prices' | 'newPoint' | { pricePoint: string }>('form');
+  const [view, setView] = useState<'form' | 'prices' | 'newPoint' | { pricePoint: string } | { editPoint: string }>('form');
   const [pointAdded, setPointAdded] = useState(false);
+  const [pointSaved, setPointSaved] = useState(false);
   const [newPoint, setNewPoint] = useState<NewPoint>({ name: '', addressText: '', type: 'shop', sellerName: '' });
   const [newPointErrors, setNewPointErrors] = useState<{ name?: boolean; address?: boolean }>({});
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -131,6 +133,10 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
 
   const isCreate = mode.kind === 'create';
   const isPoint = mode.kind === 'point';
+  // A point edited from the card shows its new name at once (the card data of the showcase is read later).
+  const pointName = (locationId: string, fallback: string) => locations.find((location) => location.id === locationId)?.name ?? fallback;
+  const editPoint = (locationId: string) => setView({ editPoint: locationId });
+  const editLabel = (locationId: string, fallback: string) => t('points.editNamed', { name: pointName(locationId, fallback) });
   const draftId = mode.kind === 'create' ? mode.draft?.id ?? null : null;
   const currentPhotoIds = readyPhotoIds(photos);
   const photosChanged = photos.length !== startPhotoIds.length || currentPhotoIds.some((id, index) => id !== startPhotoIds[index]);
@@ -467,6 +473,25 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
     );
   }
 
+  // seller-card-point-link: one of the Seller's points opens as a screen over the card; the card's form stays mounted
+  // underneath, so nothing typed is lost.
+  if (typeof view === 'object' && 'editPoint' in view) {
+    return (
+      <SellerTradingPoints
+        seller={seller}
+        onSellerChange={setSeller}
+        editLocationId={view.editPoint}
+        onClose={(result) => {
+          setView('form');
+          if (result === 'saved') {
+            setPointSaved(true);
+            window.setTimeout(() => setPointSaved(false), TOAST_MS);
+          }
+        }}
+      />
+    );
+  }
+
   if (typeof view === 'object') {
     const location = locations.find((item) => item.id === view.pricePoint);
     const point = values.points[view.pricePoint];
@@ -530,7 +555,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
           <>
             <div className="banner soft" style={{ padding: '12px 14px', borderRadius: 14, flexDirection: 'row', gap: 10 }}>
               <Ic name="pin" className="pt" />
-              <p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('card.pointOnly', { name: pointOffer.location.name, count: cardOffers.length - 1 })}</p>
+              <p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('card.pointOnly', { name: pointName(pointOffer.location.id, pointOffer.location.name), count: cardOffers.length - 1 })}</p>
+              <PointEditLabel label={editLabel(pointOffer.location.id, pointOffer.location.name)} onClick={() => editPoint(pointOffer.location.id)} disabled={disabled} />
             </div>
             <div className="fld"><div className="fl">Название товара</div><div className="inp dis">{lead.product.name}{lead.packLabel ? ` · ${lead.packLabel}` : ''}</div><span className="hint">Название общее для всех точек</span></div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
@@ -679,9 +705,10 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                     </div>
                   </button>
                 ) : (
-                  <button type="button" className={`card${pointAdded ? ' hl' : ''}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} onClick={() => setOverlay('points')} disabled={disabled}>
+                  <div style={{ position: 'relative' }}>
+                  <button type="button" className={`card${pointAdded ? ' hl' : ''}`} style={{ width: '100%', flexDirection: 'row', alignItems: 'center', gap: 12 }} onClick={() => setOverlay('points')} disabled={disabled}>
                     <Ic name="pin" className="pt" />
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, paddingRight: selectedPoints.length === 1 ? 36 : 0 }}>
                       <div className="ts">{selectedPoints.length === 1
                         ? locations.find((location) => location.id === selectedPoints[0]![0])?.name
                         : `${selectedPoints.length} из ${locations.length} точек`}</div>
@@ -691,6 +718,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                     </div>
                     <Ic name="right" className="c2" />
                   </button>
+                  {selectedPoints.length === 1 && <PointEditLabel label={editLabel(selectedPoints[0]![0], '')} onClick={() => editPoint(selectedPoints[0]![0])} disabled={disabled} style={{ position: 'absolute', right: 44, top: '50%', transform: 'translateY(-50%)', margin: 0 }} />}
+                  </div>
                 )}
                 {errors.points && <div className="fld"><ErrorLine id={err('points')}>{t(errors.points)}</ErrorLine></div>}
                 {selectedPoints.length > 0 && (
@@ -714,13 +743,14 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                   const changing = checked && now && commonAmount && Number(now) !== Number(commonAmount);
                   return (
                     <label key={offer.id} className="li" style={{ minHeight: 48, cursor: cardOffers.length > 1 ? 'pointer' : 'default' }}>
-                      <Check checked={checked} onChange={(next) => update({ applyPrice: { ...values.applyPrice, [offer.id]: next } })} label={offer.location.name} disabled={disabled || cardOffers.length === 1} />
+                      <Check checked={checked} onChange={(next) => update({ applyPrice: { ...values.applyPrice, [offer.id]: next } })} label={pointName(offer.location.id, offer.location.name)} disabled={disabled || cardOffers.length === 1} />
                       <div className="mid">
-                        <div className="ts">{offer.location.name}</div>
+                        <div className="ts">{pointName(offer.location.id, offer.location.name)}</div>
                         {!checked && offer.priceOwn
                           ? <p className="c num"><span className="bd bd-p" style={{ height: 20 }}>{t('card.ownPriceKept', { price: price(now) })}</span> не меняется</p>
                           : <p className="c num">{changing ? `${formatAmount(now!)} → ${price(commonAmount)}` : price(now)}</p>}
                       </div>
+                      <PointEditLabel label={editLabel(offer.location.id, offer.location.name)} onClick={() => editPoint(offer.location.id)} disabled={disabled} />
                     </label>
                   );
                 })}
@@ -731,6 +761,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
                       <label key={location.id} className="li" style={{ minHeight: 48, cursor: 'pointer' }}>
                         <Check checked={values.points[location.id]?.selected ?? false} onChange={(next) => togglePoint(location.id, next)} label={location.name} disabled={disabled} />
                         <div className="mid"><div className="ts">{location.name}</div><p className="c">{location.addressText}</p></div>
+                        <PointEditLabel label={t('points.editNamed', { name: location.name })} onClick={() => editPoint(location.id)} disabled={disabled} />
                       </label>
                     ))}
                   </>
@@ -753,6 +784,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
       </main>
 
       {pointAdded && <Toast bottom={isCreate ? 150 : 96}>{t('card.pointAdded')}</Toast>}
+      {pointSaved && <Toast bottom={isCreate ? 150 : 96}>{t('card.pointSaved')}</Toast>}
 
       <div className="foot">
         {busy === 'send' ? (
@@ -802,6 +834,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
               <label key={location.id} className="li" style={{ cursor: 'pointer' }}>
                 <Check checked={values.points[location.id]?.selected ?? false} onChange={(next) => togglePoint(location.id, next)} label={location.name} />
                 <div className="mid"><div className="ts">{location.name}</div><p className="c">{location.addressText}</p></div>
+                <PointEditLabel label={t('points.editNamed', { name: location.name })} onClick={() => { setOverlay(null); editPoint(location.id); }} />
               </label>
             ))}
           </div>
