@@ -39,7 +39,7 @@ function moreSellerEntry(page: Page) {
 }
 
 function startSellerLine(page: Page) {
-  return page.getByRole('link', { name: 'Продаёте продукты? Откройте свою витрину', exact: true });
+  return page.getByRole('link', { name: 'Разместить товар', exact: true });
 }
 
 async function authenticateInOpenModal(page: Page, phone: string) {

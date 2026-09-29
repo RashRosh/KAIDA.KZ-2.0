@@ -1,0 +1,74 @@
+/* First Entry — the buyer start page (phone). Ported from the accepted mockup's fe.css (docs/product/mockup/
+   seller-ai-first-rev1/fe.css, version 1790680691-0123), mobile and live-demo rules only, scoped to .kaida.
+   Do not restyle here: change the mockup first. */
+.kaida .fe-hdr{height:60px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.kaida .fe-logo{display:flex;align-items:center;gap:8px;font:700 20px/24px var(--display);letter-spacing:.02em;color:var(--ink)}
+.kaida .fe-logo .ic{width:22px;height:27px;color:var(--primary)}
+.kaida main.body.fe-body{gap:14px;padding:12px 20px 12px;min-height:0}
+.kaida .fe-h1{margin:0;font:700 34px/38px var(--display);letter-spacing:-.025em;color:var(--ink);text-wrap:balance}
+.kaida .fe-h1 .ln{display:block;overflow:hidden;padding-bottom:2px}
+.kaida .fe-h1 .ln>span{display:block}
+.kaida .fe-sub{margin:0;font:400 16px/23px var(--sans);color:var(--ink2);max-width:330px}
+
+/* search field (a real input) */
+.kaida .fe-search{height:60px;border-radius:16px;border:1.5px solid var(--line-control);background:var(--surface);display:flex;align-items:center;gap:10px;padding:0 16px;flex:none;position:relative;overflow:hidden}
+.kaida .fe-search:focus-within{border:2px solid var(--primary);box-shadow:0 0 0 4px var(--primary-soft)}
+.kaida .fe-search>.ic{color:var(--ink2);flex:none}
+.kaida .fe-search .fe-field{flex:1;min-width:0;position:relative;height:100%;display:flex;align-items:center}
+.kaida .fe-search input{width:100%;min-width:0;border:0;outline:0;background:none;font:400 17px/24px var(--sans);color:var(--ink);padding:0}
+.kaida .fe-search input::placeholder{color:var(--ink3)}
+.kaida .fe-search input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.kaida .fe-search .ph-t{position:absolute;inset:0;display:flex;align-items:center;font:400 17px/24px var(--sans);color:var(--ink3);white-space:nowrap;overflow:hidden;pointer-events:none}
+.kaida .fe-caret{display:inline-block;width:2px;height:22px;background:var(--primary);margin-left:1px;border-radius:1px;flex:none}
+.kaida .fe-wave{position:absolute;left:0;bottom:0;height:3px;width:40%;background:linear-gradient(90deg,#9900cc00,#9900cc,#9900cc00);border-radius:2px;opacity:0;pointer-events:none}
+.kaida .fe-note{display:flex;align-items:center;gap:6px;font:500 13px/18px var(--sans);color:var(--ink2);margin-top:-6px}
+.kaida .fe-note .ic{width:16px;height:16px;color:var(--success)}
+.kaida .fe-seller{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px;height:56px;flex:none;border-top:1px solid var(--line);font:500 15px/20px var(--sans);color:var(--primary-text);background:none;width:100%;text-decoration:none}
+.kaida .fe-seller .ic{width:20px;height:20px}
+
+/* the example (two AI-B01 cards in the state «Пример») */
+.kaida .fe-res{display:flex;flex-direction:column;gap:10px}
+.kaida .fe-offer{position:relative;gap:12px;padding:12px;cursor:text}
+.kaida .fe-photo{width:92px;height:92px;border-radius:12px;overflow:hidden;position:relative;flex:none}
+.kaida .fe-photo svg{display:block;width:100%;height:100%;position:absolute;inset:0}
+.kaida .fe-photo .fresh{z-index:2}
+.kaida .fe-dist{display:flex;align-items:center;gap:6px;font:500 14px/20px var(--sans);color:var(--ink)}
+.kaida .fe-dist svg{flex:none}
+.kaida .fe-dist .c2{font-weight:400}
+.kaida .fe-offer .ct{pointer-events:none}
+
+/* the demo (about 3.5 s, once, then it stops) */
+@keyframes fe-line{from{transform:translateY(105%)}to{transform:none}}
+@keyframes fe-type{from{width:0}to{width:var(--w)}}
+@keyframes fe-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes fe-wave{0%{opacity:1;transform:translateX(-100%)}99%{opacity:1;transform:translateX(250%)}100%{opacity:0;transform:translateX(250%)}}
+@keyframes fe-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fe-fadein{from{opacity:0}to{opacity:1}}
+@keyframes fe-mask{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes fe-stamp{0%{opacity:0;transform:scale(.6) rotate(-6deg)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:none}}
+@keyframes fe-draw{from{stroke-dashoffset:64}to{stroke-dashoffset:0}}
+@keyframes fe-out{from{opacity:1}to{opacity:0}}
+@keyframes fe-fly{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
+.kaida .fe-live .fe-h1 .ln>span{animation:fe-line 520ms var(--ease-out-soft) both}
+.kaida .fe-live .fe-h1 .ln:nth-child(2)>span{animation-delay:80ms}
+.kaida .fe-live .fe-h1 .ln:nth-child(3)>span{animation-delay:160ms}
+.kaida .fe-live .fe-sub{animation:fe-in 400ms var(--ease-out) 200ms both}
+.kaida .fe-live .tp{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;width:0;animation:fe-type 600ms steps(var(--n,8),end) 700ms forwards}
+.kaida .fe-live .ph-rest{position:absolute;left:0;animation:fe-out 1ms linear 700ms forwards}
+.kaida .fe-live .fe-caret{animation:fe-blink 1s steps(1) infinite}
+.kaida .fe-live .fe-wave{animation:fe-wave 520ms var(--ease-in-out) 1350ms both}
+.kaida .fe-live .fe-res .fe-offer{animation:fe-fly 420ms var(--ease-out-soft) both}
+.kaida .fe-live .fe-res .k1{animation-delay:1800ms}.kaida .fe-live .fe-res .k2{animation-delay:2150ms}
+.kaida .fe-live .fe-res .fe-photo svg{animation:fe-mask 420ms var(--ease-out-soft) both}
+.kaida .fe-live .fe-res .k1 .fe-photo svg{animation-delay:1850ms}.kaida .fe-live .fe-res .k2 .fe-photo svg{animation-delay:2200ms}
+.kaida .fe-live .fe-res .o-t,.kaida .fe-live .fe-res .o-p,.kaida .fe-live .fe-res .o-l,.kaida .fe-live .fe-res .fe-cts{animation:fe-in 260ms var(--ease-out) both}
+.kaida .fe-live .fe-res .k1 .o-t{animation-delay:1950ms}.kaida .fe-live .fe-res .k1 .o-p{animation-delay:2010ms}.kaida .fe-live .fe-res .k1 .o-l{animation-delay:2070ms}.kaida .fe-live .fe-res .k1 .fe-cts{animation-delay:2130ms}
+.kaida .fe-live .fe-res .k2 .o-t{animation-delay:2300ms}.kaida .fe-live .fe-res .k2 .o-p{animation-delay:2360ms}.kaida .fe-live .fe-res .k2 .o-l{animation-delay:2420ms}.kaida .fe-live .fe-res .k2 .fe-cts{animation-delay:2480ms}
+.kaida .fe-live .fe-dist path.arc{stroke-dasharray:64;animation:fe-draw 520ms var(--ease-out) both}
+.kaida .fe-live .fe-res .k1 .fe-dist path.arc{animation-delay:2250ms}.kaida .fe-live .fe-res .k2 .fe-dist path.arc{animation-delay:2600ms}
+.kaida .fe-live .fe-res .fresh{animation:fe-stamp 360ms var(--spring) both}
+.kaida .fe-live .fe-res .k1 .fresh{animation-delay:2900ms}.kaida .fe-live .fe-res .k2 .fresh{animation-delay:3150ms}
+.kaida .fe-live .fe-sell{animation:fe-fadein 300ms var(--ease-out) 600ms both}
+@media (prefers-reduced-motion:reduce){.kaida .fe-live *,.kaida .fe-live *::before,.kaida .fe-live *::after{animation:none!important}.kaida .fe-live .tp{width:var(--w)}.kaida .fe-live .ph-rest{display:none}}
+.kaida .fe-search .go{width:44px;height:44px;border-radius:12px;border:0;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;margin-right:-8px}
+.kaida .fe-seller.fe-live{animation:fe-fadein 300ms var(--ease-out) 600ms both}

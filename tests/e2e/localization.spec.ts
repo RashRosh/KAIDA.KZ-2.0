@@ -14,7 +14,7 @@ test('«Ещё» changes the language in one sheet, keeps the route and the choi
   await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
   await expect(page.getByRole('button', { name: /^Тіл/ })).toContainText('Қазақша');
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /Тауардың қайда барын тап/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
 
   await chooseLanguageInMore(page, 'Русский');
   await page.goto('/');
@@ -31,7 +31,7 @@ test.describe('first visit', () => {
     const buttons = page.getByRole('button', { name: /^(Русский|Қазақша)$/ });
     await expect(buttons).toHaveText(['Қазақша', 'Русский']);
     await buttons.first().click();
-    await expect(page.getByRole('heading', { name: /Тауардың қайда барын тап/ })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
 
     await setLocaleCookie(context, 'ru');
     await page.reload();

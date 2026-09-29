@@ -16,18 +16,16 @@ function overlaps(a: Box, b: Box) {
 async function expectResultsBar(page: Page) {
   const search = page.getByRole('search', { name: 'Поиск предложений' });
   const input = search.getByRole('searchbox', { name: 'Какой товар ищете?' });
-  const submit = search.getByRole('button', { name: 'Искать', exact: true });
   const location = search.getByRole('button', { name: 'Учитывать моё местоположение', exact: true });
 
   await expect(input).toBeVisible();
-  await expect(submit).toBeVisible();
-  const submitBox = (await submit.boundingBox())!;
-  expect(Math.abs(submitBox.width - submitBox.height)).toBeLessThanOrEqual(1);
-  expect(submitBox.height).toBeGreaterThanOrEqual(44);
-  expect(overlaps((await input.boundingBox())!, submitBox)).toBe(false);
-  expect(overlaps((await location.boundingBox())!, submitBox)).toBe(false);
+  // B01 has no search button: the query runs from the keyboard (Enter / the phone's search key).
+  await expect(search.getByRole('button', { name: 'Искать', exact: true })).toHaveCount(0);
+  const locationBox = (await location.boundingBox())!;
+  expect(locationBox.height).toBeGreaterThanOrEqual(44);
+  expect(overlaps((await input.boundingBox())!, locationBox)).toBe(false);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  return { input, submit };
+  return { input };
 }
 
 test('UX2A the results search bar stays usable on a tablet and a narrow phone with one square Search submit', async ({ page }, testInfo) => {
@@ -42,7 +40,7 @@ test('UX2A the results search bar stays usable on a tablet and a narrow phone wi
   const mobile = await expectResultsBar(page);
 
   await mobile.input.fill('говядина');
-  await mobile.submit.click();
+  await mobile.input.press('Enter');
   await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('говядина');
   await expect(page.getByRole('article').filter({ hasText: 'Говядина' }).first()).toBeVisible();
 });

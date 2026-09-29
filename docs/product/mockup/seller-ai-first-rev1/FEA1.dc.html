@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>FE-M · Mobile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="kaida.css">
+<link rel="stylesheet" href="fe.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="ab" style="width: 2740px; height: 1320px; gap: 28px;">
+  <div class="ab-head">
+    <div class="ab-id">FIRST ENTRY · MOBILE < 1280</div>
+    <h2 class="ab-title">Mobile — поле поиска и выдача-пример</h2>
+    <p class="ab-desc">Первый экран — это сам KAIDA: заголовок, настоящее поле поиска и выдача-пример из двух точек. Демо печатает запрос в плейсхолдер, карточки прилетают по очереди, за ними — плашки свежести: чем результат отличается от каталога — свежестью, ценой, точкой и расстоянием. Живая версия — FE-PM (Play).</p>
+  </div>
+<div class="row">
+    <div class="shot w390">
+      <div class="cap"><b>FE-M · 1 · Первый кадр</b><br>0 ms · до начала демо</div>
+      <div class="fe-ph"><header class="fe-hdr"><div class="fe-logo"><span class="ic i-logo" role="img" aria-label="KAIDA"></span>KAIDA</div><div class="lang" role="group" aria-label="Язык / Тіл"><span class="on" lang="ru">РУС</span><span lang="kk">ҚАЗ</span></div></header><main class="fe-body"><h1 class="fe-h1"><span class="ln"><span>Найдите, где</span></span><span class="ln"><span>это продают</span></span><span class="ln"><span>рядом.</span></span></h1><p class="fe-sub">Актуальные предложения продавцов, цены и расстояние до товара.</p><div class="fe-search" role="search" aria-label="Поиск товара"><span class="ic i-search"></span><span class="ph-t">Что ищете?</span></div><div class="fe-note"><span class="ic i-check"></span>Без регистрации</div></main><button class="fe-seller fe-sell"><span class="ic i-store"></span>Разместить товар</button></div>
+      <div class="note"><span>Поле — настоящий <b>input</b> с подписью «Поиск товара» (aria-label). Системный запрос геолокации не показывается.</span></div>
+    </div>
+
+    <div class="shot w390">
+      <div class="cap"><b>FE-M · 2 · Итоговый кадр демо</b><br>≈3,5 s · демо остановилось</div>
+      <div class="fe-ph"><header class="fe-hdr"><div class="fe-logo"><span class="ic i-logo" role="img" aria-label="KAIDA"></span>KAIDA</div><div class="lang" role="group" aria-label="Язык / Тіл"><span class="on" lang="ru">РУС</span><span lang="kk">ҚАЗ</span></div></header><main class="fe-body"><h1 class="fe-h1"><span class="ln"><span>Найдите, где</span></span><span class="ln"><span>это продают</span></span><span class="ln"><span>рядом.</span></span></h1><p class="fe-sub">Актуальные предложения продавцов, цены и расстояние до товара.</p><div class="fe-search" role="search" aria-label="Поиск товара"><span class="ic i-search"></span><span class="ph-t">баранина<span class="fe-caret"></span></span></div><div class="fe-note"><span class="ic i-check"></span>Без регистрации</div><div class="ov">Пример · так выглядит результат</div><div class="fe-res" style="display: flex; flex-direction: column; gap: 10px;"><article class="card fe-offer k1" style="gap: 12px; padding: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="fe-photo"><svg class="ph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="100" height="100" fill="#efe4d8"/><ellipse cx="50" cy="66" rx="46" ry="24" fill="#c49a6c"/><ellipse cx="50" cy="63" rx="46" ry="24" fill="#d4ad7f"/><path d="M22 58c-4-14 8-26 26-27 17-1 32 6 34 18 2 11-9 19-27 20-18 1-30-2-33-11z" fill="#f2d7cc"/><path d="M26 57c-3-11 7-21 22-22 15-1 27 5 29 15 1 9-8 15-23 16-15 1-25-1-28-9z" fill="#b8433d"/><path d="M33 49c8-4 18-5 27-2M36 58c9-3 19-3 29 1M45 42c3 6 3 13 0 19" stroke="#e7aa9e" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="71" cy="47" r="6" fill="#f6eee2"/><circle cx="71" cy="47" r="2.6" fill="#e0d2bd"/></svg><span class="fresh fr0">Сегодня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+                <h3 class="h3 o-t" style="font-size: 16px; line-height: 21px;">Баранина, лопатка</h3>
+                <div class="o-p"><span class="pr">4 200 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2 o-l">Мясная лавка «Береке»</p>
+                <div class="fe-dist o-l"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="3" cy="12" r="2.5" fill="var(--primary)"/><path class="arc" d="M5 11 Q15 -1 25 8" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="26" cy="9" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2"/></svg><b style="font-weight: 600;">850 м</b> <span class="c2">от вас</span></div>
+              </div>
+            </div>
+            <div class="fe-cts" style="display: flex; align-items: center; gap: 4px;"><span class="ct route"><span class="ic i-route sm"></span>Маршрут</span><span class="sp"></span><div class="cts"><span class="ct"><span class="ic i-phone"></span></span><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div></div>
+          </article><article class="card fe-offer k2" style="gap: 12px; padding: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="fe-photo"><svg class="ph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="100" height="100" fill="#ece2d6"/><ellipse cx="50" cy="68" rx="46" ry="22" fill="#b48d63"/><ellipse cx="50" cy="65" rx="46" ry="22" fill="#cda77a"/><path d="M24 44c10-6 42-6 54 0v26c-12 5-44 5-54 0z" fill="#f2d7cc"/><rect x="28" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="30.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M30 50h5M30 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="39" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="41.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M41 50h5M41 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="50" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="52.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M52 50h5M52 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="61" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="63.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M63 50h5M63 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="72" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="74.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M74 50h5M74 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/></svg><span class="fresh fr2">2 дня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+                <h3 class="h3 o-t" style="font-size: 16px; line-height: 21px;">Баранина, рёбра</h3>
+                <div class="o-p"><span class="pr">3 900 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2 o-l">Зелёный базар · место 35А</p>
+                <div class="fe-dist o-l"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="3" cy="12" r="2.5" fill="var(--primary)"/><path class="arc" d="M5 11 Q15 -1 25 8" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="26" cy="9" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2"/></svg><b style="font-weight: 600;">1,4 км</b> <span class="c2">от вас</span></div>
+              </div>
+            </div>
+            <div class="fe-cts" style="display: flex; align-items: center; gap: 4px;"><span class="ct route"><span class="ic i-route sm"></span>Маршрут</span><span class="sp"></span><div class="cts"><span class="ct"><span class="ic i-phone"></span></span><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div></div>
+          </article></div></main><button class="fe-seller fe-sell"><span class="ic i-store"></span>Разместить товар</button></div>
+      <div class="note"><span>«баранина» — <b>плейсхолдер</b>, а не значение: поле пустое и готово к вводу. Две карточки AI-B01 в состоянии «Пример»: мясная лавка «Береке» и Зелёный базар, место 35А. Контакты и «Маршрут» неактивны: тап по любой части карточки ставит курсор в поле.</span></div>
+    </div>
+
+    <div class="shot w390">
+      <div class="cap"><b>FE-M · 3 · Фокус</b><br>тап по полю или карточке</div>
+      <div class="fe-ph"><header class="fe-hdr"><div class="fe-logo"><span class="ic i-logo" role="img" aria-label="KAIDA"></span>KAIDA</div><div class="lang" role="group" aria-label="Язык / Тіл"><span class="on" lang="ru">РУС</span><span lang="kk">ҚАЗ</span></div></header><main class="fe-body"><h1 class="fe-h1"><span class="ln"><span>Найдите, где</span></span><span class="ln"><span>это продают</span></span><span class="ln"><span>рядом.</span></span></h1><div class="fe-search foc" role="search" aria-label="Поиск товара"><span class="ic i-search"></span><span class="ph-t"><span class="fe-caret" style="margin-right: 2px;"></span>Что ищете?</span></div><div class="fe-note"><span class="ic i-check"></span>Без регистрации</div></main><div class="fe-kb" aria-hidden="true"><div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i></div><div><i class="s"></i><i class="w"></i><i class="s" style="background: var(--primary);"></i></div></div></div>
+      <div class="note"><span>Демо обрывается мгновенно, карточки-пример скрываются, поле в фокусе пустое, плейсхолдер «Что ищете?». Открывается клавиатура.</span></div>
+    </div>
+
+    <div class="shot w390">
+      <div class="cap"><b>FE-M · 4 · Ввод</b><br>есть текст в поле</div>
+      <div class="fe-ph"><header class="fe-hdr"><div class="fe-logo"><span class="ic i-logo" role="img" aria-label="KAIDA"></span>KAIDA</div><div class="lang" role="group" aria-label="Язык / Тіл"><span class="on" lang="ru">РУС</span><span lang="kk">ҚАЗ</span></div></header><main class="fe-body"><h1 class="fe-h1"><span class="ln"><span>Найдите, где</span></span><span class="ln"><span>это продают</span></span><span class="ln"><span>рядом.</span></span></h1><div class="fe-search foc" role="search" aria-label="Поиск товара"><span class="ic i-search"></span><span class="val">кур<span class="fe-caret"></span></span><button class="go" aria-label="Искать"><span class="ic i-right"></span></button></div><div class="fe-note"><span class="ic i-check"></span>Без регистрации</div></main><div class="fe-kb" aria-hidden="true"><div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i></div><div><i class="s"></i><i class="w"></i><i class="s" style="background: var(--primary);"></i></div></div></div>
+      <div class="note"><span>Кнопка → появляется только когда в поле есть текст. Enter или → открывает выдачу AI-B01 по введённому запросу. Пустой запрос не отправляется.</span></div>
+    </div>
+
+    <div class="shot w390">
+      <div class="cap"><b>FE-M · 5 · Без анимации</b><br>reduced motion и повторные визиты</div>
+      <div class="fe-ph"><header class="fe-hdr"><div class="fe-logo"><span class="ic i-logo" role="img" aria-label="KAIDA"></span>KAIDA</div><div class="lang" role="group" aria-label="Язык / Тіл"><span class="on" lang="ru">РУС</span><span lang="kk">ҚАЗ</span></div></header><main class="fe-body"><h1 class="fe-h1"><span class="ln"><span>Найдите, где</span></span><span class="ln"><span>это продают</span></span><span class="ln"><span>рядом.</span></span></h1><p class="fe-sub">Актуальные предложения продавцов, цены и расстояние до товара.</p><div class="fe-search" role="search" aria-label="Поиск товара"><span class="ic i-search"></span><span class="ph-t">Что ищете?</span></div><div class="fe-note"><span class="ic i-check"></span>Без регистрации</div><div class="ov">Пример · так выглядит результат</div><div class="fe-res" style="display: flex; flex-direction: column; gap: 10px;"><article class="card fe-offer k1" style="gap: 12px; padding: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="fe-photo"><svg class="ph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="100" height="100" fill="#efe4d8"/><ellipse cx="50" cy="66" rx="46" ry="24" fill="#c49a6c"/><ellipse cx="50" cy="63" rx="46" ry="24" fill="#d4ad7f"/><path d="M22 58c-4-14 8-26 26-27 17-1 32 6 34 18 2 11-9 19-27 20-18 1-30-2-33-11z" fill="#f2d7cc"/><path d="M26 57c-3-11 7-21 22-22 15-1 27 5 29 15 1 9-8 15-23 16-15 1-25-1-28-9z" fill="#b8433d"/><path d="M33 49c8-4 18-5 27-2M36 58c9-3 19-3 29 1M45 42c3 6 3 13 0 19" stroke="#e7aa9e" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="71" cy="47" r="6" fill="#f6eee2"/><circle cx="71" cy="47" r="2.6" fill="#e0d2bd"/></svg><span class="fresh fr0">Сегодня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+                <h3 class="h3 o-t" style="font-size: 16px; line-height: 21px;">Баранина, лопатка</h3>
+                <div class="o-p"><span class="pr">4 200 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2 o-l">Мясная лавка «Береке»</p>
+                <div class="fe-dist o-l"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="3" cy="12" r="2.5" fill="var(--primary)"/><path class="arc" d="M5 11 Q15 -1 25 8" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="26" cy="9" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2"/></svg><b style="font-weight: 600;">850 м</b> <span class="c2">от вас</span></div>
+              </div>
+            </div>
+            <div class="fe-cts" style="display: flex; align-items: center; gap: 4px;"><span class="ct route"><span class="ic i-route sm"></span>Маршрут</span><span class="sp"></span><div class="cts"><span class="ct"><span class="ic i-phone"></span></span><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div></div>
+          </article><article class="card fe-offer k2" style="gap: 12px; padding: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="fe-photo"><svg class="ph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="100" height="100" fill="#ece2d6"/><ellipse cx="50" cy="68" rx="46" ry="22" fill="#b48d63"/><ellipse cx="50" cy="65" rx="46" ry="22" fill="#cda77a"/><path d="M24 44c10-6 42-6 54 0v26c-12 5-44 5-54 0z" fill="#f2d7cc"/><rect x="28" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="30.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M30 50h5M30 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="39" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="41.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M41 50h5M41 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="50" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="52.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M52 50h5M52 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="61" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="63.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M63 50h5M63 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="72" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="74.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M74 50h5M74 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/></svg><span class="fresh fr2">2 дня</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+                <h3 class="h3 o-t" style="font-size: 16px; line-height: 21px;">Баранина, рёбра</h3>
+                <div class="o-p"><span class="pr">3 900 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2 o-l">Зелёный базар · место 35А</p>
+                <div class="fe-dist o-l"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="3" cy="12" r="2.5" fill="var(--primary)"/><path class="arc" d="M5 11 Q15 -1 25 8" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="26" cy="9" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2"/></svg><b style="font-weight: 600;">1,4 км</b> <span class="c2">от вас</span></div>
+              </div>
+            </div>
+            <div class="fe-cts" style="display: flex; align-items: center; gap: 4px;"><span class="ct route"><span class="ic i-route sm"></span>Маршрут</span><span class="sp"></span><div class="cts"><span class="ct"><span class="ic i-phone"></span></span><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div></div>
+          </article></div></main><button class="fe-seller fe-sell"><span class="ic i-store"></span>Разместить товар</button></div>
+      <div class="note"><span>Сразу итоговый кадр без движения: две карточки-пример, плейсхолдер «Что ищете?». Показывается при prefers-reduced-motion и при каждом визите после первого.</span></div>
+    </div>
+
+    <div class="shot w390">
+      <div class="cap"><b>FE-M · 6 · KZ</b><span class="fe-tag-kz" style="margin-left: 6px;">KZ · черновик</span><br>реальная длина казахских строк</div>
+      <div class="fe-ph"><header class="fe-hdr"><div class="fe-logo"><span class="ic i-logo" role="img" aria-label="KAIDA"></span>KAIDA</div><div class="lang" role="group" aria-label="Язык / Тіл"><span lang="ru">РУС</span><span class="on" lang="kk">ҚАЗ</span></div></header><main class="fe-body"><h1 class="fe-h1"><span class="ln"><span>Керек тауарды</span></span><span class="ln"><span>жақын жерден</span></span><span class="ln"><span>табыңыз.</span></span></h1><p class="fe-sub">Сатушылардың өзекті ұсыныстары, бағалары және тауарға дейінгі қашықтық.</p><div class="fe-search" role="search" aria-label="Тауар іздеу"><span class="ic i-search"></span><span class="ph-t">қой еті<span class="fe-caret"></span></span></div><div class="fe-note"><span class="ic i-check"></span>Тіркелусіз</div><div class="ov">Мысал · нәтиже осылай көрінеді</div><div class="fe-res" style="display: flex; flex-direction: column; gap: 10px;"><article class="card fe-offer k1" style="gap: 12px; padding: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="fe-photo"><svg class="ph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="100" height="100" fill="#efe4d8"/><ellipse cx="50" cy="66" rx="46" ry="24" fill="#c49a6c"/><ellipse cx="50" cy="63" rx="46" ry="24" fill="#d4ad7f"/><path d="M22 58c-4-14 8-26 26-27 17-1 32 6 34 18 2 11-9 19-27 20-18 1-30-2-33-11z" fill="#f2d7cc"/><path d="M26 57c-3-11 7-21 22-22 15-1 27 5 29 15 1 9-8 15-23 16-15 1-25-1-28-9z" fill="#b8433d"/><path d="M33 49c8-4 18-5 27-2M36 58c9-3 19-3 29 1M45 42c3 6 3 13 0 19" stroke="#e7aa9e" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="71" cy="47" r="6" fill="#f6eee2"/><circle cx="71" cy="47" r="2.6" fill="#e0d2bd"/></svg><span class="fresh fr0">Бүгін</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+                <h3 class="h3 o-t" style="font-size: 16px; line-height: 21px;">Қой еті, жауырын</h3>
+                <div class="o-p"><span class="pr">4 200 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2 o-l">«Береке» ет дүкені</p>
+                <div class="fe-dist o-l"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="3" cy="12" r="2.5" fill="var(--primary)"/><path class="arc" d="M5 11 Q15 -1 25 8" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="26" cy="9" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2"/></svg><b style="font-weight: 600;">850 м</b> <span class="c2">сізден</span></div>
+              </div>
+            </div>
+            <div class="fe-cts" style="display: flex; align-items: center; gap: 4px;"><span class="ct route"><span class="ic i-route sm"></span>Бағыт</span><span class="sp"></span><div class="cts"><span class="ct"><span class="ic i-phone"></span></span><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div></div>
+          </article><article class="card fe-offer k2" style="gap: 12px; padding: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="fe-photo"><svg class="ph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="100" height="100" fill="#ece2d6"/><ellipse cx="50" cy="68" rx="46" ry="22" fill="#b48d63"/><ellipse cx="50" cy="65" rx="46" ry="22" fill="#cda77a"/><path d="M24 44c10-6 42-6 54 0v26c-12 5-44 5-54 0z" fill="#f2d7cc"/><rect x="28" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="30.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M30 50h5M30 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="39" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="41.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M41 50h5M41 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="50" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="52.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M52 50h5M52 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="61" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="63.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M63 50h5M63 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/><rect x="72" y="36" width="9" height="34" rx="4.5" fill="#b8433d"/><rect x="74.5" y="30" width="4" height="12" rx="2" fill="#f6eee2"/><path d="M74 50h5M74 58h5" stroke="#e7aa9e" stroke-width="1.6" stroke-linecap="round"/></svg><span class="fresh fr2">2 күн</span></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-top: 2px;">
+                <h3 class="h3 o-t" style="font-size: 16px; line-height: 21px;">Қой қабырғасы</h3>
+                <div class="o-p"><span class="pr">3 900 ₸</span> <span class="c2" style="font-size: 14px;">/ кг</span></div>
+                <p class="c c2 o-l">Көк базар · 35А орын</p>
+                <div class="fe-dist o-l"><svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true"><circle cx="3" cy="12" r="2.5" fill="var(--primary)"/><path class="arc" d="M5 11 Q15 -1 25 8" stroke="var(--primary)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="26" cy="9" r="3.2" fill="#fff" stroke="var(--primary)" stroke-width="2"/></svg><b style="font-weight: 600;">1,4 км</b> <span class="c2">сізден</span></div>
+              </div>
+            </div>
+            <div class="fe-cts" style="display: flex; align-items: center; gap: 4px;"><span class="ct route"><span class="ic i-route sm"></span>Бағыт</span><span class="sp"></span><div class="cts"><span class="ct"><span class="ic i-phone"></span></span><span class="ct"><img src="/_blob/127a626f246aa48c4b8bc196e32e93a2" alt=""></span><span class="ct"><img src="/_blob/24ad95a4b3664ef668a9dad80a7f425a" alt=""></span></div></div>
+          </article></div></main><button class="fe-seller fe-sell"><span class="ic i-store"></span>Тауар орналастыру</button></div>
+      <div class="note"><span><span><span class="fe-tag-kz">KZ · черновик</span> Тексты — мой перевод, нужна вычитка носителем. Заголовок в 3 строки, обе карточки помещаются над «Тауар орналастыру».</span></span></div>
+    </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2740,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

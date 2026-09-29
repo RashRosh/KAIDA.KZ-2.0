@@ -18,7 +18,33 @@ test.describe('first visit', () => {
     await page.goto('/seller');
     await expect(page.getByText('Тілді таңдаңыз')).toHaveCount(0);
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Іздеу' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
+  });
+});
+
+test.describe('the start page', () => {
+  test('the demo plays on the first visit only; the field stops it; the arrow needs text', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Найдите, где');
+    // First visit: the typed word runs in the placeholder while the field stays empty, and the example is there.
+    await expect(page.locator('.fe-live')).not.toHaveCount(0);
+    await expect(page.getByRole('searchbox', { name: 'Какой товар ищете?' })).toHaveValue('');
+    await expect(page.getByText('Пример · так выглядит результат')).toBeVisible();
+    expect(await page.evaluate(() => window.localStorage.getItem('kaida_fe_demo_seen'))).toBe('1');
+
+    // Second visit: the final frame, no motion classes; the field stops the example.
+    await page.reload();
+    await expect(page.getByText('Пример · так выглядит результат')).toBeVisible();
+    await expect(page.locator('.fe-live')).toHaveCount(0);
+    const field = page.getByRole('searchbox', { name: 'Какой товар ищете?' });
+    await expect(field).toHaveAttribute('placeholder', 'Что ищете?');
+    await expect(page.getByRole('button', { name: 'Искать' })).toHaveCount(0);
+    await field.focus();
+    await expect(page.getByText('Пример · так выглядит результат')).toHaveCount(0);
+    await field.fill('мёд');
+    await expect(page.getByRole('button', { name: 'Искать' })).toBeVisible();
+    await field.fill('  ');
+    await expect(page.getByRole('button', { name: 'Искать' })).toHaveCount(0);
   });
 });
 
@@ -30,6 +56,7 @@ test('a result card opens the offer page with seller, comment and interest; navi
 
   await page.getByRole('searchbox', { name: 'Какой товар ищете?' }).fill('баранина');
   await page.getByRole('button', { name: 'Искать' }).click();
+  await expect(page.getByRole('searchbox', { name: 'Какой товар ищете?' })).toHaveValue('баранина');
   await expect(page.getByText('Сначала актуальные')).toBeVisible();
   const card = page.getByRole('article').filter({ hasText: SEED_POINT });
   await expect(card).toContainText(/4\s200\s₸/);
