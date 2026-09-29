@@ -262,6 +262,12 @@ test('photo tiles: arrows follow the photo, × deletes, drag stays under the poi
     await page.mouse.up();
     await expect(editor.locator('.mt.lift')).toHaveCount(0);
 
+    // The next press must target the settled tile, not its visual position during the 200 ms FLIP animation.
+    await editor.locator('li[data-photo-key]').evaluateAll(async (items) => {
+      const animations = items.flatMap((item) => item.getAnimations({ subtree: true }));
+      await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+    });
+
     // Reduced motion still changes the order immediately, but the held tile neither scales nor travels.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const reducedLi = editor.locator('li[data-photo-key]').nth(1);
