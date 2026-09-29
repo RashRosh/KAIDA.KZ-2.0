@@ -130,6 +130,12 @@ test('a new card in two of three points with an own price is published after the
     const card = showcaseCard(page, /Баранина, лопатка · 600 г/);
     await expect(card).toContainText('2 точки');
     await expect(card).toContainText('Без фото');
+    await expect(card.getByText('Дополнить', { exact: true })).toHaveCount(0);
+    await card.getByRole('button', { name: 'Добавить фотографии: Баранина, лопатка' }).click();
+    await expect(page).toHaveURL(/edit=.*focus=photos/);
+    await expect(offerEditor(page).getByLabel('Добавить', { exact: true })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(card).toBeVisible();
     const offers = await ownedOffers(page);
     expect(offers.map((offer) => [offer.location.name, offer.price.amount, offer.priceOwn]).sort()).toEqual([
       [points[0], '5000', false],
