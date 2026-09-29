@@ -202,6 +202,10 @@ export function SearchScreen() {
           autoComplete="off"
           enterKeyHint="search"
         />
+        {query && !loading && (
+          <button type="button" className="ib" aria-label={t('search.clear')} style={{ width: 44, height: 44, margin: '0 -12px 0 0' }}
+            onClick={() => { setQuery(''); input.current?.focus(); }}><Ic name="close" className="c2" /></button>
+        )}
       </div>
       <button type="submit" className={compact ? 'ib' : 'btn btn-p'} disabled={loading}
         aria-label={compact ? (loading ? t('search.loading') : t('search.submit')) : undefined}>
@@ -225,26 +229,26 @@ export function SearchScreen() {
   const validation = state.kind === 'validation' && <div className="fld"><p id="search-validation" className="emsg" role="alert"><Ic name="alert" />{t('search.validation')}</p></div>;
   const location = locationStatus && <p className="c" role={locationState.kind === 'error' ? 'alert' : 'status'}>{locationStatus}</p>;
 
+  const chips = (
+    <div className="chips" aria-label={t('search.popularQueries')} role="group">
+      {popularSearches.map((term) => (
+        <button key={term} type="button" className="chip" disabled={loading} onClick={() => quickSearch(term)}>{term}</button>
+      ))}
+    </div>
+  );
+
   if (!started) {
     return (
       <BuyerScreen section="search" overlay={seller.modal}>
         <main className="body" style={{ gap: 16, padding: '24px 16px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <h1 className="h1">{t('home.title.before')} <span style={{ color: 'var(--primary-text)' }}>{t('home.title.accent')}</span></h1>
-            <p className="t c2">{t('home.description')}</p>
-          </div>
+          <h1 className="h1">{t('home.title.before')} <span style={{ color: 'var(--primary-text)' }}>{t('home.title.accent')}</span></h1>
           {form(false)}
           {validation}
           {location}
-          <div className="chips" aria-label={t('search.popularQueries')} role="group">
-            {popularSearches.map((term) => (
-              <button key={term} type="button" className="chip" disabled={loading} onClick={() => quickSearch(term)}>{term}</button>
-            ))}
-          </div>
+          {chips}
           <a href="/seller" className="c" onClick={(event) => void seller.enter(event)} style={{ marginTop: 'auto' }}>
             {t('buyer.sellerLine')} <Ic name="right" className="xs" />
           </a>
-          <p className="c" style={{ color: 'var(--ink3)' }}>{t('common.disclaimer')}</p>
         </main>
       </BuyerScreen>
     );
@@ -274,6 +278,8 @@ export function SearchScreen() {
           </div>
         )}
         {loading && offers.length === 0 && <ResultSkeletons />}
+        {/* Nothing to show (empty result, error, empty query): keep the popular queries as the way forward. */}
+        {!loading && offers.length === 0 && chips}
         {offers.length > 0 && (
           <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {offers.map((offer) => <li key={offer.id}><ResultCard offer={offer} /></li>)}
