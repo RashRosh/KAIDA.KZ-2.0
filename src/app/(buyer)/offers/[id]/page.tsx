@@ -1,13 +1,11 @@
 import { z } from 'zod';
-import { AppHeader } from '../../_components/AppHeader';
-import styles from '../../page.module.css';
 import { getRequestLocale } from '@/i18n/server';
 import { getBuyerOffer, type BuyerOfferPage } from '@/modules/search/application/get-buyer-offer';
 import { BuyerOfferView, OfferUnavailable } from './BuyerOfferView';
 
 export const dynamic = 'force-dynamic';
 
-// Buyer Offer page (offer-photos contract §2): the same eligibility as Search, never a hidden Offer.
+// Buyer Offer page (offer-photos contract §2): the same eligibility as Search, never a hidden Offer; B02 layout.
 export default async function OfferPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const locale = await getRequestLocale();
@@ -21,15 +19,5 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
       failed = true;
     }
   }
-
-  return (
-    <>
-      <AppHeader />
-      <div className={styles.shell}>
-        <main className={styles.main}>
-          {offer ? <BuyerOfferView offer={offer} /> : <OfferUnavailable failed={failed} />}
-        </main>
-      </div>
-    </>
-  );
+  return offer ? <BuyerOfferView offer={offer} /> : <OfferUnavailable failed={failed} />;
 }

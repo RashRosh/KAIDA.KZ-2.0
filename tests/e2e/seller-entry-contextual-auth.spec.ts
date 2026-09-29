@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { morePhone } from './buyer-helpers';
 import { fillOfferFields, offerEditor } from './offer-editor-helpers';
 
 function phoneFor(projectName: string, scenario: 'cancel' | 'seller' | 'product') {
@@ -32,12 +33,13 @@ async function cleanup(phone: string) {
   }
 }
 
-async function openPrimaryNav(page: Page) {
-  const nav = page.getByRole('navigation', { name: 'Основная навигация' });
-  if (await nav.isVisible().catch(() => false)) return nav;
-  await page.getByRole('button', { name: 'Открыть меню', exact: true }).click();
-  await expect(nav).toBeVisible();
-  return nav;
+// buyer-screens-mockup: the seller entry is «Я продавец — моя витрина» on buyer «Ещё» and the line on the search start.
+function moreSellerEntry(page: Page) {
+  return page.getByRole('link', { name: 'Я продавец — моя витрина', exact: true });
+}
+
+function startSellerLine(page: Page) {
+  return page.getByRole('link', { name: 'Продаёте продукты? Откройте свою витрину', exact: true });
 }
 
 async function authenticateInOpenModal(page: Page, phone: string) {
@@ -65,12 +67,20 @@ test('seller-intent cancel keeps buyer context and cannot leak into ordinary log
   const phone = phoneFor(testInfo.project.name, 'cancel');
   await cleanup(phone);
   try {
-    await page.goto('/?q=%D0%B1%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
+    await page.goto('/');
+    const sellerLine = startSellerLine(page);
+    await sellerLine.click();
+    await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
+    await expect(page).toHaveURL('/');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toBeHidden();
+    await expect(sellerLine).toBeFocused();
+
+    await page.goto('/more');
     const buyerUrl = page.url();
 
     for (const closeWith of ['button', 'escape', 'backdrop'] as const) {
-      const nav = await openPrimaryNav(page);
-      const sellerTrigger = nav.getByRole('link', { name: 'Продавцу', exact: true });
+      const sellerTrigger = moreSellerEntry(page);
       await sellerTrigger.click();
       const dialog = page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' });
       await expect(dialog).toBeVisible();
@@ -85,10 +95,10 @@ test('seller-intent cancel keeps buyer context and cannot leak into ordinary log
       await expect(sellerTrigger).toBeFocused();
     }
 
-    await page.getByRole('button', { name: 'Войти', exact: true }).click();
+    await page.getByRole('button', { name: /^Войти/ }).click();
     await authenticateInOpenModal(page, phone);
     await expect(page).toHaveURL(buyerUrl);
-    await expect(page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
+    await expect(page.getByText(morePhone(phone), { exact: true })).toBeVisible();
   } finally {
     await cleanup(phone);
   }
@@ -98,10 +108,9 @@ test('seller-intent OTP success routes to the first-run workspace', async ({ pag
   const phone = phoneFor(testInfo.project.name, 'seller');
   await cleanup(phone);
   try {
-    await page.goto('/nearby');
-    const nav = await openPrimaryNav(page);
-    await nav.getByRole('link', { name: 'Продавцу', exact: true }).click();
-    await expect(page).toHaveURL('/nearby');
+    await page.goto('/');
+    await startSellerLine(page).click();
+    await expect(page).toHaveURL('/');
     await authenticateInOpenModal(page, phone);
 
     await expect(page).toHaveURL('/seller');
@@ -122,11 +131,10 @@ test('authenticated product-first flow preserves input through required setup be
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
     await authenticateThroughApi(page, phone);
-    await page.goto('/');
-    await expect(page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
+    await page.goto('/more');
+    await expect(page.getByText(morePhone(phone), { exact: true })).toBeVisible();
 
-    const nav = await openPrimaryNav(page);
-    await nav.getByRole('link', { name: 'Продавцу', exact: true }).click();
+    await moreSellerEntry(page).click();
     await expect(page).toHaveURL('/seller');
     await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toHaveCount(0);
 

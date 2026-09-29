@@ -14,7 +14,8 @@ function formatPhone(e164: string) {
   return `+7 ${digits.slice(1, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 9)} ${digits.slice(9)}`;
 }
 
-// AI-S19 · More: the account, «Добавить списком», language and sign-out.
+// AI-S19 · More: the account, «Добавить списком», language, the way back to the buyer screens and sign-out.
+// One account serves both roles (PO, 2026-09-29): sign-out lands on the buyer «Ещё», where «Войти» shows it took effect.
 export function SellerMore() {
   const { locale, setLocale, t } = useI18n();
   const router = useRouter();
@@ -38,7 +39,7 @@ export function SellerMore() {
       await forgetPushOnThisDevice();
       const response = await fetch('/api/auth/logout', { method: 'POST' });
       if (response.ok) {
-        router.push('/');
+        router.push('/more');
         router.refresh();
       }
     } finally {
@@ -49,7 +50,7 @@ export function SellerMore() {
   const row = { textDecoration: 'none', color: 'inherit' } as const;
   return (
     <Phone>
-      <Bar title={t('cabinet.more')} lang />
+      <Bar title={t('cabinet.more')} />
       {phone === null ? <LoginRequired /> : (
         <main className="body" style={{ gap: 12 }}>
           <div className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -69,6 +70,9 @@ export function SellerMore() {
             <button type="button" className="li" onClick={() => { setChoice(locale); setLanguageOpen(true); }} aria-haspopup="dialog">
               <Ic name="globe" className="c2" /><div className="mid"><div className="ts">{t('more.language')}</div><p className="c">{t(locale === 'ru' ? 'language.ru' : 'language.kk')}</p></div><Ic name="right" className="c2" />
             </button>
+            <Link className="li" href="/" style={row}>
+              <Ic name="search" className="c2" /><div className="mid"><div className="ts">{t('cabinet.buyerEntry')}</div></div><Ic name="right" className="c2" />
+            </Link>
             <button type="button" className="li" onClick={() => void logout()} disabled={loggingOut} aria-busy={loggingOut}>
               {loggingOut ? <span className="spin c2" /> : <Ic name="left" className="c2" />}<div className="mid"><div className="ts">{loggingOut ? t('cabinet.loggingOut') : t('cabinet.logout')}</div></div>
             </button>

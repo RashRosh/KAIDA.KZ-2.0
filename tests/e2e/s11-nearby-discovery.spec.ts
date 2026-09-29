@@ -161,11 +161,12 @@ async function mockGeolocation(page: import('@playwright/test').Page, point: typ
 
 async function openNearbyFromShell(page: import('@playwright/test').Page) {
   const nav = page.getByRole('navigation', { name: 'Основная навигация' });
-  if (!await nav.isVisible().catch(() => false)) {
-    await page.getByRole('button', { name: 'Открыть меню', exact: true }).click();
-    await expect(nav).toBeVisible();
-  }
   await nav.getByRole('link', { name: 'Рядом', exact: true }).click();
+}
+
+// B01: «1,2 км» from 1 km, metres below.
+function distanceText(meters: number) {
+  return meters < 1000 ? `${meters} м` : `${(Math.round(meters / 100) / 10).toFixed(1).replace('.', ',')} км`;
 }
 
 function assertDiscoveryPrivacy(body: unknown) {
@@ -208,14 +209,14 @@ test('Buyer clicks Nearby once, gets only nearby buyer-eligible Offers, keeps ac
 
   const cards = page.getByRole('article');
   await expect(cards.nth(0)).toContainText(insideLocationName);
-  await expect(cards.nth(0)).toContainText('1000 м');
+  await expect(cards.nth(0)).toContainText(distanceText(1000));
   await expect(cards.nth(1)).toContainText(boundaryLocationName);
-  await expect(cards.nth(1)).toContainText(`${NEARBY_RADIUS_METERS_DEFAULT} м`);
+  await expect(cards.nth(1)).toContainText(distanceText(NEARBY_RADIUS_METERS_DEFAULT));
   await expect(page.getByText(outsideLocationName)).toHaveCount(0);
   await expect(page.getByText(geolessLocationName)).toHaveCount(0);
 
   const firstCard = cards.nth(0);
-  for (const label of ['Позвонить', 'Маршрут', 'WhatsApp']) {
+  for (const label of ['Позвонить продавцу', `Маршрут до ${insideLocationName}`, 'Написать в WhatsApp']) {
     await expect(firstCard.getByRole('link', { name: label, exact: true })).toBeVisible();
   }
 

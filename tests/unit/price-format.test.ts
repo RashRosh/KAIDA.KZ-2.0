@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAmount } from '../../src/app/_components/OfferCard';
+import { formatAmount } from '../../src/app/_components/format-amount';
 
 describe('decimal display without floating point conversion', () => {
   it.each([

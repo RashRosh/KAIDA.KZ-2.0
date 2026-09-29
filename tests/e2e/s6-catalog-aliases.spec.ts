@@ -55,7 +55,7 @@ test('S6 buyer resolves мясо барана to canonical Баранина Offe
   expect(body.query).toBe('мясо барана');
   const seedOffer = body.offers.find((offer: { id: string }) => offer.id === seedIds.lambOffer);
   expect(seedOffer?.product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
-  const seedCard = page.getByRole('article').filter({ hasText: 'Асыл Ет, тестовый продавец' });
+  const seedCard = page.getByRole('article').filter({ hasText: 'Тестовая мясная точка' });
   await expect(seedCard).toHaveCount(1);
   await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 });

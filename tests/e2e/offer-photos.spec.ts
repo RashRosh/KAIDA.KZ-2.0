@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import sharp from 'sharp';
 import { testDatabaseUrl } from '../integration/database';
+import { setLocaleCookie } from './buyer-helpers';
 import { fillOfferFields, offerEditor } from './offer-editor-helpers';
 
 // offer-photos §7: create with photos, cover by buttons, publish without photos through the reminder, a failed
@@ -152,7 +153,7 @@ test('a card without photos is published after the reminder; in Kazakh the remin
     await expect(page.getByText('Без фото', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Добавить фото' })).toBeVisible();
 
-    await page.context().addCookies([{ name: 'kaida_locale', value: 'kk', url: page.url() }]);
+    await setLocaleCookie(page.context(), 'kk');
     await page.reload();
     await expect(page.getByText('Фотосы бар карточкаларды жиі таңдайды')).toBeVisible();
     await page.getByRole('button', { name: 'Фотосыз жариялау' }).click();

@@ -10,7 +10,7 @@ import { PRICE_UNIT_LABELS } from '../../../modules/offers/price-unit/price-unit
 import type { SellerChangeSetView } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
-import { formatAmount } from '../../_components/OfferCard';
+import { formatAmount } from '../../_components/format-amount';
 import { Bar, Check, ErrorLine, Ic, Phone, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';

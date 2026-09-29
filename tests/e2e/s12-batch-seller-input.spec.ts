@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { digestSessionToken } from '../../src/modules/identity/crypto/session-token';
 import { testDatabaseUrl } from '../integration/database';
+import { openOffer } from './buyer-helpers';
 import { proposeNewOffer } from './offer-editor-helpers';
 
 const baseURL = 'http://127.0.0.1:3100';
@@ -65,17 +66,25 @@ async function search(page: import('@playwright/test').Page, query: string) {
   await page.getByLabel('Какой товар ищете?').press('Enter');
 }
 
-function sellerOfferCard(page: import('@playwright/test').Page, sellerName: string) {
-  return page.locator('article').filter({ hasText: sellerName });
+// B01 shows the point, not the seller; the comment is read on the offer page (B02).
+function sellerOfferCard(page: import('@playwright/test').Page, pointName: string) {
+  return page.locator('article').filter({ hasText: pointName });
+}
+
+async function expectOfferComment(page: import('@playwright/test').Page, card: import('@playwright/test').Locator, product: string, comment: string, absent: string) {
+  await openOffer(card, product);
+  await expect(page.getByTestId('offer-comment')).toHaveText(comment);
+  await expect(page.getByText(absent, { exact: true })).toHaveCount(0);
 }
 
 test('Seller reviews and confirms several Offer changes as one persisted batch', async ({ page }, testInfo) => {
   const auth = await authenticate(page, testInfo.project.name);
   const sellerName = `S12 E2E ${testInfo.project.name}`;
+  const pointName = `S12 E2E точка ${testInfo.project.name}`;
   try {
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await page.getByLabel('Название для покупателей').fill('S12 E2E точка');
+    await page.getByLabel('Название для покупателей').fill(pointName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S12 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -106,15 +115,15 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await expect(page.getByText('S12 новая баранина', { exact: true })).toBeVisible();
 
     await search(page, 'баранина');
-    const oldLambCard = sellerOfferCard(page, sellerName);
+    const oldLambCard = sellerOfferCard(page, pointName);
     await expect(oldLambCard).toHaveCount(1);
-    await expect(oldLambCard.getByText('S12 старая баранина', { exact: true })).toBeVisible();
-    await expect(oldLambCard.getByText('S12 новая баранина', { exact: true })).toHaveCount(0);
+    await expectOfferComment(page, oldLambCard, 'Баранина', 'S12 старая баранина', 'S12 новая баранина');
 
     await search(page, 'говядина');
-    const oldBeefCard = sellerOfferCard(page, sellerName);
+    const oldBeefCard = sellerOfferCard(page, pointName);
     await expect(oldBeefCard).toHaveCount(1);
-    await expect(oldBeefCard.getByText('S12 старая говядина', { exact: true })).toBeVisible();
+    await openOffer(oldBeefCard, 'Говядина');
+    await expect(page.getByTestId('offer-comment')).toHaveText('S12 старая говядина');
 
     await page.goto(reviewUrl);
     await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
@@ -122,13 +131,13 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     await expect(page.getByRole('status').filter({ hasText: 'Изменения применены' })).toBeVisible();
 
     await search(page, 'баранина');
-    const newLambCard = sellerOfferCard(page, sellerName);
+    const newLambCard = sellerOfferCard(page, pointName);
     await expect(newLambCard).toHaveCount(1);
-    await expect(newLambCard.getByText('S12 новая баранина', { exact: true })).toBeVisible();
-    await expect(newLambCard.getByText('S12 старая баранина', { exact: true })).toHaveCount(0);
+    await expectOfferComment(page, newLambCard, 'Баранина', 'S12 новая баранина', 'S12 старая баранина');
 
     await search(page, 'говядина');
-    await expect(sellerOfferCard(page, sellerName)).toHaveCount(0);
+    await expect(sellerOfferCard(page, 'Тестовая мясная точка')).toHaveCount(1);
+    await expect(sellerOfferCard(page, pointName)).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(auth.pool, auth.userId, auth.phone);

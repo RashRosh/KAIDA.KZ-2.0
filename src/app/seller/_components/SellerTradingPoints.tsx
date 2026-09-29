@@ -343,7 +343,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   // AI-S12 · Points: empty state or the list of points with their contacts.
   return (
     <Phone>
-      <Bar title={t('points.title')} lang />
+      <Bar title={t('points.title')} />
       {locations.length === 0 ? (
         <main className="body" style={{ justifyContent: 'center', gap: 16, padding: 24 }}>
           <div className="ill" aria-hidden="true">

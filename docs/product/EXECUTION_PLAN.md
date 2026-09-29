@@ -25,13 +25,14 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.34-operator-post-check`;
-- checkpoint commit: `f87ccb4` (merge PR #58, merged-main CI green); в него входят пункты 1–4 этапа 1
-  (`offer-photos`, `point-contacts-hours` — PR #53; `seller-showcase-editor` — PR #56; `operator-post-check` — PR #58);
+- tag: `v0.0.36-actuality-reminders`;
+- checkpoint commit: `5375bab` (merge PR #61, merged-main CI green) — **этап 1 закрыт**: `offer-photos`,
+  `point-contacts-hours` (PR #53), `seller-showcase-editor` (PR #56), `operator-post-check` (PR #58), анимации по
+  странице Motion (PR #59), `offer-actuality` (PR #60, `v0.0.35`), `actuality-reminders` (PR #61);
 - после Pass 3 закрыты: `localization-foundation` (`v0.0.27`), `catalog-localization` (`v0.0.28`),
   `seller-comment-translation` (`v0.0.29`, переводчик выключен до переезда на свой сервер), `seller-cabinet-overview`
   (`v0.0.30`), `offer-price-unit` (`v0.0.31`), `seller-offer-editor` (`v0.0.32`, единый ручной редактор),
-  этап 1 пункты 1–3 (`v0.0.33`), пункт 4 `operator-post-check` (`v0.0.34`);
+  этап 1 пункты 1–3 (`v0.0.33`), пункт 4 `operator-post-check` (`v0.0.34`), пункт 5а (`v0.0.35`), пункт 5б (`v0.0.36`);
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading
   Points Workspace (#36), Buyer interest guest visibility (`v0.0.26`).
 
@@ -61,8 +62,8 @@ Feature freeze сохраняется: новые product capabilities вне э
 | 2 | Первый макет | Сдан: https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 |
 | 3 | Ревизия 1: правки редактора, решения PO, экраны «ИИ выключен», прототип ручного пути | Сдана в тот же макет (кадры `Rev 1`); сверка с §5 ТЗ ревизии — все 13 пунктов закрыты |
 | 4 | Visual acceptance макета после ревизии 1 | Принят PO 2026-09-25; копия — `docs/product/mockup/seller-ai-first-rev1/` |
-| 5 | Slice Contracts этапа 1 (ИИ выключен) | Пункты 1–3 утверждены (`offer-photos`, `point-contacts-hours`, `seller-showcase-editor`) |
-| 6 | Реализация этапа 1 по контрактам | Пункты 1–2 слиты (PR #53, 2026-09-27, без checkpoint tag); пункт 3 — в работе, см. `docs/agents/CURRENT_STATE.md` |
+| 5 | Slice Contracts этапа 1 (ИИ выключен) | Все пять утверждены |
+| 6 | Реализация этапа 1 по контрактам | Этап 1 закрыт 2026-09-28 (`v0.0.36-actuality-reminders`) |
 
 ### Этап 1 — продавец без ИИ (черновой состав, порядок утверждает PO на шаге 5)
 
@@ -120,9 +121,16 @@ Feature freeze сохраняется: новые product capabilities вне э
 
 ---
 
+# Экраны покупателя по макету — первым после этапа 1
+
+Решение PO (2026-09-29): экраны покупателя пересобираются по принятому макету (`B01` выдача, `B02` детальная
+карточка; экраны без кадра — из классов макета) раньше замороженной очереди. Без новых функций: фильтры `B07` —
+stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B06`) остаются insertion candidate. Контракт —
+`docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md`.
+
 # FROZEN COMMITTED QUEUE — после этапа 1
 
-Эти stages сохраняют порядок, но ни один из них не стартует до закрытия этапа 1. Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
+Эти stages сохраняют порядок и начинаются после экранов покупателя по макету (решение PO, 2026-09-29). Перескочить этап можно только после отдельного Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
 |---|---|---|
@@ -134,7 +142,7 @@ Feature freeze сохраняется: новые product capabilities вне э
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
-| 10 | S15 — Search learning | Feature Map |
+| 10 | S15 — Search learning; название карточки из каталога — на языке покупателя; немедленное оповещение оператора о товаре вне каталога (решения PO, 2026-09-29) | Feature Map |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review | Feature Map |
 | 12 | Монетизация — лимиты активных карточек, подписка продавца, продвижение карточек (S25–S29) | `FEATURE_MAP.md` / future Slice Contracts |
 
@@ -202,6 +210,28 @@ jobs; рассматривается вместе с актуальностью.
 
 - earliest: unscheduled — требует product/security решения;
 - trigger: Product Owner выбирает naive resend или отдельный slice с throttling ближе к launch.
+
+## Промо-баннер над строкой поиска (решение PO, 2026-09-29)
+
+Место над строкой поиска у покупателя под акции, новинки и другую информирующую / вовлекающую маркетинговую
+информацию.
+
+- earliest: после экранов покупателя по макету;
+- экраны покупателя не реализуют баннер, но их вёрстка не должна мешать вставить его над строкой поиска;
+- перед контрактом: кадр дизайнера, кто и как управляет содержимым (оператор), правила маркировки рекламы и связь с
+  монетизацией / продвижением (stage 12, S28–S29).
+
+## Аналитика поиска и живой главный экран покупателя (решение PO, 2026-09-29)
+
+Запись поисковых запросов покупателей (без привязки к человеку: текст, дата, нашлось ли что-то) — основа для двух
+вещей: «популярные» запросы на главном экране (самое частое за 7–14 дней, только запросы с находками; запасной
+список, пока данных мало) и продажа аналитики спроса продавцам (stage 12, монетизация).
+
+- earliest: после экранов покупателя по макету; нужны миграция и контракт;
+- в тот же slice: выдача сразу на главном экране (ближайшее при включённой геолокации, иначе популярное), нужна ли
+  кнопка «Найти» или выдача подстраивается под набираемое, «Может, вы искали…» при опечатке;
+- перед контрактом: правила хранения запросов и приватность (что считается персональными данными), связь с
+  монетизацией (stage 12).
 
 ## Unify buyer Search entry points
 

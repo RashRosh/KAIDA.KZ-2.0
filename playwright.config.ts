@@ -15,6 +15,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:3100',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // buyer-screens-mockup: the language is chosen once at the first visit; flows start with it chosen (Russian).
+    // The first-visit choice itself is covered with an empty storage state in buyer-screens.spec.ts.
+    storageState: { cookies: [{ name: 'kaida_locale', value: 'ru', domain: '127.0.0.1', path: '/', expires: -1, httpOnly: false, secure: false, sameSite: 'Lax' }], origins: [] },
   },
   projects: [
     { name: 'mobile', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },

@@ -1,9 +1,0 @@
-.background {
-  min-height: calc(100dvh - 84px);
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box;
-}
-
-@media (min-width: 48rem) {
-  .background { min-height: calc(100dvh - 160px); }
-}

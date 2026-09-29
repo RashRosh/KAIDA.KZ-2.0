@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { SEED_POINT, signOutInMore } from './buyer-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000931' : '+77000000932';
@@ -47,7 +48,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+    await expect(page.getByRole('article').filter({ hasText: SEED_POINT })).toHaveCount(1);
 
     await page.goto('/seller');
     await expect(page.getByRole('heading', { name: 'Нужно войти' })).toBeVisible();
@@ -104,12 +105,12 @@ test('authenticated User creates Seller + first Location and persists after relo
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
+    await expect(page.getByRole('article').filter({ hasText: SEED_POINT })).toHaveCount(1);
+    await signOutInMore(page);
+    await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+    await expect(page.getByRole('article').filter({ hasText: SEED_POINT })).toHaveCount(1);
   } finally {
     await pool.end();
     await cleanup(phone);

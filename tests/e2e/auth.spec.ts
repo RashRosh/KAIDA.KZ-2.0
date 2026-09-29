@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { morePhone, SEED_POINT } from './buyer-helpers';
 
 function phoneFor(projectName: string, suffix = '1') {
   return projectName === 'mobile' ? `+7700000090${suffix}` : `+7700000091${suffix}`;
@@ -21,19 +22,21 @@ async function cleanup(phone: string) {
   }
 }
 
+// buyer-screens-mockup: sign-in lives on buyer «Ещё» (no «Войти» in the top bars).
 test('auth modal opens in place and dismisses without changing auth state', async ({ page }) => {
-  await page.goto('/');
-  const trigger = page.getByRole('button', { name: 'Войти', exact: true });
+  await page.goto('/more');
+  const trigger = page.getByRole('button', { name: /^Войти/ });
   await expect(trigger).toBeVisible();
 
   await trigger.click();
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL('/more');
   let dialog = page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' });
   await expect(dialog).toBeVisible();
   const box = await dialog.boundingBox();
   expect(box).toBeTruthy();
-  expect(box!.width).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth - 16));
-  expect(box!.height).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight - 16));
+  // The mockup's bottom sheet: inside the phone column and the screen height.
+  expect(box!.width).toBeLessThanOrEqual(await page.evaluate(() => Math.min(480, window.innerWidth)));
+  expect(box!.height).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight));
 
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
@@ -58,18 +61,17 @@ test('auth modal opens in place and dismisses without changing auth state', asyn
 
 test('anonymous search, modal login, persistence, search after login and logout', async ({ page, browser }, testInfo) => {
   const phone = phoneFor(testInfo.project.name, '1');
-  const seedCard = () => page.getByRole('article')
-    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
-    .filter({ hasText: 'Тестовая мясная точка' });
+  const seedCard = () => page.getByRole('article').filter({ hasText: SEED_POINT });
+  const signedIn = page.getByText(morePhone(phone), { exact: true });
   await cleanup(phone);
   try {
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Войти', exact: true }).click();
+    await page.getByRole('navigation', { name: 'Основная навигация' }).getByRole('link', { name: 'Ещё', exact: true }).click();
+    await page.getByRole('button', { name: /^Войти/ }).click();
     const dialog = page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' });
     await expect(dialog).toBeVisible();
     await dialog.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
@@ -89,17 +91,18 @@ test('anonymous search, modal login, persistence, search after login and logout'
     await dialog.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(testCode);
     await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
     await expect(dialog).toBeHidden();
-    // The search query is kept in the address (offer-photos: Back from an Offer page returns to the same results).
-    await expect(page).toHaveURL(`/?${new URLSearchParams({ q: 'баранина' })}`);
-    const loggedInButton = page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) });
-    await expect(loggedInButton).toBeVisible();
+    await expect(page).toHaveURL('/more');
+    await expect(signedIn).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
 
+    await page.goBack();
+    await expect(page).toHaveURL(`/?${new URLSearchParams({ q: 'баранина' })}`);
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 
-    await page.reload();
-    await expect(loggedInButton).toBeVisible();
+    await page.goto('/more');
+    await expect(signedIn).toBeVisible();
     const cookies = await page.context().cookies();
     const sessionCookie = cookies.find((cookie) => cookie.name === 'kaida_session');
     expect(sessionCookie).toBeTruthy();
@@ -110,15 +113,16 @@ test('anonymous search, modal login, persistence, search after login and logout'
     const storageState = await page.context().storageState();
     const reopened = await browser.newContext({ storageState });
     const reopenedPage = await reopened.newPage();
-    await reopenedPage.goto('/');
-    await expect(reopenedPage.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
+    await reopenedPage.goto('/more');
+    await expect(reopenedPage.getByText(morePhone(phone), { exact: true })).toBeVisible();
     await reopened.close();
 
-    await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Выйти', exact: true }).click();
+    await expect(page.getByRole('button', { name: /^Войти/ })).toBeVisible();
     const me = await page.request.get('/api/auth/me');
     expect(me.status()).toBe(200);
     expect(await me.json()).toEqual({ user: null });
+    await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(seedCard().getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 
@@ -50,26 +49,12 @@ export function Phone({ children }: { children: React.ReactNode }) {
   return <div className="kaida kaida-app motion"><div className="ph">{children}</div></div>;
 }
 
-export function Lang() {
-  const { locale, setLocale, t } = useI18n();
-  const router = useRouter();
-  return (
-    <div className="lang" role="group" aria-label={t('language.switch')}>
-      {(['ru', 'kk'] as const).map((choice) => (
-        <button key={choice} type="button" aria-pressed={locale === choice} onClick={() => { setLocale(choice); router.refresh(); }}>
-          {choice === 'ru' ? 'РУС' : 'ҚАЗ'}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-export function Bar({ title, onBack, backLabel = 'Назад', backDisabled = false, lang = false, children }: {
+// PROJECT_RULES.md §18.4 «Язык» (PO, 2026-09-29): no language switch in the top bar; it lives in «Ещё».
+export function Bar({ title, onBack, backLabel = 'Назад', backDisabled = false, children }: {
   title: string;
   onBack?: () => void;
   backLabel?: string;
   backDisabled?: boolean;
-  lang?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -80,7 +65,6 @@ export function Bar({ title, onBack, backLabel = 'Назад', backDisabled = fa
         </button>
       )}
       <h1 className="bar-t" style={{ margin: 0 }}>{title}</h1>
-      {lang && <Lang />}
       {children}
     </header>
   );

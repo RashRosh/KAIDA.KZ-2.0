@@ -45,7 +45,7 @@ export function SellerPointsSection() {
   if (state.kind === 'ready') return <SellerTradingPoints seller={state.seller} onSellerChange={setSeller} autoOpenAdd={state.seller === null} />;
   return (
     <Phone>
-      <Bar title={t('points.title')} lang />
+      <Bar title={t('points.title')} />
       {state.kind === 'anonymous' ? <LoginRequired /> : (
         <main className="body" style={{ gap: 10 }} aria-busy={state.kind === 'loading' || undefined}>
           {state.kind === 'error' ? <LoadError title={t('seller.loadError')} onRetry={retry} /> : (

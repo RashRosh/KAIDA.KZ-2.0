@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { expectSignedIn, openOffer, SEED_POINT, signOutInMore } from './buyer-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000000881' : '+77000000891';
@@ -35,17 +36,18 @@ async function login(page: Page, phone: string) {
   await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page).toHaveURL('/');
-  await expect(page.getByRole('button', { name: new RegExp(`Выйти \\(${phone.replace('+', '\\+')}\\)`) })).toBeVisible();
+  await expectSignedIn(page, phone);
 }
 
-async function searchSeedProduct(page: Page) {
+// buyer-screens-mockup: «В избранное» is on the offer page (B02), opened from the result card.
+async function openSeedOffer(page: Page) {
+  await page.goto('/');
   await page.getByLabel('Какой товар ищете?').fill('баранина');
   await page.getByLabel('Какой товар ищете?').press('Enter');
-  const card = page.getByRole('article')
-    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
-    .filter({ hasText: 'Тестовая мясная точка' });
+  const card = page.getByRole('article').filter({ hasText: SEED_POINT });
   await expect(card.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
-  return card;
+  await openOffer(card, 'Баранина');
+  await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
 }
 
 test('buyer interest survives reload and a later login, then can be removed', async ({ page }, testInfo) => {
@@ -54,22 +56,20 @@ test('buyer interest survives reload and a later login, then can be removed', as
   try {
     await login(page, phone);
 
-    let card = await searchSeedProduct(page);
-    await card.getByRole('button', { name: 'Добавить в избранное' }).click();
-    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await openSeedOffer(page);
+    await page.getByRole('button', { name: 'Добавить в избранное' }).click();
+    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
 
     await page.reload();
-    card = await searchSeedProduct(page);
-    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
 
-    await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
+    await signOutInMore(page);
     await login(page, phone);
 
-    card = await searchSeedProduct(page);
-    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
-    await card.getByRole('button', { name: 'В избранном' }).click();
-    await expect(card.getByRole('button', { name: 'Добавить в избранное' })).toHaveAttribute('aria-pressed', 'false');
+    await openSeedOffer(page);
+    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'В избранном' }).click();
+    await expect(page.getByRole('button', { name: 'Добавить в избранное' })).toHaveAttribute('aria-pressed', 'false');
   } finally {
     await cleanup(phone);
   }
@@ -79,9 +79,8 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
   const phone = anonymousFlowPhoneFor(testInfo.project.name);
   await cleanup(phone);
   try {
-    await page.goto('/');
-    const card = await searchSeedProduct(page);
-    const heart = card.getByRole('button', { name: /Добавить в избранное|В избранном|Сохраняем/ });
+    await openSeedOffer(page);
+    const heart = page.getByRole('button', { name: /Добавить в избранное|В избранном|Сохраняем/ });
     await expect(heart).toBeVisible();
     await expect(heart).toHaveAttribute('aria-pressed', 'false');
 
@@ -111,7 +110,7 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
     await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
 
     await expect(dialog).toBeHidden();
-    await expect(card.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
     expect(interestRequests.some((url) => /\/api\/interests\/[^/]+$/.test(url))).toBe(true);
   } finally {
     await cleanup(phone);

@@ -9,7 +9,7 @@ import { useI18n } from '../../../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../../../i18n/messages';
 import { formatOfferPrice } from '../../../_components/cabinet-data';
 import { photoUrl } from '../../../../../modules/media/contracts/photo.contract';
-import { formatAmount } from '../../../../_components/OfferCard';
+import { formatAmount } from '../../../../_components/format-amount';
 import { pluralKey } from '../../../_components/card-model';
 import { Bar, Ic, LoadError, LoginRequired, Phone, Thumb } from '../../../_kaida/ui';
 

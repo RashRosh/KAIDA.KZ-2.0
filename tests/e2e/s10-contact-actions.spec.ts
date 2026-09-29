@@ -106,9 +106,9 @@ test('point contacts are verified by code and reach the buyer card with the hour
       return offer;
     };
     let offer = await search();
-    await expect(offer.getByRole('link', { name: 'Позвонить', exact: true })).toHaveCount(0);
-    await expect(offer.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', `https://wa.me/${phone.slice(1)}`);
-    await expect(offer.getByRole('link', { name: 'Маршрут', exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
+    await expect(offer.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toHaveCount(0);
+    await expect(offer.getByRole('link', { name: 'Написать в WhatsApp', exact: true })).toHaveAttribute('href', `https://wa.me/${phone.slice(1)}`);
+    await expect(offer.getByRole('link', { name: `Маршрут до ${pointName}`, exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
     const hours = offer.getByTestId('opening-hours');
     await expect(hours).toContainText('9.00–18.00');
     await expect(hours).toContainText('ВС Круглосуточно');
@@ -128,7 +128,7 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await expect(page.getByText('Подтверждён', { exact: true })).toHaveCount(2);
 
     offer = await search();
-    await expect(offer.getByRole('link', { name: 'Позвонить', exact: true })).toHaveAttribute('href', `tel:${pointPhone}`);
+    await expect(offer.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toHaveAttribute('href', `tel:${pointPhone}`);
 
     // A second point starts with the first point's contacts and hours.
     await page.goto('/seller/points');

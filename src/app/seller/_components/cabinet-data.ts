@@ -1,5 +1,5 @@
 import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
-import { formatAmount } from '../../_components/OfferCard';
+import { formatAmount } from '../../_components/format-amount';
 
 export function formatOfferPrice(price: SellerOfferView['price']) {
   if (!price) return null;

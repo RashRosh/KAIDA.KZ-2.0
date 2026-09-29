@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { seedIds } from '../../src/db/seed';
 import { testDatabaseUrl } from '../integration/database';
+import { SEED_POINT, signOutInMore } from './buyer-helpers';
 import { fillOfferFields, openNewCard } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
@@ -53,7 +54,7 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+    await expect(page.getByRole('article').filter({ hasText: SEED_POINT })).toHaveCount(1);
 
     await page.goto('/seller');
     await expect(page.getByRole('heading', { name: 'Нужно войти' })).toBeVisible();
@@ -69,7 +70,7 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
     // Seller cabinet: point, contacts and «Добавить товар» are separate destinations (seller-cabinet-overview).
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(`S4 E2E продавец ${testInfo.project.name}`);
-    await page.getByLabel('Название для покупателей').fill('S4 E2E точка');
+    await page.getByLabel('Название для покупателей').fill(`S4 E2E точка ${testInfo.project.name}`);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S4 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -118,15 +119,15 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
     await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
-    const createdCard = page.getByRole('article').filter({ hasText: `S4 E2E продавец ${testInfo.project.name}` });
+    const createdCard = page.getByRole('article').filter({ hasText: `S4 E2E точка ${testInfo.project.name}` });
     await expect(createdCard).toHaveCount(1);
     // seller-showcase-editor: «Цена за» is required now, so the buyer sees the unit.
     await expect(createdCard).toContainText(/4\s321,5\s₸\s*\/\s*кг/);
     expect((await pool.query('SELECT * FROM offers WHERE id=$1', [seedIds.lambOffer])).rows[0]).toEqual(seedBefore);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-    await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
+    await signOutInMore(page);
+    await page.goto('/');
     await page.getByLabel('Какой товар ищете?').fill('баранина');
     await page.getByLabel('Какой товар ищете?').press('Enter');
     await expect(createdCard).toHaveCount(1);

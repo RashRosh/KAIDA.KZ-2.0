@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('lamb: search by button, full offer, responsive layout and refresh', async ({ page }, testInfo) => {
   await page.goto('/');
   await expect(page.getByText('По вашему запросу ничего не найдено.')).toHaveCount(0);
-  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
+  const searchRegion = page.getByRole('search', { name: 'Поиск предложений' });
   await page.getByLabel('Какой товар ищете?').fill('баранина');
   const responsePromise = page.waitForResponse((response) => response.url().includes('/api/search?'));
   await searchRegion.getByRole('button', { name: 'Искать', exact: true }).click();
@@ -28,18 +28,21 @@ test('lamb: search by button, full offer, responsive layout and refresh', async 
     sellerComment: 'Свежий привоз.',
   });
   const seedCard = page.getByRole('article')
-    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
     .filter({ hasText: 'Тестовая мясная точка' });
   await expect(seedCard).toHaveCount(1);
   await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
   await expect(seedCard).toContainText(/4\s200\s₸\s\/\sкг/);
-  await expect(seedCard).toContainText('Асыл Ет, тестовый продавец');
   await expect(seedCard).toContainText('Тестовая мясная точка');
   await expect(seedCard).toContainText('Алматы, Зелёный базар, тестовый павильон 12');
-  await expect(seedCard).toContainText('Свежий привоз.');
+  // B01: the seller and the comment are on the offer page, not on the result card.
+  await expect(seedCard).not.toContainText('Асыл Ет, тестовый продавец');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await testInfo.attach('lamb-offer', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
-  await page.reload();
+  await seedCard.getByRole('link', { name: 'Баранина', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Баранина', level: 1 })).toBeVisible();
+  await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('offer-comment')).toContainText('Свежий привоз.');
+  await page.goto('/');
   await page.getByLabel('Какой товар ищете?').fill('БАРАНИНА');
   await page.getByLabel('Какой товар ищете?').press('Enter');
   await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
@@ -47,13 +50,12 @@ test('lamb: search by button, full offer, responsive layout and refresh', async 
 
 test('popular shortcut executes the same real Search flow', async ({ page }) => {
   await page.goto('/');
-  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
   const responsePromise = page.waitForResponse((response) => response.url().includes('/api/search?'));
-  await searchRegion.getByRole('button', { name: 'Баранина', exact: true }).click();
+  await page.getByRole('group', { name: 'Популярные запросы' }).getByRole('button', { name: 'Баранина', exact: true }).click();
   const response = await responsePromise;
   expect(response.status()).toBe(200);
   await expect(page.getByLabel('Какой товар ищете?')).toHaveValue('Баранина');
-  await expect(page.getByRole('article').filter({ hasText: 'Асыл Ет, тестовый продавец' })).toHaveCount(1);
+  await expect(page.getByRole('article').filter({ hasText: 'Тестовая мясная точка' })).toHaveCount(1);
 });
 
 test('unknown product clears the previous result', async ({ page }) => {
@@ -62,7 +64,6 @@ test('unknown product clears the previous result', async ({ page }) => {
   await input.fill('баранина');
   await input.press('Enter');
   const seedCard = page.getByRole('article')
-    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
     .filter({ hasText: 'Тестовая мясная точка' });
   await expect(seedCard).toHaveCount(1);
   await input.fill('единорог');
@@ -79,18 +80,19 @@ test('beef has a mandatory price with no unit suffix', async ({ page }) => {
   await expect(card).toContainText('Говядина');
   await expect(card).toContainText(/3\s900\s₸/);
   await expect(card).not.toContainText('/');
-  await expect(card).toContainText('Есть мякоть и мясо на кости.');
+  await card.getByRole('link', { name: 'Говядина', exact: true }).click();
+  await expect(page.getByTestId('offer-comment')).toContainText('Есть мякоть и мясо на кости.');
 });
 
 test('empty query is validated without sending an API request', async ({ page }) => {
   let requests = 0;
   page.on('request', (request) => { if (request.url().includes('/api/search')) requests++; });
   await page.goto('/');
-  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
+  const screen = page.getByRole('main');
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill('   ');
   await input.press('Enter');
-  await expect(searchRegion.getByRole('alert')).toHaveText('Введите название товара.');
+  await expect(screen.getByRole('alert')).toHaveText('Введите название товара.');
   await expect(input).toHaveAttribute('aria-invalid', 'true');
   await expect(input).toBeFocused();
   expect(requests).toBe(0);
@@ -106,7 +108,7 @@ test('loading blocks a second submit while the real request is pending', async (
     await route.continue();
   });
   await page.goto('/');
-  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
+  const searchRegion = page.getByRole('search', { name: 'Поиск предложений' });
   const input = page.getByLabel('Какой товар ищете?');
   const searchForm = input.locator('xpath=ancestor::form');
   await input.fill('баранина');
@@ -116,7 +118,6 @@ test('loading blocks a second submit while the real request is pending', async (
   await searchForm.evaluate((form: HTMLFormElement) => form.requestSubmit());
   releaseRequest();
   const seedCard = page.getByRole('article')
-    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
     .filter({ hasText: 'Тестовая мясная точка' });
   await expect(seedCard).toHaveCount(1);
   expect(requests).toBe(1);
@@ -124,18 +125,17 @@ test('loading blocks a second submit while the real request is pending', async (
 
 test('network failure clears old results and permits a real retry', async ({ page }) => {
   await page.goto('/');
-  const searchRegion = page.getByRole('region', { name: 'Поиск предложений' });
+  const screen = page.getByRole('main');
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill('баранина');
   await input.press('Enter');
   const seedCard = page.getByRole('article')
-    .filter({ hasText: 'Асыл Ет, тестовый продавец' })
     .filter({ hasText: 'Тестовая мясная точка' });
   await expect(seedCard).toHaveCount(1);
   await page.route('**/api/search?*', (route) => route.abort('failed'));
   await input.fill('говядина');
   await input.press('Enter');
-  await expect(searchRegion.getByRole('alert')).toHaveText('Не удалось выполнить поиск. Попробуйте ещё раз.');
+  await expect(screen.getByRole('alert')).toContainText('Не удалось выполнить поиск. Попробуйте ещё раз.');
   await expect(page.getByRole('article')).toHaveCount(0);
   await expect(input).toHaveValue('говядина');
   await page.unroute('**/api/search?*');

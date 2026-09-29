@@ -10,6 +10,7 @@ let productId: string;
 let productName: string;
 let sellerId: string;
 let sellerName: string;
+let pointName: string;
 let locationId: string;
 let offerId: string;
 let noPhoneSellerId: string;
@@ -39,6 +40,7 @@ test.beforeAll(async ({}, workerInfo) => {
   productName = `UX1D E2E Product ${suffix}`;
   sellerId = randomUUID();
   sellerName = `UX1D eligible seller ${suffix}`;
+  pointName = `UX1D eligible point ${suffix}`;
   locationId = randomUUID();
   offerId = randomUUID();
   noPhoneSellerId = randomUUID();
@@ -69,7 +71,7 @@ test.beforeAll(async ({}, workerInfo) => {
     ($6,$9,'UX1D no geo point','Almaty UX1D no geo','shop',NULL,NULL)`, [
     locationId,
     sellerId,
-    `UX1D eligible point ${suffix}`,
+    pointName,
     noPhoneLocationId,
     noPhoneSellerId,
     noGeoLocationId,
@@ -110,55 +112,46 @@ async function runSearch(page: Page) {
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill(productName);
   await input.press('Enter');
-  const card = page.getByRole('article').filter({ hasText: sellerName });
+  const card = page.getByRole('article').filter({ hasText: pointName });
   await expect(card).toHaveCount(1);
   return card;
 }
 
-async function assertEqualSocialRow(card: Locator, names: string[]) {
-  const row = card.locator('[aria-label="Дополнительные контакты"]');
-  await expect(row).toBeVisible();
-  const rowBox = await row.boundingBox();
-  expect(rowBox).not.toBeNull();
-  const boxes: Array<{ x: number; y: number; width: number; height: number }> = [];
+// buyer-screens-mockup B01: only the point's existing contacts, as named icon-only links of at least 44 × 44 on the
+// row of «Маршрут».
+async function assertContactIcons(card: Locator, names: string[]) {
+  // The results body enters with a slide (Motion m-enter): measure only once it has settled.
+  await card.page().locator('main.body').evaluate((main) => Promise.all(main.getAnimations().map((animation) => animation.finished)));
+  const route = card.getByRole('link', { name: /^Маршрут до / });
+  const routeBox = (await route.boundingBox())!;
   for (const name of names) {
     const link = card.getByRole('link', { name, exact: true });
     await expect(link).toBeVisible();
     expect((await link.textContent())?.trim()).toBe('');
-    const box = await link.boundingBox();
-    expect(box).not.toBeNull();
-    boxes.push(box!);
-    expect(box!.height).toBeGreaterThanOrEqual(44);
-
-    const icon = link.locator('img');
-    await expect(icon).toHaveCount(1);
-    const iconBox = await icon.boundingBox();
-    expect(iconBox).not.toBeNull();
-    expect(iconBox!.width).toBe(18);
-    expect(iconBox!.height).toBe(18);
+    const box = (await link.boundingBox())!;
+    expect(Math.round(box.width)).toBeGreaterThanOrEqual(44);
+    expect(Math.round(box.height)).toBeGreaterThanOrEqual(44);
+    expect(Math.abs(box.y + box.height / 2 - (routeBox.y + routeBox.height / 2))).toBeLessThan(2);
   }
-  expect(boxes.every((box) => Math.abs(box.y - boxes[0]!.y) < 1)).toBe(true);
-  expect(Math.max(...boxes.map(({ width }) => width)) - Math.min(...boxes.map(({ width }) => width))).toBeLessThan(2);
-  if (names.length === 1) expect(Math.abs(boxes[0]!.width - rowBox!.width)).toBeLessThan(2);
 }
 
-test('UX1D OfferCard exposes Call+Route, WhatsApp as an icon-only row, and Route alone for a point without contacts', async ({ page, request }, testInfo) => {
+test('UX1D result card exposes Route and the verified contacts as icons, and Route alone for a point without contacts', async ({ page, request }, testInfo) => {
   let card = await runSearch(page);
-  await expect(page.getByText(/UX1D no geo seller/)).toHaveCount(0);
+  await expect(page.getByText(/UX1D no geo point/)).toHaveCount(0);
   // point-contacts-hours: a point without contacts is visible with Route only, never empty or grey contact icons.
   const noPhoneCard = page.getByRole('article').filter({ hasText: 'UX1D no phone point' });
-  await expect(noPhoneCard.locator('[aria-label="Основные действия"]').getByRole('link')).toHaveCount(1);
-  await expect(noPhoneCard.getByRole('link', { name: 'Маршрут', exact: true })).toBeVisible();
-  await expect(noPhoneCard.getByRole('link', { name: 'Позвонить', exact: true })).toHaveCount(0);
+  await expect(noPhoneCard.getByRole('link', { name: 'Маршрут до UX1D no phone point', exact: true })).toBeVisible();
+  await expect(noPhoneCard.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toHaveCount(0);
+  await expect(noPhoneCard.getByRole('link', { name: 'Написать в WhatsApp', exact: true })).toHaveCount(0);
 
-  const primary = card.locator('[aria-label="Основные действия"]');
-  await expect(primary.getByRole('link')).toHaveCount(2);
-  const call = card.getByRole('link', { name: 'Позвонить', exact: true });
-  const route = card.getByRole('link', { name: 'Маршрут', exact: true });
+  const call = card.getByRole('link', { name: 'Позвонить продавцу', exact: true });
+  const whatsApp = card.getByRole('link', { name: 'Написать в WhatsApp', exact: true });
+  const route = card.getByRole('link', { name: `Маршрут до ${pointName}`, exact: true });
   await expect(call).toHaveAttribute('href', 'tel:+77015551901');
+  await expect(whatsApp).toHaveAttribute('href', 'https://wa.me/77015551902');
   await expect(route).toHaveAttribute('href', `/api/offers/${offerId}/route`);
-  expect((await call.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-  expect((await route.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  expect(Math.round((await route.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
+  await assertContactIcons(card, ['Позвонить продавцу', 'Написать в WhatsApp']);
   expect(await page.content()).not.toContain(String(destination.latitude));
   expect(await page.content()).not.toContain(String(destination.longitude));
 
@@ -166,18 +159,17 @@ test('UX1D OfferCard exposes Call+Route, WhatsApp as an icon-only row, and Route
   expect(redirect.status()).toBe(302);
   expect(redirect.headers().location).toBe('dgis://2gis.ru/routeSearch/rsType/car/to/76.889709,43.238949');
 
-  await assertEqualSocialRow(card, ['WhatsApp']);
   await connection.pool.query('UPDATE locations SET whatsapp_phone_e164=NULL WHERE id=$1', [locationId]);
   card = await runSearch(page);
-  await expect(card.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveCount(0);
-  await expect(card.getByRole('link', { name: 'Позвонить', exact: true })).toBeVisible();
+  await expect(card.getByRole('link', { name: 'Написать в WhatsApp', exact: true })).toHaveCount(0);
+  await assertContactIcons(card, ['Позвонить продавцу']);
 
   if (testInfo.project.name === 'desktop') {
     for (const width of [320, 360, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-      await expect(card.getByRole('link', { name: 'Позвонить', exact: true })).toBeVisible();
-      await expect(card.getByRole('link', { name: 'Маршрут', exact: true })).toBeVisible();
+      await expect(card.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toBeVisible();
+      await expect(card.getByRole('link', { name: `Маршрут до ${pointName}`, exact: true })).toBeVisible();
     }
   } else {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

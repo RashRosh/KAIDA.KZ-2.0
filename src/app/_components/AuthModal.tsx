@@ -3,7 +3,6 @@
 import { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
-import styles from './AuthModal.module.css';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type User = { id: string; phone: string };
@@ -20,39 +19,6 @@ type AuthModalProps = {
   onAuthenticated: (user: User) => void;
   description?: string;
 };
-
-function ShieldIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3 20 7v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4Z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M6 6l12 12M18 6 6 18" />
-    </svg>
-  );
-}
-
-function PhoneIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M7.2 3.8 10 8 8.3 9.7c1.1 2.3 3 4.2 5.3 5.3l1.7-1.7 4.2 2.8-.9 3.6c-.2.8-1 1.4-1.8 1.3C9.6 20.1 3.9 14.4 3 7.2c-.1-.8.5-1.6 1.3-1.8l2.9-.7Z" />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M5 12h14M14 7l5 5-5 5" />
-    </svg>
-  );
-}
 
 // Live display grouping only; normalizeKzPhone already strips spaces/()/- server-side.
 function formatKzPhoneInput(raw: string): string {
@@ -169,28 +135,28 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
 
   if (!open || typeof document === 'undefined') return null;
 
+  // buyer-screens-mockup: the sign-in sheet in the mockup's classes (AI-B04 · Auth); flows, texts and ids unchanged.
+  // It is portalled to the page body, so it carries its own .kaida frame (kaida-app.css .kaida-portal).
   return createPortal(
-    <div className={styles.overlay} data-testid="auth-backdrop" onMouseDown={handleBackdrop}>
-      <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="auth-title" aria-describedby="auth-description">
-        <button type="button" className={styles.close} onClick={resetAndClose} aria-label={t('auth.close')}>
-          <CloseIcon />
-        </button>
+    <div className="kaida kaida-portal">
+      <div className="portal-col">
+        <div className="scrim" data-testid="auth-backdrop" onMouseDown={handleBackdrop} />
+        <section className="sheet" role="dialog" aria-modal="true" aria-labelledby="auth-title" aria-describedby="auth-description">
+          <div className="grab" />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h2 className="h3" id="auth-title" style={{ flex: 1 }}>{t('auth.title')}</h2>
+            <button type="button" className="ib" onClick={resetAndClose} aria-label={t('auth.close')}><span className="ic i-close" aria-hidden="true" /></button>
+          </div>
 
-        <div className={styles.titleRow}>
-          <span className={styles.brandMark}><ShieldIcon /></span>
-          <h2 id="auth-title">{t('auth.title')}</h2>
-        </div>
-
-        {step === 'phone' ? (
-          <>
-            <p id="auth-description" className={styles.description}>{description ?? t('auth.defaultDescription')}</p>
-            <form className={styles.form} onSubmit={requestCode} noValidate>
-              <div>
-                <label className={styles.label} htmlFor="auth-phone">{t('auth.phone')}</label>
-                <div className={styles.field}>
-                  <span className={styles.fieldIcon}><PhoneIcon /></span>
+          {step === 'phone' ? (
+            <>
+              <p id="auth-description" className="c c2">{description ?? t('auth.defaultDescription')}</p>
+              <form onSubmit={requestCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="fld">
+                  <label htmlFor="auth-phone">{t('auth.phone')}</label>
                   <input
                     id="auth-phone"
+                    className="inp"
                     type="tel"
                     autoComplete="tel"
                     value={phone}
@@ -200,45 +166,42 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
                     autoFocus
                   />
                 </div>
+                {error && <div className="fld"><p className="emsg" role="alert"><span className="ic i-alert" aria-hidden="true" />{error}</p></div>}
+                <button type="submit" className="btn btn-p lg w" disabled={loading}>{loading ? t('auth.gettingCode') : t('auth.getCode')}</button>
+              </form>
+            </>
+          ) : (
+            <>
+              <p id="auth-description" className="c c2">{t('auth.codeFor', { phone: canonicalPhone })}</p>
+              <div className="banner info" role="status" style={{ padding: '10px 12px', borderRadius: 12, gap: 2 }}>
+                <span className="c">{t('auth.testMode')}</span>
+                <strong className="ts">{t('auth.testCode', { code: testCode })}</strong>
               </div>
-              {error && <p className={styles.error} role="alert">{error}</p>}
-              <button type="submit" className={styles.primary} disabled={loading}>
-                <span>{loading ? t('auth.gettingCode') : t('auth.getCode')}</span>
-                {!loading && <span className={styles.buttonIcon}><ArrowIcon /></span>}
-              </button>
-            </form>
-          </>
-        ) : (
-          <>
-            <p id="auth-description" className={styles.description}>{t('auth.codeFor', { phone: canonicalPhone })}</p>
-            <div className={styles.testCode} role="status">
-              <span>{t('auth.testMode')}</span>
-              <strong>{t('auth.testCode', { code: testCode })}</strong>
-            </div>
-            <form className={styles.form} onSubmit={verifyCode} noValidate>
-              <div>
-                <label className={styles.label} htmlFor="auth-otp">{t('auth.otp')}</label>
-                <input
-                  id="auth-otp"
-                  className={styles.otpInput}
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  disabled={loading}
-                  autoFocus
-                />
-              </div>
-              {error && <p className={styles.error} role="alert">{error}</p>}
-              <button type="submit" className={styles.primary} disabled={loading || code.length !== 6}>{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
-              <button type="button" className={styles.secondary} onClick={changePhone} disabled={loading}>{t('auth.changePhone')}</button>
-            </form>
-          </>
-        )}
-      </section>
+              <form onSubmit={verifyCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="fld">
+                  <label htmlFor="auth-otp">{t('auth.otp')}</label>
+                  <input
+                    id="auth-otp"
+                    className="inp otp"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    value={code}
+                    onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    disabled={loading}
+                    autoFocus
+                  />
+                </div>
+                {error && <div className="fld"><p className="emsg" role="alert"><span className="ic i-alert" aria-hidden="true" />{error}</p></div>}
+                <button type="submit" className="btn btn-p lg w" disabled={loading || code.length !== 6}>{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
+                <button type="button" className="btn btn-g w" onClick={changePhone} disabled={loading}>{t('auth.changePhone')}</button>
+              </form>
+            </>
+          )}
+        </section>
+      </div>
     </div>,
     document.body,
   );
