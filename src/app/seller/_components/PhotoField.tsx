@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, type Dispatch, type PointerEvent as ReactPointerEvent, type SetStateAction } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type Dispatch, type PointerEvent as ReactPointerEvent, type SetStateAction } from 'react';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 
 export const PHOTO_LIMIT = 5;
-const LONG_PRESS_MS = 350;
+const LONG_PRESS_MS = 300;
+const LIFT_MS = 150;
+const SETTLE_MS = 200;
 const MOVE_TOLERANCE_PX = 8;
+const SPRING = 'cubic-bezier(.34,1.56,.64,1)';
+const LIFT_SCALE = 1.08;
 
 export type PhotoTile = {
   key: string;
@@ -41,8 +45,13 @@ function move<T>(list: T[], from: number, to: number): T[] {
   return next;
 }
 
-// Offer photos (offer-photos contract §2): each file uploads on its own with progress and retry; the first tile is
-// the cover. Order changes by long press and drag, and equally by buttons, so dragging is never the only way.
+function reducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+// Offer photos (offer-photos contract §2, seller-photo-tiles contract): each file uploads on its own with progress and
+// retry; the first tile is the cover. Every ready tile carries ☆ (make cover) and × (delete); a tap opens the ← → micro-
+// menu under the tile; a long press lifts the tile and it follows the finger, so dragging is never the only way.
 export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
   tiles: PhotoTile[];
   setTiles: Dispatch<SetStateAction<PhotoTile[]>>;
@@ -54,11 +63,15 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
+  const [rowSize, setRowSize] = useState(4);
   const gridRef = useRef<HTMLUListElement>(null);
   const press = useRef<{ key: string; x: number; y: number; timer: number } | null>(null);
+  const drag = useRef<{ key: string; li: HTMLElement; tile: HTMLElement; grabX: number; grabY: number } | null>(null);
   const draggingRef = useRef<string | null>(null);
   const suppressClick = useRef(false);
   const requests = useRef(new Map<string, XMLHttpRequest>());
+  const layout = useRef(new Map<string, { left: number; top: number }>());
+  const arrowFocus = useRef<'left' | 'right' | null>(null);
 
   useEffect(() => { draggingRef.current = draggingKey; }, [draggingKey]);
 
@@ -75,6 +88,52 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
     const pending = requests.current;
     return () => { for (const request of pending.values()) request.abort(); };
   }, []);
+
+  // How many tiles fit in a row: the micro-menu goes under the row of the selected tile.
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const first = grid.querySelector<HTMLElement>('[data-photo-key], [data-photo-add]');
+      if (!first || first.offsetWidth === 0) return;
+      const gap = parseFloat(getComputedStyle(grid).columnGap) || 8;
+      setRowSize(Math.max(1, Math.floor((grid.clientWidth + gap) / (first.offsetWidth + gap))));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, []);
+
+  // A tap outside the row (and its menu) closes the micro-menu.
+  useEffect(() => {
+    if (!selectedKey) return;
+    const onDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || gridRef.current?.contains(event.target)) return;
+      setSelectedKey(null);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [selectedKey]);
+
+  // Tiles change places with a 200 ms spring (FLIP) — the lifted tile is moved by the finger instead.
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const next = new Map<string, { left: number; top: number }>();
+    const skip = reducedMotion();
+    for (const li of grid.querySelectorAll<HTMLElement>('[data-photo-key]')) {
+      const key = li.dataset.photoKey!;
+      const now = { left: li.offsetLeft, top: li.offsetTop };
+      next.set(key, now);
+      const before = layout.current.get(key);
+      if (skip || !before || key === draggingRef.current) continue;
+      const dx = before.left - now.left;
+      const dy = before.top - now.top;
+      if (dx !== 0 || dy !== 0) li.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: SETTLE_MS, easing: SPRING });
+    }
+    layout.current = next;
+  });
 
   function patch(key: string, change: Partial<PhotoTile>) {
     setTiles((current) => current.map((tile) => (tile.key === key ? { ...tile, ...change } : tile)));
@@ -145,22 +204,45 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
     setAnnouncement(to === 0 ? t('photos.nowCover') : t('photos.movedTo', { position: to + 1 }));
   }
 
-  function onPointerDown(event: ReactPointerEvent, key: string) {
-    if (disabled || event.button !== 0) return;
+  function makeCover(key: string) {
+    reorder(key, 0);
+    setSelectedKey(null);
+  }
+
+  function onPointerDown(event: ReactPointerEvent, tile: PhotoTile) {
+    if (disabled || event.button !== 0 || tile.status !== 'ready') return;
     // Captured, so the drag keeps receiving moves and the release even outside the grid.
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    const timer = window.setTimeout(() => {
-      setDraggingKey(key);
-      setSelectedKey(key);
-      navigator.vibrate?.(10);
-    }, LONG_PRESS_MS);
-    press.current = { key, x: event.clientX, y: event.clientY, timer };
+    const timer = window.setTimeout(() => lift(tile.key), LONG_PRESS_MS);
+    press.current = { key: tile.key, x: event.clientX, y: event.clientY, timer };
+  }
+
+  // Hold done: the tile rises (scale 1.08 and a shadow, 150 ms), then follows the finger 1:1.
+  function lift(key: string) {
+    const current = press.current;
+    const li = gridRef.current?.querySelector<HTMLElement>(`[data-photo-key="${CSS.escape(key)}"]`);
+    const tile = li?.querySelector<HTMLElement>('.mt');
+    if (!current || !li || !tile) return;
+    const rect = tile.getBoundingClientRect();
+    drag.current = { key, li, tile, grabX: current.x - rect.left, grabY: current.y - rect.top };
+    if (reducedMotion()) {
+      tile.style.transform = `scale(${LIFT_SCALE})`;
+    } else {
+      tile.style.transition = `transform ${LIFT_MS}ms ease-out`;
+      tile.style.transform = `scale(${LIFT_SCALE})`;
+      window.setTimeout(() => { tile.style.transition = 'none'; }, LIFT_MS);
+    }
+    setDraggingKey(key);
+    setSelectedKey(null);
+    navigator.vibrate?.(10);
   }
 
   function onPointerMove(event: ReactPointerEvent) {
     const current = press.current;
     if (!current) return;
-    if (!draggingRef.current) {
+    const grid = gridRef.current;
+    const held = drag.current;
+    if (!held || !grid) {
       // Moving before the long press completes is a scroll, not a drag.
       if (Math.hypot(event.clientX - current.x, event.clientY - current.y) > MOVE_TOLERANCE_PX) {
         window.clearTimeout(current.timer);
@@ -168,27 +250,63 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
       }
       return;
     }
-    const over = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-photo-key]');
-    const overKey = over?.dataset.photoKey;
-    if (!overKey || overKey === draggingRef.current) return;
-    const to = tiles.findIndex((tile) => tile.key === overKey);
-    reorder(draggingRef.current, to);
+    const box = grid.getBoundingClientRect();
+    const x = event.clientX - box.left;
+    const y = event.clientY - box.top;
+    held.tile.style.transform = `translate(${x - held.grabX - held.li.offsetLeft}px, ${y - held.grabY - held.li.offsetTop}px) scale(${LIFT_SCALE})`;
+    // The slot under the finger (by layout, so slots that are still settling do not flip back and forth).
+    for (const li of grid.querySelectorAll<HTMLElement>('[data-photo-key]')) {
+      const key = li.dataset.photoKey!;
+      if (key === held.key) continue;
+      if (x >= li.offsetLeft && x <= li.offsetLeft + li.offsetWidth && y >= li.offsetTop && y <= li.offsetTop + li.offsetHeight) {
+        reorder(held.key, tiles.findIndex((tile) => tile.key === key));
+        break;
+      }
+    }
   }
 
+  // Released: the tile settles into its slot in 200 ms; released outside the row it returns along the same path.
   function endPress() {
     if (press.current) window.clearTimeout(press.current.timer);
     press.current = null;
-    // The release after a drag must not also toggle the selection through the button's click.
-    if (draggingRef.current) suppressClick.current = true;
+    const held = drag.current;
+    drag.current = null;
+    if (held) {
+      // The release after a drag must not also toggle the selection through the button's click.
+      suppressClick.current = true;
+      const from = held.tile.style.transform;
+      held.tile.style.transition = '';
+      held.tile.style.transform = '';
+      if (!reducedMotion() && from) held.tile.animate([{ transform: from }, { transform: 'none' }], { duration: SETTLE_MS, easing: 'ease-out' });
+    }
     setDraggingKey(null);
   }
 
+  function onTap(tile: PhotoTile) {
+    if (suppressClick.current) { suppressClick.current = false; return; }
+    arrowFocus.current = null;
+    if (tile.status === 'error') { if (tile.file && tile.error === 'photos.errorUpload') retry(tile); return; }
+    if (tile.status !== 'ready') return;
+    setSelectedKey((current) => (current === tile.key ? null : tile.key));
+  }
+
   const selectedIndex = tiles.findIndex((tile) => tile.key === selectedKey);
-  const selected = selectedIndex >= 0 ? tiles[selectedIndex] : undefined;
+  const selected = selectedIndex >= 0 && !draggingKey ? tiles[selectedIndex] : undefined;
   const full = tiles.length >= PHOTO_LIMIT;
   const failed = tiles.map((tile, index) => ({ tile, index })).filter(({ tile }) => tile.status === 'error');
+  // The micro-menu sits under the row that holds the selected tile.
+  const menuAfter = selected ? Math.min(tiles.length - 1, (Math.floor(selectedIndex / rowSize) + 1) * rowSize - 1) : -1;
+  const tileLabel = (index: number) => (index === 0 ? t('photos.tileCover', { position: index + 1 }) : t('photos.tile', { position: index + 1 }));
 
-  // AI-S09 · Editor · Media: 72 px tiles, the cover marked with a star, progress and error on the tile itself.
+  // The menu moves with its photo, and the arrow the finger used keeps the focus after the photo changed place.
+  useEffect(() => {
+    if (!arrowFocus.current || !gridRef.current) return;
+    const wanted = gridRef.current.querySelector<HTMLButtonElement>(`[data-arrow="${arrowFocus.current}"]`);
+    const other = gridRef.current.querySelector<HTMLButtonElement>(`[data-arrow="${arrowFocus.current === 'left' ? 'right' : 'left'}"]`);
+    (wanted && !wanted.disabled ? wanted : other)?.focus();
+  }, [selectedIndex]);
+
+  // AI-S09 · Editor · Media: 72 px tiles, the cover marked with a star, ☆ and × on the tile, progress and error on it too.
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }} aria-labelledby={`${ids}-title`}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -196,39 +314,65 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
         <span className="c num">{full ? `${tiles.length} из ${PHOTO_LIMIT} — максимум` : t('photos.counter', { count: tiles.length, limit: PHOTO_LIMIT })}</span>
       </div>
 
-      <ul ref={gridRef} className="mrow" style={{ margin: 0, padding: 0, listStyle: 'none' }} onPointerMove={onPointerMove} onPointerUp={endPress} onPointerCancel={endPress}>
-        {tiles.map((tile, index) => (
-          <li key={tile.key} data-photo-key={tile.key} style={{ opacity: tile.key === draggingKey ? 0.6 : 1 }}>
-            <button
-              type="button"
-              className={`mt img${tile.status === 'uploading' ? ' up' : ''}${tile.status === 'error' ? ' er' : ''}`}
-              style={{ padding: 0, border: 0, cursor: 'pointer', outline: tile.key === selectedKey ? '2px solid var(--primary)' : undefined, outlineOffset: tile.key === selectedKey ? 2 : undefined }}
-              onClick={() => {
-                if (suppressClick.current) { suppressClick.current = false; return; }
-                if (tile.status === 'error' && tile.file && tile.error === 'photos.errorUpload') { retry(tile); return; }
-                setSelectedKey((current) => (current === tile.key ? null : tile.key));
-              }}
-              onPointerDown={(event) => onPointerDown(event, tile.key)}
-              onContextMenu={(event) => event.preventDefault()}
-              aria-pressed={tile.key === selectedKey}
-              aria-label={index === 0 ? t('photos.tileCover', { position: index + 1 }) : t('photos.tile', { position: index + 1 })}
-              disabled={disabled}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- local object URLs and owner-only photo routes */}
-              <img src={tile.previewUrl} alt="" draggable={false} />
-              {index === 0 && <span className="cv star" role="img" aria-label={t('photos.cover')} title={t('photos.cover')}><span className="ic i-starf" /></span>}
-              {tile.status === 'uploading' && (
-                <div className="pb" role="progressbar" aria-label={t('photos.uploading')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(tile.progress * 100)}>
-                  <i style={{ width: `${Math.round(tile.progress * 100)}%` }} />
+      <ul ref={gridRef} className="mrow" style={{ margin: 0, padding: 0, listStyle: 'none', position: 'relative' }} onPointerMove={onPointerMove} onPointerUp={endPress} onPointerCancel={endPress}
+        onKeyDown={(event) => { if (event.key === 'Escape' && selectedKey) { event.stopPropagation(); setSelectedKey(null); } }}>
+        {tiles.flatMap((tile, index) => {
+          const ready = tile.status === 'ready';
+          const label = tileLabel(index);
+          const items = [(
+            <li key={tile.key} data-photo-key={tile.key}>
+              <div className={`mt img${tile.status === 'uploading' ? ' up' : ''}${tile.status === 'error' ? ' er' : ''}${tile.key === selectedKey && !draggingKey ? ' sel' : ''}${tile.key === draggingKey ? ' lift' : ''}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- local object URLs and owner-only photo routes */}
+                <img src={tile.previewUrl} alt="" draggable={false} />
+                <button
+                  type="button"
+                  className="tap"
+                  onPointerDown={(event) => onPointerDown(event, tile)}
+                  onClick={() => onTap(tile)}
+                  onContextMenu={(event) => event.preventDefault()}
+                  aria-pressed={ready ? tile.key === selectedKey : undefined}
+                  aria-label={label}
+                  disabled={disabled}
+                />
+                {index === 0 && <span className="cv star" role="img" aria-label={t('photos.cover')} title={t('photos.cover')}><span className="ic i-starf" /></span>}
+                {ready && index > 0 && (
+                  <button type="button" className="cvb" aria-label={`${t('photos.makeCover')}: ${label}`} onClick={() => makeCover(tile.key)} disabled={disabled}>
+                    <span className="ic i-star" />
+                  </button>
+                )}
+                {ready && (
+                  <button type="button" className="del" aria-label={`${t('photos.remove')}: ${label}`} onClick={() => remove(tile.key)} disabled={disabled}>
+                    <span className="ic i-close" />
+                  </button>
+                )}
+                {tile.status === 'uploading' && (
+                  <div className="pb" role="progressbar" aria-label={t('photos.uploading')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(tile.progress * 100)}>
+                    <i style={{ width: `${Math.round(tile.progress * 100)}%` }} />
+                  </div>
+                )}
+                {tile.status === 'error' && (
+                  <div className="erl"><span className="ic i-refresh sm" />{tile.file && tile.error === 'photos.errorUpload' ? t('photos.retry') : t('photos.remove')}</div>
+                )}
+              </div>
+            </li>
+          )];
+          if (index === menuAfter && selected) {
+            const column = selectedIndex % rowSize;
+            items.push(
+              <li key="photo-menu" className="mpop-wrap" role="toolbar" aria-label={t('photos.orderToolbar', { position: selectedIndex + 1, count: tiles.length })}>
+                <div className="mpop" style={{ left: `calc(${column} * (72px + 8px) + 36px)`, transform: 'translateX(-50%)' }}>
+                  <button type="button" data-arrow="left" aria-label={t('photos.moveLeft')} disabled={disabled || selectedIndex === 0}
+                    onClick={() => { arrowFocus.current = 'left'; reorder(selected.key, selectedIndex - 1); }}><span className="ic i-left sm" /></button>
+                  <span className="sep" />
+                  <button type="button" data-arrow="right" aria-label={t('photos.moveRight')} disabled={disabled || selectedIndex === tiles.length - 1}
+                    onClick={() => { arrowFocus.current = 'right'; reorder(selected.key, selectedIndex + 1); }}><span className="ic i-right sm" /></button>
                 </div>
-              )}
-              {tile.status === 'error' && (
-                <div className="erl"><span className="ic i-refresh sm" />{tile.file && tile.error === 'photos.errorUpload' ? t('photos.retry') : t('photos.remove')}</div>
-              )}
-            </button>
-          </li>
-        ))}
-        <li>
+              </li>,
+            );
+          }
+          return items;
+        })}
+        <li data-photo-add>
           {full ? (
             <div className="mt add" style={{ color: 'var(--ink3)', borderColor: 'var(--line)' }} aria-disabled="true"><span className="ic i-plus" />Лимит</div>
           ) : (
@@ -259,25 +403,6 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
           </div>
         </div>
       ))}
-
-      {selected && (
-        <div className="card p16" style={{ gap: 4, boxShadow: 'var(--shadow-md)' }} role="group" aria-label={t('photos.actionsFor', { position: selectedIndex + 1 })}>
-          <div className="ov" style={{ padding: '4px 0 8px' }}>{t('photos.tile', { position: selectedIndex + 1 })}</div>
-          {selectedIndex > 0 && (
-            <button type="button" className="li" style={{ minHeight: 48, border: 0, background: 'none', padding: '8px 0' }} onClick={() => reorder(selected.key, 0)} disabled={disabled}>
-              <span className="ic i-cover c2" /><div className="mid"><div className="ts">{t('photos.makeCover')}</div></div>
-            </button>
-          )}
-          <div className="li" style={{ minHeight: 48 }}>
-            <span className="ic i-drag c2" /><div className="mid"><div className="ts">Переместить</div></div>
-            <button type="button" className="ib" style={{ width: 40, height: 40 }} onClick={() => reorder(selected.key, selectedIndex - 1)} disabled={disabled || selectedIndex === 0} aria-label={t('photos.moveLeft')}><span className="ic i-left sm" /></button>
-            <button type="button" className="ib" style={{ width: 40, height: 40 }} onClick={() => reorder(selected.key, selectedIndex + 1)} disabled={disabled || selectedIndex === tiles.length - 1} aria-label={t('photos.moveRight')}><span className="ic i-right sm" /></button>
-          </div>
-          <button type="button" className="li" style={{ minHeight: 48, color: 'var(--danger)', border: 0, borderTop: '1px solid var(--line)', background: 'none', padding: '8px 0' }} onClick={() => remove(selected.key)} disabled={disabled}>
-            <span className="ic i-trash" /><div className="mid"><div className="ts">{t('photos.remove')}</div></div>
-          </button>
-        </div>
-      )}
 
       <p className="c">{tiles.length === 0 ? t('photos.emptyHint') : 'Удерживайте фото, чтобы изменить порядок.'}</p>
       {blockedMessage && <div className="fld" role="alert"><div className="emsg"><span className="ic i-alert" />{t(blockedMessage)}</div></div>}

@@ -92,4 +92,9 @@ E2E. `pnpm verify` green.
 3. **Failed tile that cannot be retried** (wrong type, too large): the mockup shows only `Повторить`. Today such a tile
    is removed through the error line under the row. **Request:** confirm keeping that line (or a frame).
    **PO: yes (2026-09-29).**
-4. **Cover on a tile that is uploading** when it is first in the row: not drawn; proposal — star appears when ready.
+4. **Cover star on a tile that is still uploading** and first in the row: as today, the star is shown at once
+   (`★` for position 1 whatever the status); `☆` / `×` appear when the photo is ready.
+5. **Hit area, as built:** the tile is 72 px wide, so two 44 px targets do not fit side by side. `☆` and `×` each take
+   their half of the tile's top edge — 36 × 44 px inside the tile (the tile clips overflow); the drawn 22 px look is
+   unchanged. `←` / `→` are 44 × 44. If the PO wants full 44 × 44 for `☆` / `×`, the tile must grow or the buttons
+   must move — a design decision.

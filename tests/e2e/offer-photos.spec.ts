@@ -95,10 +95,9 @@ test('Seller adds photos, makes the second the cover and publishes; Buyer opens 
     await expect(editor.getByText('3 из 5')).toBeVisible();
     await expect(editor.getByRole('progressbar')).toHaveCount(0);
 
-    // Cover by buttons alone: select photo 2, make it the cover.
-    await editor.getByRole('button', { name: 'Фото 2', exact: true }).click();
-    await editor.getByRole('button', { name: 'Сделать обложкой' }).click();
-    await expect(editor.getByRole('button', { name: 'Фото 1, обложка' })).toBeVisible();
+    // Cover by the ☆ on the tile (seller-photo-tiles): photo 2 becomes the cover.
+    await editor.getByRole('button', { name: 'Сделать обложкой: Фото 2' }).click();
+    await expect(editor.getByRole('button', { name: 'Фото 1, обложка', exact: true })).toBeVisible();
 
     await fillOfferFields(page, { product: 'Баранина', price: '5100', unit: 'kg' });
     await toConfirm(page);
@@ -192,8 +191,7 @@ test('a rejected file stays at its tile and blocks sending until it is removed; 
     await page.getByRole('article').getByRole('button').first().click();
     await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
     const edit = offerEditor(page);
-    await edit.getByRole('button', { name: 'Фото 1, обложка' }).click();
-    await edit.getByRole('button', { name: 'Удалить' }).click();
+    await edit.getByRole('button', { name: 'Удалить: Фото 1, обложка' }).click();
     await expect(edit.getByText('0 из 5')).toBeVisible();
     await edit.getByRole('button', { name: 'Проверить и сохранить' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\//);
@@ -201,6 +199,58 @@ test('a rejected file stays at its tile and blocks sending until it is removed; 
     await page.getByRole('button', { name: 'Опубликовать без фото' }).click();
     await expect(page.getByRole('status').filter({ hasText: /Изменения опубликованы|Өзгерістер жарияланды/ })).toBeVisible();
     expect(await offerPhotoIds(sellerId)).toEqual([]);
+  } finally {
+    await cleanup(phone);
+  }
+});
+
+test('photo tiles: tap opens the ← → menu that follows the photo, edges are disabled, × deletes, a long press lifts the tile', async ({ page }, testInfo) => {
+  const phone = phoneFor(testInfo.project.name, 4);
+  await cleanup(phone);
+  try {
+    await prepareSeller(page, phone, `D ${testInfo.project.name}`);
+    const editor = await openCreate(page);
+    await editor.locator('input[type="file"]').setInputFiles([
+      { name: 'one.png', mimeType: 'image/png', buffer: await png({ r: 200, g: 40, b: 40 }) },
+      { name: 'two.png', mimeType: 'image/png', buffer: await png({ r: 40, g: 160, b: 60 }) },
+      { name: 'three.png', mimeType: 'image/png', buffer: await png({ r: 40, g: 60, b: 200 }) },
+    ]);
+    await expect(editor.getByText('3 из 5')).toBeVisible();
+    const srcs = () => editor.locator('li[data-photo-key] img').evaluateAll((images) => images.map((image) => (image as HTMLImageElement).src));
+    const [one, two, three] = await srcs();
+
+    // Tap: a ring on the tile and the toolbar under its row; the cover cannot move left.
+    // The bottom of the tile: its top corners belong to ☆ and ×.
+    await editor.getByRole('button', { name: 'Фото 1, обложка', exact: true }).click({ position: { x: 36, y: 60 } });
+    const toolbar = editor.getByRole('toolbar', { name: 'Фото 1 из 3: порядок' });
+    await expect(toolbar).toBeVisible();
+    await expect(toolbar.getByRole('button', { name: 'Переместить влево' })).toBeDisabled();
+
+    // → twice: the photo travels to the end, the menu with it, and the right arrow goes dead at the edge.
+    await toolbar.getByRole('button', { name: 'Переместить вправо' }).click();
+    await editor.getByRole('toolbar', { name: 'Фото 2 из 3: порядок' }).getByRole('button', { name: 'Переместить вправо' }).click();
+    const last = editor.getByRole('toolbar', { name: 'Фото 3 из 3: порядок' });
+    await expect(last.getByRole('button', { name: 'Переместить вправо' })).toBeDisabled();
+    expect(await srcs()).toEqual([two, three, one]);
+
+    // Tapping outside closes the menu.
+    await editor.getByText('Удерживайте фото, чтобы изменить порядок.').click();
+    await expect(editor.getByRole('toolbar')).toHaveCount(0);
+
+    // × deletes the tile.
+    await editor.getByRole('button', { name: 'Удалить: Фото 3' }).click();
+    await expect(editor.getByText('2 из 5')).toBeVisible();
+    expect(await srcs()).toEqual([two, three]);
+
+    // Long press lifts the tile (seller-photo-tiles §2); the feel of the drag itself is checked on a phone.
+    const tile = editor.getByRole('button', { name: 'Фото 2', exact: true });
+    const box = (await tile.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + 60);
+    await page.mouse.down();
+    await expect(editor.locator('.mt.lift')).toHaveCount(1);
+    await page.mouse.up();
+    await expect(editor.locator('.mt.lift')).toHaveCount(0);
+    expect(await srcs()).toEqual([two, three]);
   } finally {
     await cleanup(phone);
   }
