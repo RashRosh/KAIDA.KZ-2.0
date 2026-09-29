@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { chooseLanguageInMore, openOffer } from './buyer-helpers';
 import { fillOfferFields, offerEditor, openNewCard } from './offer-editor-helpers';
 
 // The default web server runs with the translator off; `translatorOnBaseURL` is the same build with the fake adapter.
@@ -112,26 +113,31 @@ test.describe('translator on', () => {
       await expect(form.getByRole('textbox', { name: /^Комментарий/ })).toHaveValue(kkComment);
       await confirmOffer(page);
 
-      const card = page.getByRole('article').filter({ has: page.getByText(sellerName, { exact: true }) });
+      // B02: the comment and its translation are on the offer page.
+      const card = page.getByRole('article').filter({ hasText: `${sellerName} нүкте` });
+      const comment = page.getByTestId('offer-comment');
       await expect(async () => {
         await searchLamb(page);
-        await expect(card.getByText(ruTranslation, { exact: true })).toBeVisible({ timeout: 1000 });
+        await openOffer(card, 'Баранина');
+        await expect(comment.getByText(ruTranslation, { exact: true })).toBeVisible({ timeout: 1000 });
       }).toPass({ timeout: 15000 });
-      await expect(card.getByText('Автоперевод', { exact: true })).toBeVisible();
-      await expect(card.getByText(ruTranslation, { exact: true })).toHaveAttribute('lang', 'ru');
+      const offerUrl = page.url();
+      await expect(comment.getByText(/Автоперевод/)).toBeVisible();
+      await expect(comment.getByText(ruTranslation, { exact: true })).toHaveAttribute('lang', 'ru');
 
-      const toggle = card.getByRole('button', { name: 'Показать оригинал' });
+      const toggle = comment.getByRole('button', { name: 'Показать оригинал' });
       await toggle.focus();
       await page.keyboard.press('Enter');
-      await expect(card.getByText(kkComment, { exact: true })).toHaveAttribute('lang', 'kk');
-      await card.getByRole('button', { name: 'Показать перевод' }).click();
-      await expect(card.getByText(ruTranslation, { exact: true })).toBeVisible();
+      await expect(comment.getByText(kkComment, { exact: true })).toHaveAttribute('lang', 'kk');
+      await comment.getByRole('button', { name: 'Показать перевод' }).click();
+      await expect(comment.getByText(ruTranslation, { exact: true })).toBeVisible();
 
-      await page.getByRole('button', { name: 'Қазақша' }).click();
-      await expect(card.getByText(kkComment, { exact: true })).toBeVisible();
-      await expect(card.getByText('Автоаударма')).toHaveCount(0);
-      await expect(card.getByText(/Аударма қолжетімсіз/)).toHaveCount(0);
-      await expect(card.getByText(sellerName, { exact: true })).toBeVisible();
+      await chooseLanguageInMore(page, 'Қазақша');
+      await page.goto(offerUrl);
+      await expect(comment.getByText(kkComment, { exact: true })).toBeVisible();
+      await expect(comment.getByText(/Автоаударма/)).toHaveCount(0);
+      await expect(comment.getByText(/Аударма қолжетімсіз/)).toHaveCount(0);
+      await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
     } finally {
       await cleanup(phones.login);
     }
@@ -151,15 +157,19 @@ test.describe('translator off', () => {
       await expect(page.getByRole('button', { name: 'Проверить перевод' })).toHaveCount(0);
       await confirmOffer(page);
 
-      const card = page.getByRole('article').filter({ has: page.getByText(sellerName, { exact: true }) });
+      const card = page.getByRole('article').filter({ hasText: `${sellerName} нүкте` });
+      const comment = page.getByTestId('offer-comment');
       await searchLamb(page);
-      await expect(card.getByText(kkComment, { exact: true })).toBeVisible();
-      await expect(card.getByText('Автоперевод')).toHaveCount(0);
-      await expect(card.getByText(/Перевод недоступен/)).toHaveCount(0);
+      await openOffer(card, 'Баранина');
+      const offerUrl = page.url();
+      await expect(comment.getByText(kkComment, { exact: true })).toBeVisible();
+      await expect(comment.getByText(/Автоперевод/)).toHaveCount(0);
+      await expect(comment.getByText(/Перевод недоступен/)).toHaveCount(0);
 
-      await page.getByRole('button', { name: 'Қазақша' }).click();
-      await expect(card.getByText(kkComment, { exact: true })).toBeVisible();
-      await expect(card.getByText(/Автоаударма|Аударма қолжетімсіз/)).toHaveCount(0);
+      await chooseLanguageInMore(page, 'Қазақша');
+      await page.goto(offerUrl);
+      await expect(comment.getByText(kkComment, { exact: true })).toBeVisible();
+      await expect(comment.getByText(/Автоаударма|Аударма қолжетімсіз/)).toHaveCount(0);
     } finally {
       await cleanup(phones.login);
     }

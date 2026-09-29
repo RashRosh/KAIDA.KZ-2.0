@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { openOffer } from './buyer-helpers';
 import { proposeNewOffer } from './offer-editor-helpers';
 
 interface SearchOfferBody {
@@ -157,7 +158,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
 
     const beforeConfirmation = await buyerSearch(buyerPage, 'Баранина');
     expect(containsIdentity(beforeConfirmation, identity)).toBe(false);
-    await expect(buyerPage.getByText(sellerName, { exact: true })).toHaveCount(0);
+    await expect(buyerPage.getByText(locationName, { exact: true })).toHaveCount(0);
 
     const createConfirmResponse = sellerPage.waitForResponse((response) => (
       response.url().includes('/api/seller/change-sets/')
@@ -185,10 +186,13 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     const alias = await buyerSearch(buyerPage, 'мясо барана');
     const aliasOffer = alias.offers.find((offer) => offer.id === offerId);
     expect(aliasOffer).toEqual(canonicalOffer);
-    const sellerOfferCard = buyerPage.getByRole('article').filter({ has: buyerPage.getByText(sellerName, { exact: true }) });
+    const sellerOfferCard = buyerPage.getByRole('article').filter({ has: buyerPage.getByText(locationName, { exact: true }) });
     await expect(sellerOfferCard).toHaveCount(1);
     await expect(sellerOfferCard.getByRole('heading', { name: 'мясо барана', exact: true })).toBeVisible();
-    await expect(sellerOfferCard.getByText(sellerComment, { exact: true })).toBeVisible();
+    // B02: the seller and the comment are on the offer page.
+    await openOffer(sellerOfferCard, 'мясо барана');
+    await expect(buyerPage.getByText(sellerName, { exact: true })).toBeVisible();
+    await expect(buyerPage.getByTestId('offer-comment')).toHaveText(sellerComment);
 
     // seller-showcase-editor: switching a point off lives on the card screen of «Моя витрина».
     await sellerPage.goto('/seller');
@@ -218,7 +222,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     const aliasAfterDeactivation = await buyerSearch(buyerPage, 'мясо барана');
     expect(canonicalAfterDeactivation.offers.some((offer) => offer.id === offerId)).toBe(false);
     expect(aliasAfterDeactivation.offers.some((offer) => offer.id === offerId)).toBe(false);
-    await expect(buyerPage.getByText(sellerName, { exact: true })).toHaveCount(0);
+    await expect(buyerPage.getByText(locationName, { exact: true })).toHaveCount(0);
   } finally {
     await sellerContext.close();
     await buyerContext.close();

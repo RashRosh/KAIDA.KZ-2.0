@@ -72,13 +72,17 @@ test('authenticated seller shell exposes logout and logout clears private seller
     await expect(await logout()).toBeVisible();
     await expect(page.getByText('Вход по этому номеру')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.getByRole('link', { name: 'Я покупатель — поиск товаров' }).click();
+    await expect(page).toHaveURL('/');
+    await expect(page.getByLabel('Какой товар ищете?')).toBeVisible();
 
     await page.goto('/seller/points');
     await expect(tradingPointCard.getByText(locationName, { exact: true })).toBeVisible();
     await (await logout()).click();
 
-    await expect(page).toHaveURL('/');
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
+    // One account for both roles: sign-out lands on the buyer «Ещё», where «Войти» is back.
+    await expect(page).toHaveURL('/more');
+    await expect(page.getByRole('button', { name: /^Войти/ })).toBeVisible();
     await expect(page.getByText(displayName, { exact: true })).toHaveCount(0);
     await expect(page.getByText(locationName, { exact: true })).toHaveCount(0);
 
@@ -88,6 +92,10 @@ test('authenticated seller shell exposes logout and logout clears private seller
 
     const sellerMe = await page.request.get('/api/seller/me');
     expect(sellerMe.status()).toBe(401);
+
+    // buyer-screens-mockup: buyer «Ещё» offers sign-in again.
+    await page.goto('/more');
+    await expect(page.getByRole('button', { name: /^Войти/ })).toBeVisible();
 
     await page.goto('/seller/batch');
     await expect(page.getByRole('heading', { name: 'Нужно войти' })).toBeVisible();

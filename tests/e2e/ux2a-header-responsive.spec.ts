@@ -1,21 +1,10 @@
-import { expect, test } from '@playwright/test';
-import { Pool } from 'pg';
-import { testDatabaseUrl } from '../integration/database';
+import { expect, test, type Page } from '@playwright/test';
+
+// buyer-screens-mockup (revises UX2A): the site header leaves buyer routes; the results screen keeps its own search
+// bar. It stays usable on a tablet and a narrow phone: one square Search submit of at least 44 px, no overlaps, no
+// horizontal scroll, and a new search runs from it.
 
 type Box = { x: number; y: number; width: number; height: number };
-
-const PHONE = '+77000000929';
-
-async function cleanup() {
-  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
-  try {
-    await pool.query('DELETE FROM auth_sessions WHERE user_id IN (SELECT id FROM users WHERE phone_e164=$1)', [PHONE]);
-    await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=$1', [PHONE]);
-    await pool.query('DELETE FROM users WHERE phone_e164=$1', [PHONE]);
-  } finally {
-    await pool.end();
-  }
-}
 
 function overlaps(a: Box, b: Box) {
   return a.x < b.x + b.width
@@ -24,78 +13,36 @@ function overlaps(a: Box, b: Box) {
     && a.y + a.height > b.y;
 }
 
-async function expectSearchGeometry(page: import('@playwright/test').Page) {
-  const search = page.getByRole('search', { name: 'Поиск из шапки' });
-  const input = search.getByRole('searchbox', { name: 'Поиск товара', exact: true });
+async function expectResultsBar(page: Page) {
+  const search = page.getByRole('search', { name: 'Поиск предложений' });
+  const input = search.getByRole('searchbox', { name: 'Какой товар ищете?' });
   const submit = search.getByRole('button', { name: 'Искать', exact: true });
+  const location = search.getByRole('button', { name: 'Учитывать моё местоположение', exact: true });
 
-  await expect(search).toBeVisible();
   await expect(input).toBeVisible();
   await expect(submit).toBeVisible();
-
-  const inputBox = await input.boundingBox();
-  const submitBox = await submit.boundingBox();
-  expect(inputBox).not.toBeNull();
-  expect(submitBox).not.toBeNull();
-  expect(Math.abs(submitBox!.width - submitBox!.height)).toBeLessThanOrEqual(1);
-  expect(Math.abs(submitBox!.height - inputBox!.height)).toBeLessThanOrEqual(1);
-  expect(submitBox!.width).toBeGreaterThanOrEqual(44);
-  expect(submitBox!.height).toBeGreaterThanOrEqual(44);
-
-  return { search, submit };
+  const submitBox = (await submit.boundingBox())!;
+  expect(Math.abs(submitBox.width - submitBox.height)).toBeLessThanOrEqual(1);
+  expect(submitBox.height).toBeGreaterThanOrEqual(44);
+  expect(overlaps((await input.boundingBox())!, submitBox)).toBe(false);
+  expect(overlaps((await location.boundingBox())!, submitBox)).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  return { input, submit };
 }
 
-async function authenticateThroughApi(page: import('@playwright/test').Page) {
-  const requested = await page.request.post('/api/auth/otp/request', { data: { phone: PHONE } });
-  expect(requested.status()).toBe(201);
-  const payload = await requested.json() as {
-    challenge: { id: string };
-    delivery: { code: string };
-  };
-
-  const verified = await page.request.post('/api/auth/otp/verify', {
-    data: { challengeId: payload.challenge.id, code: payload.delivery.code },
-  });
-  expect(verified.status()).toBe(200);
-}
-
-test('UX2A keeps authenticated tablet and narrow header usable with one square Search submit', async ({ page }, testInfo) => {
+test('UX2A the results search bar stays usable on a tablet and a narrow phone with one square Search submit', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'Single targeted UX2A proof');
 
-  await cleanup();
-  try {
-    await authenticateThroughApi(page);
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto('/?q=%D0%B1%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
+  await expect(page.getByRole('article').first()).toBeVisible();
+  await expectResultsBar(page);
 
-    await page.setViewportSize({ width: 1024, height: 900 });
-    await page.goto('/');
-    const logoutButton = page.getByRole('button', { name: new RegExp(`^Выйти \\(${PHONE.replace('+', '\\+')}\\)$`) });
-    await expect(logoutButton).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 720 });
+  const mobile = await expectResultsBar(page);
 
-    const tablet = await expectSearchGeometry(page);
-    const searchBox = await tablet.search.boundingBox();
-    const logoutBox = await logoutButton.boundingBox();
-    expect(searchBox).not.toBeNull();
-    expect(logoutBox).not.toBeNull();
-    expect(overlaps(searchBox!, logoutBox!)).toBe(false);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-
-    await page.setViewportSize({ width: 390, height: 844 });
-    const mobile = await expectSearchGeometry(page);
-    const mobileSearchBox = await mobile.search.boundingBox();
-    const mobileLogoutBox = await logoutButton.boundingBox();
-    const menuBox = await page.getByRole('button', { name: 'Открыть меню', exact: true }).boundingBox();
-    expect(mobileSearchBox).not.toBeNull();
-    expect(mobileLogoutBox).not.toBeNull();
-    expect(menuBox).not.toBeNull();
-    expect(overlaps(mobileSearchBox!, mobileLogoutBox!)).toBe(false);
-    expect(overlaps(mobileSearchBox!, menuBox!)).toBe(false);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-
-    await mobile.search.getByRole('searchbox', { name: 'Поиск товара', exact: true }).fill('баранина');
-    await mobile.submit.click();
-    await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('баранина');
-    await expect(page.getByLabel('Какой товар ищете?')).toHaveValue('баранина');
-  } finally {
-    await cleanup();
-  }
+  await mobile.input.fill('говядина');
+  await mobile.submit.click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('говядина');
+  await expect(page.getByRole('article').filter({ hasText: 'Говядина' }).first()).toBeVisible();
 });

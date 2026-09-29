@@ -1,116 +1,59 @@
 import { expect, test } from '@playwright/test';
 
 type Page = import('@playwright/test').Page;
-type Locator = import('@playwright/test').Locator;
+
+// buyer-screens-mockup (revises UX1A / UX1A1): the site header and its menu leave buyer routes; every buyer screen is
+// the phone column of the accepted mockup with the bottom navigation «Поиск / Рядом / Ещё».
 
 const NAV_NAME = 'Основная навигация';
 
-async function openPrimaryNav(page: Page) {
+async function expectBuyerShell(page: Page) {
   const nav = page.getByRole('navigation', { name: NAV_NAME });
-  if (await nav.isVisible().catch(() => false)) return nav;
-
-  const openButton = page.getByRole('button', { name: 'Открыть меню', exact: true });
-  await expect(openButton).toBeVisible();
-  await openButton.click();
   await expect(nav).toBeVisible();
-  return nav;
-}
-
-async function expectNavEntries(nav: Locator) {
-  await expect(nav.getByRole('link', { name: 'Поиск', exact: true })).toBeVisible();
-  await expect(nav.getByRole('link', { name: 'Рядом', exact: true })).toBeVisible();
-  await expect(nav.getByRole('link', { name: 'Продавцу', exact: true })).toBeVisible();
-}
-
-async function expectSharedShell(page: Page, projectName: string) {
-  const header = page.getByRole('banner');
-
-  await expect(header).toBeVisible();
-  await expect(header.getByRole('link', { name: 'KAIDA.KZ, главная', exact: true })).toBeVisible();
-  await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toBeVisible();
-
-  if (projectName === 'mobile') {
-    await expect(header.getByRole('button', { name: 'Открыть меню', exact: true })).toBeVisible();
-  } else {
-    const nav = page.getByRole('navigation', { name: NAV_NAME });
-    await expect(nav).toBeVisible();
-    await expectNavEntries(nav);
-  }
-
+  await expect(nav.getByRole('link')).toHaveText(['Поиск', 'Рядом', 'Ещё']);
+  await expect(page.getByRole('banner').filter({ has: page.getByRole('link', { name: 'KAIDA.KZ, главная' }) })).toHaveCount(0);
+  await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Открыть меню', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  // The phone column: at most 480 px, centred, the navigation at its bottom edge.
+  const column = await page.locator('.kaida-app > .ph').boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(column).not.toBeNull();
+  expect(column!.width).toBeLessThanOrEqual(480);
+  expect(Math.abs(column!.x + column!.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(1);
+  const navBox = (await nav.boundingBox())!;
+  expect(Math.abs(navBox.y + navBox.height - viewport.height)).toBeLessThanOrEqual(1);
 }
 
-test('current main areas share the composed shell without horizontal overflow', async ({ page }, testInfo) => {
-  const navGeometry: Array<{ x: number; width: number }> = [];
-  const expectedPrimaryRowHeight = testInfo.project.name === 'mobile' ? 84 : 104;
-
-  for (const path of ['/', '/nearby', '/login']) {
+test('buyer routes share the mockup phone column and bottom navigation without horizontal overflow', async ({ page }) => {
+  for (const path of ['/', '/nearby', '/more', '/login']) {
     await page.goto(path);
-    await expectSharedShell(page, testInfo.project.name);
-
-    const primaryRowBox = await page.getByTestId('primary-header-row').boundingBox();
-    expect(primaryRowBox).not.toBeNull();
-    expect(Math.abs(primaryRowBox!.height - expectedPrimaryRowHeight)).toBeLessThanOrEqual(1);
-
-    if (path === '/login') {
-      await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
-      continue;
-    }
-
-    if (testInfo.project.name === 'mobile') {
-      const nav = await openPrimaryNav(page);
-      await expectNavEntries(nav);
-      await page.getByRole('button', { name: 'Закрыть меню', exact: true }).click();
-      await expect(page.getByRole('button', { name: 'Открыть меню', exact: true })).toBeVisible();
-    } else {
-      const headerBox = await page.getByRole('banner').boundingBox();
-      expect(headerBox).not.toBeNull();
-      expect(headerBox!.height).toBeGreaterThan(expectedPrimaryRowHeight);
-
-      const navBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
-      expect(navBox).not.toBeNull();
-      navGeometry.push({ x: navBox!.x, width: navBox!.width });
-    }
-  }
-
-  if (navGeometry.length > 0) {
-    const first = navGeometry[0];
-    for (const current of navGeometry) {
-      expect(Math.abs(current.x - first.x)).toBeLessThanOrEqual(1);
-      expect(Math.abs(current.width - first.width)).toBeLessThanOrEqual(1);
-    }
+    await expectBuyerShell(page);
+    if (path === '/login') await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
   }
 
   await page.goto('/');
-  const searchInput = page.getByLabel('Какой товар ищете?');
-  await expect(searchInput).toBeVisible();
-  expect(await searchInput.evaluate((element) => getComputedStyle(element).borderRadius)).toBe('12px');
-  expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarGutter)).toContain('stable');
-  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain('Inter');
-
-  const radii = await page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement);
-    return [
-      '--radius-sm',
-      '--radius',
-      '--radius-lg',
-      '--radius-xl',
-    ].map((property) => Number.parseFloat(root.getPropertyValue(property)));
-  });
-  expect(radii).toEqual([0.5, 0.75, 1, 1.25]);
+  // The mockup's fonts and field shape, not the Pass 3 tokens.
+  expect(await page.locator('.kaida').first().evaluate((element) => getComputedStyle(element).fontFamily)).toContain('Roboto');
+  await expect(page.getByLabel('Какой товар ищете?')).toBeVisible();
 });
 
-test('active navigation state follows the current product area', async ({ page }) => {
+test('active navigation state follows the current buyer section', async ({ page }) => {
   for (const [path, activeLabel] of [
     ['/', 'Поиск'],
     ['/nearby', 'Рядом'],
+    ['/more', 'Ещё'],
   ] as const) {
     await page.goto(path);
-    const nav = await openPrimaryNav(page);
-    const activeLink = nav.getByRole('link', { name: activeLabel, exact: true });
-    await expect(activeLink).toHaveAttribute('aria-current', 'page');
+    const nav = page.getByRole('navigation', { name: NAV_NAME });
+    await expect(nav.getByRole('link', { name: activeLabel, exact: true })).toHaveAttribute('aria-current', 'page');
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   }
+
+  await page.getByRole('navigation', { name: NAV_NAME }).getByRole('link', { name: 'Поиск', exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByLabel('Какой товар ищете?')).toBeVisible();
 });
 
 // The seller area is the accepted seller mockup (PROJECT_RULES §18.1): its own header and bottom navigation, no site shell.
@@ -122,80 +65,9 @@ test('seller area uses the seller app shell without horizontal overflow', async 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test('desktop shell uses logo-search-auth top row and stable left navigation row', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'Desktop composition proof');
-
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
-
-  const wordmarkBox = await page.getByRole('link', { name: 'KAIDA.KZ, главная', exact: true }).boundingBox();
-  const searchBox = await page.getByRole('search', { name: 'Поиск из шапки' }).boundingBox();
-  const loginBox = await page.getByRole('button', { name: 'Войти', exact: true }).boundingBox();
-  const navBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
-
-  expect(wordmarkBox).not.toBeNull();
-  expect(searchBox).not.toBeNull();
-  expect(loginBox).not.toBeNull();
-  expect(navBox).not.toBeNull();
-  expect(wordmarkBox!.x).toBeLessThan(searchBox!.x);
-  expect(searchBox!.x + searchBox!.width).toBeLessThan(loginBox!.x + loginBox!.width);
-  expect(Math.abs(navBox!.x - wordmarkBox!.x)).toBeLessThanOrEqual(1);
-
-  const firstNavX = navBox!.x;
-  const firstSearchGeometry = { x: searchBox!.x, width: searchBox!.width };
-  for (const linkName of ['Рядом', 'Поиск']) {
-    await page.getByRole('navigation', { name: NAV_NAME }).getByRole('link', { name: linkName, exact: true }).click();
-    await expectSharedShell(page, testInfo.project.name);
-    const currentNavBox = await page.getByRole('navigation', { name: NAV_NAME }).boundingBox();
-    const currentSearchBox = await page.getByRole('search', { name: 'Поиск из шапки' }).boundingBox();
-    expect(currentNavBox).not.toBeNull();
-    expect(currentSearchBox).not.toBeNull();
-    expect(Math.abs(currentNavBox!.x - firstNavX)).toBeLessThanOrEqual(1);
-    expect(Math.abs(currentSearchBox!.x - firstSearchGeometry.x)).toBeLessThanOrEqual(1);
-    expect(Math.abs(currentSearchBox!.width - firstSearchGeometry.width)).toBeLessThanOrEqual(1);
-  }
-});
-
-test('desktop header search enters the real buyer search flow', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'Desktop header search proof');
-
-  await page.goto('/nearby');
-  const headerSearch = page.getByRole('search', { name: 'Поиск из шапки' });
-  await headerSearch.getByRole('searchbox', { name: 'Поиск товара', exact: true }).fill('баранина');
-  await headerSearch.getByRole('button', { name: 'Искать', exact: true }).click();
-
-  await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe('баранина');
-  await expect(page.getByLabel('Какой товар ищете?')).toHaveValue('баранина');
-  await expect(page.getByRole('status')).toHaveText('Найдено 1 предложение');
-});
-
-test('mobile navigation is compact, dismissible and closes after route selection', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'Mobile interaction proof');
-
-  await page.goto('/');
-  const openButton = page.getByRole('button', { name: 'Открыть меню', exact: true });
-  await expect(openButton).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByRole('navigation', { name: NAV_NAME })).toHaveCount(0);
-
-  await openButton.click();
-  await expect(page.getByRole('button', { name: 'Закрыть меню', exact: true })).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByRole('navigation', { name: NAV_NAME })).toBeVisible();
-
-  await page.keyboard.press('Escape');
-  await expect(openButton).toBeVisible();
-  await expect(page.getByRole('navigation', { name: NAV_NAME })).toHaveCount(0);
-
-  await openButton.click();
-  await page.getByRole('navigation', { name: NAV_NAME }).getByRole('link', { name: 'Рядом', exact: true }).click();
-  await expect(page).toHaveURL(/\/nearby$/);
-  await expect(page.getByRole('button', { name: 'Открыть меню', exact: true })).toBeVisible();
-  await expect(page.getByRole('navigation', { name: NAV_NAME })).toHaveCount(0);
-});
-
 test('anonymous seller entry opens auth over the current page', async ({ page }) => {
-  await page.goto('/');
-  const nav = await openPrimaryNav(page);
-  await nav.getByRole('link', { name: 'Продавцу', exact: true }).click();
-  await expect(page).toHaveURL('/');
+  await page.goto('/more');
+  await page.getByRole('link', { name: 'Я продавец — моя витрина', exact: true }).click();
+  await expect(page).toHaveURL('/more');
   await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
 });

@@ -1,10 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { AppHeader } from '../_components/AppHeader';
-import { AuthModal } from '../_components/AuthModal';
-import styles from './page.module.css';
-import { useI18n } from '@/i18n/I18nProvider';
+import { AuthModal } from '../../_components/AuthModal';
+import { BuyerScreen } from '../_ui/buyer-ui';
 
 // actuality-reminders: a reminder opened while signed out comes back to its list after sign-in. Only this one
 // same-site path is accepted, so the parameter cannot send anyone elsewhere.
@@ -16,17 +14,11 @@ function afterLogin() {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { t } = useI18n();
 
   return (
-    <>
-      <AppHeader showAuth={false} contextLabel={t('context.login')} />
-      <main className={styles.background} aria-hidden="true" />
-      <AuthModal
-        open
-        onClose={() => router.replace('/')}
-        onAuthenticated={() => router.replace(afterLogin())}
-      />
-    </>
+    // The sign-in sheet over an empty buyer screen (buyer-screens-mockup).
+    <BuyerScreen section="more" overlay={<AuthModal open onClose={() => router.replace('/')} onAuthenticated={() => router.replace(afterLogin())} />}>
+      <main className="body" aria-hidden="true" />
+    </BuyerScreen>
   );
 }

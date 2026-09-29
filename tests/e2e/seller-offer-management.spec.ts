@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { openOffer, SEED_POINT, signOutInMore } from './buyer-helpers';
 import { proposeNewOffer, proposeOfferEdit } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
@@ -78,19 +79,27 @@ async function search(page: import('@playwright/test').Page) {
   await page.getByLabel('Какой товар ищете?').press('Enter');
 }
 
+// B01 has no seller comment: the buyer reads it on the offer page.
+async function expectBuyerComment(page: import('@playwright/test').Page, card: import('@playwright/test').Locator, comment: string, absent?: string) {
+  await openOffer(card, 'Баранина');
+  await expect(page.getByTestId('offer-comment')).toHaveText(comment);
+  if (absent) await expect(page.getByText(absent, { exact: true })).toHaveCount(0);
+}
+
 test('Seller manages an existing Offer only after explicit confirmation and buyer Search follows committed state', async ({ page }, testInfo) => {
   // A long end-to-end flow (create, edit, off, on, search after each step): ~25 s alone, so the default 30 s is too tight.
   test.setTimeout(60_000);
   const phone = phoneFor(testInfo.project.name);
   const sellerName = `S5 E2E ${testInfo.project.name}`;
-  const sellerOfferCard = page.getByRole('article').filter({ has: page.getByText(sellerName, { exact: true }) });
+  const pointName = `S5 E2E точка ${testInfo.project.name}`;
+  const sellerOfferCard = page.getByRole('article').filter({ hasText: pointName });
   await cleanup(phone);
   try {
     await login(page, phone);
 
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill(sellerName);
-    await page.getByLabel('Название для покупателей').fill('S5 E2E точка');
+    await page.getByLabel('Название для покупателей').fill(pointName);
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы, S5 E2E адрес');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
@@ -101,9 +110,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 
     await search(page);
-    await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(sellerOfferCard.getByText('S5 старая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard).toHaveCount(1);
     await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
+    await expectBuyerComment(page, sellerOfferCard, 'S5 старая партия');
 
     // seller-showcase-editor: cards live on «Моя витрина»; the card screen holds «Изменить», «Выключить», «Включить».
     await page.goto('/seller');
@@ -119,10 +128,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByText('S5 новая партия', { exact: true })).toBeVisible();
 
     await search(page);
-    await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(sellerOfferCard.getByText('S5 старая партия', { exact: true })).toBeVisible();
-    await expect(sellerOfferCard.getByText('S5 новая партия', { exact: true })).toHaveCount(0);
+    await expect(sellerOfferCard).toHaveCount(1);
     await expect(sellerOfferCard.getByText(/4 200 ₸/)).toBeVisible();
+    await expectBuyerComment(page, sellerOfferCard, 'S5 старая партия', 'S5 новая партия');
 
     await page.goto(updateReviewUrl);
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
@@ -130,10 +138,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByRole('status').filter({ hasText: 'Изменения опубликованы' })).toBeVisible();
 
     await search(page);
-    await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(sellerOfferCard.getByText('S5 новая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard).toHaveCount(1);
     await expect(sellerOfferCard.getByText(/4 500 ₸/)).toBeVisible();
-    await expect(sellerOfferCard.getByText('S5 старая партия', { exact: true })).toHaveCount(0);
+    await expectBuyerComment(page, sellerOfferCard, 'S5 новая партия', 'S5 старая партия');
 
     await page.goto('/seller');
     await page.getByRole('article').first().getByRole('button').first().click();
@@ -142,13 +149,14 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     const deactivateReviewUrl = page.url();
 
     await search(page);
-    await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
+    await expect(sellerOfferCard).toHaveCount(1);
     await page.goto(deactivateReviewUrl);
     await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Предложение выключено' })).toBeVisible();
 
     await search(page);
-    await expect(page.getByText(sellerName, { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('article').filter({ hasText: SEED_POINT })).toHaveCount(1);
+    await expect(sellerOfferCard).toHaveCount(0);
 
     await page.goto('/seller');
     await page.getByRole('article').first().getByRole('button').first().click();
@@ -158,8 +166,8 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await expect(page.getByRole('status').filter({ hasText: 'Предложение включено' })).toBeVisible();
 
     await search(page);
-    await expect(page.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(sellerOfferCard.getByText('S5 новая партия', { exact: true })).toBeVisible();
+    await expect(sellerOfferCard).toHaveCount(1);
+    await expectBuyerComment(page, sellerOfferCard, 'S5 новая партия');
 
     await page.goto('/seller');
     await page.reload();
@@ -170,12 +178,9 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
     await expect(page).toHaveURL(/\/seller(\?.*)?$/);
 
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Выйти' }).click();
-    await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeVisible();
-    await page.getByLabel('Какой товар ищете?').fill('баранина');
-    await page.getByLabel('Какой товар ищете?').press('Enter');
-    await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
+    await signOutInMore(page);
+    await search(page);
+    await expect(page.getByRole('article').filter({ hasText: SEED_POINT })).toHaveCount(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
     await cleanup(phone);

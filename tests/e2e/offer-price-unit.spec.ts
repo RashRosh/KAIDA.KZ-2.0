@@ -45,11 +45,15 @@ async function prepareSeller(page: Page, phones: { login: string; public: string
   });
 }
 
-// The mockup's РУС / ҚАЗ switch in the header of the seller screens.
-async function switchLocale(page: Page, name: 'ҚАЗ' | 'РУС') {
-  const control = page.getByRole('button', { name, exact: true }).filter({ visible: true }).last();
-  await control.click();
-  await expect(control).toHaveAttribute('aria-pressed', 'true');
+// PROJECT_RULES.md §18.4 «Язык» (buyer-screens-mockup): the language is changed on «Ещё» → «Язык».
+async function switchToKazakh(page: Page) {
+  const back = page.url();
+  await page.goto('/seller/more');
+  await page.getByRole('button', { name: /^Язык/ }).click();
+  await page.getByRole('radio', { name: 'Қазақша' }).click();
+  await page.getByRole('button', { name: 'Готово', exact: true }).click();
+  await expect(page.getByRole('button', { name: /^Тіл/ })).toBeVisible();
+  await page.goto(back);
 }
 
 function backToEdit(page: Page, label = 'Вернуться к правке') {
@@ -85,7 +89,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
     await expect(custom).toHaveAttribute('aria-invalid', 'true');
     await custom.fill('ведро');
 
-    // The editor has no language switch (accepted mockup: РУС / ҚАЗ lives in the header of the top screens).
+    // The editor has no language switch (it lives on «Ещё»).
     await expect(page.getByRole('button', { name: 'ҚАЗ', exact: true })).toHaveCount(0);
 
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
@@ -130,7 +134,7 @@ test('Seller chooses a canonical or own price unit that survives locale switch a
 
     // Canonical labels follow the interface language in the cabinet and in buyer reads.
     const cardTestId = (await card.getAttribute('data-testid'))!;
-    await switchLocale(page, 'ҚАЗ');
+    await switchToKazakh(page);
     await expect(page.getByTestId(cardTestId).getByText('/ дана')).toBeVisible();
     const lamb = async (locale: 'ru' | 'kk') => {
       const body = await (await page.request.get(`/api/search?q=${encodeURIComponent('баранина')}&locale=${locale}`)).json();

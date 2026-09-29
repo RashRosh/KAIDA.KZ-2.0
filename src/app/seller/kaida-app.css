@@ -44,3 +44,29 @@
 .kaida.motion .ph>.sheet.leaving>*, .kaida.motion .toast.leaving>*{animation:none}
 .kaida.motion .ph>.scrim.leaving{animation:m-fade-out var(--dur-base) var(--ease-in) both}
 .kaida.motion .toast.leaving{animation:m-toast-out var(--dur-base) var(--ease-in) both}
+/* buyer-screens-mockup: a whole-card link (B01) — the title link covers the card, its buttons stay on top and
+   separately focusable (no nested interactive elements). */
+.kaida .card.linkcard{position:relative}
+.kaida .linkcard .stretch{color:inherit;text-decoration:none}
+.kaida .linkcard .stretch::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.kaida .linkcard .stretch:focus-visible{outline:none}
+.kaida .linkcard:has(.stretch:focus-visible){outline:2px solid var(--focus);outline-offset:2px}
+.kaida .linkcard .ct, .kaida .linkcard button{position:relative;z-index:1}
+/* buyer-screens-mockup · B02 gallery: 300 px, swipe between photos, dots, the plaque and back button on top. */
+.kaida .gal{position:relative;height:300px;flex:none;background:var(--sunken);overflow:hidden}
+.kaida .gal.img{border-radius:0}
+.kaida .gal-track{display:flex;height:100%;margin:0;padding:0;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.kaida .gal-track::-webkit-scrollbar{display:none}
+.kaida .gal-track>li{flex:0 0 100%;height:100%;scroll-snap-align:start;position:relative}
+.kaida .gal-track img{width:100%;height:100%;object-fit:cover;display:block}
+.kaida .gal-prev, .kaida .gal-next{position:absolute;top:50%;transform:translateY(-50%);background:#ffffffe6;z-index:2}
+.kaida .gal-prev{left:8px}
+.kaida .gal-next{right:8px}
+.kaida .gal-prev:disabled, .kaida .gal-next:disabled{opacity:.4}
+.kaida .gal-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+.kaida .gal-dots i{width:6px;height:6px;border-radius:3px;background:#ffffff99}
+.kaida .gal-dots i.on{width:20px;background:#fff}
+/* buyer-screens-mockup: an overlay portalled to the page body (the sign-in sheet) gets its own phone column. */
+.kaida.kaida-portal{position:fixed;inset:0;z-index:50;background:transparent;display:flex;justify-content:center}
+.kaida.kaida-portal>.portal-col{position:relative;width:100%;max-width:480px;height:100%}
+.kaida.kaida-portal .sheet{z-index:3}

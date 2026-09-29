@@ -4,24 +4,14 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { nearbyResponseSchema, type NearbyResponse } from '@/modules/discovery/contracts/discovery.contract';
 import { buyerLocationSchema, type BuyerLocation } from '@/modules/search/contracts/buyer-location.contract';
-import { OfferCard } from '../_components/OfferCard';
-import styles from '../page.module.css';
+import { Ic } from '../../seller/_kaida/ui';
+import { BuyerScreen, NEARBY_NAV_INTENT_KEY, ResultCard, ResultSkeletons } from '../_ui/buyer-ui';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type NearbyState =
   | { kind: 'initial' | 'locating' | 'loading' | 'geo_error' | 'request_error' }
   | { kind: 'success'; result: NearbyResponse };
 
-const NEARBY_NAV_INTENT_KEY = 'kaida:nearby-nav-intent';
-
-function RefreshIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M21 12a9 9 0 1 1-3-6.7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M21 3v6h-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 export function NearbyFeed() {
   const { locale, t } = useI18n();
@@ -111,75 +101,57 @@ export function NearbyFeed() {
     : '';
   const hasResults = state.kind === 'success' && state.result.offers.length > 0;
 
+  // buyer-screens-mockup: «Рядом» (no frame) from the mockup's classes; the same cards as the search results (B01).
   return (
-    <section className={styles.searchArea} aria-label={t('nearby.area')}>
-      {!hasResults && (
-        <div className={styles.intro}>
-          <p className={styles.eyebrow}>{t('nearby.eyebrow')}</p>
-          <h1>{t('nearby.title')}</h1>
-          <p className={styles.description}>{t('nearby.description')}</p>
-          <Link href="/" className={styles.secondaryLink}>{t('nearby.searchSpecific')}</Link>
-        </div>
-      )}
-
-      {!hasResults && (
-        <>
-          <button
-            type="button"
-            className={styles.nearbyButton}
-            disabled={busy}
-            onClick={requestNearby}
-          >
-            {buttonLabel}
+    <BuyerScreen
+      section="nearby"
+      top={hasResults ? (
+        <header className="bar">
+          <h1 className="bar-t" style={{ margin: 0 }}>{t('nearby.offersTitle')} <span className="c2">({state.result.offers.length})</span></h1>
+          <button type="button" className="ib" disabled={busy} onClick={requestNearby} aria-label={buttonLabel} title={buttonLabel}>
+            <Ic name="refresh" />
           </button>
-          <p className={styles.help}>{t('nearby.privacy')}</p>
-        </>
-      )}
-
-      {state.kind === 'geo_error' && (
-        <p className={styles.error} role="alert">
-          {t('nearby.geoError')}
-        </p>
-      )}
-      {state.kind === 'request_error' && (
-        <p className={styles.error} role="alert">{t('nearby.requestError')}</p>
-      )}
-
-      <div className={styles.results} aria-busy={busy}>
-        <p
-          className={`${styles.feedback} ${hasResults ? styles.feedbackVisuallyHidden : ''}`}
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {feedback}
-        </p>
+        </header>
+      ) : undefined}
+    >
+      <main className="body" style={{ gap: 12, padding: hasResults ? 12 : '24px 16px' }} aria-label={t('nearby.area')} aria-busy={busy || undefined}>
+        {!hasResults && (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <p className="ov">{t('nearby.eyebrow')}</p>
+              <h1 className="h1">{t('nearby.title')}</h1>
+              <p className="t c2">{t('nearby.description')}</p>
+              <Link href="/" className="c">{t('nearby.searchSpecific')}</Link>
+            </div>
+            <button type="button" className="btn btn-p lg w" disabled={busy} onClick={requestNearby}>
+              <Ic name="pin" className="sm" />{buttonLabel}
+            </button>
+            <p className="c">{t('nearby.privacy')}</p>
+          </>
+        )}
+        {state.kind === 'geo_error' && (
+          <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14 }}>
+            <p className="c" style={{ color: 'var(--ink)' }}>{t('nearby.geoError')}</p>
+          </div>
+        )}
+        {state.kind === 'request_error' && (
+          <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14 }}>
+            <p className="c" style={{ color: 'var(--ink)' }}>{t('nearby.requestError')}</p>
+          </div>
+        )}
+        <p className={hasResults ? 'vh' : 'c'} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
+        {state.kind === 'loading' && <ResultSkeletons />}
         {hasResults && (
           <>
-            <div className={styles.resultsHeader}>
-              <h1>{t('nearby.offersTitle')}</h1>
-              <span className={styles.resultsCount}>({state.result.offers.length})</span>
-              <button
-                type="button"
-                className={styles.refreshButton}
-                disabled={busy}
-                onClick={requestNearby}
-                aria-label={buttonLabel}
-                title={buttonLabel}
-              >
-                <RefreshIcon />
-              </button>
-            </div>
-            <ul className={styles.offerList} aria-label={t('nearby.offersTitle')}>
+            <p className="c">{t('buyer.captionNear')}</p>
+            <ul aria-label={t('nearby.offersTitle')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {state.result.offers.map((offer) => (
-                <li key={offer.id}>
-                  <OfferCard offer={offer} distanceMeters={offer.distanceMeters} />
-                </li>
+                <li key={offer.id}><ResultCard offer={offer} distanceMeters={offer.distanceMeters} /></li>
               ))}
             </ul>
           </>
         )}
-      </div>
-    </section>
+      </main>
+    </BuyerScreen>
   );
 }

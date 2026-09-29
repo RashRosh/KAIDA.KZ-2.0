@@ -142,7 +142,7 @@ stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B0
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
-| 10 | S15 — Search learning | Feature Map |
+| 10 | S15 — Search learning; название карточки из каталога — на языке покупателя; немедленное оповещение оператора о товаре вне каталога (решения PO, 2026-09-29) | Feature Map |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review | Feature Map |
 | 12 | Монетизация — лимиты активных карточек, подписка продавца, продвижение карточек (S25–S29) | `FEATURE_MAP.md` / future Slice Contracts |
 

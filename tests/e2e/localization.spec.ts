@@ -1,36 +1,43 @@
 import { expect, test } from '@playwright/test';
+import { chooseLanguageInMore, setLocaleCookie } from './buyer-helpers';
 
-test('switches locale in one action and preserves query input across reload', async ({ page }) => {
-  await page.goto('/?q=');
-  const input = page.getByLabel('Какой товар ищете?');
-  await input.fill('черновик');
+// buyer-screens-mockup §8 e (PROJECT_RULES.md §18.4 «Язык»): the language is chosen once at the first visit and later
+// changed only on «Ещё» → «Язык»; saving to the cookie and keeping the route are unchanged.
 
-  await page.getByRole('button', { name: 'Қазақша' }).click();
-
-  await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
-  await expect(page.getByRole('heading', { name: /Тауардың қайда барын тап/ })).toBeVisible();
-  await expect(page.getByLabel('Қандай тауар іздейсіз?')).toHaveValue('черновик');
-  await expect(page).toHaveURL(/\?q=$/);
+test('«Ещё» changes the language in one sheet, keeps the route and the choice survives reload', async ({ page }) => {
+  await page.goto('/more');
+  await chooseLanguageInMore(page, 'Қазақша');
+  await expect(page).toHaveURL(/\/more$/);
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'Тағы', exact: true })).toHaveAttribute('aria-current', 'page');
 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
-  await expect(page.getByRole('button', { name: 'Қазақша' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /^Тіл/ })).toContainText('Қазақша');
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /Тауардың қайда барын тап/ })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Русский' }).click();
-  await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
+  await chooseLanguageInMore(page, 'Русский');
+  await page.goto('/');
   await expect(page.getByLabel('Какой товар ищете?')).toBeVisible();
 });
 
-test('uses browser Kazakh on a first visit and an explicit cookie wins', async ({ browser, baseURL }) => {
-  const context = await browser.newContext({ locale: 'kk-KZ' });
-  const page = await context.newPage();
-  await page.goto(baseURL!);
-  await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
+test.describe('first visit', () => {
+  test.use({ storageState: { cookies: [], origins: [] }, locale: 'kk-KZ' });
 
-  await context.addCookies([{ name: 'kaida_locale', value: 'ru', url: baseURL! }]);
-  await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
-  await context.close();
+  test('suggests the browser Kazakh on the first-visit choice, and a saved cookie wins afterwards', async ({ page, context }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
+    await expect(page.getByText('Тілді таңдаңыз')).toBeVisible();
+    const buttons = page.getByRole('button', { name: /^(Русский|Қазақша)$/ });
+    await expect(buttons).toHaveText(['Қазақша', 'Русский']);
+    await buttons.first().click();
+    await expect(page.getByRole('heading', { name: /Тауардың қайда барын тап/ })).toBeVisible();
+
+    await setLocaleCookie(context, 'ru');
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
+    await expect(page.getByLabel('Какой товар ищете?')).toBeVisible();
+  });
 });
 
 test('API ignores Accept-Language and keeps legacy Russian errors', async ({ request }) => {
@@ -59,7 +66,10 @@ test('Russian and Kazakh catalog terms find the same Offer; the card title stays
   await page.getByLabel('Какой товар ищете?').fill('қой еті');
   await page.getByLabel('Какой товар ищете?').press('Enter');
   await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Қазақша' }).click();
+  await expect(page).toHaveURL(/\?q=/);
+  const results = page.url();
+  await chooseLanguageInMore(page, 'Қазақша');
+  await page.goto(results);
   await expect(page.getByLabel('Қандай тауар іздейсіз?')).toHaveValue('қой еті');
   // The title stays as the Seller wrote it after the language switch.
   await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();

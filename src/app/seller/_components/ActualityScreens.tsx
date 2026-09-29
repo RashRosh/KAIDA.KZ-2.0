@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
-import { actualityText } from '../../_components/ActualityBadge';
-import { formatAmount } from '../../_components/OfferCard';
+import { actualityText } from '../../_components/actuality-text';
+import { formatAmount } from '../../_components/format-amount';
 import { Bar, Ic, Phone, Thumb } from '../_kaida/ui';
 import { pluralKey, type SellerCard } from './card-model';
 import { PushToggle } from './PushToggle';

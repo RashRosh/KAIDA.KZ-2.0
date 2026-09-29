@@ -10,7 +10,7 @@ import type { SellerChangeSetView } from '../../../modules/seller-input/contract
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
-import { formatAmount } from '../../_components/OfferCard';
+import { formatAmount } from '../../_components/format-amount';
 import { Bar, Ic, LoadError, LoginRequired, Nav, Phone, Sheet, SkeletonRows, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
 import { ActualityScreen, ActualityTask, ArchiveScreen, daysLabel, FreshPlaque, useReconfirm } from './ActualityScreens';
 import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardEditor';
@@ -120,7 +120,7 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   );
   const screen = (content: React.ReactNode, extra?: React.ReactNode) => (
     <Phone>
-      <Bar title={t('showcase.title')} lang />
+      <Bar title={t('showcase.title')} />
       {content}
       {extra}
       <Nav active="showcase" />
