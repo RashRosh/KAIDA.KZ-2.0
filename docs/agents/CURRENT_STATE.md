@@ -3,66 +3,60 @@
 Короткий операционный снимок. Долговечные правила — в `AGENTS.md` и `docs/PROJECT_RULES.md`, очередь — в
 `docs/product/EXECUTION_PLAN.md`. Перед работой перепроверь git/GitHub: этот файл может устареть.
 
-- Проверено: 2026-09-29.
-- `main`: `517ffe6` (merge PR #62 — план монетизации, этап 12).
-- Последний checkpoint tag: `v0.0.36-actuality-reminders` на `5375bab` (этап 1 закрыт).
-- Текущий slice: «Экраны покупателя по макету» — `docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md` (APPROVED
-  2026-09-29), ветка `claude/buyer-screens`.
-- Миграции: последняя `0019_actuality_reminders`; этот slice миграций не добавляет.
+- Проверено: 2026-09-30.
+- `origin/main`: `4567eff` (merge PR #67), merged-main CI green.
+- Последний annotated product checkpoint: `v0.0.36-actuality-reminders` на `5375bab`.
+- После checkpoint в `main` вошли PR #63, #64, #65 и #67; недостающие checkpoint tags — первый repository gate.
+- PR #66 открыт и mergeable, но его успешные checks старше актуального `main`; перед merge нужен refresh и новый CI.
+- Текущая локальная ветка: `docs/search-demand-planning` от `origin/main`.
 
-# Current contract (только текущая задача)
+## Current task
 
-Экраны покупателя (поиск, результаты B01, «Рядом», страница товара B02, вход, новый «Ещё») собраны из классов
-принятого макета в колонке телефона с нижней навигацией «Поиск / Рядом / Ещё». Новых функций нет. Имя продавца,
-комментарий и «В избранное» — только на странице товара. Язык выбирается один раз при первом входе (любая страница
-покупателя или продавца), дальше — «Ещё» → «Язык»; «Войти»/«Выйти» — на «Ещё»; в верхних строках продавца нет
-`РУС / ҚАЗ`.
+Docs/planning pass, без product implementation:
 
-# Completed (ветка `claude/buyer-screens`)
+1. зафиксировать Search System Spec v0.1 как target source, не Slice Contract;
+2. зафиксировать KAIDA Demand concept v0.1;
+3. добавить Initial Product Catalog v0.1 как неизменённый editorial input artifact;
+4. расширить S15 на S15A Catalog bootstrap, S15B Search System revision и S15C Demand Data Foundation;
+5. обновить `FEATURE_MAP.md`, `EXECUTION_PLAN.md` и Issue #55.
 
-- Маршруты покупателя перенесены в группу `src/app/(buyer)`; общие блоки — `(buyer)/_ui` (`BuyerScreen`, `BuyerNav`,
-  `ResultCard`, `SearchScreen`, `useSellerEntry`, `useInterest`); `LanguageGate` + `LanguageChoice` в
-  `src/app/seller/_kaida`.
-- Старые шапка, меню, `SearchForm`, `OfferCard`, переключатель языка и CSS-модули удалены; окно входа
-  (`AuthModal`) — классы макета, поведение прежнее.
-- Решения по ходу работы: ошибка нового поиска убирает карточки прошлого запроса (как было); «Назад» со страницы
-  товара возвращает к тому же списку и после перехода без перезагрузки страницы.
-- Ручной просмотр PO (2026-09-29): ошибки `.emsg` вне поля обёрнуты в `.fld` (значок съезжал); «Продаёте
-  продукты? Откройте свою витрину»; из заметки о языке убрано «Названия товаров не переводятся»; в «Ещё» продавца —
-  «Я покупатель — поиск товаров», «Выйти» у продавца ведёт на `/more` покупателя (один аккаунт на обе роли).
-- E2E переписаны под новую разметку (`tests/e2e/buyer-helpers.ts`); новый `buyer-screens.spec.ts`;
-  `pass3-tokens-visual-regression` снят по контракту (§4); проверка ширин на двух языках перенесена в
-  `buyer-screens.spec.ts`. В `playwright.config.ts` язык по умолчанию задан cookie `kaida_locale=ru`.
+## Fixed near queue
 
-# Remaining
+1. missing checkpoint tags;
+2. PR #66;
+3. Seller Location geo fallback;
+4. KAIDA address directory;
+5. Nearby result-first;
+6. Search filters closer/fresher/distance;
+7. Search filters cheaper/price range;
+8. AI Input;
+9. AI moderation;
+10. Discovery / `Для вас`;
+11. S15A → S15B → S15C.
 
-1. Полный `pnpm verify`, PR по поручению PO, CI, ручная приёмка PO (телефон, свежий браузер), merge (PO), tag.
-2. Дальше по `EXECUTION_PLAN.md`: фильтры поиска `B07`; место под рекламный баннер над поиском — отдельный этап.
+Catalog и KAIDA Demand не вставляются раньше этой очереди. Казахская вычитка и отдельная desktop-работа отложены по
+решению PO и в этом pass не затрагиваются.
 
-# Known problems / conflicts
+## Product-source boundaries
 
-- `kk`-тексты экранов продавца и покупателя не вычитаны (§18.3); решение PO 2026-09-27 — отложено, merge не блокирует.
-- Экраны без кадра в макете: экран карточки у оператора; редактор режима работы точки, «Добавить списком», вход не
-  выполнен, напоминание о неполной карточке, включение/выключение точки на экране карточки, баннер «нет фото» на
-  подтверждении, подтверждение пакета/включения/выключения; «Ещё» покупателя и экран выбора языка собраны по образцу
-  AI-S19. Колокольчик уведомлений не выведен (S18 вне этапа 1).
-- Отличия от кадров: геолокация только в экране существующей точки (нет поиска адреса и карты S12A); ссылка
-  «Настроить цены по точкам» оставлена и при выборе всех точек (по контракту); время в `input[type=time]` зависит от
-  локали браузера; в ленте оператора пометка «изменена» без уточнения поля; в «Актуальности» нет правки строки на
-  месте и удаления; в архиве нет «Исчезнет через N дней» (контракт offer-actuality §3).
-- Нестабильные E2E под нагрузкой локальной машины (8 ГБ): длинные сценарии иногда не укладываются в 30 с; на CI
-  GitHub стабильно зелёные.
+- Catalog workbook: 787 candidates, 682 `YES`, 105 `REVIEW`; это не migration/seed. Draft KK не verified, а
+  `candidate_code` не `Product.id`.
+- Search Spec требует будущей сверки с кодом и contract revisions closed S0/S6/S7/S9/S13.
+- S15C разрешает только D0/D1 и необходимую основу D2; seller Demand UI/paid Demand позже и по readiness gates.
+- Решение PO 2026-09-30: `buyer_interests` не равен explicit «Сообщить, когда появится»; различаются search/view,
+  interest и explicit waiting.
+- Решение PO 2026-09-30: active-product limit выключен на пилоте, но остаётся configurable future monetization option;
+  значение определяется по статистике.
+- Решение PO 2026-09-30: `Category` остаётся полноценной сущностью; Excel `category_code` только маппится на простой
+  неглубокий рубрикатор KAIDA.
 
-# Next action
+## Next action
 
-Полный verify экранов покупателя; спросить PO про PR.
+Проверить docs diff и ссылки. Issue #55 синхронизирован с решениями PO. Commit, push и PR — только по прямому
+поручению PO.
 
-# Do not regress
+## Do not include
 
-- Название карточки — свободное, смешанный ввод с подсказками каталога (контракт §8, решения a–g).
-- Цена > 0; «Другое» — одно слово 1–20 букв; черновики только для новых карточек.
-- Правка одной точки многоточечной карточки меняет только цену (`CardSharedFieldsError`, HTTP 409).
-- Каждая публикация/правка идёт через `SellerChangeSet`; подтверждение актуальности — тоже (`reconfirm_offer`).
-- Снятие оператором и ярус актуальности — по одному общему правилу для всех путей покупателя; не дублировать по экранам.
-- Разметка продавца и покупателя = классы макета; `kaida.css` не править вручную (пере-генерировать из макета).
-- Язык не переключается из верхних строк; выбор — при первом входе и на «Ещё» (§18.4).
+- личные `next-env.d.ts`, `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`;
+- реализацию, migrations, seeds, APIs или UI;
+- KK proofreading или desktop changes.
