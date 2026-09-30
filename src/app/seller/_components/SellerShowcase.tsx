@@ -236,11 +236,6 @@ function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; 
   return (
     <article className={`card${highlighted ? ' hl is-new' : ''}`} aria-labelledby={`card-${card.cardId}`} data-testid={`seller-card-${card.cardId}`}
       style={{ position: 'relative', ...(card.removal ? { border: '1.5px solid var(--danger)' } : {}) }}>
-      {!cover && (
-        <button type="button" className="photo-shortcut" onClick={onAddPhoto} aria-label={`${t('source.photos')}: ${lead.product.name}`}>
-          <Ic name="plus" />
-        </button>
-      )}
       <button type="button" className="rowbtn" onClick={onOpen} aria-labelledby={`card-${card.cardId}`}>
         <Thumb photoUrl={cover ? photoUrl(cover.id, 'thumb') : null} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -264,6 +259,11 @@ function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; 
           ) : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>}
         </div>
       </button>
+      {!cover && (
+        <button type="button" className="photo-shortcut" onClick={onAddPhoto} aria-label={`${t('source.photos')}: ${lead.product.name}`}>
+          <Ic name="plus" />
+        </button>
+      )}
       {missing.length > 0 && (
         <p className="c" style={{ paddingLeft: 68 }}>{missing.map((key) => t(key)).join(' · ')}. {t('showcase.incomplete')}</p>
       )}
