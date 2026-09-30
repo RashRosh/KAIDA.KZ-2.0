@@ -103,6 +103,23 @@ export function Toast({ children, bottom }: { children: React.ReactNode; bottom?
   );
 }
 
+// seller-card-point-link: just a pencil on a trading point of the Seller — opens that point for editing. The touch
+// area is 44 × 44, the row loses only the width of the icon.
+export function PointEditLabel({ label, focusKey, onClick, disabled, style }: { label: string; focusKey: string; onClick: () => void; disabled?: boolean; style?: React.CSSProperties }) {
+  return (
+    <button type="button" className="ib" data-point-edit-focus={focusKey} style={{ width: 44, height: 44, margin: '-10px -10px -10px -4px', flex: 'none', color: 'var(--primary-text)', ...style }} aria-label={label} title={label} disabled={disabled}
+      onClick={(event) => { event.preventDefault(); event.stopPropagation(); onClick(); }}>
+      <Ic name="pencil" className="sm" />
+    </button>
+  );
+}
+
+export function focusPointEditLabel(focusKey: string) {
+  const button = [...document.querySelectorAll<HTMLButtonElement>('[data-point-edit-focus]')]
+    .find((item) => item.dataset.pointEditFocus === focusKey);
+  button?.focus();
+}
+
 const FOCUSABLE = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)';
 
 // Scrim + bottom sheet (kaida .scrim/.sheet); focus moves in, stays in, and returns to the opener on close.
