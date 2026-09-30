@@ -25,6 +25,19 @@
 
 Slice Contract определяет точное поведение и acceptance. Issue/Feature Map/макет не имеют права молча расширять его scope.
 
+## Commercial / Monetization / Backoffice work
+
+Перед planning или implementation, связанными с Free / Pro / Boost / Business, тарифами, entitlements, usage,
+Billing, Promotion или административными workflows, дополнительно прочитай:
+
+- `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
+- `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
+- `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`, если затронут Demand.
+
+Эти документы — parent product/planning sources, а не разрешение на реализацию. Backoffice остаётся клиентом общего
+backend/domain, Commercial & Monetization Readiness предшествует его IA/UX, а каждый implementation workflow требует
+своего места в `EXECUTION_PLAN.md` и отдельного Slice Contract.
+
 ## UI / UX work
 
 Перед подготовкой или реализацией UI/UX Slice Contract дополнительно прочитай:
@@ -61,6 +74,8 @@ Controller не проектирует и не реализует slice. Он п
 - процесс и boundaries → `PROJECT_RULES.md`;
 - текущая очередь → `EXECUTION_PLAN.md`;
 - долгосрочная capability map → `FEATURE_MAP.md`;
+- commercial semantics Free / Pro / Boost / Business → `KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
+- Backoffice planning/decomposition → `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
 - визуальный стиль и композиция → принятый макет (`PROJECT_RULES.md` §18.1); обязательные UI-правила → `PROJECT_RULES.md` §18.4;
 - unresolved detailed work → GitHub Issues;
 - exact slice behavior → Slice Contract;

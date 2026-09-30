@@ -16,6 +16,15 @@ Seller Input
 → Buyer Action
 ```
 
+Parent sources для будущих cross-cutting workstreams:
+
+- commercial semantics / Free–Pro–Boost–Business →
+  `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
+- Backoffice planning/decomposition → `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
+- Demand product/readiness → `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`.
+
+Они задают direction и dependencies, но не являются Slice Contracts и не разрешают implementation.
+
 ## Core domain
 
 Основные понятия MVP:
@@ -65,15 +74,15 @@ Seller Input
 | S22 | Auth | Test OTP заменяется real SMS delivery | S2 | До публичного запуска | PLANNED |
 | S23 | Notifications | Buyer получает уведомление о новом Offer интересующего Product | S14 | После MVP | PLANNED |
 | S24 | Recommendations | Детерминированная personalized feed без ML | S14 + data | После MVP | PLANNED |
-| S25 | Monetization | Configurable active-product tariff limit: выключен на пилоте, возможен позже по данным | S5 + pilot statistics | Stage 12 | PLANNED |
-| S26 | Subscription | Subscription меняет лимиты/возможности Seller | S25 | Сразу после MVP (stage 12) | PLANNED |
-| S27 | Convenience | Paid plan открывает ускоренный bulk input | S20, S26 | Сразу после MVP (stage 12) | PLANNED |
-| S28 | Promotion | Seller создаёт promotion для Offer | S9 | Сразу после MVP (stage 12) | PLANNED |
-| S29 | Promotion | Promoted Offer получает маркированный дополнительный охват | S28 | Сразу после MVP (stage 12) | PLANNED |
+| S25 | Monetization policy | **STALE FORM:** hard active-Offer tariff cap удалён из текущего направления; вернуться можно только по pilot evidence и новому явному PO decision | pilot evidence + commercial parent source | Stage 12 review gate | REVIEW REQUIRED |
+| S26 | Commercial foundation | Первый конкретный paid use case получает server-side CommercialAccount / Plan / Entitlements / Limits / EffectiveEntitlements minimum, без generic framework заранее | approved commercial parent source + owning use case | Stage 12, отдельные slices | PLANNED / NOT AUTHORIZED |
+| S27 | Pro | Один sellable Pro объединяет AI + full Demand + Performance и запускается только после минимально полезной готовности всех трёх capabilities | S17–S20 + D4 readiness + S33 + S26 + Billing foundation | Stage 12, readiness-gated | PLANNED |
+| S28 | Boost | Eligible Offer получает отдельные Purchase / PromotionCampaign semantics; one-off Boost доступен независимо от Pro, не меняет organic ranking и не гарантирует продажу | S26 + buyer visibility/moderation policy + future payment foundation | Stage 12, отдельный workstream | PLANNED |
+| S29 | Boost delivery | Paid Offer получает маркированный дополнительный охват на approved sponsored surfaces, отдельно от organic и Editorial Featured | S28 + delivery/measurement contract | Stage 12, readiness-gated | PLANNED |
 | S30 | Recommendations | Behavioral ranking учитывает реальные interactions | S24 + data | Позднее | PLANNED |
 | S31 | Discovery | Редкость товара влияет на показ | data | Позднее | PLANNED |
 | S32 | Trust | ИИ-модерация проверяет новые карточки и правки до публикации; спорное — человеку | S17 | После AI Input | PLANNED |
-| S33 | Seller analytics | Seller видит показы/контакты/эффективность продвижения | S28–S29 | Позднее | PLANNED |
+| S33 | Seller performance | Free: views/opens/route/contact actions и basic totals; Pro: breakdown/trends/history/Demand linkage/funnel-like/Boost analytics; proxy action не называется продажей | instrumentation + S26; S28–S29 для Boost metrics | Stage 12 / позднее | PLANNED |
 
 ## Inserted / cross-cutting capabilities
 
@@ -98,6 +107,10 @@ Seller Input
   метки рекламы и связь с платным продвижением (S28–S29) решает отдельный контракт;
 - KAIDA-owned address directory built on open data (OpenStreetMap) for Location address suggestions;
 - KAIDA Demand: internal data foundation → readiness-gated free seller signals → readiness-gated paid analytics;
+- Commercial foundation: server-side effective access, auditable usage/overrides and non-destructive downgrade;
+- Backoffice: общий administrative client, который после planning/readiness раскладывается на operational vertical
+  slices, а не строится одним релизом;
+- Editorial Featured и Paid Promotion/Boost как разные entities/reasons of display;
 - Market internal navigation as future spatial capability.
 
 Наличие capability в этом разделе **не означает**, что её можно начать вне текущей очереди.
@@ -334,14 +347,110 @@ Seller-provided Offer media и AI media-input — разные capabilities. Н�
 
 Market — специализированный spatial container, а не центр архитектуры. Generic Location flow должен продолжать работать независимо от future Market scheme/MarketPlace capability.
 
-### Monetization
+### Commercial model / Monetization
 
-Монетизация имеет пять совместимых инструментов: **configurable active-product limit**, **AI/Convenience**, **Demand**,
-**Promotion/Boost**, **Business**. На пилоте лимит выключен ради накопления предложения, но архитектура не объявляет
-ассортимент навсегда безлимитным; конкретный тарифный порог определяется позднее по статистике. Promotion не должен
-обходить organic relevance/freshness eligibility. D4 появляется только после readiness gate, бесплатного D3 pilot и
-отдельной проверки willingness to pay; полезные базовые D3-сигналы не скрываются за paywall. S25–S29 пока не
-перенумеровываются.
+Source: `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`.
+
+Внешняя упаковка — **Free / Pro / Business + отдельный Boost**:
+
+- Free сохраняет полноценную ручную правдивую витрину и organic visibility;
+- Pro объединяет `AI + full Demand + Performance`; строить/флагировать компоненты можно отдельно, но продавать Pro —
+  только после минимально полезной готовности всех трёх;
+- Boost — one-off paid reach конкретного eligible Offer, независимо от Pro;
+- Business монетизирует organizational scale, а не просто большое число товаров.
+
+Общая conceptual model:
+
+```text
+CommercialAccount → Plan → Entitlements → Limits → Usage → Overrides → BillingState
+→ Purchases / PromotionCampaigns → EffectiveEntitlements
+```
+
+Она не требует немедленно создавать одноимённые tables. Каждый future slice материализует только нужный minimum.
+Commercial checks выполняются server-side; product analytics не являются usage/billing ledger; downgrade не удаляет
+данные. Technical/anti-abuse/fair-use limits отделены от commercial limits.
+
+Первая версия фиксирует `1 Seller = 1 CommercialAccount`; Locations Seller используют общий commercial status.
+Organization/polymorphic owner не вводятся до отдельного подтверждённого Business slice.
+
+**S25 требует пересмотра:** прежний hard active-Offer cap конфликтует с supply/Search/Demand и не готов к
+implementation. Модель «первые N бесплатно, дальше плати» удалена из текущего monetization direction; Free сохраняет
+полный вручную поддерживаемый правдивый ассортимент. Вернуться к cap можно только по pilot evidence и новому явному
+PO decision. Technical/anti-abuse/fair-use limits остаются допустимыми.
+
+#### Pro chain
+
+```text
+AI ready + D4 paid-readiness + Performance instrumentation
+→ S26 commercial/effective-access minimum
+→ Pro feature gates
+→ Billing foundation
+→ Pro lifecycle/purchase
+```
+
+Внутренние feature flags не превращают частично готовый набор в продаваемый Pro.
+
+#### Demand chain
+
+```text
+S15B → S15C D0/D1 + D2 foundation → internal validation → D3 free pilot
+→ seller reaction + buyer benefit proof → willingness-to-pay → D4 in Pro
+```
+
+Privacy thresholds сильнее entitlement; Pro не превращает неготовые/редкие данные в seller-facing Demand.
+Demand не имеет отдельной подписки: D3 actionable signals входят в Free, D4 full Demand — в Pro, D6 multi-location /
+aggregated Demand — в Business. Основная IA: `Ещё → Что ищут покупатели`; Showcase показывает только actionable
+teasers с CTA.
+
+#### Boost chain
+
+```text
+sponsored-surface policy → PromotionCampaign eligibility → Purchase/payment foundation
+→ marked Search / Nearby / relevant Discovery delivery → measurement/support
+```
+
+Boost не меняет organic Search/Discovery и не обходит actuality, moderation или buyer visibility. `Editorial Featured`
+и `Paid Promotion` имеют разные entities, permissions, audit, metrics и removal semantics; Featured нельзя использовать
+как shortcut. Boost v1: product/category relevance + geography + limited display period; fixed price/fixed period/
+estimated extra reach, без auction/CPC/CPM и без гарантии продаж. Packages/prices/frequency caps/inventory принадлежат
+отдельному Boost Product Spec.
+
+#### Business chain
+
+```text
+employees/roles → multi-location management → bulk operations + XLS/CSV import
+→ cross-location analytics + aggregated Demand → audit/history + higher/custom quotas
+→ Business lifecycle → later API / 1C / ERP / integrations
+```
+
+Business переиспользует Seller/Location/Offer/Change Set domains, а не создаёт отдельный backend.
+
+S25–S29 сохраняют идентификаторы ради истории, но их прежняя линейная зависимость
+`hard cap → subscription → bulk → promotion` больше не является roadmap contract.
+
+### Backoffice
+
+Source: `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`.
+
+Backoffice — administrative client общего backend/domain. До его IA/UX обязательны:
+
+```text
+Requirement Inventory → Operations Map → Roles/Permissions → Domain states/invariants
+→ Commercial & Monetization Readiness → MVP/Later → IA/UX → capability-gap audit
+→ slice decomposition/dependency graph
+```
+
+После этого implementation идёт небольшими operational vertical slices. Первый vertical — **Catalog Operations**:
+find Product → open → create/edit → Category/Alias → deactivate → see relations/duplicates → audit. Затем по dependency
+audit: Seller/Location/Offer operations; moderation; reports/support; Editorial Featured; commercial read model;
+audited Overrides; Promotion operations; Billing support позже. Это не разрешение сделать один mega-slice
+`Backoffice`.
+
+Minimum roles: `operator` для Catalog/Seller/Location/Offer, `moderator` для reviews/media, `admin` для roles/config/
+critical operations; privileged commercial scope/role добавляется позже. Generic enterprise RBAC заранее не строится.
+Editorial Featured ведёт команда KAIDA через Backoffice для «Интересное сегодня», home и market/discovery surfaces;
+Seller его не покупает, normal Search sorting оно не меняет. Commercial Override ограничен entitlement/limit,
+обязательными reason/actor/expiry/audit и default maximum duration 30 дней.
 
 ## MVP boundary
 

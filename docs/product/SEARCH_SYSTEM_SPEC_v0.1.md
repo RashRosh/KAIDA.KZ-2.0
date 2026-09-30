@@ -662,7 +662,9 @@ radius_m INT NULL
 
 Эти события являются внутренними. Публичный Seller API не должен возвращать индивидуальные search events, user_id, session key или точную позицию конкретного П1.
 
-Политика агрегации, минимальный размер аудитории, retention и будущий коммерческий доступ описываются отдельным ТЗ на Demand/монетизацию.
+Политика агрегации, минимальный размер аудитории и retention описываются
+`KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`; будущий commercial access —
+`KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`. Paid entitlement не снимает privacy threshold.
 
 Для аналитики принципиально различать:
 
@@ -995,6 +997,9 @@ Payload создания:
 - сложные товарные атрибуты и их taxonomy;
 - правила ручной/автоматической модерации новых Products;
 - персонализированный ranking.
+
+Будущий Boost проектируется как отдельная `PromotionCampaign`/paid surface и не переиспользует Editorial Featured.
+Он не изменяет описанный здесь organic Search contract.
 
 ---
 

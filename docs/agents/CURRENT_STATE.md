@@ -4,59 +4,70 @@
 `docs/product/EXECUTION_PLAN.md`. Перед работой перепроверь git/GitHub: этот файл может устареть.
 
 - Проверено: 2026-09-30.
-- `origin/main`: `4567eff` (merge PR #67), merged-main CI green.
-- Последний annotated product checkpoint: `v0.0.36-actuality-reminders` на `5375bab`.
-- После checkpoint в `main` вошли PR #63, #64, #65 и #67; недостающие checkpoint tags — первый repository gate.
-- PR #66 открыт и mergeable, но его успешные checks старше актуального `main`; перед merge нужен refresh и новый CI.
-- Текущая локальная ветка: `docs/search-demand-planning` от `origin/main`.
+- `origin/main`: `fd11a48` (merge PR #66), merged-main CI run `36706008273` green.
+- Последний annotated product checkpoint: `v0.0.41-card-point-link` на `fd11a48`.
+- Checkpoint tail `v0.0.37`–`v0.0.41` закрыт; PR #66 merged.
+- Текущая локальная ветка: `docs/commercial-backoffice-pipeline` от `origin/main`.
 
 ## Current task
 
-Docs/planning pass, без product implementation:
+Docs/planning pass по Product Owner direction, без production implementation:
 
-1. зафиксировать Search System Spec v0.1 как target source, не Slice Contract;
-2. зафиксировать KAIDA Demand concept v0.1;
-3. добавить Initial Product Catalog v0.1 как неизменённый editorial input artifact;
-4. расширить S15 на S15A Catalog bootstrap, S15B Search System revision и S15C Demand Data Foundation;
-5. обновить `FEATURE_MAP.md`, `EXECUTION_PLAN.md` и Issue #55.
+1. зафиксировать общую Commercial Entitlements Model для Free / Pro / Boost / Business;
+2. пометить старую hard-cap форму S25 stale / review required;
+3. встроить independent dependency chains Pro / Demand / Boost / Business;
+4. зафиксировать Backoffice как client общего backend/domain;
+5. поставить Commercial & Monetization Readiness до Backoffice IA/UX;
+6. разложить будущий Backoffice на operational vertical-slice families;
+7. обновить только future planning, не переставляя committed near queue.
 
 ## Fixed near queue
 
-1. missing checkpoint tags;
-2. PR #66;
-3. Seller Location geo fallback;
-4. KAIDA address directory;
-5. Nearby result-first;
-6. Search filters closer/fresher/distance;
-7. Search filters cheaper/price range;
-8. AI Input;
-9. AI moderation;
-10. Discovery / `Для вас`;
-11. S15A → S15B → S15C.
+1. Seller Location geo fallback;
+2. KAIDA address directory;
+3. Nearby result-first;
+4. Search filters closer/fresher/distance;
+5. Search filters cheaper/price range;
+6. AI Input;
+7. AI moderation;
+8. Discovery / `Для вас`;
+9. S15A → S15B → S15C;
+10. S16 remainder + MVP/Demand readiness;
+11. future Commercial/Backoffice planning gates and readiness-gated slices.
 
-Catalog и KAIDA Demand не вставляются раньше этой очереди. Казахская вычитка и отдельная desktop-работа отложены по
-решению PO и в этом pass не затрагиваются.
+Текущий docs pass не разрешает начинать следующий product slice. Казахская вычитка и отдельная desktop-работа
+остаются отложенными по решению PO и не затрагиваются.
 
 ## Product-source boundaries
 
-- Catalog workbook: 787 candidates, 682 `YES`, 105 `REVIEW`; это не migration/seed. Draft KK не verified, а
-  `candidate_code` не `Product.id`.
-- Search Spec требует будущей сверки с кодом и contract revisions closed S0/S6/S7/S9/S13.
-- S15C разрешает только D0/D1 и необходимую основу D2; seller Demand UI/paid Demand позже и по readiness gates.
-- Решение PO 2026-09-30: `buyer_interests` не равен explicit «Сообщить, когда появится»; различаются search/view,
-  interest и explicit waiting.
-- Решение PO 2026-09-30: active-product limit выключен на пилоте, но остаётся configurable future monetization option;
-  значение определяется по статистике.
-- Решение PO 2026-09-30: `Category` остаётся полноценной сущностью; Excel `category_code` только маппится на простой
-  неглубокий рубрикатор KAIDA.
+- Commercial parent source: `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`.
+- Backoffice parent planning source: `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`.
+- Free сохраняет полноценную ручную правдивую витрину; hard commercial active-Offer cap удалён из текущего
+  monetization direction и может вернуться только по evidence + новому явному PO decision.
+- S25 old hard-cap form — `REVIEW REQUIRED`, не implementation-ready.
+- Первая commercial scope: `1 Seller = 1 CommercialAccount`; Organization/polymorphic owner сейчас не вводятся.
+- Pro = AI + full Demand + Performance; capability readiness независима, но sellable Pro ждёт минимум всех трёх.
+- Boost — one-off purchase независимо от Pro; organic ranking и Editorial Featured не используются как shortcut;
+  v1 без auction/CPC/CPM и без guarantee of sales.
+- Business minimum = employees/roles, multi-location, bulk/XLS/CSV, cross-location analytics, aggregated Demand,
+  audit/history и higher quotas; API/1C/ERP/integrations позже.
+- Backoffice не содержит business/commercial logic; первый future operational vertical — Catalog Operations, затем
+  остальные slices по dependency audit. Minimum roles: operator/moderator/admin.
+- S15C разрешает D0/D1 и необходимую основу D2; D3/D4 остаются readiness-gated.
+- Demand: actionable signals = Free, full = Pro, aggregated multi-location = Business; отдельной подписки нет.
+
+Открыты: pricing, численные AI/batch quotas, trial/grace/cancel, refund, payment provider, Boost prices/packages/
+frequency caps/inventory и exact Demand privacy threshold. Они не блокируют текущий docs pass.
 
 ## Next action
 
-Проверить docs diff и ссылки. Issue #55 синхронизирован с решениями PO. Commit, push и PR — только по прямому
-поручению PO.
+Docs diff/link consistency audit завершён; решения и открытые decisions показаны Product Owner. Ближайшее действие —
+только по прямому поручению PO выполнить commit → push → PR → merge → merged-main verification → annotated docs
+checkpoint. После закрытия этого docs checkpoint первый product stage по очереди — Seller Location geo fallback;
+его implementation не начинать без отдельного разрешения PO.
 
 ## Do not include
 
-- личные `next-env.d.ts`, `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`;
-- реализацию, migrations, seeds, APIs или UI;
+- личные `next-env.d.ts`, `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`, `.pnpm-store/`;
+- implementation, migrations, seeds, APIs, UI, Billing, payment provider, Boost или Business;
 - KK proofreading или desktop changes.

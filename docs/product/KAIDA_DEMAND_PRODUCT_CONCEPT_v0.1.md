@@ -4,11 +4,15 @@
 > реализацию.** В stage 10 разрешена только Demand Data Foundation (D0/D1 и необходимая база D2) после отдельных
 > contracts. Seller UI, бесплатные сигналы и paid Demand проходят собственные readiness gates.
 >
-> **Последующие решения PO от 30.09.2026 имеют приоритет над вариантами внутри concept:** active-product limit выключен
-> на пилоте, но сохраняется как configurable future tariff option; interest и explicit waiting не объединяются;
+> **Последующие решения PO от 30.09.2026 имеют приоритет над вариантами внутри concept:** Free сохраняет полноценную
+> ручную витрину, hard commercial active-Offer cap удалён из текущего monetization direction, а старая форма S25
+> требует review; interest и
+> explicit waiting не объединяются;
 > 682 `YES` — кандидатное RU-ядро с пакетным import после dedup/conflict report; `Category` остаётся полноценной
 > сущностью, а Excel taxonomy только маппится на простой рубрикатор; privacy threshold конфигурируем и определяется по
 > данным; D3 сначала бесплатный, D4 требует подтверждённой цепочки supply response и отдельного willingness-to-pay.
+> Demand не является отдельной подпиской: actionable signals входят в Free, full Demand — в Pro, aggregated
+> multi-location Demand — в Business. Seller entry зафиксирован как `Ещё → Что ищут покупатели`.
 
 **Версия:** 0.1
 **Дата:** 30.09.2026
@@ -39,14 +43,13 @@ KAIDA Demand — рабочее название направления, в ко
 
 ## 1.1. Baseline
 
-На момент анализа:
+Актуальная сверка 2026-09-30:
 
-- `main`: `4567effc1460bf8c014767d203683a9421bec4f6`;
-- последний commit: merge PR #67 `fix: быстрый переход к фото из карточки витрины`;
-- GitHub Actions run `36672416633` для этого SHA завершён `success`;
-- verified product checkpoint в `EXECUTION_PLAN.md`: `v0.0.36-actuality-reminders`;
-- после checkpoint в `main` уже вошли новые buyer/seller UI-изменения по принятому макету;
-- PR #66 `Редактирование торговой точки из карточки товара` на момент анализа открыт и **не входит** в baseline этого документа.
+- `main`: `fd11a48fdca4f1645e70217d09c5a37b8a5d16eb`;
+- последний commit: merge PR #66 `Редактирование торговой точки из карточки товара`;
+- GitHub Actions run `36706008273` для этого SHA завершён `success`;
+- verified product checkpoint: `v0.0.41-card-point-link`;
+- checkpoints buyer/seller UI tail `v0.0.37`–`v0.0.41` закрыты.
 
 ## 1.2. Что уже реально есть в продукте и важно для Demand
 
@@ -203,36 +206,23 @@ Push infrastructure уже существует:
 - без точного местоположения и отдельных buyer sessions;
 - редкие запросы не показывать;
 - решить временные и географические срезы;
-- решить free vs paid;
+- применить packaging Free signals → full Demand in Pro → aggregated multi-location Demand in Business;
 - связать с S15 Search learning и Catalog.
 
 KAIDA Demand является развитием этой идеи.
 
 ## 2.2. Monetization в текущем roadmap
 
-`EXECUTION_PLAN.md` ставит Monetization в stage 12 после MVP boundary review.
+`EXECUTION_PLAN.md` сохраняет commercial work после MVP/Demand readiness и добавляет planning gates до Backoffice
+IA/UX. `FEATURE_MAP.md` помечает S25 hard-cap form как `REVIEW REQUIRED`, задаёт commercial foundation и разделяет
+Pro, Demand, Boost и Business. KAIDA Demand остаётся собственным D0–D6 workstream и входит в Pro только после D4
+paid-readiness.
 
-Сейчас туда входят:
+## 2.3. Устранённое несоответствие S25
 
-- S25 — active Offer limits;
-- S26 — seller subscription;
-- S27 — paid accelerated/bulk input;
-- S28 — promotion creation;
-- S29 — promoted reach.
-
-KAIDA Demand как отдельная capability в S25–S29 **сейчас отсутствует**.
-
-## 2.3. Важное несоответствие
-
-Текущий roadmap начинает monetization с ограничения числа active Offers.
-
-При этом концепция KAIDA Demand приводит к противоположному marketplace-принципу:
-
-> KAIDA выгодно иметь максимально полный и актуальный supply; не стоит заставлять П2 скрывать реальные товары только потому, что он не оплатил дополнительный лимит.
-
-Поэтому S25 `Policy ограничивает active Offers` и будущая модель Demand требуют отдельного Product Owner решения до составления финального monetization ТЗ.
-
-**Этот документ не переписывает Feature Map молча.**
+PO выбрал supply-first direction: Free не скрывает правдивый ассортимент ради baseline paywall. Commercial hard cap
+удалён из текущего monetization direction, S25 old form не implementation-ready. Commercial value строится через Pro
+(`AI + full Demand + Performance`), отдельный Boost и Business; technical/anti-abuse/fair-use limits остаются допустимы.
 
 ---
 
@@ -242,17 +232,11 @@ KAIDA Demand как отдельная capability в S25–S29 **сейчас о
 
 `docs/product/SEARCH_SYSTEM_SPEC_v0.1.md`
 
-Он лежит в ветке:
+Canonical copy уже находится в `main`; при будущей S15B всё равно нужно учесть историю ветки
+`docs/search-system-spec-v0.1` и сверить target source с актуальным кодом.
 
-`docs/search-system-spec-v0.1`
-
-и **не слит в main**.
-
-На момент анализа ветка:
-
-- ahead of `main`: 1 commit;
-- behind `main`: 14 commits;
-- её единственное содержательное отличие — этот документ.
+Историческая ветка использовалась как источник при переносе spec; её старые ahead/behind counts не являются
+repository evidence.
 
 Следовательно:
 
@@ -800,10 +784,13 @@ KAIDA Demand — прежде всего **local demand**.
 - qualitative signal при небольшом объёме данных.
 
 Количество бесплатных opportunity previews — конфигурируемое, не фиксируется здесь.
+На `Витрине` показываются только actionable teasers с CTA; полный Demand открывается через
+`Ещё → Что ищут покупатели`.
 
-## 18.2. KAIDA Demand paid layer
+## 18.2. Full KAIDA Demand / Pro capability
 
-Платный уровень даёт полноценную локальную разведку:
+После собственного paid-readiness gate полный Demand входит в Pro как одна из трёх осей `AI + Demand + Performance`.
+Pro entitlement не делает данные готовыми и не снимает privacy suppression. Capability даёт:
 
 - полный список opportunities;
 - numeric unique-demand counts, если privacy threshold выполнен;
@@ -827,11 +814,19 @@ KAIDA Demand — прежде всего **local demand**.
 - несколько точек одновременно;
 - aggregated city/area views;
 - сравнение точек;
-- heatmap;
-- экспорт;
-- API;
-- scheduled reports;
+- cross-location analytics;
+- aggregated Demand;
+- audit/history;
 - role-based company access.
+
+Heatmap, export, scheduled reports, API/1C/ERP и integrations — subsequent capabilities по отдельным readiness gates,
+а не обязательная часть первого sellable Business.
+
+## 18.4. Packaging rule
+
+Отдельной подписки `KAIDA Demand` нет. Demand упаковывается только как Free signals, full capability внутри Pro и
+multi-location/aggregated capability внутри Business. Exact presentation, periods, radii и объём Free preview
+определяются после production-like data и privacy validation.
 
 ---
 
@@ -1306,11 +1301,10 @@ S15 / Search instrumentation
 
 ---
 
-# 34. Рекомендуемое место в roadmap
+# 34. Место в roadmap
 
-В текущем Feature Map Demand отсутствует.
-
-Рекомендация:
+Demand зафиксирован в `FEATURE_MAP.md` как D0–D6 и в `EXECUTION_PLAN.md` как S15C foundation с отдельными readiness
+gates. Этот документ остаётся parent product source, но не меняет execution order самостоятельно.
 
 ## Phase A — Demand Data Foundation
 
@@ -1331,13 +1325,11 @@ S15 / Search instrumentation
 
 Может быть бесплатным capability, потому что повышает supply liquidity.
 
-## Phase C — KAIDA Demand paid
+## Phase C — Full KAIDA Demand in Pro
 
-Увязать с seller subscription stage.
-
-Он может идти в monetization stage 12, но точное место нужно обновить в `EXECUTION_PLAN.md` / `FEATURE_MAP.md` отдельным PO decision.
-
-Не перенумеровывать S25–S29 автоматически.
+После доказанной цепочки D3 и отдельного willingness-to-pay evidence D4 может получить commercial entitlement внутри
+Pro. Общая commercial semantics задаётся `KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`; privacy threshold остаётся
+сильнее entitlement. Реализация требует отдельного Slice Contract и PO authorization.
 
 ---
 
@@ -1455,53 +1447,19 @@ Business
 
 ---
 
-# 40. Критический открытый вопрос: active Offer limits
+# 40. Решение PO: active Offer limits
 
-Current roadmap S25:
+Конфликт решён 2026-09-30:
 
-> Policy ограничивает active Offers.
+- Free сохраняет полноценную ручную правдивую витрину;
+- hard commercial active-Offer cap удалён из текущего monetization direction;
+- S25 в старой форме не implementation-ready;
+- technical, anti-abuse и fair-use limits допустимы и не являются paywall;
+- основная value proposition монетизации: Pro (`AI + full Demand + Performance`), отдельный Boost и Business.
 
-KAIDA Demand strategy:
-
-> максимальный supply coverage увеличивает полезность Search и вероятность закрытия Demand Gap.
-
-Эти идеи потенциально конфликтуют.
-
-До ТЗ монетизации необходимо выбрать одно из направлений.
-
-### Вариант A — hard limit active cards
-
-Плюс:
-
-- простой paywall.
-
-Минусы:
-
-- KAIDA сознательно скрывает supply;
-- ухудшает buyer coverage;
-- продавец может не внести редкие позиции;
-- Demand Gap становится частично создан самой KAIDA.
-
-### Вариант B — базовый ассортимент не ограничиваем жёстко
-
-Монетизируем:
-
-- AI convenience;
-- Demand intelligence;
-- promotion;
-- Business tools.
-
-Плюс:
-
-- supply liquidity.
-
-Минус:
-
-- subscription требует другой value proposition.
-
-**Рекомендация этого документа: Вариант B.**
-
-Но это ещё требует формального PO update Feature Map.
+Вернуться к commercial assortment cap можно только по реальным pilot evidence и новому явному PO decision; тогда ему
+потребуется отдельный configurable и non-destructive contract. Само сохранение технической возможности не является
+roadmap commitment.
 
 ---
 
@@ -1604,19 +1562,20 @@ Demand показывает, что товар сейчас ищут
 
 # 43. Что нужно решить перед ТЗ дизайнеру
 
-1. UI name:
-   - `Что ищут покупатели`;
-   - `Возможности`;
-   - другое.
-2. Показываем ли exact counts в Free при достаточной аудитории или только qualitative signal.
-3. Сколько free opportunities показывать.
-4. Какие period presets.
-5. Какие radius presets.
-6. Нужен ли отдельный Opportunity detail screen.
-7. Каким должен быть upgrade/paywall pattern.
-8. Где именно teaser живёт на `Витрине`.
-9. Показываем ли trend в первой paid версии.
-10. Нужен ли seller push для Demand v1 или достаточно in-app + digest.
+Уже зафиксировано PO: UI name `Что ищут покупатели`, entry `Ещё → Что ищут покупатели`, на `Витрине` — только
+actionable teasers с CTA; отдельной Demand subscription нет.
+
+Открыты только presentation details после накопления данных:
+
+1. exact counts в Free при достаточной аудитории или qualitative signal;
+2. количество free opportunities;
+3. period presets;
+4. radius presets;
+5. нужен ли отдельный Opportunity detail screen;
+6. upgrade/paywall pattern внутри Pro packaging;
+7. точная позиция teaser на `Витрине`;
+8. trend в первой paid версии;
+9. seller push для Demand v1 или in-app + digest.
 
 ---
 
@@ -1632,7 +1591,7 @@ Demand показывает, что товар сейчас ищут
 8. Privacy cohort threshold.
 9. Aggregate refresh cadence.
 10. Data retention raw vs aggregate.
-11. Seller entitlement model.
+11. Demand capability key/gate внутри общей Commercial Entitlements Model.
 12. Demand API/read model.
 13. Anti-abuse.
 14. Notification cadence.
@@ -1645,20 +1604,19 @@ Demand показывает, что товар сейчас ищут
 
 ---
 
-# 45. Что нужно обновить в репозитории после продуктового утверждения
+# 45. Repository integration state
 
-После утверждения этого концепта отдельно, не молча:
+В canonical planning уже выполнено:
 
-1. обновить Issue #55;
-2. добавить KAIDA Demand в `FEATURE_MAP.md`;
-3. определить его позицию в `EXECUTION_PLAN.md`;
-4. решить конфликт S25 active Offer limits;
-5. rebase Search System Spec branch на актуальный `main`;
-6. разделить:
-   - Search Data Foundation;
-   - Seller Demand Signals;
-   - Paid Demand;
-7. только затем писать Slice Contract(ы).
+1. Issue #55 является owning backlog;
+2. D0–D6 отражены в `FEATURE_MAP.md`;
+3. S15C и readiness gates отражены в `EXECUTION_PLAN.md`;
+4. S25 hard-cap form помечена `REVIEW REQUIRED`;
+5. Search Data Foundation, Seller Free Demand Signals и full Demand разделены;
+6. commercial access связан с общей Commercial Entitlements Model.
+
+До implementation по-прежнему нужны актуальная сверка Search System с кодом, отдельные Slice Contracts и явная
+авторизация PO.
 
 ---
 
