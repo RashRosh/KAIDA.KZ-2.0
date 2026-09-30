@@ -23,7 +23,8 @@ Seller Input
 - `User` — учётная запись;
 - `Seller` — профиль продавца;
 - `Location` — физическая торговая точка;
-- `Category` — каталог/navigation grouping;
+- `Category` — полноценная сущность каталога/navigation grouping для просмотра ассортимента, Search filters,
+  Discovery, market pages и будущей маршрутизации спроса; Excel taxonomy маппится на неё, но не определяет её модель;
 - `Product` — канонический товар;
 - `Offer` — актуальное предложение Product в конкретной Location;
 - `SellerChangeSet` — набор предлагаемых продавцом изменений;
@@ -52,7 +53,9 @@ Seller Input
 | S12 | Seller Input | Один Change Set содержит несколько Change Items | S5 | MVP | CLOSED |
 | S13 | Interests | Buyer отмечает Product как интересующий | S2, S6 | MVP | CLOSED |
 | S14 | Discovery | Buyer видит Offers по явно указанным интересам | S7, S13 | MVP | PLANNED |
-| S15 | Search learning | Оператор анализирует matched/unmatched/zero-result queries | S6, S7 | MVP | PLANNED |
+| S15A | Catalog bootstrap | Утверждённое RU-ядро стартового каталога проходит staging, merge и контролируемый import без дублей | S6 + PO-approved rows | Stage 10 | PLANNED |
+| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A, S7, S9 | Stage 10 | PLANNED |
+| S15C | Demand Data Foundation | KAIDA собирает conscious canonical/unresolved/zero-result demand и privacy-safe internal aggregates | S15B | Stage 10 | PLANNED |
 | S16 | Operations | Оператор может отключить ошибочный Offer/Seller; первая часть — снятие карточки по факту публикации | S7 | Этап 1 (снятие) / MVP | PLANNED |
 | S17 | AI Input | Свободный текст предлагает Seller Change Set | S12 | После этапа 1 | PLANNED |
 | S18 | AI Input | Voice предлагает Seller Change Set | S17 | После этапа 1 | PLANNED |
@@ -62,7 +65,7 @@ Seller Input
 | S22 | Auth | Test OTP заменяется real SMS delivery | S2 | До публичного запуска | PLANNED |
 | S23 | Notifications | Buyer получает уведомление о новом Offer интересующего Product | S14 | После MVP | PLANNED |
 | S24 | Recommendations | Детерминированная personalized feed без ML | S14 + data | После MVP | PLANNED |
-| S25 | Monetization | Policy ограничивает active Offers | S5 | Сразу после MVP (stage 12) | PLANNED |
+| S25 | Monetization | Configurable active-product tariff limit: выключен на пилоте, возможен позже по данным | S5 + pilot statistics | Stage 12 | PLANNED |
 | S26 | Subscription | Subscription меняет лимиты/возможности Seller | S25 | Сразу после MVP (stage 12) | PLANNED |
 | S27 | Convenience | Paid plan открывает ускоренный bulk input | S20, S26 | Сразу после MVP (stage 12) | PLANNED |
 | S28 | Promotion | Seller создаёт promotion для Offer | S9 | Сразу после MVP (stage 12) | PLANNED |
@@ -94,6 +97,7 @@ Seller Input
   другой информирующей и вовлекающей маркетинговой информации KAIDA; кто и как управляет содержимым, частота смены,
   метки рекламы и связь с платным продвижением (S28–S29) решает отдельный контракт;
 - KAIDA-owned address directory built on open data (OpenStreetMap) for Location address suggestions;
+- KAIDA Demand: internal data foundation → readiness-gated free seller signals → readiness-gated paid analytics;
 - Market internal navigation as future spatial capability.
 
 Наличие capability в этом разделе **не означает**, что её можно начать вне текущей очереди.
@@ -215,12 +219,13 @@ https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4.
     поиске, определяет контракт (ревизия S6/S7).
     **Смешанный ввод** (решение 2026-09-27): пока продавец печатает, под полем появляются подсказки из каталога;
     выбранная подсказка привязывает карточку к каталогу, а без выбора карточка публикуется под словами продавца без
-    ожидания. Полный список всех товаров заранее не составить — каталог растёт из реальных карточек. Поиск — по
-    началу слов названия плюс каталог и синонимы (`docs/slices/seller-showcase-editor/SLICE_CONTRACT.md`).
+    ожидания. Стартовый редакторский каталог не закрывает весь рынок — он растёт из реальных карточек и запросов.
+    Seller-title word-start fallback остаётся только отдельным unresolved-путём и не смешивается через `OR` с
+    resolved Product search (`docs/slices/seller-showcase-editor/SLICE_CONTRACT.md`, будущая ревизия S15B).
     **Показ названия на языке покупателя** (решение 2026-09-29): карточка, привязанная к каталогу, показывает
     покупателю название товара из каталога на его языке; карточка вне каталога — слова продавца как есть. Сейчас
-    название везде показывается словами продавца; правило вводится вместе с S15 Search learning (stage 10
-    `EXECUTION_PLAN.md`), где каталог пополняется из реальных карточек.
+    название везде показывается словами продавца; правило вводится внутри S15A/S15B (stage 10
+    `EXECUTION_PLAN.md`), где каталог проходит bootstrap и затем пополняется контролируемо.
     **Оповещение о товаре вне каталога** (решение 2026-09-29): как только публикуется карточка, не привязанная к
     каталогу, оператор сразу получает оповещение, чтобы перевести название или добавить товар в каталог и привязать
     карточку. Кто именно получает (оператор, модератор, администратор) и каким каналом — решает Slice Contract. Входит
@@ -229,7 +234,8 @@ https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4.
 11. **Фильтр у строки поиска** (решение 2026-09-25). Кнопка «Фильтры» открывает ровно три настройки: сортировка
     («Сначала ближе», «Сначала актуальнее», «Сначала дешевле»), расстояние (до 1 / 3 / 5 км, любое) и цена от–до.
     «Ближе» и расстояние работают только при явно разрешённой геолокации покупателя. Как сравниваются цены с разными
-    единицами (за кг и за шт.), определяет контракт сортировки по цене.
+    единицами (за кг и за шт.), определяет контракт сортировки по цене. Contracts фильтров не объявляют текущий Search
+    финальным: они обязаны быть совместимы с будущей S15B и не цементировать смешивание canonical и title fallback.
 
 12. **Актуальность и ИИ — обязательны к запуску сервиса** (решение 2026-09-25): это главные отличия KAIDA, без них
     сервис теряет смысл, и публичный запуск без них не проводится. Актуальность вместе с напоминаниями продавцу
@@ -253,12 +259,71 @@ AI — способ сформировать черновики карточек
 
 ### Search learning
 
+S15 теперь является workstream из трёх частей:
+
+- **S15A Catalog bootstrap** — controlled RU bootstrap из утверждённых PO строк;
+- **S15B Search System revision** — canonical `product_id` primary, catalog suggestions, resolved search отдельно от
+  seller-title fallback, known-zero отдельно от unknown;
+- **S15C Demand Data Foundation** — D0/D1 и необходимая основа D2, internal/privacy-safe, без seller Demand UI.
+
 Пользовательские query strings не создают Product автоматически:
 
 ```text
 Query Log
 → matched / unmatched / zero-result analysis
 → controlled Product / alias / Category change
+```
+
+#### Initial Product Catalog v0.1 — input artifact
+
+Источник: `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`. Это редакторский workbook, не migration и не
+production seed: 787 candidates, из них 682 `include_v01=YES`, 105 `REVIEW`; RU — canonical/editorial basis, KK —
+непроверенный draft. `candidate_code` — временный внешний ключ и никогда не `Product.id`.
+
+Catalog contract определит staging/validation, merge с существующими Products, stable UUID, localized names, aliases,
+collisions, idempotency, rollback/correction и пакетный acceptance report. 682 `YES` — кандидатное RU-ядро: безопасные
+строки принимаются пакетом после дедупликации, неоднозначные остаются человеку; 105 `REVIEW` не входят в первый import.
+Нельзя считать draft KK verified, ставить `verified_at`, хранить весь каталог в seed или создавать дубли. Category —
+полноценная сущность KAIDA; `category_code` workbook проходит явный mapping в простой неглубокий рубрикатор, а не
+становится финальной taxonomy автоматически. Отложенная KK proofreading не блокирует RU bootstrap.
+
+#### Search System target
+
+`docs/product/SEARCH_SYSTEM_SPEC_v0.1.md` — target product source, не действующий Slice Contract. Перед S15B его нужно
+сверить с текущим кодом и closed S0/S6/S7/S9/S13, учесть историю ветки `docs/search-system-spec-v0.1` и оформить
+явные contract revisions. Fuzzy применяется только к suggestions; unresolved demand и controlled catalog evolution не
+создают Product автоматически.
+
+Решение PO (2026-09-30): generic `buyer_interests` и explicit «Сообщить, когда появится» не объединяются. Demand
+различает `поиск/просмотр → интерес → явное ожидание появления`; только последнее означает разрешение уведомить П1.
+Техническую модель watch определяет отдельный contract.
+
+### KAIDA Demand
+
+Источник: `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`; owning backlog — Issue #55. Demand показывает продавцу
+агрегированные opportunities, а не individual buyer events. Demand не меняет organic ranking и не пишет Seller changes
+мимо `SellerChangeSet`.
+
+| ID | Capability | Audience / result | Gate |
+|---|---|---|---|
+| D0 | Search Demand Events | Internal conscious submit events: canonical/unresolved, zero/unmet context, result count, explicit geo only when used | S15B contract + privacy/session/anti-bot rules |
+| D1 | Search Learning / Demand Aggregates | Internal matched/unmatched/zero-result canonical/unresolved aggregates and operator validation | D0 production-like data |
+| D2 | Availability Watches | Buyer явно выбирает «Сообщить, когда появится»; unresolved может позднее связаться с Product | Separate watch contract; generic interest ≠ watch |
+| D3 | Seller Free Demand Signals | Actionable aggregate cards, которые помогают закрывать unmet demand | Valid aggregates + Demand readiness gate |
+| D4 | KAIDA Demand | Paid full list, periods, radius, supply and trend | D3 value proof + paid readiness gate |
+| D5 | Demand Alerts | Push / digest | D3/D4 + notification policy |
+| D6 | Business Demand | Multi-location / city / export | Later evidence and Business model |
+
+Privacy boundary неизменен: sellers не получают user/session IDs, individual events или exact buyer coordinates;
+не видят отдельные queries или history конкретного П1. Считаются unique users/privacy-safe anonymous demand sources,
+а не raw repeats; редкие cohorts suppressed, geo укрупняется, minimum cohort threshold конфигурируем. До определения
+безопасного порога такие группы не попадают в seller-facing Demand. Seller endpoints возвращают только aggregates;
+test/demo/bot traffic исключается.
+
+Порядок нельзя смешивать с будущим UI:
+
+```text
+instrumentation → production-like accumulation → internal validation → free signals → paid Demand
 ```
 
 ### Media
@@ -271,7 +336,12 @@ Market — специализированный spatial container, а не це�
 
 ### Monetization
 
-Volume limits, convenience and promotion/reach — независимые axes. Promotion не должен обходить organic relevance/freshness eligibility.
+Монетизация имеет пять совместимых инструментов: **configurable active-product limit**, **AI/Convenience**, **Demand**,
+**Promotion/Boost**, **Business**. На пилоте лимит выключен ради накопления предложения, но архитектура не объявляет
+ассортимент навсегда безлимитным; конкретный тарифный порог определяется позднее по статистике. Promotion не должен
+обходить organic relevance/freshness eligibility. D4 появляется только после readiness gate, бесплатного D3 pilot и
+отдельной проверки willingness to pay; полезные базовые D3-сигналы не скрываются за paywall. S25–S29 пока не
+перенумеровываются.
 
 ## MVP boundary
 
@@ -288,4 +358,12 @@ Buyer discovery loop:
 Buyer открывает KAIDA → видит актуальные Offers рядом / по интересу
 ```
 
-Точная readiness к MVP/public beta определяется отдельным boundary review после committed core contour, а не номером строки в Feature Map.
+Точная readiness к MVP/public beta определяется отдельным boundary review после committed core contour, а не номером
+строки в Feature Map.
+
+Рядом с stage 11 проводится отдельный **Demand readiness assessment**; он не обязан блокировать сам MVP. Проверяются:
+production-like traffic без test/demo/bot, качество canonical resolution и unresolved pipeline, explicit watches,
+privacy-usable aggregates, соответствие supply buyer-visible reality и наличие actionable gaps. D3/D4 открываются
+только по собственным gates. Для D3 заранее измеряется цепочка `signal → seller reaction → Product added/activated →
+buyer-visible Offer → unmet demand received supply`; численные критерии назначаются после реального трафика. D4 требует
+как доказанной ценности этой цепочки, так и отдельного willingness-to-pay evidence.

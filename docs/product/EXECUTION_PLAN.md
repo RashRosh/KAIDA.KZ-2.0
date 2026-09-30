@@ -16,6 +16,9 @@
 - process / verification / stable boundaries, включая обязательные UI-правила → `docs/PROJECT_RULES.md`;
 - current execution order → этот файл;
 - long-range capability/dependency map и продуктовые решения PO → `docs/product/FEATURE_MAP.md`;
+- target product sources для будущих contracts → `docs/product/SEARCH_SYSTEM_SPEC_v0.1.md`,
+  `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` и
+  `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`;
 - целевой UX продавца → `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` + `SELLER_AI_FIRST_DESIGN_REVISION_1.md` + макет
   (`PROJECT_RULES.md` §18.1);
 - exact slice behavior → `docs/slices/**/SLICE_CONTRACT.md`;
@@ -36,7 +39,16 @@
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading
   Points Workspace (#36), Buyer interest guest visibility (`v0.0.26`).
 
-Текущий `main` может содержать более поздние docs/tooling maintenance commits без нового product checkpoint.
+Фактический repository state при обновлении 2026-09-30:
+
+- `origin/main`: `4567eff` (merge PR #67), merged-main CI green;
+- после `v0.0.36` в `main` вошли buyer screens (PR #63), First Entry mobile (PR #64), seller photo tiles (PR #65) и
+  showcase photo shortcut (PR #67), но отдельные annotated checkpoint tags для этого хвоста ещё не поставлены;
+- PR #66 (`Редактирование торговой точки из карточки товара`) открыт, mergeable; его успешные checks относятся к
+  предыдущему `main`, поэтому перед merge нужны refresh/rebase и актуальный CI evidence.
+
+Текущий `main` может содержать более поздние изменения без нового product checkpoint; перед работой состояние всё
+равно перепроверяется.
 
 ---
 
@@ -106,8 +118,9 @@ Feature freeze сохраняется: новые product capabilities вне э
 
 ### Название товара — свободное до формирования каталога (решение PO, 2026-09-25)
 
-Продавец пишет название своими словами; карточка публикуется под этим названием без выбора из каталога. Сопоставление
-с каталогом KAIDA — позже, когда каталог будет сформирован. Для этапа 1 это означает: состояние «товара нет в
+Продавец пишет название своими словами; карточка публикуется под этим названием без выбора из каталога. Наличие
+editorial workbook само по себе ничего не меняет: сопоставление с каталогом KAIDA начинается только после S15A/S15B
+и утверждённых contracts. Для этапа 1 это означает: состояние «товара нет в
 каталоге» в редакторе не нужно; контракт пункта 3 должен определить, как карточка со свободным названием находится
 в поиске (сейчас поиск идёт через каталог и aliases — закрытые S6/S7), и это ревизия закрытых contracts по
 `PROJECT_RULES.md` §4.
@@ -121,12 +134,20 @@ Feature freeze сохраняется: новые product capabilities вне э
 
 ---
 
-# Экраны покупателя по макету — первым после этапа 1
+# Экраны покупателя по макету — закрыто в `main`, checkpoint tag ещё нужен
 
-Решение PO (2026-09-29): экраны покупателя пересобираются по принятому макету (`B01` выдача, `B02` детальная
-карточка; экраны без кадра — из классов макета) раньше замороженной очереди. Без новых функций: фильтры `B07` —
-stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B06`) остаются insertion candidate. Контракт —
-`docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md`.
+Решение PO (2026-09-29) выполнено в PR #63: экраны покупателя пересобраны по принятому макету (`B01` выдача, `B02`
+детальная карточка; экраны без кадра — из классов макета) раньше замороженной очереди. Новые функции не добавлялись:
+фильтры `B07` остаются stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B06`) — insertion candidate. Контракт —
+`docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md`. До product work нужно закрыть checkpoint hygiene ниже.
+
+## Ближайшие repository gates — порядок фиксирован
+
+Это не новые product stages и не повод менять очередь:
+
+1. поставить недостающие annotated checkpoint tags на уже проверенный хвост после `v0.0.36`;
+2. довести PR #66 на актуальном `main`: refresh/rebase, CI, manual acceptance, merge и checkpoint по обычному процессу;
+3. только затем переходить к stage 1 Seller Location geo fallback.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -142,16 +163,21 @@ stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B0
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
-| 10 | S15 — Search learning; название карточки из каталога — на языке покупателя; немедленное оповещение оператора о товаре вне каталога (решения PO, 2026-09-29) | Feature Map |
-| 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review | Feature Map |
-| 12 | Монетизация — лимиты активных карточек, подписка продавца, продвижение карточек (S25–S29) | `FEATURE_MAP.md` / future Slice Contracts |
+| 10A | S15A — Catalog bootstrap: контролируемо принять утверждённое RU-ядро, без автоматического импорта workbook | Feature Map / future Slice Contract |
+| 10B | S15B — Search System revision: каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
+| 10C | S15C — Demand Data Foundation: D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
+| 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
+| 12 | Монетизация: configurable active-product limit + AI/Convenience, Demand, Promotion/Boost, Business; S25–S29 пока не перенумеровывать | `FEATURE_MAP.md` / future Slice Contracts |
 
 M1 (фото), первая часть S16 (снятие карточки оператором) и актуальность с напоминаниями (Issues #31, #32) перенесены в этап 1.
 
-**Монетизация (решение PO, 2026-09-28):** отдельный этап сразу после решения о границе MVP (stage 11), до публичного
-запуска не блокирует. Состав и порядок — S25 лимиты → S26 подписка → S27 платный ускоренный ввод → S28–S29
-продвижение; модель цен, платёжный провайдер в Казахстане и юридические документы (оферта) решаются в Slice Contract
-первого пункта. Продвижение не обходит органические правила актуальности и видимости (`FEATURE_MAP.md`).
+**Монетизация (решение PO, 2026-09-30):** отдельный этап сразу после решения о границе MVP (stage 11), до публичного
+запуска не блокирует. Направления: configurable active-product limit, AI/Convenience, Demand, Promotion/Boost и
+Business. На пилоте лимит active products выключен: приоритет — накопление предложения. Это не означает бессрочно
+безлимитный ассортимент; архитектура сохраняет возможность позднее включить тарифный лимит, а значение определяется
+только по статистике. Текущие S25–S29 не перенумеровываются. Paid D4 можно планировать только после Demand readiness
+gate, бесплатного пилота и отдельной проверки willingness to pay. Продвижение не обходит органические правила
+актуальности и видимости (`FEATURE_MAP.md`).
 
 ### Ключевые dependencies
 
@@ -162,8 +188,91 @@ M1 (фото), первая часть S16 (снятие карточки опе
   licence/attribution и operational модели источника.
 - Актуальность входит в этап 1: подтверждение актуальности живёт на «Моей витрине». Напоминания (#32) — в том же пункте.
 - Search Sorting выполняется после политики актуальности.
+- Contracts stages 5–6 не объявляют существующую Search-модель финальной и не закрепляют смешивание catalog resolve с
+  seller-title fallback. Они добавляют сортировки/фильтры совместимо с будущей S15B; сравнение цены разрешено только
+  для сопоставимой единицы или подтверждённой нормализованной цены.
 - AI Input и AI-модерация по `PROJECT_RULES.md` §10.1 — улучшения поверх ручного пути; ручной путь и публикация без
   предварительной модерации обязаны работать при недоступном ИИ.
+
+### Stage 10 — S15 workstream, не срочная вставка в ближнюю очередь
+
+Подготовленные источники фиксируют целевую модель, но не являются Slice Contracts и не разрешают реализацию раньше
+stage 10.
+
+#### S15A — Catalog bootstrap
+
+Входной artifact `KAIDA.KZ_initial_product_catalog_v0.1.xlsx` содержит 787 кандидатов: 682 `include_v01=YES` и 105
+`REVIEW`; RU — canonical/editorial basis, KK — draft, отдельно даны aliases, editorial categories и source metadata.
+Workbook — редакторский источник, не production migration и не seed.
+
+Будущий contract обязан определить staging/validation, merge с существующими Products, stable UUID, localized names,
+aliases, collision handling, idempotency, rollback/correction и пакетный отчёт принятия. 682 `YES` — кандидатное
+RU-ядро: безопасные строки принимаются пакетно после дедупликации, неоднозначные конфликты остаются человеку;
+автоматическое объединение допустимо только при однозначном правиле. `candidate_code` — временный внешний ID, не
+`Product.id`.
+
+Запрещено молча: импортировать все строки или 105 `REVIEW`; считать draft KK проверенным или ставить ему
+`verified_at`; объявлять Excel taxonomy финальным рубрикатором; класть весь каталог в seed; дублировать существующие
+Products. `Category` остаётся полноценной сущностью KAIDA, а `category_code` workbook маппится на простой неглубокий
+рубрикатор KAIDA. Вычитка KK отложена и не блокирует RU bootstrap.
+
+#### S15B — Search System revision
+
+`SEARCH_SYSTEM_SPEC_v0.1.md` перенесён на текущий `main` как target source. Перед implementation нужно сверить его с
+текущим кодом и закрытыми S0/S6/S7/S9/S13, учесть историю ветки `docs/search-system-spec-v0.1`, затем выпустить
+contract revisions/Slice Contracts.
+
+Целевая модель: canonical `product_id` — основной путь; catalog suggestions помогают выбрать Product; resolved Product
+search не смешивается через `OR` с seller-title fallback; known Product + zero offers отличается от unknown query;
+canonical и unresolved demand различаются; query не создаёт Product автоматически; fuzzy используется только для
+suggestions; каталог развивается контролируемой редактурой.
+
+**Решение PO (2026-09-30):** generic `buyer_interests` и «Сообщить, когда появится» — разные сущности и сигналы.
+Demand различает как минимум три уровня силы намерения:
+
+```text
+поиск/просмотр → интерес → явное ожидание появления
+```
+
+Search и interest нельзя выдавать продавцу за число людей, явно ожидающих товар. Точную модель watch определяет
+отдельный contract.
+
+#### S15C — Demand Data Foundation
+
+В stage 10 входят D0 Search Demand Events, D1 Search Learning / Demand Aggregates и только необходимая основа D2
+Availability Watches. События создаются только conscious submit; сохраняют canonical/unresolved outcome,
+zero/unmet-context, result count и buyer geo только когда покупатель явно его использовал. Нужны privacy-safe session
+semantics, исключение test/demo/bot traffic, internal aggregates и linkage unresolved → resolved Product.
+
+`Сообщить, когда появится` — явное действие ожидания и разрешение уведомить П1. Общий `buyer_interests` не доказывает
+ожидание и не подменяет watch. Seller API/UI здесь нет. Продавцу никогда не передаются individual events, отдельные
+queries, user/session IDs, history конкретного П1 или exact buyer coordinates. Считаются прежде всего уникальные
+users/privacy-safe anonymous demand sources, а не сырые повторы. Редкие cohorts подавляются, география укрупняется,
+minimum cohort threshold конфигурируем; пока безопасный порог не определён, seller-facing Demand для таких групп не
+показывается.
+
+Порядок развития фиксирован:
+
+```text
+instrumentation
+→ production-like accumulation
+→ internal validation
+→ free seller signals
+→ paid KAIDA Demand
+```
+
+#### Demand readiness на stage 11 и после
+
+Stage 11 оценивает Demand readiness рядом с MVP boundary, но не обязан блокировать сам MVP. Проверяются объём и
+чистота трафика, canonical resolution, unresolved pipeline, explicit waiting, privacy-usable aggregates, соответствие
+supply buyer-visible reality и наличие регулярно actionable gaps.
+
+D3 Seller Free Demand Signals можно вставить только после валидных агрегатов и readiness gate; сначала он бесплатный.
+Базовые сигналы, которые помогают закрывать unmet demand, не прячутся за paywall. Для D3 сразу закладываются события,
+которые позволяют проверить цепочку `signal → seller reaction → Product added/activated → buyer-visible Offer → unmet
+demand received supply`. D4 paid Demand входит в stage 12 только после подтверждения этой цепочки и отдельной проверки
+willingness to pay: реакция на бесплатный сигнал сама по себе не доказывает готовность платить. Численные критерии до
+реального трафика не придумываются; D5 alerts и D6 Business остаются последующими readiness-gated stages.
 
 ---
 

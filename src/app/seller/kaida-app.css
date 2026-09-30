@@ -23,6 +23,9 @@
 .kaida .sheet{max-height:92%;overflow-y:auto}
 .kaida .rowbtn{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;gap:12px;width:100%;border-radius:10px}
 .kaida .rowbtn:focus-visible{outline:2px solid var(--focus);outline-offset:4px}
+.kaida .photo-shortcut{appearance:none;position:absolute;z-index:1;left:12px;top:12px;width:56px;height:56px;border:1.5px dashed var(--line-control);border-radius:10px;background:var(--sunken);color:var(--primary-text);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.kaida .photo-shortcut:focus-visible,.kaida .mt.add:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .photo-shortcut .ic{width:28px;height:28px}
 .kaida a.chip{text-decoration:none}
 .kaida .chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .kaida .li:disabled{opacity:1}

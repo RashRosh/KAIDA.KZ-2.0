@@ -89,10 +89,11 @@ function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: 
 
 // AI-S09 in the «ИИ выключен» mode (seller-showcase-editor §2): one editor for a new card, a draft, a change in all
 // points and the price of one point. Full screen on phones, a dialog on desktop; overlay rules PROJECT_RULES §18.4.
-export function CardEditor({ mode, seller: initialSeller, initial, reopen, commentTranslationEnabled, onClose, onSaved, onReload }: {
+export function CardEditor({ mode, seller: initialSeller, initial, initialFocus, reopen, commentTranslationEnabled, onClose, onSaved, onReload }: {
   mode: CardEditorMode;
   seller: SellerView | null;
   initial?: CardEditorInitial;
+  initialFocus?: 'photos';
   // Query that reopens this editor from the review page («Вернуться к правке»).
   reopen: string;
   commentTranslationEnabled: boolean;
@@ -149,6 +150,15 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
   const cardLocationIds = new Set(cardOffers.map((offer) => offer.location.id));
   // Options are chosen on mousedown, so choosing never blurs the field first.
   const suggestOpen = titleFocused && !suggestDismissed && suggestions.length > 0;
+
+  useEffect(() => {
+    if (initialFocus !== 'photos' || isPoint) return;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(`${ids}-photos`)?.scrollIntoView({ block: 'center' });
+      document.getElementById(`${ids}-photo-add`)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [ids, initialFocus, isPoint]);
 
   function requestClose() {
     if (busyRef.current) return;
@@ -599,7 +609,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, reopen, comme
         ) : (
           <>
             <div id={`${ids}-photos`}>
-              <PhotoField tiles={photos} setTiles={(next) => { setPhotos(next); setPhotoBlock(null); setFailure(null); }} disabled={disabled} blockedMessage={photoBlock ?? undefined} />
+              <PhotoField tiles={photos} setTiles={(next) => { setPhotos(next); setPhotoBlock(null); setFailure(null); }} disabled={disabled} blockedMessage={photoBlock ?? undefined} addInputId={`${ids}-photo-add`} />
             </div>
 
             <div className="fld" style={{ position: 'relative' }}>
