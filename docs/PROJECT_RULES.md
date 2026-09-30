@@ -24,6 +24,8 @@ UI → API → business logic → DB → tests → manual acceptance
 - `PROJECT_RULES.md` — процесс и устойчивые boundaries;
 - `docs/product/EXECUTION_PLAN.md` — единственный текущий execution order;
 - `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости;
+- `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md` — parent semantics Free / Pro / Boost / Business;
+- `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` — parent planning/decomposition Backoffice;
 - принятые макеты по §18.1 — визуальный стиль и композиция; обязательные UI-правила — §18.4 этого файла;
 - GitHub Issues — подробные требования к незакрытой работе;
 - `docs/slices/**/SLICE_CONTRACT.md` — точное поведение конкретного slice.
@@ -259,15 +261,60 @@ Identity должен позволять заменить test delivery реал
 
 Public-launch security requirements определяются отдельными launch-stage contracts; test OTP не является production-ready механизмом.
 
-## 17. Монетизация
+## 17. Commercial model и монетизация
 
-Архитектурно учитывать три независимых направления:
+Parent product source: `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`. Он не разрешает реализацию без
+отдельного Slice Contract.
 
-- **объём** — лимит активных Offers по policy/tariff;
-- **удобство** — более быстрые/массовые способы seller input;
-- **охват** — отдельное продвижение Offer.
+Целевая упаковка:
 
-Не смешивать subscription Seller и promotion Offer. Promotion не должен обходить organic relevance/freshness eligibility.
+- **Free** — полноценная ручная правдивая витрина и organic visibility по обычным правилам;
+- **Pro** — `AI + full Demand + Performance`; capabilities могут создаваться/флагироваться раздельно, но внешний
+  Pro не продаётся до минимально полезной готовности всех трёх осей;
+- **Boost** — отдельная one-off purchase дополнительного маркированного охвата конкретного eligible Offer, доступная
+  независимо от Pro;
+- **Business** — organizational scale: employees/roles, multi-location, bulk operations, XLS/CSV import,
+  cross-location analytics, aggregated Demand, audit/history и повышенные квоты; API/1C/ERP/integrations — later.
+
+Общая conceptual chain:
+
+```text
+CommercialAccount → Plan → Entitlements → Limits → Usage → Overrides → BillingState
+→ Purchases / PromotionCampaigns → EffectiveEntitlements
+```
+
+В первой версии действует `1 Seller = 1 CommercialAccount`; все Locations Seller используют его общий коммерческий
+статус. Organization/polymorphic owner не вводятся заранее и могут появиться только отдельным Business slice.
+
+Коммерческие проверки выполняются server-side и одинаково для П2, Backoffice и будущих transport adapters. Plan,
+Override или Purchase не обходят relevance, actuality, moderation, buyer visibility, privacy, security и другие
+domain/safety rules. Downgrade не удаляет Offers, Locations или историю только из-за потери paid access.
+
+Hard commercial cap активных Offers не является текущим направлением монетизации. Старый S25 в форме
+`active Offers <= N` не готов к implementation; Free Seller сохраняет полный вручную поддерживаемый правдивый
+ассортимент. Вернуться к cap можно только по pilot evidence и новому явному PO decision. Technical, anti-abuse и
+fair-use limits допустимы; значения quotas не hardcode-ятся до owning contract.
+
+Override действует только на entitlement/limit, всегда имеет reason, actor и обязательный expiry. Default maximum
+duration — 30 дней; продление является отдельным audited change. Override не обходит product/domain rules.
+
+`Editorial Featured` и `Paid Promotion/Boost` — разные сущности с разными reason, permissions, audit, metrics и
+removal semantics. Featured нельзя использовать как shortcut для рекламы. Paid placement маркируется и не меняет
+organic sorting.
+
+Performance не выдаёт proxy-события за сделки: view, card open, route или contact action нельзя называть продажей
+или покупкой.
+
+### 17.1. Backoffice boundary
+
+Parent planning source: `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`.
+
+Backoffice — административный клиент общего modular monolith, а не отдельная система и не владелец business logic.
+Он вызывает общие domain operations; permissions и audit проверяются server-side. До Backoffice IA/UX обязательны
+Operations Map, roles/permissions, domain states/invariants и Commercial & Monetization Readiness. После planning
+Backoffice раскладывается на небольшие operational vertical slices и проходит обычный процесс §3–7 и §19.
+Первый operational vertical — Catalog Operations; minimum roles — `operator`, `moderator`, `admin`, без generic
+enterprise RBAC заранее. Privileged commercial scope появляется позже по доказанной необходимости.
 
 ## 18. UI / UX
 

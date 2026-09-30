@@ -19,6 +19,8 @@
 - target product sources для будущих contracts → `docs/product/SEARCH_SYSTEM_SPEC_v0.1.md`,
   `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` и
   `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`;
+- commercial semantics → `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
+- Backoffice planning/decomposition → `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
 - целевой UX продавца → `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` + `SELLER_AI_FIRST_DESIGN_REVISION_1.md` + макет
   (`PROJECT_RULES.md` §18.1);
 - exact slice behavior → `docs/slices/**/SLICE_CONTRACT.md`;
@@ -28,27 +30,17 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.36-actuality-reminders`;
-- checkpoint commit: `5375bab` (merge PR #61, merged-main CI green) — **этап 1 закрыт**: `offer-photos`,
-  `point-contacts-hours` (PR #53), `seller-showcase-editor` (PR #56), `operator-post-check` (PR #58), анимации по
-  странице Motion (PR #59), `offer-actuality` (PR #60, `v0.0.35`), `actuality-reminders` (PR #61);
-- после Pass 3 закрыты: `localization-foundation` (`v0.0.27`), `catalog-localization` (`v0.0.28`),
-  `seller-comment-translation` (`v0.0.29`, переводчик выключен до переезда на свой сервер), `seller-cabinet-overview`
-  (`v0.0.30`), `offer-price-unit` (`v0.0.31`), `seller-offer-editor` (`v0.0.32`, единый ручной редактор),
-  этап 1 пункты 1–3 (`v0.0.33`), пункт 4 `operator-post-check` (`v0.0.34`), пункт 5а (`v0.0.35`), пункт 5б (`v0.0.36`);
-- ранее закрыты `S0–S13`, `UX1A`–`UX2A`, Mandatory Offer Price, Seller Entry / contextual auth (#35), Seller Trading
-  Points Workspace (#36), Buyer interest guest visibility (`v0.0.26`).
+- tag: `v0.0.41-card-point-link`;
+- checkpoint commit: `fd11a48` (merge PR #66); merged-main CI run `36706008273` green;
+- хвост после `v0.0.36` закрыт отдельными annotated tags: buyer screens (`v0.0.37`), First Entry mobile (`v0.0.38`),
+  seller photo tiles (`v0.0.39`), showcase photo shortcut (`v0.0.40`) и card → point editor (`v0.0.41`);
+- **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
+  `offer-actuality` и `actuality-reminders`;
+- ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
+  Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
 
-Фактический repository state при обновлении 2026-09-30:
-
-- `origin/main`: `4567eff` (merge PR #67), merged-main CI green;
-- после `v0.0.36` в `main` вошли buyer screens (PR #63), First Entry mobile (PR #64), seller photo tiles (PR #65) и
-  showcase photo shortcut (PR #67), но отдельные annotated checkpoint tags для этого хвоста ещё не поставлены;
-- PR #66 (`Редактирование торговой точки из карточки товара`) открыт, mergeable; его успешные checks относятся к
-  предыдущему `main`, поэтому перед merge нужны refresh/rebase и актуальный CI evidence.
-
-Текущий `main` может содержать более поздние изменения без нового product checkpoint; перед работой состояние всё
-равно перепроверяется.
+Фактический repository state при обновлении 2026-09-30: `origin/main = fd11a48`, tag
+`v0.0.41-card-point-link`, merged-main CI green. Перед новой работой состояние всё равно перепроверяется.
 
 ---
 
@@ -134,20 +126,18 @@ editorial workbook само по себе ничего не меняет: соп
 
 ---
 
-# Экраны покупателя по макету — закрыто в `main`, checkpoint tag ещё нужен
+# Экраны покупателя по макету — закрыто (`v0.0.37-buyer-screens`)
 
 Решение PO (2026-09-29) выполнено в PR #63: экраны покупателя пересобраны по принятому макету (`B01` выдача, `B02`
 детальная карточка; экраны без кадра — из классов макета) раньше замороженной очереди. Новые функции не добавлялись:
 фильтры `B07` остаются stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B06`) — insertion candidate. Контракт —
-`docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md`. До product work нужно закрыть checkpoint hygiene ниже.
+`docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md`.
 
-## Ближайшие repository gates — порядок фиксирован
+## Ближайшие repository gates — закрыты
 
-Это не новые product stages и не повод менять очередь:
-
-1. поставить недостающие annotated checkpoint tags на уже проверенный хвост после `v0.0.36`;
-2. довести PR #66 на актуальном `main`: refresh/rebase, CI, manual acceptance, merge и checkpoint по обычному процессу;
-3. только затем переходить к stage 1 Seller Location geo fallback.
+Недостающие tags поставлены; PR #66 принят, слит и закрыт checkpoint `v0.0.41-card-point-link`. Следующий product stage
+остаётся Seller Location geo fallback. Текущий docs-only commercial/Backoffice pass не разрешает начинать его
+implementation и не меняет его место в очереди.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -167,17 +157,24 @@ editorial workbook само по себе ничего не меняет: соп
 | 10B | S15B — Search System revision: каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
 | 10C | S15C — Demand Data Foundation: D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
-| 12 | Монетизация: configurable active-product limit + AI/Convenience, Demand, Promotion/Boost, Business; S25–S29 пока не перенумеровывать | `FEATURE_MAP.md` / future Slice Contracts |
+| 11A | Backoffice foundation planning: Requirement Inventory → Operations Map → minimum roles/Permissions → Domain states/invariants; first operational target = Catalog Operations | `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` |
+| 11B | Commercial & Monetization Readiness: утвердить domain semantics/operations до Backoffice IA/UX, без Billing/Boost implementation | `KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md` |
+| 11C | Backoffice planning completion: MVP/Later → IA/UX → capability-gap audit → operational slice decomposition/dependency graph | `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` |
+| 12 | Readiness-gated commercial и Backoffice portfolio: отдельные slices/chains Pro, Demand, Boost, Business и operational Backoffice; не mega-implementation | `FEATURE_MAP.md` / parent sources / future Slice Contracts |
 
 M1 (фото), первая часть S16 (снятие карточки оператором) и актуальность с напоминаниями (Issues #31, #32) перенесены в этап 1.
 
-**Монетизация (решение PO, 2026-09-30):** отдельный этап сразу после решения о границе MVP (stage 11), до публичного
-запуска не блокирует. Направления: configurable active-product limit, AI/Convenience, Demand, Promotion/Boost и
-Business. На пилоте лимит active products выключен: приоритет — накопление предложения. Это не означает бессрочно
-безлимитный ассортимент; архитектура сохраняет возможность позднее включить тарифный лимит, а значение определяется
-только по статистике. Текущие S25–S29 не перенумеровываются. Paid D4 можно планировать только после Demand readiness
-gate, бесплатного пилота и отдельной проверки willingness to pay. Продвижение не обходит органические правила
-актуальности и видимости (`FEATURE_MAP.md`).
+**Commercial correction (решение PO, 2026-09-30):** Free сохраняет полноценную ручную правдивую витрину. Старый S25
+с hard active-Offer cap помечен `REVIEW REQUIRED` и не готов к implementation; модель «первые N бесплатно, дальше
+плати» удалена из текущего monetization direction. Вернуться к ней можно только по pilot evidence и новому явному PO
+decision; допустимы technical/anti-abuse/fair-use limits. Целевая упаковка: Pro = `AI + full Demand + Performance`;
+Boost = независимая от Pro one-off purchase маркированного дополнительного охвата; Business = organizational scale.
+`Editorial Featured` не является `Paid Promotion`.
+
+Stages 11A–11C — planning/readiness, не implementation. Они не разрешают Billing UI, provider, subscriptions, новые
+billing tables, Boost, Business или seller-facing paid Demand. Stage 12 не является одним monetization release:
+каждый workflow проходит собственные dependencies и обычный vertical-slice loop. Идентификаторы S25–S29 сохраняются
+ради истории, но прежняя линейная схема `hard cap → subscription → bulk → promotion` считается stale.
 
 ### Ключевые dependencies
 
@@ -193,6 +190,22 @@ gate, бесплатного пилота и отдельной проверки
   для сопоставимой единицы или подтверждённой нормализованной цены.
 - AI Input и AI-модерация по `PROJECT_RULES.md` §10.1 — улучшения поверх ручного пути; ручной путь и публикация без
   предварительной модерации обязаны работать при недоступном ИИ.
+- Backoffice IA/UX не начинается до Requirement Inventory, Operations Map, Roles/Permissions, domain
+  states/invariants и отдельного Commercial & Monetization Readiness gate. Backoffice не получает собственную
+  business logic и после planning раскладывается на operational vertical slices.
+- Commercial access рассчитывается server-side через minimum модели
+  `CommercialAccount → Plan → Entitlements → Limits → Usage → Overrides → BillingState → Purchases /
+  PromotionCampaigns → EffectiveEntitlements`; это conceptual dependency, а не список tables для немедленного создания.
+- Pro зависит одновременно от готовых AI, D4 paid-readiness и Performance instrumentation; entitlement не заменяет
+  readiness capability. Capabilities могут создаваться/флагироваться отдельно, но sellable Pro не запускается до
+  минимально полезной готовности всех трёх.
+- Boost развивается отдельной цепочкой и доступен независимо от Pro. Campaign delivery не смешивается с organic
+  ranking или Editorial Featured и не обходит actuality/moderation/buyer visibility. V1 ограничен
+  product/category relevance, geography и display period на Search/Nearby/relevant Discovery; без auction/CPC/CPM и
+  без гарантии продаж.
+- Business v1 начинается с employees/roles и multi-location scope одного Seller поверх общих
+  Seller/Location/Offer/Change Set domains; bulk/XLS/CSV и cross-location analytics развиваются там же.
+  Organization и API/1C/ERP/integrations — отдельные later slices по evidence, а не стартовая foundation.
 
 ### Stage 10 — S15 workstream, не срочная вставка в ближнюю очередь
 
@@ -273,6 +286,37 @@ D3 Seller Free Demand Signals можно вставить только посл�
 demand received supply`. D4 paid Demand входит в stage 12 только после подтверждения этой цепочки и отдельной проверки
 willingness to pay: реакция на бесплатный сигнал сама по себе не доказывает готовность платить. Численные критерии до
 реального трафика не придумываются; D5 alerts и D6 Business остаются последующими readiness-gated stages.
+
+### Stages 11A–12 — Commercial / Backoffice future order
+
+Фиксируется порядок planning gates, а не один большой implementation backlog:
+
+```text
+11A  Backoffice Requirement Inventory / Operations / Permissions / Domain invariants
+→ 11B Commercial & Monetization Readiness
+→ 11C MVP/Later + IA/UX + capability gaps + slice dependency graph
+→ 12  отдельные approved vertical slices по готовым dependencies
+```
+
+В stage 12 действуют независимые chains:
+
+- **Pro:** AI ready + D4 paid-readiness + Performance instrumentation → commercial/effective-access minimum → Pro
+  gates → Billing foundation → единый sellable `AI + full Demand + Performance` lifecycle/purchase;
+- **Demand:** S15B → S15C → internal validation → D3 actionable Free signals → seller/buyer value proof →
+  willingness-to-pay → D4 full Demand in Pro → D6 aggregated/multi-location Demand in Business; отдельной Demand
+  subscription нет;
+- **Boost:** sponsored-surface policy → PromotionCampaign eligibility → Purchase/payment foundation → marked paid
+  Search/Nearby/relevant Discovery delivery → measurement/support; Boost не требует Pro, не использует auction/CPC/CPM
+  в v1 и не гарантирует sales;
+- **Business:** employees/roles → multi-location → bulk operations + XLS/CSV import → cross-location analytics +
+  aggregated Demand → audit/history + higher/custom quotas → later API/1C/ERP/integrations;
+- **Backoffice operational slices:** первым идёт Catalog Operations (`find → open → create/edit → Category/Alias →
+  deactivate → relations/duplicates → audit`), затем Seller/Location/Offer operations → moderation → reports/support →
+  Editorial Featured; commercial visibility/Overrides, Promotion operations и Billing support открываются только
+  после соответствующего shared domain foundation. Порядок после Catalog подтверждается dependency audit.
+
+Это future ordering. Ни одна строка не разрешает production implementation без owning Product Spec/Slice Contract и
+отдельной команды PO.
 
 ---
 
@@ -399,7 +443,9 @@ AI остаётся способом сформировать черновики
 - после актуальности + Search Sorting;
 - после AI Input;
 - после S16 перед решением о MVP/public beta;
-- после монетизации (stage 12).
+- после Demand readiness assessment;
+- после Commercial & Monetization Readiness и Backoffice slice decomposition (stages 11A–11C);
+- после каждого independently closed commercial/Backoffice checkpoint stage 12, а не после одного mega-release.
 
 Если утверждённое требование не имеет места ни в COMMITTED, ни в INSERTION CANDIDATES, ни в Feature Map, оно получает статус **UNPLACED GAP** и разбирается явно.
 
