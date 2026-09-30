@@ -198,7 +198,7 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
       )}
       {entries.length === 0 && <p className="t c2">{t('showcase.draftsEmpty')}</p>}
       {entries.map((entry) => entry.kind === 'card'
-        ? <CardRow key={entry.card.cardId} card={entry.card} highlighted={highlight === entry.card.cardId} onOpen={() => go(`card=${entry.card.cardId}`)} onComplete={() => go(`edit=${entry.card.cardId}`)} />
+        ? <CardRow key={entry.card.cardId} card={entry.card} highlighted={highlight === entry.card.cardId} onOpen={() => go(`card=${entry.card.cardId}`)} onAddPhoto={() => go(`edit=${entry.card.cardId}&focus=photos`)} />
         : <DraftRow key={entry.draft.id} draft={entry.draft} onOpen={() => go(`draft=${entry.draft.id}`)} />)}
     </main>,
     toast,
@@ -226,7 +226,7 @@ function priceLine(card: SellerCard, t: ReturnType<typeof useI18n>['t']) {
   );
 }
 
-function CardRow({ card, highlighted, onOpen, onComplete }: { card: SellerCard; highlighted: boolean; onOpen: () => void; onComplete: () => void }) {
+function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; highlighted: boolean; onOpen: () => void; onAddPhoto: () => void }) {
   const { t } = useI18n();
   const lead = card.lead;
   const cover = lead.photos?.[0];
@@ -235,7 +235,7 @@ function CardRow({ card, highlighted, onOpen, onComplete }: { card: SellerCard; 
   if (!lead.sellerComment) missing.push('showcase.noComment');
   return (
     <article className={`card${highlighted ? ' hl is-new' : ''}`} aria-labelledby={`card-${card.cardId}`} data-testid={`seller-card-${card.cardId}`}
-      style={card.removal ? { border: '1.5px solid var(--danger)' } : undefined}>
+      style={{ position: 'relative', ...(card.removal ? { border: '1.5px solid var(--danger)' } : {}) }}>
       <button type="button" className="rowbtn" onClick={onOpen} aria-labelledby={`card-${card.cardId}`}>
         <Thumb photoUrl={cover ? photoUrl(cover.id, 'thumb') : null} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -259,11 +259,13 @@ function CardRow({ card, highlighted, onOpen, onComplete }: { card: SellerCard; 
           ) : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>}
         </div>
       </button>
+      {!cover && (
+        <button type="button" className="photo-shortcut" onClick={onAddPhoto} aria-label={`${t('source.photos')}: ${lead.product.name}`}>
+          <Ic name="plus" />
+        </button>
+      )}
       {missing.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 68 }}>
-          <p className="c" style={{ flex: 1 }}>{missing.map((key) => t(key)).join(' · ')}. {t('showcase.incomplete')}</p>
-          <button type="button" className="btn btn-g sm" style={{ padding: 0 }} onClick={onComplete}>{t('showcase.complete')}</button>
-        </div>
+        <p className="c" style={{ paddingLeft: 68 }}>{missing.map((key) => t(key)).join(' · ')}. {t('showcase.incomplete')}</p>
       )}
     </article>
   );
@@ -338,6 +340,7 @@ function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTrans
 }) {
   const params = useSearchParams();
   const from = params.get('from');
+  const initialFocus = params.get('focus') === 'photos' ? 'photos' : undefined;
   const creating = params.get('new') === '1';
   const draft = drafts.find((item) => item.id === params.get('draft')) ?? null;
   const editCard = findCard(cards, params.get('edit'));
@@ -385,6 +388,7 @@ function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTrans
         mode={mode}
         seller={seller}
         initial={initial}
+        initialFocus={initialFocus}
         reopen={reopen}
         commentTranslationEnabled={commentTranslationEnabled}
         onClose={onClose}

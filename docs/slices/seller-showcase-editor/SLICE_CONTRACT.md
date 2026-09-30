@@ -47,7 +47,9 @@ draft and finishes it later. A Buyer finds the card by words of its name.
   - `Выключено` — all its points are off;
   - `Черновик` — an unsent draft, with what is missing: `Не заполнено: цена, точка`.
 - **Incomplete card reminder** (`FEATURE_MAP.md` п. 4): a published card without photo or without comment shows
-  `Без фото` / `Без комментария` with the action `Дополнить`, which opens the editor.
+  `Без фото` / `Без комментария`. When there is no photo, the placeholder shows a `+`; tapping it opens the editor
+  at the photo control. Tapping the rest of the row still opens the card screen, where the full edit remains
+  available. A missing comment has no duplicate quick-edit action.
 - After publishing, the card is on top and highlighted with `Опубликовано. Карточка уже видна покупателям` or
   `Изменения опубликованы` (`OFF1 · Published`).
 - Loading shows skeletons of the same shape; the primary action is available at once. A failed load shows

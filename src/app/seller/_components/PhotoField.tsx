@@ -63,11 +63,12 @@ function reducedMotion() {
 // Offer photos (offer-photos contract §2, seller-photo-tiles contract): each file uploads on its own with progress and
 // retry; the first tile is the cover. Every ready tile carries ☆ (make cover) and × (delete); a tap opens the ← → micro-
 // menu under the tile; a long press lifts the tile and it follows the finger, so dragging is never the only way.
-export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
+export function PhotoField({ tiles, setTiles, disabled, blockedMessage, addInputId }: {
   tiles: PhotoTile[];
   setTiles: Dispatch<SetStateAction<PhotoTile[]>>;
   disabled: boolean;
   blockedMessage?: MessageKey;
+  addInputId?: string;
 }) {
   const { t } = useI18n();
   const ids = useId();
@@ -417,6 +418,7 @@ export function PhotoField({ tiles, setTiles, disabled, blockedMessage }: {
           ) : (
             <label className="mt add" style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
               <input
+                id={addInputId}
                 type="file"
                 accept="image/*"
                 multiple
