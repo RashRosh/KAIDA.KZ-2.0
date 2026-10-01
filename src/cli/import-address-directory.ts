@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -69,10 +69,16 @@ async function main() {
   };
   try {
     await osmium(['getid', '-r', pbf, ALMATY_RELATION, '-o', boundaryPbf, '-O']);
-    await osmium(['export', boundaryPbf, '--geometry-types=polygon', '-o', boundaryGeoJson, '-O']);
-    const boundary = JSON.parse(await readFile(boundaryGeoJson, 'utf8')) as { features?: unknown[] };
-    if (!boundary.features?.length) throw new Error('Almaty relation did not produce a polygon');
-    await osmium(['extract', '--polygon', boundaryPbf, pbf, '-o', almatyPbf, '-O']);
+    await osmium(['export', boundaryPbf, '--geometry-types=polygon', '-a', 'type,id', '-o', boundaryGeoJson, '-O']);
+    const boundaryExport = JSON.parse(await readFile(boundaryGeoJson, 'utf8')) as {
+      features?: Array<{ properties?: Record<string, unknown> }>;
+    };
+    const boundaryFeature = boundaryExport.features?.find((feature) =>
+      feature.properties?.['@type'] === 'relation' && Number(feature.properties['@id']) === Number(ALMATY_RELATION.slice(1))
+    );
+    if (!boundaryFeature) throw new Error('Almaty relation did not produce a polygon');
+    await writeFile(boundaryGeoJson, JSON.stringify({ type: 'FeatureCollection', features: [boundaryFeature] }));
+    await osmium(['extract', '--polygon', boundaryGeoJson, pbf, '-o', almatyPbf, '-O']);
     await osmium(['tags-filter', almatyPbf, 'nwr/addr:housenumber', 'w/highway', 'nwr/amenity=marketplace', 'nwr/shop=mall', 'nwr/building=retail', '-o', filteredPbf, '-O']);
     await osmium(['export', filteredPbf, '-f', 'geojsonseq', '-a', 'type,id', '-x', 'print_record_separator=false', '-o', sequence, '-O']);
 

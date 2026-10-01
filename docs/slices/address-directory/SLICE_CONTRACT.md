@@ -281,7 +281,7 @@ Run the pinned importer on the current Geofabrik Kazakhstan extract into a dispo
 - raw/accepted/deduplicated/rejected counts by kind;
 - final table and index sizes;
 - import duration and peak operational requirements available from the runner;
-- representative exact/prefix/typo queries for a house, street, Зелёный Базар and Алтын Орда;
+- representative exact/prefix/typo queries for a house, street, Зелёный Базар and Рынок Барыс;
 - `EXPLAIN` evidence that the intended indexes are used.
 
 Generated OSM data and dumps remain outside Git. After targeted proof, run one full `pnpm verify` and branch CI.
