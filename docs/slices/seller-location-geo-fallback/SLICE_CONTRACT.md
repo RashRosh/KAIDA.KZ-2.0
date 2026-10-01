@@ -1,6 +1,6 @@
 # Seller Location geo fallback — approved S8 revision
 
-**Status:** `APPROVED — SCHEDULED IN EXECUTION_PLAN.md, COMMITTED #1 (next after Issue #27)`
+**Status:** `READY FOR PR — PRODUCT OWNER MANUAL ACCEPTANCE PASSED 2026-10-01`
 
 **Approved:** 2026-09-22, Product Owner (RashRosh), in-conversation approval of Section 0's STOP write-up. Sections
 1–8 below are accepted as the Slice Contract content for this capability. Scheduled the same day into
@@ -14,6 +14,34 @@ may begin only after the UI redesign stabilization gate closes and `EXECUTION_PL
 **Checkpoint commit:** `28eae6d64fac92b71339b3ae2f5235040f75b447`
 
 **Source:** UX follow-up spot-check, `docs/product/UX_REFERENCE_INDEX.md` (2026-09-21), finding #1 of the "Карта пути KAIDA" walkthrough artifact.
+
+## Current implementation preflight — 2026-10-01
+
+This section supersedes the old scheduling/freeze statements below; those statements are retained as historical
+approval context. The prerequisite UI stabilization and commercial/Backoffice docs gates are closed through
+checkpoint `v0.0.42-commercial-backoffice-pipeline` (`4348db8`, merged-main CI `36767783836` green). Product Owner
+explicitly authorized implementation on branch `slice/seller-location-geo-fallback`.
+
+Repository inspection narrowed the implementation surface:
+
+- the current UI owner is `src/app/seller/_components/SellerTradingPoints.tsx`;
+- manual confirmation reuses the existing owner-scoped `PUT /api/seller/locations/[id]/geo`,
+  `locationGeoSchema`, use case and repository predicate already accepted in S8; no migration, new API route,
+  backend use case or repository method is required;
+- a client-side parser accepts raw coordinate pairs and coordinate-bearing 2GIS, Google Maps and Yandex Maps URLs;
+  shortened/provider links without embedded coordinates are rejected rather than resolved over the network;
+- the browser action remains first; parsing only creates a preview, and the existing mutation is called only after
+  explicit confirmation;
+- stage 1a (KAIDA address directory) stays separate and is not implemented here;
+- per current PO direction this slice adds no KK copy pass and no separate desktop redesign. It reuses existing
+  localized labels, accepted mockup classes and the existing responsive frame.
+
+Implementation/test whitelist: `SellerTradingPoints.tsx`, the manual-input parser contract, parser unit tests,
+the existing location-geo E2E suite, and the minimal canonical status/superseding notes in this contract,
+S8's historical contract, `EXECUTION_PLAN.md` and `CURRENT_STATE.md`.
+
+Product Owner manually accepted the implemented flow on 2026-10-01: point → edit → manual entry → paste coordinates
+or a 2GIS / Google Maps / Yandex Maps link → review parsed coordinates → explicit confirm.
 
 Section 0 is the `PROJECT_RULES.md` §4 STOP write-up required before any closed contract may be revised; it has
 been reviewed and approved. Sections 1–8 are the accepted Slice Contract content. The stage is scheduled but
@@ -53,10 +81,12 @@ This is deliberately the leaner option: it reduces this proposal's own risk prof
 
 - S8 §11–12 must be revised to permit this second, manual coordinate-setting path;
 - the "No map... is added" and "browser-only" framing in the closed contract becomes historically inaccurate the moment this ships — S8's own document would need a superseding note, not a silent rewrite of its historical acceptance criteria;
-- new/changed API surface on `PUT /api/seller/locations/:id/geo` or an adjacent endpoint to accept a manually-set point through the same owner-scoped mutation pattern, reusing the exact same validation (`-90..90`/`-180..180`, pair-consistency) already proven by S8;
+- the preflight confirmed that the existing `PUT /api/seller/locations/:id/geo` already accepts the same complete
+  validated point regardless of its client-side source, so no API surface change is required;
 - privacy boundary from S8 §13 (no raw geo/lat/lng in public Search API) must be explicitly re-verified against this new write path — it is not automatically inherited, even though the mechanism itself adds no new external exposure.
 
-**Which slices/modules are affected:** `S8-location-geo` (contract itself), `Locations` module (new use-case), Seller `/seller` UI (new control), possibly `Issue #36` Seller Trading Points card workspace (the natural UI location for this control now that Locations get their own cards) — this proposal is written to compose with #36, not replace it.
+**Which slices/modules are affected:** `S8-location-geo` (superseding contract note), Seller Trading Points UI (new
+control) and a client-side parser contract. The existing Locations route/use case/repository remain unchanged.
 
 **Decision:** approved 2026-09-22 (see Status line above). S8 §11–12 are revised as described; sections 1–8 below are the accepted contract content.
 
@@ -92,7 +122,7 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 ## 5. Risk flags
 
 - **DB migration:** NO — same `latitude`/`longitude` columns, same constraints.
-- **Public API:** YES — new/changed owner-scoped mutation path accepting a manually-supplied point.
+- **Public API:** NO — the existing owner-scoped S8 mutation is reused unchanged.
 - **Auth/security/privacy:** YES — must re-verify the public Search privacy boundary against the new write path explicitly, not assume it.
 - **Concurrency/atomicity:** NO new risk beyond existing S8 pattern.
 - **Data loss:** NO.
@@ -116,7 +146,9 @@ A Seller who cannot or does not want to grant browser geolocation while physical
 ## 7. Automated verification plan
 
 - **Unit:** parser for the paste field — valid `lat, lng` pairs (with/without spaces, with/without a trailing label), recognized link shapes from at least 2ГИС/Google Maps/Yandex Maps URL patterns, out-of-range values, malformed/unrecognized input, empty input.
-- **Integration:** owner-scoped manual-point mutation — valid save, invalid/out-of-range rejection, foreign-owner rejection, same-pair idempotent re-save; direct `/api/search` assertion that no raw geo/lat/lng leaks for a manually-set Location (mirrors existing S8 privacy test, run again against this new write path).
+- **Integration/regression:** rerun the existing S8 owner-scoped mutation coverage — valid save, invalid/out-of-range
+  rejection, foreign-owner rejection and same-pair idempotent re-save. Because manual and browser sources converge
+  before the unchanged API, the manual E2E also re-verifies `/api/search` against the resulting saved Location.
 - **E2E (mobile + desktop):** browser action still primary/first; manual fallback reachable without a prior denial; paste a valid link → parsed preview shown → confirm → saved state matches browser-set state visually; paste garbage → clear error, nothing saved.
 - **Regression:** existing S8 E2E/integration/migration suites unchanged and passing.
 - One full branch CI on the final executable SHA after targeted proof.
