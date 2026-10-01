@@ -1,4 +1,4 @@
-name: S2 verify
+name: KAIDA verify
 
 on:
   push:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: s2-${{ github.workflow }}-${{ github.ref }}
+  group: kaida-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,7 +64,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s2-browser-report-${{ github.sha }}
+          name: kaida-browser-report-${{ github.sha }}
           path: |
             playwright-report/
             test-results/
