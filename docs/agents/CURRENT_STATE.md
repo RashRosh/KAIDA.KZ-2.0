@@ -10,12 +10,12 @@
 - Активная product branch: `slice/address-directory`; PR #72 открыт.
 - Product implementation head до maintenance merge: `8316991`.
 - Maintenance merge head: `fa4e2af`; `KAIDA verify` run `36850756559` green.
-- Текущий branch head: `2162a60` (`slice/address-directory` = `origin/slice/address-directory`); blocker/handoff-only commits follow product-code SHA `71faf9d`.
+- Текущий branch head: `93ee724` (`slice/address-directory` = `origin/slice/address-directory`); contains root-only boundary import fix and Barys real-data example correction.
 - PR #72 **не готов к merge** до закрытия real-data blocker и Product Owner manual acceptance.
 
 ## Current task
 
-Stage 1a, KAIDA address directory для Almaty pilot. PO подтвердил Almaty-only boundary `r2465058` and replacement of only the invalid real-data example with `Рынок Барыс`; `Зеленый базар` remains required. Root-only boundary selection, targeted real-data proof and same-checksum no-op now pass in a disposable local PostgreSQL database. Next gate is full branch verification; stop before Product Owner manual acceptance.
+Stage 1a, KAIDA address directory для Almaty pilot. PO подтвердил Almaty-only boundary `r2465058` and replacement of only the invalid real-data example with `Рынок Барыс`; `Зеленый базар` remains required. Local targeted proof passes on product code SHA `93ee724`; exact-SHA remote proof and clean branch CI are pending. Stop before manual acceptance.
 
 ## Last completed
 
@@ -46,6 +46,7 @@ Stage 1a, KAIDA address directory для Almaty pilot. PO подтвердил A
 - Repository-backed query proof PASS: house `улица Кабдолова, 14А`; street prefix `10-ый п` and typo `10-й проезд`; Green Bazaar `osm:r20040804` → `Зелёный Базар`; Barys `osm:w216728654` → `Рынок Барыс`.
 - Measured 4-run app-query latency ranges: house 787.540–1,158.787 ms; street prefix 24.100–26.582 ms; street typo 13.411–14.817 ms; Green Bazaar 7.999–9.426 ms; Barys 6.944–7.703 ms.
 - Same-checksum retry using all 132,113 stored rows returned `activated:false` with the same import ID and active counts unchanged.
+- Product code/proof fix pushed as `93ee724`; existing manual exact-SHA proof dispatched as run `36913897409` with `proof_sha=93ee724e7e668d34ec0e105ae4dc04b52613248d`.
 
 ## Verification
 
@@ -67,6 +68,8 @@ Stage 1a, KAIDA address directory для Almaty pilot. PO подтвердил A
 - import wall-clock/peak memory not captured locally; existing remote real-data workflow captures those with `/usr/bin/time -v`;
 - local `pnpm verify`: FAIL at global ESLint with 2,376 errors and 8,127 warnings; typecheck, database tests, unit, integration, build and E2E stages did not run;
 - focused ESLint for `src/cli/import-address-directory.ts`: PASS; full clean-checkout branch verification: PENDING;
+- exact-SHA real-data proof run `36913897409`: import and all operational queries/latency/index-plan steps PASS on `93ee724`; artifact uploaded. Its embedded `pnpm verify` stopped at test DB preparation because the proof workflow omitted `TEST_DATABASE_URL` and the CI test-database creation step;
+- Existing proof workflow now mirrors the CI test DB environment (`TEST_DATABASE_URL`, test auth/timeouts and isolated `kaida_test` creation); local YAML/config assertions pass.
 - read-only OSM diagnosis artifacts from runs `36855912179` / `36856552657`: Green Bazaar probe inside Almaty: true; Altyn Orda representative point inside: false; both artifacts uploaded successfully;
 - real candidates: raw 6,361; accepted 6,160; rejected 201; deduplicated 3,072 (3,011 address, 60 street, zero marketplace, one retail);
 - pinned importer: activated 3,533 (3,147 addresses, 385 streets, zero marketplaces, one retail); same-checksum retry was an idempotent no-op;
@@ -83,9 +86,9 @@ The earlier exact-SHA proof produced zero marketplace entries and `Зелены�
 
 ## Next action
 
-1. Commit/push only the four authorized files now that targeted real-data proof is green; keep all local generated folders unstaged.
-2. Run clean-checkout branch verification and the existing exact-SHA real-data workflow; resolve any changed-source failures without changing boundary or acceptance.
-3. Stop before Product Owner manual acceptance.
+1. Commit/push only the workflow test-DB configuration fix and this handoff update.
+2. Rerun the existing proof with `proof_sha=93ee724e7e668d34ec0e105ae4dc04b52613248d`; collect artifact and full `pnpm verify` result.
+3. Confirm independent branch CI for the resulting pushed head; stop before Product Owner manual acceptance.
 
 ## Current constraints
 

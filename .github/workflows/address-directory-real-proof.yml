@@ -17,8 +17,15 @@ jobs:
     timeout-minutes: 60
     env:
       DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida
+      TEST_DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida_test
       SOURCE_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf
       SOURCE_MD5_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf.md5
+      OFFER_VALIDITY_PERIOD_HOURS: '168'
+      IDENTITY_OTP_TTL_SECONDS: '300'
+      IDENTITY_SESSION_TTL_SECONDS: '2592000'
+      IDENTITY_OTP_HMAC_SECRET_HEX: '1111111111111111111111111111111111111111111111111111111111111111'
+      IDENTITY_COOKIE_SECURE: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
     services:
       postgres:
         image: postgres:18
@@ -61,6 +68,14 @@ jobs:
 
       - name: Migrate disposable proof database
         run: pnpm db:migrate
+
+      - name: Create separate test database and assert clean development database
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i "$POSTGRES_CONTAINER" psql -U kaida -d kaida -v ON_ERROR_STOP=1 < docker/init/01-create-test-db.sql
+          test "$(docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -tAc "SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")" = "0"
+          docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -c 'SHOW server_version;'
 
       - name: Download and verify current Geofabrik Kazakhstan PBF
         shell: bash
