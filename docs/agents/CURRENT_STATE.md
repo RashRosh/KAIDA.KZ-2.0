@@ -31,6 +31,7 @@ Stage 1a, KAIDA address directory для Almaty pilot. Текущая задач
 - Diagnosis commits established that polygon extraction discarded boundary relations; importer fix `71faf9d` now extracts with the relation-bearing boundary PBF.
 - Current-head full regression / branch CI: PASS on `71faf9d` (`36857093256` pull request run; `36857088758` push run).
 - Existing proof workflow now has a manual-only `proof_sha` dispatch, pinned checkout and SHA assertion; local YAML parse and diff check pass.
+- Workflow/handoff commit `1166d5063b6610addb88cffa54f74e68bf690e33` is pushed to `origin/slice/address-directory`; tracked worktree is clean.
 
 ## Verification
 
@@ -48,10 +49,9 @@ Post-fix real-data acceptance is not yet verified. PR #72 remains blocked on the
 
 ## Next action
 
-1. Commit and push only the workflow and this handoff file to `slice/address-directory`.
-2. Dispatch the proof with `proof_sha=71faf9d2d81f8f28e146699750c64f6ba127a825`; collect artifact and workflow evidence.
-3. If proof passes, run required branch verification on the resulting head. If real-data criteria fail due to a genuine contract conflict, stop for Product Owner decision; do not alter product behavior, boundary or contract.
-4. Stop before Product Owner manual acceptance.
+1. Dispatch the proof with `proof_sha=71faf9d2d81f8f28e146699750c64f6ba127a825`; verify checkout assertion and collect artifact/workflow evidence.
+2. If proof passes, run required branch verification on the resulting head. If real-data criteria fail due to a genuine contract conflict, stop for Product Owner decision; do not alter product behavior, boundary or contract.
+3. Stop before Product Owner manual acceptance.
 
 ## Current constraints
 
