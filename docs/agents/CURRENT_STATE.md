@@ -32,27 +32,33 @@ Stage 1a, KAIDA address directory для Almaty pilot. Текущая задач
 - Current-head full regression / branch CI: PASS on `71faf9d` (`36857093256` pull request run; `36857088758` push run).
 - Existing proof workflow now has a manual-only `proof_sha` dispatch, pinned checkout and SHA assertion; local YAML parse and diff check pass.
 - Workflow/handoff commit `1166d5063b6610addb88cffa54f74e68bf690e33` is pushed to `origin/slice/address-directory`; tracked worktree is clean.
-- Exact-SHA real-data proof dispatched as run `36896594370`, targeting `71faf9d2d81f8f28e146699750c64f6ba127a825`; result pending.
+- Exact-SHA real-data proof run `36896594370` targeted `71faf9d2d81f8f28e146699750c64f6ba127a825`; it completed but failed the Green Bazaar representative query.
+- Existing diagnostics: Green Bazaar relation `r20040804` is tagged `amenity=marketplace`, `building=retail`, with `name:ru=Зелёный Базар`; its Almaty probe is inside boundary `r2465058`. Altyn Orda relation `r17596655` is `type=marketplace`, but its representative point `[76.76804085874286, 43.23370785]` is outside the contracted boundary; no Altyn Orda name match was found in the Almaty extraction.
+- Run `36896594370` completed with failure after successfully verifying checkout SHA, source checksum, boundary/candidate extraction and importer; importer activated 3,533 entries but still recorded zero marketplaces.
 
 ## Verification
 
 - full regression (`pnpm verify`) and branch CI `36857093256` on `71faf9d`: PASS;
 - push CI `36857088758` on `71faf9d`: PASS;
-- manual workflow YAML parse / pinned-checkout assertions: PASS; GitHub dispatch on exact SHA: PENDING;
-- GitHub real-data proof run `36896594370`: in progress; evidence artifact pending;
+- manual workflow YAML parse / pinned-checkout assertions: PASS; run `36896594370` checkout guard passed for exact SHA `71faf9d2d81f8f28e146699750c64f6ba127a825`;
+- real source: Geofabrik `kazakhstan-260929.osm.pbf`, published MD5 `eb97ae46ad3a65672fd48bd885763dab`, SHA-256 `0020c7643397915c195e897d759eec3fe19dd602a4f44b7da48039144d34716c`, timestamp `2026-09-29T23:52:32Z`, 223,792,807 bytes; boundary `r2465058` and candidate extraction: PASS;
+- read-only OSM diagnosis artifacts from runs `36855912179` / `36856552657`: Green Bazaar probe inside Almaty: true; Altyn Orda representative point inside: false; both artifacts uploaded successfully;
+- real candidates: raw 6,361; accepted 6,160; rejected 201; deduplicated 3,072 (3,011 address, 60 street, zero marketplace, one retail);
+- pinned importer: activated 3,533 (3,147 addresses, 385 streets, zero marketplaces, one retail); same-checksum retry was an idempotent no-op;
+- DB size: table 888 kB, all indexes 2,696 kB, trigram index 2,264 kB, total 3,624 kB;
+- representative query step failed: `Зеленый базар` returned no result; `Алтын Орда`, latency, EXPLAIN and full `pnpm verify` were not reached. Evidence artifact: `address-directory-real-proof-71faf9d2d81f8f28e146699750c64f6ba127a825` from run `36896594370`;
 - real PBF download/checksum: PASS;
-- baseline real import and its counts/DB sizes: recorded before importer fix; representative `Зеленый базар` query failed on pre-fix SHA `881aceb`;
-- post-fix exact-SHA real-data proof, representative queries, latency and EXPLAIN evidence: PENDING;
+- prior proof on pre-fix SHA `881aceb` also failed the same marketplace query;
 - Product Owner manual acceptance: PENDING.
 
 ## Blocker
 
-Post-fix real-data acceptance is not yet verified. PR #72 remains blocked on the exact-SHA real-data proof and Product Owner manual acceptance. Do not weaken contract criteria, hardcode market names or change the approved geography.
+Two blockers remain. The exact-SHA proof still produced zero marketplace entries and `Зеленый базар` returned no result. Separately, Slice Contract requires an Altyn Orda representative query while restricting the dataset to Almaty; the identified `r17596655` marketplace is outside boundary `r2465058`, with no matching Altyn Orda result in the Almaty extraction. This is a genuine contract conflict requiring Product Owner decision before any change to geography or acceptance. Do not weaken criteria, hardcode names or change the approved boundary.
 
 ## Next action
 
-1. Inspect run `36896594370` until complete; verify its checkout assertion, proof result and uploaded evidence artifact.
-2. If proof passes, run required branch verification on the resulting head. If real-data criteria fail due to a genuine contract conflict, stop for Product Owner decision; do not alter product behavior, boundary or contract.
+1. Stop and request Product Owner decision on the conflict between the Almaty-only boundary and the required Altyn Orda representative query; no product behavior, boundary or Slice Contract edits are authorized before that decision.
+2. Do not run branch verification as a passing proof; full `pnpm verify` was skipped after the failed real-data step.
 3. Stop before Product Owner manual acceptance.
 
 ## Current constraints
