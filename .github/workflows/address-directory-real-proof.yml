@@ -66,9 +66,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y osmium-tool postgresql-client
 
-      - name: Migrate disposable proof database
-        run: pnpm db:migrate
-
       - name: Create separate test database and assert clean development database
         env:
           POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
@@ -76,6 +73,9 @@ jobs:
           docker exec -i "$POSTGRES_CONTAINER" psql -U kaida -d kaida -v ON_ERROR_STOP=1 < docker/init/01-create-test-db.sql
           test "$(docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -tAc "SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")" = "0"
           docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -c 'SHOW server_version;'
+
+      - name: Migrate disposable proof database
+        run: pnpm db:migrate
 
       - name: Download and verify current Geofabrik Kazakhstan PBF
         shell: bash
