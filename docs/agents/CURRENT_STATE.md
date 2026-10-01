@@ -16,23 +16,24 @@ Stage 1a — Address Directory для Almaty pilot. Boundary строго relati
 
 ## Last completed
 
-- Workflow ordering fix применён локально: перестановка двух существующих шагов — создание `kaida_test` + clean-guard на `kaida` теперь идут до `pnpm db:migrate`; продукт/контракты не менялись.
 - Targeted real-data proof (live 2026-10-02): PASS — активный импорт на pinned checksum `0020c764...`, 132113 entries (128955 address / 2940 street / 63 marketplace / 155 retail); representative queries, latency/EXPLAIN, idempotency, index plan, size — green.
+- Exact-SHA proof `36930285619` on `e3f1a22`: все proof-шаги (clean-DB guard, migration, import, queries, EXPLAIN, idempotency) PASS; embedded `pnpm verify` упал только на E2E — Playwright Chromium не был установлен в proof-workflow.
+- Workflow fix добавил `Install Chromium` (`pnpm exec playwright install --with-deps chromium`) перед `pnpm verify` (аналог `ci.yml`), без ослабления проверок.
 
 ## Verification
 
-- Targeted real-data proof: PASS (local/live, до remote).
-- Exact-SHA remote proof на новом head: PENDING.
-- Independent branch CI на новом head: PENDING.
+- Targeted real-data proof: PASS.
+- Exact-SHA remote proof с Chromium fix на новом head: PENDING (перезапуск).
+- Independent branch CI: PENDING.
 - Product Owner manual acceptance: PENDING.
 
 ## Blocker
 
-Нет открытого technical blocker. Открытые gates: green exact-SHA remote proof, independent branch CI, Product Owner manual acceptance.
+Нет открытого technical blocker. Открытые gates: green exact-SHA remote proof (после Chromium fix), independent branch CI, Product Owner manual acceptance.
 
 ## Next action
 
-1. Commit + push workflow fix в `slice/address-directory`.
+1. Commit + push Chromium fix в `slice/address-directory`.
 2. Запустить `Address directory real-data proof` на exact new HEAD SHA; требовать PASS всего workflow, включая embedded `pnpm verify`.
 3. Проверить независимый branch CI на том же head.
 4. Обновить snapshot и остановиться перед Product Owner manual acceptance.

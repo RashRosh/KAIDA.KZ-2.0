@@ -283,6 +283,9 @@ jobs:
           " | tee proof-evidence/explain-zelenyi-bazar.txt
           grep -q 'address_directory_entries_search_trgm_idx' proof-evidence/explain-zelenyi-bazar.txt
 
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Full verify after real-data proof
         run: pnpm verify
 
