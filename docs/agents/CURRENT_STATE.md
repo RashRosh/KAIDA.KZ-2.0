@@ -9,24 +9,27 @@
 - Последний annotated product checkpoint: `v0.0.43-seller-location-geo-fallback` на `762e170`.
 - Активная product branch: `slice/address-directory` от checkpoint `v0.0.43-seller-location-geo-fallback`.
 - Product implementation head до maintenance merge: `8316991` (`feat: add Almaty address directory`).
-- Branch CI run `36845040888` на exact implementation head `8316991`: green.
-- Maintenance base `a5df3a7` из PR #71 интегрирован обычным merge в текущий repository HEAD; exact SHA этого merge всегда сверять через git, post-merge branch CI — через GitHub.
+- Актуальный post-maintenance merge head: `fa4e2af`.
+- `KAIDA verify` run `36850756559` на exact head `fa4e2af`: green.
+- PR #72 открыт и mergeable; merge не разрешён до закрытия real-data proof и Product Owner manual acceptance.
 
 ## Current task
 
 Stage 1a, KAIDA address directory для Almaty pilot.
 
-Implementation и автоматическая verification завершены. Slice **не закрыт**: обязательный real-data operational proof на реальном checksummed Geofabrik Kazakhstan PBF и Product Owner manual acceptance ещё pending.
+Implementation, maintenance merge и автоматическая branch verification завершены. Текущий существенный шаг: закрыть обязательный real-data operational proof на реальном checksummed Geofabrik Kazakhstan PBF без изменения product code.
+
+Slice **не закрыт**: real-data proof и Product Owner manual acceptance ещё pending.
 
 Точный behavior и закрытая contract revision принадлежат `docs/slices/address-directory/SLICE_CONTRACT.md`. Очередь после закрытия этого slice смотреть только в `docs/product/EXECUTION_PLAN.md`.
 
 ## Last completed
 
 - Реализация address directory закоммичена и отправлена в `slice/address-directory` как `8316991`.
-- GitHub branch CI на этом exact implementation SHA завершён успешно.
+- Maintenance-изменения PR #71 интегрированы обычным merge commit `fa4e2af`; единственный конфликт `CURRENT_STATE.md` разрешён на новой структуре #71 с сохранением актуального Address Directory state.
+- Product code относительно `8316991` при maintenance merge не менялся.
+- Post-merge `KAIDA verify` run `36850756559` на exact SHA `fa4e2af`: PASS.
 - Синтетический PBF proof подтверждает importer path, same-checksum idempotency и автоматические сценарии, но не подменяет требуемый real Geofabrik proof.
-- Maintenance-изменения PR #71 сохранены: crash-safe handoff / effort policy и общий workflow `KAIDA verify`.
-- Единственный merge conflict был в `CURRENT_STATE.md`; он разрешён на новой структуре #71 с сохранением актуального Address Directory state. Product code относительно `8316991` не менялся.
 
 ## Verification
 
@@ -39,25 +42,23 @@ Implementation и автоматическая verification завершены. 
 - новые address-directory E2E: PASS;
 - full E2E: 150 PASS, 3 expected skipped; один старый geo-тест получил timeout при клике и сразу прошёл изолированный повтор;
 - branch CI `36845040888` на implementation head `8316991`: PASS;
-- post-merge scoped lint: PASS;
-- post-merge typecheck: PASS;
-- post-merge unit: 317 PASS;
-- post-merge branch CI: PENDING;
-- real Geofabrik PBF operational proof: PENDING;
+- post-maintenance branch CI `36850756559` на `fa4e2af`: PASS;
+- real Geofabrik PBF operational proof: IN PROGRESS;
 - Product Owner manual acceptance: PENDING.
 
 ## Blocker / pending external gate
 
-Из текущей execution environment Geofabrik endpoint не отвечает. Не считать synthetic fixture доказательством real-data acceptance и не ослаблять criterion 12 ради закрытия slice.
+Предыдущее execution environment не могло получить Geofabrik endpoint. Новый recovery-run должен сначала повторно проверить доступность реального `kazakhstan-latest.osm.pbf`; synthetic fixture не считается доказательством real-data acceptance и criterion 12 не ослабляется.
 
 ## Next action
 
-1. push текущего merge head в `slice/address-directory` без force-push и дождаться green CI PR #72;
-2. когда checksummed Geofabrik Kazakhstan PBF доступен из execution environment, запустить pinned real importer в disposable/local database;
-3. записать source timestamp/checksum, Almaty counts, DB/index size, import duration и representative exact/prefix/typo query evidence согласно Slice Contract;
-4. убедиться, что intended indexes используются;
-5. после real-data proof выполнить Product Owner manual acceptance;
-6. только затем проходить оставшиеся repository gates slice по `PROJECT_RULES.md`.
+1. на disposable PostgreSQL скачать текущий Geofabrik Kazakhstan PBF и проверить опубликованный checksum/provenance;
+2. запустить pinned importer с Almaty boundary `r2465058`;
+3. записать source timestamp/checksum, raw/accepted/deduplicated/rejected counts by kind, DB/index size, import duration/peak requirements и representative exact/prefix/typo query evidence;
+4. записать `EXPLAIN` evidence использования intended indexes;
+5. после proof прогнать полный `pnpm verify` и branch CI на финальном executable SHA;
+6. затем передать Product Owner manual acceptance scenario из Slice Contract;
+7. только после manual acceptance проходить оставшиеся repository gates slice по `PROJECT_RULES.md`.
 
 ## Current constraints
 
@@ -65,5 +66,6 @@ Implementation и автоматическая verification завершены. 
 - no public Nominatim/Overpass runtime dependency, paid geocoder, map SDK, PostGIS или второй runtime service;
 - no other city / Kazakhstan-wide rollout, buyer geocoding или Backoffice;
 - no KK proofreading/localization pass или отдельный desktop redesign;
-- product code Address Directory не менять ради maintenance merge без объективной необходимости;
+- product code Address Directory не менять ради verification/handoff без объективной необходимости;
+- generated OSM data/dumps не коммитить;
 - personal `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`, `.pnpm-store/` не включать.
