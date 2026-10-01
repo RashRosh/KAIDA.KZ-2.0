@@ -4,10 +4,12 @@ import { testDatabaseUrl } from '../integration/database';
 import { proposeNewOffer } from './offer-editor-helpers';
 
 const GEO = { latitude: 43.238949, longitude: 76.889709 };
+type GeoScenario = 'success' | 'failure' | 'manual';
 
-function phoneFor(projectName: string, scenario: 'success' | 'failure') {
+function phoneFor(projectName: string, scenario: GeoScenario) {
   if (scenario === 'success') return projectName === 'mobile' ? '+77000000991' : '+77000000992';
-  return projectName === 'mobile' ? '+77000000993' : '+77000000994';
+  if (scenario === 'failure') return projectName === 'mobile' ? '+77000000993' : '+77000000994';
+  return projectName === 'mobile' ? '+77000000995' : '+77000000996';
 }
 
 
@@ -46,7 +48,7 @@ async function login(page: Page, phone: string) {
   await expect(page).toHaveURL('/');
 }
 
-async function createSeller(page: Page, projectName: string, scenario: 'success' | 'failure') {
+async function createSeller(page: Page, projectName: string, scenario: GeoScenario) {
   await page.goto('/seller/points');
   await page.getByLabel('Название для покупателей').fill(`S8 E2E seller ${projectName}-${scenario}`);
   await page.getByLabel('Тип торговой точки').selectOption('shop');
@@ -93,6 +95,64 @@ test('S8 Seller explicitly saves browser geolocation and public Search hides raw
     await expect(page.getByRole('button', { name: /^Обновить местоположение/ })).toBeVisible();
     await createLambOffer(page, comment);
 
+    const search = await page.context().request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
+    expect(search.status()).toBe(200);
+    const body = await search.json();
+    const offer = body.offers.find((candidate: { seller: { displayName: string } }) => candidate.seller.displayName === sellerName);
+    expect(offer).toBeTruthy();
+    expect(offer.location).not.toHaveProperty('geo');
+    expect(offer.location).not.toHaveProperty('latitude');
+    expect(offer.location).not.toHaveProperty('longitude');
+    expect(JSON.stringify(offer)).not.toContain('43.238949');
+    expect(JSON.stringify(offer)).not.toContain('76.889709');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  } finally {
+    await cleanup(phone);
+  }
+});
+
+test('Seller can preview and explicitly save a map link when browser geolocation is unavailable', async ({ page }, testInfo) => {
+  const phone = phoneFor(testInfo.project.name, 'manual');
+  const sellerName = `S8 E2E seller ${testInfo.project.name}-manual`;
+  const comment = `S8 manual privacy ${testInfo.project.name}`;
+  let mutationRequests = 0;
+  page.on('request', (request) => {
+    if (/\/api\/seller\/locations\/[0-9a-f-]+\/geo$/.test(request.url()) && request.method() === 'PUT') mutationRequests += 1;
+  });
+
+  await cleanup(phone);
+  try {
+    await login(page, phone);
+    await createSeller(page, testInfo.project.name, 'manual');
+    await page.getByRole('button', { name: /^Изменить торговую точку/ }).click();
+    await page.getByRole('button', { name: /^Заполнить вручную/ }).click();
+
+    const input = page.getByLabel('Заполнить вручную', { exact: true });
+    await input.fill('https://example.com/not-a-supported-map');
+    await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
+    await expect(page.getByText('Не удалось определить местоположение. Попробуйте снова.', { exact: true })).toBeVisible();
+    expect(mutationRequests).toBe(0);
+
+    await input.fill('https://www.google.com/maps/place/Almaty/@43.238949,76.889709,16z');
+    await expect(page.getByTestId('manual-geo-preview')).toContainText('43.238949, 76.889709');
+    expect(mutationRequests).toBe(0);
+
+    const saveResponse = page.waitForResponse((response) => (
+      /\/api\/seller\/locations\/[0-9a-f-]+\/geo$/.test(response.url())
+      && response.request().method() === 'PUT'
+    ));
+    await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();
+    const saved = await saveResponse;
+    expect(saved.status()).toBe(200);
+    expect((await saved.json()).location.geo).toEqual(GEO);
+    expect(mutationRequests).toBe(1);
+    await expect(page.getByRole('status').filter({ hasText: 'Местоположение сохранено.' })).toBeVisible();
+
+    const me = await page.context().request.get('/api/seller/me');
+    expect(me.status()).toBe(200);
+    expect((await me.json()).seller.locations[0].geo).toEqual(GEO);
+
+    await createLambOffer(page, comment);
     const search = await page.context().request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
     expect(search.status()).toBe(200);
     const body = await search.json();

@@ -1,5 +1,11 @@
 # S8 Implementation Contract — Location Geo
 
+> **Superseding note (2026-10-01):** the approved
+> `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` revises the historical browser-only UI boundary in
+> §11–12 by adding an explicitly confirmed manual paste-and-parse fallback. The browser action remains primary;
+> S8 validation, owner scope and public-search privacy boundaries remain unchanged. The original acceptance record
+> below is retained as history rather than silently rewritten.
+
 **Status:** CONTRACT STAGE; IMPLEMENTATION BLOCKED  
 **Feature Spec:** S8 DESIGN APPROVED  
 **Base checkpoint:** `v0.0.8-s7`  

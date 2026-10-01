@@ -133,11 +133,13 @@ editorial workbook само по себе ничего не меняет: соп
 фильтры `B07` остаются stages 5–6 ниже; отзывы, рейтинг и жалобы (`B03`–`B06`) — insertion candidate. Контракт —
 `docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md`.
 
-## Ближайшие repository gates — закрыты
+## Текущий repository gate
 
-Недостающие tags поставлены; PR #66 принят, слит и закрыт checkpoint `v0.0.41-card-point-link`. Следующий product stage
-остаётся Seller Location geo fallback. Текущий docs-only commercial/Backoffice pass не разрешает начинать его
-implementation и не меняет его место в очереди.
+Docs-only commercial/Backoffice pass принят в PR #69 и закрыт checkpoint
+`v0.0.42-commercial-backoffice-pipeline` (`4348db8`, merged-main CI `36767783836` green). Product Owner отдельной
+командой разрешил начать следующий product stage 2026-10-01. Seller Location geo fallback реализован на ветке
+`slice/seller-location-geo-fallback` и прошёл ручную приёмку PO 2026-10-01; доставка через PR ещё не закрыта.
+Порядок следующих stages не меняется.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -178,7 +180,8 @@ billing tables, Boost, Business или seller-facing paid Demand. Stage 12 не 
 
 ### Ключевые dependencies
 
-- Geo fallback остаётся первым stage после этапа 1: contract утверждён (2026-09-22, S8 revision).
+- Geo fallback — активный stage: contract утверждён (2026-09-22, S8 revision), implementation разрешён PO
+  2026-10-01 после checkpoint `v0.0.42-commercial-backoffice-pipeline`.
 - Address directory (1a) идёт **после** geo fallback: подсказки адреса — улучшение поверх пути, который обязан
   работать без них (`PROJECT_RULES.md` §10.1). Макет может показывать поиск адреса и ссылку на карту с пометкой future
   data source; UI slice не реализует stages 1/1a молча. Первый шаг 1a — проверка покрытия адресов Алматы,

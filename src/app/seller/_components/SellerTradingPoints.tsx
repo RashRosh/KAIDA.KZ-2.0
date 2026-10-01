@@ -1,7 +1,8 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
-import type { LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
+import type { LocationGeo, LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
+import { parseManualLocationInput } from '@/modules/locations/contracts/manual-location-input';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
 import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
@@ -50,6 +51,10 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [addressText, setAddressText] = useState(embeddedLocation?.addressText ?? '');
   const [submitting, setSubmitting] = useState(false);
   const [geoBusyId, setGeoBusyId] = useState<string | null>(null);
+  const [manualGeoLocationId, setManualGeoLocationId] = useState<string | null>(null);
+  const [manualGeoInput, setManualGeoInput] = useState('');
+  const [manualGeoPreview, setManualGeoPreview] = useState<LocationGeo | null>(null);
+  const [manualGeoInvalid, setManualGeoInvalid] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [details, setDetails] = useState<Map<string, PointDetailsView>>(new Map());
@@ -279,6 +284,35 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     }
   }
 
+  async function saveGeo(locationId: string, geo: LocationGeo) {
+    setError('');
+    setStatus('');
+    setGeoBusyId(locationId);
+    try {
+      const response = await fetch(`/api/seller/locations/${locationId}/geo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geo),
+      });
+      const data = await response.json() as LocationResponse;
+      if (!response.ok || !data.location) {
+        setError(t('points.geoSaveError'));
+        return false;
+      }
+      onSellerChange({
+        ...seller!,
+        locations: locations.map((location) => location.id === locationId ? data.location! : location),
+      });
+      setStatus(t('points.geoSaved'));
+      return true;
+    } catch {
+      setError(t('points.geoSaveError'));
+      return false;
+    } finally {
+      setGeoBusyId(null);
+    }
+  }
+
   function requestGeo(locationId: string) {
     setError('');
     setStatus('');
@@ -290,29 +324,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setGeoBusyId(locationId);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        void (async () => {
-          try {
-            const response = await fetch(`/api/seller/locations/${locationId}/geo`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
-            });
-            const data = await response.json() as LocationResponse;
-            if (!response.ok || !data.location) {
-              setError(t('points.geoSaveError'));
-              return;
-            }
-            onSellerChange({
-              ...seller!,
-              locations: locations.map((location) => location.id === locationId ? data.location! : location),
-            });
-            setStatus(t('points.geoSaved'));
-          } catch {
-            setError(t('points.geoSaveError'));
-          } finally {
-            setGeoBusyId(null);
-          }
-        })();
+        void saveGeo(locationId, { latitude: position.coords.latitude, longitude: position.coords.longitude });
       },
       (geoError) => {
         setGeoBusyId(null);
@@ -320,6 +332,38 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
+  }
+
+  function openManualGeo(locationId: string) {
+    setManualGeoLocationId(locationId);
+    setManualGeoInput('');
+    setManualGeoPreview(null);
+    setManualGeoInvalid(false);
+    setError('');
+    setStatus('');
+  }
+
+  function closeManualGeo() {
+    setManualGeoLocationId(null);
+    setManualGeoInput('');
+    setManualGeoPreview(null);
+    setManualGeoInvalid(false);
+  }
+
+  function changeManualGeo(value: string) {
+    setManualGeoInput(value);
+    const parsed = parseManualLocationInput(value);
+    setManualGeoPreview(parsed ? { latitude: parsed.latitude, longitude: parsed.longitude } : null);
+    setManualGeoInvalid(false);
+    setError('');
+  }
+
+  async function confirmManualGeo() {
+    if (!manualGeoLocationId || !manualGeoPreview) {
+      setManualGeoInvalid(true);
+      return;
+    }
+    if (await saveGeo(manualGeoLocationId, manualGeoPreview)) closeManualGeo();
   }
 
   const statusToast = status && <Toast>{status}</Toast>;
@@ -375,6 +419,14 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
                   </div>
                   <Ic name="right" className="c2" />
                 </button>
+                <button type="button" className="li" disabled={geoBusyId === editing.id || submitting} onClick={() => openManualGeo(editing.id)}>
+                  <div className="lic p"><Ic name="link" /></div>
+                  <div className="mid">
+                    <div className="ts">{t('source.manual')}</div>
+                    <p className="c">2GIS · Google Maps · Яндекс Карты</p>
+                  </div>
+                  <Ic name="right" className="c2" />
+                </button>
               </div>
             )}
           </div>
@@ -400,6 +452,32 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
             <p className="t c2" id={`${ids}-discard`}>{t('points.discardText')}</p>
             <button type="button" className="btn btn-p lg w" onClick={() => setConfirmDiscard(false)} data-autofocus>{t('card.keep')}</button>
             <button type="button" className="btn btn-g w" style={{ color: 'var(--danger)' }} onClick={() => { setConfirmDiscard(false); closeForm(); }}>{t('card.close')}</button>
+          </Sheet>
+        )}
+        {manualGeoLocationId && (
+          <Sheet title={t('points.where')} onClose={closeManualGeo} describedBy={`${ids}-manual-geo-hint`}>
+            <div className="fld">
+              <label htmlFor={`${ids}-manual-geo`}>{t('source.manual')}</label>
+              <input id={`${ids}-manual-geo`} className={`inp${manualGeoInvalid ? ' er' : ''}`} value={manualGeoInput}
+                onChange={(event) => changeManualGeo(event.target.value)} placeholder="43.238949, 76.889709"
+                maxLength={2048} autoComplete="off" spellCheck={false} aria-invalid={manualGeoInvalid}
+                aria-describedby={`${ids}-manual-geo-hint${manualGeoInvalid ? ` ${ids}-manual-geo-error` : ''}`} data-autofocus />
+              <span className="hint" id={`${ids}-manual-geo-hint`}>2GIS · Google Maps · Яндекс Карты · 43.238949, 76.889709</span>
+              {manualGeoInvalid && <div className="emsg" id={`${ids}-manual-geo-error`}><Ic name="alert" />{t('points.geoGeneric')}</div>}
+            </div>
+            {error && <div className="banner err" role="alert"><Ic name="alert" /><span>{error}</span></div>}
+            {manualGeoPreview && (
+              <div className="card p16" style={{ gap: 8 }} role="status" data-testid="manual-geo-preview">
+                <div className="ts">{t('point.geoYes')}</div>
+                <div className="kv"><span>{t('points.where')}</span><span className="num">{manualGeoPreview.latitude.toFixed(6)}, {manualGeoPreview.longitude.toFixed(6)}</span></div>
+                <p className="c">{t('points.geoSet')}</p>
+              </div>
+            )}
+            <button type="button" className="btn btn-p lg w" onClick={() => void confirmManualGeo()}
+              disabled={geoBusyId === manualGeoLocationId} aria-busy={geoBusyId === manualGeoLocationId}>
+              {geoBusyId === manualGeoLocationId && <span className="spin" />}{t('confirm.confirm')}
+            </button>
+            <button type="button" className="btn btn-g w" onClick={closeManualGeo} disabled={geoBusyId === manualGeoLocationId}>{t('offerManage.cancel')}</button>
           </Sheet>
         )}
       </Phone>
