@@ -25,6 +25,8 @@ describe('Seller Trading Points pure contract logic', () => {
   it('trims the strict identity payload and rejects missing, unknown, ownership, contact and coordinate fields', () => {
     expect(locationIdentitySchema.parse({ name: '  Point  ', type: 'market', addressText: '  Address  ' }))
       .toEqual({ name: 'Point', type: 'market', addressText: 'Address' });
+    expect(locationIdentitySchema.parse({ name: 'Point', type: 'shop', addressText: 'Client preview', addressDirectoryEntryId: 'osm:n123' }))
+      .toEqual({ name: 'Point', type: 'shop', addressText: 'Client preview', addressDirectoryEntryId: 'osm:n123' });
 
     for (const invalid of [
       { name: '', type: 'shop', addressText: 'Address' },

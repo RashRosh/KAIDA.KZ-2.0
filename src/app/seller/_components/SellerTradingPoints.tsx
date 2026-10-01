@@ -11,6 +11,7 @@ import { Bar, Ic, Nav, Phone, shakeErrors, Sheet, Toast, TOAST_MS } from '../_ka
 import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
+import { AddressSuggestionInput } from './AddressSuggestionInput';
 
 type ApiError = { error?: { message?: string } };
 type LocationResponse = { location?: LocationView } & ApiError;
@@ -49,6 +50,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [name, setName] = useState(embeddedLocation?.name ?? '');
   const [type, setType] = useState<LocationType>(embeddedLocation?.type ?? 'shop');
   const [addressText, setAddressText] = useState(embeddedLocation?.addressText ?? '');
+  const [addressDirectoryEntryId, setAddressDirectoryEntryId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [geoBusyId, setGeoBusyId] = useState<string | null>(null);
   const [manualGeoLocationId, setManualGeoLocationId] = useState<string | null>(null);
@@ -129,6 +131,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setName('');
     setType('shop');
     setAddressText('');
+    setAddressDirectoryEntryId(null);
     setEditingId(null);
     setError('');
   }
@@ -148,6 +151,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setName(location.name);
     setType(location.type);
     setAddressText(location.addressText);
+    setAddressDirectoryEntryId(null);
     setEditingId(location.id);
     fillDetails(await detailsOf(location.id));
     setCopiedFrom(null);
@@ -162,7 +166,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     onClose?.(result);
   }
 
-  const snapshot = () => JSON.stringify({ name: name.trim(), type, addressText: addressText.trim(), contacts, hours });
+  const snapshot = () => JSON.stringify({ name: name.trim(), type, addressText: addressText.trim(), addressDirectoryEntryId, contacts, hours });
   const dirty = embedded && formReady && baseline !== null && snapshot() !== baseline;
   function goBack() {
     if (dirty) setConfirmDiscard(true);
@@ -200,6 +204,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         name: embeddedLocation.name.trim(),
         type: embeddedLocation.type,
         addressText: embeddedLocation.addressText.trim(),
+        addressDirectoryEntryId: null,
         contacts: { phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' },
         hours: source?.openingHours ?? templateOpeningHours(),
       }));
@@ -238,8 +243,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         method: mode === 'edit' ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(firstSetup
-          ? { seller: { displayName: sellerDisplayName.trim() || normalizedName }, location: { name: normalizedName, type, addressText: normalizedAddress } }
-          : { name: normalizedName, type, addressText: normalizedAddress }),
+          ? { seller: { displayName: sellerDisplayName.trim() || normalizedName }, location: { name: normalizedName, type, addressText: normalizedAddress, ...(addressDirectoryEntryId ? { addressDirectoryEntryId } : {}) } }
+          : { name: normalizedName, type, addressText: normalizedAddress, ...(addressDirectoryEntryId ? { addressDirectoryEntryId } : {}) }),
       });
       const data = await response.json() as LocationResponse & SellerResponse;
       const savedSeller = firstSetup ? data.seller : null;
@@ -406,9 +411,20 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
             </select>
           </div>
           <div className="fld">
-            <div className="fl">{t('points.where')}</div>
-            <label htmlFor="trading-location-address" className="vh">{t('points.address')}</label>
-            <input id="trading-location-address" className="inp" placeholder={t('points.addressPlaceholder')} value={addressText} onChange={(event) => setAddressText(event.target.value)} maxLength={500} disabled={submitting} autoComplete="street-address" required />
+            <AddressSuggestionInput
+              id="trading-location-address"
+              label={t('points.address')}
+              visibleLabel={t('points.where')}
+              value={addressText}
+              onChange={setAddressText}
+              selectedEntryId={addressDirectoryEntryId}
+              onSelectedEntryIdChange={setAddressDirectoryEntryId}
+              placeholder={t('points.addressPlaceholder')}
+              hint={t('point.addressHint')}
+              disabled={submitting}
+              required
+              autoComplete="street-address"
+            />
             {editing && (
               <div className="card" style={{ gap: 0, padding: '0 12px', marginTop: 6 }}>
                 <button type="button" className="li" disabled={geoBusyId === editing.id || submitting} onClick={() => requestGeo(editing.id)}>

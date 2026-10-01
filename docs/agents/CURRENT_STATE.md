@@ -4,53 +4,59 @@
 `docs/product/EXECUTION_PLAN.md`. Перед работой перепроверить git/GitHub: этот файл может устареть.
 
 - Проверено: 2026-10-01.
-- `origin/main`: `4348db8` (merge PR #69), merged-main CI run `36767783836` green.
-- Последний annotated product checkpoint: `v0.0.42-commercial-backoffice-pipeline` на `4348db8`.
-- Текущая локальная ветка: `slice/seller-location-geo-fallback` от `origin/main`.
+- `origin/main`: `762e170` (merge PR #70), merged-main CI run `36813870467` green.
+- Последний annotated product checkpoint: `v0.0.43-seller-location-geo-fallback` на `762e170`.
+- Текущая локальная ветка: `slice/address-directory` от checkpoint `v0.0.43-seller-location-geo-fallback`.
 
 ## Current task
 
-Активный product stage: Seller Location geo fallback. Implementation завершён; Product Owner вручную принял flow
-2026-10-01. Ветка готова к push/PR и branch CI.
+Активный implementation stage: 1a, KAIDA address directory для Almaty pilot.
 
-Scope:
+Обязательный preflight завершён:
 
-1. сохранить browser geolocation первым способом;
-2. добавить вторичное ручное действие для координат или ссылки 2GIS / Google Maps / Яндекс Карт;
-3. распарсить значение локально и показать preview;
-4. сохранять только после явного подтверждения через существующий owner-scoped S8 endpoint;
-5. доказать отсутствие внешних map/geocoding-запросов и утечки raw geo в Search.
+1. OSM coverage внутри Almaty relation `2465058`: 134,066 объектов с house number, 129,026 также со street
+   (96.24%); Зелёный Базар и Алтын Орда присутствуют как marketplace data;
+2. source: weekly checksummed Geofabrik Kazakhstan PBF, no OSM/Overpass/Nominatim runtime calls;
+3. licence: ODbL attribution/provenance/share-alike are acceptance requirements;
+4. hosting proposal: isolated index in current PostgreSQL with `pg_trgm`, no Nominatim/PostGIS/second service;
+5. manual address and existing browser/map-link geo flows remain first-class fallbacks.
 
-Новых API routes, DB migration и backend domain logic не требуется. KAIDA address directory остаётся отдельным
-следующим stage 1a. Казахская вычитка и отдельная desktop-доработка отложены решением PO и не затрагиваются.
+Approved exact behavior and closed-contract revision are in
+`docs/slices/address-directory/SLICE_CONTRACT.md`. Product Owner approved implementation on 2026-10-01 by direct
+instruction «Утверждают контракт реализуй». Implementation and automated verification are complete; acceptance is
+still pending real Geofabrik data evidence and Product Owner manual verification.
+
+## Implemented approved revision
+
+Current Location identity mutations deliberately do not change geo. A selected server-owned directory entry must
+save its address and coordinates atomically. Approved solution: accept only an opaque `addressDirectoryEntryId`,
+resolve it server-side and atomically write
+`addressText + latitude + longitude`; arbitrary client coordinates remain
+rejected. Manual address edit keeps existing geo semantics.
 
 ## Fixed near queue after current slice
 
-1. KAIDA address directory;
-2. Nearby result-first;
-3. Search filters closer/fresher/distance;
-4. Search filters cheaper/price range;
-5. AI Input;
-6. AI moderation;
-7. Discovery / `Для вас`;
-8. S15A → S15B → S15C;
-9. S16 remainder + MVP/Demand readiness;
-10. future Commercial/Backoffice readiness-gated slices.
-
-## Product-source boundaries
-
-- Current exact behavior: `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md`.
-- Historical S8 contract remains the source for validation, ownership and Search privacy boundaries.
-- Visual composition comes from the accepted seller mockup and existing `SellerTradingPoints` workspace.
-- Commercial/Backoffice parent docs remain planning sources only and do not authorize implementation.
+1. Nearby result-first;
+2. Search filters closer/fresher/distance;
+3. Search filters cheaper/price range;
+4. AI Input;
+5. AI moderation;
+6. Discovery / `Для вас`;
+7. S15A → S15B → S15C;
+8. S16 remainder + MVP/Demand readiness;
+9. future Commercial/Backoffice readiness-gated slices.
 
 ## Next action
 
-Commit only the slice files, push the branch, open the PR and wait for branch CI/review. Merge and checkpoint tag
-remain separate repository actions after PR evidence.
+Run the importer against the real checksummed Geofabrik Kazakhstan PBF when that endpoint is reachable from the
+execution environment, verify the Almaty counts/search sample, then perform Product Owner manual acceptance.
+Automated evidence is green: lint, typecheck, build, 317 unit tests, 197 integration tests, the synthetic PBF
+end-to-end importer proof, 150/154 full E2E tests with three expected skips and one unrelated timeout that passed on
+isolated rerun. Commit/push/PR/merge/tag remain separate direct commands.
 
 ## Do not include
 
 - personal `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`, `.pnpm-store/`;
-- address directory, maps SDK/API, external geocoder, new API or migration;
-- KK proofreading or separate desktop changes.
+- public Nominatim/Overpass runtime dependency, paid geocoder, map SDK, PostGIS or a second runtime service;
+- another city, Kazakhstan-wide rollout, buyer geocoding or Backoffice;
+- KK proofreading/localization pass or separate desktop redesign.

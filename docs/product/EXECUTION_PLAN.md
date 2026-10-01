@@ -30,17 +30,18 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.41-card-point-link`;
-- checkpoint commit: `fd11a48` (merge PR #66); merged-main CI run `36706008273` green;
+- tag: `v0.0.43-seller-location-geo-fallback`;
+- checkpoint commit: `762e170` (merge PR #70); merged-main CI run `36813870467` green;
 - хвост после `v0.0.36` закрыт отдельными annotated tags: buyer screens (`v0.0.37`), First Entry mobile (`v0.0.38`),
-  seller photo tiles (`v0.0.39`), showcase photo shortcut (`v0.0.40`) и card → point editor (`v0.0.41`);
+  seller photo tiles (`v0.0.39`), showcase photo shortcut (`v0.0.40`), card → point editor (`v0.0.41`),
+  commercial/Backoffice pipeline (`v0.0.42`) и Seller Location geo fallback (`v0.0.43`);
 - **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
   `offer-actuality` и `actuality-reminders`;
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
   Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
 
-Фактический repository state при обновлении 2026-09-30: `origin/main = fd11a48`, tag
-`v0.0.41-card-point-link`, merged-main CI green. Перед новой работой состояние всё равно перепроверяется.
+Фактический repository state при обновлении 2026-10-01: `origin/main = 762e170`, tag
+`v0.0.43-seller-location-geo-fallback`, merged-main CI green. Перед новой работой состояние всё равно перепроверяется.
 
 ---
 
@@ -135,10 +136,9 @@ editorial workbook само по себе ничего не меняет: соп
 
 ## Текущий repository gate
 
-Docs-only commercial/Backoffice pass принят в PR #69 и закрыт checkpoint
-`v0.0.42-commercial-backoffice-pipeline` (`4348db8`, merged-main CI `36767783836` green). Product Owner отдельной
-командой разрешил начать следующий product stage 2026-10-01. Seller Location geo fallback реализован на ветке
-`slice/seller-location-geo-fallback` и прошёл ручную приёмку PO 2026-10-01; доставка через PR ещё не закрыта.
+Seller Location geo fallback принят, слит PR #70 и закрыт checkpoint
+`v0.0.43-seller-location-geo-fallback` (`762e170`, merged-main CI `36813870467` green). Product Owner утвердил
+`docs/slices/address-directory/SLICE_CONTRACT.md` и разрешил implementation stage 1a прямой командой 2026-10-01.
 Порядок следующих stages не меняется.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
@@ -148,7 +148,7 @@ Docs-only commercial/Backoffice pass принят в PR #69 и закрыт chec
 | # | Stage | Owner |
 |---|---|---|
 | 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
-| 1a | KAIDA address directory на открытых данных (подсказки адреса) | `FEATURE_MAP.md` / future Slice Contract |
+| 1a | KAIDA address directory на открытых данных (подсказки адреса) | `docs/slices/address-directory/SLICE_CONTRACT.md` (`IMPLEMENTED`, real-data + manual acceptance pending) |
 | 4 | Nearby result-first correction | Issue #34 |
 | 5 | Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние | Issue #12, `FEATURE_MAP.md` |
 | 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
@@ -180,12 +180,14 @@ billing tables, Boost, Business или seller-facing paid Demand. Stage 12 не 
 
 ### Ключевые dependencies
 
-- Geo fallback — активный stage: contract утверждён (2026-09-22, S8 revision), implementation разрешён PO
-  2026-10-01 после checkpoint `v0.0.42-commercial-backoffice-pipeline`.
+- Geo fallback закрыт checkpoint `v0.0.43-seller-location-geo-fallback`.
 - Address directory (1a) идёт **после** geo fallback: подсказки адреса — улучшение поверх пути, который обязан
   работать без них (`PROJECT_RULES.md` §10.1). Макет может показывать поиск адреса и ссылку на карту с пометкой future
-  data source; UI slice не реализует stages 1/1a молча. Первый шаг 1a — проверка покрытия адресов Алматы,
-  licence/attribution и operational модели источника.
+  data source; UI slice не реализует stages 1/1a молча. Preflight 2026-10-01 подтвердил достаточную основу для
+  Almaty pilot: 134,066 OSM objects с `addr:housenumber`, из них 129,026 (96.24%) также имеют `addr:street` внутри
+  OSM boundary relation `2465058`; это не гарантия полной адресной базы, поэтому manual flow остаётся first-class.
+  Выбран weekly Geofabrik Kazakhstan PBF → isolated PostgreSQL + `pg_trgm`, без Nominatim/PostGIS/внешнего runtime
+  geocoder. ODbL attribution/provenance/share-alike и real import cost evidence входят в acceptance утверждённого contract.
 - Актуальность входит в этап 1: подтверждение актуальности живёт на «Моей витрине». Напоминания (#32) — в том же пункте.
 - Search Sorting выполняется после политики актуальности.
 - Contracts stages 5–6 не объявляют существующую Search-модель финальной и не закрепляют смешивание catalog resolve с

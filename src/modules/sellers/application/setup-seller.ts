@@ -3,6 +3,8 @@ import { getDatabase } from '../../../db/client';
 import { createLocation } from '../../locations/infrastructure/locations.repository';
 import type { SellerSetupInput, SellerView } from '../contracts/seller.contract';
 import { createSeller, findSellerByOwner } from '../infrastructure/sellers.repository';
+import { findActiveAddressDirectoryEntry } from '../../address-directory/infrastructure/address-directory.repository';
+import { AddressDirectoryEntryNotFoundError } from '../../address-directory/application/address-directory-errors';
 
 export class SellerAlreadyExistsError extends Error {
   readonly code = 'SELLER_ALREADY_EXISTS' as const;
@@ -35,6 +37,10 @@ export async function setupSeller(
     return await database.transaction(async (tx) => {
       const existing = await findSellerByOwner(tx, ownerUserId);
       if (existing) throw new SellerAlreadyExistsError();
+      const selected = input.location.addressDirectoryEntryId
+        ? await findActiveAddressDirectoryEntry(tx, input.location.addressDirectoryEntryId)
+        : null;
+      if (input.location.addressDirectoryEntryId && !selected) throw new AddressDirectoryEntryNotFoundError();
 
       const seller = await createSeller(tx, {
         ownerUserId,
@@ -43,8 +49,9 @@ export async function setupSeller(
       const location = await createLocation(tx, {
         sellerId: seller.id,
         name: input.location.name.trim(),
-        addressText: input.location.addressText.trim(),
+        addressText: selected?.addressText ?? input.location.addressText.trim(),
         type: input.location.type,
+        ...(selected ? { geo: { latitude: selected.latitude, longitude: selected.longitude } } : {}),
       });
       return { ...seller, locations: [location] };
     });
