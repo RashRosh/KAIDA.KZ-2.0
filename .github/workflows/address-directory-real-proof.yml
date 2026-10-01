@@ -16,8 +16,8 @@ jobs:
     timeout-minutes: 60
     env:
       DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida
-      SOURCE_URL: https://download.geofabrik.de/asia/kazakhstan-latest.osm.pbf
-      SOURCE_MD5_URL: https://download.geofabrik.de/asia/kazakhstan-latest.osm.pbf.md5
+      SOURCE_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf
+      SOURCE_MD5_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf.md5
     services:
       postgres:
         image: postgres:18
@@ -79,6 +79,7 @@ jobs:
             echo "source_timestamp=$source_timestamp"
             echo "pbf_bytes=$(stat -c %s /tmp/kaida-proof-work/kazakhstan.osm.pbf)"
             echo "almaty_relation=r2465058"
+            echo "latest_alias_note=kazakhstan-latest.osm.pbf returned a redirect loop on 2026-10-01; proof pinned to latest dated extract listed by Geofabrik"
           } | tee proof-evidence/source.txt
 
           echo "PBF_SHA256=$sha256" >> "$GITHUB_ENV"
