@@ -72,7 +72,7 @@ async function main() {
     await osmium(['export', boundaryPbf, '--geometry-types=polygon', '-o', boundaryGeoJson, '-O']);
     const boundary = JSON.parse(await readFile(boundaryGeoJson, 'utf8')) as { features?: unknown[] };
     if (!boundary.features?.length) throw new Error('Almaty relation did not produce a polygon');
-    await osmium(['extract', '--polygon', boundaryGeoJson, pbf, '-o', almatyPbf, '-O']);
+    await osmium(['extract', '--polygon', boundaryPbf, pbf, '-o', almatyPbf, '-O']);
     await osmium(['tags-filter', almatyPbf, 'nwr/addr:housenumber', 'w/highway', 'nwr/amenity=marketplace', 'nwr/shop=mall', 'nwr/building=retail', '-o', filteredPbf, '-O']);
     await osmium(['export', filteredPbf, '-f', 'geojsonseq', '-a', 'type,id', '-x', 'print_record_separator=false', '-o', sequence, '-O']);
 
