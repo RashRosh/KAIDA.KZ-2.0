@@ -1,11 +1,12 @@
 name: Address directory real-data proof
 
 on:
-  push:
-    branches:
-      - slice/address-directory
-    paths:
-      - .github/workflows/address-directory-real-proof.yml
+  workflow_dispatch:
+    inputs:
+      proof_sha:
+        description: Commit SHA whose code is tested by the proof
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -35,6 +36,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.proof_sha }}
+
+      - name: Verify proof checkout SHA
+        env:
+          EXPECTED_PROOF_SHA: ${{ inputs.proof_sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_PROOF_SHA"
 
       - uses: actions/setup-node@v5
         with:
@@ -257,6 +265,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: address-directory-real-proof-${{ github.sha }}
+          name: address-directory-real-proof-${{ inputs.proof_sha }}
           path: proof-evidence/
           retention-days: 14

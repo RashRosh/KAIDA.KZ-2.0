@@ -10,16 +10,12 @@
 - Активная product branch: `slice/address-directory`; PR #72 открыт.
 - Product implementation head до maintenance merge: `8316991`.
 - Maintenance merge head: `fa4e2af`; `KAIDA verify` run `36850756559` green.
-- Текущий branch head после real-data proof harness: `881aceb`; exact head всегда перепроверять через git/GitHub.
+- Текущий branch head после real-data proof harness и reconciliation: `71faf9d`; exact head всегда перепроверять через git/GitHub.
 - PR #72 **не готов к merge** до закрытия real-data blocker и Product Owner manual acceptance.
 
 ## Current task
 
-Stage 1a, KAIDA address directory для Almaty pilot.
-
-Real-data operational proof на реальном checksummed Geofabrik Kazakhstan PBF обнаружил contract blocker: текущий импорт реальных данных даёт `marketplaces: 0`, поэтому обязательный representative query `Зеленый базар` не возвращает результат.
-
-Текущий существенный шаг: определить, является ли причина несовпадением OSM tags/filtering или географической границей, и внести только минимальное исправление, необходимое для выполнения уже утверждённого Slice Contract. Contract не ослаблять.
+Stage 1a, KAIDA address directory для Almaty pilot. Текущая задача — добавить ручной запуск existing real-data proof workflow с явным `proof_sha`, затем запустить его для точного product-code SHA `71faf9d2d81f8f28e146699750c64f6ba127a825`. Изменение только CI workflow; product behavior, contracted boundary и Slice Contract остаются неизменными.
 
 ## Last completed
 
@@ -32,36 +28,30 @@ Real-data operational proof на реальном checksummed Geofabrik Kazakhst
 - Real candidate counts: raw `6361`; accepted `6160`; rejected `201`; deduplicated `3072` (`3011` address, `60` street, `0` marketplace, `1` retail).
 - Pinned importer активировал snapshot из `3072` entries; повторный импорт того же checksum вернул `activated:false` с тем же import id — idempotency подтверждён.
 - DB size после real import: table `760 kB`, all indexes `2016 kB`, trigram index `1656 kB`, total `2808 kB`.
+- Diagnosis commits established that polygon extraction discarded boundary relations; importer fix `71faf9d` now extracts with the relation-bearing boundary PBF.
+- Current-head full regression / branch CI: PASS on `71faf9d` (`36857093256` pull request run; `36857088758` push run).
+- Existing proof workflow now has a manual-only `proof_sha` dispatch, pinned checkout and SHA assertion; local YAML parse and diff check pass.
 
 ## Verification
 
-- ранее закрытые lint/typecheck/build/unit/integration/E2E: PASS на implementation/merge heads;
-- branch CI `36845040888` на `8316991`: PASS;
-- post-maintenance branch CI `36850756559` на `fa4e2af`: PASS;
+- full regression (`pnpm verify`) and branch CI `36857093256` on `71faf9d`: PASS;
+- push CI `36857088758` on `71faf9d`: PASS;
+- manual workflow YAML parse / pinned-checkout assertions: PASS; GitHub dispatch on exact SHA: PENDING;
 - real PBF download/checksum: PASS;
-- Almaty boundary extraction: PASS;
-- real importer first activation: PASS;
-- same-checksum idempotent import: PASS;
-- real counts / DB sizes: RECORDED;
-- representative `Зеленый базар` query: **FAIL — no result**;
-- representative `Алтын Орда` query: not reached after Green Bazaar failure;
-- EXPLAIN evidence / full `pnpm verify` after completed real-data proof: PENDING until blocker is fixed;
+- baseline real import and its counts/DB sizes: recorded before importer fix; representative `Зеленый базар` query failed on pre-fix SHA `881aceb`;
+- post-fix exact-SHA real-data proof, representative queries, latency and EXPLAIN evidence: PENDING;
 - Product Owner manual acceptance: PENDING.
 
 ## Blocker
 
-Approved Slice Contract requires real representative queries for a house, street, `Зелёный Базар` and `Алтын Орда`, and manual acceptance requires `Зеленый базар` to resolve to `Зелёный Базар`. Current real extract/import produces zero marketplace entries, so synthetic fixtures cannot close this criterion.
-
-Не менять contract, не хардкодить названия рынков и не расширять географию молча. Сначала доказать фактическую причину на OSM data.
+Post-fix real-data acceptance is not yet verified. PR #72 remains blocked on the exact-SHA real-data proof and Product Owner manual acceptance. Do not weaken contract criteria, hardcode market names or change the approved geography.
 
 ## Next action
 
-1. inspect actual OSM object/tags for Green Bazaar (`relation 20040804`) in the same PBF and search real PBF for Altyn Orda name variants;
-2. определить, находится ли Altyn Orda внутри contracted Almaty boundary;
-3. если проблема только в generic tag coverage — минимально расширить importer filter/transform, добавить targeted tests и повторить real-data proof;
-4. если для Altyn Orda требуется изменить contracted geographic boundary — STOP и вынести Product Owner contract decision до изменения behavior;
-5. после успешного real-data proof прогнать полный `pnpm verify` и branch CI на final executable SHA;
-6. затем передать Product Owner manual acceptance scenario.
+1. Commit and push only the workflow and this handoff file to `slice/address-directory`.
+2. Dispatch the proof with `proof_sha=71faf9d2d81f8f28e146699750c64f6ba127a825`; collect artifact and workflow evidence.
+3. If proof passes, run required branch verification on the resulting head. If real-data criteria fail due to a genuine contract conflict, stop for Product Owner decision; do not alter product behavior, boundary or contract.
+4. Stop before Product Owner manual acceptance.
 
 ## Current constraints
 
@@ -69,6 +59,6 @@ Approved Slice Contract requires real representative queries for a house, street
 - no public Nominatim/Overpass runtime dependency, paid geocoder, map SDK, PostGIS или второй runtime service;
 - no other city / Kazakhstan-wide rollout, buyer geocoding или Backoffice без contract decision;
 - no KK proofreading/localization pass или отдельный desktop redesign;
-- product code не менять до доказательства причины real-data blocker;
+- this task changes CI workflow only; do not change product behavior, approved boundary or Slice Contract;
 - generated OSM data/dumps не коммитить;
 - personal `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`, `.pnpm-store/` не включать.
