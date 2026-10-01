@@ -32,12 +32,14 @@ Stage 1a, KAIDA address directory для Almaty pilot. Текущая задач
 - Current-head full regression / branch CI: PASS on `71faf9d` (`36857093256` pull request run; `36857088758` push run).
 - Existing proof workflow now has a manual-only `proof_sha` dispatch, pinned checkout and SHA assertion; local YAML parse and diff check pass.
 - Workflow/handoff commit `1166d5063b6610addb88cffa54f74e68bf690e33` is pushed to `origin/slice/address-directory`; tracked worktree is clean.
+- Exact-SHA real-data proof dispatched as run `36896594370`, targeting `71faf9d2d81f8f28e146699750c64f6ba127a825`; result pending.
 
 ## Verification
 
 - full regression (`pnpm verify`) and branch CI `36857093256` on `71faf9d`: PASS;
 - push CI `36857088758` on `71faf9d`: PASS;
 - manual workflow YAML parse / pinned-checkout assertions: PASS; GitHub dispatch on exact SHA: PENDING;
+- GitHub real-data proof run `36896594370`: in progress; evidence artifact pending;
 - real PBF download/checksum: PASS;
 - baseline real import and its counts/DB sizes: recorded before importer fix; representative `Зеленый базар` query failed on pre-fix SHA `881aceb`;
 - post-fix exact-SHA real-data proof, representative queries, latency and EXPLAIN evidence: PENDING;
@@ -49,7 +51,7 @@ Post-fix real-data acceptance is not yet verified. PR #72 remains blocked on the
 
 ## Next action
 
-1. Dispatch the proof with `proof_sha=71faf9d2d81f8f28e146699750c64f6ba127a825`; verify checkout assertion and collect artifact/workflow evidence.
+1. Inspect run `36896594370` until complete; verify its checkout assertion, proof result and uploaded evidence artifact.
 2. If proof passes, run required branch verification on the resulting head. If real-data criteria fail due to a genuine contract conflict, stop for Product Owner decision; do not alter product behavior, boundary or contract.
 3. Stop before Product Owner manual acceptance.
 
