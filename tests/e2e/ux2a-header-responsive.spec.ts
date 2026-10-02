@@ -16,14 +16,16 @@ function overlaps(a: Box, b: Box) {
 async function expectResultsBar(page: Page) {
   const search = page.getByRole('search', { name: 'Поиск предложений' });
   const input = search.getByRole('searchbox', { name: 'Какой товар ищете?' });
-  const location = search.getByRole('button', { name: 'Учитывать моё местоположение', exact: true });
+  // stage #5: the pin toggle is replaced by the «Фильтры» button (B07) next to the search field.
+  const filters = search.getByRole('button', { name: 'Фильтры', exact: true });
 
   await expect(input).toBeVisible();
+  await expect(filters).toBeVisible();
   // B01 has no search button: the query runs from the keyboard (Enter / the phone's search key).
   await expect(search.getByRole('button', { name: 'Искать', exact: true })).toHaveCount(0);
-  const locationBox = (await location.boundingBox())!;
-  expect(locationBox.height).toBeGreaterThanOrEqual(44);
-  expect(overlaps((await input.boundingBox())!, locationBox)).toBe(false);
+  const filtersBox = (await filters.boundingBox())!;
+  expect(filtersBox.height).toBeGreaterThanOrEqual(44);
+  expect(overlaps((await input.boundingBox())!, filtersBox)).toBe(false);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   return { input };
 }

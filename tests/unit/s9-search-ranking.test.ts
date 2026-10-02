@@ -7,6 +7,8 @@ import {
   rankSearchOfferCandidates,
   type SearchRankingCandidate,
 } from '../../src/modules/search/ranking/search-ranking';
+import { readSearchRankingPolicy } from '../../src/modules/search/config/search-ranking-policy.config';
+import { ageingSince, type ActualityPolicy } from '../../src/modules/offers/actuality/actuality';
 
 function offer(id: string): SearchOffer {
   return {
@@ -30,6 +32,25 @@ function candidate(
 const buyer = { latitude: 43.238949, longitude: 76.889709 };
 const near = { latitude: 43.238949, longitude: 76.889709 };
 const far = { latitude: 43.338949, longitude: 76.989709 };
+
+// stage #5: the S9 ordering inside a freshness tier is weighted (slice contract §2); tiers themselves are tested
+// in offer-actuality / search-sort-distance tests.
+const NOW = new Date('2026-09-13T12:00:00Z');
+const ACTUALITY: ActualityPolicy = { dueHours: 24, ageingHours: 48, hiddenHours: 168, archiveHours: 336 };
+const RANKING = readSearchRankingPolicy();
+
+function rank(
+  input: readonly SearchRankingCandidate[],
+  location?: typeof buyer,
+  mode: 'actuality' | 'distance' = 'actuality',
+) {
+  return rankSearchOfferCandidates(input, location, ageingSince(NOW, ACTUALITY), {
+    now: NOW,
+    actualityPolicy: ACTUALITY,
+    rankingPolicy: RANKING,
+    sortMode: mode,
+  });
+}
 
 function ids(items: readonly SearchRankingCandidate[]) {
   return items.map((item) => item.offer.id);
@@ -58,19 +79,19 @@ describe('S9 Haversine distance', () => {
   });
 });
 
-describe('S9 deterministic ranking', () => {
+describe('S9 deterministic ranking (stage #5 weighted semantics)', () => {
   const id1 = '40000000-0000-4000-8000-000000000001';
   const id2 = '40000000-0000-4000-8000-000000000002';
   const id3 = '40000000-0000-4000-8000-000000000003';
   const id4 = '40000000-0000-4000-8000-000000000004';
 
-  it('ranks known geo before geoless and distance before freshness', () => {
+  it('ranks known geo before geoless: a geo-less Offer gets no distance component', () => {
     const input = [
       candidate(id1, '2026-09-13T10:00:00Z', near),
       candidate(id2, '2026-09-13T11:59:00Z', far),
       candidate(id3, '2026-09-13T11:59:30Z', null),
     ];
-    expect(ids(rankSearchOfferCandidates(input, buyer))).toEqual([id1, id2, id3]);
+    expect(ids(rank(input, buyer))).toEqual([id1, id2, id3]);
   });
 
   it('uses freshness then Offer.id for equal rounded distance', () => {
@@ -79,7 +100,7 @@ describe('S9 deterministic ranking', () => {
       candidate(id3, '2026-09-13T10:00:00Z', near),
       candidate(id1, '2026-09-13T11:00:00Z', near),
     ];
-    expect(ids(rankSearchOfferCandidates(input, buyer))).toEqual([id1, id2, id3]);
+    expect(ids(rank(input, buyer))).toEqual([id1, id2, id3]);
   });
 
   it('orders geoless Offers by freshness then Offer.id', () => {
@@ -88,7 +109,7 @@ describe('S9 deterministic ranking', () => {
       candidate(id2, '2026-09-13T11:00:00Z', null),
       candidate(id1, '2026-09-13T11:00:00Z', null),
     ];
-    expect(ids(rankSearchOfferCandidates(input, buyer))).toEqual([id1, id2, id3]);
+    expect(ids(rank(input, buyer))).toEqual([id1, id2, id3]);
   });
 
   it('without Buyer location ignores geo presence and uses freshness then Offer.id', () => {
@@ -98,7 +119,7 @@ describe('S9 deterministic ranking', () => {
       candidate(id2, '2026-09-13T11:00:00Z', far),
       candidate(id1, '2026-09-13T11:00:00Z', near),
     ];
-    expect(ids(rankSearchOfferCandidates(input))).toEqual([id3, id1, id2, id4]);
+    expect(ids(rank(input))).toEqual([id3, id1, id2, id4]);
   });
 
   it('does not mutate caller order and is permutation-stable', () => {
@@ -109,7 +130,7 @@ describe('S9 deterministic ranking', () => {
       candidate(id1, '2026-09-13T11:00:00Z', near),
     ];
     const original = ids(base);
-    const expected = ids(rankSearchOfferCandidates(base, buyer));
+    const expected = ids(rank(base, buyer));
     expect(ids(base)).toEqual(original);
 
     const permutations = [
@@ -118,7 +139,7 @@ describe('S9 deterministic ranking', () => {
       [base[2]!, base[3]!, base[0]!, base[1]!],
     ];
     for (const permutation of permutations) {
-      expect(ids(rankSearchOfferCandidates(permutation, buyer))).toEqual(expected);
+      expect(ids(rank(permutation, buyer))).toEqual(expected);
     }
   });
 });

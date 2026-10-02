@@ -198,16 +198,23 @@ describe('S11 Nearby Discovery on PostgreSQL 18 after UX1D eligibility', () => {
 
   it('keeps Search unfiltered by Nearby radius while applying UX1D phone+geo eligibility', async () => {
     const search = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
+    // stage #5 weighted ordering (contract §2): inside the fresh tier the absolute scores put the fresher
+    // «outside» Offer (5001 m) ahead of «boundary» (5000 m). Search itself stays unfiltered by the Nearby
+    // radius, and the closed UX1D location-aware eligibility keeps excluding geo-less Locations.
     expect(search.offers.map(({ id }) => id)).toEqual([
       offerIds.insideFreshA,
       offerIds.insideFreshB,
       offerIds.insideOld,
-      offerIds.boundary,
       offerIds.outside,
+      offerIds.boundary,
     ]);
-    expect(search.offers.map(({ id }) => id)).toContain(offerIds.outside);
     expect(search.offers.map(({ id }) => id)).not.toContain(offerIds.geoless);
-    expect(JSON.stringify(search)).not.toContain('"distanceMeters"');
+    expect(JSON.stringify(search)).not.toContain('"geo"');
+    expect(JSON.stringify(search)).not.toContain('"latitude"');
+    expect(JSON.stringify(search)).not.toContain('"longitude"');
+    // The derived whole-meter distance is public only for geo-known Offers of a location-aware request.
+    expect(search.offers.find(({ id }) => id === offerIds.insideFreshA)!.distanceMeters).toBe(1000);
+    expect(search.offers.find(({ id }) => id === offerIds.outside)!.distanceMeters).toBe(5001);
   });
 
   it('returns the same exact order for repeated identical inputs', async () => {

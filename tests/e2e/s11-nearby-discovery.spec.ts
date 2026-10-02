@@ -188,7 +188,9 @@ function assertDiscoveryPrivacy(body: unknown) {
 
 function assertSearchPrivacy(body: unknown) {
   const serialized = JSON.stringify(body);
-  for (const forbidden of ['"geo"', '"latitude"', '"longitude"', '"buyerLocation"', '"distanceMeters"', '"lastConfirmedAt"']) {
+  // stage #5: the derived whole-meter distanceMeters of a location-aware request is a legitimate public field;
+  // raw coordinates stay forbidden (slice contract §3).
+  for (const forbidden of ['"geo"', '"latitude"', '"longitude"', '"buyerLocation"', '"lastConfirmedAt"']) {
     expect(serialized).not.toContain(forbidden);
   }
 }
@@ -325,10 +327,12 @@ test('Search API remains unfiltered by the S11 radius, applies UX1D eligibility 
   const postResponse = await request.post('/api/search', { data: { q: productName, buyerLocation } });
   expect(postResponse.status()).toBe(200);
   const postBody = await postResponse.json();
+  // stage #5 weighted ordering (contract §2): inside the fresh tier the fresher «outside» Offer (5001 m) now
+  // scores above «boundary» (5000 m); the fresh tier stays ahead as a whole.
   expect(postBody.offers.map((offer: { id: string }) => offer.id)).toEqual([
     insideOfferId,
-    boundaryOfferId,
     outsideOfferId,
+    boundaryOfferId,
   ]);
   expect(postBody.offers.map((offer: { id: string }) => offer.id)).toContain(outsideOfferId);
   expect(postBody.offers.map((offer: { id: string }) => offer.id)).not.toContain(geolessOfferId);

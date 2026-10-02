@@ -109,9 +109,11 @@ describe('S10 point contacts projection on PostgreSQL 18', () => {
     expect(sellerObject(result)).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
     const serialized = JSON.stringify(result);
     expect(serialized).not.toContain(identityPhone);
+    // stage #5: derived distanceMeters is a legitimate public field of a location-aware request; raw geo and
+    // private ranking inputs stay forbidden (slice contract §3).
     for (const forbidden of [
       'ownerUserId', 'owner_user_id', 'latitude', 'longitude', 'buyerLocation',
-      'distance', 'distanceMeters', 'lastConfirmedAt', 'rank', 'score',
+      'lastConfirmedAt', 'rank', 'score',
       '"url"', '"href"', '"link"', '"redirect"',
     ]) expect(serialized).not.toContain(forbidden);
   });

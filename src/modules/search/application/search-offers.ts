@@ -15,6 +15,7 @@ import { findOffersByProductOrTitleWords } from '../infrastructure/search.reposi
 import { queryWords } from '../../offers/title/offer-title';
 import { rankSearchOfferCandidates } from '../ranking/search-ranking';
 import { ageingSince, buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
+import { readSearchRankingPolicy, type SearchSortMode } from '../config/search-ranking-policy.config';
 import type { Locale } from '../../../i18n/config';
 
 type SearchLifecycleOptions = {
@@ -23,6 +24,8 @@ type SearchLifecycleOptions = {
   buyerLocation?: BuyerLocation;
   locale?: Locale;
   commentTranslationEnabled?: boolean;
+  // stage #5: the buyer picks only the mode; the server-side SearchRankingPolicy maps it onto the current weights.
+  sortMode?: SearchSortMode;
 };
 
 export async function searchOffers(
@@ -50,7 +53,21 @@ export async function searchOffers(
     ? await findOffersByProductOrTitleWords(db, match, cutoff)
     : await findOffersByProductOrTitleWords(db, match, cutoff, locale, commentTranslationEnabled);
   const policy = readActualityPolicy();
-  const offers = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation, ageingSince(now, policy))
-    .map(({ offer, lastConfirmedAt }) => ({ ...offer, actuality: buyerActuality(lastConfirmedAt, now, policy) }));
+  const actuality = ageingSince(now, policy);
+  const ranked = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation, actuality, {
+    now,
+    actualityPolicy: policy,
+    rankingPolicy: readSearchRankingPolicy(),
+    sortMode: lifecycleOptions.sortMode ?? 'actuality',
+  });
+  const offers = ranked.map(({ offer, lastConfirmedAt, rankingDistanceMeters }) => ({
+    ...offer,
+    actuality: buyerActuality(lastConfirmedAt, now, policy),
+    // stage #5: the derived whole-meter distance is public only when the request carried the buyer location;
+    // a geo-less Offer (or a location-less request) exposes no distance at all.
+    ...(lifecycleOptions.buyerLocation && rankingDistanceMeters !== null
+      ? { distanceMeters: rankingDistanceMeters }
+      : {}),
+  }));
   return { query, offers };
 }

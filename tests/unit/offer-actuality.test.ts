@@ -11,6 +11,7 @@ import {
 import { cardActuality } from '../../src/app/seller/_components/card-model';
 import type { SellerOfferView } from '../../src/modules/offers/contracts/seller-offer.contract';
 import { rankSearchOfferCandidates, type SearchRankingCandidate } from '../../src/modules/search/ranking/search-ranking';
+import { readSearchRankingPolicy } from '../../src/modules/search/config/search-ranking-policy.config';
 
 // offer-actuality §6/§7: stages and badges at every boundary, the fresh tier first, card age = oldest active point.
 
@@ -60,10 +61,9 @@ describe('fresh tier before ageing tier', () => {
 
   it('ranks a fresh far offer before an ageing near one, with and without buyer location', () => {
     const since = ageingSince(now, policy);
-    expect(rankSearchOfferCandidates([near, far], { latitude: 43.25, longitude: 76.95 }, since).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
-    expect(rankSearchOfferCandidates([near, far], undefined, since).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
-    // Without the tier (closed S9 behavior) distance wins.
-    expect(rankSearchOfferCandidates([near, far], { latitude: 43.25, longitude: 76.95 }).map((c) => c.offer.id)).toEqual([near.offer.id, far.offer.id]);
+    const options = { now, actualityPolicy: policy, rankingPolicy: readSearchRankingPolicy(), sortMode: 'actuality' as const };
+    expect(rankSearchOfferCandidates([near, far], { latitude: 43.25, longitude: 76.95 }, since, options).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
+    expect(rankSearchOfferCandidates([near, far], undefined, since, options).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
   });
 });
 
