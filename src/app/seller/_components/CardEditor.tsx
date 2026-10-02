@@ -15,6 +15,7 @@ import { Bar, Check, ErrorLine, focusPointEditLabel, Ic, Phone, PointEditLabel, 
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';
 import { SellerTradingPoints } from './SellerTradingPoints';
+import { AddressSuggestionInput } from './AddressSuggestionInput';
 import { pluralKey, type SellerCard } from './card-model';
 import {
   createBody,
@@ -47,7 +48,7 @@ export type CardEditorInitial = { values: Partial<CardValues>; photoIds?: string
 
 type ApiResult = { changeSet?: SellerChangeSetView; seller?: SellerView; location?: LocationView; draft?: OfferDraftView; error?: { code?: string } };
 type Suggestion = { id: string; name: string };
-type NewPoint = { name: string; addressText: string; type: LocationType; sellerName: string };
+type NewPoint = { name: string; addressText: string; addressDirectoryEntryId: string | null; type: LocationType; sellerName: string };
 
 const UNIT_CODES: UnitCode[] = ['kg', 'liter', 'piece', 'package', 'other'];
 
@@ -123,7 +124,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const [view, setView] = useState<'form' | 'prices' | 'newPoint' | { pricePoint: string } | { editPoint: string }>('form');
   const [pointAdded, setPointAdded] = useState(false);
   const [pointSaved, setPointSaved] = useState(false);
-  const [newPoint, setNewPoint] = useState<NewPoint>({ name: '', addressText: '', type: 'shop', sellerName: '' });
+  const [newPoint, setNewPoint] = useState<NewPoint>({ name: '', addressText: '', addressDirectoryEntryId: null, type: 'shop', sellerName: '' });
   const [newPointErrors, setNewPointErrors] = useState<{ name?: boolean; address?: boolean }>({});
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [titleFocused, setTitleFocused] = useState(false);
@@ -375,7 +376,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
     busyRef.current = true;
     setBusy('send');
     try {
-      const location = { name: newPoint.name, type: newPoint.type, addressText: newPoint.addressText };
+      const location = { name: newPoint.name, type: newPoint.type, addressText: newPoint.addressText, ...(newPoint.addressDirectoryEntryId ? { addressDirectoryEntryId: newPoint.addressDirectoryEntryId } : {}) };
       let created: LocationView | undefined;
       if (!seller) {
         const { ok, data } = await post('/api/seller/setup', { seller: { displayName: derivedSellerName(newPoint.sellerName, newPoint.name) }, location });
@@ -388,7 +389,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       setBusy(null);
       if (!created) { setFailure('send'); return; }
       update({ points: { ...values.points, [created.id]: { selected: true, ownPrice: null } } });
-      setNewPoint({ name: '', addressText: '', type: 'shop', sellerName: '' });
+      setNewPoint({ name: '', addressText: '', addressDirectoryEntryId: null, type: 'shop', sellerName: '' });
       setView('form');
       setPointAdded(true);
       window.setTimeout(() => setPointAdded(false), TOAST_MS);
@@ -431,10 +432,19 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
             {newPointErrors.name && <ErrorLine>{t('points.nameRequired')}</ErrorLine>}
           </div>
           <div className="fld">
-            <label htmlFor={`${ids}-point-address`}>Где находится точка</label>
-            <input id={`${ids}-point-address`} className={`inp${newPointErrors.address ? ' er' : ''}`} value={newPoint.addressText} maxLength={500} autoComplete="off"
-              placeholder="Адрес, рынок, павильон" aria-invalid={newPointErrors.address || undefined}
-              onChange={(event) => { setNewPoint((current) => ({ ...current, addressText: event.target.value })); setNewPointErrors((current) => ({ ...current, address: false })); }} disabled={disabled} />
+            <AddressSuggestionInput
+              id={`${ids}-point-address`}
+              label="Где находится точка"
+              value={newPoint.addressText}
+              onChange={(addressText) => { setNewPoint((current) => ({ ...current, addressText })); setNewPointErrors((current) => ({ ...current, address: false })); }}
+              selectedEntryId={newPoint.addressDirectoryEntryId}
+              onSelectedEntryIdChange={(addressDirectoryEntryId) => setNewPoint((current) => ({ ...current, addressDirectoryEntryId }))}
+              placeholder="Адрес, рынок, павильон"
+              hint={t('point.addressHint')}
+              invalid={newPointErrors.address}
+              disabled={disabled}
+              required
+            />
             {newPointErrors.address && <ErrorLine>{t('points.addressRequired')}</ErrorLine>}
           </div>
           <div className="fld">

@@ -1,0 +1,298 @@
+name: Address directory real-data proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      proof_sha:
+        description: Commit SHA whose code is tested by the proof
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida
+      TEST_DATABASE_URL: postgresql://kaida:kaida_ci_local@127.0.0.1:5432/kaida_test
+      SOURCE_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf
+      SOURCE_MD5_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf.md5
+      OFFER_VALIDITY_PERIOD_HOURS: '168'
+      IDENTITY_OTP_TTL_SECONDS: '300'
+      IDENTITY_SESSION_TTL_SECONDS: '2592000'
+      IDENTITY_OTP_HMAC_SECRET_HEX: '1111111111111111111111111111111111111111111111111111111111111111'
+      IDENTITY_COOKIE_SECURE: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: kaida
+          POSTGRES_PASSWORD: kaida_ci_local
+          POSTGRES_DB: kaida
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kaida -d kaida"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.proof_sha }}
+
+      - name: Verify proof checkout SHA
+        env:
+          EXPECTED_PROOF_SHA: ${{ inputs.proof_sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_PROOF_SHA"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies and proof tools
+        run: |
+          pnpm install --frozen-lockfile
+          sudo apt-get update
+          sudo apt-get install -y osmium-tool postgresql-client
+
+      - name: Create separate test database and assert clean development database
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i "$POSTGRES_CONTAINER" psql -U kaida -d kaida -v ON_ERROR_STOP=1 < docker/init/01-create-test-db.sql
+          test "$(docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -tAc "SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")" = "0"
+          docker exec "$POSTGRES_CONTAINER" psql -U kaida -d kaida -c 'SHOW server_version;'
+
+      - name: Migrate disposable proof database
+        run: pnpm db:migrate
+
+      - name: Download and verify current Geofabrik Kazakhstan PBF
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p proof-evidence /tmp/kaida-proof-work
+          curl -fL --retry 4 --retry-delay 3 -o /tmp/kaida-proof-work/kazakhstan.osm.pbf "$SOURCE_URL"
+          curl -fL --retry 4 --retry-delay 3 -o /tmp/kaida-proof-work/kazakhstan.osm.pbf.md5 "$SOURCE_MD5_URL"
+
+          published_md5="$(awk '{print $1}' /tmp/kaida-proof-work/kazakhstan.osm.pbf.md5 | head -1)"
+          actual_md5="$(md5sum /tmp/kaida-proof-work/kazakhstan.osm.pbf | awk '{print $1}')"
+          test "$published_md5" = "$actual_md5"
+
+          sha256="$(sha256sum /tmp/kaida-proof-work/kazakhstan.osm.pbf | awk '{print $1}')"
+          last_modified="$(curl -fsSI "$SOURCE_URL" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} /^last-modified:/ {sub(/^[^:]+:[ ]*/, ""); print; exit}')"
+          test -n "$last_modified"
+          source_timestamp="$(date -u -d "$last_modified" +%Y-%m-%dT%H:%M:%SZ)"
+
+          {
+            echo "source_url=$SOURCE_URL"
+            echo "published_md5=$published_md5"
+            echo "sha256=$sha256"
+            echo "http_last_modified=$last_modified"
+            echo "source_timestamp=$source_timestamp"
+            echo "pbf_bytes=$(stat -c %s /tmp/kaida-proof-work/kazakhstan.osm.pbf)"
+            echo "almaty_relation=r2465058"
+            echo "latest_alias_note=kazakhstan-latest.osm.pbf returned a redirect loop on 2026-10-01; proof pinned to latest dated extract listed by Geofabrik"
+          } | tee proof-evidence/source.txt
+
+          echo "PBF_SHA256=$sha256" >> "$GITHUB_ENV"
+          echo "SOURCE_TIMESTAMP=$source_timestamp" >> "$GITHUB_ENV"
+
+      - name: Reproduce Almaty boundary and candidate counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=/tmp/kaida-proof-work
+          pbf="$work/kazakhstan.osm.pbf"
+          osmium getid -r "$pbf" r2465058 -o "$work/almaty-boundary.osm.pbf" -O
+          osmium export "$work/almaty-boundary.osm.pbf" --geometry-types=polygon -a type,id -o "$work/almaty-boundaries.geojson" -O
+          node - "$work/almaty-boundaries.geojson" "$work/almaty-boundary.geojson" <<'NODE'
+          const fs = require('node:fs');
+          const boundaryExport = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const boundaryFeature = boundaryExport.features?.find((feature) =>
+            feature.properties?.['@type'] === 'relation' && Number(feature.properties['@id']) === 2465058
+          );
+          if (!boundaryFeature) throw new Error('Almaty relation r2465058 did not produce a polygon');
+          fs.writeFileSync(process.argv[3], JSON.stringify({ type: 'FeatureCollection', features: [boundaryFeature] }));
+          NODE
+          osmium extract --polygon "$work/almaty-boundary.geojson" "$pbf" -o "$work/almaty.osm.pbf" -O
+          osmium tags-filter "$work/almaty.osm.pbf" 'nwr/addr:housenumber' 'w/highway' 'nwr/amenity=marketplace' 'nwr/shop=mall' 'nwr/building=retail' -o "$work/almaty-filtered.osm.pbf" -O
+          osmium export "$work/almaty-filtered.osm.pbf" -f geojsonseq -a type,id -x print_record_separator=false -o "$work/features.geojsonseq" -O
+
+          {
+            echo "boundary_relation=r2465058"
+            echo "boundary_feature=relation/2465058"
+            echo "boundary_geojson_sha256=$(sha256sum "$work/almaty-boundary.geojson" | awk '{print $1}')"
+            echo "boundary_geojson_bytes=$(stat -c %s "$work/almaty-boundary.geojson")"
+          } | tee proof-evidence/boundary.txt
+
+          cat > .proof-counts.ts <<'TS'
+          import { createReadStream, writeFileSync } from 'node:fs';
+          import { createInterface } from 'node:readline';
+          import { transformOsmFeature, deduplicateAddressDirectoryEntries } from './src/modules/address-directory/import/osm-feature-transform';
+
+          type Kind = 'address' | 'street' | 'marketplace' | 'retail' | 'unknown';
+          const empty = () => ({ address: 0, street: 0, marketplace: 0, retail: 0, unknown: 0, total: 0 });
+          const raw = empty();
+          const accepted = empty();
+          const rejected = empty();
+          const text = (p: Record<string, unknown>, k: string) => typeof p[k] === 'string' && String(p[k]).trim() ? String(p[k]).trim() : undefined;
+          const candidateKind = (p: Record<string, unknown>): Kind => {
+            if (text(p, 'amenity') === 'marketplace' || text(p, 'type') === 'marketplace') return 'marketplace';
+            if (text(p, 'shop') === 'mall' || text(p, 'building') === 'retail') return 'retail';
+            if (text(p, 'addr:housenumber')) return 'address';
+            if (text(p, 'highway')) return 'street';
+            return 'unknown';
+          };
+          const entries = [];
+          const input = createInterface({ input: createReadStream('/tmp/kaida-proof-work/features.geojsonseq'), crlfDelay: Infinity });
+          for await (const line of input) {
+            if (!line.trim()) continue;
+            const feature = JSON.parse(line);
+            const kind = candidateKind(feature.properties ?? {});
+            raw[kind] += 1; raw.total += 1;
+            const entry = transformOsmFeature(feature);
+            if (entry) {
+              accepted[entry.kind] += 1; accepted.total += 1; entries.push(entry);
+            } else {
+              rejected[kind] += 1; rejected.total += 1;
+            }
+          }
+          const deduplicatedEntries = deduplicateAddressDirectoryEntries(entries);
+          const deduplicated = empty();
+          for (const entry of deduplicatedEntries) { deduplicated[entry.kind] += 1; deduplicated.total += 1; }
+          const removedByDedup = { total: accepted.total - deduplicated.total };
+          const result = { raw, accepted, rejected, deduplicated, removedByDedup };
+          writeFileSync('proof-evidence/counts.json', JSON.stringify(result, null, 2) + '\n');
+          console.log(JSON.stringify(result, null, 2));
+          TS
+          pnpm exec tsx .proof-counts.ts
+          rm .proof-counts.ts
+
+      - name: Run pinned importer and capture operational requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o proof-evidence/import-time.txt \
+            pnpm db:import:addresses -- \
+              --pbf /tmp/kaida-proof-work/kazakhstan.osm.pbf \
+              --source-url "$SOURCE_URL" \
+              --checksum "$PBF_SHA256" \
+              --source-timestamp "$SOURCE_TIMESTAMP" \
+            | tee proof-evidence/import-result.json
+
+          /usr/bin/time -v -o proof-evidence/idempotent-import-time.txt \
+            pnpm db:import:addresses -- \
+              --pbf /tmp/kaida-proof-work/kazakhstan.osm.pbf \
+              --source-url "$SOURCE_URL" \
+              --checksum "$PBF_SHA256" \
+              --source-timestamp "$SOURCE_TIMESTAMP" \
+            | tee proof-evidence/idempotent-import-result.json
+
+      - name: Record DB sizes, query latency and index-backed plans
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'ANALYZE address_directory_entries;'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -P pager=off -c "
+            SELECT i.source_url, i.source_timestamp, i.source_checksum, i.status, i.entry_count, i.counts
+            FROM address_directory_imports i
+            ORDER BY i.started_at DESC LIMIT 1;
+          " | tee proof-evidence/import-db-record.txt
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -P pager=off -c "
+            SELECT
+              pg_size_pretty(pg_relation_size('address_directory_entries')) AS table_size,
+              pg_size_pretty(pg_indexes_size('address_directory_entries')) AS all_indexes_size,
+              pg_size_pretty(pg_relation_size('address_directory_entries_search_trgm_idx')) AS trgm_index_size,
+              pg_size_pretty(pg_total_relation_size('address_directory_entries')) AS total_size;
+          " | tee proof-evidence/db-size.txt
+
+          cat > .proof-queries.ts <<'TS'
+          import { writeFileSync } from 'node:fs';
+          import { performance } from 'node:perf_hooks';
+          import { and, eq } from 'drizzle-orm';
+          import { createDatabase } from './src/db/client';
+          import { addressDirectoryEntries } from './src/modules/address-directory/db/address-directory-entries.table';
+          import { addressDirectoryImports } from './src/modules/address-directory/db/address-directory-imports.table';
+          import { searchActiveAddressDirectory } from './src/modules/address-directory/infrastructure/address-directory.repository';
+
+          const url = process.env.DATABASE_URL;
+          if (!url) throw new Error('DATABASE_URL missing');
+          const { db, pool } = createDatabase(url);
+          try {
+            const active = and(eq(addressDirectoryImports.status, 'active'), eq(addressDirectoryImports.id, addressDirectoryEntries.importId));
+            const house = (await db.select({ value: addressDirectoryEntries.displayName }).from(addressDirectoryEntries).innerJoin(addressDirectoryImports, eq(addressDirectoryImports.id, addressDirectoryEntries.importId)).where(and(active, eq(addressDirectoryEntries.kind, 'address'))).limit(1))[0]?.value;
+            const street = (await db.select({ value: addressDirectoryEntries.displayName }).from(addressDirectoryEntries).innerJoin(addressDirectoryImports, eq(addressDirectoryImports.id, addressDirectoryEntries.importId)).where(and(active, eq(addressDirectoryEntries.kind, 'street'))).limit(1))[0]?.value;
+            if (!house || !street) throw new Error('Real import lacks representative house or street');
+            const typo = street.length > 5 ? street.slice(0, 3) + street.slice(4) : street;
+            const queries = [
+              { label: 'house-exact', query: house },
+              { label: 'street-prefix', query: street.slice(0, Math.max(3, Math.min(7, street.length))) },
+              { label: 'street-typo', query: typo },
+              { label: 'zelenyi-bazar', query: 'Зеленый базар' },
+              { label: 'barys-marketplace', query: 'Рынок Барыс' },
+            ];
+            const out = [];
+            for (const item of queries) {
+              const runs = [];
+              let results = [];
+              for (let n = 0; n < 4; n += 1) {
+                const start = performance.now();
+                results = await searchActiveAddressDirectory(db, item.query);
+                runs.push(Number((performance.now() - start).toFixed(3)));
+              }
+              out.push({ ...item, latencyMs: { warmup: runs[0], measured: runs.slice(1), min: Math.min(...runs.slice(1)), max: Math.max(...runs.slice(1)) }, results });
+            }
+            const bazar = out.find((x) => x.label === 'zelenyi-bazar');
+            const barys = out.find((x) => x.label === 'barys-marketplace');
+            if (!bazar?.results.length) throw new Error('Зеленый базар returned no real-data result');
+            if (!barys?.results.length) throw new Error('Рынок Барыс returned no real-data result');
+            writeFileSync('proof-evidence/query-evidence.json', JSON.stringify(out, null, 2) + '\n');
+            console.log(JSON.stringify(out, null, 2));
+          } finally {
+            await pool.end();
+          }
+          TS
+          pnpm exec tsx .proof-queries.ts
+          rm .proof-queries.ts
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -P pager=off -c "
+            EXPLAIN (ANALYZE, BUFFERS)
+            SELECT e.source_key, e.kind, e.display_name, e.address_text
+            FROM address_directory_entries e
+            JOIN address_directory_imports i ON i.id = e.import_id
+            WHERE i.status = 'active'
+              AND (e.search_text LIKE '%зеленый базар%' OR e.search_text % 'зеленый базар')
+            ORDER BY
+              CASE WHEN e.search_text LIKE 'зеленый базар%' THEN 0 WHEN e.search_text LIKE '%зеленый базар%' THEN 1 ELSE 2 END,
+              similarity(e.search_text, 'зеленый базар') DESC,
+              CASE e.kind WHEN 'marketplace' THEN 0 WHEN 'address' THEN 1 WHEN 'street' THEN 2 ELSE 3 END,
+              e.address_text,
+              e.source_key
+            LIMIT 8;
+          " | tee proof-evidence/explain-zelenyi-bazar.txt
+          grep -q 'address_directory_entries_search_trgm_idx' proof-evidence/explain-zelenyi-bazar.txt
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Full verify after real-data proof
+        run: pnpm verify
+
+      - name: Upload proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: address-directory-real-proof-${{ inputs.proof_sha }}
+          path: proof-evidence/
+          retention-days: 14

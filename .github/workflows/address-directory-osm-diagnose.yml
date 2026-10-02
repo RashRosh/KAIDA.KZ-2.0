@@ -1,0 +1,131 @@
+name: Address directory OSM diagnosis
+
+on:
+  push:
+    branches:
+      - slice/address-directory
+    paths:
+      - .github/workflows/address-directory-osm-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf
+      SOURCE_MD5_URL: https://download.geofabrik.de/asia/kazakhstan-260929.osm.pbf.md5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install osmium and geometry tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y osmium-tool python3-shapely
+
+      - name: Download exact proof PBF
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p diagnosis /tmp/osm-diagnosis
+          curl -fL -o /tmp/osm-diagnosis/kazakhstan.osm.pbf "$SOURCE_URL"
+          curl -fL -o /tmp/osm-diagnosis/kazakhstan.osm.pbf.md5 "$SOURCE_MD5_URL"
+          expected="$(awk '{print $1}' /tmp/osm-diagnosis/kazakhstan.osm.pbf.md5 | head -1)"
+          actual="$(md5sum /tmp/osm-diagnosis/kazakhstan.osm.pbf | awk '{print $1}')"
+          test "$expected" = "$actual"
+          echo "published_md5=$expected" | tee diagnosis/source.txt
+
+      - name: Inspect target market objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=/tmp/osm-diagnosis
+          pbf="$work/kazakhstan.osm.pbf"
+
+          osmium getid -r "$pbf" r20040804 -o "$work/green-bazaar.osm.pbf" -O
+          osmium cat "$work/green-bazaar.osm.pbf" -f opl | grep '^r20040804' | tee diagnosis/green-bazaar-relation.opl
+
+          osmium getid -r "$pbf" r17596655 -o "$work/altyn-orda.osm.pbf" -O
+          osmium cat "$work/altyn-orda.osm.pbf" -f opl | grep '^r17596655' | tee diagnosis/altyn-orda-relation.opl
+          osmium export "$work/altyn-orda.osm.pbf" --geometry-types=polygon -o "$work/altyn-orda.geojson" -O
+
+      - name: Find market names in national PBF
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=/tmp/osm-diagnosis
+          pbf="$work/kazakhstan.osm.pbf"
+          osmium tags-filter "$pbf" nwr/name nwr/name:ru nwr/name:kk nwr/alt_name nwr/official_name -o "$work/named.osm.pbf" -O
+          osmium cat "$work/named.osm.pbf" -f opl \
+            | grep -Ei 'Алтын|Зел[^ ]*.*базар|Green.*Bazar|K.k.*Bazar|Altyn.*Orda' \
+            | tee diagnosis/national-market-name-matches.opl || true
+
+      - name: Diagnose contracted Almaty boundary geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=/tmp/osm-diagnosis
+          pbf="$work/kazakhstan.osm.pbf"
+          osmium getid -r "$pbf" r2465058 -o "$work/almaty-boundary.osm.pbf" -O
+          osmium cat "$work/almaty-boundary.osm.pbf" -f opl | grep '^r2465058' | tee diagnosis/almaty-boundary-relation.opl
+          osmium export "$work/almaty-boundary.osm.pbf" --geometry-types=polygon -o "$work/almaty-boundary.geojson" -O
+
+          cat > "$work/analyze-boundary.py" <<'PY'
+          import json
+          from shapely.geometry import shape, Point
+          from shapely.ops import unary_union
+
+          with open('/tmp/osm-diagnosis/almaty-boundary.geojson', encoding='utf-8') as f:
+              data = json.load(f)
+          features = data.get('features', [])
+          geoms = [shape(f['geometry']) for f in features if f.get('geometry')]
+          union = unary_union(geoms)
+
+          with open('/tmp/osm-diagnosis/altyn-orda.geojson', encoding='utf-8') as f:
+              altyn_data = json.load(f)
+          altyn_geoms = [shape(f['geometry']) for f in altyn_data.get('features', []) if f.get('geometry')]
+          altyn_union = unary_union(altyn_geoms)
+          altyn_point = altyn_union.representative_point()
+
+          green = Point(76.9545, 43.2646)
+          result = {
+              'feature_count': len(features),
+              'geometry_types': [g.geom_type for g in geoms],
+              'feature_ids': [f.get('id') for f in features],
+              'union_bounds': union.bounds,
+              'union_area_degrees2': union.area,
+              'green_probe': [green.x, green.y],
+              'green_inside_union': union.covers(green),
+              'altyn_representative_point': [altyn_point.x, altyn_point.y],
+              'altyn_inside_union': union.covers(altyn_point),
+          }
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          with open('diagnosis/boundary-geometry-analysis.json', 'w', encoding='utf-8') as out:
+              json.dump(result, out, ensure_ascii=False, indent=2)
+              out.write('\n')
+          PY
+          python3 "$work/analyze-boundary.py"
+
+          osmium extract --polygon "$work/almaty-boundary.geojson" "$pbf" -o "$work/almaty.osm.pbf" -O
+          osmium tags-filter "$work/almaty.osm.pbf" nwr/name nwr/name:ru nwr/name:kk nwr/alt_name nwr/official_name -o "$work/almaty-named.osm.pbf" -O
+          osmium cat "$work/almaty-named.osm.pbf" -f opl \
+            | grep -Ei 'Алтын|Зел[^ ]*.*базар|Green.*Bazar|K.k.*Bazar|Altyn.*Orda' \
+            | tee diagnosis/almaty-market-name-matches.opl || true
+
+          for rel in r20040804 r17596655; do
+            if osmium getid "$work/almaty.osm.pbf" "$rel" -o "$work/${rel}-inside.osm.pbf" -O 2>/dev/null; then
+              echo "${rel}_present_in_extracted_pbf=yes"
+            else
+              echo "${rel}_present_in_extracted_pbf=no"
+            fi
+          done | tee diagnosis/boundary-membership.txt
+
+      - name: Upload diagnosis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: address-directory-osm-diagnosis-${{ github.sha }}
+          path: diagnosis/
+          retention-days: 14

@@ -5,6 +5,7 @@ import { SESSION_COOKIE_NAME } from '../../../../../modules/identity/session/ses
 import { LocationNotFoundError } from '../../../../../modules/locations/application/location-errors';
 import { updateOwnedLocation } from '../../../../../modules/locations/application/update-owned-location';
 import { locationIdentitySchema } from '../../../../../modules/locations/contracts/location.contract';
+import { AddressDirectoryEntryNotFoundError } from '../../../../../modules/address-directory/application/address-directory-errors';
 
 export const runtime = 'nodejs';
 const noStore = { 'Cache-Control': 'no-store' };
@@ -38,6 +39,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
   } catch (error) {
     if (error instanceof LocationNotFoundError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 404, headers: noStore });
+    }
+    if (error instanceof AddressDirectoryEntryNotFoundError) {
+      return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }
     console.error('Location update failed');
     return NextResponse.json({ error: { code: 'LOCATION_UNAVAILABLE', message: 'Не удалось изменить торговую точку.' } }, { status: 503, headers: noStore });

@@ -3,6 +3,7 @@ import { resolveCurrentUser } from '@/modules/identity/application/resolve-curre
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { SellerAlreadyExistsError, setupSeller } from '@/modules/sellers/application/setup-seller';
 import { sellerSetupBodySchema } from '@/modules/sellers/contracts/seller.contract';
+import { AddressDirectoryEntryNotFoundError } from '@/modules/address-directory/application/address-directory-errors';
 
 export const runtime = 'nodejs';
 
@@ -44,6 +45,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (error instanceof SellerAlreadyExistsError) {
       return NextResponse.json(
         { error: { code: 'SELLER_ALREADY_EXISTS', message: error.message } },
+        { status: 409, headers: noStore },
+      );
+    }
+    if (error instanceof AddressDirectoryEntryNotFoundError) {
+      return NextResponse.json(
+        { error: { code: error.code, message: error.message } },
         { status: 409, headers: noStore },
       );
     }

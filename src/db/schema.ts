@@ -21,3 +21,5 @@ export { offerCardRemovals } from '../modules/moderation/db/offer-card-removals.
 export { operatorFeedMarks } from '../modules/moderation/db/operator-feed-marks.table';
 export { pushSubscriptions } from '../modules/reminders/db/push-subscriptions.table';
 export { actualityRemindersSent } from '../modules/reminders/db/actuality-reminders-sent.table';
+export { addressDirectoryImports } from '../modules/address-directory/db/address-directory-imports.table';
+export { addressDirectoryEntries } from '../modules/address-directory/db/address-directory-entries.table';

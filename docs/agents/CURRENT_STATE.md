@@ -1,62 +1,47 @@
 # Current verified state
 
-Короткий операционный снимок. Долговечные правила — в `AGENTS.md` и `docs/PROJECT_RULES.md`; текущей очередью владеет только `docs/product/EXECUTION_PLAN.md`. Перед работой всегда перепроверить git/GitHub: этот файл намеренно хранит только текущее состояние и может устареть.
+Короткий операционный snapshot. Перед работой сверить его с фактическими git/GitHub; история хранится в Git/PR/CI, не здесь.
 
 ## Verified base
 
-- Проверено: 2026-10-01.
-- `origin/main`: `762e170` (merge PR #70), merged-main CI run `36813870467` green.
+- Проверено: 2026-10-02.
+- `origin/main`: `a5df3a7` (merge PR #71); merged-main CI green.
 - Последний annotated product checkpoint: `v0.0.43-seller-location-geo-fallback` на `762e170`.
-- Активная product branch: `slice/address-directory` от checkpoint `v0.0.43-seller-location-geo-fallback`.
-- Текущий head product branch: `8316991` (`feat: add Almaty address directory`).
-- Branch CI run `36845040888` на exact head `8316991`: green.
+- Активная branch: `slice/address-directory`; PR #72 открыт.
+- PR #72 не готов к merge до green exact-SHA proof + independent branch CI + Product Owner manual acceptance.
 
 ## Current task
 
-Stage 1a, KAIDA address directory для Almaty pilot.
-
-Implementation и автоматическая verification завершены. Slice **не закрыт**: обязательный real-data operational proof на реальном checksummed Geofabrik Kazakhstan PBF и Product Owner manual acceptance ещё pending.
-
-Точный behavior и закрытая contract revision принадлежат `docs/slices/address-directory/SLICE_CONTRACT.md`. Очередь после закрытия этого slice смотреть только в `docs/product/EXECUTION_PLAN.md`.
+Stage 1a — Address Directory для Almaty pilot. Boundary строго relation `2465058`. Невалидный пример `Алтын Орда` заменён на `Рынок Барыс`; `Зелёный Базар` остаётся обязательным real-data и manual-acceptance кейсом.
 
 ## Last completed
 
-- Реализация address directory закоммичена и отправлена в `slice/address-directory` как `8316991`.
-- GitHub branch CI на этом exact SHA завершён успешно.
-- Синтетический PBF proof подтверждает importer path, same-checksum idempotency и автоматические сценарии, но не подменяет требуемый real Geofabrik proof.
+- Exact-SHA real-data proof `36931827113` + independent branch CI на `c1ddbf9` — PASS.
+- Current head `0e2fd5b` green: KAIDA verify `36933053991` — SUCCESS.
+- Automated §10 evidence собран локально на production build (head `0e2fd5b`): оба e2e `tests/e2e/address-directory.spec.ts` PASS (Trading Points workspace + embedded card flow; выбор «Зелёный базар» → canonical address+geo `43.263, 76.956`, attribution OSM, manual fallback). Остальные сценарии §10 подтверждены existing green e2e/integration (ручной адрес без блокировки, «Местоположение не задано», изменение текста после выбора = manual, geo не сохраняется, atomic resolve + stale reject в integration).
 
 ## Verification
 
-- lint: PASS;
-- typecheck: PASS;
-- build: PASS;
-- unit: 317 PASS;
-- integration: 197 PASS;
-- synthetic PBF import + повторный идемпотентный import: PASS;
-- новые address-directory E2E: PASS;
-- full E2E: 150 PASS, 3 expected skipped; один старый geo-тест получил timeout при клике и сразу прошёл изолированный повтор;
-- branch CI `36845040888` на `8316991`: PASS;
-- real Geofabrik PBF operational proof: PENDING;
-- Product Owner manual acceptance: PENDING.
-
-## Blocker / pending external gate
-
-Из текущей execution environment Geofabrik endpoint не отвечает. Не считать synthetic fixture доказательством real-data acceptance и не ослаблять criterion 12 ради закрытия slice.
+- Current head `0e2fd5b`: green (technical gates closed).
+- Automated manual-acceptance evidence: PASS (e2e на production build).
+- Product Owner manual acceptance: **PASS** — PO прошёл ручной тест на телефоне через `http://192.168.8.71:3000/seller/points` (production-сервер поднят локально и после теста остановлен). «все прощелкал. все норм. принято».
+- Pre-merge diff audit PR #72: **APPROVED FOR MERGE** — чисто: closed contracts сохранены, риски доказаны, manual acceptance пройден лично PO. Единственная заметка — статус `SLICE_CONTRACT.md` (обновлён здесь же).
 
 ## Next action
 
-Когда checksummed Geofabrik Kazakhstan PBF доступен из execution environment:
+PO поручил мердж PR #72: «поправь и мердж». Выполняется merge branch `slice/address-directory` в `main`; tag пока не поручен.
 
-1. запустить pinned real importer в disposable/local database;
-2. записать source timestamp/checksum, Almaty counts, DB/index size, import duration и representative exact/prefix/typo query evidence согласно Slice Contract;
-3. убедиться, что intended indexes используются;
-4. после real-data proof выполнить Product Owner manual acceptance;
-5. только затем проходить оставшиеся repository gates slice по `PROJECT_RULES.md`.
+## Blocker
+
+Технических и acceptance gates закрыты. Остаётся только решение Product Owner о merge PR #72 (и, при желании, checkpoint tag).
 
 ## Current constraints
 
-- manual address entry и закрытые browser/map-link geo flows остаются first-class fallbacks;
-- no public Nominatim/Overpass runtime dependency, paid geocoder, map SDK, PostGIS или второй runtime service;
-- no other city / Kazakhstan-wide rollout, buyer geocoding или Backoffice;
-- no KK proofreading/localization pass или отдельный desktop redesign;
-- personal `next.config.ts`, `.vscode/`, `scripts/`, `tmp/`, `.pnpm-store/` не включать.
+- Almaty boundary только relation `2465058`; geography не расширять.
+- `Зелёный Базар` и `Рынок Барыс` остаются acceptance cases.
+- Не добавлять public Nominatim/Overpass runtime dependency, paid geocoder, map SDK, PostGIS или второй runtime service.
+- Manual address entry и browser/map-link geo flows остаются first-class fallbacks.
+- Generated OSM data/dumps не коммитить.
+- `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/` и другие local-only файлы не коммитить.
+- Commit/push/PR/merge/tag — только по прямому поручению Product Owner.
+

@@ -40,6 +40,19 @@
 
 `CURRENT_STATE.md` хранит только текущее восстановимое состояние: verified base, active branch/task, last completed, verification, blocker при наличии, next action и локальные ограничения. История и длинная очередь туда не копируются: текущей очередью владеет только `EXECUTION_PLAN.md`.
 
+### Compactness policy для `CURRENT_STATE.md`
+
+`CURRENT_STATE.md` — **overwrite-style operational snapshot, а не append-only log**.
+
+При каждом обновлении snapshot:
+
+- удаляй superseded facts, закрытые blockers, obsolete failures, duplicate CI evidence и historical diagnosis, которые больше не влияют на следующий шаг;
+- не сохраняй старую попытку только потому, что она когда-то была важна: Git history, PR, Issues и CI artifacts уже являются историческим источником;
+- если старый failure всё ещё причинно объясняет текущий blocker, оставь только краткую ссылку на него и актуальный вывод;
+- при переходе к новому slice или новой активной задаче перепиши snapshot под новую работу, не перетаскивай историю предыдущего slice;
+- держи файл примерно в пределах **50–80 строк и не более ~6 KB**; если он вышел за этот предел, сожми его **до следующего существенного шага**;
+- компактность не имеет права скрывать незакрытый risk, непроверенную работу, dirty worktree или STOP condition.
+
 Фактический код всегда сильнее snapshot: намерение предыдущего агента читается из `CURRENT_STATE.md`, а реально успевшие изменения — из git diff/status/commits. Не утверждай, что незакоммиченная или непроверенная работа уже находится в remote/CI.
 
 ## Reasoning effort policy

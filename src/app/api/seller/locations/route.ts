@@ -4,6 +4,7 @@ import { SellerRequiredError } from '../../../../modules/locations/application/l
 import { locationIdentitySchema } from '../../../../modules/locations/contracts/location.contract';
 import { resolveCurrentUser } from '../../../../modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '../../../../modules/identity/session/session-cookie';
+import { AddressDirectoryEntryNotFoundError } from '../../../../modules/address-directory/application/address-directory-errors';
 
 export const runtime = 'nodejs';
 const noStore = { 'Cache-Control': 'no-store' };
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     return NextResponse.json({ location }, { status: 201, headers: noStore });
   } catch (error) {
     if (error instanceof SellerRequiredError) {
+      return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
+    }
+    if (error instanceof AddressDirectoryEntryNotFoundError) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }
     console.error('Location create failed');

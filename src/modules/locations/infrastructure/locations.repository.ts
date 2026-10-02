@@ -49,13 +49,22 @@ export async function createLocation(
     name: string;
     addressText: string;
     type: LocationType;
+    geo?: LocationGeo;
     // Omitted: the database template hours, marked for review; no contacts.
     details?: { phoneE164: string | null; whatsappPhoneE164: string | null; openingHours: OpeningHours; openingHoursNeedsReview: boolean };
   },
 ): Promise<LocationView> {
   const rows = await database
     .insert(locations)
-    .values({ sellerId: values.sellerId, name: values.name, addressText: values.addressText, type: values.type, ...values.details })
+    .values({
+      sellerId: values.sellerId,
+      name: values.name,
+      addressText: values.addressText,
+      type: values.type,
+      latitude: values.geo?.latitude,
+      longitude: values.geo?.longitude,
+      ...values.details,
+    })
     .returning(locationSelection);
   const location = rows[0];
   if (!location) throw new Error('Location insert did not return a row');
@@ -85,7 +94,7 @@ export async function updateLocationGeo(
 
 export async function updateLocationIdentity(
   database: LocationDb,
-  values: { sellerId: string; locationId: string; identity: LocationIdentityInput },
+  values: { sellerId: string; locationId: string; identity: LocationIdentityInput; selectedGeo?: LocationGeo },
 ): Promise<LocationView | null> {
   const rows = await database
     .update(locations)
@@ -93,6 +102,7 @@ export async function updateLocationIdentity(
       name: values.identity.name,
       type: values.identity.type,
       addressText: values.identity.addressText,
+      ...(values.selectedGeo ? { latitude: values.selectedGeo.latitude, longitude: values.selectedGeo.longitude } : {}),
     })
     .where(and(eq(locations.id, values.locationId), eq(locations.sellerId, values.sellerId)))
     .returning(locationSelection);

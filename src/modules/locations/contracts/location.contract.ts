@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { addressDirectoryEntryIdSchema } from '../../address-directory/contracts/address-directory.contract';
 
 export const LOCATION_TYPES = ['market', 'shop', 'pavilion', 'home', 'other'] as const;
 
@@ -8,6 +9,7 @@ export const locationIdentitySchema = z.object({
   name: z.string().trim().min(1).max(120),
   type: locationTypeSchema,
   addressText: z.string().trim().min(1).max(500),
+  addressDirectoryEntryId: addressDirectoryEntryIdSchema.optional(),
 }).strict();
 
 export const locationGeoSchema = z.object({
