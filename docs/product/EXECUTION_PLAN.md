@@ -40,8 +40,8 @@
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
   Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
 
-Фактический repository state при обновлении 2026-10-01: `origin/main = 762e170`, tag
-`v0.0.43-seller-location-geo-fallback`, merged-main CI green. Перед новой работой состояние всё равно перепроверяется.
+Фактический repository state при обновлении 2026-10-02: `origin/main = debd9f0` (base merge `4362660` — PR #72 Address Directory, stage 1a),
+merged-main CI green (run `36973303192`). Checkpoint tag для Address Directory ещё не создан — по имени PO. Перед новой работой состояние всё равно перепроверяется.
 
 ---
 
@@ -136,10 +136,11 @@ editorial workbook само по себе ничего не меняет: соп
 
 ## Текущий repository gate
 
-Seller Location geo fallback принят, слит PR #70 и закрыт checkpoint
-`v0.0.43-seller-location-geo-fallback` (`762e170`, merged-main CI `36813870467` green). Product Owner утвердил
-`docs/slices/address-directory/SLICE_CONTRACT.md` и разрешил implementation stage 1a прямой командой 2026-10-01.
-Порядок следующих stages не меняется.
+Address Directory (stage 1a) **закрыт**: продан/принят PO, слит PR #72
+(`4362660`, финальный doc-коммит `debd9f0`), merged-main CI на `debd9f0`
+(run `36973303192`) green, manual acceptance **PASS** («все прощелкал. все норм. принято»).
+Последний закрытый verified checkpoint — `v0.0.43-seller-location-geo-fallback` на `762e170`;
+checkpoint tag для Address Directory будет создан по имени Product Owner. Порядок следующих stages не меняется.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -148,7 +149,7 @@ Seller Location geo fallback принят, слит PR #70 и закрыт check
 | # | Stage | Owner |
 |---|---|---|
 | 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
-| 1a | KAIDA address directory на открытых данных (подсказки адреса) | `docs/slices/address-directory/SLICE_CONTRACT.md` (`IMPLEMENTED`, real-data + manual acceptance pending) |
+| 1a | ~~KAIDA address directory на открытых данных (подсказки адреса)~~ — **закрыт** (PR #72, manual acceptance PASS) | `docs/slices/address-directory/SLICE_CONTRACT.md` |
 | 4 | Nearby result-first correction | Issue #34 |
 | 5 | Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние | Issue #12, `FEATURE_MAP.md` |
 | 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
