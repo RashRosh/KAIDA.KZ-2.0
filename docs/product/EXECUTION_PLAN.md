@@ -40,8 +40,8 @@
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
   Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
 
-Фактический repository state при обновлении 2026-10-02: `origin/main = debd9f0` (base merge `4362660` — PR #72 Address Directory, stage 1a),
-merged-main CI green (run `36973303192`). Checkpoint tag для Address Directory ещё не создан — по имени PO. Перед новой работой состояние всё равно перепроверяется.
+Фактический repository state при обновлении 2026-10-02: `origin/main = 4acdb2a` (Address Directory, stage 1a; base merge `4362660` — PR #72),
+merged-main CI green (run `36973303192`), checkpoint annotated tag `v0.0.44-address-directory` создан PO и запушен на remote. Последний verified checkpoint — `v0.0.44-address-directory` на `4acdb2a`. Перед новой работой состояние всё равно перепроверяется.
 
 ---
 
@@ -139,8 +139,8 @@ editorial workbook само по себе ничего не меняет: соп
 Address Directory (stage 1a) **закрыт**: продан/принят PO, слит PR #72
 (`4362660`, финальный doc-коммит `debd9f0`), merged-main CI на `debd9f0`
 (run `36973303192`) green, manual acceptance **PASS** («все прощелкал. все норм. принято»).
-Последний закрытый verified checkpoint — `v0.0.43-seller-location-geo-fallback` на `762e170`;
-checkpoint tag для Address Directory будет создан по имени Product Owner. Порядок следующих stages не меняется.
+Последний закрытый verified checkpoint — annotated tag `v0.0.44-address-directory` на `4acdb2a`
+(создан PO и запушен на remote). Порядок следующих stages не меняется.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 

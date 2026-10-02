@@ -5,14 +5,14 @@
 ## Verified base
 
 - Проверено: 2026-10-02.
-- `origin/main`: `debd9f0` (docs: record PR #72 merged state); base merge `4362660` (Merge PR #72). Слито и запушено.
+- `origin/main`: `4acdb2a` (`docs: close stage 1a Address Directory, update post-merge state`); base merge `4362660` (Merge PR #72). Слито и запушено.
 - Merged-main CI green: run `36973303192` на `debd9f0` — SUCCESS.
 - PR #72 `MERGED` (state MERGED `2026-10-02T06:22:07Z`); ветка `slice/address-directory` слита, PR закрыт.
-- Последний annotated product checkpoint: `v0.0.43-seller-location-geo-fallback` на `762e170`. Checkpoint tag для Address Directory не создан — ждёт поручения PO.
+- Последний verified product checkpoint: annotated tag `v0.0.44-address-directory` (tagger PO, 2026-10-02) на `4acdb2a`, опубликован на remote.
 
 ## Current task
 
-Stage 1a — Address Directory для Almaty pilot. Boundary строго relation `2465058`. Невалидный пример `Алтын Орда` заменён на `Рынок Барыс`; `Зелёный Базар` остаётся обязательным real-data и manual-acceptance кейсом.
+Нет активного slice: Address Directory (stage 1a) закрыт и принят. Ожидается решение Product Owner о выборе следующего stage из `EXECUTION_PLAN.md`.
 
 ## Last completed
 
@@ -30,11 +30,11 @@ Stage 1a — Address Directory для Almaty pilot. Boundary строго relati
 
 ## Next action
 
-PR #72 слит и закрыт: `main` = `debd9f0`, merge-коммит `4362660`, PR №72 state MERGED. Убраны все «open/pending merge» записи; slice `address-directory` (stage 1a) завершён и закрыт. По поручению PO осталось: создать annotated checkpoint tag (ожидается имя, напр. `v0.0.44-address-directory`) и выбрать следующий stage из NEXT. Worktree чистый, только локальные/игнорируемые файлы (`next-env.d.ts`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`) — коммитить их нельзя.
+Address Directory (stage 1a) завершён и закрыт: `main` = `4acdb2a`, annotated checkpoint tag `v0.0.44-address-directory` создан PO и запушен на remote. Убраны все «open/pending merge» записи. Далее — выбрать следующий stage из `EXECUTION_PLAN.md` (по FROZEN COMMITTED QUEUE следующим незакрытым идёт №4 Nearby result-first correction, Issue #34). Commit/push/PR/tag — только по поручению Product Owner. Worktree чистый, только локальные/игнорируемые файлы (`next-env.d.ts`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`) — коммитить их нельзя.
 
 ## Blocker
 
-Merge и acceptance gates закрыты (PR #72 MERGED, merged-main CI green). Остаётся только: создание checkpoint tag по имени, которое назовёт Product Owner, и решение PO о выборе следующего stage из NEXT.
+Нет blockers: Address Directory (stage 1a) закрыт (PR #72 MERGED, merged-main CI green, checkpoint `v0.0.44-address-directory` создан и запушен). Открыт только продуктовый выбор PO: какой stage взять следующим из `EXECUTION_PLAN.md`.
 
 ## Current constraints
 
