@@ -40,10 +40,10 @@
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
   Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
 
-Фактический repository state при обновлении 2026-10-02: `origin/main = 3652278` (Nearby result-first correction; merge `3652278` — PR #73, slice-коммит `4bd5709`),
-merged-main CI green (run `37044132910`), manual acceptance **PASS**. Checkpoint annotated tag `v0.0.45-nearby-result-first`
+Фактический repository state при обновлении 2026-10-03: `origin/main = aadb6b2` (Search filters — sort «Ближе»/«Актуальнее» + distance; merge `aadb6b2` — PR #74, slice-коммит `9634178`),
+merged-main CI green (run `37071285541`), manual acceptance **PASS**. Checkpoint annotated tag `v0.0.46-search-sort-distance`
 создаётся этим docs-коммитом сразу после green CI и пушится на remote; **до фактического создания тег не считать существующим**.
-На момент записи последним фактически существующим verified checkpoint остаётся `v0.0.44-address-directory` на `4acdb2a`. Перед новой работой состояние всё равно перепроверяется.
+На момент записи последним фактически существующим verified checkpoint остаётся `v0.0.45-nearby-result-first` на `0bdfc3a`. Перед новой работой состояние всё равно перепроверяется.
 
 ---
 
@@ -138,13 +138,19 @@ editorial workbook само по себе ничего не меняет: соп
 
 ## Текущий repository gate
 
-Nearby result-first correction (stage #4) **закрыт**: contract APPROVED, реализация слита PR #73
-(slice-коммит `4bd5709`, merge `3652278`), branch CI на `4bd5709` green (push run `37037435942`,
-pull_request run `37037458565`), merged-main CI на `3652278` green (run `37044132910`),
-manual acceptance **PASS** (правильный user flow и отображение Nearby results; точное число карточек PO не утверждал).
-Checkpoint annotated tag `v0.0.45-nearby-result-first` создаётся этим docs-коммитом после green CI;
-до фактического создания тег не считать существующим. Следующий незакрытый stage — **#5**
-(Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние, Issue #12). Порядок stages не меняется.
+Search filters — сортировка «Ближе»/«Актуальнее» + расстояние (stage #5) **закрыт**: contract rev 6A APPROVED,
+реализация слита PR #74 (slice-коммит `9634178`, merge `aadb6b2`), branch CI на `9634178` green
+(push run `37067949468`, pull_request run `37067991791`), merged-main CI на `aadb6b2` green (run `37071285541`),
+manual acceptance **PASS** (swap режимов «Актуальнее»/«Ближе» на одной fresh-паре, радиус-фильтр, empty-filtered,
+denial + retry, RU/KK). Checkpoint annotated tag `v0.0.46-search-sort-distance` создаётся этим docs-коммитом
+после green CI; до фактического создания тег не считать существующим.
+
+**Новое решение PO (2026-10-03): перед stage #6 вставляется отдельный stage 5A** — slice
+«Search visibility for addressed Locations without coordinates»: addressText обязателен; отсутствие coordinates
+не должно исключать Offer из ordinary Search; geo-dependent behavior (distance, радиус, Nearby, route) остаётся
+недоступным без coordinates. Это явная ревизия geo-eligibility части UX1D. Draft-контракт подготовлен
+(хранится в agent handoff), в репозиторий входит после APPROVED PO. **Stage #6 (Дешевле + цена от–до,
+Issue #12) остаётся после 5A.** Issue #12 остаётся OPEN — он владеет и stage #5, и stage #6.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -155,7 +161,8 @@ Checkpoint annotated tag `v0.0.45-nearby-result-first` создаётся эти
 | 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
 | 1a | ~~KAIDA address directory на открытых данных (подсказки адреса)~~ — **закрыт** (PR #72, manual acceptance PASS) | `docs/slices/address-directory/SLICE_CONTRACT.md` |
 | 4 | ~~Nearby result-first correction~~ — **закрыт** (PR #73, manual acceptance PASS) | Issue #34, `docs/slices/nearby-result-first/SLICE_CONTRACT.md` |
-| 5 | Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние | Issue #12, `FEATURE_MAP.md` |
+| 5 | ~~Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние~~ — **закрыт** (PR #74, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-distance/SLICE_CONTRACT.md` |
+| 5A | Search visibility for addressed Locations without coordinates (identity ≠ coordinates; явная ревизия geo-eligibility UX1D; новый PO decision 2026-10-03) | Draft в agent handoff; future Slice Contract |
 | 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
