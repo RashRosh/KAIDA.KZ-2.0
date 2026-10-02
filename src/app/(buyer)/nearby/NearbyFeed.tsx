@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { nearbyResponseSchema, type NearbyResponse } from '@/modules/discovery/contracts/discovery.contract';
 import { buyerLocationSchema, type BuyerLocation } from '@/modules/search/contracts/buyer-location.contract';
@@ -116,18 +115,9 @@ export function NearbyFeed() {
     >
       <main className="body" style={{ gap: 12, padding: hasResults ? 12 : '24px 16px' }} aria-label={t('nearby.area')} aria-busy={busy || undefined}>
         {!hasResults && (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <p className="ov">{t('nearby.eyebrow')}</p>
-              <h1 className="h1">{t('nearby.title')}</h1>
-              <p className="t c2">{t('nearby.description')}</p>
-              <Link href="/" className="c">{t('nearby.searchSpecific')}</Link>
-            </div>
-            <button type="button" className="btn btn-p lg w" disabled={busy} onClick={requestNearby}>
-              <Ic name="pin" className="sm" />{buttonLabel}
-            </button>
-            <p className="c">{t('nearby.privacy')}</p>
-          </>
+          <button type="button" className="btn btn-p lg w" disabled={busy} onClick={requestNearby}>
+            <Ic name="pin" className="sm" />{buttonLabel}
+          </button>
         )}
         {state.kind === 'geo_error' && (
           <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14 }}>
