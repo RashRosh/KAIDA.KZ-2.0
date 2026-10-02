@@ -169,13 +169,13 @@ describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
   it('discards all private ranking metadata at the public SearchResponse boundary', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     const serialized = JSON.stringify(result);
+    // stage #5: the derived whole-meter distanceMeters is now a legitimate public field of a location-aware
+    // request; raw geo and all private ranking inputs stay forbidden (slice contract §3).
     for (const forbidden of [
       '"geo"',
       '"latitude"',
       '"longitude"',
       '"buyerLocation"',
-      '"distance"',
-      '"distanceMeters"',
       '"lastConfirmedAt"',
       '"rank"',
       '"score"',

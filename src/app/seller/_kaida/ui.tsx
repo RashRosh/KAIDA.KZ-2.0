@@ -123,11 +123,13 @@ export function focusPointEditLabel(focusKey: string) {
 const FOCUSABLE = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)';
 
 // Scrim + bottom sheet (kaida .scrim/.sheet); focus moves in, stays in, and returns to the opener on close.
-export function Sheet({ title, onClose, role = 'dialog', closeButton = true, children, describedBy }: {
+export function Sheet({ title, onClose, role = 'dialog', closeButton = true, closeLabel = 'Закрыть', children, describedBy }: {
   title: string;
   onClose: () => void;
   role?: 'dialog' | 'alertdialog';
   closeButton?: boolean;
+  // Buyer surfaces pass the interface-locale label (stage #5); the seller shell keeps its Russian default.
+  closeLabel?: string;
   children: React.ReactNode;
   describedBy?: string;
 }) {
@@ -162,7 +164,7 @@ export function Sheet({ title, onClose, role = 'dialog', closeButton = true, chi
         {closeButton ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h2 className="h3" id={`${ids}-t`} style={{ flex: 1 }}>{title}</h2>
-            <button type="button" className="ib" aria-label="Закрыть" onClick={onClose}><Ic name="close" /></button>
+            <button type="button" className="ib" aria-label={closeLabel} onClick={onClose}><Ic name="close" /></button>
           </div>
         ) : (
           <h2 className="h3" id={`${ids}-t`}>{title}</h2>

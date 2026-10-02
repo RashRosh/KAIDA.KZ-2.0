@@ -104,13 +104,13 @@ async function expectCardOrder(page: import('@playwright/test').Page, locationNa
 
 function assertPublicPrivacy(body: unknown) {
   const serialized = JSON.stringify(body);
+  // stage #5: the derived whole-meter distanceMeters of a location-aware request is a legitimate public field;
+  // raw Buyer/Seller coordinates and private ranking inputs stay forbidden (slice contract §3).
   for (const forbidden of [
     '"geo"',
     '"latitude"',
     '"longitude"',
     '"buyerLocation"',
-    '"distance"',
-    '"distanceMeters"',
     '"lastConfirmedAt"',
     '"rank"',
     '"score"',
@@ -119,7 +119,7 @@ function assertPublicPrivacy(body: unknown) {
   }
 }
 
-test('Buyer location is explicit, transient, disableable and changes only the next explicit Search among UX1D-eligible Offers', async ({ page }) => {
+test('Buyer location is explicit, transient and reached only through the «Фильтры» geo intent', async ({ page }) => {
   await page.addInitScript((point) => {
     Object.defineProperty(window, '__s9GeoCalls', { value: 0, writable: true, configurable: true });
     Object.defineProperty(navigator, 'geolocation', {
@@ -152,8 +152,9 @@ test('Buyer location is explicit, transient, disableable and changes only the ne
   });
 
   await page.goto('/');
-  // First Entry: the start page has no location control; it is on the results screen.
+  // First Entry: the start page has neither the removed pin control nor the filters button.
   await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Фильтры', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { __s9GeoCalls: number }).__s9GeoCalls)).toBe(0);
 
   const input = page.getByLabel('Какой товар ищете?');
@@ -165,40 +166,121 @@ test('Buyer location is explicit, transient, disableable and changes only the ne
   await expect(page.getByText(geolessLocationName)).toHaveCount(0);
   expect(searchRequests).toBe(1);
 
-  await page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true }).click();
-  await expect(page.getByText('Местоположение будет учтено при следующем поиске.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Не учитывать местоположение', exact: true })).toBeVisible();
+  // stage #5: the results header carries «Фильтры» (B07) with the sort radiogroup and the distance chips —
+  // no price block (stage #6).
+  await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Сортировка' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Сначала ближе' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Сначала актуальнее' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Расстояние' })).toBeVisible();
+  for (const chip of ['до 1 км', 'до 3 км', 'до 5 км', 'Любое']) {
+    await expect(page.getByRole('radio', { name: chip, exact: true })).toBeVisible();
+  }
+  await expect(page.getByText('Цена', { exact: false })).toHaveCount(0);
+
+  // Selecting «Сначала ближе» is itself the explicit geo intent: the prompt fires without any other button.
+  await page.getByRole('radio', { name: 'Сначала ближе' }).click();
   expect(await page.evaluate(() => (window as unknown as { __s9GeoCalls: number }).__s9GeoCalls)).toBe(1);
   expect(searchRequests).toBe(1);
 
-  const postRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
-  await input.press('Enter');
+  const postRequest = page.waitForRequest((request) => {
+    if (new URL(request.url()).pathname !== '/api/search') return false;
+    return request.postData()?.includes('"sort":"distance"') ?? false;
+  });
+  await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
+  await expect(page.getByRole('button', { name: 'Фильтры, активно 1' })).toBeVisible();
   expect((await postRequest).method()).toBe('POST');
   await expectCardOrder(page, [nearLocationName, farLocationName]);
+  await expect(page.getByRole('button', { name: 'Убрать фильтр Сначала ближе' })).toBeVisible();
   expect(searchRequests).toBe(2);
 
-  await page.getByRole('button', { name: 'Не учитывать местоположение', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toBeVisible();
-  expect(searchRequests).toBe(2);
+  // The applied sort chip removes itself and returns to «Сначала актуальнее».
+  await page.getByRole('button', { name: 'Убрать фильтр Сначала ближе' }).click();
+  await expect(page.getByRole('button', { name: 'Фильтры, активно 1' })).toHaveCount(0);
+  expect(searchRequests).toBe(3);
+  await expectCardOrder(page, [nearLocationName, farLocationName]);
 
-  const fallbackRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
-  await input.press('Enter');
-  expect((await fallbackRequest).method()).toBe('GET');
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
-
-  await page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Не учитывать местоположение', exact: true })).toBeVisible();
+  // Reload: the transient location is gone, geolocation is not re-requested, the default Search is GET.
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { __s9GeoCalls: number }).__s9GeoCalls)).toBe(0);
-
   await page.getByLabel('Какой товар ищете?').fill(productName);
   const reloadRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await page.getByLabel('Какой товар ищете?').press('Enter');
   expect((await reloadRequest).method()).toBe('GET');
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
 });
 
-test('browser geolocation failure is non-blocking and ordinary Search remains GET', async ({ page }) => {
+test('the distance radius filters the visible results instantly and the empty-filtered state follows B07', async ({ page }) => {
+  // The mocked buyer sits far away from both fixtures, so «до 1 км» filters everything out and the
+  // B07 «С такими фильтрами ничего нет» state appears.
+  await page.addInitScript((point) => {
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition(success: PositionCallback) {
+          success({
+            coords: {
+              latitude: point.latitude,
+              longitude: point.longitude,
+              accuracy: 10,
+              altitude: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+              toJSON: () => ({}),
+            },
+            timestamp: Date.now(),
+            toJSON: () => ({}),
+          } as GeolocationPosition);
+        },
+      },
+    });
+  }, { latitude: 0, longitude: 0 });
+
+  await page.goto('/');
+  const input = page.getByLabel('Какой товар ищете?');
+  await input.fill(productName);
+  await input.press('Enter');
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
+
+  await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
+  await page.getByRole('radio', { name: 'Сначала ближе' }).click();
+  await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
+  // Both fixtures are thousands of kilometres away, so freshness keeps «far» above «near» even in this mode;
+  // the point of the test is the radius filtering below.
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  // The applied summary line follows B07: count · distance · sort.
+  await expect(page.getByText('2 предложения · сначала ближе').first()).toBeVisible();
+
+  // A finite radius applies instantly from the sheet and can empty the visible set.
+  await page.getByRole('button', { name: /^Фильтры(, активно \d+)?$/ }).click();
+  await page.getByRole('radio', { name: 'до 1 км', exact: true }).click();
+  await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
+  await expect(page.getByRole('button', { name: 'Фильтры, активно 2' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Убрать фильтр до 1 км' })).toBeVisible();
+  await expect(page.getByRole('article')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'С такими фильтрами ничего нет' })).toBeVisible();
+  await expect(page.getByText('Без фильтров по запросу')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Сбросить фильтры' }).click();
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expect(page.getByRole('button', { name: 'Фильтры, активно 2' })).toHaveCount(0);
+});
+
+test('the filters sheet is fully translated in Kazakh', async ({ page }) => {
+  await page.context().addCookies([{ name: 'kaida_locale', value: 'kk', domain: '127.0.0.1', path: '/' }]);
+  await page.goto('/');
+  const input = page.getByLabel('Қандай тауар іздейсіз?');
+  await input.fill(productName);
+  await input.press('Enter');
+  await page.getByRole('button', { name: 'Фильтрлер', exact: true }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Сұрыптау' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Алдымен жақын' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Кез келген', exact: true })).toBeVisible();
+});
+
+test('geolocation denial keeps «Актуальнее» honest, resets the radius and offers the B07 retry', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
@@ -210,19 +292,35 @@ test('browser geolocation failure is non-blocking and ordinary Search remains GE
     });
   });
 
+  let searchRequests = 0;
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === '/api/search') searchRequests += 1;
+  });
+
   await page.goto('/');
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill(productName);
   await input.press('Enter');
   await expectCardOrder(page, [farLocationName, nearLocationName]);
+  expect(searchRequests).toBe(1);
 
-  await page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true }).click();
-  await expect(page.getByText('Не удалось определить местоположение. Поиск работает без учёта расстояния.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Попробовать снова', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
+  await page.getByRole('radio', { name: 'Сначала ближе' }).click();
+  await expect(page.getByText('Не удалось определить местоположение')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Разрешить геолокацию' })).toBeVisible();
 
-  const requestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
-  await input.press('Enter');
-  expect((await requestPromise).method()).toBe('GET');
+  // The denial reverted the geo-dependent draft: the ordinary Search keeps working as «Актуальнее».
+  await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
+  await expect(page.getByRole('button', { name: 'Фильтры, активно 1' })).toHaveCount(0);
+  expect(searchRequests).toBe(1);
+  await expectCardOrder(page, [farLocationName, nearLocationName]);
+
+  // The banner retry button re-requests the permission (still denied here) and stays concise.
+  await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
+  await page.getByRole('radio', { name: 'Сначала ближе' }).click();
+  await page.getByRole('button', { name: 'Разрешить геолокацию' }).click();
+  await expect(page.getByText('Не удалось определить местоположение')).toBeVisible();
+  expect(searchRequests).toBe(1);
   await expectCardOrder(page, [farLocationName, nearLocationName]);
 });
 
@@ -232,6 +330,17 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
     expect(response.status()).toBe(400);
     expect((await response.json()).error.code).toBe('INVALID_QUERY');
   }
+
+  // stage #5: the additive sort mode is strict — garbage is rejected, and client-side numeric weights are
+  // rejected by the strict request schema (weights belong to the server-side SearchRankingPolicy only).
+  const badSort = await request.get('/api/search', { params: { q: productName, sort: 'cheapest' } });
+  expect(badSort.status()).toBe(400);
+  expect((await badSort.json()).error.code).toBe('INVALID_SEARCH_REQUEST');
+  const weightsPost = await request.post('/api/search', { data: { q: productName, buyerLocation, freshnessWeight: 0.9, distanceWeight: 0.1 } });
+  expect(weightsPost.status()).toBe(400);
+  expect((await weightsPost.json()).error.code).toBe('INVALID_SEARCH_REQUEST');
+  const distanceSortGet = await request.get('/api/search', { params: { q: productName, sort: 'distance' } });
+  expect(distanceSortGet.status()).toBe(200);
 
   const getCanonical = await request.get('/api/search', { params: { q: productName } });
   const getAlias = await request.get('/api/search', { params: { q: aliasName } });
@@ -256,6 +365,9 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
   const postCanonicalBody = await postCanonical.json();
   const postAliasBody = await postAlias.json();
   expect(postCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId]);
+  // stage #5: the derived whole-meter distance is public for geo-known Offers of a location-aware request.
+  expect(postCanonicalBody.offers[0].distanceMeters).toBe(0);
+  expect(postCanonicalBody.offers[1].distanceMeters).toBeGreaterThan(10000);
   expect(postAliasBody.offers.map((offer: { id: string }) => offer.id)).toEqual(
     postCanonicalBody.offers.map((offer: { id: string }) => offer.id),
   );

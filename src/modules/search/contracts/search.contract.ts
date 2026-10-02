@@ -4,6 +4,10 @@ import { pointPublicContactsSchema } from '../../locations/details/point-public-
 
 export const searchQuerySchema = z.string().trim().min(1, 'Введите название товара.');
 
+// stage #5: the buyer UI/API pass only the sort mode, never numeric weights; the server-side SearchRankingPolicy
+// maps the mode onto the current weights (search-ranking-policy.config.ts).
+export const searchSortModeSchema = z.enum(['actuality', 'distance']);
+
 export const searchOfferSchema = z.object({
   id: z.uuid(),
   // name is the Seller's own title; id is the catalog link when the card has one (seller-showcase-editor).
@@ -36,6 +40,9 @@ export const searchOfferSchema = z.object({
   coverPhotoId: z.uuid().optional(),
   // offer-actuality: whole days since the Seller's last confirmation (badge «Сегодня» … «6 дней») and the tier.
   actuality: z.object({ days: z.number().int().min(0), ageing: z.boolean() }).optional(),
+  // stage #5: derived whole-meter distance, present only on geo-known Offers of a request that carried the buyer
+  // location (any sort mode); raw Buyer/Seller coordinates never appear in the public DTO.
+  distanceMeters: z.number().int().nonnegative().optional(),
   // Present only while the translator is enabled and the comment is not already in the interface locale.
   sellerCommentTranslation: z.discriminatedUnion('status', [
     z.object({

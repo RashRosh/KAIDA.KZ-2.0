@@ -1,12 +1,27 @@
 import type { SearchOffer } from '../contracts/search.contract';
 import type { BuyerLocation } from '../contracts/buyer-location.contract';
+import type { SearchRankingPolicy, SearchSortMode } from '../config/search-ranking-policy.config';
+import type { ActualityPolicy } from '../../offers/actuality/actuality';
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
+const HOUR_MS = 60 * 60 * 1000;
 
 export type SearchRankingCandidate = {
   offer: SearchOffer;
   lastConfirmedAt: Date;
   locationGeo: BuyerLocation | null;
+};
+
+export type RankedSearchCandidate = SearchRankingCandidate & {
+  // S9 whole-meter distance used for ranking; null when the Offer's Location has no geo.
+  rankingDistanceMeters: number | null;
+};
+
+export type SearchRankingOptions = {
+  now: Date;
+  actualityPolicy: ActualityPolicy;
+  rankingPolicy: SearchRankingPolicy;
+  sortMode: SearchSortMode;
 };
 
 function toRadians(degrees: number): number {
@@ -46,18 +61,52 @@ export function compareActualityTier(a: { lastConfirmedAt: Date }, b: { lastConf
   return aAgeing === bAgeing ? 0 : aAgeing ? 1 : -1;
 }
 
+// stage #5 (slice contract §2.4): absolute freshness score inside the Offer's own tier — no result-set normalization.
+// The spans follow the freshness tier boundaries of the actuality policy (defaults: fresh 48h, ageing 48h…168h),
+// so scoring can never disagree with the tier rule: the newest Offer of a tier scores ≈ 1 and decays to 0 at its end.
+export function freshnessScore(lastConfirmedAt: Date, now: Date, actualityPolicy: ActualityPolicy): number {
+  const ageMs = Math.max(0, now.getTime() - lastConfirmedAt.getTime());
+  const freshSpanMs = actualityPolicy.ageingHours * HOUR_MS;
+  if (ageMs < freshSpanMs) return Math.max(0, 1 - ageMs / freshSpanMs);
+  const ageingSpanMs = (actualityPolicy.hiddenHours - actualityPolicy.ageingHours) * HOUR_MS;
+  return Math.max(0, 1 - (ageMs - freshSpanMs) / ageingSpanMs);
+}
+
+// Absolute decaying distance score (slice contract §2.4): 0 km ≈ 1, smoothly decreasing; never normalized
+// against the other Offers of the result set.
+export function distanceScore(rankingDistanceMeters: number): number {
+  return 1 / (1 + rankingDistanceMeters / 1000);
+}
+
+// A geo-less Offer gets no distance component at all — its freshness part is not renormalized (contract §2.6).
+function weightedScore(
+  candidate: SearchRankingCandidate,
+  rankingDistanceMeters: number | null,
+  weights: SearchRankingPolicy[SearchSortMode],
+  options: SearchRankingOptions,
+): number {
+  const fresh = freshnessScore(candidate.lastConfirmedAt, options.now, options.actualityPolicy);
+  if (rankingDistanceMeters === null) return fresh * weights.freshnessWeight;
+  return fresh * weights.freshnessWeight + distanceScore(rankingDistanceMeters) * weights.distanceWeight;
+}
+
 export function rankSearchOfferCandidates(
   candidates: readonly SearchRankingCandidate[],
-  buyerLocation?: BuyerLocation,
-  ageingSince?: Date,
-): SearchRankingCandidate[] {
+  buyerLocation: BuyerLocation | undefined,
+  ageingSince: Date | undefined,
+  options: SearchRankingOptions,
+): RankedSearchCandidate[] {
   if (!buyerLocation) {
-    return [...candidates].sort((a, b) => compareActualityTier(a, b, ageingSince) || compareFreshnessThenId(a, b));
+    // Without Buyer location Search ranks by pure freshness semantics — the weights are not involved at all.
+    return [...candidates]
+      .sort((a, b) => compareActualityTier(a, b, ageingSince) || compareFreshnessThenId(a, b))
+      .map((candidate) => ({ ...candidate, rankingDistanceMeters: null }));
   }
 
+  const weights = options.rankingPolicy[options.sortMode];
   const ranked = candidates.map((candidate) => ({
     candidate,
-    distanceMeters: candidate.locationGeo === null
+    rankingDistanceMeters: candidate.locationGeo === null
       ? null
       : distanceMetersForRanking(buyerLocation, candidate.locationGeo),
   }));
@@ -65,13 +114,11 @@ export function rankSearchOfferCandidates(
   ranked.sort((a, b) => {
     const tier = compareActualityTier(a.candidate, b.candidate, ageingSince);
     if (tier !== 0) return tier;
-    if (a.distanceMeters === null && b.distanceMeters !== null) return 1;
-    if (a.distanceMeters !== null && b.distanceMeters === null) return -1;
-    if (a.distanceMeters !== null && b.distanceMeters !== null && a.distanceMeters !== b.distanceMeters) {
-      return a.distanceMeters - b.distanceMeters;
-    }
+    const aScore = weightedScore(a.candidate, a.rankingDistanceMeters, weights, options);
+    const bScore = weightedScore(b.candidate, b.rankingDistanceMeters, weights, options);
+    if (aScore !== bScore) return aScore > bScore ? -1 : 1;
     return compareFreshnessThenId(a.candidate, b.candidate);
   });
 
-  return ranked.map(({ candidate }) => candidate);
+  return ranked.map(({ candidate, rankingDistanceMeters }) => ({ ...candidate, rankingDistanceMeters }));
 }

@@ -3,25 +3,34 @@
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
-import { offerCount } from '../../../i18n/format';
+import { offerCount, offersCount, showOffersLabel } from '../../../i18n/format';
 import { buyerLocationSchema, type BuyerLocation } from '../../../modules/search/contracts/buyer-location.contract';
 import { searchQuerySchema, searchResponseSchema, type SearchResponse } from '../../../modules/search/contracts/search.contract';
+import { filterOffersByRadius } from '../../../modules/search/radius-filter';
+import type { SearchSortMode } from '../../../modules/search/config/search-ranking-policy.config';
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
+import { Sheet } from '../../seller/_kaida/ui';
 import { useSellerEntry } from './seller-entry';
 
 // buyer-screens-mockup · search start (no frame, mockup classes) and results (B01). The search behavior is the one of
 // S0 / S7 / S9: explicit submit, optional transient buyer location, popular queries, the query kept in the address.
+// stage #5 (B07): «Фильтры» — sorting «Сначала ближе»/«Сначала актуальнее» and the distance radius; the standalone
+// pin toggle is gone — selecting «Сначала ближе» or a finite radius is itself the explicit geolocation intent.
 
 type SearchState =
   | { kind: 'initial' | 'loading' | 'validation' | 'error' }
   | { kind: 'success'; result: SearchResponse };
 
 type BuyerLocationState =
-  | { kind: 'not_enabled' }
-  | { kind: 'requesting' }
-  | { kind: 'enabled'; point: BuyerLocation }
-  | { kind: 'error' };
+  | { kind: 'not_enabled' | 'requesting' | 'error' }
+  | { kind: 'enabled'; point: BuyerLocation };
+
+const RADIUS_OPTIONS = [
+  { meters: 1000, labelKey: 'search.radius1' },
+  { meters: 3000, labelKey: 'search.radius3' },
+  { meters: 5000, labelKey: 'search.radius5' },
+] as const;
 
 const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс', 'Яблоки'] as const;
 const DEMO_SEEN_KEY = 'kaida_fe_demo_seen';
@@ -38,10 +47,18 @@ export function SearchScreen() {
   const [shown, setShown] = useState<SearchResponse | null>(null);
   const writtenQuery = useRef<string | null>(null);
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
+  // stage #5: applied filter values; the sheet edits drafts and «Показать N предложений» commits them.
+  const [sortMode, setSortMode] = useState<SearchSortMode>('actuality');
+  const [radiusMeters, setRadiusMeters] = useState<number | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [draftSort, setDraftSort] = useState<SearchSortMode>('actuality');
+  const [draftRadius, setDraftRadius] = useState<number | null>(null);
   const pending = useRef(false);
-  const lastSearch = useRef<{ query: string; location?: BuyerLocation } | null>(null);
+  const lastSearch = useRef<{ query: string; location?: BuyerLocation; sortMode: SearchSortMode } | null>(null);
   const localeRef = useRef(locale);
   const previousLocaleRef = useRef(locale);
+  const sortModeRef = useRef(sortMode);
+  const locationRef = useRef<BuyerLocation | undefined>(undefined);
   const input = useRef<HTMLInputElement>(null);
   const seller = useSellerEntry();
   const loading = state.kind === 'loading';
@@ -76,32 +93,42 @@ export function SearchScreen() {
   }
 
   useEffect(() => { localeRef.current = locale; }, [locale]);
+  useEffect(() => { sortModeRef.current = sortMode; }, [sortMode]);
 
-  // A language change re-reads the shown results: pack and unit labels and comment translations follow the locale.
+  // A language change re-reads the shown results with the same request (query, location, sort mode): pack and unit
+  // labels and comment translations follow the locale; the applied filters and the results are kept.
   useEffect(() => {
     if (previousLocaleRef.current === locale) return;
     previousLocaleRef.current = locale;
-    if (!shown || shown.offers.length === 0) return;
+    const last = lastSearch.current;
+    if (!shown || shown.offers.length === 0 || !last) return;
     let active = true;
-    const current = shown;
-    void fetch(`/api/search?${new URLSearchParams({ q: current.query, locale })}`, { cache: 'no-store' })
+    const request = last.location
+      ? fetch(`/api/search?locale=${locale}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: last.query, buyerLocation: last.location, sort: last.sortMode }),
+        cache: 'no-store',
+      })
+      : fetch(`/api/search?${new URLSearchParams({ q: last.query, locale, sort: last.sortMode })}`, { cache: 'no-store' });
+    void request
       .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
       .then((localized) => {
         if (!active || !localized) return;
         const byId = new Map(localized.offers.map((offer) => [offer.id, offer]));
-        setShown({
+        setShown((current) => current && ({
           ...current,
           offers: current.offers.map((offer) => {
             const fresh = byId.get(offer.id);
             return { ...offer, pack: fresh ? fresh.pack : offer.pack, price: fresh?.price ?? offer.price, sellerCommentTranslation: fresh?.sellerCommentTranslation };
           }),
-        });
+        }));
       })
       .catch(() => undefined);
     return () => { active = false; };
   }, [locale, shown]);
 
-  const executeSearch = useCallback(async (rawQuery: string, buyerLocation?: BuyerLocation) => {
+  const executeSearch = useCallback(async (rawQuery: string, buyerLocation: BuyerLocation | undefined, mode: SearchSortMode) => {
     if (pending.current) return;
     const parsed = searchQuerySchema.safeParse(rawQuery);
     if (!parsed.success) {
@@ -110,7 +137,7 @@ export function SearchScreen() {
       return;
     }
     pending.current = true;
-    lastSearch.current = { query: parsed.data, location: buyerLocation };
+    lastSearch.current = { query: parsed.data, location: buyerLocation, sortMode: mode };
     setStarted(true);
     setState({ kind: 'loading' });
     try {
@@ -118,11 +145,11 @@ export function SearchScreen() {
         ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, buyerLocation }),
+          body: JSON.stringify({ q: parsed.data, buyerLocation, sort: mode }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, locale: localeRef.current })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, locale: localeRef.current, sort: mode })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
@@ -157,7 +184,7 @@ export function SearchScreen() {
       writtenQuery.current = addressQuery;
       setQuery(addressQuery);
       if (addressQuery) {
-        void executeSearch(addressQuery);
+        void executeSearch(addressQuery, locationRef.current, sortModeRef.current);
       } else {
         setShown(null);
         setStarted(false);
@@ -167,10 +194,22 @@ export function SearchScreen() {
     return () => window.clearTimeout(timer);
   }, [executeSearch, addressQuery]);
 
+  // stage #5: requesting the browser geolocation happens only through an explicit geo intent of the buyer —
+  // selecting «Сначала ближе» or a finite distance in the sheet (or the banner's retry button). On denial or
+  // unavailability the ordinary Search keeps working: «Сначала актуальнее» stays, a finite radius resets to «Любое»,
+  // and the sheet banner carries the concise feedback and the retry (contract §4 «Geolocation intent»).
+  function revertGeoDependentSettings() {
+    setSortMode('actuality');
+    setRadiusMeters(null);
+    setDraftSort('actuality');
+    setDraftRadius(null);
+  }
+
   function requestBuyerLocation() {
     if (locationState.kind === 'requesting') return;
     if (!navigator.geolocation) {
       setLocationState({ kind: 'error' });
+      revertGeoDependentSettings();
       return;
     }
     setLocationState({ kind: 'requesting' });
@@ -178,37 +217,79 @@ export function SearchScreen() {
       (position) => {
         const parsed = buyerLocationSchema.safeParse({ latitude: position.coords.latitude, longitude: position.coords.longitude });
         setLocationState(parsed.success ? { kind: 'enabled', point: parsed.data } : { kind: 'error' });
+        if (!parsed.success) revertGeoDependentSettings();
       },
-      () => setLocationState({ kind: 'error' }),
+      () => {
+        setLocationState({ kind: 'error' });
+        revertGeoDependentSettings();
+      },
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 },
     );
   }
 
   const buyerLocation = locationState.kind === 'enabled' ? locationState.point : undefined;
+  useEffect(() => { locationRef.current = buyerLocation; }, [buyerLocation]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await executeSearch(query, buyerLocation);
+    await executeSearch(query, buyerLocation, sortMode);
   }
 
   function quickSearch(term: string) {
     if (loading) return;
     setQuery(term);
-    void executeSearch(term, buyerLocation);
+    void executeSearch(term, buyerLocation, sortMode);
   }
 
   const locationEnabled = locationState.kind === 'enabled';
-  const locationLabel = locationEnabled
-    ? t('search.locationDisable')
-    : locationState.kind === 'requesting'
-      ? t('search.locationLoading')
-      : locationState.kind === 'error' ? t('search.tryAgain') : t('search.locationEnable');
-  const locationStatus = locationEnabled ? t('search.locationEnabled') : locationState.kind === 'error' ? t('search.locationError') : '';
-  const feedback = loading
-    ? t('search.loadingOffers')
-    : state.kind === 'success'
-      ? state.result.offers.length === 0 ? t('search.empty') : offerCount(locale, state.result.offers.length)
-      : '';
+
+  function radiusLabel(meters: number): string {
+    return t(RADIUS_OPTIONS.find((option) => option.meters === meters)?.labelKey ?? 'search.radiusAny');
+  }
+
+  function openSheet() {
+    setDraftSort(sortMode);
+    setDraftRadius(radiusMeters);
+    setSheetOpen(true);
+  }
+
+  function selectSort(mode: SearchSortMode) {
+    setDraftSort(mode);
+    if (mode === 'distance' && !locationEnabled) requestBuyerLocation();
+  }
+
+  function selectRadius(meters: number | null) {
+    setDraftRadius(meters);
+    if (meters !== null && !locationEnabled) requestBuyerLocation();
+  }
+
+  // «Показать N предложений» (B07): commit the drafts. The radius is a client-side presentation filter, so it applies
+  // without a request; a sort-mode change re-runs the search (ranking stays a server authority). A geo-dependent
+  // setting commits only with the granted location.
+  function applyFilters() {
+    const nextSort = draftSort === 'distance' && !locationEnabled ? sortMode : draftSort;
+    const nextRadius = locationEnabled ? draftRadius : null;
+    setRadiusMeters(nextRadius);
+    if (nextSort !== sortMode) {
+      setSortMode(nextSort);
+      if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, nextSort);
+    }
+    setSheetOpen(false);
+  }
+
+  // «Сбросить» (B07): back to the defaults «Сначала актуальнее» / «Любое».
+  function resetFilters() {
+    setDraftSort('actuality');
+    setDraftRadius(null);
+    setRadiusMeters(null);
+    if (sortMode !== 'actuality') {
+      setSortMode('actuality');
+      if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, 'actuality');
+    }
+    setSheetOpen(false);
+  }
+
+  const activeFilters = (sortMode !== 'actuality' ? 1 : 0) + (radiusMeters !== null ? 1 : 0);
 
   const form = (compact: boolean) => (
     <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate
@@ -240,20 +321,19 @@ export function SearchScreen() {
       <button
         type="button"
         className="ib"
-        disabled={locationState.kind === 'requesting'}
-        aria-label={locationLabel}
-        aria-pressed={locationEnabled}
-        title={locationLabel}
-        style={locationEnabled ? { color: 'var(--primary-text)', background: 'var(--primary-soft)' } : undefined}
-        onClick={() => { if (locationEnabled) setLocationState({ kind: 'not_enabled' }); else requestBuyerLocation(); }}
+        aria-label={activeFilters > 0 ? t('search.filtersActive', { count: activeFilters }) : t('search.filters')}
+        aria-haspopup="dialog"
+        title={t('search.filters')}
+        style={{ width: 44, position: 'relative', ...(activeFilters > 0 ? { color: 'var(--primary-text)', background: 'var(--primary-soft)' } : {}) }}
+        onClick={openSheet}
       >
-        <Ic name="pin" />
+        <Ic name="filter" />
+        {activeFilters > 0 && <span className="dot" aria-hidden="true" style={{ top: 4, marginLeft: 26 }}>{activeFilters}</span>}
       </button>
     </form>
   );
 
   const validation = state.kind === 'validation' && <div className="fld"><p id="search-validation" className="emsg" role="alert"><Ic name="alert" />{t('search.validation')}</p></div>;
-  const location = locationStatus && <p className="c" role={locationState.kind === 'error' ? 'alert' : 'status'}>{locationStatus}</p>;
 
   const chips = (
     <div className="chips" aria-label={t('search.popularQueries')} role="group">
@@ -261,6 +341,88 @@ export function SearchScreen() {
         <button key={term} type="button" className="chip" disabled={loading} onClick={() => quickSearch(term)}>{term}</button>
       ))}
     </div>
+  );
+
+  const appliedChips: { key: string; label: string; remove: () => void }[] = [];
+  if (sortMode === 'distance') {
+    appliedChips.push({
+      key: 'sort',
+      label: t('search.sortDistance'),
+      remove: () => {
+        setSortMode('actuality');
+        if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, 'actuality');
+      },
+    });
+  }
+  if (radiusMeters !== null) {
+    appliedChips.push({ key: 'radius', label: radiusLabel(radiusMeters), remove: () => setRadiusMeters(null) });
+  }
+
+  const appliedChipsRow = appliedChips.length > 0 && (
+    <div style={{ display: 'flex', gap: 6, overflow: 'hidden', padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }} aria-label={t('search.activeFilters')}>
+      {appliedChips.map((chip) => (
+        <button key={chip.key} type="button" className="chip on" style={{ height: 32, padding: '0 8px 0 12px', fontSize: 13 }}
+          aria-label={t('search.removeFilter', { label: chip.label })}
+          onClick={chip.remove}>
+          {chip.label}<Ic name="close" style={{ width: 16, height: 16 }} />
+        </button>
+      ))}
+    </div>
+  );
+
+  const geoNeeded = draftSort === 'distance' || draftRadius !== null;
+  // After a denial the geo-dependent drafts are reverted, but the concise feedback and the retry (B07) stay
+  // visible while the sheet is open.
+  const showLocationBanner = sheetOpen && (geoNeeded || locationState.kind === 'error');
+
+  const filtersSheet = sheetOpen && (
+    <Sheet title={t('search.filtersTitle')} onClose={() => setSheetOpen(false)} closeLabel={t('search.close')}>
+      {showLocationBanner && (
+        <div className="banner gray" role={locationState.kind === 'error' ? 'alert' : 'status'} style={{ gap: 8, padding: 12, borderRadius: 14 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Ic name="locate" className="c2" />
+            <p className="c c2" style={{ flex: 1 }}>
+              {locationState.kind === 'error' ? t('search.locationError') : t('search.locationNeeded')}
+            </p>
+          </div>
+          <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
+            disabled={locationState.kind === 'requesting'} onClick={requestBuyerLocation}>
+            <Ic name="locate" className="sm" />{t('search.allowLocation')}
+          </button>
+        </div>
+      )}
+      <div className="ov">{t('search.sorting')}</div>
+      <div role="radiogroup" aria-label={t('search.sorting')} style={{ display: 'flex', flexDirection: 'column' }}>
+        {(['distance', 'actuality'] as const).map((mode) => (
+          <label key={mode} className="li" style={{ minHeight: 40, padding: '2px 0', position: 'relative' }}>
+            <input type="radio" name="search-sort" className="cbx" checked={draftSort === mode} onChange={() => selectSort(mode)} />
+            <span className={`rd${draftSort === mode ? ' on' : ''}`} aria-hidden="true" />
+            <div className="mid"><div className="t">{mode === 'distance' ? t('search.sortDistance') : t('search.sortActuality')}</div></div>
+          </label>
+        ))}
+      </div>
+      <div className="ov" style={{ marginTop: 2 }}>{t('search.distanceLabel')}</div>
+      <div className="chips" role="radiogroup" aria-label={t('search.distanceLabel')} style={{ gap: 6, flexWrap: 'nowrap' }}>
+        {RADIUS_OPTIONS.map(({ meters, labelKey }) => (
+          <button key={meters} type="button" role="radio" aria-checked={draftRadius === meters}
+            className={`chip${draftRadius === meters ? ' on' : ''}`} style={{ padding: '0 10px', height: 34 }}
+            onClick={() => selectRadius(meters)}>
+            {t(labelKey)}
+          </button>
+        ))}
+        <button type="button" role="radio" aria-checked={draftRadius === null}
+          className={`chip${draftRadius === null ? ' on' : ''}`} style={{ padding: '0 10px', height: 34 }}
+          onClick={() => selectRadius(null)}>
+          {t('search.radiusAny')}
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 2 }}>
+        <button type="button" className="btn btn-p lg w" onClick={applyFilters}>
+          {showOffersLabel(locale, filterOffersByRadius(shown?.offers ?? [], draftRadius).length)}
+        </button>
+        <button type="button" className="btn btn-g w" style={{ height: 36 }} onClick={resetFilters}>{t('search.reset')}</button>
+      </div>
+    </Sheet>
   );
 
   if (!started) {
@@ -334,34 +496,60 @@ export function SearchScreen() {
   }
 
   const offers = shown?.offers ?? [];
+  // stage #5: the radius is a client-side presentation filter over the complete response (slice contract §2.7).
+  const visibleOffers = filterOffersByRadius(offers, radiusMeters);
+  const filteredEmpty = radiusMeters !== null && offers.length > 0 && visibleOffers.length === 0;
+  const showSummary = !loading && !filteredEmpty && (radiusMeters !== null || sortMode === 'distance');
+  const summaryParts = [offersCount(locale, visibleOffers.length)];
+  if (radiusMeters !== null) summaryParts.push(radiusLabel(radiusMeters));
+  if (sortMode === 'distance') summaryParts.push(t('search.sortDistance'));
+  const feedback = loading
+    ? t('search.loadingOffers')
+    : state.kind === 'success'
+      ? visibleOffers.length === 0 ? t('search.empty') : offerCount(locale, visibleOffers.length)
+      : '';
+
   return (
     <BuyerScreen
       section="search"
-      overlay={seller.modal}
+      overlay={<> {seller.modal} {filtersSheet} </>}
       top={<header className="bar" style={{ padding: '0 12px', gap: 8 }}>{form(true)}</header>}
     >
-      <main className="body" style={{ gap: 12, padding: 12 }} aria-busy={loading || undefined}>
+      {appliedChipsRow}
+      <main className="body" style={filteredEmpty
+        ? { justifyContent: 'center', alignItems: 'center', gap: 14, padding: 24, textAlign: 'center' }
+        : { gap: 12, padding: 12 }} aria-busy={loading || undefined}>
         {validation}
-        {location}
-        <p className="c">{buyerLocation ? t('buyer.captionNear') : t('buyer.captionFresh')}</p>
-        <p className={offers.length > 0 && !loading ? 'vh' : 'c'} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
+        {showSummary
+          ? <p className="c">{summaryParts.join(' · ')}</p>
+          : <p className="c">{buyerLocation ? t('buyer.captionNear') : t('buyer.captionFresh')}</p>}
+        {!filteredEmpty && <p className={visibleOffers.length > 0 && !loading ? 'vh' : 'c'} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>}
         {state.kind === 'error' && (
           <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14, gap: 8 }}>
             <div style={{ display: 'flex', gap: 10 }}><Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('search.error')}</p></div>
             {lastSearch.current && (
               <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
-                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, lastSearch.current.location)}>
+                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sortMode)}>
                 <Ic name="refresh" className="sm" />{t('cabinet.retry')}
               </button>
             )}
           </div>
         )}
-        {loading && offers.length === 0 && <ResultSkeletons />}
+        {loading && visibleOffers.length === 0 && <ResultSkeletons />}
         {/* Nothing to show (empty result, error, empty query): keep the popular queries as the way forward. */}
-        {!loading && offers.length === 0 && chips}
-        {offers.length > 0 && (
+        {!loading && visibleOffers.length === 0 && !filteredEmpty && chips}
+        {filteredEmpty && (
+          <>
+            <div className="lic" style={{ width: 64, height: 64, borderRadius: 20 }}><Ic name="filter" className="lg" /></div>
+            <h1 className="h2" style={{ margin: 0 }}>{t('search.filteredEmptyTitle')}</h1>
+            <p className="t c2" style={{ margin: 0 }}>{t('search.filteredEmptyText', { query, count: offersCount(locale, offers.length) })}</p>
+            <button type="button" className="btn btn-p lg w" onClick={resetFilters}>{t('search.resetFilters')}</button>
+            <button type="button" className="btn btn-g w" onClick={openSheet}>{t('search.editFilters')}</button>
+          </>
+        )}
+        {visibleOffers.length > 0 && (
           <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {offers.map((offer) => <li key={offer.id}><ResultCard offer={offer} /></li>)}
+            {visibleOffers.map((offer) => <li key={offer.id}><ResultCard offer={offer} distanceMeters={offer.distanceMeters} /></li>)}
           </ul>
         )}
       </main>
