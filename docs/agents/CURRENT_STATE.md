@@ -16,23 +16,24 @@ Stage 1a — Address Directory для Almaty pilot. Boundary строго relati
 
 ## Last completed
 
-- Exact-SHA real-data proof `36931827113` on `c1ddbf9` — PASS/full success: все proof-шаги (clean-DB guard, migrate, pinned Geofabrik PBF, boundary+counts, real importer+idempotency, query latency+EXPLAIN) и embedded `pnpm verify` (включая E2E) green.
-- Root cause of prior verify failure was workflow-only: proof-workflow не устанавливал Playwright Chromium (в отличие от `ci.yml`). Добавлен шаг `Install Chromium` перед `pnpm verify`; без ослабления проверок и без правок продукта/контракта.
-- Independent branch CI `KAIDA verify` на том же head `c1ddbf9` — success (оба run: 36931770044, 36931776050).
+- Exact-SHA real-data proof `36931827113` + independent branch CI на `c1ddbf9` — PASS.
+- Current head `0e2fd5b` green: KAIDA verify `36933053991` — SUCCESS.
+- Automated §10 evidence собран локально на production build (head `0e2fd5b`): оба e2e `tests/e2e/address-directory.spec.ts` PASS (Trading Points workspace + embedded card flow; выбор «Зелёный базар» → canonical address+geo `43.263, 76.956`, attribution OSM, manual fallback). Остальные сценарии §10 подтверждены existing green e2e/integration (ручной адрес без блокировки, «Местоположение не задано», изменение текста после выбора = manual, geo не сохраняется, atomic resolve + stale reject в integration).
 
 ## Verification
 
-- Exact-SHA real-data proof на `c1ddbf9`: PASS.
-- Independent branch CI на `c1ddbf9`: PASS (2 runs green).
-- Product Owner manual acceptance: PENDING — остановка по инструкции.
-
-## Blocker
-
-Нет открытого technical blocker. Финальный gate — Product Owner manual acceptance.
+- Current head `0e2fd5b`: green (technical gates closed).
+- Automated manual-acceptance evidence: PASS (e2e на production build).
+- Product Owner manual acceptance: **PASS** — PO прошёл ручной тест на телефоне через `http://192.168.8.71:3000/seller/points` (production-сервер поднят локально и после теста остановлен). «все прощелкал. все норм. принято».
+- Pre-merge diff audit PR #72: **APPROVED FOR MERGE** — чисто: closed contracts сохранены, риски доказаны, manual acceptance пройден лично PO. Единственная заметка — статус `SLICE_CONTRACT.md` (обновлён здесь же).
 
 ## Next action
 
-Пройти Product Owner manual acceptance на `c1ddbf9`. Никаких дальнейших изменений/merge/tag до его явного поручения.
+PO поручил мердж PR #72: «поправь и мердж». Выполняется merge branch `slice/address-directory` в `main`; tag пока не поручен.
+
+## Blocker
+
+Технических и acceptance gates закрыты. Остаётся только решение Product Owner о merge PR #72 (и, при желании, checkpoint tag).
 
 ## Current constraints
 

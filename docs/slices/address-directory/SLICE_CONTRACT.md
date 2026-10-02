@@ -1,8 +1,10 @@
 # KAIDA address directory — Almaty pilot
 
-**Status:** `IMPLEMENTED — REAL-DATA AND MANUAL ACCEPTANCE PENDING`
+**Status:** `ACCEPTED — MERGED`
 
 **Approved:** 2026-10-01 by direct Product Owner instruction: «Утверждают контракт реализуй».
+
+**Manual acceptance:** 2026-10-02 PASS на телефоне («все прощелкал. все норм. принято»).
 
 **Prepared:** 2026-10-01 after repository, data-source, licence and coverage preflight.
 
