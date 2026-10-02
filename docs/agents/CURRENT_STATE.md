@@ -29,7 +29,7 @@ Stage 1a — Address Directory для Almaty pilot. Boundary строго relati
 
 ## Next action
 
-PO поручил мердж PR #72: «поправь и мердж». Выполняется merge branch `slice/address-directory` в `main`; tag пока не поручен.
+Merge PR #72 выполнен: `main` → `4362660`, PR №72 закрыт (state MERGED `2026-10-02T06:22:07Z`). Tag checkpoint не поручен — ждать прямого поручения PO на tag (если нужен). Worktree содержит только локальные/игнорируемые файлы (`next-env.d.ts`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`) — коммитить их нельзя.
 
 ## Blocker
 
