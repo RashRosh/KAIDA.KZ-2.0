@@ -40,8 +40,10 @@
 - ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
   Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
 
-Фактический repository state при обновлении 2026-10-02: `origin/main = 4acdb2a` (Address Directory, stage 1a; base merge `4362660` — PR #72),
-merged-main CI green (run `36973303192`), checkpoint annotated tag `v0.0.44-address-directory` создан PO и запушен на remote. Последний verified checkpoint — `v0.0.44-address-directory` на `4acdb2a`. Перед новой работой состояние всё равно перепроверяется.
+Фактический repository state при обновлении 2026-10-02: `origin/main = 3652278` (Nearby result-first correction; merge `3652278` — PR #73, slice-коммит `4bd5709`),
+merged-main CI green (run `37044132910`), manual acceptance **PASS**. Checkpoint annotated tag `v0.0.45-nearby-result-first`
+создаётся этим docs-коммитом сразу после green CI и пушится на remote; **до фактического создания тег не считать существующим**.
+На момент записи последним фактически существующим verified checkpoint остаётся `v0.0.44-address-directory` на `4acdb2a`. Перед новой работой состояние всё равно перепроверяется.
 
 ---
 
@@ -136,11 +138,13 @@ editorial workbook само по себе ничего не меняет: соп
 
 ## Текущий repository gate
 
-Address Directory (stage 1a) **закрыт**: продан/принят PO, слит PR #72
-(`4362660`, финальный doc-коммит `debd9f0`), merged-main CI на `debd9f0`
-(run `36973303192`) green, manual acceptance **PASS** («все прощелкал. все норм. принято»).
-Последний закрытый verified checkpoint — annotated tag `v0.0.44-address-directory` на `4acdb2a`
-(создан PO и запушен на remote). Порядок следующих stages не меняется.
+Nearby result-first correction (stage #4) **закрыт**: contract APPROVED, реализация слита PR #73
+(slice-коммит `4bd5709`, merge `3652278`), branch CI на `4bd5709` green (push run `37037435942`,
+pull_request run `37037458565`), merged-main CI на `3652278` green (run `37044132910`),
+manual acceptance **PASS** (правильный user flow и отображение Nearby results; точное число карточек PO не утверждал).
+Checkpoint annotated tag `v0.0.45-nearby-result-first` создаётся этим docs-коммитом после green CI;
+до фактического создания тег не считать существующим. Следующий незакрытый stage — **#5**
+(Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние, Issue #12). Порядок stages не меняется.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -150,7 +154,7 @@ Address Directory (stage 1a) **закрыт**: продан/принят PO, с�
 |---|---|---|
 | 1 | Seller Location geo fallback (paste-and-parse, S8 revision) | `docs/slices/seller-location-geo-fallback/SLICE_CONTRACT.md` |
 | 1a | ~~KAIDA address directory на открытых данных (подсказки адреса)~~ — **закрыт** (PR #72, manual acceptance PASS) | `docs/slices/address-directory/SLICE_CONTRACT.md` |
-| 4 | Nearby result-first correction | Issue #34 |
+| 4 | ~~Nearby result-first correction~~ — **закрыт** (PR #73, manual acceptance PASS) | Issue #34, `docs/slices/nearby-result-first/SLICE_CONTRACT.md` |
 | 5 | Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние | Issue #12, `FEATURE_MAP.md` |
 | 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
