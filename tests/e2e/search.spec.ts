@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('lamb: search by the arrow, full offer, responsive layout and refresh', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/welcome');
   await expect(page.getByText('По вашему запросу ничего не найдено.')).toHaveCount(0);
   const searchRegion = page.getByRole('search', { name: 'Поиск предложений' });
   // The arrow appears only while there is text in the field (First Entry).

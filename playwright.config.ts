@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 import { NEARBY_RADIUS_METERS_DEFAULT } from './src/modules/discovery/config/discovery.config';
 import { testDatabaseUrl } from './tests/integration/database';
+import { returningVisitorState } from './tests/e2e/browser-state';
 
 const identityTestSecret = '1111111111111111111111111111111111111111111111111111111111111111';
 
@@ -15,9 +16,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:3100',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    // buyer-screens-mockup: the language is chosen once at the first visit; flows start with it chosen (Russian).
-    // The first-visit choice itself is covered with an empty storage state in buyer-screens.spec.ts.
-    storageState: { cookies: [{ name: 'kaida_locale', value: 'ru', domain: '127.0.0.1', path: '/', expires: -1, httpOnly: false, secure: false, sameSite: 'Lax' }], origins: [] },
+    // Flows start as a returning visitor: the language chosen (Russian) and First Entry already shown (stage 6B, one
+    // central definition in tests/e2e/browser-state.ts). First Entry itself is covered from `firstVisitState`.
+    storageState: returningVisitorState,
   },
   projects: [
     { name: 'mobile', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },

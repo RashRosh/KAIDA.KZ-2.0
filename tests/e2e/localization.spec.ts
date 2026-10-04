@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { chooseLanguageInMore, setLocaleCookie } from './buyer-helpers';
+import { emptyBrowserState } from './browser-state';
 
-// buyer-screens-mockup §8 e (PROJECT_RULES.md §18.4 «Язык»): the language is chosen once at the first visit and later
-// changed only on «Ещё» → «Язык»; saving to the cookie and keeping the route are unchanged.
+// buyer-screens-mockup §8 e (PROJECT_RULES.md §18.4 «Язык»): no language screen exists; the language is the saved choice,
+// else the browser's, else Russian, and changes on First Entry and on «Ещё» → «Язык»; saving to the cookie and keeping
+// the route are unchanged.
 
 test('«Ещё» changes the language in one sheet, keeps the route and the choice survives reload', async ({ page }) => {
   await page.goto('/more');
@@ -13,7 +15,7 @@ test('«Ещё» changes the language in one sheet, keeps the route and the choi
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
   await expect(page.getByRole('button', { name: /^Тіл/ })).toContainText('Қазақша');
-  await page.goto('/');
+  await page.goto('/welcome');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
 
   await chooseLanguageInMore(page, 'Русский');
@@ -22,16 +24,14 @@ test('«Ещё» changes the language in one sheet, keeps the route and the choi
 });
 
 test.describe('first visit', () => {
-  test.use({ storageState: { cookies: [], origins: [] }, locale: 'kk-KZ' });
+  test.use({ storageState: emptyBrowserState, locale: 'kk-KZ' });
 
-  test('suggests the browser Kazakh on the first-visit choice, and a saved cookie wins afterwards', async ({ page, context }) => {
+  test('the browser Kazakh decides the first render without a language screen, and a saved cookie wins afterwards', async ({ page, context }) => {
     await page.goto('/');
+    await expect(page).toHaveURL(/\/welcome$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
-    await expect(page.getByText('Тілді таңдаңыз')).toBeVisible();
-    const buttons = page.getByRole('button', { name: /^(Русский|Қазақша)$/ });
-    await expect(buttons).toHaveText(['Қазақша', 'Русский']);
-    await buttons.first().click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
+    await expect(page.getByText('Тілді таңдаңыз')).toHaveCount(0);
 
     await setLocaleCookie(context, 'ru');
     await page.reload();

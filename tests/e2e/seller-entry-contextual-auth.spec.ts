@@ -33,7 +33,7 @@ async function cleanup(phone: string) {
   }
 }
 
-// buyer-screens-mockup: the seller entry is «Я продавец — моя витрина» on buyer «Ещё» and the line on the search start.
+// buyer-screens-mockup: the seller entry is «Я продавец — моя витрина» on buyer «Ещё» and the line on First Entry (`/welcome`).
 function moreSellerEntry(page: Page) {
   return page.getByRole('link', { name: 'Я продавец — моя витрина', exact: true });
 }
@@ -67,11 +67,11 @@ test('seller-intent cancel keeps buyer context and cannot leak into ordinary log
   const phone = phoneFor(testInfo.project.name, 'cancel');
   await cleanup(phone);
   try {
-    await page.goto('/');
+    await page.goto('/welcome');
     const sellerLine = startSellerLine(page);
     await sellerLine.click();
     await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/welcome');
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toBeHidden();
     await expect(sellerLine).toBeFocused();
@@ -108,9 +108,9 @@ test('seller-intent OTP success routes to the first-run workspace', async ({ pag
   const phone = phoneFor(testInfo.project.name, 'seller');
   await cleanup(phone);
   try {
-    await page.goto('/');
+    await page.goto('/welcome');
     await startSellerLine(page).click();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/welcome');
     await authenticateInOpenModal(page, phone);
 
     await expect(page).toHaveURL('/seller');
