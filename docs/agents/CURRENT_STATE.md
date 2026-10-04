@@ -14,9 +14,9 @@
 (`f9dd7cf`) — неизменный evidence.
 
 - **6A** — закрыт (PR #80). Контракт 6B — в `main` (PR #81).
-- **6B First Entry correction** — реализован на ветке `slice/first-entry-correction` (реализация `cc94d7e`):
-  `/welcome` = First Entry, `/` = Search, постоянный intro-маркер, без языкового экрана, переключатель языка на
-  First Entry. Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только после PASS.
+- **6B First Entry correction** — manual acceptance **PASS**; PR #84 (`slice/first-entry-correction`). После green
+  merged-main CI создаётся annotated tag `v0.0.48-first-entry-correction` на merge-коммите; до создания тег не считать
+  существующим.
 
 ## Verification (local)
 
@@ -25,8 +25,8 @@ Unit 338/338, integration 197/197, typecheck и eslint чистые, полны�
 
 ## Next action
 
-1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
-2. После PASS: PR реализации, merge, затем 6C (Search Home + состояние поиска) — отдельный контракт.
+1. Merged-main CI → создать и запушить tag `v0.0.48-first-entry-correction` → STOP.
+2. 6C (Search Home + состояние поиска) — отдельный контракт; не начинать без решения PO.
 
 ## Current constraints
 

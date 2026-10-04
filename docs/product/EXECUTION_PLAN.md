@@ -150,8 +150,10 @@ Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates` соз�
 green) сохраняется неизменной как evidence; новая ветка Rev 3 строится от актуального `main`, из старой берутся только
 полезные hunks/tests. Issue #12 остаётся OPEN.
 
-**Следующий незакрытый шаг — 6B** (First Entry correction); 6A выполнен этим docs-изменением. Порядок 6B → 6C → 6D → 6
-выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
+**6A и 6B закрыты** (6B: PR #84, manual acceptance PASS; checkpoint tag `v0.0.48-first-entry-correction` создаётся на
+merge-коммите после green merged-main CI, до фактического создания тег не считать существующим). **Следующий
+незакрытый шаг — 6C** (Search Home + состояние последнего поиска; контракт ещё не подготовлен, реализацию не начинать
+без решения PO). Порядок 6C → 6D → 6 выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
 внутри структуры, которую сразу заменят.
 
 Решения PO (2026-10-04), которые должны войти в соответствующие Slice Contracts, не сокращаясь:
@@ -185,7 +187,7 @@ green) сохраняется неизменной как evidence; новая �
 | 5 | ~~Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние~~ — **закрыт** (PR #74, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-distance/SLICE_CONTRACT.md` |
 | 5A | ~~Search visibility for addressed Locations without coordinates~~ — **закрыт** (PR #77 + repair PR #78, manual acceptance PASS) | `docs/slices/search-visibility-without-coordinates/SLICE_CONTRACT.md`, Issue #12 |
 | 6A | Process/UX rules maintenance: граница доставки mobile + RU, выбор interaction pattern, язык без отдельного gate (docs) | `PROJECT_RULES.md` §18.4–18.5 |
-| 6B | First Entry correction: `/welcome` отдельно от Search `/`, intro один раз на браузер/устройство, язык на First Entry, без `LanguageGate` | `docs/slices/first-entry-correction/SLICE_CONTRACT.md` |
+| 6B | ~~First Entry correction: `/welcome` отдельно от Search `/`, intro один раз на браузер/устройство, язык на First Entry, без языкового экрана~~ — **закрыт** (PR #84, manual acceptance PASS) | `docs/slices/first-entry-correction/SLICE_CONTRACT.md` |
 | 6C | Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате) | future Slice Contract, после 6B |
 | 6D | Inline-язык в `Ещё` (покупатель и продавец): `Русский \| Қазақша`, сразу, без Sheet/Done | future Slice Contract, после 6C |
 | 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 | Issue #12, future contract (`docs/slices/search-price-sort-range/` rev 3), после 6D |
