@@ -4,28 +4,23 @@
 
 ## Verified base
 
-- Проверено: 2026-10-04 (6-я сессия).
+- Проверено: 2026-10-05 (6-я сессия).
 - `origin/main`: `e07e3de` (контракт 6D слит, PR #87). Последний checkpoint-тег: `v0.0.49-search-home-last-state`.
 
 ## Current task
 
-**Stage 6D — Inline language in «Ещё»** (`docs/slices/inline-language/SLICE_CONTRACT.md`, APPROVED).
-Реализована на ветке `slice/inline-language` (реализация `f1ab8c1`): два варианта `Русский | Қазақша` на месте в `Ещё`
-покупателя и продавца, применяются сразу, активный отмечен `aria-pressed`, без листа/радио/«Готово»; E2E меняют язык
-через общий помощник `chooseLanguageInMore`. Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только
-после PASS. Stage 6 Rev 3, Query Log и динамические чипы не начинать.
+**Stage 6D — Inline language in «Ещё»** — реализован (`slice/inline-language`, PR #88): строка «Язык» с компактной
+таблеткой `РУС | ҚАЗ` из макета у покупателя и продавца, применяется сразу, без листа. Manual acceptance **PASS**, branch
+CI green. После green merged-main CI создаётся annotated tag `v0.0.50-inline-language` на merge-коммите; до создания
+тег не считать существующим.
 
-## Verification (local)
-
-Unit 344/344, integration 197/197, eslint чистый; новый E2E (покупатель и продавец, mobile RU) зелёный; полный E2E
-зелёный (единичные нестабильности локальной машины на несвязанных тестах проходят при повторе).
-Неиспользуемые ключи `more.languageTitle`, `more.languageNote`, `more.done` оставлены: локальная папка PO `tmp/` (в git
-нет) на них ссылается и ломает локальный `next build`.
+Дальше — **Stage 6 Rev 3** (сортировка `Расстояние / Цена / Актуальность` с направлением, один vertical slice): контракт
+ещё не подготовлен, реализацию не начинать без решения PO. Затем 6F/6G (Query Log, динамические чипы).
 
 ## Next action
 
-1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
-2. После PASS: PR реализации, merge, checkpoint. Затем Stage 6 Rev 3 — отдельным решением PO.
+1. Merged-main CI → tag `v0.0.50-inline-language`.
+2. Stage 6 Rev 3: подготовить Slice Contract, ждать утверждения.
 
 ## Current constraints
 
@@ -34,3 +29,4 @@ Unit 344/344, integration 197/197, eslint чистый; новый E2E (поку
 - Граница доставки: mobile + русский (`PROJECT_RULES.md` §18.5).
 - Mimosa pre-commit scanner может ложно блокировать новые test-файлы с `pool.query($n)`; не менять код ради него.
 - Issue #12 остаётся OPEN.
+- Неиспользуемые ключи `more.languageTitle`, `more.languageNote`, `more.done` остаются в каталогах (локальная `tmp/` PO на них ссылается).
