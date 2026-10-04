@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { PLAIN_SEARCH_URL } from './browser-state';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 import { proposeNewOffer } from './offer-editor-helpers';
@@ -67,7 +68,7 @@ test('point contacts are verified by code and reach the buyer card with the hour
     const requested = await (await requestResponse).json();
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(PLAIN_SEARCH_URL);
 
     // First point: a new number for calls, the login number for WhatsApp, Sunday around the clock.
     await page.goto('/seller/points');

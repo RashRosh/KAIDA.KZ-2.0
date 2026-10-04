@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { PLAIN_SEARCH_URL } from './browser-state';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 import { openOffer } from './buyer-helpers';
@@ -99,7 +100,7 @@ async function login(page: Page, phone: string) {
   const requested = await (await requestResponse).json();
   await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
-  await expect(page).toHaveURL('/');
+  await expect(page).toHaveURL(PLAIN_SEARCH_URL);
 }
 
 async function buyerSearch(page: Page, query: string): Promise<SearchBody> {

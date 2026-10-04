@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { PLAIN_SEARCH_URL } from './browser-state';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 import { SEED_POINT, signOutInMore } from './buyer-helpers';
@@ -60,7 +61,7 @@ test('authenticated User creates Seller + first Location and persists after relo
     const requested = await (await requestResponse).json();
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(PLAIN_SEARCH_URL);
 
     // Seller cabinet: trading points and contacts are separate destinations (seller-cabinet-overview).
     await page.goto('/seller/points');

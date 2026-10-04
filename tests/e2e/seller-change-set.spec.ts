@@ -65,7 +65,8 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
     const requested = await (await requestResponse).json();
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
-    await expect(page).toHaveURL('/');
+    // Stage 6C: a plain «/» reopens the last search of this tab, so the address may carry its query.
+    await expect(page).toHaveURL(/\/(\?q=.*)?$/);
 
     // Seller cabinet: point, contacts and «Добавить товар» are separate destinations (seller-cabinet-overview).
     await page.goto('/seller/points');

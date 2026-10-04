@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { PLAIN_SEARCH_URL } from './browser-state';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 
@@ -73,7 +74,7 @@ test('authenticated seller shell exposes logout and logout clears private seller
     await expect(page.getByText('Вход по этому номеру')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.getByRole('link', { name: 'Я покупатель — поиск товаров' }).click();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(PLAIN_SEARCH_URL);
     await expect(page.getByLabel('Какой товар ищете?')).toBeVisible();
 
     await page.goto('/seller/points');

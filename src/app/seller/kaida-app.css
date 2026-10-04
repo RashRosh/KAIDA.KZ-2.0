@@ -15,6 +15,9 @@
 .kaida .inp>input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
 .kaida .inp>input::placeholder,.kaida .inp>textarea::placeholder,.kaida input.inp::placeholder{color:var(--ink3)}
 .kaida .btn:focus-visible,.kaida .ib:focus-visible,.kaida .li:focus-visible,.kaida .card:focus-visible,.kaida .nav a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* stage 6C: the query chips under the results field stay in one scrolling row. */
+.kaida .chips-row .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.kaida .chips-row .chip{flex:none}
 .kaida .lang button{appearance:none;border:0;background:transparent;padding:0 10px;display:flex;align-items:center;font:500 12px/16px var(--sans);color:var(--ink2);cursor:pointer}
 .kaida .lang button[aria-pressed="true"]{background:var(--primary-soft);color:var(--primary-text)}
 .kaida .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

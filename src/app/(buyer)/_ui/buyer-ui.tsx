@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { MouseEvent } from 'react';
+import { useSyncExternalStore, type MouseEvent } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
+import { parseLastSearchState, readLastSearchRaw } from '../../../modules/search/last-search-state';
 import type { SearchOffer } from '../../../modules/search/contracts/search.contract';
 import { buildContactActions } from '../../../modules/sellers/contact/build-contact-actions';
 import { actualityText } from '../../_components/actuality-text';
@@ -34,10 +35,17 @@ function markNearbyIntent(event: MouseEvent<HTMLAnchorElement>) {
   }
 }
 
+// Stage 6C: with a last Search in this tab, «Поиск» reopens it through an explicit Search address carrying the query, so
+// the visitor never goes through the generic-entry routing; without one it is the plain Search address.
+const subscribeToNothing = () => () => {};
+
 export function BuyerNav({ active }: { active: BuyerSection }) {
   const { t } = useI18n();
+  const lastSearchRaw = useSyncExternalStore(subscribeToNothing, readLastSearchRaw, () => null);
+  const lastSearch = parseLastSearchState(lastSearchRaw);
+  const searchHref = lastSearch ? `/?${new URLSearchParams({ q: lastSearch.query })}` : '/';
   const items: { key: BuyerSection; href: string; icon: string; label: string }[] = [
-    { key: 'search', href: '/', icon: 'search', label: t('nav.search') },
+    { key: 'search', href: searchHref, icon: 'search', label: t('nav.search') },
     { key: 'nearby', href: '/nearby', icon: 'pin', label: t('nav.nearby') },
     { key: 'more', href: '/more', icon: 'menu', label: t('buyer.more') },
   ];
