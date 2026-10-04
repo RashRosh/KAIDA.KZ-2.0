@@ -188,7 +188,7 @@ merge-коммите после green merged-main CI, до фактическо�
 | 5A | ~~Search visibility for addressed Locations without coordinates~~ — **закрыт** (PR #77 + repair PR #78, manual acceptance PASS) | `docs/slices/search-visibility-without-coordinates/SLICE_CONTRACT.md`, Issue #12 |
 | 6A | Process/UX rules maintenance: граница доставки mobile + RU, выбор interaction pattern, язык без отдельного gate (docs) | `PROJECT_RULES.md` §18.4–18.5 |
 | 6B | ~~First Entry correction: `/welcome` отдельно от Search `/`, intro один раз на браузер/устройство, язык на First Entry, без языкового экрана~~ — **закрыт** (PR #84, manual acceptance PASS) | `docs/slices/first-entry-correction/SLICE_CONTRACT.md` |
-| 6C | Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате) | future Slice Contract, после 6B |
+| 6C | Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате) | `docs/slices/search-home-last-state/SLICE_CONTRACT.md` (DRAFT) |
 | 6D | Inline-язык в `Ещё` (покупатель и продавец): `Русский \| Қазақша`, сразу, без Sheet/Done | future Slice Contract, после 6C |
 | 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 | Issue #12, future contract (`docs/slices/search-price-sort-range/` rev 3), после 6D |
 | 6F | Search Query Log — минимальный срез, одна модель с будущим S15C D0 | future Slice Contract; privacy/retention risk |
