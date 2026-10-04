@@ -10,12 +10,13 @@
 ## Current task
 
 **Stage 6 Rev 3 — explicit Search sorting** (`docs/slices/search-sort-rev3/SLICE_CONTRACT.md`, APPROVED) — реализован на
-ветке `slice/search-sort-rev3`: popover из трёх критериев (`Расстояние / Цена / Актуальность`) с направлением вместо
+ветке `slice/search-sort-rev3` (PR #90): popover из трёх критериев (`Расстояние / Цена / Актуальность`) с направлением вместо
 листа «Фильтры» и радиуса; выбранный критерий — первичный порядок, без tier и весов; цена — номинальная KZT;
 `sort=distance` требует координат (иначе `400`), геолокация только по явному выбору «Расстояние», при отказе —
 актуальность и краткое сообщение; публичный API `sort`/`direction`; состояние последнего поиска вкладки — запрос +
-sort + direction. Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только после PASS.
-Затем 6F/6G (Query Log, динамические чипы) — не начинать.
+sort + direction. Manual acceptance **PASS**, branch CI green. После green merged-main CI создаётся annotated tag
+`v0.0.51-search-sort-rev3` на merge-коммите; до создания тег не считать существующим.
+Дальше 6F/6G (Query Log, динамические чипы) — контракт ещё не подготовлен, реализацию не начинать без решения PO.
 
 ## Verification (local)
 
@@ -25,8 +26,8 @@ Unit 343/343, integration 204/204, typecheck и eslint чистые; новые 
 
 ## Next action
 
-1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
-2. После PASS: PR реализации, merge, checkpoint. Затем 6F — отдельным решением PO.
+1. Merged-main CI → tag `v0.0.51-search-sort-rev3`.
+2. 6F: подготовить Slice Contract, ждать утверждения.
 
 ## Current constraints
 

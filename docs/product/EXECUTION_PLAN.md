@@ -150,10 +150,11 @@ Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates` соз�
 green) сохраняется неизменной как evidence; новая ветка Rev 3 строится от актуального `main`, из старой берутся только
 полезные hunks/tests. Issue #12 остаётся OPEN.
 
-**6A–6D закрыты** (6B: PR #84, tag `v0.0.48-first-entry-correction`; 6C: PR #86, tag `v0.0.49-search-home-last-state`;
-6D: PR #88, manual acceptance PASS, checkpoint tag `v0.0.50-inline-language` создаётся на merge-коммите после green
-merged-main CI, до фактического создания тег не считать существующим). **Следующий незакрытый шаг — Stage 6 Rev 3**
-(контракт ещё не подготовлен, реализацию не начинать без решения PO). Порядок 6D → 6 был выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
+**6A–6D и Stage 6 Rev 3 закрыты** (6B: PR #84, tag `v0.0.48-first-entry-correction`; 6C: PR #86, tag
+`v0.0.49-search-home-last-state`; 6D: PR #88, tag `v0.0.50-inline-language`; Rev 3: PR #90, manual acceptance PASS,
+checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-коммите после green merged-main CI, до фактического
+создания тег не считать существующим). **Следующий незакрытый шаг — 6F** (минимальный Search Query Log; контракт ещё не
+подготовлен, реализацию не начинать без решения PO). Порядок 6D → 6 был выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
 внутри структуры, которую сразу заменят.
 
 Решения PO (2026-10-04), которые должны войти в соответствующие Slice Contracts, не сокращаясь:
@@ -190,7 +191,7 @@ merged-main CI, до фактического создания тег не сч�
 | 6B | ~~First Entry correction: `/welcome` отдельно от Search `/`, intro один раз на браузер/устройство, язык на First Entry, без языкового экрана~~ — **закрыт** (PR #84, manual acceptance PASS) | `docs/slices/first-entry-correction/SLICE_CONTRACT.md` |
 | 6C | ~~Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате)~~ — **закрыт** (PR #86, manual acceptance PASS) | `docs/slices/search-home-last-state/SLICE_CONTRACT.md` |
 | 6D | ~~Inline-язык в `Ещё` (покупатель и продавец): компактная таблетка `РУС \| ҚАЗ` в строке «Язык», сразу, без Sheet/Done~~ — **закрыт** (PR #88, manual acceptance PASS) | `docs/slices/inline-language/SLICE_CONTRACT.md` |
-| 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 | Issue #12, `docs/slices/search-sort-rev3/SLICE_CONTRACT.md` (DRAFT) |
+| 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 — **закрыт** (PR #90, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-rev3/SLICE_CONTRACT.md` |
 | 6F | Search Query Log — минимальный срез, одна модель с будущим S15C D0 | future Slice Contract; privacy/retention risk |
 | 6G | Динамические популярные запросы (≤5, окно по конфигу, curated fallback) | future Slice Contract, после 6F |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
