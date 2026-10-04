@@ -1,6 +1,6 @@
 # Inline language in «Ещё» (stage 6D)
 
-**Status:** DRAFT — ожидает PO/Controller review; реализация не разрешена.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Controller/PO, 2026-10-04; контракт `f74b858` финальный).
 **Base:** `main` `c13eea2` (checkpoint `v0.0.49-search-home-last-state`).
 **Branch:** `slice/inline-language-contract` (contract-only).
 **Plan:** stage 6D (`EXECUTION_PLAN.md`). Следом: Stage 6 Rev 3.
