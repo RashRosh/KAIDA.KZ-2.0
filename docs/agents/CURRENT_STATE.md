@@ -10,11 +10,10 @@
 ## Current task
 
 **Stage 6C — Search Home + last Search state** (`docs/slices/search-home-last-state/SLICE_CONTRACT.md`, APPROVED).
-Реализована на ветке `slice/search-home-last-state` (реализация `606ccec`): Search Home (поле по центру, ≤5 чипов, без
-ленты), чипы остаются после поиска, последний поиск вкладки (запрос + сортировка/радиус stage 5) в `sessionStorage`,
-`Поиск` в навигации ведёт на `/?q=…` и результаты запрашиваются заново, нормализация geo-состояния без координат.
-Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только после PASS. 6D, Stage 6 Rev 3, Query Log и
-динамические чипы не начинать. Stage 6B закрыт (`v0.0.48-first-entry-correction`).
+Реализована (`slice/search-home-last-state`, PR #86): Search Home, чипы после поиска, последний поиск вкладки в
+`sessionStorage`, `Поиск` ведёт на `/?q=…`. Manual acceptance **PASS**, branch CI green. После green merged-main CI
+создаётся annotated tag `v0.0.49-search-home-last-state` на merge-коммите; до создания тег не считать существующим.
+Следом 6D (inline-язык в `Ещё`) — контракт ещё не утверждён, реализацию не начинать.
 
 ## Verification (local)
 
@@ -24,8 +23,8 @@ Unit 344/344, integration 197/197, typecheck и eslint чистые; новые 
 
 ## Next action
 
-1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
-2. После PASS: PR реализации, merge, checkpoint. Затем 6D — отдельным решением PO.
+1. Merged-main CI → tag `v0.0.49-search-home-last-state`.
+2. 6D: подготовить Slice Contract, ждать утверждения.
 
 ## Current constraints
 
