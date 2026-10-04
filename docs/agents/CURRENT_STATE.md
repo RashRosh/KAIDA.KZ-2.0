@@ -5,28 +5,27 @@
 ## Verified base
 
 - Проверено: 2026-10-04 (6-я сессия).
-- `origin/main`: `d98a365` (6A PR #80 и контракт 6B PR #81 слиты). Последний checkpoint-тег: `v0.0.47-search-visibility-without-coordinates`.
+- `origin/main`: `9607163` (контракт 6C слит, PR #85). Последний checkpoint-тег: `v0.0.48-first-entry-correction`.
 
 ## Current task
 
-**Corrective sequence 6A → 6B → 6C → 6D → 6 (Search sort Rev 3) → 6F → 6G** (порядок и решения PO — `EXECUTION_PLAN.md`,
-«Текущий repository gate»). Stage #6 Rev 2 отклонён на manual acceptance: ветка `slice/search-price-sort-range-contract`
-(`f9dd7cf`) — неизменный evidence.
-
-- **6A** — закрыт (PR #80). Контракт 6B — в `main` (PR #81).
-- **6B First Entry correction** — manual acceptance **PASS**; PR #84 (`slice/first-entry-correction`). После green
-  merged-main CI создаётся annotated tag `v0.0.48-first-entry-correction` на merge-коммите; до создания тег не считать
-  существующим.
+**Stage 6C — Search Home + last Search state** (`docs/slices/search-home-last-state/SLICE_CONTRACT.md`, APPROVED).
+Реализована на ветке `slice/search-home-last-state` (реализация `606ccec`): Search Home (поле по центру, ≤5 чипов, без
+ленты), чипы остаются после поиска, последний поиск вкладки (запрос + сортировка/радиус stage 5) в `sessionStorage`,
+`Поиск` в навигации ведёт на `/?q=…` и результаты запрашиваются заново, нормализация geo-состояния без координат.
+Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только после PASS. 6D, Stage 6 Rev 3, Query Log и
+динамические чипы не начинать. Stage 6B закрыт (`v0.0.48-first-entry-correction`).
 
 ## Verification (local)
 
-Unit 338/338, integration 197/197, typecheck и eslint чистые, полный E2E (mobile + desktop) зелёный после обновления
-проверок, которые утверждали старое «`/` = First Entry» / языковой экран. Branch CI — см. GitHub.
+Unit 344/344, integration 197/197, typecheck и eslint чистые; новые 10 E2E (mobile RU) зелёные; полный E2E зелёный, кроме
+редкой локальной нестабильности редактора продавца (`offer-actuality`, не связана с поиском). Два существующих E2E
+обновлены: после входа «/» восстанавливает последний поиск (адрес `/?q=…`), UX1D стартует с чистой вкладкой.
 
 ## Next action
 
-1. Merged-main CI → создать и запушить tag `v0.0.48-first-entry-correction` → STOP.
-2. 6C (Search Home + состояние поиска) — отдельный контракт; не начинать без решения PO.
+1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
+2. После PASS: PR реализации, merge, checkpoint. Затем 6D — отдельным решением PO.
 
 ## Current constraints
 
