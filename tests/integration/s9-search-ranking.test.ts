@@ -113,9 +113,23 @@ describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
     expect(compileOnly).toBeTypeOf('function');
   });
 
-  it('with Buyer location ranks geo-known Offers by weighted policy ahead of geo-less (stage 5A)', async () => {
+  it('with Buyer location the default is still the actuality, fresher first — the location adds only the distance', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     expect(ids(result)).toEqual([
+      offerIds.geolessFresh,
+      offerIds.farNewer,
+      offerIds.nearFreshA,
+      offerIds.nearFreshB,
+      offerIds.nearOld,
+      offerIds.geolessOld,
+    ]);
+    expect(result.offers.find((offer) => offer.id === offerIds.nearFreshA)!.distanceMeters).toBe(0);
+    expect(result.offers.find((offer) => offer.id === offerIds.geolessFresh)).not.toHaveProperty('distanceMeters');
+  });
+
+  it('explicit «Расстояние»: nearer first, geo-less Offers after every geo-known one for both directions (stage 6 Rev 3)', async () => {
+    const asc = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation, sort: 'distance' });
+    expect(ids(asc)).toEqual([
       offerIds.nearFreshA,
       offerIds.nearFreshB,
       offerIds.nearOld,
@@ -123,11 +137,15 @@ describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
       offerIds.geolessFresh,
       offerIds.geolessOld,
     ]);
-  });
-
-  it('keeps a farther newer eligible Offer below nearer eligible Offers', async () => {
-    const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
-    expect(ids(result).indexOf(offerIds.nearOld)).toBeLessThan(ids(result).indexOf(offerIds.farNewer));
+    const desc = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation, sort: 'distance', direction: 'desc' });
+    expect(ids(desc)).toEqual([
+      offerIds.farNewer,
+      offerIds.nearFreshA,
+      offerIds.nearFreshB,
+      offerIds.nearOld,
+      offerIds.geolessFresh,
+      offerIds.geolessOld,
+    ]);
   });
 
   it('without Buyer location sorts buyer-eligible Offers — including geo-less — by freshness then Offer.id', async () => {

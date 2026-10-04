@@ -42,10 +42,10 @@ test('the Search Home shows the centered field and at most five chips, with no f
   await expect(chips(page)).toHaveCount(5);
   await expect(chips(page)).toHaveText(['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс']);
   await expect(page.getByRole('article')).toHaveCount(0);
-  await expect(page.getByText('Сначала актуальные')).toHaveCount(0);
+  await expect(page.getByText(/^Порядок:/)).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(0);
   await expect(page.getByText('Пример · так выглядит результат')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /^Фильтры/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Сортировка', exact: true })).toHaveCount(0);
   const box = await field(page).boundingBox();
   expect(box?.y ?? 0).toBeGreaterThan(250);
   expect(searchRequests).toBe(0);
@@ -59,7 +59,7 @@ test('a chip search moves the field and the chips to the top and keeps the chips
   const box = await field(page).boundingBox();
   expect(box?.y ?? 999).toBeLessThan(120);
   await expect(chips(page)).toHaveCount(5);
-  await expect(page.getByRole('button', { name: /^Фильтры/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Сортировка', exact: true })).toBeVisible();
 
   // The chips stay when there is nothing to show as well.
   await field(page).fill('несуществующийтовар');
@@ -111,52 +111,60 @@ test('the tab state holds only the query and the preferences — no results, no 
   await page.getByRole('button', { name: 'Баранина', exact: true }).click();
   await expect(page.getByRole('article').first()).toBeVisible();
   const raw = await storedState(page);
-  expect(JSON.parse(raw ?? 'null')).toEqual({ v: 1, query: 'Баранина', sort: 'actuality', radiusMeters: null });
-  for (const forbidden of ['offers', 'latitude', 'longitude', 'price']) expect(raw).not.toContain(forbidden);
+  expect(JSON.parse(raw ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'actuality', direction: 'desc' });
+  for (const forbidden of ['offers', 'latitude', 'longitude', 'price', 'radius']) expect(raw).not.toContain(forbidden);
   expect(await page.evaluate((key) => window.localStorage.getItem(key), STORAGE_KEY)).toBeNull();
   expect((await context.cookies()).some((cookie) => cookie.name === STORAGE_KEY || cookie.value.includes('Баранина'))).toBe(false);
   expect(new URL(page.url()).search).toBe('?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
 });
 
-test('a restored distance sort and radius fall back without coordinates and without asking for geolocation', async ({ page }) => {
+test('a restored distance sort falls back to the actuality without coordinates and without asking for geolocation', async ({ page }) => {
   await mockGeolocation(page);
   await page.goto('/');
   await page.getByRole('button', { name: 'Баранина', exact: true }).click();
   await expect(page.getByRole('article').first()).toBeVisible();
-  await page.getByRole('button', { name: /^Фильтры/ }).click();
-  await page.getByRole('radio', { name: 'Сначала ближе' }).click();
-  await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
-  await expect(page.getByRole('button', { name: 'Убрать фильтр Сначала ближе' })).toBeVisible();
+  await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
+  await page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^Расстояние/ }).click();
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'Расстояние, ближе первыми', exact: true })).toBeVisible();
   expect(await geoCalls(page)).toBe(1);
-  expect(JSON.parse((await storedState(page)) ?? 'null').sort).toBe('distance');
+  expect(JSON.parse((await storedState(page)) ?? 'null')).toMatchObject({ sort: 'distance', direction: 'asc' });
 
   await nav(page, 'Ещё').click();
   await nav(page, 'Поиск').click();
   await expect(page.getByRole('article').first()).toBeVisible();
   // The tab state and the screen agree on the normalized values; no prompt was triggered.
-  await expect(page.getByRole('button', { name: 'Убрать фильтр Сначала ближе' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /^Фильтры, активно/ })).toHaveCount(0);
-  expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 1, query: 'Баранина', sort: 'actuality', radiusMeters: null });
+  await expect.poll(async () => JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'actuality', direction: 'desc' });
+  await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'Актуальность, свежее первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
   // Returning did not ask again: the counter is still the one explicit request made before leaving.
   expect(await geoCalls(page)).toBe(1);
 
   // A later explicit choice of «Расстояние» is a geolocation intent again.
-  await page.getByRole('button', { name: /^Фильтры/ }).click();
-  await page.getByRole('radio', { name: 'Сначала ближе' }).click();
-  expect(await geoCalls(page)).toBe(2);
+  await page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^Расстояние/ }).click();
+  await expect.poll(() => geoCalls(page)).toBe(2);
 });
 
-test('a stored finite radius is normalized to «Любое» even when the stored sort is actuality', async ({ page }) => {
+test('a price sort and its direction are restored; a Stage 5 state degrades to the actuality without a radius', async ({ page }) => {
   await page.addInitScript((key) => {
     if (!window.sessionStorage.getItem(key)) {
-      window.sessionStorage.setItem(key, JSON.stringify({ v: 1, query: 'Баранина', sort: 'actuality', radiusMeters: 3000 }));
+      window.sessionStorage.setItem(key, JSON.stringify({ v: 2, query: 'Баранина', sort: 'price', direction: 'desc' }));
     }
   }, STORAGE_KEY);
   await page.goto('/');
   await expect(page.getByRole('article').first()).toBeVisible();
-  await expect(field(page)).toHaveValue('Баранина');
-  await expect(page.getByRole('button', { name: /^Фильтры, активно/ })).toHaveCount(0);
-  await expect.poll(async () => JSON.parse((await storedState(page)) ?? 'null')?.radiusMeters).toBeNull();
+  await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'Цена, дороже первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+
+  // The Stage 5 / 6C value (query + sort + radius) keeps the query, drops the radius and falls back without coordinates.
+  const legacy = await page.context().newPage();
+  await legacy.addInitScript((key) => {
+    window.sessionStorage.setItem(key, JSON.stringify({ v: 1, query: 'Баранина', sort: 'distance', radiusMeters: 3000 }));
+  }, STORAGE_KEY);
+  await legacy.goto('/');
+  await expect(legacy.getByRole('article').first()).toBeVisible();
+  await expect(legacy.getByRole('searchbox', { name: 'Какой товар ищете?' })).toHaveValue('Баранина');
+  await expect.poll(async () => JSON.parse((await storedState(legacy)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'actuality', direction: 'desc' });
+  await legacy.close();
 });
 
 test('a plain / with a last search reopens it; another tab and damaged storage give the Home', async ({ page, context }) => {

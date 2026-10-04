@@ -7,8 +7,6 @@ import {
   rankSearchOfferCandidates,
   type SearchRankingCandidate,
 } from '../../src/modules/search/ranking/search-ranking';
-import { readSearchRankingPolicy } from '../../src/modules/search/config/search-ranking-policy.config';
-import { ageingSince, type ActualityPolicy } from '../../src/modules/offers/actuality/actuality';
 
 function offer(id: string): SearchOffer {
   return {
@@ -34,23 +32,13 @@ const buyer = { latitude: 43.238949, longitude: 76.889709 };
 const near = { latitude: 43.238949, longitude: 76.889709 };
 const far = { latitude: 43.338949, longitude: 76.989709 };
 
-// stage #5: the S9 ordering inside a freshness tier is weighted (slice contract §2); tiers themselves are tested
-// in offer-actuality / search-sort-distance tests.
-const NOW = new Date('2026-09-13T12:00:00Z');
-const ACTUALITY: ActualityPolicy = { dueHours: 24, ageingHours: 48, hiddenHours: 168, archiveHours: 336 };
-const RANKING = readSearchRankingPolicy();
-
 function rank(
   input: readonly SearchRankingCandidate[],
   location?: typeof buyer,
-  mode: 'actuality' | 'distance' = 'actuality',
+  sort: 'actuality' | 'distance' | 'price' = 'actuality',
+  direction: 'asc' | 'desc' = sort === 'actuality' ? 'desc' : 'asc',
 ) {
-  return rankSearchOfferCandidates(input, location, ageingSince(NOW, ACTUALITY), {
-    now: NOW,
-    actualityPolicy: ACTUALITY,
-    rankingPolicy: RANKING,
-    sortMode: mode,
-  });
+  return rankSearchOfferCandidates(input, location, { sort, direction });
 }
 
 function ids(items: readonly SearchRankingCandidate[]) {
@@ -80,50 +68,13 @@ describe('S9 Haversine distance', () => {
   });
 });
 
-describe('S9 deterministic ranking (stage #5 weighted semantics)', () => {
+describe('S9 deterministic ranking (explicit sorting, stage 6 Rev 3)', () => {
   const id1 = '40000000-0000-4000-8000-000000000001';
   const id2 = '40000000-0000-4000-8000-000000000002';
   const id3 = '40000000-0000-4000-8000-000000000003';
   const id4 = '40000000-0000-4000-8000-000000000004';
 
-  it('ranks known geo before geoless: a geo-less Offer gets no distance component', () => {
-    const input = [
-      candidate(id1, '2026-09-13T10:00:00Z', near),
-      candidate(id2, '2026-09-13T11:59:00Z', far),
-      candidate(id3, '2026-09-13T11:59:30Z', null),
-    ];
-    expect(ids(rank(input, buyer))).toEqual([id1, id2, id3]);
-  });
-
-  it('uses freshness then Offer.id for equal rounded distance', () => {
-    const input = [
-      candidate(id2, '2026-09-13T11:00:00Z', near),
-      candidate(id3, '2026-09-13T10:00:00Z', near),
-      candidate(id1, '2026-09-13T11:00:00Z', near),
-    ];
-    expect(ids(rank(input, buyer))).toEqual([id1, id2, id3]);
-  });
-
-  it('orders geoless Offers by freshness then Offer.id', () => {
-    const input = [
-      candidate(id3, '2026-09-13T10:00:00Z', null),
-      candidate(id2, '2026-09-13T11:00:00Z', null),
-      candidate(id1, '2026-09-13T11:00:00Z', null),
-    ];
-    expect(ids(rank(input, buyer))).toEqual([id1, id2, id3]);
-  });
-
-  it('without Buyer location ignores geo presence and uses freshness then Offer.id', () => {
-    const input = [
-      candidate(id4, '2026-09-13T09:00:00Z', near),
-      candidate(id3, '2026-09-13T12:00:00Z', null),
-      candidate(id2, '2026-09-13T11:00:00Z', far),
-      candidate(id1, '2026-09-13T11:00:00Z', near),
-    ];
-    expect(ids(rank(input))).toEqual([id3, id1, id2, id4]);
-  });
-
-  it('does not mutate caller order and is permutation-stable', () => {
+  it('does not mutate the caller order and is permutation-stable for every criterion', () => {
     const base = [
       candidate(id4, '2026-09-13T09:00:00Z', null),
       candidate(id2, '2026-09-13T11:00:00Z', near),
@@ -131,16 +82,21 @@ describe('S9 deterministic ranking (stage #5 weighted semantics)', () => {
       candidate(id1, '2026-09-13T11:00:00Z', near),
     ];
     const original = ids(base);
-    const expected = ids(rank(base, buyer));
-    expect(ids(base)).toEqual(original);
-
-    const permutations = [
-      [base[3]!, base[2]!, base[1]!, base[0]!],
-      [base[1]!, base[0]!, base[3]!, base[2]!],
-      [base[2]!, base[3]!, base[0]!, base[1]!],
-    ];
-    for (const permutation of permutations) {
-      expect(ids(rank(permutation, buyer))).toEqual(expected);
+    for (const sort of ['actuality', 'distance', 'price'] as const) {
+      const expected = ids(rank(base, buyer, sort));
+      expect(ids(base)).toEqual(original);
+      const permutations = [
+        [base[3]!, base[2]!, base[1]!, base[0]!],
+        [base[1]!, base[0]!, base[3]!, base[2]!],
+        [base[2]!, base[3]!, base[0]!, base[1]!],
+      ];
+      for (const permutation of permutations) expect(ids(rank(permutation, buyer, sort))).toEqual(expected);
     }
+  });
+
+  it('the whole-meter distance is attached only when the request has a buyer location', () => {
+    const input = [candidate(id1, '2026-09-13T11:00:00Z', near), candidate(id2, '2026-09-13T11:00:00Z', null)];
+    expect(rank(input, buyer).map((item) => item.rankingDistanceMeters)).toEqual([0, null]);
+    expect(rank(input).map((item) => item.rankingDistanceMeters)).toEqual([null, null]);
   });
 });

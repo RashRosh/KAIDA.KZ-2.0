@@ -4,9 +4,24 @@ import { pointPublicContactsSchema } from '../../locations/details/point-public-
 
 export const searchQuerySchema = z.string().trim().min(1, 'Введите название товара.');
 
-// stage #5: the buyer UI/API pass only the sort mode, never numeric weights; the server-side SearchRankingPolicy
-// maps the mode onto the current weights (search-ranking-policy.config.ts).
-export const searchSortModeSchema = z.enum(['actuality', 'distance']);
+// Stage 6 Rev 3 (slice contract §3.2/§3.5): the buyer chooses an explicit sort criterion and its direction; the selected
+// criterion is the primary ordering — there is no weighted score behind it. `distance` needs the buyer coordinates.
+export const searchSortModeSchema = z.enum(['actuality', 'distance', 'price']);
+export const searchSortDirectionSchema = z.enum(['asc', 'desc']);
+
+export type SearchSortMode = z.infer<typeof searchSortModeSchema>;
+export type SearchSortDirection = z.infer<typeof searchSortDirectionSchema>;
+
+// The natural direction of every criterion: fresher first, cheaper first, nearer first.
+export const NATURAL_SORT_DIRECTION: Record<SearchSortMode, SearchSortDirection> = {
+  actuality: 'desc',
+  price: 'asc',
+  distance: 'asc',
+};
+
+export function resolveSortDirection(sort: SearchSortMode, direction: SearchSortDirection | undefined): SearchSortDirection {
+  return direction ?? NATURAL_SORT_DIRECTION[sort];
+}
 
 export const searchOfferSchema = z.object({
   id: z.uuid(),

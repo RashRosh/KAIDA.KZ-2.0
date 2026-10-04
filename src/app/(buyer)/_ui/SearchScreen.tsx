@@ -3,20 +3,26 @@
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
-import { offerCount, offersCount, showOffersLabel } from '../../../i18n/format';
+import { offerCount } from '../../../i18n/format';
 import { buyerLocationSchema, type BuyerLocation } from '../../../modules/search/contracts/buyer-location.contract';
-import { searchQuerySchema, searchResponseSchema, type SearchResponse } from '../../../modules/search/contracts/search.contract';
-import { filterOffersByRadius } from '../../../modules/search/radius-filter';
+import {
+  NATURAL_SORT_DIRECTION,
+  searchQuerySchema,
+  searchResponseSchema,
+  type SearchResponse,
+  type SearchSortDirection,
+  type SearchSortMode,
+} from '../../../modules/search/contracts/search.contract';
 import { normalizeGeoDependentState, readLastSearchState, writeLastSearchState } from '../../../modules/search/last-search-state';
-import type { SearchSortMode } from '../../../modules/search/config/search-ranking-policy.config';
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
-import { Sheet } from '../../seller/_kaida/ui';
+import { SortPopover } from './SortPopover';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
 // S0 / S7 / S9: explicit submit, optional transient buyer location, popular queries, the query kept in the address.
-// stage #5 (B07): «Фильтры» — sorting «Сначала ближе»/«Сначала актуальнее» and the distance radius; the standalone
-// pin toggle is gone — selecting «Сначала ближе» or a finite radius is itself the explicit geolocation intent.
+// Stage 6 Rev 3: an explicit sort control (a popover of three criteria — Расстояние, Цена, Актуальность — each with a
+// direction); the selected criterion is the real primary ordering and is applied by a new request (ranking stays a server
+// authority). Choosing «Расстояние» is itself the explicit geolocation intent.
 
 type SearchState =
   | { kind: 'initial' | 'loading' | 'validation' | 'error' }
@@ -25,12 +31,6 @@ type SearchState =
 type BuyerLocationState =
   | { kind: 'not_enabled' | 'requesting' | 'error' }
   | { kind: 'enabled'; point: BuyerLocation };
-
-const RADIUS_OPTIONS = [
-  { meters: 1000, labelKey: 'search.radius1' },
-  { meters: 3000, labelKey: 'search.radius3' },
-  { meters: 5000, labelKey: 'search.radius5' },
-] as const;
 
 // Stage 6C: at most five curated queries — the first five of the existing set; no popularity data is involved.
 const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс'] as const;
@@ -49,25 +49,24 @@ export function SearchScreen() {
   const [shown, setShown] = useState<SearchResponse | null>(null);
   const writtenQuery = useRef<string | null>(null);
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
-  // stage #5: applied filter values; the sheet edits drafts and «Показать N предложений» commits them.
-  const [sortMode, setSortMode] = useState<SearchSortMode>('actuality');
-  const [radiusMeters, setRadiusMeters] = useState<number | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [draftSort, setDraftSort] = useState<SearchSortMode>('actuality');
-  const [draftRadius, setDraftRadius] = useState<number | null>(null);
+  // Stage 6 Rev 3: the applied sort criterion and its direction (default: actuality, fresher first).
+  const [sort, setSort] = useState<SearchSortMode>('actuality');
+  const [direction, setDirection] = useState<SearchSortDirection>(NATURAL_SORT_DIRECTION.actuality);
+  // Shown after a geolocation denial for «Расстояние»: the order fell back to the actuality.
+  const [distanceNotice, setDistanceNotice] = useState(false);
   const pending = useRef(false);
-  const lastSearch = useRef<{ query: string; location?: BuyerLocation; sortMode: SearchSortMode } | null>(null);
+  const lastSearch = useRef<{ query: string; location?: BuyerLocation; sort: SearchSortMode; direction: SearchSortDirection } | null>(null);
   const localeRef = useRef(locale);
   const previousLocaleRef = useRef(locale);
-  const sortModeRef = useRef(sortMode);
+  const preferencesRef = useRef({ sort, direction });
   const locationRef = useRef<BuyerLocation | undefined>(undefined);
   const input = useRef<HTMLInputElement>(null);
   const loading = state.kind === 'loading';
   useEffect(() => { localeRef.current = locale; }, [locale]);
-  useEffect(() => { sortModeRef.current = sortMode; }, [sortMode]);
+  useEffect(() => { preferencesRef.current = { sort, direction }; }, [sort, direction]);
 
-  // A language change re-reads the shown results with the same request (query, location, sort mode): pack and unit
-  // labels and comment translations follow the locale; the applied filters and the results are kept.
+  // A language change re-reads the shown results with the same request (query, location, sort, direction): pack and unit
+  // labels and comment translations follow the locale; the applied sorting and the results are kept.
   useEffect(() => {
     if (previousLocaleRef.current === locale) return;
     previousLocaleRef.current = locale;
@@ -78,10 +77,10 @@ export function SearchScreen() {
       ? fetch(`/api/search?locale=${locale}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: last.query, buyerLocation: last.location, sort: last.sortMode }),
+        body: JSON.stringify({ q: last.query, buyerLocation: last.location, sort: last.sort, direction: last.direction }),
         cache: 'no-store',
       })
-      : fetch(`/api/search?${new URLSearchParams({ q: last.query, locale, sort: last.sortMode })}`, { cache: 'no-store' });
+      : fetch(`/api/search?${new URLSearchParams({ q: last.query, locale, sort: last.sort, direction: last.direction })}`, { cache: 'no-store' });
     void request
       .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
       .then((localized) => {
@@ -99,8 +98,22 @@ export function SearchScreen() {
     return () => { active = false; };
   }, [locale, shown]);
 
-  const executeSearch = useCallback(async (rawQuery: string, buyerLocation: BuyerLocation | undefined, mode: SearchSortMode) => {
+  const executeSearch = useCallback(async (
+    rawQuery: string,
+    buyerLocation: BuyerLocation | undefined,
+    requestedSort: SearchSortMode,
+    requestedDirection: SearchSortDirection,
+  ) => {
     if (pending.current) return;
+    // «Расстояние» needs coordinates: without them the request is never sent as `distance` (the API rejects it) — the
+    // order falls back to the actuality and the UI says so (it is the same state, not a hidden one).
+    const fellBack = requestedSort === 'distance' && !buyerLocation;
+    const mode = fellBack ? 'actuality' : requestedSort;
+    const order = fellBack ? NATURAL_SORT_DIRECTION.actuality : requestedDirection;
+    if (fellBack) {
+      setSort(mode);
+      setDirection(order);
+    }
     const parsed = searchQuerySchema.safeParse(rawQuery);
     if (!parsed.success) {
       setState({ kind: 'validation' });
@@ -108,7 +121,7 @@ export function SearchScreen() {
       return;
     }
     pending.current = true;
-    lastSearch.current = { query: parsed.data, location: buyerLocation, sortMode: mode };
+    lastSearch.current = { query: parsed.data, location: buyerLocation, sort: mode, direction: order };
     setStarted(true);
     setSearchedQuery(parsed.data);
     setState({ kind: 'loading' });
@@ -117,11 +130,11 @@ export function SearchScreen() {
         ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, buyerLocation, sort: mode }),
+          body: JSON.stringify({ q: parsed.data, buyerLocation, sort: mode, direction: order }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, locale: localeRef.current, sort: mode })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, locale: localeRef.current, sort: mode, direction: order })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
@@ -163,18 +176,19 @@ export function SearchScreen() {
         setQuery(addressQuery);
         const preferences = stored && stored.query === addressQuery ? normalizeGeoDependentState(stored, hasCoordinates) : null;
         if (preferences) {
-          setSortMode(preferences.sort);
-          setRadiusMeters(preferences.radiusMeters);
-          sortModeRef.current = preferences.sort;
+          setSort(preferences.sort);
+          setDirection(preferences.direction);
+          preferencesRef.current = { sort: preferences.sort, direction: preferences.direction };
         }
-        void executeSearch(addressQuery, locationRef.current, preferences ? preferences.sort : sortModeRef.current);
+        const next = preferences ?? preferencesRef.current;
+        void executeSearch(addressQuery, locationRef.current, next.sort, next.direction);
       } else if (stored) {
         const preferences = normalizeGeoDependentState(stored, hasCoordinates);
         setQuery(preferences.query);
-        setSortMode(preferences.sort);
-        setRadiusMeters(preferences.radiusMeters);
-        sortModeRef.current = preferences.sort;
-        void executeSearch(preferences.query, locationRef.current, preferences.sort);
+        setSort(preferences.sort);
+        setDirection(preferences.direction);
+        preferencesRef.current = { sort: preferences.sort, direction: preferences.direction };
+        void executeSearch(preferences.query, locationRef.current, preferences.sort, preferences.direction);
       } else {
         setQuery('');
         setShown(null);
@@ -187,43 +201,35 @@ export function SearchScreen() {
     return () => window.clearTimeout(timer);
   }, [executeSearch, addressQuery]);
 
-  // Stage 6C: the last Search of this tab — query and the released preferences only; never results or coordinates.
+  // Stage 6C + Rev 3: the last Search of this tab — query, sort and direction only; never results or coordinates.
   useEffect(() => {
     if (!searchedQuery) return;
-    writeLastSearchState({ query: searchedQuery, sort: sortMode, radiusMeters: radiusMeters as 1000 | 3000 | 5000 | null });
-  }, [searchedQuery, sortMode, radiusMeters]);
+    writeLastSearchState({ query: searchedQuery, sort, direction });
+  }, [searchedQuery, sort, direction]);
 
-  // stage #5: requesting the browser geolocation happens only through an explicit geo intent of the buyer —
-  // selecting «Сначала ближе» or a finite distance in the sheet (or the banner's retry button). On denial or
-  // unavailability the ordinary Search keeps working: «Сначала актуальнее» stays, a finite radius resets to «Любое»,
-  // and the sheet banner carries the concise feedback and the retry (contract §4 «Geolocation intent»).
-  function revertGeoDependentSettings() {
-    setSortMode('actuality');
-    setRadiusMeters(null);
-    setDraftSort('actuality');
-    setDraftRadius(null);
-  }
-
-  function requestBuyerLocation() {
-    if (locationState.kind === 'requesting') return;
-    if (!navigator.geolocation) {
-      setLocationState({ kind: 'error' });
-      revertGeoDependentSettings();
-      return;
-    }
-    setLocationState({ kind: 'requesting' });
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const parsed = buyerLocationSchema.safeParse({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        setLocationState(parsed.success ? { kind: 'enabled', point: parsed.data } : { kind: 'error' });
-        if (!parsed.success) revertGeoDependentSettings();
-      },
-      () => {
+  // Requesting the browser geolocation happens only through an explicit geo intent of the buyer — choosing «Расстояние».
+  // On denial or unavailability the ordinary Search keeps working: the order falls back to the actuality.
+  function requestBuyerLocation(): Promise<BuyerLocation | null> {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
         setLocationState({ kind: 'error' });
-        revertGeoDependentSettings();
-      },
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 },
-    );
+        resolve(null);
+        return;
+      }
+      setLocationState({ kind: 'requesting' });
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const parsed = buyerLocationSchema.safeParse({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+          setLocationState(parsed.success ? { kind: 'enabled', point: parsed.data } : { kind: 'error' });
+          resolve(parsed.success ? parsed.data : null);
+        },
+        () => {
+          setLocationState({ kind: 'error' });
+          resolve(null);
+        },
+        { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 },
+      );
+    });
   }
 
   const buyerLocation = locationState.kind === 'enabled' ? locationState.point : undefined;
@@ -231,64 +237,40 @@ export function SearchScreen() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await executeSearch(query, buyerLocation, sortMode);
+    await executeSearch(query, buyerLocation, sort, direction);
   }
 
   function quickSearch(term: string) {
     if (loading) return;
     setQuery(term);
-    void executeSearch(term, buyerLocation, sortMode);
+    void executeSearch(term, buyerLocation, sort, direction);
   }
 
-  const locationEnabled = locationState.kind === 'enabled';
-
-  function radiusLabel(meters: number): string {
-    return t(RADIUS_OPTIONS.find((option) => option.meters === meters)?.labelKey ?? 'search.radiusAny');
+  function applyOrder(nextSort: SearchSortMode, nextDirection: SearchSortDirection, location: BuyerLocation | undefined) {
+    setSort(nextSort);
+    setDirection(nextDirection);
+    if (lastSearch.current) void executeSearch(lastSearch.current.query, location, nextSort, nextDirection);
   }
 
-  function openSheet() {
-    setDraftSort(sortMode);
-    setDraftRadius(radiusMeters);
-    setSheetOpen(true);
-  }
-
-  function selectSort(mode: SearchSortMode) {
-    setDraftSort(mode);
-    if (mode === 'distance' && !locationEnabled) requestBuyerLocation();
-  }
-
-  function selectRadius(meters: number | null) {
-    setDraftRadius(meters);
-    if (meters !== null && !locationEnabled) requestBuyerLocation();
-  }
-
-  // «Показать N предложений» (B07): commit the drafts. The radius is a client-side presentation filter, so it applies
-  // without a request; a sort-mode change re-runs the search (ranking stays a server authority). A geo-dependent
-  // setting commits only with the granted location.
-  function applyFilters() {
-    const nextSort = draftSort === 'distance' && !locationEnabled ? sortMode : draftSort;
-    const nextRadius = locationEnabled ? draftRadius : null;
-    setRadiusMeters(nextRadius);
-    if (nextSort !== sortMode) {
-      setSortMode(nextSort);
-      if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, nextSort);
+  // A choice applies at once. A new criterion starts with its natural direction; the active one reverses its direction.
+  async function chooseCriterion(criterion: SearchSortMode) {
+    if (loading || locationState.kind === 'requesting') return;
+    setDistanceNotice(false);
+    const nextDirection = criterion === sort ? (direction === 'asc' ? 'desc' : 'asc') : NATURAL_SORT_DIRECTION[criterion];
+    if (criterion === 'distance' && !buyerLocation) {
+      const point = await requestBuyerLocation();
+      if (point) {
+        applyOrder('distance', nextDirection, point);
+      } else {
+        setDistanceNotice(true);
+        if (sort !== 'actuality' || direction !== NATURAL_SORT_DIRECTION.actuality) {
+          applyOrder('actuality', NATURAL_SORT_DIRECTION.actuality, undefined);
+        }
+      }
+      return;
     }
-    setSheetOpen(false);
+    applyOrder(criterion, nextDirection, buyerLocation);
   }
-
-  // «Сбросить» (B07): back to the defaults «Сначала актуальнее» / «Любое».
-  function resetFilters() {
-    setDraftSort('actuality');
-    setDraftRadius(null);
-    setRadiusMeters(null);
-    if (sortMode !== 'actuality') {
-      setSortMode('actuality');
-      if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, 'actuality');
-    }
-    setSheetOpen(false);
-  }
-
-  const activeFilters = (sortMode !== 'actuality' ? 1 : 0) + (radiusMeters !== null ? 1 : 0);
 
   const form = (compact: boolean, withFilters = true) => (
     <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate
@@ -317,18 +299,7 @@ export function SearchScreen() {
             onClick={() => { setQuery(''); input.current?.focus(); }}><Ic name="close" className="c2" /></button>
         )}
       </div>
-      {withFilters && <button
-        type="button"
-        className="ib"
-        aria-label={activeFilters > 0 ? t('search.filtersActive', { count: activeFilters }) : t('search.filters')}
-        aria-haspopup="dialog"
-        title={t('search.filters')}
-        style={{ width: 44, position: 'relative', ...(activeFilters > 0 ? { color: 'var(--primary-text)', background: 'var(--primary-soft)' } : {}) }}
-        onClick={openSheet}
-      >
-        <Ic name="filter" />
-        {activeFilters > 0 && <span className="dot" aria-hidden="true" style={{ top: 4, marginLeft: 26 }}>{activeFilters}</span>}
-      </button>}
+      {withFilters && <SortPopover sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} />}
     </form>
   );
 
@@ -340,88 +311,6 @@ export function SearchScreen() {
         <button key={term} type="button" className="chip" disabled={loading} onClick={() => quickSearch(term)}>{term}</button>
       ))}
     </div>
-  );
-
-  const appliedChips: { key: string; label: string; remove: () => void }[] = [];
-  if (sortMode === 'distance') {
-    appliedChips.push({
-      key: 'sort',
-      label: t('search.sortDistance'),
-      remove: () => {
-        setSortMode('actuality');
-        if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, 'actuality');
-      },
-    });
-  }
-  if (radiusMeters !== null) {
-    appliedChips.push({ key: 'radius', label: radiusLabel(radiusMeters), remove: () => setRadiusMeters(null) });
-  }
-
-  const appliedChipsRow = appliedChips.length > 0 && (
-    <div style={{ display: 'flex', gap: 6, overflow: 'hidden', padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }} aria-label={t('search.activeFilters')}>
-      {appliedChips.map((chip) => (
-        <button key={chip.key} type="button" className="chip on" style={{ height: 32, padding: '0 8px 0 12px', fontSize: 13 }}
-          aria-label={t('search.removeFilter', { label: chip.label })}
-          onClick={chip.remove}>
-          {chip.label}<Ic name="close" style={{ width: 16, height: 16 }} />
-        </button>
-      ))}
-    </div>
-  );
-
-  const geoNeeded = draftSort === 'distance' || draftRadius !== null;
-  // After a denial the geo-dependent drafts are reverted, but the concise feedback and the retry (B07) stay
-  // visible while the sheet is open.
-  const showLocationBanner = sheetOpen && (geoNeeded || locationState.kind === 'error');
-
-  const filtersSheet = sheetOpen && (
-    <Sheet title={t('search.filtersTitle')} onClose={() => setSheetOpen(false)} closeLabel={t('search.close')}>
-      {showLocationBanner && (
-        <div className="banner gray" role={locationState.kind === 'error' ? 'alert' : 'status'} style={{ gap: 8, padding: 12, borderRadius: 14 }}>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Ic name="locate" className="c2" />
-            <p className="c c2" style={{ flex: 1 }}>
-              {locationState.kind === 'error' ? t('search.locationError') : t('search.locationNeeded')}
-            </p>
-          </div>
-          <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
-            disabled={locationState.kind === 'requesting'} onClick={requestBuyerLocation}>
-            <Ic name="locate" className="sm" />{t('search.allowLocation')}
-          </button>
-        </div>
-      )}
-      <div className="ov">{t('search.sorting')}</div>
-      <div role="radiogroup" aria-label={t('search.sorting')} style={{ display: 'flex', flexDirection: 'column' }}>
-        {(['distance', 'actuality'] as const).map((mode) => (
-          <label key={mode} className="li" style={{ minHeight: 40, padding: '2px 0', position: 'relative' }}>
-            <input type="radio" name="search-sort" className="cbx" checked={draftSort === mode} onChange={() => selectSort(mode)} />
-            <span className={`rd${draftSort === mode ? ' on' : ''}`} aria-hidden="true" />
-            <div className="mid"><div className="t">{mode === 'distance' ? t('search.sortDistance') : t('search.sortActuality')}</div></div>
-          </label>
-        ))}
-      </div>
-      <div className="ov" style={{ marginTop: 2 }}>{t('search.distanceLabel')}</div>
-      <div className="chips" role="radiogroup" aria-label={t('search.distanceLabel')} style={{ gap: 6, flexWrap: 'nowrap' }}>
-        {RADIUS_OPTIONS.map(({ meters, labelKey }) => (
-          <button key={meters} type="button" role="radio" aria-checked={draftRadius === meters}
-            className={`chip${draftRadius === meters ? ' on' : ''}`} style={{ padding: '0 10px', height: 34 }}
-            onClick={() => selectRadius(meters)}>
-            {t(labelKey)}
-          </button>
-        ))}
-        <button type="button" role="radio" aria-checked={draftRadius === null}
-          className={`chip${draftRadius === null ? ' on' : ''}`} style={{ padding: '0 10px', height: 34 }}
-          onClick={() => selectRadius(null)}>
-          {t('search.radiusAny')}
-        </button>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 2 }}>
-        <button type="button" className="btn btn-p lg w" onClick={applyFilters}>
-          {showOffersLabel(locale, filterOffersByRadius(shown?.offers ?? [], draftRadius).length)}
-        </button>
-        <button type="button" className="btn btn-g w" style={{ height: 36 }} onClick={resetFilters}>{t('search.reset')}</button>
-      </div>
-    </Sheet>
   );
 
   // Stage 6C: while a plain `/` decides, nothing flashes; then either the Search Home or the results view follows.
@@ -442,14 +331,8 @@ export function SearchScreen() {
     );
   }
 
-  const offers = shown?.offers ?? [];
-  // stage #5: the radius is a client-side presentation filter over the complete response (slice contract §2.7).
-  const visibleOffers = filterOffersByRadius(offers, radiusMeters);
-  const filteredEmpty = radiusMeters !== null && offers.length > 0 && visibleOffers.length === 0;
-  const showSummary = !loading && !filteredEmpty && (radiusMeters !== null || sortMode === 'distance');
-  const summaryParts = [offersCount(locale, visibleOffers.length)];
-  if (radiusMeters !== null) summaryParts.push(radiusLabel(radiusMeters));
-  if (sortMode === 'distance') summaryParts.push(t('search.sortDistance'));
+  const visibleOffers = shown?.offers ?? [];
+  const orderPhrase = t(`search.order.${sort}.${direction}` as 'search.order.price.asc');
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
@@ -459,40 +342,30 @@ export function SearchScreen() {
   return (
     <BuyerScreen
       section="search"
-      overlay={filtersSheet}
       top={<header className="bar" style={{ padding: '0 12px', gap: 8 }}>{form(true)}</header>}
     >
       <div className="chips-row" style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>{chips}</div>
-      {appliedChipsRow}
-      <main className="body" style={filteredEmpty
-        ? { justifyContent: 'center', alignItems: 'center', gap: 14, padding: 24, textAlign: 'center' }
-        : { gap: 12, padding: 12 }} aria-busy={loading || undefined}>
+      <main className="body" style={{ gap: 12, padding: 12 }} aria-busy={loading || undefined}>
         {validation}
-        {showSummary
-          ? <p className="c">{summaryParts.join(' · ')}</p>
-          : <p className="c">{buyerLocation ? t('buyer.captionNear') : t('buyer.captionFresh')}</p>}
-        {!filteredEmpty && <p className={visibleOffers.length > 0 && !loading ? 'vh' : 'c'} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>}
+        <p className="c">{t('search.orderCaption', { order: orderPhrase })}</p>
+        {distanceNotice && (
+          <div className="banner gray" role="alert" style={{ gap: 8, padding: 12, borderRadius: 14 }}>
+            <div style={{ display: 'flex', gap: 10 }}><Ic name="locate" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t('search.distanceNeedsLocation')}</p></div>
+          </div>
+        )}
+        <p className={visibleOffers.length > 0 && !loading ? 'vh' : 'c'} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
         {state.kind === 'error' && (
           <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14, gap: 8 }}>
             <div style={{ display: 'flex', gap: 10 }}><Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('search.error')}</p></div>
             {lastSearch.current && (
               <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
-                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sortMode)}>
+                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sort, lastSearch.current.direction)}>
                 <Ic name="refresh" className="sm" />{t('cabinet.retry')}
               </button>
             )}
           </div>
         )}
         {loading && visibleOffers.length === 0 && <ResultSkeletons />}
-        {filteredEmpty && (
-          <>
-            <div className="lic" style={{ width: 64, height: 64, borderRadius: 20 }}><Ic name="filter" className="lg" /></div>
-            <h1 className="h2" style={{ margin: 0 }}>{t('search.filteredEmptyTitle')}</h1>
-            <p className="t c2" style={{ margin: 0 }}>{t('search.filteredEmptyText', { query, count: offersCount(locale, offers.length) })}</p>
-            <button type="button" className="btn btn-p lg w" onClick={resetFilters}>{t('search.resetFilters')}</button>
-            <button type="button" className="btn btn-g w" onClick={openSheet}>{t('search.editFilters')}</button>
-          </>
-        )}
         {visibleOffers.length > 0 && (
           <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {visibleOffers.map((offer) => <li key={offer.id}><ResultCard offer={offer} distanceMeters={offer.distanceMeters} /></li>)}

@@ -10,12 +10,11 @@ import {
   type Clock,
 } from '../../offers/lifecycle/offer-lifecycle';
 import type { BuyerLocation } from '../contracts/buyer-location.contract';
-import { searchQuerySchema, type SearchResponse } from '../contracts/search.contract';
+import { resolveSortDirection, searchQuerySchema, type SearchResponse, type SearchSortDirection, type SearchSortMode } from '../contracts/search.contract';
 import { findOffersByProductOrTitleWords } from '../infrastructure/search.repository';
 import { queryWords } from '../../offers/title/offer-title';
 import { rankSearchOfferCandidates } from '../ranking/search-ranking';
-import { ageingSince, buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
-import { readSearchRankingPolicy, type SearchSortMode } from '../config/search-ranking-policy.config';
+import { buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import type { Locale } from '../../../i18n/config';
 
 type SearchLifecycleOptions = {
@@ -24,8 +23,9 @@ type SearchLifecycleOptions = {
   buyerLocation?: BuyerLocation;
   locale?: Locale;
   commentTranslationEnabled?: boolean;
-  // stage #5: the buyer picks only the mode; the server-side SearchRankingPolicy maps it onto the current weights.
-  sortMode?: SearchSortMode;
+  // Stage 6 Rev 3: the explicit sort criterion (default actuality) and its direction (default: the natural one).
+  sort?: SearchSortMode;
+  direction?: SearchSortDirection;
 };
 
 export async function searchOffers(
@@ -53,12 +53,10 @@ export async function searchOffers(
     ? await findOffersByProductOrTitleWords(db, match, cutoff)
     : await findOffersByProductOrTitleWords(db, match, cutoff, locale, commentTranslationEnabled);
   const policy = readActualityPolicy();
-  const actuality = ageingSince(now, policy);
-  const ranked = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation, actuality, {
-    now,
-    actualityPolicy: policy,
-    rankingPolicy: readSearchRankingPolicy(),
-    sortMode: lifecycleOptions.sortMode ?? 'actuality',
+  const sort = lifecycleOptions.sort ?? 'actuality';
+  const ranked = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation, {
+    sort,
+    direction: resolveSortDirection(sort, lifecycleOptions.direction),
   });
   const offers = ranked.map(({ offer, lastConfirmedAt, rankingDistanceMeters }) => ({
     ...offer,

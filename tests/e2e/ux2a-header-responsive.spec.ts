@@ -16,8 +16,8 @@ function overlaps(a: Box, b: Box) {
 async function expectResultsBar(page: Page) {
   const search = page.getByRole('search', { name: 'Поиск предложений' });
   const input = search.getByRole('searchbox', { name: 'Какой товар ищете?' });
-  // stage #5: the pin toggle is replaced by the «Фильтры» button (B07) next to the search field.
-  const filters = search.getByRole('button', { name: 'Фильтры', exact: true });
+  // Stage 6 Rev 3: the sort button (a popover of three criteria) sits next to the search field.
+  const filters = search.getByRole('button', { name: 'Сортировка', exact: true });
 
   await expect(input).toBeVisible();
   await expect(filters).toBeVisible();
