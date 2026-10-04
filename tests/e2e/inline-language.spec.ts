@@ -9,6 +9,9 @@ test.beforeEach(({}, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'The current delivery gate is mobile + Russian.');
 });
 
+// Each test signs in, switches the language twice, reloads and narrows the viewport: more than the default 30 s on a slow runner.
+test.setTimeout(60_000);
+
 // One account per surface: the two tests run in parallel workers and must not clean up each other's user.
 const phones = { '/more': '+77000014081', '/seller/more': '+77000014082' } as const;
 
