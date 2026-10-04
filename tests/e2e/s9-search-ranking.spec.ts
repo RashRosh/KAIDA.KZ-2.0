@@ -151,7 +151,7 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
     if (new URL(request.url()).pathname === '/api/search') searchRequests += 1;
   });
 
-  await page.goto('/');
+  await page.goto('/welcome');
   // First Entry: the start page has neither the removed pin control nor the filters button.
   await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Фильтры', exact: true })).toHaveCount(0);

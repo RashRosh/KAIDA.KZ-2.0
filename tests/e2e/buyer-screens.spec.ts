@@ -1,30 +1,29 @@
 import { expect, test } from '@playwright/test';
 import { SEED_POINT, setLocaleCookie } from './buyer-helpers';
+import { emptyBrowserState } from './browser-state';
 
-// buyer-screens-mockup §6: the language is chosen once at the first visit; the result card (B01) opens the offer page
+// buyer-screens-mockup §6: no language screen intercepts a page; the result card (B01) opens the offer page
 // (B02) with the seller, comment and interest; bottom navigation and buyer «Ещё»; no language switch in top bars.
 // Uses the seeded «Баранина» offer (Тестовая мясная точка, Асыл Ет).
 
 test.describe('first visit', () => {
-  test.use({ storageState: { cookies: [], origins: [] } });
+  test.use({ storageState: emptyBrowserState });
 
-  test('the language is asked once, before any buyer or seller page, and then remembered', async ({ page }) => {
+  test('no language screen intercepts a buyer or seller page', async ({ page }) => {
     await page.goto('/nearby');
-    await expect(page.getByText('Выберите язык')).toBeVisible();
-    await expect(page.getByRole('navigation')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Қазақша' }).click();
-    await expect(page.getByRole('navigation').getByRole('link', { name: 'Жақын жерде' })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByText('Выберите язык')).toHaveCount(0);
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'Рядом' })).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
 
     await page.goto('/seller');
-    await expect(page.getByText('Тілді таңдаңыз')).toHaveCount(0);
-    await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
+    await expect(page.getByText('Выберите язык')).toHaveCount(0);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
   });
 });
 
 test.describe('the start page', () => {
   test('the demo plays on the first visit only; the field stops it; the arrow needs text', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/welcome');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Найдите, где');
     // First visit: the typed word runs in the placeholder while the field stays empty, and the example is there.
     await expect(page.locator('.fe-live')).not.toHaveCount(0);
@@ -49,7 +48,7 @@ test.describe('the start page', () => {
 });
 
 test('a result card opens the offer page with seller, comment and interest; navigation and «Ещё» work', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/welcome');
   // No language switch and no sign-in on the top of the buyer screens.
   await expect(page.getByRole('group', { name: 'Язык интерфейса' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Войти' })).toHaveCount(0);
