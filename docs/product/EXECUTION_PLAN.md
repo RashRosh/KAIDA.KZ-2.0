@@ -190,7 +190,7 @@ merged-main CI, до фактического создания тег не сч�
 | 6B | ~~First Entry correction: `/welcome` отдельно от Search `/`, intro один раз на браузер/устройство, язык на First Entry, без языкового экрана~~ — **закрыт** (PR #84, manual acceptance PASS) | `docs/slices/first-entry-correction/SLICE_CONTRACT.md` |
 | 6C | ~~Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате)~~ — **закрыт** (PR #86, manual acceptance PASS) | `docs/slices/search-home-last-state/SLICE_CONTRACT.md` |
 | 6D | ~~Inline-язык в `Ещё` (покупатель и продавец): компактная таблетка `РУС \| ҚАЗ` в строке «Язык», сразу, без Sheet/Done~~ — **закрыт** (PR #88, manual acceptance PASS) | `docs/slices/inline-language/SLICE_CONTRACT.md` |
-| 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 | Issue #12, future contract (`docs/slices/search-price-sort-range/` rev 3), после 6D |
+| 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 | Issue #12, `docs/slices/search-sort-rev3/SLICE_CONTRACT.md` (DRAFT) |
 | 6F | Search Query Log — минимальный срез, одна модель с будущим S15C D0 | future Slice Contract; privacy/retention risk |
 | 6G | Динамические популярные запросы (≤5, окно по конфигу, curated fallback) | future Slice Contract, после 6F |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
