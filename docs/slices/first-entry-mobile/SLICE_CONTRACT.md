@@ -13,6 +13,19 @@ demo), `fe.css` (mobile and live-demo rules). Mandatory UI rules: `PROJECT_RULES
 
 **Base:** `main` after PR #63 (buyer screens).
 
+**Revised by `docs/slices/first-entry-correction/SLICE_CONTRACT.md` (PO, 2026-10-04).** Superseded clauses of this contract:
+
+- §2 «The route is `/`» — First Entry is `/welcome`; `/` is the ordinary Search.
+- §2 Layout, Header «No `РУС / ҚАЗ` switch — the language is chosen once at the first visit» — First Entry carries the
+  language switch as in mockup `FEA1`; there is no separate language screen.
+- §2 Search, «Popular-query chips leave the start screen … stay under an empty result» — superseded for the ordinary
+  Search by the Search Home slice.
+- §4 AC 1 «without the language switch» and AC 7 «the language is the one chosen in the language gate».
+- §6 item 2 «Language switch in the header: removed».
+
+Everything else (layout, example fixture, demo animation, `kaida_fe_demo_seen`, `→` rule, geolocation, seller strip)
+stays valid and moves to `/welcome` as described there.
+
 ## 1. User task
 
 A Buyer opens the service and understands in a few seconds what it does: one query shows several nearby sellers,

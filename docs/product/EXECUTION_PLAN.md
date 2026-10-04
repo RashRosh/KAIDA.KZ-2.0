@@ -143,11 +143,35 @@ editorial workbook само по себе ничего не меняет: соп
 PR #77 (slice-коммит `444b44f`, merge `419e60e`; repair-коммит `186ec21` — order-agnostic test assertion, merge `3763373` — PR #78),
 branch CI green (runs `37182360419`/`37182363774` на `e21e2f8`, `37191449657`/`37198879235` на `186ec21`),
 merged-main CI на `3763373` green (run `37199326198`), manual acceptance **PASS**.
-Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates` создаётся этим docs-коммитом после green CI;
-до фактического создания тег не считать существующим.
+Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates` создан на `415a25a`.
 
-**Следующий незакрытый stage — #6** (Поиск: сортировка «дешевле» и цена от–до, Issue #12 — остаётся OPEN).
-Порядок stages не меняется.
+**Stage #6 Rev 2 отклонён на manual acceptance (PO, 2026-10-04)** — CHANGES REQUESTED, без PR/merge/tag. Ветка
+`slice/search-price-sort-range-contract` (contract `b26573a`, реализация `977dbf0`, head `f9dd7cf`, branch CI `37205826673`
+green) сохраняется неизменной как evidence; новая ветка Rev 3 строится от актуального `main`, из старой берутся только
+полезные hunks/tests. Issue #12 остаётся OPEN.
+
+**Следующий незакрытый шаг — 6B** (First Entry correction); 6A выполнен этим docs-изменением. Порядок 6B → 6C → 6D → 6
+выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
+внутри структуры, которую сразу заменят.
+
+Решения PO (2026-10-04), которые должны войти в соответствующие Slice Contracts, не сокращаясь:
+
+- **6B/6C:** `/welcome` — First Entry, показывается один раз на браузер/устройство; `/` — постоянный Search; пункт
+  `Поиск` никогда не открывает First Entry. Состояние последнего поиска (запрос, сортировка, направление) — только в
+  пределах вкладки/сессии; выдача и координаты не сохраняются, при возврате результаты запрашиваются заново; `distance`
+  без текущих координат при восстановлении нормализуется в `actuality` (и в UI, и в хранилище), геолокация автоматически
+  не запрашивается.
+- **6D:** язык без отдельного gate и без Sheet — на First Entry и в `Ещё`, у покупателя и у продавца.
+- **6 (Rev 3):** `sort=actuality|distance|price`, `direction=asc|desc`; выбранный критерий — настоящий первичный порядок,
+  скрытого взвешенного score нет; порядок «свежие выше ageing» при явном `price`/`distance` больше не действует
+  (`<7d` eligibility остаётся), actuality — tie-breaker, затем id; цена — номинальная KZT без нормализации единиц;
+  geo-less после geo-known в обоих направлениях distance; по умолчанию actuality, свежие первыми; повторный выбор
+  активного критерия меняет направление. Радиус, цена от–до, чипы фильтров, sheet «Фильтры» и `sort=cheaper` удаляются.
+- **6F/6G:** только осознанные submit; без user-id и постоянного/сессионного идентификатора, пока контракт не докажет
+  необходимость; событие — нормализованный запрос, время и нужный исход поиска; raw-события не дольше 90 дней
+  (конфигурируемо); окно популярности по умолчанию 14 дней (конфигурируемо), порог повторов конфигурируем, ≤5 чипов,
+  curated fallback; сырые запросы продавцу не показываются; модель общая с S15C, второй не создаётся.
+- **Backlog аудита overlay** (вне текущих slices): выбор единицы цены, выбор торговых точек, «Откуда карточка».
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -160,7 +184,13 @@ Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates` соз�
 | 4 | ~~Nearby result-first correction~~ — **закрыт** (PR #73, manual acceptance PASS) | Issue #34, `docs/slices/nearby-result-first/SLICE_CONTRACT.md` |
 | 5 | ~~Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние~~ — **закрыт** (PR #74, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-distance/SLICE_CONTRACT.md` |
 | 5A | ~~Search visibility for addressed Locations without coordinates~~ — **закрыт** (PR #77 + repair PR #78, manual acceptance PASS) | `docs/slices/search-visibility-without-coordinates/SLICE_CONTRACT.md`, Issue #12 |
-| 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
+| 6A | Process/UX rules maintenance: граница доставки mobile + RU, выбор interaction pattern, язык без отдельного gate (docs) | `PROJECT_RULES.md` §18.4–18.5 |
+| 6B | First Entry correction: `/welcome` отдельно от Search `/`, intro один раз на браузер/устройство, язык на First Entry, без `LanguageGate` | `docs/slices/first-entry-correction/SLICE_CONTRACT.md` |
+| 6C | Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате) | future Slice Contract, после 6B |
+| 6D | Inline-язык в `Ещё` (покупатель и продавец): `Русский \| Қазақша`, сразу, без Sheet/Done | future Slice Contract, после 6C |
+| 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 | Issue #12, future contract (`docs/slices/search-price-sort-range/` rev 3), после 6D |
+| 6F | Search Query Log — минимальный срез, одна модель с будущим S15C D0 | future Slice Contract; privacy/retention risk |
+| 6G | Динамические популярные запросы (≤5, окно по конфигу, curated fallback) | future Slice Contract, после 6F |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
