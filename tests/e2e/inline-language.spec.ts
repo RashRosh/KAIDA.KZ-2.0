@@ -90,7 +90,7 @@ async function exerciseInlineLanguage(page: Page, path: keyof typeof phones) {
 
   // Back to Russian in one tap; both names fit from 320 px without a horizontal scroll.
   await page.setViewportSize({ width: 320, height: 800 });
-  await languageGroup(page, 'Тіл').getByRole('button', { name: 'Русский', exact: true }).click();
+  await page.getByRole('button', { name: 'Русский', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   for (const name of ['Русский', 'Қазақша']) {
