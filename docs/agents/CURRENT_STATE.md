@@ -5,7 +5,7 @@
 ## Verified base
 
 - Проверено: 2026-10-04 (6-я сессия).
-- `origin/main`: `fa77612` (merge PR #80 — 6A, docs-only; CI green). Последний checkpoint-тег: `v0.0.47-search-visibility-without-coordinates`.
+- `origin/main`: `d98a365` (6A PR #80 и контракт 6B PR #81 слиты). Последний checkpoint-тег: `v0.0.47-search-visibility-without-coordinates`.
 
 ## Current task
 
@@ -13,15 +13,20 @@
 «Текущий repository gate»). Stage #6 Rev 2 отклонён на manual acceptance: ветка `slice/search-price-sort-range-contract`
 (`f9dd7cf`) — неизменный evidence.
 
-- **6A** — закрыт (merged, PR #80).
-- **6B First Entry correction** — контракт `docs/slices/first-entry-correction/SLICE_CONTRACT.md` APPROVED —
-  IMPLEMENTATION AUTHORIZED. Production-реализации ещё нет.
+- **6A** — закрыт (PR #80). Контракт 6B — в `main` (PR #81).
+- **6B First Entry correction** — реализован на ветке `slice/first-entry-correction` (реализация `cc94d7e`):
+  `/welcome` = First Entry, `/` = Search, постоянный intro-маркер, без языкового экрана, переключатель языка на
+  First Entry. Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только после PASS.
+
+## Verification (local)
+
+Unit 338/338, integration 197/197, typecheck и eslint чистые, полный E2E (mobile + desktop) зелёный после обновления
+проверок, которые утверждали старое «`/` = First Entry» / языковой экран. Branch CI — см. GitHub.
 
 ## Next action
 
-1. Смержить docs-only PR с контрактом 6B в `main`.
-2. Реализация 6B на новой ветке `slice/first-entry-correction` от актуального `main`; строго по контракту, без 6C/6D/Stage 6 Rev 3.
-3. Targeted + full regression + branch CI → STOP до PO manual acceptance (PR/merge/tag реализации — только после PASS).
+1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
+2. После PASS: PR реализации, merge, затем 6C (Search Home + состояние поиска) — отдельный контракт.
 
 ## Current constraints
 
