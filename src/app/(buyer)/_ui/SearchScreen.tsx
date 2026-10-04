@@ -7,6 +7,7 @@ import { offerCount, offersCount, showOffersLabel } from '../../../i18n/format';
 import { buyerLocationSchema, type BuyerLocation } from '../../../modules/search/contracts/buyer-location.contract';
 import { searchQuerySchema, searchResponseSchema, type SearchResponse } from '../../../modules/search/contracts/search.contract';
 import { filterOffersByRadius } from '../../../modules/search/radius-filter';
+import { normalizeGeoDependentState, readLastSearchState, writeLastSearchState } from '../../../modules/search/last-search-state';
 import type { SearchSortMode } from '../../../modules/search/config/search-ranking-policy.config';
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
@@ -31,7 +32,8 @@ const RADIUS_OPTIONS = [
   { meters: 5000, labelKey: 'search.radius5' },
 ] as const;
 
-const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс', 'Яблоки'] as const;
+// Stage 6C: at most five curated queries — the first five of the existing set; no popularity data is involved.
+const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс'] as const;
 export function SearchScreen() {
   const { locale, t } = useI18n();
   // The query kept in the address (replaceState below is synced into the router), so Back from an offer page
@@ -39,6 +41,11 @@ export function SearchScreen() {
   const addressQuery = useSearchParams().get('q') ?? '';
   const [query, setQuery] = useState(addressQuery);
   const [state, setState] = useState<SearchState>(addressQuery ? { kind: 'loading' } : { kind: 'initial' });
+  // Stage 6C: the Search Home (field + chips, no feed) shows until a deliberate search starts; `ready` is false only
+  // while a plain `/` still decides between the Home and the last Search of this tab (storage is read after mount).
+  const [started, setStarted] = useState(Boolean(addressQuery));
+  const [ready, setReady] = useState(Boolean(addressQuery));
+  const [searchedQuery, setSearchedQuery] = useState('');
   const [shown, setShown] = useState<SearchResponse | null>(null);
   const writtenQuery = useRef<string | null>(null);
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
@@ -102,6 +109,8 @@ export function SearchScreen() {
     }
     pending.current = true;
     lastSearch.current = { query: parsed.data, location: buyerLocation, sortMode: mode };
+    setStarted(true);
+    setSearchedQuery(parsed.data);
     setState({ kind: 'loading' });
     try {
       const response = buyerLocation
@@ -141,20 +150,48 @@ export function SearchScreen() {
   }, []);
 
   // An address this screen did not write (first open, Back, «Поиск» in the navigation) decides what is shown.
+  // Stage 6C: a plain `/` reopens the last Search of this tab, fetched afresh; with none it is the Search Home. Without
+  // buyer coordinates every geo-dependent preference is normalized (UI and the tab state are rewritten alike) and the
+  // geolocation is never requested here.
   useEffect(() => {
     if (addressQuery === writtenQuery.current) return;
     const timer = window.setTimeout(() => {
       writtenQuery.current = addressQuery;
-      setQuery(addressQuery);
+      const stored = readLastSearchState();
+      const hasCoordinates = locationRef.current !== undefined;
       if (addressQuery) {
-        void executeSearch(addressQuery, locationRef.current, sortModeRef.current);
+        setQuery(addressQuery);
+        const preferences = stored && stored.query === addressQuery ? normalizeGeoDependentState(stored, hasCoordinates) : null;
+        if (preferences) {
+          setSortMode(preferences.sort);
+          setRadiusMeters(preferences.radiusMeters);
+          sortModeRef.current = preferences.sort;
+        }
+        void executeSearch(addressQuery, locationRef.current, preferences ? preferences.sort : sortModeRef.current);
+      } else if (stored) {
+        const preferences = normalizeGeoDependentState(stored, hasCoordinates);
+        setQuery(preferences.query);
+        setSortMode(preferences.sort);
+        setRadiusMeters(preferences.radiusMeters);
+        sortModeRef.current = preferences.sort;
+        void executeSearch(preferences.query, locationRef.current, preferences.sort);
       } else {
+        setQuery('');
         setShown(null);
+        setStarted(false);
+        setSearchedQuery('');
         setState({ kind: 'initial' });
       }
+      setReady(true);
     }, 0);
     return () => window.clearTimeout(timer);
   }, [executeSearch, addressQuery]);
+
+  // Stage 6C: the last Search of this tab — query and the released preferences only; never results or coordinates.
+  useEffect(() => {
+    if (!searchedQuery) return;
+    writeLastSearchState({ query: searchedQuery, sort: sortMode, radiusMeters: radiusMeters as 1000 | 3000 | 5000 | null });
+  }, [searchedQuery, sortMode, radiusMeters]);
 
   // stage #5: requesting the browser geolocation happens only through an explicit geo intent of the buyer —
   // selecting «Сначала ближе» or a finite distance in the sheet (or the banner's retry button). On denial or
@@ -253,7 +290,7 @@ export function SearchScreen() {
 
   const activeFilters = (sortMode !== 'actuality' ? 1 : 0) + (radiusMeters !== null ? 1 : 0);
 
-  const form = (compact: boolean) => (
+  const form = (compact: boolean, withFilters = true) => (
     <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate
       style={{ display: 'flex', alignItems: 'center', gap: 8, flex: compact ? 1 : 'none', minWidth: 0 }}>
       <label htmlFor="product-query" className="vh">{t('search.question')}</label>
@@ -280,7 +317,7 @@ export function SearchScreen() {
             onClick={() => { setQuery(''); input.current?.focus(); }}><Ic name="close" className="c2" /></button>
         )}
       </div>
-      <button
+      {withFilters && <button
         type="button"
         className="ib"
         aria-label={activeFilters > 0 ? t('search.filtersActive', { count: activeFilters }) : t('search.filters')}
@@ -291,7 +328,7 @@ export function SearchScreen() {
       >
         <Ic name="filter" />
         {activeFilters > 0 && <span className="dot" aria-hidden="true" style={{ top: 4, marginLeft: 26 }}>{activeFilters}</span>}
-      </button>
+      </button>}
     </form>
   );
 
@@ -387,6 +424,24 @@ export function SearchScreen() {
     </Sheet>
   );
 
+  // Stage 6C: while a plain `/` decides, nothing flashes; then either the Search Home or the results view follows.
+  if (!ready) {
+    return <BuyerScreen section="search"><main className="body" aria-busy="true" /></BuyerScreen>;
+  }
+
+  // Stage 6C Search Home: the field centered with the curated chips; no feed, no caption, no First Entry.
+  if (!started) {
+    return (
+      <BuyerScreen section="search">
+        <main className="body" style={{ justifyContent: 'center', gap: 16, padding: '0 16px 48px' }}>
+          {form(false, false)}
+          {validation}
+          {chips}
+        </main>
+      </BuyerScreen>
+    );
+  }
+
   const offers = shown?.offers ?? [];
   // stage #5: the radius is a client-side presentation filter over the complete response (slice contract §2.7).
   const visibleOffers = filterOffersByRadius(offers, radiusMeters);
@@ -407,6 +462,7 @@ export function SearchScreen() {
       overlay={filtersSheet}
       top={<header className="bar" style={{ padding: '0 12px', gap: 8 }}>{form(true)}</header>}
     >
+      <div className="chips-row" style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>{chips}</div>
       {appliedChipsRow}
       <main className="body" style={filteredEmpty
         ? { justifyContent: 'center', alignItems: 'center', gap: 14, padding: 24, textAlign: 'center' }
@@ -428,8 +484,6 @@ export function SearchScreen() {
           </div>
         )}
         {loading && visibleOffers.length === 0 && <ResultSkeletons />}
-        {/* Nothing to show (empty result, error, empty query): keep the popular queries as the way forward. */}
-        {!loading && visibleOffers.length === 0 && !filteredEmpty && chips}
         {filteredEmpty && (
           <>
             <div className="lic" style={{ width: 64, height: 64, borderRadius: 20 }}><Ic name="filter" className="lg" /></div>

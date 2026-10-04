@@ -108,6 +108,9 @@ test.afterAll(async () => {
 });
 
 async function runSearch(page: Page) {
+  // Stage 6C: a plain «/» would reopen the previous search of this tab; each run starts from the Search Home so a single
+  // search is in flight while the card is measured.
+  await page.addInitScript(() => window.sessionStorage.removeItem('kaida:last-search'));
   await page.goto('/');
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill(productName);
