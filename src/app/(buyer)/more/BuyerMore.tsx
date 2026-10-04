@@ -5,12 +5,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { AuthModal } from '../../_components/AuthModal';
 import { forgetPushOnThisDevice } from '../../_components/push-client';
-import { Bar, Ic, Radio, Sheet } from '../../seller/_kaida/ui';
+import { Bar, Ic } from '../../seller/_kaida/ui';
+import { InlineLanguage } from '../../seller/_kaida/InlineLanguage';
 import { BuyerScreen } from '../_ui/buyer-ui';
 import { useSellerEntry } from '../_ui/seller-entry';
 
 // buyer-screens-mockup · buyer «Ещё» (no frame; built like the seller's AI-S19): sign-in or the signed-in phone with
-// sign-out, the language (chosen once at the first visit, changed only here) and the way to the seller cabinet.
+// sign-out, the language (an inline choice of two, applied at once) and the way to the seller cabinet.
 
 function formatPhone(e164: string) {
   const digits = e164.replace(/\D/g, '');
@@ -19,14 +20,12 @@ function formatPhone(e164: string) {
 }
 
 export function BuyerMore() {
-  const { locale, setLocale, t } = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
   const seller = useSellerEntry();
   const [phone, setPhone] = useState<string | null | undefined>(undefined);
   const [signInOpen, setSignInOpen] = useState(false);
   const signInButton = useRef<HTMLButtonElement>(null);
-  const [languageOpen, setLanguageOpen] = useState(false);
-  const [choice, setChoice] = useState(locale);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const loadUser = useCallback(async () => {
@@ -70,19 +69,6 @@ export function BuyerMore() {
           onAuthenticated={(user) => { setSignInOpen(false); setPhone(user.phone); router.refresh(); }}
         />
       )}
-      {languageOpen && (
-        <Sheet title={t('more.languageTitle')} onClose={() => setLanguageOpen(false)} closeButton={false}>
-          <div role="radiogroup" aria-label={t('more.language')} style={{ display: 'flex', flexDirection: 'column' }}>
-            {(['ru', 'kk'] as const).map((value) => (
-              <button key={value} type="button" className="li" role="radio" aria-checked={choice === value} onClick={() => setChoice(value)}>
-                <Radio on={choice === value} /><div className="mid"><div className="ts">{t(value === 'ru' ? 'language.ru' : 'language.kk')}</div></div>
-              </button>
-            ))}
-          </div>
-          <p className="c">{t('more.languageNote')}</p>
-          <button type="button" className="btn btn-p lg w" onClick={() => { setLocale(choice); setLanguageOpen(false); router.refresh(); }}>{t('more.done')}</button>
-        </Sheet>
-      )}
     </>
   );
 
@@ -109,9 +95,7 @@ export function BuyerMore() {
           )}
         </div>
         <div className="card" style={{ gap: 0, padding: '0 12px' }}>
-          <button type="button" className="li" onClick={() => { setChoice(locale); setLanguageOpen(true); }} aria-haspopup="dialog" style={{ background: 'transparent', border: 0 }}>
-            <Ic name="globe" className="c2" /><div className="mid"><div className="ts">{t('more.language')}</div><p className="c">{t(locale === 'ru' ? 'language.ru' : 'language.kk')}</p></div><Ic name="right" className="c2" />
-          </button>
+          <InlineLanguage />
           <a className="li" href="/seller" onClick={(event) => void seller.enter(event)} style={{ textDecoration: 'none', color: 'inherit', borderTop: '1px solid var(--line)' }}>
             <Ic name="store" className="c2" /><div className="mid"><div className="ts">{t('buyer.sellerEntry')}</div></div><Ic name="right" className="c2" />
           </a>

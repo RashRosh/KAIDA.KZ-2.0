@@ -14,7 +14,7 @@ test('«Ещё» changes the language in one sheet, keeps the route and the choi
 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'kk');
-  await expect(page.getByRole('button', { name: /^Тіл/ })).toContainText('Қазақша');
+  await expect(page.getByRole('group', { name: 'Тіл' }).getByRole('button', { name: 'Қазақша' })).toHaveAttribute('aria-pressed', 'true');
   await page.goto('/welcome');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Керек тауарды');
 

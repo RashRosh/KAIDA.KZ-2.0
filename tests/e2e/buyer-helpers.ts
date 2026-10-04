@@ -44,11 +44,10 @@ export async function setLocaleCookie(context: BrowserContext, locale: 'ru' | 'k
   await context.addCookies([{ name: 'kaida_locale', value: locale, domain: '127.0.0.1', path: '/' }]);
 }
 
-// PROJECT_RULES.md §18.4 «Язык»: after the first-visit choice the language is changed on buyer «Ещё» → «Язык».
-export async function chooseLanguageInMore(page: Page, language: 'Русский' | 'Қазақша') {
-  await page.goto('/more');
-  await page.getByRole('button', { name: /^(Язык|Тіл)/ }).click();
-  await page.getByRole('radio', { name: language }).click();
-  await page.getByRole('button', { name: /^(Готово|Дайын)$/ }).click();
+// PROJECT_RULES.md §18.4 «Язык» (stage 6D): the language is changed on «Ещё» by one tap on an inline option — buyer `/more`
+// by default, the Seller's `/seller/more` through `path`. The single place that knows how the control works.
+export async function chooseLanguageInMore(page: Page, language: 'Русский' | 'Қазақша', path = '/more') {
+  await page.goto(path);
+  await page.getByRole('group', { name: /^(Язык|Тіл)$/ }).getByRole('button', { name: language, exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', language === 'Қазақша' ? 'kk' : 'ru');
 }

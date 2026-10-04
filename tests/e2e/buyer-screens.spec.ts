@@ -85,9 +85,7 @@ test('a result card opens the offer page with seller, comment and interest; navi
   await nav.getByRole('link', { name: 'Ещё' }).click();
   await expect(nav.getByRole('link', { name: 'Ещё' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('button', { name: /^Войти/ })).toBeVisible();
-  await page.getByRole('button', { name: /^Язык/ }).click();
-  await expect(page.getByRole('dialog', { name: 'Язык / Тіл' }).getByRole('radio', { name: 'Русский' })).toHaveAttribute('aria-checked', 'true');
-  await page.keyboard.press('Escape');
+  await expect(page.getByRole('group', { name: 'Язык' }).getByRole('button', { name: 'Русский' })).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('link', { name: /Я продавец/ }).click();
   await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
   await page.getByRole('button', { name: 'Закрыть' }).click();
