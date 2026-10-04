@@ -107,14 +107,16 @@ afterAll(async () => {
 });
 
 describe('UX1D buyer Offer actionability on PostgreSQL 18', () => {
-  // point-contacts-hours revised UX1D: a public phone is no longer required, only point geo and lifecycle.
-  it('uses the same geo+lifecycle eligibility for Search and Nearby without deleting incomplete records', async () => {
-    const expected = [offerIds.eligible, offerIds.noPhone].sort();
+  // point-contacts-hours revised UX1D: a public phone is no longer required. Stage 5A revised the geo part:
+  // coordinates are required only by geo-dependent behavior (Nearby), not by ordinary Search visibility.
+  it('keeps Nearby geo-eligible while ordinary Search accepts addressed Locations without coordinates', async () => {
+    const searchExpected = [offerIds.eligible, offerIds.noPhone, offerIds.noGeo, offerIds.neither].sort();
+    const nearbyExpected = [offerIds.eligible, offerIds.noPhone].sort();
     const search = await searchOffers(productName, db, options);
-    expect(search.offers.map(({ id }) => id).sort()).toEqual(expected);
+    expect(search.offers.map(({ id }) => id).sort()).toEqual(searchExpected);
 
     const nearby = await findNearbyOffers(point, db, { ...options, nearbyRadiusMeters: 5000 });
-    expect(nearby.offers.map(({ id }) => id).sort()).toEqual(expected);
+    expect(nearby.offers.map(({ id }) => id).sort()).toEqual(nearbyExpected);
     expect(nearby.offers.map(({ distanceMeters }) => distanceMeters)).toEqual([0, 0]);
 
     const stored = await pool.query('SELECT id,status FROM offers WHERE product_id=$1 ORDER BY id', [productId]);

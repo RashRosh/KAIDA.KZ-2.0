@@ -33,6 +33,8 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
         },
         price: { amount: '4200.00', currency: 'KZT', unit: 'кг' },
         sellerComment: 'Свежий привоз.',
+        // stage 5A: the seed point has complete coordinates, so the route capability is available.
+        routeAvailable: true,
       }],
     });
     expect(searchResponseSchema.safeParse(result).success).toBe(true);

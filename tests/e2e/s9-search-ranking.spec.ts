@@ -162,8 +162,12 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
   const firstRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await input.press('Enter');
   expect((await firstRequest).method()).toBe('GET');
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
-  await expect(page.getByText(geolessLocationName)).toHaveCount(0);
+  // stage 5A: the addressed geo-less Offer (the freshest fixture) is visible in ordinary Search and ranks by
+  // pure freshness; its card has neither distance nor a route action.
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
+  const geolessCard = page.getByRole('article').filter({ hasText: geolessLocationName });
+  await expect(geolessCard.getByRole('link', { name: /Маршрут до / })).toHaveCount(0);
+  await expect(geolessCard.getByText(/км$| м$/)).toHaveCount(0);
   expect(searchRequests).toBe(1);
 
   // stage #5: the results header carries «Фильтры» (B07) with the sort radiogroup and the distance chips —
@@ -190,7 +194,7 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
   await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
   await expect(page.getByRole('button', { name: 'Фильтры, активно 1' })).toBeVisible();
   expect((await postRequest).method()).toBe('POST');
-  await expectCardOrder(page, [nearLocationName, farLocationName]);
+  await expectCardOrder(page, [nearLocationName, farLocationName, geolessLocationName]);
   await expect(page.getByRole('button', { name: 'Убрать фильтр Сначала ближе' })).toBeVisible();
   expect(searchRequests).toBe(2);
 
@@ -198,7 +202,7 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
   await page.getByRole('button', { name: 'Убрать фильтр Сначала ближе' }).click();
   await expect(page.getByRole('button', { name: 'Фильтры, активно 1' })).toHaveCount(0);
   expect(searchRequests).toBe(3);
-  await expectCardOrder(page, [nearLocationName, farLocationName]);
+  await expectCardOrder(page, [nearLocationName, farLocationName, geolessLocationName]);
 
   // Reload: the transient location is gone, geolocation is not re-requested, the default Search is GET.
   await page.reload();
@@ -208,7 +212,7 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
   const reloadRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search');
   await page.getByLabel('Какой товар ищете?').press('Enter');
   expect((await reloadRequest).method()).toBe('GET');
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
 });
 
 test('the distance radius filters the visible results instantly and the empty-filtered state follows B07', async ({ page }) => {
@@ -242,16 +246,16 @@ test('the distance radius filters the visible results instantly and the empty-fi
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill(productName);
   await input.press('Enter');
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
 
   await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
   await page.getByRole('radio', { name: 'Сначала ближе' }).click();
   await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
-  // Both fixtures are thousands of kilometres away, so freshness keeps «far» above «near» even in this mode;
-  // the point of the test is the radius filtering below.
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  // Both geo-known fixtures are thousands of kilometres away, so freshness keeps «far» above «near» even in this
+  // mode; the geo-less Offer stays inside the tier after every geo-known one (stage 5A «Ближе» grouping).
+  await expectCardOrder(page, [farLocationName, nearLocationName, geolessLocationName]);
   // The applied summary line follows B07: count · distance · sort.
-  await expect(page.getByText('2 предложения · сначала ближе').first()).toBeVisible();
+  await expect(page.getByText('3 предложения · сначала ближе').first()).toBeVisible();
 
   // A finite radius applies instantly from the sheet and can empty the visible set.
   await page.getByRole('button', { name: /^Фильтры(, активно \d+)?$/ }).click();
@@ -264,7 +268,7 @@ test('the distance radius filters the visible results instantly and the empty-fi
   await expect(page.getByText('Без фильтров по запросу')).toBeVisible();
 
   await page.getByRole('button', { name: 'Сбросить фильтры' }).click();
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
   await expect(page.getByRole('button', { name: 'Фильтры, активно 2' })).toHaveCount(0);
 });
 
@@ -301,7 +305,7 @@ test('geolocation denial keeps «Актуальнее» honest, resets the radiu
   const input = page.getByLabel('Какой товар ищете?');
   await input.fill(productName);
   await input.press('Enter');
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
   expect(searchRequests).toBe(1);
 
   await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
@@ -313,7 +317,7 @@ test('geolocation denial keeps «Актуальнее» honest, resets the radiu
   await page.getByRole('button', { name: /^Показать \d+ предложени/ }).click();
   await expect(page.getByRole('button', { name: 'Фильтры, активно 1' })).toHaveCount(0);
   expect(searchRequests).toBe(1);
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
 
   // The banner retry button re-requests the permission (still denied here) and stays concise.
   await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
@@ -321,7 +325,7 @@ test('geolocation denial keeps «Актуальнее» honest, resets the radiu
   await page.getByRole('button', { name: 'Разрешить геолокацию' }).click();
   await expect(page.getByText('Не удалось определить местоположение')).toBeVisible();
   expect(searchRequests).toBe(1);
-  await expectCardOrder(page, [farLocationName, nearLocationName]);
+  await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
 });
 
 test('GET stays backward compatible and GET/POST share S6 semantics, privacy and deterministic ordering among buyer-eligible Offers', async ({ request }) => {
@@ -348,8 +352,9 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
   expect(getAlias.status()).toBe(200);
   const getCanonicalBody = await getCanonical.json();
   const getAliasBody = await getAlias.json();
-  expect(getCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([farOfferId, nearOfferId]);
-  expect(getCanonicalBody.offers.map((offer: { id: string }) => offer.id)).not.toContain(geolessOfferId);
+  // stage 5A: the geo-less Offer (the freshest) participates in ordinary Search; its route capability is false.
+  expect(getCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([geolessOfferId, farOfferId, nearOfferId]);
+  expect(getCanonicalBody.offers.map((offer: { routeAvailable: boolean }) => offer.routeAvailable)).toEqual([false, true, true]);
   expect(getAliasBody.offers.map((offer: { id: string }) => offer.id)).toEqual(
     getCanonicalBody.offers.map((offer: { id: string }) => offer.id),
   );
@@ -364,10 +369,14 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
   expect(postAlias.status()).toBe(200);
   const postCanonicalBody = await postCanonical.json();
   const postAliasBody = await postAlias.json();
-  expect(postCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId]);
+  // stage 5A: inside the tier the geo-known Offers rank by weighted score, the geo-less Offer follows without
+  // a distance component and with routeAvailable false.
+  expect(postCanonicalBody.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId, geolessOfferId]);
+  expect(postCanonicalBody.offers.map((offer: { routeAvailable: boolean }) => offer.routeAvailable)).toEqual([true, true, false]);
   // stage #5: the derived whole-meter distance is public for geo-known Offers of a location-aware request.
   expect(postCanonicalBody.offers[0].distanceMeters).toBe(0);
   expect(postCanonicalBody.offers[1].distanceMeters).toBeGreaterThan(10000);
+  expect(postCanonicalBody.offers[2]).not.toHaveProperty('distanceMeters');
   expect(postAliasBody.offers.map((offer: { id: string }) => offer.id)).toEqual(
     postCanonicalBody.offers.map((offer: { id: string }) => offer.id),
   );
@@ -377,9 +386,9 @@ test('GET stays backward compatible and GET/POST share S6 semantics, privacy and
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const repeatedGet = await (await request.get('/api/search', { params: { q: productName } })).json();
-    expect(repeatedGet.offers.map((offer: { id: string }) => offer.id)).toEqual([farOfferId, nearOfferId]);
+    expect(repeatedGet.offers.map((offer: { id: string }) => offer.id)).toEqual([geolessOfferId, farOfferId, nearOfferId]);
     const repeatedPost = await (await request.post('/api/search', { data: postBody })).json();
-    expect(repeatedPost.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId]);
+    expect(repeatedPost.offers.map((offer: { id: string }) => offer.id)).toEqual([nearOfferId, farOfferId, geolessOfferId]);
   }
 });
 

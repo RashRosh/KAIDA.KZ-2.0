@@ -102,8 +102,12 @@ test('#36 manages multiple trading-point cards and requires explicit single/batc
 
     const search = await page.request.get('/api/search?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
     expect(search.status()).toBe(200);
-    const searchBody = await search.json() as { offers: Array<{ seller: { displayName: string } }> };
-    expect(searchBody.offers.map((offer) => offer.seller.displayName)).not.toContain(`Seller 36 ${testInfo.project.name}`);
+    const searchBody = await search.json() as { offers: Array<{ seller: { displayName: string }; routeAvailable: boolean }> };
+    // stage 5A: an addressed (even geo-less) point's published Offer is visible in ordinary Search, without the
+    // route capability — the point has no coordinates («Местоположение не задано»).
+    const ownOffers = searchBody.offers.filter((offer) => offer.seller.displayName === `Seller 36 ${testInfo.project.name}`);
+    expect(ownOffers.length).toBeGreaterThan(0);
+    for (const offer of ownOffers) expect(offer.routeAvailable).toBe(false);
 
     await page.goto('/seller/batch');
     const firstItem = page.getByTestId('batch-item-0');

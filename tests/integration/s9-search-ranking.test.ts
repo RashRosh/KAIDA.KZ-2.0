@@ -113,16 +113,16 @@ describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
     expect(compileOnly).toBeTypeOf('function');
   });
 
-  it('with Buyer location ranks buyer-eligible Offers by whole-meter distance, then freshness, then Offer.id', async () => {
+  it('with Buyer location ranks geo-known Offers by weighted policy ahead of geo-less (stage 5A)', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     expect(ids(result)).toEqual([
       offerIds.nearFreshA,
       offerIds.nearFreshB,
       offerIds.nearOld,
       offerIds.farNewer,
+      offerIds.geolessFresh,
+      offerIds.geolessOld,
     ]);
-    expect(ids(result)).not.toContain(offerIds.geolessFresh);
-    expect(ids(result)).not.toContain(offerIds.geolessOld);
   });
 
   it('keeps a farther newer eligible Offer below nearer eligible Offers', async () => {
@@ -130,23 +130,23 @@ describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
     expect(ids(result).indexOf(offerIds.nearOld)).toBeLessThan(ids(result).indexOf(offerIds.farNewer));
   });
 
-  it('without Buyer location sorts buyer-eligible Offers by freshness then Offer.id', async () => {
+  it('without Buyer location sorts buyer-eligible Offers — including geo-less — by freshness then Offer.id', async () => {
     const result = await searchOffers(productName, db, lifecycleOptions);
     expect(ids(result)).toEqual([
+      offerIds.geolessFresh,
       offerIds.farNewer,
       offerIds.nearFreshA,
       offerIds.nearFreshB,
       offerIds.nearOld,
+      offerIds.geolessOld,
     ]);
   });
 
   it('excludes ineligible, inactive and cutoff-equal expired Offers before ranking', async () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
-    expect(ids(result)).not.toContain(offerIds.geolessFresh);
-    expect(ids(result)).not.toContain(offerIds.geolessOld);
     expect(ids(result)).not.toContain(offerIds.inactiveNearest);
     expect(ids(result)).not.toContain(offerIds.expiredNearest);
-    expect(result.offers).toHaveLength(4);
+    expect(result.offers).toHaveLength(6);
   });
 
   it('uses identical S6 canonical/alias semantics and exact ranking order', async () => {

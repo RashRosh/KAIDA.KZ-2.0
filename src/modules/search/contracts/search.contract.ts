@@ -36,6 +36,10 @@ export const searchOfferSchema = z.object({
     unit: z.string().nullable(),
   }),
   sellerComment: z.string().nullable(),
+  // stage 5A: public route capability — tells the client whether the current route capability is available for this
+  // Offer (in the current implementation derived from the existing route prerequisite: complete Location
+  // coordinates). Raw coordinates are not part of the public DTO.
+  routeAvailable: z.boolean(),
   // Present only when the Offer has photos; the thumbnail URL is built from it.
   coverPhotoId: z.uuid().optional(),
   // offer-actuality: whole days since the Seller's last confirmation (badge «Сегодня» … «6 дней») and the tier.

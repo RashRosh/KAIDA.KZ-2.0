@@ -93,7 +93,8 @@ afterAll(async () => {
 describe('S10 point contacts projection on PostgreSQL 18', () => {
   it('shows Offers of a point without contacts, with no contacts field at all', async () => {
     const result = await searchOffers(productName, db, options);
-    expect(ids(result)).toEqual([offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld]);
+    // stage 5A: the geo-less point stays visible in ordinary Search and ranks by pure freshness.
+    expect(ids(result)).toEqual([offerIds.geolessNewest, offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld]);
     for (const offer of result.offers) expect(offer.location).not.toHaveProperty('contacts');
     expect(sellerObject(result)).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
   });
@@ -103,9 +104,12 @@ describe('S10 point contacts projection on PostgreSQL 18', () => {
     await pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+12025550123',$2)", [sellerId, now]);
 
     const result = await searchOffers(productName, db, { ...options, buyerLocation });
-    expect(ids(result)).toEqual([offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer]);
+    // stage 5A: the geo-less Offer ranks inside its tier without a distance component, after every geo-known Offer.
+    expect(ids(result)).toEqual([offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer, offerIds.geolessNewest]);
     expect(result.offers[0]!.location.contacts).toEqual({ phoneE164: '+12025550123' });
     expect(result.offers[2]!.location).not.toHaveProperty('contacts');
+    // stage 5A: route capability follows the presence of complete Location coordinates.
+    expect(result.offers.map((offer) => offer.routeAvailable)).toEqual([true, true, true, false]);
     expect(sellerObject(result)).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
     const serialized = JSON.stringify(result);
     expect(serialized).not.toContain(identityPhone);
@@ -118,15 +122,15 @@ describe('S10 point contacts projection on PostgreSQL 18', () => {
     ]) expect(serialized).not.toContain(forbidden);
   });
 
-  it('preserves S1 visibility, S6 alias resolution and exact S9 ordering among buyer-eligible Offers when optional contacts change', async () => {
-    const expectedWithGeo = [offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer];
-    const expectedWithoutGeo = [offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld];
+  it('preserves S1 visibility, S6 alias resolution and exact ordering among buyer-eligible Offers when optional contacts change', async () => {
+    // stage 5A: the geo-less Offer joins both results — freshness-first without location, after geo-known with one.
+    const expectedWithGeo = [offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer, offerIds.geolessNewest];
+    const expectedWithoutGeo = [offerIds.geolessNewest, offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld];
 
     const withGeo = await searchOffers(productName, db, { ...options, buyerLocation });
     const withoutGeo = await searchOffers(productName, db, options);
     expect(ids(withGeo)).toEqual(expectedWithGeo);
     expect(ids(withoutGeo)).toEqual(expectedWithoutGeo);
-    expect(ids(withGeo)).not.toContain(offerIds.geolessNewest);
     expect(ids(withGeo)).not.toContain(offerIds.inactive);
     expect(ids(withGeo)).not.toContain(offerIds.expired);
 

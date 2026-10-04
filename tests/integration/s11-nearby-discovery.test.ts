@@ -196,25 +196,27 @@ describe('S11 Nearby Discovery on PostgreSQL 18 after UX1D eligibility', () => {
     expect(after).toEqual(before);
   });
 
-  it('keeps Search unfiltered by Nearby radius while applying UX1D phone+geo eligibility', async () => {
+  it('keeps Search unfiltered by Nearby radius and visible for geo-less Locations (stage 5A)', async () => {
     const search = await searchOffers(productName, db, { ...lifecycleOptions, buyerLocation });
     // stage #5 weighted ordering (contract §2): inside the fresh tier the absolute scores put the fresher
-    // «outside» Offer (5001 m) ahead of «boundary» (5000 m). Search itself stays unfiltered by the Nearby
-    // radius, and the closed UX1D location-aware eligibility keeps excluding geo-less Locations.
+    // «outside» Offer (5001 m) ahead of «boundary» (5000 m). Stage 5A: the geo-less Offer (the freshest, with no
+    // distance component) ranks last inside the tier; Search itself stays unfiltered by the Nearby radius.
     expect(search.offers.map(({ id }) => id)).toEqual([
       offerIds.insideFreshA,
       offerIds.insideFreshB,
       offerIds.insideOld,
       offerIds.outside,
       offerIds.boundary,
+      offerIds.geoless,
     ]);
-    expect(search.offers.map(({ id }) => id)).not.toContain(offerIds.geoless);
     expect(JSON.stringify(search)).not.toContain('"geo"');
     expect(JSON.stringify(search)).not.toContain('"latitude"');
     expect(JSON.stringify(search)).not.toContain('"longitude"');
-    // The derived whole-meter distance is public only for geo-known Offers of a location-aware request.
+    // The derived whole-meter distance is public only for geo-known Offers of a location-aware request, and the
+    // route capability follows the same prerequisite.
     expect(search.offers.find(({ id }) => id === offerIds.insideFreshA)!.distanceMeters).toBe(1000);
     expect(search.offers.find(({ id }) => id === offerIds.outside)!.distanceMeters).toBe(5001);
+    expect(search.offers.map((offer) => offer.routeAvailable)).toEqual([true, true, true, true, true, false]);
   });
 
   it('returns the same exact order for repeated identical inputs', async () => {
