@@ -15,10 +15,6 @@ test.setTimeout(60_000);
 // One account per surface: the two tests run in parallel workers and must not clean up each other's user.
 const phones = { '/more': '+77000014081', '/seller/more': '+77000014082' } as const;
 
-async function cleanup() {
-  for (const phone of Object.values(phones)) await cleanupPhone(phone);
-}
-
 async function cleanupPhone(phone: string) {
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
   try {
@@ -31,8 +27,6 @@ async function cleanupPhone(phone: string) {
   }
 }
 
-test.afterAll(cleanup);
-
 async function signIn(page: Page, phone: string) {
   const requested = await (await page.request.post('/api/auth/otp/request', { data: { phone } })).json();
   expect((await page.request.post('/api/auth/otp/verify', { data: { challengeId: requested.challenge.id, code: requested.delivery.code } })).ok()).toBe(true);
@@ -43,6 +37,15 @@ const languageGroup = (page: Page, name: 'Язык' | 'Тіл') => page.getByRol
 async function exerciseInlineLanguage(page: Page, path: keyof typeof phones) {
   const phone = phones[path];
   await cleanupPhone(phone);
+  try {
+    await runInlineLanguage(page, path, phone);
+  } finally {
+    // Only this test's own user: a global clean-up in a skipped project would race the running one.
+    await cleanupPhone(phone);
+  }
+}
+
+async function runInlineLanguage(page: Page, path: keyof typeof phones, phone: string) {
   await signIn(page, phone);
   await page.goto(path);
   const group = languageGroup(page, 'Язык');
