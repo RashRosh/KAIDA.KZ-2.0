@@ -215,9 +215,12 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
         clock: () => NOW, validityPeriodHours: 72, nearbyRadiusMeters: 50_000,
       });
       // stage 5A: addressed (even geo-less and phone-less) Locations produce ordinary-Search-visible Offers;
-      // Nearby keeps requiring complete Location coordinates. The search query matches only the «Баранина» offers.
+      // Nearby keeps requiring complete Location coordinates. The search query matches only the «Баранина»
+      // offers, and the confirmed batch items carry no guaranteed order (S9 §10: never rely on row order).
       const searchIds = search.offers.map((offer) => offer.id);
-      const baraninaIds = [singleOfferId, batchConfirmed.items[0]!.resultOffer!.id];
+      const baraninaIds = [singleOfferId, ...batchConfirmed.items
+        .filter((item) => item.product.name === 'Баранина')
+        .map((item) => item.resultOffer!.id)];
       for (const offerId of baraninaIds) expect(searchIds).toContain(offerId);
       for (const offerId of createdIds) {
         expect(nearby.offers.map((offer) => offer.id)).not.toContain(offerId);
