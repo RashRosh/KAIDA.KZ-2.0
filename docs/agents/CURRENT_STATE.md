@@ -5,26 +5,27 @@
 ## Verified base
 
 - Проверено: 2026-10-04 (6-я сессия).
-- `origin/main`: `9607163` (контракт 6C слит, PR #85). Последний checkpoint-тег: `v0.0.48-first-entry-correction`.
+- `origin/main`: `e07e3de` (контракт 6D слит, PR #87). Последний checkpoint-тег: `v0.0.49-search-home-last-state`.
 
 ## Current task
 
-**Stage 6C — Search Home + last Search state** (`docs/slices/search-home-last-state/SLICE_CONTRACT.md`, APPROVED).
-Реализована (`slice/search-home-last-state`, PR #86): Search Home, чипы после поиска, последний поиск вкладки в
-`sessionStorage`, `Поиск` ведёт на `/?q=…`. Manual acceptance **PASS**, branch CI green. После green merged-main CI
-создаётся annotated tag `v0.0.49-search-home-last-state` на merge-коммите; до создания тег не считать существующим.
-Следом 6D (inline-язык в `Ещё`) — контракт ещё не утверждён, реализацию не начинать.
+**Stage 6D — Inline language in «Ещё»** (`docs/slices/inline-language/SLICE_CONTRACT.md`, APPROVED).
+Реализована на ветке `slice/inline-language` (реализация `f1ab8c1`): два варианта `Русский | Қазақша` на месте в `Ещё`
+покупателя и продавца, применяются сразу, активный отмечен `aria-pressed`, без листа/радио/«Готово»; E2E меняют язык
+через общий помощник `chooseLanguageInMore`. Ждёт branch CI и PO manual acceptance (mobile RU). PR/merge/tag — только
+после PASS. Stage 6 Rev 3, Query Log и динамические чипы не начинать.
 
 ## Verification (local)
 
-Unit 344/344, integration 197/197, typecheck и eslint чистые; новые 10 E2E (mobile RU) зелёные; полный E2E зелёный, кроме
-редкой локальной нестабильности редактора продавца (`offer-actuality`, не связана с поиском). Два существующих E2E
-обновлены: после входа «/» восстанавливает последний поиск (адрес `/?q=…`), UX1D стартует с чистой вкладкой.
+Unit 344/344, integration 197/197, eslint чистый; новый E2E (покупатель и продавец, mobile RU) зелёный; полный E2E
+зелёный (единичные нестабильности локальной машины на несвязанных тестах проходят при повторе).
+Неиспользуемые ключи `more.languageTitle`, `more.languageNote`, `more.done` оставлены: локальная папка PO `tmp/` (в git
+нет) на них ссылается и ломает локальный `next build`.
 
 ## Next action
 
-1. Merged-main CI → tag `v0.0.49-search-home-last-state`.
-2. 6D: подготовить Slice Contract, ждать утверждения.
+1. Branch CI на финальном SHA → отчёт PO. STOP до manual acceptance.
+2. После PASS: PR реализации, merge, checkpoint. Затем Stage 6 Rev 3 — отдельным решением PO.
 
 ## Current constraints
 
