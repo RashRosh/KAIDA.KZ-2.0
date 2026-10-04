@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { PLAIN_SEARCH_URL } from './browser-state';
 import { Pool } from 'pg';
 import { seedIds } from '../../src/db/seed';
 import { testDatabaseUrl } from '../integration/database';
@@ -74,7 +75,7 @@ test('S6 seller proposes alias as canonical Product and confirms the Offer', asy
     const requested = await (await requestResponse).json();
     await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
     await page.getByRole('button', { name: 'Войти', exact: true }).click();
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(PLAIN_SEARCH_URL);
 
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('S6 E2E продавец');

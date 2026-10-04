@@ -9,3 +9,7 @@ const introSeenCookie = { name: 'kaida_intro_seen', value: '1', ...cookieBase };
 export const returningVisitorState = { cookies: [localeCookie, introSeenCookie], origins: [] };
 export const firstVisitState = { cookies: [localeCookie], origins: [] };
 export const emptyBrowserState = { cookies: [], origins: [] };
+
+// Stage 6C: a plain «/» reopens the last search of the tab, so after a login or a redirect the buyer address is «/» with
+// or without that query — both are the same Search entry.
+export const PLAIN_SEARCH_URL = /^https?:\/\/[^/]+\/(\?q=[^#]*)?$/;
