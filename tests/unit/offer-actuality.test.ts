@@ -10,8 +10,7 @@ import {
 } from '../../src/modules/offers/actuality/actuality';
 import { cardActuality } from '../../src/app/seller/_components/card-model';
 import type { SellerOfferView } from '../../src/modules/offers/contracts/seller-offer.contract';
-import { rankSearchOfferCandidates, type SearchRankingCandidate } from '../../src/modules/search/ranking/search-ranking';
-import { readSearchRankingPolicy } from '../../src/modules/search/config/search-ranking-policy.config';
+import { compareActualityTier, rankSearchOfferCandidates, type SearchRankingCandidate } from '../../src/modules/search/ranking/search-ranking';
 
 // offer-actuality §6/§7: stages and badges at every boundary, the fresh tier first, card age = oldest active point.
 
@@ -49,21 +48,27 @@ describe('actuality policy', () => {
   });
 });
 
-describe('fresh tier before ageing tier', () => {
+describe('actuality tier helper (kept for Nearby) and the explicit Search sorting', () => {
   const now = new Date('2026-09-28T12:00:00Z');
   const candidate = (id: string, hoursAgo: number, latitude: number): SearchRankingCandidate => ({
-    offer: { id } as SearchRankingCandidate['offer'],
+    offer: { id, price: { amount: '1000', currency: 'KZT', unit: null } } as SearchRankingCandidate['offer'],
     lastConfirmedAt: new Date(now.getTime() - hoursAgo * H),
     locationGeo: { latitude, longitude: 76.95 },
   });
   const near = candidate('00000000-0000-4000-8000-000000000001', 60, 43.2501);
   const far = candidate('00000000-0000-4000-8000-000000000002', 1, 43.40);
 
-  it('ranks a fresh far offer before an ageing near one, with and without buyer location', () => {
+  it('compareActualityTier still ranks the ageing tier after the fresh one (used by Nearby)', () => {
     const since = ageingSince(now, policy);
-    const options = { now, actualityPolicy: policy, rankingPolicy: readSearchRankingPolicy(), sortMode: 'actuality' as const };
-    expect(rankSearchOfferCandidates([near, far], { latitude: 43.25, longitude: 76.95 }, since, options).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
-    expect(rankSearchOfferCandidates([near, far], undefined, since, options).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
+    expect(compareActualityTier(near, far, since)).toBe(1);
+    expect(compareActualityTier(far, near, since)).toBe(-1);
+    expect(compareActualityTier(far, far, since)).toBe(0);
+  });
+
+  it('an explicit Search sort has no tier: distance asc puts the ageing nearer offer first, actuality desc the fresh one', () => {
+    const buyer = { latitude: 43.25, longitude: 76.95 };
+    expect(rankSearchOfferCandidates([near, far], buyer, { sort: 'distance', direction: 'asc' }).map((c) => c.offer.id)).toEqual([near.offer.id, far.offer.id]);
+    expect(rankSearchOfferCandidates([near, far], buyer, { sort: 'actuality', direction: 'desc' }).map((c) => c.offer.id)).toEqual([far.offer.id, near.offer.id]);
   });
 });
 

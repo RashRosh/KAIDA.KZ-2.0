@@ -328,15 +328,15 @@ test('Search API remains unfiltered by the S11 radius and accepts geo-less Locat
   const postResponse = await request.post('/api/search', { data: { q: productName, buyerLocation } });
   expect(postResponse.status()).toBe(200);
   const postBody = await postResponse.json();
-  // stage #5 weighted ordering (contract §2): inside the fresh tier the fresher «outside» Offer (5001 m) now
-  // scores above «boundary» (5000 m); stage 5A: the geo-less Offer ranks after every geo-known Offer.
+  // Stage 6 Rev 3: the default order is the actuality, fresher first, with or without the location (stage 5A: the
+  // geo-less Offer is the freshest fixture).
   expect(postBody.offers.map((offer: { id: string }) => offer.id)).toEqual([
-    insideOfferId,
+    geolessOfferId,
     outsideOfferId,
     boundaryOfferId,
-    geolessOfferId,
+    insideOfferId,
   ]);
-  expect(postBody.offers.map((offer: { routeAvailable: boolean }) => offer.routeAvailable)).toEqual([true, true, true, false]);
+  expect(postBody.offers.map((offer: { routeAvailable: boolean }) => offer.routeAvailable)).toEqual([false, true, true, true]);
   expect(postBody.offers.map((offer: { id: string }) => offer.id)).toContain(outsideOfferId);
   assertSearchPrivacy(postBody);
 });

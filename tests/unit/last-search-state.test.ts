@@ -6,19 +6,19 @@ import {
   type LastSearchState,
 } from '../../src/modules/search/last-search-state';
 
-// Stage 6C: the tab-scoped last Search state — only the query and the released stage 5 preferences, defensively parsed.
-const base: LastSearchState = { query: 'баранина', sort: 'actuality', radiusMeters: null };
+// Stage 6C + Rev 3: the tab-scoped last Search state — the query, the sort criterion and its direction, defensively parsed.
+const base: LastSearchState = { query: 'баранина', sort: 'actuality', direction: 'desc' };
 
 describe('last Search state', () => {
-  it('round-trips the query and the released preferences with a format version', () => {
-    const raw = serializeLastSearchState({ query: 'баранина', sort: 'distance', radiusMeters: 3000 });
-    expect(JSON.parse(raw ?? '')).toEqual({ v: 1, query: 'баранина', sort: 'distance', radiusMeters: 3000 });
-    expect(parseLastSearchState(raw)).toEqual({ query: 'баранина', sort: 'distance', radiusMeters: 3000 });
+  it('round-trips the query, the sort and the direction with a format version', () => {
+    const raw = serializeLastSearchState({ query: 'баранина', sort: 'price', direction: 'desc' });
+    expect(JSON.parse(raw ?? '')).toEqual({ v: 2, query: 'баранина', sort: 'price', direction: 'desc' });
+    expect(parseLastSearchState(raw)).toEqual({ query: 'баранина', sort: 'price', direction: 'desc' });
   });
 
-  it('never stores results, coordinates or anything beyond the reconstruction data', () => {
-    const raw = serializeLastSearchState(base) ?? '';
-    for (const forbidden of ['offers', 'latitude', 'longitude', 'buyerLocation', 'result']) {
+  it('never stores results, coordinates or a radius', () => {
+    const raw = serializeLastSearchState({ ...base, sort: 'distance', direction: 'asc' }) ?? '';
+    for (const forbidden of ['offers', 'latitude', 'longitude', 'buyerLocation', 'result', 'radius']) {
       expect(raw).not.toContain(forbidden);
     }
   });
@@ -29,23 +29,39 @@ describe('last Search state', () => {
   });
 
   it('treats a missing, foreign, damaged or wrongly shaped value as no last search', () => {
-    for (const raw of [null, undefined, '', 'not json', '[]', '{}', '{"v":2,"query":"a","sort":"actuality","radiusMeters":null}']) {
+    for (const raw of [null, undefined, '', 'not json', '[]', '{}', '{"v":3,"query":"a","sort":"actuality","direction":"desc"}']) {
       expect(parseLastSearchState(raw)).toBeNull();
     }
+    expect(parseLastSearchState('{"v":2,"query":"","sort":"actuality","direction":"desc"}')).toBeNull();
+    expect(parseLastSearchState('{"v":2,"query":"a","sort":"cheaper","direction":"asc"}')).toBeNull();
+    expect(parseLastSearchState('{"v":2,"query":"a","sort":"price","direction":"up"}')).toBeNull();
+    expect(parseLastSearchState('{"v":2,"query":"a","sort":"price","direction":"asc","offers":[]}')).toBeNull();
+  });
+
+  it('degrades the Stage 5 / 6C value minimally: the query stays, the radius goes, the direction is the natural one', () => {
+    expect(parseLastSearchState('{"v":1,"query":"баранина","sort":"actuality","radiusMeters":null}'))
+      .toEqual({ query: 'баранина', sort: 'actuality', direction: 'desc' });
+    expect(parseLastSearchState('{"v":1,"query":"баранина","sort":"actuality","radiusMeters":3000}'))
+      .toEqual({ query: 'баранина', sort: 'actuality', direction: 'desc' });
+    expect(parseLastSearchState('{"v":1,"query":"баранина","sort":"distance","radiusMeters":1000}'))
+      .toEqual({ query: 'баранина', sort: 'distance', direction: 'asc' });
     expect(parseLastSearchState('{"v":1,"query":"","sort":"actuality","radiusMeters":null}')).toBeNull();
-    expect(parseLastSearchState('{"v":1,"query":"a","sort":"cheaper","radiusMeters":null}')).toBeNull();
-    expect(parseLastSearchState('{"v":1,"query":"a","sort":"actuality","radiusMeters":2000}')).toBeNull();
-    expect(parseLastSearchState('{"v":1,"query":"a","sort":"actuality","radiusMeters":null,"offers":[]}')).toBeNull();
   });
 
-  it('normalizes every geo-dependent value when there are no coordinates', () => {
-    expect(normalizeGeoDependentState({ ...base, sort: 'distance' }, false)).toEqual(base);
-    expect(normalizeGeoDependentState({ ...base, radiusMeters: 5000 }, false)).toEqual(base);
-    expect(normalizeGeoDependentState({ ...base, sort: 'distance', radiusMeters: 1000 }, false)).toEqual(base);
+  it('without coordinates a restored distance becomes actuality with its natural direction', () => {
+    expect(normalizeGeoDependentState({ ...base, sort: 'distance', direction: 'asc' }, false)).toEqual(base);
+    expect(normalizeGeoDependentState({ ...base, sort: 'distance', direction: 'desc' }, false)).toEqual(base);
   });
 
-  it('keeps the stored values when coordinates are present', () => {
-    const geo: LastSearchState = { query: 'мёд', sort: 'distance', radiusMeters: 3000 };
+  it('actuality and price need no coordinates and keep their direction', () => {
+    const older: LastSearchState = { ...base, direction: 'asc' };
+    const dearer: LastSearchState = { query: 'мёд', sort: 'price', direction: 'desc' };
+    expect(normalizeGeoDependentState(older, false)).toEqual(older);
+    expect(normalizeGeoDependentState(dearer, false)).toEqual(dearer);
+  });
+
+  it('keeps a distance state when coordinates are present', () => {
+    const geo: LastSearchState = { query: 'мёд', sort: 'distance', direction: 'desc' };
     expect(normalizeGeoDependentState(geo, true)).toEqual(geo);
   });
 });

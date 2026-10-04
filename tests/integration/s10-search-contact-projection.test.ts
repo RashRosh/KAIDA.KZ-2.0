@@ -104,12 +104,12 @@ describe('S10 point contacts projection on PostgreSQL 18', () => {
     await pool.query("INSERT INTO seller_verified_phones (seller_id,phone_e164,verified_at) VALUES ($1,'+12025550123',$2)", [sellerId, now]);
 
     const result = await searchOffers(productName, db, { ...options, buyerLocation });
-    // stage 5A: the geo-less Offer ranks inside its tier without a distance component, after every geo-known Offer.
-    expect(ids(result)).toEqual([offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer, offerIds.geolessNewest]);
-    expect(result.offers[0]!.location.contacts).toEqual({ phoneE164: '+12025550123' });
-    expect(result.offers[2]!.location).not.toHaveProperty('contacts');
+    // Stage 6 Rev 3: the default order is the actuality, fresher first; the geo-less Offer (Stage 5A) is the freshest.
+    expect(ids(result)).toEqual([offerIds.geolessNewest, offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld]);
+    expect(result.offers.find((offer) => offer.id === offerIds.nearFresh)!.location.contacts).toEqual({ phoneE164: '+12025550123' });
+    expect(result.offers.find((offer) => offer.id === offerIds.farNewer)!.location).not.toHaveProperty('contacts');
     // stage 5A: route capability follows the presence of complete Location coordinates.
-    expect(result.offers.map((offer) => offer.routeAvailable)).toEqual([true, true, true, false]);
+    expect(result.offers.map((offer) => offer.routeAvailable)).toEqual([false, true, true, true]);
     expect(sellerObject(result)).toEqual({ id: sellerId, displayName: 'S10 Search Seller' });
     const serialized = JSON.stringify(result);
     expect(serialized).not.toContain(identityPhone);
@@ -123,9 +123,9 @@ describe('S10 point contacts projection on PostgreSQL 18', () => {
   });
 
   it('preserves S1 visibility, S6 alias resolution and exact ordering among buyer-eligible Offers when optional contacts change', async () => {
-    // stage 5A: the geo-less Offer joins both results — freshness-first without location, after geo-known with one.
-    const expectedWithGeo = [offerIds.nearFresh, offerIds.nearOld, offerIds.farNewer, offerIds.geolessNewest];
-    const expectedWithoutGeo = [offerIds.geolessNewest, offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld];
+    // Stage 6 Rev 3: the default order is the actuality, with or without a buyer location; the geo-less Offer joins both.
+    const expectedWithGeo = [offerIds.geolessNewest, offerIds.farNewer, offerIds.nearFresh, offerIds.nearOld];
+    const expectedWithoutGeo = expectedWithGeo;
 
     const withGeo = await searchOffers(productName, db, { ...options, buyerLocation });
     const withoutGeo = await searchOffers(productName, db, options);

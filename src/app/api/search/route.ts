@@ -1,6 +1,6 @@
 import { searchOffers } from '@/modules/search/application/search-offers';
 import { geoSearchRequestSchema } from '@/modules/search/contracts/buyer-location.contract';
-import { searchQuerySchema, searchSortModeSchema } from '@/modules/search/contracts/search.contract';
+import { searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from '@/modules/search/contracts/search.contract';
 import { localeFromApiRequest } from '../../../i18n/api';
 
 export const runtime = 'nodejs';
@@ -17,16 +17,18 @@ export async function GET(request: Request): Promise<Response> {
       { status: 400, headers: noStoreHeaders },
     );
   }
-  // stage #5: additive sort mode; a missing parameter means the default «Актуальнее», garbage is rejected.
+  // Stage 6 Rev 3: `sort` (default actuality) and `direction` (default: the natural one of the sort); garbage is rejected.
+  // `distance` needs the buyer coordinates, which a GET cannot carry: it is rejected instead of being ordered otherwise.
   const sort = searchSortModeSchema.optional().safeParse(params.get('sort') ?? undefined);
-  if (!sort.success) {
+  const direction = searchSortDirectionSchema.optional().safeParse(params.get('direction') ?? undefined);
+  if (!sort.success || !direction.success || sort.data === 'distance') {
     return Response.json(
       { error: { code: 'INVALID_SEARCH_REQUEST', message: 'Проверьте параметры поиска.' } },
       { status: 400, headers: noStoreHeaders },
     );
   }
   try {
-    return Response.json(await searchOffers(parsed.data, undefined, { locale, sortMode: sort.data }), { headers: noStoreHeaders });
+    return Response.json(await searchOffers(parsed.data, undefined, { locale, sort: sort.data, direction: direction.data }), { headers: noStoreHeaders });
   } catch {
     console.error('Search request failed');
     return Response.json(
@@ -58,7 +60,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     return Response.json(
-      await searchOffers(parsed.data.q, undefined, { buyerLocation: parsed.data.buyerLocation, locale, sortMode: parsed.data.sort }),
+      await searchOffers(parsed.data.q, undefined, { buyerLocation: parsed.data.buyerLocation, locale, sort: parsed.data.sort, direction: parsed.data.direction }),
       { headers: noStoreHeaders },
     );
   } catch {

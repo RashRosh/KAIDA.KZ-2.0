@@ -1,10 +1,7 @@
-import type { SearchOffer } from '../contracts/search.contract';
+import type { SearchOffer, SearchSortDirection, SearchSortMode } from '../contracts/search.contract';
 import type { BuyerLocation } from '../contracts/buyer-location.contract';
-import type { SearchRankingPolicy, SearchSortMode } from '../config/search-ranking-policy.config';
-import type { ActualityPolicy } from '../../offers/actuality/actuality';
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
-const HOUR_MS = 60 * 60 * 1000;
 
 export type SearchRankingCandidate = {
   offer: SearchOffer;
@@ -13,15 +10,15 @@ export type SearchRankingCandidate = {
 };
 
 export type RankedSearchCandidate = SearchRankingCandidate & {
-  // S9 whole-meter distance used for ranking; null when the Offer's Location has no geo.
+  // Whole-meter distance from the buyer location; null when the Offer's Location has no geo or the request had none.
   rankingDistanceMeters: number | null;
 };
 
+// Stage 6 Rev 3 (slice contract §3.2): the selected criterion is the primary ordering of all buyer-eligible Offers —
+// there is no tier and no weighted score behind it.
 export type SearchRankingOptions = {
-  now: Date;
-  actualityPolicy: ActualityPolicy;
-  rankingPolicy: SearchRankingPolicy;
-  sortMode: SearchSortMode;
+  sort: SearchSortMode;
+  direction: SearchSortDirection;
 };
 
 function toRadians(degrees: number): number {
@@ -45,15 +42,20 @@ export function distanceMetersForRanking(from: BuyerLocation, to: BuyerLocation)
   return Math.round(haversineDistanceMeters(from, to));
 }
 
-function compareFreshnessThenId(a: SearchRankingCandidate, b: SearchRankingCandidate): number {
-  const aTime = a.lastConfirmedAt.getTime();
-  const bTime = b.lastConfirmedAt.getTime();
-  if (aTime !== bTime) return aTime > bTime ? -1 : 1;
+function compareId(a: SearchRankingCandidate, b: SearchRankingCandidate): number {
   if (a.offer.id === b.offer.id) return 0;
   return a.offer.id < b.offer.id ? -1 : 1;
 }
 
+function compareFreshnessThenId(a: SearchRankingCandidate, b: SearchRankingCandidate): number {
+  const aTime = a.lastConfirmedAt.getTime();
+  const bTime = b.lastConfirmedAt.getTime();
+  if (aTime !== bTime) return aTime > bTime ? -1 : 1;
+  return compareId(a, b);
+}
+
 // offer-actuality: offers confirmed at or before `ageingSince` form the ageing tier, ranked after every fresh offer.
+// Kept for Nearby (S11), whose order is not changed by the explicit Search sorting.
 export function compareActualityTier(a: { lastConfirmedAt: Date }, b: { lastConfirmedAt: Date }, ageingSince?: Date): number {
   if (!ageingSince) return 0;
   const aAgeing = a.lastConfirmedAt.getTime() <= ageingSince.getTime();
@@ -61,70 +63,49 @@ export function compareActualityTier(a: { lastConfirmedAt: Date }, b: { lastConf
   return aAgeing === bAgeing ? 0 : aAgeing ? 1 : -1;
 }
 
-// stage #5 (slice contract §2.4): absolute freshness score inside the Offer's own tier — no result-set normalization.
-// The spans follow the freshness tier boundaries of the actuality policy (defaults: fresh 48h, ageing 48h…168h),
-// so scoring can never disagree with the tier rule: the newest Offer of a tier scores ≈ 1 and decays to 0 at its end.
-export function freshnessScore(lastConfirmedAt: Date, now: Date, actualityPolicy: ActualityPolicy): number {
-  const ageMs = Math.max(0, now.getTime() - lastConfirmedAt.getTime());
-  const freshSpanMs = actualityPolicy.ageingHours * HOUR_MS;
-  if (ageMs < freshSpanMs) return Math.max(0, 1 - ageMs / freshSpanMs);
-  const ageingSpanMs = (actualityPolicy.hiddenHours - actualityPolicy.ageingHours) * HOUR_MS;
-  return Math.max(0, 1 - (ageMs - freshSpanMs) / ageingSpanMs);
+// Nominal price (MVP rule): the numeric KZT amount only — units and pack sizes are never normalized.
+function nominalPrice(candidate: SearchRankingCandidate): number {
+  return Number.parseFloat(candidate.offer.price.amount);
 }
 
-// Absolute decaying distance score (slice contract §2.4): 0 km ≈ 1, smoothly decreasing; never normalized
-// against the other Offers of the result set.
-export function distanceScore(rankingDistanceMeters: number): number {
-  return 1 / (1 + rankingDistanceMeters / 1000);
-}
-
-// A geo-less Offer gets no distance component at all — its freshness part is not renormalized (contract §2.6).
-function weightedScore(
-  candidate: SearchRankingCandidate,
-  rankingDistanceMeters: number | null,
-  weights: SearchRankingPolicy[SearchSortMode],
-  options: SearchRankingOptions,
-): number {
-  const fresh = freshnessScore(candidate.lastConfirmedAt, options.now, options.actualityPolicy);
-  if (rankingDistanceMeters === null) return fresh * weights.freshnessWeight;
-  return fresh * weights.freshnessWeight + distanceScore(rankingDistanceMeters) * weights.distanceWeight;
+// `direction` flips only the primary criterion; every tie-breaker keeps its own fixed direction.
+function directed(comparison: number, direction: SearchSortDirection): number {
+  return direction === 'asc' ? comparison : -comparison;
 }
 
 export function rankSearchOfferCandidates(
   candidates: readonly SearchRankingCandidate[],
   buyerLocation: BuyerLocation | undefined,
-  ageingSince: Date | undefined,
   options: SearchRankingOptions,
 ): RankedSearchCandidate[] {
-  if (!buyerLocation) {
-    // Without Buyer location Search ranks by pure freshness semantics — the weights are not involved at all.
-    return [...candidates]
-      .sort((a, b) => compareActualityTier(a, b, ageingSince) || compareFreshnessThenId(a, b))
-      .map((candidate) => ({ ...candidate, rankingDistanceMeters: null }));
+  if (options.sort === 'distance' && !buyerLocation) {
+    // The public API rejects this request; reaching it is a programming error, never a silent re-ordering.
+    throw new Error('Sorting by distance needs the buyer location');
   }
 
-  const weights = options.rankingPolicy[options.sortMode];
-  const ranked = candidates.map((candidate) => ({
-    candidate,
-    rankingDistanceMeters: candidate.locationGeo === null
-      ? null
-      : distanceMetersForRanking(buyerLocation, candidate.locationGeo),
+  const ranked: RankedSearchCandidate[] = candidates.map((candidate) => ({
+    ...candidate,
+    rankingDistanceMeters: buyerLocation && candidate.locationGeo !== null
+      ? distanceMetersForRanking(buyerLocation, candidate.locationGeo)
+      : null,
   }));
 
   ranked.sort((a, b) => {
-    const tier = compareActualityTier(a.candidate, b.candidate, ageingSince);
-    if (tier !== 0) return tier;
-    // Stage 5A contract §2.1 «Ближе»: every geo-known Offer of the tier ranks ahead of the geo-less group (the
-    // geo-less group then orders by freshness → id). «Актуальнее» lets the absolute weighted scores interleave.
-    if (options.sortMode === 'distance') {
-      if (a.rankingDistanceMeters === null && b.rankingDistanceMeters !== null) return 1;
-      if (a.rankingDistanceMeters !== null && b.rankingDistanceMeters === null) return -1;
+    if (options.sort === 'actuality') {
+      const byAge = a.lastConfirmedAt.getTime() - b.lastConfirmedAt.getTime();
+      // asc = older first, desc = fresher first; equal actuality falls back to the stable id.
+      return directed(byAge, options.direction) || compareId(a, b);
     }
-    const aScore = weightedScore(a.candidate, a.rankingDistanceMeters, weights, options);
-    const bScore = weightedScore(b.candidate, b.rankingDistanceMeters, weights, options);
-    if (aScore !== bScore) return aScore > bScore ? -1 : 1;
-    return compareFreshnessThenId(a.candidate, b.candidate);
+    if (options.sort === 'price') {
+      return directed(nominalPrice(a) - nominalPrice(b), options.direction) || compareFreshnessThenId(a, b);
+    }
+    // distance: every geo-known Offer precedes every geo-less one for both directions; geo-less Offers never get a
+    // distance and keep the order «fresher first → id».
+    if (a.rankingDistanceMeters === null && b.rankingDistanceMeters === null) return compareFreshnessThenId(a, b);
+    if (a.rankingDistanceMeters === null) return 1;
+    if (b.rankingDistanceMeters === null) return -1;
+    return directed(a.rankingDistanceMeters - b.rankingDistanceMeters, options.direction) || compareFreshnessThenId(a, b);
   });
 
-  return ranked.map(({ candidate, rankingDistanceMeters }) => ({ ...candidate, rankingDistanceMeters }));
+  return ranked;
 }
