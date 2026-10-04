@@ -138,19 +138,16 @@ editorial workbook само по себе ничего не меняет: соп
 
 ## Текущий repository gate
 
-Search filters — сортировка «Ближе»/«Актуальнее» + расстояние (stage #5) **закрыт**: contract rev 6A APPROVED,
-реализация слита PR #74 (slice-коммит `9634178`, merge `aadb6b2`), branch CI на `9634178` green
-(push run `37067949468`, pull_request run `37067991791`), merged-main CI на `aadb6b2` green (run `37071285541`),
-manual acceptance **PASS** (swap режимов «Актуальнее»/«Ближе» на одной fresh-паре, радиус-фильтр, empty-filtered,
-denial + retry, RU/KK). Checkpoint annotated tag `v0.0.46-search-sort-distance` создаётся этим docs-коммитом
-после green CI; до фактического создания тег не считать существующим.
+**Stage 5A — Search visibility for addressed Locations without coordinates — закрыт**: contract rev 3 APPROVED
+(`docs/slices/search-visibility-without-coordinates/SLICE_CONTRACT.md`, contract commit `fc7c717`), реализация слита
+PR #77 (slice-коммит `444b44f`, merge `419e60e`; repair-коммит `186ec21` — order-agnostic test assertion, merge `3763373` — PR #78),
+branch CI green (runs `37182360419`/`37182363774` на `e21e2f8`, `37191449657`/`37198879235` на `186ec21`),
+merged-main CI на `3763373` green (run `37199326198`), manual acceptance **PASS**.
+Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates` создаётся этим docs-коммитом после green CI;
+до фактического создания тег не считать существующим.
 
-**Новое решение PO (2026-10-03): перед stage #6 вставляется отдельный stage 5A** — slice
-«Search visibility for addressed Locations without coordinates»: addressText обязателен; отсутствие coordinates
-не должно исключать Offer из ordinary Search; geo-dependent behavior (distance, радиус, Nearby, route) остаётся
-недоступным без coordinates. Это явная ревизия geo-eligibility части UX1D. Draft-контракт подготовлен
-(хранится в agent handoff), в репозиторий входит после APPROVED PO. **Stage #6 (Дешевле + цена от–до,
-Issue #12) остаётся после 5A.** Issue #12 остаётся OPEN — он владеет и stage #5, и stage #6.
+**Следующий незакрытый stage — #6** (Поиск: сортировка «дешевле» и цена от–до, Issue #12 — остаётся OPEN).
+Порядок stages не меняется.
 
 # FROZEN COMMITTED QUEUE — после этапа 1
 
@@ -162,7 +159,7 @@ Issue #12) остаётся после 5A.** Issue #12 остаётся OPEN —
 | 1a | ~~KAIDA address directory на открытых данных (подсказки адреса)~~ — **закрыт** (PR #72, manual acceptance PASS) | `docs/slices/address-directory/SLICE_CONTRACT.md` |
 | 4 | ~~Nearby result-first correction~~ — **закрыт** (PR #73, manual acceptance PASS) | Issue #34, `docs/slices/nearby-result-first/SLICE_CONTRACT.md` |
 | 5 | ~~Поиск: кнопка «Фильтры» — сортировка «ближе» / «актуальнее» и расстояние~~ — **закрыт** (PR #74, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-distance/SLICE_CONTRACT.md` |
-| 5A | Search visibility for addressed Locations without coordinates (identity ≠ coordinates; явная ревизия geo-eligibility UX1D; новый PO decision 2026-10-03) | Draft в agent handoff; future Slice Contract |
+| 5A | ~~Search visibility for addressed Locations without coordinates~~ — **закрыт** (PR #77 + repair PR #78, manual acceptance PASS) | `docs/slices/search-visibility-without-coordinates/SLICE_CONTRACT.md`, Issue #12 |
 | 6 | Поиск: сортировка «дешевле» и цена от–до | Issue #12, `FEATURE_MAP.md` |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |

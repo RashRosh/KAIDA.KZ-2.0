@@ -4,27 +4,35 @@
 
 ## Verified base
 
-- Проверено: 2026-10-03 (5-я сессия, stage 5A implementation).
-- Ветка `slice/search-visibility-without-coordinates-contract` от checkpoint `v0.0.46-search-sort-distance` (`c676cbe` = origin/main).
-- Contract commit: `fc7c717` (rev 3 APPROVED — IMPLEMENTATION AUTHORIZED).
+- Проверено: 2026-10-04 (5-я сессия, закрытие stage 5A).
+- `origin/main`: `3763373` (repair merge PR #78; до него stage 5A merge `419e60e` — PR #77, slice `444b44f`, contract `fc7c717`).
+- Merged-main CI на `3763373`: run `37199326198` — SUCCESS. Branch CI: `37191449657`/`37198879235` (на `186ec21`) — SUCCESS.
+- Checkpoint annotated tag `v0.0.47-search-visibility-without-coordinates`: **авторизован PO, создаётся сразу после green CI этого docs-коммита на его SHA и пушится на remote. До фактического создания тег не считать существующим.**
+- На момент записи последний фактически существующий verified checkpoint — `v0.0.46-search-sort-distance` на `c676cbe`.
 
 ## Current task
 
-**Stage 5A — Search visibility for addressed Locations without coordinates.** Реализация по APPROVED rev 3 завершена локально, full verification пройден. **Implementation diff незакоммичен** (разрешён был только contract commit); commit/push/PR — по разрешению PO. Issue #12 остаётся OPEN.
+**Stage 5A — Search visibility for addressed Locations without coordinates — CLOSED** (PR #77 + repair PR #78, merged `3763373`, manual acceptance PASS). Это явная ревизия geo-eligibility части UX1D: address/identity — prerequisite ordinary Search visibility; coordinates — prerequisite только geo-dependent behavior (`routeAvailable`, радиус, Nearby). **NEXT = stage #6** (Поиск: сортировка «дешевле» и цена от–до, Issue #12 — остаётся OPEN, им владеет #12). Реализацию stage #6 не начинать без решения PO.
 
 ## Last completed
 
-- Реализация rev 3: `buyerVisibleOffersPredicate` → generic (lifecycle + not-removed, без geo); новый `buyerGeoVisibleOffersPredicate` (geo overlay) для `discovery.repository` (Nearby) и `buyer-offer-route.repository` (destination) — их поведение не менялось; `search.repository` (Search + Offer page) на generic. `routeAvailable: boolean` (always-present capability; в реализации выводится из route prerequisite) в Search DTO + buyer Offer DTO (через `SearchOffer`). `ResultCard`/`BuyerOfferView` — «Маршрут» только при `routeAvailable`. Seller `buyerVisible` без `locationHasGeo` (одна строка, без новых флагов/UI). Ranking: «Ближе» — группировка geo-known → geo-less (новая, contract §2.1; в stage #5 путь был недостижим); «Актуальнее» — без изменений (defensive формула уже была).
-- Verification: unit **334/334**, integration **197/197**, typecheck, build, targeted E2E (s9+s11+ux1d+search+ux2a) **45 passed**, full E2E **155 passed / 3 skipped** (повторный прогон; в первом 2 seller-workspace flake — pre-existing). Repository lint green; штатный `pnpm lint` блокируется только local-only `tmp/` (environment-only, закрывается clean CI).
-- Обновлённые old assertions (legitimate revision): ux1d integration матрица (noGeo/neither → Search included, Nearby excluded), ux1d e2e (no-geo card видим без «Маршрут»), s9/s10/s11 integration+e2e (geoless в Search-порядках, `routeAvailable` ассерты), seller-cabinet (buyerVisible true без geo), seller-trading-points (search contains, nearby excludes), search.test (DTO +routeAvailable).
+- Реализация rev 3: `buyerVisibleOffersPredicate` → generic (lifecycle + not-removed); `buyerGeoVisibleOffersPredicate` (geo overlay) для Nearby/route (поведение не менялось); Search/Offer page на generic; `routeAvailable: boolean` (always-present capability, выводится из route prerequisite) в Search DTO и buyer Offer DTO; «Маршрут» в карточке/Offer page только при `routeAvailable`; seller `buyerVisible` без `locationHasGeo`; «Ближе» — группировка geo-known → geo-less.
+- Verification: unit 334/334, integration 197/197, typecheck, build, targeted E2E 45 passed, full E2E 155 passed / 3 skipped; repository lint green (штатный `pnpm lint` блокируется только local-only `tmp/` — environment-only limitation, закрывается clean CI).
+- Инцидент закрытия: первый merged-main CI на `419e60e` упал из-за моего тест-бага (ассерт полагался на порядок batch items — S9 §10 hazard); исправлен order-агностично (`186ec21`, PR #78), стабильность 5×integration 197/197. Production semantics не менялись.
+- Manual acceptance PO: **PASS** (stage 5A).
+
+## Blocker / notes
+
+- Mimosa pre-commit scanner: полный скан локально не завершается (`scanner_enobufs`); ложно блокирует создание новых test-файлов с `pool.query($n)`. Требуется решение PO (полный audit + настройка).
 
 ## Next action
 
-1. Отчитаться PO (diff + verification + revised assertions + manual scenario); ждать разрешения на implementation commit → push → PR → CI → manual acceptance.
-2. Merge/tag — только по отдельному разрешению PO.
+1. Дождаться green CI этого docs-коммита → создать и запушить annotated tag `v0.0.47-search-visibility-without-coordinates` на его SHA.
+2. После checkpoint — ждать решения PO о старте stage #6 (Issue #12). Не начинать самостоятельно.
 
 ## Current constraints
 
-- Не менять contract semantics rev 3 без STOP/PO decision.
-- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`; Mimosa-артефакты `docs/slices/search-sort-distance/.mimosa/` тоже.
-- `next-env.d.ts` перегенерируется — возвращать к HEAD.
+- Issue #12 не закрывать (владеет stage #5, 5A-контекст и #6).
+- Stage #6 не реализовывать без решения PO.
+- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`.
+- `next-env.d.ts` перегенерируется next dev/build — в коммит не входит, при расхождении возвращать к HEAD.
