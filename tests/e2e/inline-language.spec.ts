@@ -52,10 +52,19 @@ async function exerciseInlineLanguage(page: Page, path: keyof typeof phones) {
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('radio')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Готово', exact: true })).toHaveCount(0);
+  // The pill is small, as in the mockup; each mark keeps a 44 × 44 px touch area around it. Measured in one step, after the
+  // screen's enter animation has settled.
+  await page.locator('main.body').evaluate((main) => Promise.all(main.getAnimations().map((animation) => animation.finished)));
   for (const option of [russian, kazakh]) {
-    const box = (await option.boundingBox())!;
-    expect(Math.round(box.width)).toBeGreaterThanOrEqual(44);
-    expect(Math.round(box.height)).toBeGreaterThanOrEqual(44);
+    const reach = await option.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const hit = (px: number, py: number) => element.contains(document.elementFromPoint(px, py));
+      return { width: box.width, height: box.height, above: hit(box.x + box.width / 2, box.y - 5), below: hit(box.x + box.width / 2, box.y + box.height + 5) };
+    });
+    expect(Math.round(reach.height)).toBeLessThanOrEqual(36);
+    expect(Math.round(reach.width)).toBeGreaterThanOrEqual(44);
+    expect(reach.above).toBe(true);
+    expect(reach.below).toBe(true);
   }
 
   // Tapping the active language changes nothing.

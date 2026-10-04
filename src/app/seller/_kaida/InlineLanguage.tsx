@@ -6,11 +6,12 @@ import { useI18n } from '../../../i18n/I18nProvider';
 import { Ic } from './ui';
 
 // Stage 6D (PROJECT_RULES.md §18.4 «Язык» and «Выбор interaction pattern»): the language row of «Ещё» for the buyer and
-// the Seller — two options in place, applied at once, no sheet, radio or «Готово». The saving (cookie, `<html lang>`) and
-// the «route and input stay» rule are the existing locale semantics; the names are written in their own language.
-const LANGUAGES: { locale: Locale; name: string }[] = [
-  { locale: 'ru', name: 'Русский' },
-  { locale: 'kk', name: 'Қазақша' },
+// the Seller — «Язык» and, in the same row, the small `РУС | ҚАЗ` pill of the mockup; applied at once, no sheet, radio or
+// «Готово». The saving (cookie, `<html lang>`) and the «route and input stay» rule are the existing locale semantics.
+// The pill shows the short marks; screen readers get the full names in their own language.
+const LANGUAGES: { locale: Locale; short: string; name: string }[] = [
+  { locale: 'ru', short: 'РУС', name: 'Русский' },
+  { locale: 'kk', short: 'ҚАЗ', name: 'Қазақша' },
 ];
 
 export function InlineLanguage() {
@@ -25,20 +26,20 @@ export function InlineLanguage() {
   }
 
   return (
-    <div className="li" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, padding: '12px 0', height: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Ic name="globe" className="c2" /><div className="ts">{t('more.language')}</div>
-      </div>
-      <div className="lang lang-inline" role="group" aria-label={t('more.language')}>
+    <div className="li">
+      <Ic name="globe" className="c2" />
+      <div className="mid"><div className="ts">{t('more.language')}</div></div>
+      <div className="lang lang-row" role="group" aria-label={t('more.language')}>
         {LANGUAGES.map((language) => (
           <button
             key={language.locale}
             type="button"
             lang={language.locale}
+            aria-label={language.name}
             aria-pressed={locale === language.locale}
             onClick={() => choose(language.locale)}
           >
-            {language.name}
+            {language.short}
           </button>
         ))}
       </div>
