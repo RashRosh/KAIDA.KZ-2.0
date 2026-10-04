@@ -170,8 +170,8 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
   await expect(geolessCard.getByText(/км$| м$/)).toHaveCount(0);
   expect(searchRequests).toBe(1);
 
-  // stage #5: the results header carries «Фильтры» (B07) with the sort radiogroup and the distance chips —
-  // no price block (stage #6).
+  // stage #5/#6: the results header carries «Фильтры» (B07) with the sort radiogroup, the distance chips and the
+  // price range block (covered by search-price-sort-range.spec.ts).
   await page.getByRole('button', { name: 'Фильтры', exact: true }).click();
   await expect(page.getByRole('radiogroup', { name: 'Сортировка' })).toBeVisible();
   await expect(page.getByRole('radio', { name: 'Сначала ближе' })).toBeVisible();
@@ -180,7 +180,6 @@ test('Buyer location is explicit, transient and reached only through the «Фи�
   for (const chip of ['до 1 км', 'до 3 км', 'до 5 км', 'Любое']) {
     await expect(page.getByRole('radio', { name: chip, exact: true })).toBeVisible();
   }
-  await expect(page.getByText('Цена', { exact: false })).toHaveCount(0);
 
   // Selecting «Сначала ближе» is itself the explicit geo intent: the prompt fires without any other button.
   await page.getByRole('radio', { name: 'Сначала ближе' }).click();

@@ -4,9 +4,10 @@ import { pointPublicContactsSchema } from '../../locations/details/point-public-
 
 export const searchQuerySchema = z.string().trim().min(1, 'Введите название товара.');
 
-// stage #5: the buyer UI/API pass only the sort mode, never numeric weights; the server-side SearchRankingPolicy
-// maps the mode onto the current weights (search-ranking-policy.config.ts).
-export const searchSortModeSchema = z.enum(['actuality', 'distance']);
+// stage #5/#6: the buyer UI/API pass only the sort mode, never numeric weights; the server-side SearchRankingPolicy
+// maps the weighted modes onto the current weights (search-ranking-policy.config.ts); «Дешевле» is a pure
+// nominal-price ordering mode.
+export const searchSortModeSchema = z.enum(['actuality', 'distance', 'cheaper']);
 
 export const searchOfferSchema = z.object({
   id: z.uuid(),

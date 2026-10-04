@@ -5,11 +5,13 @@
 // source can replace this config source without touching the buyer UI, the public request contract or the
 // scoring/ranking functions. No generic configuration framework is built here.
 
-export type SearchSortMode = 'actuality' | 'distance';
+export type SearchSortMode = 'actuality' | 'distance' | 'cheaper';
 
 export type SearchRankingWeights = { freshnessWeight: number; distanceWeight: number };
 
-export type SearchRankingPolicy = Record<SearchSortMode, SearchRankingWeights>;
+// Stage #6: «Дешевле» is a pure ordering mode — only the weighted modes carry policy weights; the cheaper mode
+// never reads them (slice contract §3), so the policy maps only the weighted modes.
+export type SearchRankingPolicy = { actuality: SearchRankingWeights; distance: SearchRankingWeights };
 
 export const SEARCH_RANKING_POLICY_DEFAULTS: SearchRankingPolicy = {
   actuality: { freshnessWeight: 0.7, distanceWeight: 0.3 },
@@ -30,7 +32,7 @@ function parseWeight(raw: string, source: string): number {
   return value;
 }
 
-function readModeWeights(env: SearchRankingPolicyEnvironment, mode: SearchSortMode): SearchRankingWeights {
+function readModeWeights(env: SearchRankingPolicyEnvironment, mode: 'actuality' | 'distance'): SearchRankingWeights {
   const raw = env[`SEARCH_RANKING_WEIGHTS_${mode.toUpperCase()}`];
   if (raw === undefined || raw === '') return SEARCH_RANKING_POLICY_DEFAULTS[mode];
   const parts = raw.split(',');

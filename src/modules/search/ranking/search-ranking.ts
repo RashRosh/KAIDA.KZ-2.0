@@ -1,6 +1,6 @@
 import type { SearchOffer } from '../contracts/search.contract';
 import type { BuyerLocation } from '../contracts/buyer-location.contract';
-import type { SearchRankingPolicy, SearchSortMode } from '../config/search-ranking-policy.config';
+import type { SearchRankingPolicy, SearchRankingWeights, SearchSortMode } from '../config/search-ranking-policy.config';
 import type { ActualityPolicy } from '../../offers/actuality/actuality';
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
@@ -82,12 +82,25 @@ export function distanceScore(rankingDistanceMeters: number): number {
 function weightedScore(
   candidate: SearchRankingCandidate,
   rankingDistanceMeters: number | null,
-  weights: SearchRankingPolicy[SearchSortMode],
+  weights: SearchRankingWeights,
   options: SearchRankingOptions,
 ): number {
   const fresh = freshnessScore(candidate.lastConfirmedAt, options.now, options.actualityPolicy);
   if (rankingDistanceMeters === null) return fresh * weights.freshnessWeight;
   return fresh * weights.freshnessWeight + distanceScore(rankingDistanceMeters) * weights.distanceWeight;
+}
+
+// Stage #6 («Дешевле», contract §2–§3): nominal Offer price ascending — a pure ordering mode with no policy
+// weights and no unit normalization; price.amount is a validated decimal string, compared numerically.
+function nominalPriceAmount(offer: SearchOffer): number {
+  return Number.parseFloat(offer.price.amount);
+}
+
+function comparePriceThenFreshness(a: SearchRankingCandidate, b: SearchRankingCandidate): number {
+  const aPrice = nominalPriceAmount(a.offer);
+  const bPrice = nominalPriceAmount(b.offer);
+  if (aPrice !== bPrice) return aPrice < bPrice ? -1 : 1;
+  return compareFreshnessThenId(a, b);
 }
 
 export function rankSearchOfferCandidates(
@@ -96,14 +109,18 @@ export function rankSearchOfferCandidates(
   ageingSince: Date | undefined,
   options: SearchRankingOptions,
 ): RankedSearchCandidate[] {
-  if (!buyerLocation) {
-    // Without Buyer location Search ranks by pure freshness semantics — the weights are not involved at all.
+  if (!buyerLocation || options.sortMode === 'cheaper') {
+    // Without Buyer location — or in the pure «Дешевле» mode — the weights are not involved at all: the order is
+    // freshness semantics, or nominal price ascending inside a tier (price does not depend on coordinates, so
+    // geo-known and geo-less Offers interleave on the same basis — stage 5A/§3).
+    const byPrice = options.sortMode === 'cheaper';
     return [...candidates]
-      .sort((a, b) => compareActualityTier(a, b, ageingSince) || compareFreshnessThenId(a, b))
+      .sort((a, b) => compareActualityTier(a, b, ageingSince) || (byPrice ? comparePriceThenFreshness(a, b) : compareFreshnessThenId(a, b)))
       .map((candidate) => ({ ...candidate, rankingDistanceMeters: null }));
   }
 
-  const weights = options.rankingPolicy[options.sortMode];
+  const sortMode: 'actuality' | 'distance' = options.sortMode;
+  const weights = options.rankingPolicy[sortMode];
   const ranked = candidates.map((candidate) => ({
     candidate,
     rankingDistanceMeters: candidate.locationGeo === null

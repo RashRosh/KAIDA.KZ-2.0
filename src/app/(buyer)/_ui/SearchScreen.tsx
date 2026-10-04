@@ -7,6 +7,8 @@ import { offerCount, offersCount, showOffersLabel } from '../../../i18n/format';
 import { buyerLocationSchema, type BuyerLocation } from '../../../modules/search/contracts/buyer-location.contract';
 import { searchQuerySchema, searchResponseSchema, type SearchResponse } from '../../../modules/search/contracts/search.contract';
 import { filterOffersByRadius } from '../../../modules/search/radius-filter';
+import { filterOffersByPriceRange } from '../../../modules/search/price-filter';
+import { formatAmount } from '../../_components/format-amount';
 import type { SearchSortMode } from '../../../modules/search/config/search-ranking-policy.config';
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
@@ -48,11 +50,16 @@ export function SearchScreen() {
   const writtenQuery = useRef<string | null>(null);
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
   // stage #5: applied filter values; the sheet edits drafts and «Показать N предложений» commits them.
+  // stage #6: applied price range (nominal KZT amount, inclusive bounds; null = absent bound) plus its draft text.
   const [sortMode, setSortMode] = useState<SearchSortMode>('actuality');
   const [radiusMeters, setRadiusMeters] = useState<number | null>(null);
+  const [priceMin, setPriceMin] = useState<number | null>(null);
+  const [priceMax, setPriceMax] = useState<number | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draftSort, setDraftSort] = useState<SearchSortMode>('actuality');
   const [draftRadius, setDraftRadius] = useState<number | null>(null);
+  const [draftPriceFrom, setDraftPriceFrom] = useState('');
+  const [draftPriceTo, setDraftPriceTo] = useState('');
   const pending = useRef(false);
   const lastSearch = useRef<{ query: string; location?: BuyerLocation; sortMode: SearchSortMode } | null>(null);
   const localeRef = useRef(locale);
@@ -250,7 +257,35 @@ export function SearchScreen() {
   function openSheet() {
     setDraftSort(sortMode);
     setDraftRadius(radiusMeters);
+    setDraftPriceFrom(priceMin === null ? '' : String(priceMin));
+    setDraftPriceTo(priceMax === null ? '' : String(priceMax));
     setSheetOpen(true);
+  }
+
+  // Stage #6: the nominal price range is valid when both texts are empty (absent bound) or parse to non-negative
+  // numbers with `from` not exceeding `to`; an invalid range is never applied and never reads as «0 results».
+  function parseDraftPriceRange(): { min: number | null; max: number | null } | 'invalid' {
+    const parseBound = (raw: string): number | null | 'invalid' => {
+      if (raw.trim() === '') return null;
+      const value = Number(raw);
+      return Number.isFinite(value) && value >= 0 ? value : 'invalid';
+    };
+    const min = parseBound(draftPriceFrom);
+    const max = parseBound(draftPriceTo);
+    if (min === 'invalid' || max === 'invalid') return 'invalid';
+    if (min !== null && max !== null && min > max) return 'invalid';
+    return { min, max };
+  }
+
+  const draftPriceInvalid = parseDraftPriceRange() === 'invalid';
+
+  // Stage #6: «Показать N предложений» previews both draft filters together (radius + the valid price range);
+  // an invalid range keeps the last committed one out of the preview, so the count never lies.
+  function draftFilterCount(): number {
+    const parsed = parseDraftPriceRange();
+    const offers = filterOffersByRadius(shown?.offers ?? [], draftRadius);
+    if (parsed === 'invalid') return offers.length;
+    return filterOffersByPriceRange(offers, parsed.min, parsed.max).length;
   }
 
   function selectSort(mode: SearchSortMode) {
@@ -263,10 +298,17 @@ export function SearchScreen() {
     if (meters !== null && !locationEnabled) requestBuyerLocation();
   }
 
-  // «Показать N предложений» (B07): commit the drafts. The radius is a client-side presentation filter, so it applies
-  // without a request; a sort-mode change re-runs the search (ranking stays a server authority). A geo-dependent
-  // setting commits only with the granted location.
+  // «Показать N предложений» (B07): commit the drafts. The radius and the price range are client-side presentation
+  // filters, so they apply without a request; a sort-mode change re-runs the search (ranking stays a server
+  // authority). A geo-dependent setting commits only with the granted location; an invalid price range blocks the
+  // price commit (validation stays visible) while the other settings still apply (stage #6 contract §4).
   function applyFilters() {
+    const parsedPrice = parseDraftPriceRange();
+    const priceValid = parsedPrice !== 'invalid';
+    if (priceValid) {
+      setPriceMin(parsedPrice.min);
+      setPriceMax(parsedPrice.max);
+    }
     const nextSort = draftSort === 'distance' && !locationEnabled ? sortMode : draftSort;
     const nextRadius = locationEnabled ? draftRadius : null;
     setRadiusMeters(nextRadius);
@@ -274,14 +316,18 @@ export function SearchScreen() {
       setSortMode(nextSort);
       if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, nextSort);
     }
-    setSheetOpen(false);
+    if (priceValid) setSheetOpen(false);
   }
 
-  // «Сбросить» (B07): back to the defaults «Сначала актуальнее» / «Любое».
+  // «Сбросить» (B07): back to the defaults «Сначала актуальнее» / «Любое» / empty price.
   function resetFilters() {
     setDraftSort('actuality');
     setDraftRadius(null);
+    setDraftPriceFrom('');
+    setDraftPriceTo('');
     setRadiusMeters(null);
+    setPriceMin(null);
+    setPriceMax(null);
     if (sortMode !== 'actuality') {
       setSortMode('actuality');
       if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, 'actuality');
@@ -289,7 +335,7 @@ export function SearchScreen() {
     setSheetOpen(false);
   }
 
-  const activeFilters = (sortMode !== 'actuality' ? 1 : 0) + (radiusMeters !== null ? 1 : 0);
+  const activeFilters = (sortMode !== 'actuality' ? 1 : 0) + (radiusMeters !== null ? 1 : 0) + (priceMin !== null || priceMax !== null ? 1 : 0);
 
   const form = (compact: boolean) => (
     <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate
@@ -344,10 +390,10 @@ export function SearchScreen() {
   );
 
   const appliedChips: { key: string; label: string; remove: () => void }[] = [];
-  if (sortMode === 'distance') {
+  if (sortMode !== 'actuality') {
     appliedChips.push({
       key: 'sort',
-      label: t('search.sortDistance'),
+      label: sortMode === 'cheaper' ? t('search.sortCheaper') : t('search.sortDistance'),
       remove: () => {
         setSortMode('actuality');
         if (lastSearch.current) void executeSearch(lastSearch.current.query, buyerLocation, 'actuality');
@@ -356,6 +402,17 @@ export function SearchScreen() {
   }
   if (radiusMeters !== null) {
     appliedChips.push({ key: 'radius', label: radiusLabel(radiusMeters), remove: () => setRadiusMeters(null) });
+  }
+  // stage #6: the applied nominal price range chip (B07: «до 2 000 ₸»).
+  if (priceMin !== null || priceMax !== null) {
+    const parts = [];
+    if (priceMin !== null) parts.push(`${t('search.priceFrom')} ${formatAmount(String(priceMin))}`);
+    if (priceMax !== null) parts.push(`${t('search.priceTo')} ${formatAmount(String(priceMax))}`);
+    appliedChips.push({
+      key: 'price',
+      label: `${parts.join(' – ')} ₸`,
+      remove: () => { setPriceMin(null); setPriceMax(null); },
+    });
   }
 
   const appliedChipsRow = appliedChips.length > 0 && (
@@ -393,11 +450,11 @@ export function SearchScreen() {
       )}
       <div className="ov">{t('search.sorting')}</div>
       <div role="radiogroup" aria-label={t('search.sorting')} style={{ display: 'flex', flexDirection: 'column' }}>
-        {(['distance', 'actuality'] as const).map((mode) => (
+        {(['distance', 'cheaper', 'actuality'] as const).map((mode) => (
           <label key={mode} className="li" style={{ minHeight: 40, padding: '2px 0', position: 'relative' }}>
             <input type="radio" name="search-sort" className="cbx" checked={draftSort === mode} onChange={() => selectSort(mode)} />
             <span className={`rd${draftSort === mode ? ' on' : ''}`} aria-hidden="true" />
-            <div className="mid"><div className="t">{mode === 'distance' ? t('search.sortDistance') : t('search.sortActuality')}</div></div>
+            <div className="mid"><div className="t">{mode === 'distance' ? t('search.sortDistance') : mode === 'cheaper' ? t('search.sortCheaper') : t('search.sortActuality')}</div></div>
           </label>
         ))}
       </div>
@@ -416,9 +473,31 @@ export function SearchScreen() {
           {t('search.radiusAny')}
         </button>
       </div>
+      {/* stage #6 (B07): the nominal price range — compared exactly as stated on the cards, units may differ. */}
+      <div className="ov" style={{ marginTop: 2 }}>{t('search.priceLabel')}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <div className={`inp${draftPriceInvalid ? ' er' : ''}`}>
+          <span className="c2">{t('search.priceFrom')}</span>
+          <input type="text" inputMode="numeric" aria-label={t('search.priceFromAria')} value={draftPriceFrom}
+            onChange={(event) => setDraftPriceFrom(event.target.value)} style={{ minWidth: 0 }} />
+          <span className="c2">₸</span>
+        </div>
+        <div className={`inp${draftPriceInvalid ? ' er' : ''}`}>
+          <span className="c2">{t('search.priceTo')}</span>
+          <input type="text" inputMode="numeric" aria-label={t('search.priceToAria')} value={draftPriceTo}
+            onChange={(event) => setDraftPriceTo(event.target.value)} style={{ minWidth: 0 }} />
+          <span className="c2">₸</span>
+        </div>
+      </div>
+      {draftPriceInvalid && (
+        <div className="fld" style={{ marginTop: 0 }}>
+          <p id="price-validation" className="emsg" role="alert"><Ic name="alert" />{t('search.priceInvalid')}</p>
+        </div>
+      )}
+      <p className="c" style={{ display: 'flex', gap: 6 }}><span className="ic i-info xs c2" style={{ marginTop: 2 }} /><span className="c2">{t('search.priceHint')}</span></p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 2 }}>
         <button type="button" className="btn btn-p lg w" onClick={applyFilters}>
-          {showOffersLabel(locale, filterOffersByRadius(shown?.offers ?? [], draftRadius).length)}
+          {showOffersLabel(locale, draftFilterCount())}
         </button>
         <button type="button" className="btn btn-g w" style={{ height: 36 }} onClick={resetFilters}>{t('search.reset')}</button>
       </div>
@@ -496,13 +575,22 @@ export function SearchScreen() {
   }
 
   const offers = shown?.offers ?? [];
-  // stage #5: the radius is a client-side presentation filter over the complete response (slice contract §2.7).
-  const visibleOffers = filterOffersByRadius(offers, radiusMeters);
-  const filteredEmpty = radiusMeters !== null && offers.length > 0 && visibleOffers.length === 0;
-  const showSummary = !loading && !filteredEmpty && (radiusMeters !== null || sortMode === 'distance');
+  // stage #5/#6: the radius and the nominal price range are client-side presentation filters over the complete
+  // response (slice contracts §2.7 / §4) — each narrows the visible set independently.
+  const visibleOffers = filterOffersByPriceRange(filterOffersByRadius(offers, radiusMeters), priceMin, priceMax);
+  const anyPresentationFilter = radiusMeters !== null || priceMin !== null || priceMax !== null;
+  const filteredEmpty = anyPresentationFilter && offers.length > 0 && visibleOffers.length === 0;
+  const showSummary = !loading && !filteredEmpty && (anyPresentationFilter || sortMode !== 'actuality');
   const summaryParts = [offersCount(locale, visibleOffers.length)];
   if (radiusMeters !== null) summaryParts.push(radiusLabel(radiusMeters));
+  if (priceMin !== null || priceMax !== null) {
+    summaryParts.push([
+      priceMin !== null ? `${t('search.priceFrom')} ${formatAmount(String(priceMin))}` : null,
+      priceMax !== null ? `${t('search.priceTo')} ${formatAmount(String(priceMax))}` : null,
+    ].filter(Boolean).join('–') + ' ₸');
+  }
   if (sortMode === 'distance') summaryParts.push(t('search.sortDistance'));
+  if (sortMode === 'cheaper') summaryParts.push(t('search.sortCheaper'));
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
