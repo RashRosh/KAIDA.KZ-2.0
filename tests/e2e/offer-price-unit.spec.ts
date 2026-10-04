@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
+import { chooseLanguageInMore } from './buyer-helpers';
 import { offerEditor } from './offer-editor-helpers';
 
 function phonesFor(projectName: string) {
@@ -48,11 +49,7 @@ async function prepareSeller(page: Page, phones: { login: string; public: string
 // PROJECT_RULES.md §18.4 «Язык» (buyer-screens-mockup): the language is changed on «Ещё» → «Язык».
 async function switchToKazakh(page: Page) {
   const back = page.url();
-  await page.goto('/seller/more');
-  await page.getByRole('button', { name: /^Язык/ }).click();
-  await page.getByRole('radio', { name: 'Қазақша' }).click();
-  await page.getByRole('button', { name: 'Готово', exact: true }).click();
-  await expect(page.getByRole('button', { name: /^Тіл/ })).toBeVisible();
+  await chooseLanguageInMore(page, 'Қазақша', '/seller/more');
   await page.goto(back);
 }
 

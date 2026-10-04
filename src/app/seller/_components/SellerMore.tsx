@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
-import { Bar, Ic, LoginRequired, Nav, Phone, Radio, Sheet } from '../_kaida/ui';
+import { Bar, Ic, LoginRequired, Nav, Phone } from '../_kaida/ui';
+import { InlineLanguage } from '../_kaida/InlineLanguage';
 import { forgetPushOnThisDevice } from '../../_components/push-client';
 import { PushToggle } from './PushToggle';
 
@@ -17,11 +18,9 @@ function formatPhone(e164: string) {
 // AI-S19 · More: the account, «Добавить списком», language, the way back to the buyer screens and sign-out.
 // One account serves both roles (PO, 2026-09-29): sign-out lands on the buyer «Ещё», where «Войти» shows it took effect.
 export function SellerMore() {
-  const { locale, setLocale, t } = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
   const [phone, setPhone] = useState<string | null | undefined>(undefined);
-  const [languageOpen, setLanguageOpen] = useState(false);
-  const [choice, setChoice] = useState(locale);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -67,9 +66,7 @@ export function SellerMore() {
           </div>
           <PushToggle variant="row" />
           <div className="card" style={{ gap: 0, padding: '0 12px' }}>
-            <button type="button" className="li" onClick={() => { setChoice(locale); setLanguageOpen(true); }} aria-haspopup="dialog">
-              <Ic name="globe" className="c2" /><div className="mid"><div className="ts">{t('more.language')}</div><p className="c">{t(locale === 'ru' ? 'language.ru' : 'language.kk')}</p></div><Ic name="right" className="c2" />
-            </button>
+            <InlineLanguage />
             <Link className="li" href="/" style={row}>
               <Ic name="search" className="c2" /><div className="mid"><div className="ts">{t('cabinet.buyerEntry')}</div></div><Ic name="right" className="c2" />
             </Link>
@@ -80,19 +77,6 @@ export function SellerMore() {
         </main>
       )}
       <Nav active="more" />
-      {languageOpen && (
-        <Sheet title={t('more.languageTitle')} onClose={() => setLanguageOpen(false)} closeButton={false}>
-          <div role="radiogroup" aria-label={t('more.language')} style={{ display: 'flex', flexDirection: 'column' }}>
-            {(['ru', 'kk'] as const).map((value) => (
-              <button key={value} type="button" className="li" role="radio" aria-checked={choice === value} onClick={() => setChoice(value)}>
-                <Radio on={choice === value} /><div className="mid"><div className="ts">{t(value === 'ru' ? 'language.ru' : 'language.kk')}</div></div>
-              </button>
-            ))}
-          </div>
-          <p className="c">{t('more.languageNote')}</p>
-          <button type="button" className="btn btn-p lg w" onClick={() => { setLocale(choice); setLanguageOpen(false); router.refresh(); }}>{t('more.done')}</button>
-        </Sheet>
-      )}
     </Phone>
   );
 }

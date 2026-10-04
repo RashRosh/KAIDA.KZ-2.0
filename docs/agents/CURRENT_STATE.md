@@ -4,27 +4,23 @@
 
 ## Verified base
 
-- Проверено: 2026-10-04 (6-я сессия).
-- `origin/main`: `9607163` (контракт 6C слит, PR #85). Последний checkpoint-тег: `v0.0.48-first-entry-correction`.
+- Проверено: 2026-10-05 (6-я сессия).
+- `origin/main`: `e07e3de` (контракт 6D слит, PR #87). Последний checkpoint-тег: `v0.0.49-search-home-last-state`.
 
 ## Current task
 
-**Stage 6C — Search Home + last Search state** (`docs/slices/search-home-last-state/SLICE_CONTRACT.md`, APPROVED).
-Реализована (`slice/search-home-last-state`, PR #86): Search Home, чипы после поиска, последний поиск вкладки в
-`sessionStorage`, `Поиск` ведёт на `/?q=…`. Manual acceptance **PASS**, branch CI green. После green merged-main CI
-создаётся annotated tag `v0.0.49-search-home-last-state` на merge-коммите; до создания тег не считать существующим.
-Следом 6D (inline-язык в `Ещё`) — контракт ещё не утверждён, реализацию не начинать.
+**Stage 6D — Inline language in «Ещё»** — реализован (`slice/inline-language`, PR #88): строка «Язык» с компактной
+таблеткой `РУС | ҚАЗ` из макета у покупателя и продавца, применяется сразу, без листа. Manual acceptance **PASS**, branch
+CI green. После green merged-main CI создаётся annotated tag `v0.0.50-inline-language` на merge-коммите; до создания
+тег не считать существующим.
 
-## Verification (local)
-
-Unit 344/344, integration 197/197, typecheck и eslint чистые; новые 10 E2E (mobile RU) зелёные; полный E2E зелёный, кроме
-редкой локальной нестабильности редактора продавца (`offer-actuality`, не связана с поиском). Два существующих E2E
-обновлены: после входа «/» восстанавливает последний поиск (адрес `/?q=…`), UX1D стартует с чистой вкладкой.
+Дальше — **Stage 6 Rev 3** (сортировка `Расстояние / Цена / Актуальность` с направлением, один vertical slice): контракт
+ещё не подготовлен, реализацию не начинать без решения PO. Затем 6F/6G (Query Log, динамические чипы).
 
 ## Next action
 
-1. Merged-main CI → tag `v0.0.49-search-home-last-state`.
-2. 6D: подготовить Slice Contract, ждать утверждения.
+1. Merged-main CI → tag `v0.0.50-inline-language`.
+2. Stage 6 Rev 3: подготовить Slice Contract, ждать утверждения.
 
 ## Current constraints
 
@@ -33,3 +29,4 @@ Unit 344/344, integration 197/197, typecheck и eslint чистые; новые 
 - Граница доставки: mobile + русский (`PROJECT_RULES.md` §18.5).
 - Mimosa pre-commit scanner может ложно блокировать новые test-файлы с `pool.query($n)`; не менять код ради него.
 - Issue #12 остаётся OPEN.
+- Неиспользуемые ключи `more.languageTitle`, `more.languageNote`, `more.done` остаются в каталогах (локальная `tmp/` PO на них ссылается).
