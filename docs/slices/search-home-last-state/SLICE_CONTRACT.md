@@ -1,6 +1,6 @@
 # Search Home + last Search state (stage 6C)
 
-**Status:** APPROVED WITH TWO CORRECTIONS (Controller, 2026-10-04; поправки внесены) — IMPLEMENTATION AUTHORIZED после записи контракта в `main`.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Controller/PO, 2026-10-04; контракт `49f1496` с двумя поправками финальный).
 **Base:** `main` `a31bab3` (checkpoint `v0.0.48-first-entry-correction`).
 **Branch:** `slice/search-home-last-state-contract` (contract-only).
 **Plan:** stage 6C (`EXECUTION_PLAN.md`). Следом: 6D inline-язык, затем Stage 6 Rev 3.
