@@ -9,14 +9,24 @@ export const notRemovedByOperatorPredicate = sql`not exists (
   where r.card_id = "offers"."card_id" and r.restored_at is null and r.cleared_at is null
 )`;
 
-// Buyer visibility is a read-side policy across the owning Offer, Seller and Location modules.
-// Seller-side records remain valid even when this predicate is false. A public phone is not required: contacts are
+// Generic buyer visibility: lifecycle + operator removal. Location identity (a non-blank address) is guaranteed by
+// the schema, so coordinates are NOT part of ordinary Search / buyer Offer page visibility (stage 5A: Location
+// identity ≠ Location coordinates; revises the UX1D geo-eligibility for Search only).
+// Buyer-side records remain valid even when this predicate is false. A public phone is not required: contacts are
 // optional and belong to the point (point-contacts-hours §2).
 export function buyerVisibleOffersPredicate(cutoff: Date) {
   return and(
     visibleOffersPredicate(cutoff),
+    notRemovedByOperatorPredicate,
+  );
+}
+
+// Geo-dependent eligibility on top of the generic visibility: Nearby and the route destination additionally require
+// complete Location coordinates (stage 5A — the UX1D geo requirement stays for geo-dependent behavior only).
+export function buyerGeoVisibleOffersPredicate(cutoff: Date) {
+  return and(
+    buyerVisibleOffersPredicate(cutoff),
     isNotNull(locations.latitude),
     isNotNull(locations.longitude),
-    notRemovedByOperatorPredicate,
   );
 }

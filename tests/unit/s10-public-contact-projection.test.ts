@@ -25,6 +25,7 @@ describe('public point contact projection', () => {
       location: { id: '10000000-0000-4000-8000-000000000104', name: 'Точка', addressText: 'Алматы', openingHours: templateOpeningHours() },
       price: { amount: '100', currency: 'KZT', unit: null },
       sellerComment: null,
+      routeAvailable: true,
     };
     expect(searchOfferSchema.safeParse({ ...offer, location: { ...offer.location, contacts: { phoneE164: '+77001112233' } } }).success).toBe(true);
     expect(searchOfferSchema.safeParse({ ...offer, location: { ...offer.location, contacts: {} } }).success).toBe(false);

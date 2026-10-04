@@ -30,6 +30,7 @@ function candidate(hoursAgo: number, locationGeo: SearchRankingCandidate['locati
     location: { id: '30000000-0000-4000-8000-000000000001', name: 'stage #5 unit location', addressText: 'stage #5 unit address', openingHours: templateOpeningHours() },
     price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
+    routeAvailable: true,
   } as SearchOffer;
   return { offer, lastConfirmedAt: new Date(NOW.getTime() - hoursAgo * H), locationGeo };
 }
@@ -94,6 +95,21 @@ describe('stage #5 weighted ranking', () => {
     const geoNear = candidate(2, near);
     expect(ids(rank([geoNear, geoless], 'actuality', buyer))).toEqual([geoNear.offer.id, geoless.offer.id]);
     expect(ids(rank([geoNear, geoless], 'distance', buyer))).toEqual([geoNear.offer.id, geoless.offer.id]);
+  });
+
+  it('stage 5A contract §2.1 example: a sufficiently fresher geo-less Offer outranks an older geo-known one', () => {
+    // «Актуальнее»: C (geo-known, 0 m, ~4.8 h) = 0.93 > A (geo-less, fresh) = 0.70 > B (geo-known, 1 km, 24 h) = 0.50.
+    const a = candidate(0.001, null);
+    const b = candidate(24, near);
+    const c = candidate(4.8, near);
+    expect(ids(rank([c, b, a], 'actuality', buyer))).toEqual([c.offer.id, a.offer.id, b.offer.id]);
+  });
+
+  it('«Ближе» keeps every geo-known Offer of the tier ahead of the geo-less group', () => {
+    const a = candidate(0.001, null);
+    const b = candidate(24, far);
+    const c = candidate(4.8, near);
+    expect(ids(rank([a, b, c], 'distance', buyer))).toEqual([c.offer.id, b.offer.id, a.offer.id]);
   });
 
   it('without Buyer location ranks by pure freshness semantics, ignoring weights and mode', () => {
@@ -163,6 +179,7 @@ describe('stage #5 radius presentation filter', () => {
       location: { id: '30000000-0000-4000-8000-000000000001', name: 'radius unit location', addressText: 'radius unit address', openingHours: templateOpeningHours() },
       price: { amount: '0', currency: 'KZT', unit: null },
       sellerComment: null,
+      routeAvailable: true,
       ...(distanceMeters !== undefined ? { distanceMeters } : {}),
     };
   }

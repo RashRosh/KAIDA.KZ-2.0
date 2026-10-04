@@ -4,36 +4,27 @@
 
 ## Verified base
 
-- Проверено: 2026-10-03 (4-я сессия, закрытие stage #5).
-- `origin/main`: `aadb6b2` (`Merge PR #74` — Search filters stage #5; slice-коммит `9634178`); этот docs-коммит фиксирует закрытие.
-- Merged-main CI на `aadb6b2`: run `37071285541` — SUCCESS; branch CI на `9634178` green (`37067949468`/`37067991791`).
-- Checkpoint annotated tag `v0.0.46-search-sort-distance`: **авторизован PO, создаётся сразу после green CI этого docs-коммита на его SHA и пушится на remote. До фактического создания тег не считать существующим.**
-- На момент записи последний фактически существующий verified checkpoint — `v0.0.45-nearby-result-first` на `0bdfc3a`.
+- Проверено: 2026-10-03 (5-я сессия, stage 5A implementation).
+- Ветка `slice/search-visibility-without-coordinates-contract` от checkpoint `v0.0.46-search-sort-distance` (`c676cbe` = origin/main).
+- Contract commit: `fc7c717` (rev 3 APPROVED — IMPLEMENTATION AUTHORIZED).
 
 ## Current task
 
-**Stage #5 (Search filters, Issue #12) — CLOSED** (PR #74, merged `aadb6b2`, manual acceptance PASS). **Новое решение PO 2026-10-03: перед stage #6 вставлен stage 5A** — «Search visibility for addressed Locations without coordinates» (identity ≠ coordinates; явная ревизия geo-eligibility UX1D). **NEXT = stage 5A contract preparation.** **Issue #12 остаётся OPEN** — владеет stage #5 и stage #6, не закрывать. Stage #6 (Дешевле + цена от–до) — после 5A.
+**Stage 5A — Search visibility for addressed Locations without coordinates.** Реализация по APPROVED rev 3 завершена локально, full verification пройден. **Implementation diff незакоммичен** (разрешён был только contract commit); commit/push/PR — по разрешению PO. Issue #12 остаётся OPEN.
 
 ## Last completed
 
-- Stage #5 по контракту rev 6A: SearchRankingPolicy config seam (env, fail-fast, defaults 0.70/0.30 / 0.30/0.70), weighted ranking (абсолютные score, tie-breakers, без result-set normalization), клиентский radius-фильтр (pagination boundary), API additive `sort` + derived `distanceMeters`, UI по B07 без ценового блока (counter-dot, sheet, chips, summary, empty-filtered, geo-intent/denial-retry, pin удалена), i18n ru+kk. UX1D eligibility сохранена без изменений (geo-less вне Search pipeline; ревизия — stage 5A).
-- Verification: unit 332/332, integration 197/197, typecheck, build, targeted E2E 48 passed, full E2E 155 passed / 3 skipped; repository lint green (штатный `pnpm lint` локально блокируется только local-only `tmp/` — environment-only limitation, закрывается clean CI).
-- Manual acceptance PO: **PASS**.
-
-## Blocker / notes
-
-- Mimosa pre-commit scanner: полный скан локально не завершается (`scanner_enobufs`); ложно блокирует создание новых test-файлов с `pool.query($n)`. Требуется решение PO (полный audit + настройка).
-- Draft-контракт stage 5A **восстановить из agent handoff memory** (`next-slice-contract-search-visibility-without-coordinates`) только после checkpoint closure — в репозитории его нет по решению PO.
+- Реализация rev 3: `buyerVisibleOffersPredicate` → generic (lifecycle + not-removed, без geo); новый `buyerGeoVisibleOffersPredicate` (geo overlay) для `discovery.repository` (Nearby) и `buyer-offer-route.repository` (destination) — их поведение не менялось; `search.repository` (Search + Offer page) на generic. `routeAvailable: boolean` (always-present capability; в реализации выводится из route prerequisite) в Search DTO + buyer Offer DTO (через `SearchOffer`). `ResultCard`/`BuyerOfferView` — «Маршрут» только при `routeAvailable`. Seller `buyerVisible` без `locationHasGeo` (одна строка, без новых флагов/UI). Ranking: «Ближе» — группировка geo-known → geo-less (новая, contract §2.1; в stage #5 путь был недостижим); «Актуальнее» — без изменений (defensive формула уже была).
+- Verification: unit **334/334**, integration **197/197**, typecheck, build, targeted E2E (s9+s11+ux1d+search+ux2a) **45 passed**, full E2E **155 passed / 3 skipped** (повторный прогон; в первом 2 seller-workspace flake — pre-existing). Repository lint green; штатный `pnpm lint` блокируется только local-only `tmp/` (environment-only, закрывается clean CI).
+- Обновлённые old assertions (legitimate revision): ux1d integration матрица (noGeo/neither → Search included, Nearby excluded), ux1d e2e (no-geo card видим без «Маршрут»), s9/s10/s11 integration+e2e (geoless в Search-порядках, `routeAvailable` ассерты), seller-cabinet (buyerVisible true без geo), seller-trading-points (search contains, nearby excludes), search.test (DTO +routeAvailable).
 
 ## Next action
 
-1. Дождаться green CI этого docs-коммита → создать и запушить annotated tag `v0.0.46-search-sort-distance` на его SHA.
-2. После checkpoint: по решению PO — восстановить draft stage 5A и готовить контракт к APPROVED. Реализацию 5A не начинать без APPROVED.
+1. Отчитаться PO (diff + verification + revised assertions + manual scenario); ждать разрешения на implementation commit → push → PR → CI → manual acceptance.
+2. Merge/tag — только по отдельному разрешению PO.
 
 ## Current constraints
 
-- Issue #12 не закрывать (владеет stage #5 и #6).
-- Stage 5A не реализовывать до APPROVED PO.
-- Не commit/push/merge/tag сверх закрывающей последовательности.
-- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`.
-- `next-env.d.ts` перегенерируется next dev/build — в коммит не входит, при расхождении возвращать к HEAD.
+- Не менять contract semantics rev 3 без STOP/PO decision.
+- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`; Mimosa-артефакты `docs/slices/search-sort-distance/.mimosa/` тоже.
+- `next-env.d.ts` перегенерируется — возвращать к HEAD.

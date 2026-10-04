@@ -114,6 +114,12 @@ export function rankSearchOfferCandidates(
   ranked.sort((a, b) => {
     const tier = compareActualityTier(a.candidate, b.candidate, ageingSince);
     if (tier !== 0) return tier;
+    // Stage 5A contract §2.1 «Ближе»: every geo-known Offer of the tier ranks ahead of the geo-less group (the
+    // geo-less group then orders by freshness → id). «Актуальнее» lets the absolute weighted scores interleave.
+    if (options.sortMode === 'distance') {
+      if (a.rankingDistanceMeters === null && b.rankingDistanceMeters !== null) return 1;
+      if (a.rankingDistanceMeters !== null && b.rankingDistanceMeters === null) return -1;
+    }
     const aScore = weightedScore(a.candidate, a.rankingDistanceMeters, weights, options);
     const bScore = weightedScore(b.candidate, b.rankingDistanceMeters, weights, options);
     if (aScore !== bScore) return aScore > bScore ? -1 : 1;

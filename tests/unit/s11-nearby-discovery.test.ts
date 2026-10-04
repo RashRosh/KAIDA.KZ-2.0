@@ -27,6 +27,7 @@ function offer(id: string): SearchOffer {
     location: { id: '30000000-0000-4000-8000-000000011000', name: 'S11 unit location', addressText: 'S11 unit address', openingHours: templateOpeningHours() },
     price: { amount: '0', currency: 'KZT', unit: null },
     sellerComment: null,
+    routeAvailable: true,
   };
 }
 

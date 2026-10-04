@@ -3,7 +3,7 @@ import type { Database } from '../../../db/client';
 import { locations } from '../../locations/db/locations.table';
 import { sellers } from '../../sellers/db/sellers.table';
 import { offers } from '../db/offers.table';
-import { buyerVisibleOffersPredicate } from '../visibility/buyer-offer-visibility';
+import { buyerGeoVisibleOffersPredicate } from '../visibility/buyer-offer-visibility';
 
 export type BuyerOfferRouteDestination = {
   latitude: number;
@@ -23,7 +23,7 @@ export async function findBuyerOfferRouteDestination(
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .where(and(
       eq(offers.id, offerId),
-      buyerVisibleOffersPredicate(cutoff),
+      buyerGeoVisibleOffersPredicate(cutoff),
     ))
     .limit(1);
 

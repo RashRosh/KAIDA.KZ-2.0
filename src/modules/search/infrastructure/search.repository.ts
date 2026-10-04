@@ -125,6 +125,10 @@ async function findBuyerVisibleOffers(
       throw new Error('Buyer-visible Offer has invalid price');
     }
 
+    const locationGeo = locationLatitude === null || locationLongitude === null
+      ? null
+      : { latitude: locationLatitude, longitude: locationLongitude };
+
     const offer: SearchOffer = {
       ...rest,
       // The card title is the Seller's own text in every interface language; id is the optional catalog link.
@@ -135,6 +139,9 @@ async function findBuyerVisibleOffers(
         ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
+      // stage 5A: public route capability, derived from the existing route prerequisite (complete Location
+      // coordinates); the coordinates themselves never enter the public payload.
+      routeAvailable: locationGeo !== null,
       ...(coverPhotoId ? { coverPhotoId } : {}),
     };
     const sellerCommentTranslation = projectBuyerCommentTranslation({
@@ -146,10 +153,6 @@ async function findBuyerVisibleOffers(
       detectedSourceLanguage: commentTranslationSourceLanguage,
     });
     if (sellerCommentTranslation) offer.sellerCommentTranslation = sellerCommentTranslation;
-
-    const locationGeo = locationLatitude === null || locationLongitude === null
-      ? null
-      : { latitude: locationLatitude, longitude: locationLongitude };
 
     return { offer, lastConfirmedAt, locationGeo };
   });

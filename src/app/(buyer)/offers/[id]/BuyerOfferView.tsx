@@ -168,7 +168,8 @@ export function BuyerOfferView({ offer }: { offer: BuyerOfferPage }) {
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <RouteButton offer={offer} />
+              {/* stage 5A: the route action is honest — shown only when the route capability is available. */}
+              {offer.routeAvailable && <RouteButton offer={offer} />}
               <span className="sp" />
               <ContactIcons offer={offer} />
             </div>

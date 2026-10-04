@@ -5,7 +5,7 @@ import { offers } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
 import { formatPack, packFromColumns } from '../../offers/pack/pack';
 import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
-import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
+import { buyerGeoVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
 import {
   currentCommentTranslationJoin,
@@ -50,7 +50,7 @@ export async function findVisibleDiscoveryCandidates(
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
     .leftJoin(offerCommentTranslations, currentCommentTranslationJoin(locale))
-    .where(buyerVisibleOffersPredicate(cutoff))
+    .where(buyerGeoVisibleOffersPredicate(cutoff))
     .orderBy(asc(offers.id));
 
   const verifiedBySeller = await findVerifiedPhonesBySellers(db, [...new Set(rows.map((row) => row.seller.id))]);
@@ -90,6 +90,8 @@ export async function findVisibleDiscoveryCandidates(
         ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
+      // Nearby requires complete Location coordinates (geo overlay), so the route capability is always available here.
+      routeAvailable: true,
       ...(coverPhotoId ? { coverPhotoId } : {}),
     };
     const sellerCommentTranslation = projectBuyerCommentTranslation({

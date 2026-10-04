@@ -49,10 +49,11 @@ export async function listOwnedOffers(
       throw new SellerOfferInvariantError('Цена предложения имеет неподдерживаемую валюту.');
     }
     const removal = removals.get(row.cardId);
-    // Mirrors buyerVisibleOffersPredicate: active, confirmed within the validity period, point geo, not removed.
+    // Mirrors buyerVisibleOffersPredicate (stage 5A): active, confirmed within the validity period, not removed.
+    // Location coordinates are no longer part of ordinary Search / buyer Offer page visibility; the point's geo
+    // status stays a separate point characteristic in the Seller workspace.
     const buyerVisible = row.status === 'active'
       && row.lastConfirmedAt > cutoff
-      && row.locationHasGeo
       && !removal;
     return {
       id: row.id,

@@ -181,7 +181,7 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
     }
   });
 
-  it('allows geo-less and phone-less Locations in single and batch proposals while UX1D keeps confirmed Offers buyer-ineligible', async () => {
+  it('allows geo-less and phone-less Locations in single and batch proposals while Nearby keeps requiring coordinates', async () => {
     const owner = await fixture('0364');
     try {
       const firstId = owner.seller.locations[0]!.id;
@@ -214,8 +214,12 @@ describe('#36 Seller Trading Points on PostgreSQL 18', () => {
       const nearby = await findNearbyOffers({ latitude: 43.238949, longitude: 76.889709 }, db, {
         clock: () => NOW, validityPeriodHours: 72, nearbyRadiusMeters: 50_000,
       });
+      // stage 5A: addressed (even geo-less and phone-less) Locations produce ordinary-Search-visible Offers;
+      // Nearby keeps requiring complete Location coordinates. The search query matches only the «Баранина» offers.
+      const searchIds = search.offers.map((offer) => offer.id);
+      const baraninaIds = [singleOfferId, batchConfirmed.items[0]!.resultOffer!.id];
+      for (const offerId of baraninaIds) expect(searchIds).toContain(offerId);
       for (const offerId of createdIds) {
-        expect(search.offers.map((offer) => offer.id)).not.toContain(offerId);
         expect(nearby.offers.map((offer) => offer.id)).not.toContain(offerId);
       }
     } finally {

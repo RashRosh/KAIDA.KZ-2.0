@@ -137,7 +137,12 @@ async function assertContactIcons(card: Locator, names: string[]) {
 
 test('UX1D result card exposes Route and the verified contacts as icons, and Route alone for a point without contacts', async ({ page, request }, testInfo) => {
   let card = await runSearch(page);
-  await expect(page.getByText(/UX1D no geo point/)).toHaveCount(0);
+  // stage 5A: the addressed geo-less point is visible in ordinary Search — contacts work, the route action is
+  // honestly absent (its point has neither contacts nor coordinates, so the action row is empty).
+  const noGeoCard = page.getByRole('article').filter({ hasText: 'UX1D no geo point' });
+  await expect(noGeoCard).toHaveCount(1);
+  await expect(noGeoCard.getByRole('link', { name: /Маршрут до UX1D no geo point/ })).toHaveCount(0);
+  await expect(noGeoCard.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toHaveCount(0);
   // point-contacts-hours: a point without contacts is visible with Route only, never empty or grey contact icons.
   const noPhoneCard = page.getByRole('article').filter({ hasText: 'UX1D no phone point' });
   await expect(noPhoneCard.getByRole('link', { name: 'Маршрут до UX1D no phone point', exact: true })).toBeVisible();
@@ -189,4 +194,12 @@ test('UX1D route action returns the same non-disclosing 404 for geo-less and unk
     expect(serialized).not.toContain(String(destination.latitude));
     expect(serialized).not.toContain(String(destination.longitude));
   }
+});
+
+test('stage 5A: a geo-less Offer opens its buyer Offer page without the route action', async ({ page }) => {
+  await page.goto(`/offers/${noGeoOfferId}`);
+  // The generic buyer visibility opens the page; the geo-dependent route action is honestly absent.
+  await expect(page.getByText('UX1D no geo point')).toBeVisible();
+  await expect(page.getByText('UX1D no geo seller')).toBeVisible();
+  await expect(page.getByRole('link', { name: /Маршрут до / })).toHaveCount(0);
 });

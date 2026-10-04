@@ -55,12 +55,11 @@ describe.sequential('Seller cabinet owned-offers read', () => {
     const read = async (at: Date, locale?: 'ru' | 'kk') => (await listOwnedOffers(userId, { database: db, clock: () => at, validityPeriodHours: 168, locale }))[0]!;
     const buyerSees = async (at: Date) => (await searchOffers('баранина', db, { clock: () => at, validityPeriodHours: 168 })).offers.some((offer) => offer.id === offerId);
 
-    // No public phone and no point geo yet: active, but not shown to buyers.
-    expect((await read(hours(1))).buyerVisible).toBe(false);
-    expect(await buyerSees(hours(1))).toBe(false);
+    // stage 5A: Location identity (an addressed point) is enough for ordinary Search visibility — no phone or
+    // point coordinates required; the geo status stays a separate point characteristic.
+    expect((await read(hours(1))).buyerVisible).toBe(true);
+    expect(await buyerSees(hours(1))).toBe(true);
 
-    await pool.query('UPDATE sellers SET contact_phone_e164=$2 WHERE id=$1', [seller.id, phone]);
-    expect((await read(hours(1))).buyerVisible).toBe(false);
     await pool.query('UPDATE locations SET latitude=43.2, longitude=76.9 WHERE id=$1', [locationId]);
     expect((await read(hours(1))).buyerVisible).toBe(true);
     expect(await buyerSees(hours(1))).toBe(true);
