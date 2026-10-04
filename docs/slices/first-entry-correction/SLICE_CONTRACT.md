@@ -1,6 +1,6 @@
 # First Entry correction — `/welcome` отдельно от Search `/` (stage 6B)
 
-**Status:** DRAFT — ожидает PO/Controller review; реализация не разрешена.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Controller, 2026-10-04; реализация — после записи этого статуса в `main`).
 **Base:** `main` `415a25a` + 6A (`PROJECT_RULES.md` §18.4–18.5, `EXECUTION_PLAN.md` «Текущий repository gate»).
 **Branch:** `slice/first-entry-correction-contract` (contract-only).
 **Plan:** stage 6B (`EXECUTION_PLAN.md`). Следом: 6C Search Home + состояние поиска, 6D inline-язык, stage 6 Rev 3.
