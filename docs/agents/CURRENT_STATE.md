@@ -2,6 +2,12 @@
 
 Короткий операционный snapshot. Перед работой сверить его с фактическими git/GitHub; история хранится в Git/PR/CI, не здесь.
 
+## Current task
+
+**KAIDA Production KB Importer v1 contract** (`docs/slices/production-kb-importer/SLICE_CONTRACT.md`) is prepared on
+`slice/production-kb-importer-contract` for Controller review only. Do not implement migrations, code, tests or vendored package data until
+`APPROVED — IMPLEMENTATION AUTHORIZED`.
+
 ## Verified base
 
 - Проверено: 2026-10-05 (6-я сессия).

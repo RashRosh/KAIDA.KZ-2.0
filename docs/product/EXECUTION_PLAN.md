@@ -2,6 +2,16 @@
 
 Этот документ является **единственным каноническим источником текущей очередности работ**.
 
+## Current contract review
+
+KAIDA Production KB Importer v1 is in contract review only:
+`docs/slices/production-kb-importer/SLICE_CONTRACT.md` on branch `slice/production-kb-importer-contract`.
+
+Base: `1c06115b27978a3b9b4e80668a9b8ff1748f0eba` (`v0.0.51-search-sort-rev3`, merged-main `KAIDA verify`
+run `37238019433` SUCCESS).
+
+Do not implement migrations, code, tests or vendored package data until `APPROVED — IMPLEMENTATION AUTHORIZED`.
+
 Он отвечает только на четыре вопроса:
 
 1. какой verified checkpoint последний;
