@@ -2,6 +2,20 @@
 
 **Status:** STRATEGY BACKLOG — NOT IMPLEMENTATION AUTHORIZATION
 
+Этот документ не меняет порядок и gates `EXECUTION_PLAN.md` и не конкурирует с Feature Map / Slice Contracts.
+
+**Mapping на существующий Demand workstream** (не новый параллельный поток; owning implementation workstream — Demand, `FEATURE_MAP.md` D0–D6, S15C, Issue #55):
+
+| Growth | Demand |
+|---|---|
+| G3 Demand Capture | S15C / D0 |
+| G4 «Я хочу это» | D2 / explicit waiting intent |
+| G5 Demand Aggregation | D1 / D3 |
+| G6 Buyer Return | D2 / D5 |
+| G7 Seller Demand Signal | D3 |
+
+G0–G2 (go-to-market, seeding, QR) и G8–G10 (Bounty, Demand Radar, SEO) этим mapping не покрываются и остаются strategy backlog до отдельных решений PO.
+
 ## 1. Purpose
 
 KAIDA.KZ has a two-sided cold-start problem. Buyer acquisition is useless if searches regularly return nothing; seller acquisition is weak if sellers see no buyer demand.
