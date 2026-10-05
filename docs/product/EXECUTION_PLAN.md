@@ -4,7 +4,7 @@
 
 ## Verified base и ближайшая последовательность
 
-- `main`: `ff8f08e3644af216dc2833b358610e213f7a1829`; checkpoint `v0.0.55-card-editor-suggestion-scroll` (PR #101; merged-main run `37347918337` SUCCESS); предыдущий `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
+- `main`: `9383150d08943bb50de1d915193878352650c446`; checkpoint `v0.0.56-search-known-zero` (S15B-2, PR #105; merged-main run `37370761534` SUCCESS); предыдущий `v0.0.55-card-editor-suggestion-scroll` (PR #101, run `37347918337`); `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
   merged-main `KAIDA verify` run `37326497017` SUCCESS (rerun; первый запуск cancelled инфраструктурой). Предыдущие: `v0.0.53` (run `37305378999`), `v0.0.52` (run `37293540946`).
 - **Production KB Importer v1 — CLOSED.** Production KB v1 — нормальная runtime-база KAIDA: 682 Products, 210 aliases,
   35 categories в KAIDA PostgreSQL; runtime Product UUID / Offer FK сохранены; внешней KB/corpus-зависимости в runtime нет.
@@ -15,7 +15,8 @@
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
 2. ~~Catalog-backed Seller → Buyer runtime loop~~ — **CLOSED** (`v0.0.53`, PR #93; integration/user-flow proof, production-код не менялся)
    (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`).
-   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **NEXT: S15B-2 — Search state: resolved Product + known-zero** (`docs/slices/s15b2-known-zero/SLICE_CONTRACT.md`, DRAFT); дальше S15B-3 (buyer autocomplete + `product_id`), остальное после аудита (S15B-4 — решение PO позже).
+   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **S15B-2 — Search state: resolved Product + known-zero — CLOSED** (`v0.0.56`, `docs/slices/s15b2-known-zero/SLICE_CONTRACT.md`). **NEXT: S15B-3** (buyer autocomplete + `product_id`); остальное после аудита (S15B-4 — решение PO позже).
+   **Deferred UX (backlog note, не контракт, без Issue):** *Search sorting control UX refresh* — после основных S15B semantic slices и до S15C. Будущее поведение: убрать иконку фильтра; под Search один current-sort control с критериями «По цене» / «По расстоянию» / «По актуальности»; dropdown выбирает критерий; tap по текущему критерию/стрелке меняет direction; при 0 Offers control скрыт; слово «свежее» не использовать; backend sort/direction/ranking не меняются.
 3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
 4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
 5. Начать production-like накопление demand-данных.

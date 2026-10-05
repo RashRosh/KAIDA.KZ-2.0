@@ -1,6 +1,6 @@
 # S15B-2 — Search state: resolved Product + known-zero
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-05). `resolvedProduct.name` берётся из существующего resolver как есть; без новой locale/domain-логики и без улучшения display-name.
+**Status:** CLOSED. Checkpoint `v0.0.56-search-known-zero`; PR #105; `main` `9383150d08943bb50de1d915193878352650c446`; merged-main `KAIDA verify` run `37370761534` SUCCESS; manual acceptance PASS (implementation `347a631`).
 **Base:** `main` `4bf3cbe9eb32ff76e349829ba82259de485cf48b` (checkpoint `v0.0.55-card-editor-suggestion-scroll`).
 **Plan:** второй vertical slice S15B (`EXECUTION_PLAN.md`, `SEARCH_SYSTEM_SPEC_v0.1.md` §17.2, §20 как target source). Buyer autocomplete — следующий отдельный slice (S15B-3), здесь не начинается.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5); казахский текст — в каталоге строк.
