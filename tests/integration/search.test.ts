@@ -14,6 +14,7 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
     const result = await searchOffers('баранина', connection.db);
     expect(result).toEqual({
       query: 'баранина',
+      resolvedProduct: { id: seedIds.lambProduct, name: 'Баранина' },
       offers: [{
         id: seedIds.lambOffer,
         // offer-actuality: the seed confirms the offer when the test database is prepared.

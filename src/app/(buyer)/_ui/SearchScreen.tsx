@@ -336,7 +336,7 @@ export function SearchScreen() {
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
-      ? visibleOffers.length === 0 ? t('search.empty') : offerCount(locale, visibleOffers.length)
+      ? visibleOffers.length === 0 ? t(shown?.resolvedProduct ? 'search.emptyKnown' : 'search.empty') : offerCount(locale, visibleOffers.length)
       : '';
 
   return (

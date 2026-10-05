@@ -76,6 +76,8 @@ export const searchOfferSchema = z.object({
 
 export const searchResponseSchema = z.object({
   query: z.string(),
+  // S15B-2: the catalog Product the query resolved to (exact canonical / localized name / alias), else null.
+  resolvedProduct: z.object({ id: z.uuid(), name: z.string() }).nullable().optional(),
   offers: z.array(searchOfferSchema),
 });
 

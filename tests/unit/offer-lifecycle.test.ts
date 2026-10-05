@@ -47,7 +47,7 @@ describe('S1 offer lifecycle', () => {
 
     const result = await searchOffers('  Баранина  ', database, { clock, validityPeriodHours: 168 });
 
-    expect(result).toEqual({ query: 'Баранина', offers: [] });
+    expect(result).toEqual({ query: 'Баранина', resolvedProduct: PRODUCT, offers: [] });
     expect(clock).toHaveBeenCalledTimes(1);
     expect(mockedResolveProduct).toHaveBeenCalledTimes(1);
     expect(mockedResolveProduct).toHaveBeenCalledWith(database, 'Баранина');

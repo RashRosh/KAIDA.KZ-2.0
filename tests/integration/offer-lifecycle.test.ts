@@ -82,11 +82,11 @@ describe('S1 Offer Lifecycle against PostgreSQL 18', () => {
 
   it('returns an ordinary empty result for an expired Offer', async () => {
     await setLifecycle('active', new Date('2026-09-04T12:00:00.000Z'));
-    await expect(searchFixture()).resolves.toEqual({ query: PRODUCT_NAME, offers: [] });
+    await expect(searchFixture()).resolves.toEqual({ query: PRODUCT_NAME, resolvedProduct: { id: PRODUCT_ID, name: PRODUCT_NAME }, offers: [] });
   });
 
   it('returns an ordinary empty result for an inactive Offer', async () => {
     await setLifecycle('inactive', new Date('2026-09-11T11:00:00.000Z'));
-    await expect(searchFixture()).resolves.toEqual({ query: PRODUCT_NAME, offers: [] });
+    await expect(searchFixture()).resolves.toEqual({ query: PRODUCT_NAME, resolvedProduct: { id: PRODUCT_ID, name: PRODUCT_NAME }, offers: [] });
   });
 });
