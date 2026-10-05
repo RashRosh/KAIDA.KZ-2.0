@@ -5,20 +5,19 @@
 ## Verified base
 
 - Проверено: 2026-10-05.
-- `origin/main`: `c0d1749ba352b662299708e0ce466c2916bababa`; checkpoint `v0.0.53-catalog-runtime-loop` (PR #93);
+- `origin/main`: `dba8cd8` (docs после `c0d1749`); checkpoint `v0.0.53-catalog-runtime-loop` (PR #93);
   merged-main `KAIDA verify` run `37305378999` SUCCESS. Manual acceptance PASS.
 - Production KB v1 (682 / 210 / 35) — runtime-база; runtime loop Seller → Buyer доказан тестами (production-код не менялся).
   E2E-БД ставит KB через global setup существующим импортёром; пакет защищён `.gitattributes` (`-text`).
 
 ## Current task
 
-Нет активного slice. Идёт docs-reconciliation Issues (`docs/issue-reconciliation`, не PR-ится до rebase на актуальный main).
+DRAFT-контракт S15B-1 (`docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`) на ревью. Production-код не начат.
 
 ## Next action
 
-1. Docs-only PR reconciliation Issues (после rebase).
-2. S15B малыми vertical slices после аудита кода; первый кандидат — catalog suggestion relevance / reachability
-   (подсказки: алфавит, top-5; «бар» не доводит до «Баранина»). S15B ещё не начата.
+1. Review/approval S15B-1; затем реализация (только ранжирование подсказок каталога).
+2. Остальной S15B малыми vertical slices после аудита кода (buyer autocomplete — отдельный slice).
 3. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
