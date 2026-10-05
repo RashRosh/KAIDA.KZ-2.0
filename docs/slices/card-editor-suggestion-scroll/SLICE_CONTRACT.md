@@ -1,6 +1,6 @@
 # Card editor — mobile visibility of catalog suggestions
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-05; одобрено с одним уточнением touch-критерия — внесено). Реализация начинается после закрытия S15B-1.
+**Status:** CLOSED. Checkpoint `v0.0.55-card-editor-suggestion-scroll`; PR #101; `main` `ff8f08e3644af216dc2833b358610e213f7a1829`; merged-main `KAIDA verify` run `37347918337` SUCCESS; manual acceptance PASS (implementation `b70b530`).
 **Base:** `main` (checkpoint `v0.0.53-catalog-runtime-loop`). Не зависит от S15B-1 (другие файлы), но реализуется после его закрытия.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
 

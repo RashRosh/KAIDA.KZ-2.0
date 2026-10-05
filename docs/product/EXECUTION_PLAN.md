@@ -4,7 +4,7 @@
 
 ## Verified base и ближайшая последовательность
 
-- `main`: `b3432e4219a412ddb82ddc1afb8f03ef1f93c192`; checkpoint `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97);
+- `main`: `ff8f08e3644af216dc2833b358610e213f7a1829`; checkpoint `v0.0.55-card-editor-suggestion-scroll` (PR #101; merged-main run `37347918337` SUCCESS); предыдущий `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
   merged-main `KAIDA verify` run `37326497017` SUCCESS (rerun; первый запуск cancelled инфраструктурой). Предыдущие: `v0.0.53` (run `37305378999`), `v0.0.52` (run `37293540946`).
 - **Production KB Importer v1 — CLOSED.** Production KB v1 — нормальная runtime-база KAIDA: 682 Products, 210 aliases,
   35 categories в KAIDA PostgreSQL; runtime Product UUID / Offer FK сохранены; внешней KB/corpus-зависимости в runtime нет.
@@ -15,7 +15,7 @@
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
 2. ~~Catalog-backed Seller → Buyer runtime loop~~ — **CLOSED** (`v0.0.53`, PR #93; integration/user-flow proof, production-код не менялся)
    (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`).
-   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). **NEXT:** узкий UX-slice «Card editor — mobile visibility of catalog suggestions» (`docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`, APPROVED); дальше остальной S15B малыми slices (S15B-2 не начата).
+   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **NEXT:** остальной S15B малыми slices после аудита кода (S15B-2 не начата).
 3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
 4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
 5. Начать production-like накопление demand-данных.
@@ -57,7 +57,7 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.54-catalog-suggestion-relevance`; checkpoint commit `b3432e4`; merged-main CI run `37326497017` green; предыдущие `v0.0.53-catalog-runtime-loop` (`c0d1749`), `v0.0.52-production-kb-importer-v1` (`5b21710`);
+- tag: `v0.0.55-card-editor-suggestion-scroll`; checkpoint commit `ff8f08e`; merged-main CI run `37347918337` green; предыдущие `v0.0.54-catalog-suggestion-relevance` (`b3432e4`), `v0.0.53-catalog-runtime-loop` (`c0d1749`), `v0.0.52-production-kb-importer-v1` (`5b21710`);
 - до него закрыты: Stage 6 Rev 3 (`v0.0.51-search-sort-rev3`), 6B–6D (`v0.0.48`–`v0.0.50`), 5A
   (`v0.0.47-search-visibility-without-coordinates`), `v0.0.46-search-sort-distance` и более ранние checkpoints;
 - **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
