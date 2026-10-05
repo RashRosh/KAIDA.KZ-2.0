@@ -46,6 +46,7 @@
 - target product sources для будущих contracts → `docs/product/SEARCH_SYSTEM_SPEC_v0.1.md`,
   `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` и
   `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`;
+- growth / marketplace-liquidity strategy → `docs/product/GROWTH_STRATEGY.md`: **STRATEGY BACKLOG — NOT IMPLEMENTATION AUTHORIZATION**; не меняет execution order и gates этого файла; Demand workstream (S15C / D0–D5) остаётся owning implementation workstream для G3–G7;
 - commercial semantics → `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
 - Backoffice planning/decomposition → `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
 - целевой UX продавца → `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` + `SELLER_AI_FIRST_DESIGN_REVISION_1.md` + макет

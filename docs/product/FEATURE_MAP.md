@@ -327,7 +327,7 @@ collisions, idempotency, rollback/correction и пакетный acceptance repo
 
 ### KAIDA Demand
 
-Источник: `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`; owning backlog — Issue #55. Demand показывает продавцу
+Источник: `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`; owning backlog — Issue #55. Growth-механизмы G3–G7 из `docs/product/GROWTH_STRATEGY.md` реализуются через этот же Demand workstream (S15C / D0–D5); соответствие определено в Growth Strategy. Demand показывает продавцу
 агрегированные opportunities, а не individual buyer events. Demand не меняет organic ranking и не пишет Seller changes
 мимо `SellerChangeSet`.
 
