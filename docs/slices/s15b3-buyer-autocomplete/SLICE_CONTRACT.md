@@ -1,6 +1,7 @@
 # S15B-3 — Buyer autocomplete + search by selected Product (`product_id`)
 
-**Status:** DRAFT — PO APPROVAL REQUIRED. Do not implement until `APPROVED — IMPLEMENTATION AUTHORIZED`.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-06).
+**PO decisions:** (1) buyer-подсказки используют тот же визуальный/interaction-паттерн, что seller `CardEditor` (dropdown под input, общий стиль списка, combobox/listbox); второго паттерна нет. (2) Search Home: при touch-сеансе и первом открытии непустого списка один раз прокрутить блок ближе к верху (как `card-editor-suggestion-scroll`, без высоты клавиатуры и `visualViewport`, без повторов на символ); Search Results автопрокрутку не получает, а если там подсказки перекрываются клавиатурой — STOP и отдельный отчёт. (3) `q` обязателен вместе с `product_id` (q = display text / URL / back-state, `product_id` = canonical identity). (4) Если `product_id` передан, Search идёт ТОЛЬКО по этому Product.id: без silent fallback к text/raw при несуществующем id или 0 Offers; не-uuid → 400, валидный несуществующий uuid → 200 `resolvedProduct: null`, `offers: []`; text Search только когда `product_id` не передан.
 **Base:** `main` после `v0.0.56-search-known-zero`.
 **Plan:** третий vertical slice S15B (`EXECUTION_PLAN.md`); вход — audit S15B (CURRENT / TARGET / GAP), нового полного аудита нет. `SEARCH_SYSTEM_SPEC_v0.1.md` §6, §7A, §19 — target source.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
