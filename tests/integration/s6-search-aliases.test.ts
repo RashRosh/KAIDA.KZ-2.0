@@ -33,7 +33,7 @@ describe.sequential('S6 Search through Catalog aliases on PostgreSQL 18', () => 
 
       expect((await searchOffers('S6 точно неизвестно', connection.db)).offers).toEqual([]);
       const ambiguous = await searchOffers('S6 спорный поиск', connection.db);
-      expect(ambiguous).toEqual({ query: 'S6 спорный поиск', offers: [] });
+      expect(ambiguous).toEqual({ query: 'S6 спорный поиск', resolvedProduct: null, offers: [] });
     } finally {
       await connection.pool.query('DELETE FROM product_aliases WHERE id IN ($1,$2)', [aliasA, aliasB]);
       await connection.pool.query('DELETE FROM products WHERE id IN ($1,$2)', [productA, productB]);
@@ -63,6 +63,6 @@ describe.sequential('S6 Search through Catalog aliases on PostgreSQL 18', () => 
   });
 
   it.each(['%', '_', "' OR TRUE --"] )('keeps resolver lookup parameterized for %s', async (query) => {
-    await expect(searchOffers(query, connection.db)).resolves.toEqual({ query, offers: [] });
+    await expect(searchOffers(query, connection.db)).resolves.toEqual({ query, resolvedProduct: null, offers: [] });
   });
 });

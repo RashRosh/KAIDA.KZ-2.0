@@ -46,7 +46,8 @@ export async function searchOffers(
     productId: resolution.status === 'resolved' ? resolution.product.id : null,
     words: queryWords(query),
   };
-  if (match.productId === null && match.words.length === 0) return { query, offers: [] };
+  const resolvedProduct = resolution.status === 'resolved' ? { id: resolution.product.id, name: resolution.product.name } : null;
+  if (match.productId === null && match.words.length === 0) return { query, resolvedProduct, offers: [] };
 
   const { locale, commentTranslationEnabled } = lifecycleOptions;
   const candidates = locale === undefined && commentTranslationEnabled === undefined
@@ -67,5 +68,5 @@ export async function searchOffers(
       ? { distanceMeters: rankingDistanceMeters }
       : {}),
   }));
-  return { query, offers };
+  return { query, resolvedProduct, offers };
 }
