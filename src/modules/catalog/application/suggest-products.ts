@@ -1,12 +1,14 @@
 import { getDatabase, type Database } from '../../../db/client';
-import { offerTitleSearchText, queryWords, titleMatchesQuery } from '../../offers/title/offer-title';
-import { findCatalogNamesContaining } from '../infrastructure/products.repository';
+import { queryWords } from '../../offers/title/offer-title';
+import { findCatalogSuggestionCandidates } from '../infrastructure/products.repository';
+import { rankSuggestions, type ProductSuggestion } from './rank-suggestions';
 
 export const SUGGESTION_LIMIT = 5;
 
-export type ProductSuggestion = { id: string; name: string };
+export type { ProductSuggestion };
 
-// seller-showcase-editor «Name · mixed input»: catalog products whose name or alias has every typed word as a word start.
+// seller-showcase-editor «Name · mixed input»: catalog products whose name or alias has every typed word as a word start,
+// ordered by match relevance (S15B-1) — never by an alphabetical cut before ranking.
 export async function suggestCatalogProducts(
   database: Pick<Database, 'execute'> = getDatabase(),
   input: string,
@@ -14,14 +16,5 @@ export async function suggestCatalogProducts(
 ): Promise<ProductSuggestion[]> {
   const words = queryWords(input);
   if (words.length === 0) return [];
-  const probe = words.reduce((longest, word) => word.length > longest.length ? word : longest);
-  const rows = await findCatalogNamesContaining(database, probe, locale, 100);
-  const suggestions = new Map<string, ProductSuggestion>();
-  for (const row of rows) {
-    if (suggestions.size >= SUGGESTION_LIMIT) break;
-    if (!suggestions.has(row.id) && titleMatchesQuery(offerTitleSearchText(row.matched), words)) {
-      suggestions.set(row.id, { id: row.id, name: row.name });
-    }
-  }
-  return [...suggestions.values()];
+  return rankSuggestions(await findCatalogSuggestionCandidates(database, words, locale), words, SUGGESTION_LIMIT);
 }

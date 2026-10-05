@@ -89,3 +89,33 @@ test('a non-seed Production KB Product chosen from suggestions is published and 
     await cleanup(phone);
   }
 });
+
+// S15B-1: natural typing reaches «Баранина» in the suggestions, first for «баран», and choosing it links the card.
+test('typing баран and бар shows Баранина among the catalog suggestions and choosing it works', async ({ page }, testInfo) => {
+  const tag = testInfo.project.name;
+  const phone = `+7700007${tag === 'mobile' ? '5' : '6'}020`;
+  try {
+    await prepareSeller(page, phone, `Лавка ${tag}`);
+    const editor = await openNewCard(page);
+    const name = editor.getByRole('combobox', { name: 'Название товара' });
+    await name.fill('баран');
+    const options = editor.getByRole('option');
+    await expect(options.first()).toHaveText('Баранина');
+    await expect(options).toHaveCount(5);
+    await name.fill('бар');
+    await expect(editor.getByRole('option', { name: 'Баранина', exact: true })).toBeVisible();
+    await editor.getByRole('option', { name: 'Баранина', exact: true }).click();
+    await expect(name).toHaveValue('Баранина');
+    await fillOfferFields(page, { price: '4000', unit: 'kg' });
+    await offerEditor(page).getByRole('button', { name: 'Проверить и опубликовать' }).click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\//);
+    await page.getByRole('button', { name: publishButton }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Опубликовано. Карточка уже видна покупателям' })).toBeVisible();
+    const linked = await withPool((pool) => pool.query(
+      `SELECT p.name FROM offers o JOIN products p ON p.id = o.product_id
+       WHERE o.seller_id IN (SELECT id FROM sellers WHERE owner_user_id = (SELECT id FROM users WHERE phone_e164=$1))`, [phone]));
+    expect(linked.rows).toEqual([{ name: 'Баранина' }]);
+  } finally {
+    await cleanup(phone);
+  }
+});

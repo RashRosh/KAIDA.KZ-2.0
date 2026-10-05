@@ -98,7 +98,7 @@ test('a new card in two of three points with an own price is published after the
 
     // A catalog suggestion links the card; the Seller adds their own words after it.
     const name = editor.getByRole('combobox', { name: 'Название товара' });
-    await name.fill('баранина');
+    await name.fill('бар');
     await editor.getByRole('option', { name: 'Баранина', exact: true }).click();
     await name.fill('Баранина, лопатка');
     await fillOfferFields(page, { price: '5000' });
