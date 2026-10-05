@@ -1,6 +1,6 @@
 # S15B-2 — Search state: resolved Product + known-zero
 
-**Status:** DRAFT — PO APPROVAL REQUIRED. Do not implement until `APPROVED — IMPLEMENTATION AUTHORIZED`.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-05). `resolvedProduct.name` берётся из существующего resolver как есть; без новой locale/domain-логики и без улучшения display-name.
 **Base:** `main` `4bf3cbe9eb32ff76e349829ba82259de485cf48b` (checkpoint `v0.0.55-card-editor-suggestion-scroll`).
 **Plan:** второй vertical slice S15B (`EXECUTION_PLAN.md`, `SEARCH_SYSTEM_SPEC_v0.1.md` §17.2, §20 как target source). Buyer autocomplete — следующий отдельный slice (S15B-3), здесь не начинается.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5); казахский текст — в каталоге строк.
