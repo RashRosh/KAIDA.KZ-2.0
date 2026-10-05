@@ -5,24 +5,21 @@
 ## Verified base
 
 - Проверено: 2026-10-05.
-- `origin/main`: `5b2171035c058f8337671b30222c7a247cb33b79`; checkpoint `v0.0.52-production-kb-importer-v1`;
-  merged-main `KAIDA verify` run `37293540946` SUCCESS.
-- Production KB Importer v1 — CLOSED. Runtime-каталог KAIDA PostgreSQL: 682 Products, 210 aliases, 35 categories;
-  UUID Product / FK Offer сохранены; внешних KB/corpus зависимостей нет.
-- Stage 6 Rev 3 закрыт на `v0.0.51-search-sort-rev3`.
+- `origin/main`: `c0d1749ba352b662299708e0ce466c2916bababa`; checkpoint `v0.0.53-catalog-runtime-loop` (PR #93);
+  merged-main `KAIDA verify` run `37305378999` SUCCESS. Manual acceptance PASS.
+- Production KB v1 (682 / 210 / 35) — runtime-база; runtime loop Seller → Buyer доказан тестами (production-код не менялся).
+  E2E-БД ставит KB через global setup существующим импортёром; пакет защищён `.gitattributes` (`-text`).
 
 ## Current task
 
-Docs-нормализация после Production KB v1 (ветка `docs/replan-after-production-kb-v1`) и подготовка DRAFT-контракта
-**Catalog-backed Seller → Buyer runtime loop** (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`). Это
-integration/user-flow proof, не импорт каталога и не S15B. Реализация не начата и не авторизована.
+Нет активного slice. Идёт docs-reconciliation Issues (`docs/issue-reconciliation`, не PR-ится до rebase на актуальный main).
 
 ## Next action
 
-1. Controller/PO review docs-нормализации и DRAFT-контракта runtime loop.
-2. После `APPROVED — IMPLEMENTATION AUTHORIZED` — реализовать только реально найденный gap (или минимальное
-   regression/E2E/manual proof, если путь уже работает).
-3. Далее: S15B малыми vertical slices после аудита кода → S15C/D0 → накопление demand → AI Input / AI-модерация.
+1. Docs-only PR reconciliation Issues (после rebase).
+2. S15B малыми vertical slices после аудита кода; первый кандидат — catalog suggestion relevance / reachability
+   (подсказки: алфавит, top-5; «бар» не доводит до «Баранина»). S15B ещё не начата.
+3. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
 
