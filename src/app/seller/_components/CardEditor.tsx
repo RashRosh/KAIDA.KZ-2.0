@@ -132,6 +132,11 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const requestCloseRef = useRef<() => void>(() => undefined);
   const busyRef = useRef(false);
+  // Card editor suggestion scroll: the title field block, whether this field session began with a touch, and whether
+  // the current suggestion session has already scrolled it into view.
+  const titleFieldRef = useRef<HTMLDivElement>(null);
+  const titleTouchRef = useRef(false);
+  const titleScrolledRef = useRef(false);
   const [pointReturn, setPointReturn] = useState<{ focusKey: string; overlay: 'points' | null; n: number } | null>(null);
 
   const isCreate = mode.kind === 'create';
@@ -151,6 +156,15 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const cardLocationIds = new Set(cardOffers.map((offer) => offer.location.id));
   // Options are chosen on mousedown, so choosing never blurs the field first.
   const suggestOpen = titleFocused && !suggestDismissed && suggestions.length > 0;
+
+  // On a touch session the on-screen keyboard hides the list: when it opens, bring the field block near the top of the
+  // scroll area once; a new opening after the list closed scrolls again. Mouse and keyboard focus never scroll.
+  useEffect(() => {
+    if (!suggestOpen) { titleScrolledRef.current = false; return; }
+    if (titleScrolledRef.current || !titleTouchRef.current) return;
+    titleScrolledRef.current = true;
+    titleFieldRef.current?.scrollIntoView({ block: 'start' });
+  }, [suggestOpen]);
 
   useEffect(() => {
     if (initialFocus !== 'photos' || isPoint) return;
@@ -622,7 +636,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               <PhotoField tiles={photos} setTiles={(next) => { setPhotos(next); setPhotoBlock(null); setFailure(null); }} disabled={disabled} blockedMessage={photoBlock ?? undefined} addInputId={`${ids}-photo-add`} />
             </div>
 
-            <div className="fld" style={{ position: 'relative' }}>
+            <div ref={titleFieldRef} className="fld" style={{ position: 'relative', scrollMarginTop: 12 }}>
               <label htmlFor={`${ids}-title`}>{t('card.name')}</label>
               <input
                 id={`${ids}-title`}
@@ -630,8 +644,9 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                 value={values.title}
                 onChange={(event) => setTitle(event.target.value)}
                 onKeyDown={onTitleKey}
-                onBlur={() => setTitleFocused(false)}
+                onBlur={() => { setTitleFocused(false); titleTouchRef.current = false; }}
                 onFocus={() => setTitleFocused(true)}
+                onPointerDown={(event) => { titleTouchRef.current = event.pointerType === 'touch'; }}
                 placeholder={t('card.namePlaceholder')}
                 maxLength={80}
                 autoComplete="off"
