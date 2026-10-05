@@ -16,7 +16,7 @@
 
 ## Next action
 
-1. Остальной S15B (S15B-2…) малыми vertical slices после аудита кода; buyer autocomplete — отдельный slice; не начата.
+1. S15B-2 (`docs/slices/s15b2-known-zero/SLICE_CONTRACT.md`, DRAFT на approval); затем S15B-3 buyer autocomplete + `product_id`; S15B-4 — решение PO позже. Реализация не начата.
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints

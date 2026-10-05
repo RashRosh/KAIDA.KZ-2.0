@@ -15,7 +15,7 @@
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
 2. ~~Catalog-backed Seller → Buyer runtime loop~~ — **CLOSED** (`v0.0.53`, PR #93; integration/user-flow proof, production-код не менялся)
    (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`).
-   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **NEXT:** остальной S15B малыми slices после аудита кода (S15B-2 не начата).
+   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **NEXT: S15B-2 — Search state: resolved Product + known-zero** (`docs/slices/s15b2-known-zero/SLICE_CONTRACT.md`, DRAFT); дальше S15B-3 (buyer autocomplete + `product_id`), остальное после аудита (S15B-4 — решение PO позже).
 3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
 4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
 5. Начать production-like накопление demand-данных.
