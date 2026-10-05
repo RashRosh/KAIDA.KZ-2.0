@@ -2,45 +2,36 @@
 
 Короткий операционный snapshot. Перед работой сверить его с фактическими git/GitHub; история хранится в Git/PR/CI, не здесь.
 
-## Current task
-
-**KAIDA Production KB Importer v1 contract** (`docs/slices/production-kb-importer/SLICE_CONTRACT.md`) is prepared on
-`slice/production-kb-importer-contract` for Controller review only. Do not implement migrations, code, tests or vendored package data until
-`APPROVED — IMPLEMENTATION AUTHORIZED`.
-
 ## Verified base
 
-- Проверено: 2026-10-05 (6-я сессия).
-- `origin/main`: `45859bc` (контракт Stage 6 Rev 3 слит, PR #89). Последний checkpoint-тег: `v0.0.50-inline-language`.
+- Проверено: 2026-10-05.
+- `origin/main`: `5b2171035c058f8337671b30222c7a247cb33b79`; checkpoint `v0.0.52-production-kb-importer-v1`;
+  merged-main `KAIDA verify` run `37293540946` SUCCESS.
+- Production KB Importer v1 — CLOSED. Runtime-каталог KAIDA PostgreSQL: 682 Products, 210 aliases, 35 categories;
+  UUID Product / FK Offer сохранены; внешних KB/corpus зависимостей нет.
+- Stage 6 Rev 3 закрыт на `v0.0.51-search-sort-rev3`.
 
 ## Current task
 
-**Stage 6 Rev 3 — explicit Search sorting** (`docs/slices/search-sort-rev3/SLICE_CONTRACT.md`, APPROVED) — реализован на
-ветке `slice/search-sort-rev3` (PR #90): popover из трёх критериев (`Расстояние / Цена / Актуальность`) с направлением вместо
-листа «Фильтры» и радиуса; выбранный критерий — первичный порядок, без tier и весов; цена — номинальная KZT;
-`sort=distance` требует координат (иначе `400`), геолокация только по явному выбору «Расстояние», при отказе —
-актуальность и краткое сообщение; публичный API `sort`/`direction`; состояние последнего поиска вкладки — запрос +
-sort + direction. Manual acceptance **PASS**, branch CI green. После green merged-main CI создаётся annotated tag
-`v0.0.51-search-sort-rev3` на merge-коммите; до создания тег не считать существующим.
-Дальше 6F/6G (Query Log, динамические чипы) — контракт ещё не подготовлен, реализацию не начинать без решения PO.
-
-## Verification (local)
-
-Unit 343/343, integration 204/204, typecheck и eslint чистые; новые E2E (mobile RU, `search-sort-rev3`) и обновлённые
-`s9`/6C-сценарии зелёные; полный E2E зелёный после обновления проверок, утверждавших старый порядок, лист и подпись.
-Устаревшие unit-тесты Stage 5 (веса, оценки, радиус) удалены.
+Docs-нормализация после Production KB v1 (ветка `docs/replan-after-production-kb-v1`) и подготовка DRAFT-контракта
+**Catalog-backed Seller → Buyer runtime loop** (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`). Это
+integration/user-flow proof, не импорт каталога и не S15B. Реализация не начата и не авторизована.
 
 ## Next action
 
-1. Merged-main CI → tag `v0.0.51-search-sort-rev3`.
-2. 6F: подготовить Slice Contract, ждать утверждения.
+1. Controller/PO review docs-нормализации и DRAFT-контракта runtime loop.
+2. После `APPROVED — IMPLEMENTATION AUTHORIZED` — реализовать только реально найденный gap (или минимальное
+   regression/E2E/manual proof, если путь уже работает).
+3. Далее: S15B малыми vertical slices после аудита кода → S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
 
+- Старые 6F и 6G **не авторизованы** в прежнем виде: 6F снята до реализации (цель — в S15C/D0 после S15B), 6G
+  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15B, S15C, 6F/6G, AI.
+- Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
 - Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`.
 - `next-env.d.ts` перегенерируется next dev/build — в коммит не входит.
 - Граница доставки: mobile + русский (`PROJECT_RULES.md` §18.5).
 - Mimosa pre-commit scanner может ложно блокировать новые test-файлы с `pool.query($n)`; не менять код ради него.
 - Issue #12 остаётся OPEN.
-- Неиспользуемые ключи `more.languageTitle`, `more.languageNote`, `more.done` и ключи листа «Фильтры»/радиуса остаются в каталогах.
 - Nearby (S11) использует `compareActualityTier` и `distanceMetersForRanking` из модуля ранжирования Search — не менять их поведение.

@@ -1,6 +1,7 @@
 # KAIDA Production KB Importer v1
 
-**Status:** DRAFT — CONTROLLER REVIEW REQUIRED. Do not implement until `APPROVED — IMPLEMENTATION AUTHORIZED`.
+**Status:** CLOSED.
+**Closing evidence:** checkpoint `v0.0.52-production-kb-importer-v1`; `main` `5b2171035c058f8337671b30222c7a247cb33b79`; merged-main `KAIDA verify` run `37293540946` SUCCESS; manual acceptance PASS. Contract text below is the historical record and is not redesigned.
 **Base:** `main` `1c06115b27978a3b9b4e80668a9b8ff1748f0eba` (`v0.0.51-search-sort-rev3`, merged-main `KAIDA verify` run `37238019433` SUCCESS).
 **Branch:** `slice/production-kb-importer-contract` (contract-only).
 **Source package:** `RashRosh/kaida-product-corpus` checkpoint `v0.2.0-production-kb-export-v1`, target `39db21ab57bd1c30a5265633ad73c51f56f9e9b4`, package `kaida-kb-v1`, schema `1`.

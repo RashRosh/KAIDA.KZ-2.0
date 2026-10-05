@@ -62,8 +62,8 @@ Parent sources для будущих cross-cutting workstreams:
 | S12 | Seller Input | Один Change Set содержит несколько Change Items | S5 | MVP | CLOSED |
 | S13 | Interests | Buyer отмечает Product как интересующий | S2, S6 | MVP | CLOSED |
 | S14 | Discovery | Buyer видит Offers по явно указанным интересам | S7, S13 | MVP | PLANNED |
-| S15A | Catalog bootstrap | Утверждённое RU-ядро стартового каталога проходит staging, merge и контролируемый import без дублей | S6 + PO-approved rows | Stage 10 | PLANNED |
-| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A, S7, S9 | Stage 10 | PLANNED |
+| S15A | Catalog bootstrap | Утверждённое RU-ядро стартового каталога проходит staging, merge и контролируемый import без дублей | S6 + PO-approved rows | Stage 10 | CLOSED (Production KB v1, `v0.0.52-production-kb-importer-v1`) |
+| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A (установленная Production KB v1), S7, S9; идёт после Catalog-backed Seller → Buyer runtime loop | Stage 10 | PLANNED |
 | S15C | Demand Data Foundation | KAIDA собирает conscious canonical/unresolved/zero-result demand и privacy-safe internal aggregates | S15B | Stage 10 | PLANNED |
 | S16 | Operations | Оператор может отключить ошибочный Offer/Seller; первая часть — снятие карточки по факту публикации | S7 | Этап 1 (снятие) / MVP | PLANNED |
 | S17 | AI Input | Свободный текст предлагает Seller Change Set | S12 | После этапа 1 | PLANNED |
@@ -227,22 +227,24 @@ https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4.
    Выбор конкретного фото (кадр AI-B05) — не первый шаг жалобы: он появляется только после причины «Фото не
    соответствует товару» и только если у карточки больше одного фото; при одном фото шаг пропускается (решение
    2026-09-26). Нужна правка кадров дизайнером.
-10. **Название товара — свободное до формирования каталога** (решение 2026-09-25). Продавец пишет название своими
-    словами, карточка публикуется под ним; сопоставление с каталогом KAIDA — позже. Как такая карточка находится в
-    поиске, определяет контракт (ревизия S6/S7).
+10. **Название товара — свободное название остаётся допустимым; каталог теперь существует** (решение 2026-09-25;
+    обновлено 2026-10-05). Production KB v1 установлен в KAIDA PostgreSQL (`v0.0.52`), подсказки каталога берутся из
+    runtime-каталога. Выбор из каталога **не обязателен**: продавец по-прежнему может написать название своими
+    словами, и карточка публикуется под ним, как в закрытых contracts. Как такая карточка находится в поиске, определяет
+    контракт (ревизия S6/S7).
     **Смешанный ввод** (решение 2026-09-27): пока продавец печатает, под полем появляются подсказки из каталога;
     выбранная подсказка привязывает карточку к каталогу, а без выбора карточка публикуется под словами продавца без
-    ожидания. Стартовый редакторский каталог не закрывает весь рынок — он растёт из реальных карточек и запросов.
+    ожидания. Каталог (682 Products) не закрывает весь рынок — он растёт контролируемой редактурой из реальных карточек и запросов.
     Seller-title word-start fallback остаётся только отдельным unresolved-путём и не смешивается через `OR` с
     resolved Product search (`docs/slices/seller-showcase-editor/SLICE_CONTRACT.md`, будущая ревизия S15B).
     **Показ названия на языке покупателя** (решение 2026-09-29): карточка, привязанная к каталогу, показывает
     покупателю название товара из каталога на его языке; карточка вне каталога — слова продавца как есть. Сейчас
-    название везде показывается словами продавца; правило вводится внутри S15A/S15B (stage 10
-    `EXECUTION_PLAN.md`), где каталог проходит bootstrap и затем пополняется контролируемо.
+    название везде показывается словами продавца; правило вводится внутри S15B (stage 10
+    `EXECUTION_PLAN.md`); каталог уже установлен и пополняется контролируемо.
     **Оповещение о товаре вне каталога** (решение 2026-09-29): как только публикуется карточка, не привязанная к
     каталогу, оператор сразу получает оповещение, чтобы перевести название или добавить товар в каталог и привязать
     карточку. Кто именно получает (оператор, модератор, администратор) и каким каналом — решает Slice Contract. Входит
-    в тот же stage 10; до него такие карточки видны в общей ленте пост-проверки оператора без отдельного оповещения.
+    в тот же stage 10; до этого такие карточки видны в общей ленте пост-проверки оператора без отдельного оповещения.
 
 11. **Сортировка результатов поиска** (решение 2026-09-25; ревизия PO 2026-10-04 заменяет «Фильтры»). Покупатель может
     явно отсортировать результаты по расстоянию, цене и актуальности; для каждого критерия доступны оба направления.
@@ -276,10 +278,20 @@ AI — способ сформировать черновики карточек
 
 S15 теперь является workstream из трёх частей:
 
-- **S15A Catalog bootstrap** — controlled RU bootstrap из утверждённых PO строк;
+- **S15A Catalog bootstrap** — **CLOSED**: выполнен Production KB v1 (`v0.0.52-production-kb-importer-v1`);
 - **S15B Search System revision** — canonical `product_id` primary, catalog suggestions, resolved search отдельно от
   seller-title fallback, known-zero отдельно от unknown;
-- **S15C Demand Data Foundation** — D0/D1 и необходимая основа D2, internal/privacy-safe, без seller Demand UI.
+- **S15C Demand Data Foundation** — D0/D1 и необходимая основа D2, internal/privacy-safe, без seller Demand UI;
+  идёт только после стабилизации семантики S15B. Цель отдельного «query log» (старая 6F) входит сюда: события
+  фиксируют итоговую canonical / unresolved / zero-result семантику.
+
+**Текущая база каталога:** 682 Products / 210 aliases / 35 categories установлены в KAIDA PostgreSQL (Production KB v1);
+runtime не зависит от workbook, corpus или внешней KB. Ближайший шаг — Catalog-backed Seller → Buyer runtime loop
+(`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`), затем S15B.
+
+**Динамические популярные чипы Search Home** — только популярные **canonical Product** чипы, ≤5, готовые к запуску по
+readiness-gate (достаточные проверенные D0/D1 данные; числовой порог не задан), пока действуют curated чипы. Сырые и
+unresolved запросы автоматически Products не становятся и как чипы не показываются.
 
 Пользовательские query strings не создают Product автоматически:
 
@@ -289,13 +301,13 @@ Query Log
 → controlled Product / alias / Category change
 ```
 
-#### Initial Product Catalog v0.1 — input artifact
+#### Initial Product Catalog v0.1 — исторический/редакторский источник (S15A закрыт)
 
-Источник: `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`. Это редакторский workbook, не migration и не
+Источник Production KB v1; в runtime не используется и не является будущим bootstrap. Источник: `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`. Это редакторский workbook, не migration и не
 production seed: 787 candidates, из них 682 `include_v01=YES`, 105 `REVIEW`; RU — canonical/editorial basis, KK —
 непроверенный draft. `candidate_code` — временный внешний ключ и никогда не `Product.id`.
 
-Catalog contract определит staging/validation, merge с существующими Products, stable UUID, localized names, aliases,
+Ниже — историческое описание замысла; catalog contract определил staging/validation, merge с существующими Products, stable UUID, localized names, aliases,
 collisions, idempotency, rollback/correction и пакетный acceptance report. 682 `YES` — кандидатное RU-ядро: безопасные
 строки принимаются пакетом после дедупликации, неоднозначные остаются человеку; 105 `REVIEW` не входят в первый import.
 Нельзя считать draft KK verified, ставить `verified_at`, хранить весь каталог в seed или создавать дубли. Category —
