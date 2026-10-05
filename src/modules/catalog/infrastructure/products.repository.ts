@@ -47,30 +47,29 @@ export async function findCatalogProductById(database: ProductReadDb, id: string
   return rows[0] ?? null;
 }
 
-// seller-showcase-editor: catalog names, localized names and aliases that contain a word, with the product's name in
-// the interface language. The caller applies the exact word-start rule.
-export async function findCatalogNamesContaining(
+// S15B-1: every catalog name, localized name and alias that contains all query words as substrings, with the product's
+// name in the interface language. No ordering or LIMIT here: relevance ranking and the top-5 cut happen after the exact
+// word-prefix filter (application layer), so no eligible product is lost to an early alphabetical cut.
+export async function findCatalogSuggestionCandidates(
   database: Pick<Database, 'execute'>,
-  word: string,
+  words: string[],
   locale: 'ru' | 'kk',
-  limit: number,
 ) {
-  const pattern = `%${word.replace(/[\\%_]/g, (character) => `\\${character}`)}%`;
-  const result = await database.execute<{ id: string; name: string; matched: string }>(sql`
+  const escape = (word: string) => word.replace(/[\\%_]/g, (character) => `\\${character}`);
+  const likes = words.map((word) => sql`replace(lower(n.matched), 'ё', 'е') like ${`%${escape(word)}%`}`);
+  const result = await database.execute<{ id: string; name: string; matched: string; kind: 'name' | 'alias' }>(sql`
     select p.id,
       case when ${locale} = 'kk'
         then coalesce((select pln.name from product_localized_names pln where pln.product_id = p.id and pln.locale = 'kk'), p.name)
         else p.name end as name,
-      n.matched
+      n.matched, n.kind
     from (
-      select id as product_id, name as matched from products
-      union all select product_id, name from product_localized_names
-      union all select product_id, name from product_aliases
+      select id as product_id, name as matched, 'name' as kind from products
+      union all select product_id, name, 'name' from product_localized_names
+      union all select product_id, name, 'alias' from product_aliases
     ) n
     inner join products p on p.id = n.product_id
-    where replace(lower(n.matched), 'ё', 'е') like ${pattern}
-    order by p.name, p.id
-    limit ${limit}
+    where ${sql.join(likes, sql` and `)}
   `);
   return result.rows;
 }
