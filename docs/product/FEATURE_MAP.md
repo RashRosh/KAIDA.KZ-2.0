@@ -361,6 +361,18 @@ Seller-provided Offer media и AI media-input — разные capabilities. Н�
 
 Market — специализированный spatial container, а не центр архитектуры. Generic Location flow должен продолжать работать независимо от future Market scheme/MarketPlace capability.
 
+### Backlog capabilities, owned by Issues (proposed, 2026-10-05)
+
+Подробные требования — в Issues; здесь только capability и dependency. Ничего из этого не запланировано в очередь.
+
+| Capability | Issue | Dependency / trigger |
+|---|---|---|
+| AI-правила разбора seller input (Product vs Offer-атрибуты, confidence, provenance, дубли, `product_candidate`) | #75 | AI Input S17–S20; Product KB v1 установлен |
+| Distance sensitivity товара/категории в ranking | #76 | S15B + D0/D1 данные; без скрытого score под явной сортировкой |
+| Price Intelligence (benchmark цены к рынку для покупателя и продавца) | #79 | Product resolution (S15B), сопоставимые единицы/фасовка, накопленные актуальные цены; не в ranking на MVP |
+| Группировка товаров продавца по категориям на «Моей витрине» | #54 | Category/каталог, решения PO (чьи категории, видит ли покупатель) |
+| Security automation (Trivy/Hadolint, SBOM, SLSA, Semgrep, OSV) | #83 | триггеры в Issue |
+
 ### Commercial model / Monetization
 
 Source: `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`.
