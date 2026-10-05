@@ -412,10 +412,10 @@ Issue — ровно одно. Строки с пометкой *proposed* — �
 
 | Issue | Состояние | Owner / trigger |
 |---|---|---|
-| #12 Search sorting | covered (Rev 3, `v0.0.51`); остаток — later | остаток = «Additional Search filters» ниже; *proposed:* закрыть Issue комментарием |
-| #55 Demand | input to scheduled workstream | S15C (stage 10C) после S15B; D3–D6 — по gates в Feature Map |
+| #12 Search sorting | covered / closed (completed, Stage 6 Rev 3, `v0.0.51`) | будущие фильтры — не остаток этого Issue, см. «Additional Search filters» |
+| #55 Demand | input to scheduled workstream | S15A closed (`v0.0.52`) → S15B → S15C (stage 10C); D3–D6 — по gates в Feature Map |
 | #75 AI-правила обработки seller input | input to scheduled workstream | AI Input (stage 7, S17–S20): входные правила будущих Slice Contracts; AI-модерация — stage 8 |
-| #76 distance sensitivity в ranking | later / dependency-gated | после S15B + данных D0/D1; не нарушает Rev 3 (явная сортировка без скрытого score) — *proposed* |
+| #76 distance sensitivity в ranking | later / dependency-gated | после S15B + данных D0/D1. Не может влиять скрыто на явные `actuality | distance | price`; требует отдельного relevance/recommendation context и contract revision (Rev 3 закрыл скрытый score) |
 | #79 Price Intelligence | later / dependency-gated | Product resolution (S15B) + накопленные цены; не в ranking на MVP — *proposed* |
 | #10 Market navigation | later / triggered | «Insertion candidates» ниже |
 | #54 категории товаров продавца | later / backlog | trigger: у продавцов много карточек; зависит от каталога/Category и решений PO — *proposed* |
@@ -434,7 +434,7 @@ Insertion candidate не имеет жёсткого номера. Он расс
 - direction: Market directory → scheme/MarketPlaces → Location binding → buyer internal navigation;
 - default without trigger: остаётся unscheduled.
 
-## Additional Search filters — Issue #12 (остаток)
+## Additional Search filters (отдельно от #12)
 
 Сортировка «Расстояние / Цена / Актуальность» с направлением закрыта Stage 6 Rev 3 (`v0.0.51`). Радиус и цена от–до
 в Rev 3 **сняты**; отдельные фильтры (радиус, диапазон цены, тип точки, фото/контакты, rating) не добавляются без нового
