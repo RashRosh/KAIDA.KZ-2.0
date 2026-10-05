@@ -14,7 +14,7 @@ After installation, normal buyer/seller runtime uses only KAIDA PostgreSQL. Runt
 ## 2. Scope
 
 - Vendor the exact verified five-file Production KB Package v1 as immutable application data during implementation: `products.csv`, `aliases.csv`, `categories.csv`, `CONTRACT.md`, `manifest.json`.
-- Validate the package before any database mutation.
+- Validate the package before any database mutation, including a pinned trust anchor for the exact verified `manifest.json` bytes outside the package's own manifest.
 - Persist the stable KB Product identity `KAIDA-Pxxxx` while preserving existing internal UUID primary keys.
 - Import or adopt 682 approved Products, 210 production-safe aliases and 35 categories into the existing Catalog boundary.
 - Preserve existing Offers and their `product_id` UUID references.
@@ -37,7 +37,7 @@ The implementation slice must not modify `kaida-product-corpus`.
 ## 5. Expected modules / boundaries
 
 - Application-owned immutable package data, committed in KAIDA during implementation; no runtime or CI dependency on a sibling checkout, developer filesystem, network download or GitHub.
-- A package validator that checks name/version/schema, required files, manifest hashes, source checkpoint/commit, deterministic schema, Product ID format, uniqueness, alias references and Product-category references.
+- A package validator that first checks a version-controlled expected SHA-256 of the exact vendored `manifest.json` bytes against the deterministic manifest produced by `RashRosh/kaida-product-corpus` at `v0.2.0-production-kb-export-v1` / `39db21ab57bd1c30a5265633ad73c51f56f9e9b4`. Only after that external manifest identity is accepted may it trust manifest fields and validate name/version/schema, required files, manifest-listed file hashes, source checkpoint/commit, deterministic schema, Product ID format, uniqueness, alias references and Product-category references.
 - Minimal DB persistence for:
   - unique KB Product ID mapped to one runtime Product UUID;
   - categories: code, RU label, KK label;
@@ -73,6 +73,12 @@ Persist all 35 category codes with RU/KK labels and Product-category links. No c
 
 Persist enough package identity to read from DB: package name, package version/schema, source checkpoint, source commit, manifest/package identity and imported counts. One current installed-package record is sufficient for v1.
 
+### Pinned manifest identity
+
+The package's own `manifest.json` is not by itself a trust anchor. During implementation, regenerate or copy the exact deterministic five-file package from `RashRosh/kaida-product-corpus` checkpoint `v0.2.0-production-kb-export-v1` target `39db21ab57bd1c30a5265633ad73c51f56f9e9b4`, compute SHA-256 over the exact `manifest.json` bytes, and record that expected manifest SHA-256 in KAIDA version-controlled importer metadata/code outside the five-file package.
+
+The importer must validate this pinned manifest SHA-256 before reading package identity fields or trusting any file hashes contained inside the manifest. After the manifest identity is accepted, the importer validates the manifest-listed hashes and package structure as specified above. Do not add signatures, PKI, remote verification or external services; one pinned manifest SHA-256 is sufficient for v1.
+
 ## 7. Risk flags
 
 DB migration: **YES** · public API: **NO** unless implementation proves unavoidable · auth/security/privacy: **NO** · concurrency/atomicity: **YES** · data loss: **YES** — existing Product identities/FKs must be protected · external service: **NO**.
@@ -81,8 +87,8 @@ Verification depth must match these risks: package tamper checks, migration upgr
 
 ## 8. Acceptance criteria
 
-1. The verified five-file package with `package_schema_version = 1`, expected source checkpoint and expected source commit is accepted.
-2. A corrupted, incomplete, wrong-version or hash-mismatched package is rejected before any DB mutation.
+1. The verified five-file package is accepted only when the exact `manifest.json` bytes match the externally pinned SHA-256 and the manifest then reports `package_schema_version = 1`, expected source checkpoint and expected source commit.
+2. A corrupted, incomplete, wrong-version, file hash-mismatched or manifest-tampered package is rejected before any DB mutation; this includes a package where a CSV and its manifest-listed hash were both changed so internal manifest validation would otherwise pass.
 3. All 682 package Products are represented with unique stable KB identities, and each KB ID maps to exactly one runtime Product UUID.
 4. All 210 package aliases are represented against resolved runtime Product UUIDs without duplication on repeated import.
 5. All 35 categories are persisted with RU/KK labels and valid Product references.
@@ -99,16 +105,17 @@ Verification depth must match these risks: package tamper checks, migration upgr
 1. Start from migrated + seeded application.
 2. Verify existing `Баранина` Search/Offer behavior.
 3. Run the KB import.
-4. Verify the same existing `Баранина` Offer still works and still references the original runtime Product UUID.
+4. Verify the same existing `Баранина` search/result/Offer still works after import.
 5. Exercise one imported KB Product or alias that was not in the old two-Product seed through an existing Catalog-facing flow, if available.
 6. Run the same import again.
 7. Verify no visible duplication/regression in existing buyer/seller flows.
 
-Do not create UI solely for manual acceptance. Counts, FK preservation, package validation, idempotency and rollback are automated checks.
+Do not create UI solely for manual acceptance. Counts, exact runtime Product UUID preservation, Offer FK preservation, package validation, idempotency and rollback are automated checks.
 
 ## 10. Verification plan
 
-- Package fixture validation tests: required files, manifest hashes, package/schema/source identity, Product ID format, uniqueness and references.
+- Package fixture validation tests: pinned `manifest.json` SHA-256 before trusting manifest contents; required files; manifest-listed file hashes; package/schema/source identity; Product ID format; uniqueness and references.
+- Negative package-integrity tests: direct manifest tampering is rejected before DB mutation; altering a package data file and updating its hash inside `manifest.json` is still rejected because the manifest no longer matches the externally pinned verified manifest SHA-256, and the DB remains unchanged.
 - Migration/upgrade tests for new persistence: KB ID uniqueness, category persistence, package provenance and backwards compatibility.
 - Import integration tests: valid package import counts; corrupted package fails before mutation; repeated import idempotent; deterministic conflict rolls back; concurrent imports do not create duplicates.
 - Adoption tests: seeded `Баранина` and `Говядина` keep their UUIDs; existing Offer FK values are unchanged.
