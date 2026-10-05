@@ -1,6 +1,6 @@
 # S15B-1 — Catalog suggestion relevance / reachability
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Controller/PO, 2026-10-05; одобрено с одним уточнением eligibility — внесено).
+**Status:** CLOSED. Checkpoint `v0.0.54-catalog-suggestion-relevance`; PR #97; `main` `b3432e4219a412ddb82ddc1afb8f03ef1f93c192`; merged-main `KAIDA verify` run `37326497017` SUCCESS; manual acceptance PASS.
 **Base:** `main` `dba8cd8f5939b20accb973d2bde3950c200fa306` (checkpoint `v0.0.53-catalog-runtime-loop`).
 **Plan:** первый vertical slice S15B (`EXECUTION_PLAN.md`). Остальной S15B этим контрактом не начинается.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
