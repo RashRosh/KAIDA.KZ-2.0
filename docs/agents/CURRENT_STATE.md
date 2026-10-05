@@ -5,25 +5,25 @@
 ## Verified base
 
 - Проверено: 2026-10-05.
-- `origin/main`: `dba8cd8` (docs после `c0d1749`); checkpoint `v0.0.53-catalog-runtime-loop` (PR #93);
-  merged-main `KAIDA verify` run `37305378999` SUCCESS. Manual acceptance PASS.
+- `origin/main`: `b3432e4219a412ddb82ddc1afb8f03ef1f93c192`; checkpoint `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97);
+  merged-main `KAIDA verify` run `37326497017` SUCCESS (rerun). Manual acceptance PASS. Предыдущий: `v0.0.53`.
 - Production KB v1 (682 / 210 / 35) — runtime-база; runtime loop Seller → Buyer доказан тестами (production-код не менялся).
   E2E-БД ставит KB через global setup существующим импортёром; пакет защищён `.gitattributes` (`-text`).
 
 ## Current task
 
-DRAFT-контракт S15B-1 (`docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`) на ревью. Production-код не начат.
+UX-slice «Card editor — mobile visibility of catalog suggestions» (`docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`, APPROVED): автопрокрутка поля названия при открытии подсказок в touch-сеансе. Только клиентский `CardEditor`.
 
 ## Next action
 
-1. Review/approval S15B-1; затем реализация (только ранжирование подсказок каталога).
-2. Остальной S15B малыми vertical slices после аудита кода (buyer autocomplete — отдельный slice).
+1. Реализовать UX-slice подсказок (fresh branch от main), manual acceptance на телефоне.
+2. Остальной S15B (S15B-2…) малыми vertical slices после аудита кода; buyer autocomplete — отдельный slice; не начата.
 3. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
 
 - Старые 6F и 6G **не авторизованы** в прежнем виде: 6F снята до реализации (цель — в S15C/D0 после S15B), 6G
-  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15B, S15C, 6F/6G, AI.
+  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15B-2, S15C, 6F/6G, AI.
 - Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
 - Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`.
 - `next-env.d.ts` перегенерируется next dev/build — в коммит не входит.
