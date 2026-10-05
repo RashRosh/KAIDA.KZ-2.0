@@ -121,6 +121,20 @@ describe('Production KB Importer v1', () => {
     });
   }, 45000);
 
+  it('synchronizes the canonical runtime name for an already installed KB Product without replacing its UUID', async () => {
+    await withProductionKbImportTestDatabase('sync_existing_kb_product', async (pool, db) => {
+      const installedProductId = '90000000-0000-4000-8000-000000000042';
+      await pool.query('INSERT INTO products (id,name,kb_product_id) VALUES ($1,$2,$3)', [installedProductId, 'Outdated shank name', 'KAIDA-P0042']);
+
+      await importProductionKbPackage(db);
+
+      expect((await pool.query('SELECT id,name,kb_product_id FROM products WHERE kb_product_id=$1', ['KAIDA-P0042'])).rows).toEqual([
+        { id: installedProductId, name: 'Баранья голяшка', kb_product_id: 'KAIDA-P0042' },
+      ]);
+      expect(Number((await pool.query('SELECT count(*) FROM products WHERE kb_product_id=$1', ['KAIDA-P0042'])).rows[0].count)).toBe(1);
+    });
+  }, 45000);
+
   it('rolls back the whole import on deterministic alias conflict', async () => {
     await withProductionKbImportTestDatabase('rollback', async (pool, db) => {
       const packageAlias = (await loadProductionKbPackage()).aliases[0]!;

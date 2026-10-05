@@ -275,6 +275,7 @@ async function preserveLocalizedNameAsAlias(tx: Tx, productId: string, locale: L
 async function resolveRuntimeProduct(tx: Tx, product: PackageProduct, resolved: Map<string, string>) {
   const byKb = await tx.select().from(products).where(eq(products.kbProductId, product.product_id)).limit(1);
   if (byKb[0]) {
+    await tx.update(products).set({ name: product.canonical_name_ru }).where(eq(products.id, byKb[0].id));
     resolved.set(product.product_id, byKb[0].id);
     return { id: byKb[0].id, adopted: false, created: false };
   }
