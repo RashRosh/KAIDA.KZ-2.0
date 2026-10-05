@@ -2,15 +2,31 @@
 
 Этот документ является **единственным каноническим источником текущей очередности работ**.
 
-## Current contract review
+## Verified base и ближайшая последовательность
 
-KAIDA Production KB Importer v1 is in contract review only:
-`docs/slices/production-kb-importer/SLICE_CONTRACT.md` on branch `slice/production-kb-importer-contract`.
+- `main`: `5b2171035c058f8337671b30222c7a247cb33b79`; checkpoint `v0.0.52-production-kb-importer-v1`;
+  merged-main `KAIDA verify` run `37293540946` SUCCESS.
+- **Production KB Importer v1 — CLOSED.** Production KB v1 — нормальная runtime-база KAIDA: 682 Products, 210 aliases,
+  35 categories в KAIDA PostgreSQL; runtime Product UUID / Offer FK сохранены; внешней KB/corpus-зависимости в runtime нет.
+- Stage 6 Rev 3 закрыт на `v0.0.51-search-sort-rev3`.
 
-Base: `1c06115b27978a3b9b4e80668a9b8ff1748f0eba` (`v0.0.51-search-sort-rev3`, merged-main `KAIDA verify`
-run `37238019433` SUCCESS).
+Порядок работ после решения PO (2026-10-05):
 
-Do not implement migrations, code, tests or vendored package data until `APPROVED — IMPLEMENTATION AUTHORIZED`.
+1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
+2. **NEXT: Catalog-backed Seller → Buyer runtime loop** — integration/user-flow proof, не импорт каталога
+   (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`, DRAFT; реализация не начата).
+3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
+4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
+5. Начать production-like накопление demand-данных.
+6. Параллельно накоплению — launch-critical AI Input / AI-модерация.
+7. D1 / internal demand validation, когда появятся данные.
+8. Динамические чипы Search Home — готовые к запуску только по readiness-gate популярные **canonical Product** чипы,
+   ≤5, curated fallback.
+9. Затем остальной Discovery / Demand / Operations / commercial readiness по зависимостям.
+
+Старая `6F` (отдельная модель «нормализованный сырой запрос + время») **снята до реализации**: её законная цель
+переходит в S15C/D0 после S15B, чтобы события фиксировали итоговую canonical / unresolved / zero-result семантику.
+Старая `6G` убрана из ближней очереди и переосмыслена (см. таблицу ниже). Числовой порог трафика не вводится.
 
 Он отвечает только на четыре вопроса:
 
@@ -40,20 +56,14 @@ Do not implement migrations, code, tests or vendored package data until `APPROVE
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.43-seller-location-geo-fallback`;
-- checkpoint commit: `762e170` (merge PR #70); merged-main CI run `36813870467` green;
-- хвост после `v0.0.36` закрыт отдельными annotated tags: buyer screens (`v0.0.37`), First Entry mobile (`v0.0.38`),
-  seller photo tiles (`v0.0.39`), showcase photo shortcut (`v0.0.40`), card → point editor (`v0.0.41`),
-  commercial/Backoffice pipeline (`v0.0.42`) и Seller Location geo fallback (`v0.0.43`);
+- tag: `v0.0.52-production-kb-importer-v1`; checkpoint commit `5b21710`; merged-main CI run `37293540946` green;
+- до него закрыты: Stage 6 Rev 3 (`v0.0.51-search-sort-rev3`), 6B–6D (`v0.0.48`–`v0.0.50`), 5A
+  (`v0.0.47-search-visibility-without-coordinates`), `v0.0.46-search-sort-distance` и более ранние checkpoints;
 - **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
-  `offer-actuality` и `actuality-reminders`;
-- ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog localization, seller comment translation,
-  Seller Entry / contextual auth, Seller Trading Points Workspace и связанные product checkpoints.
+  `offer-actuality` и `actuality-reminders`; ранее закрыты `S0–S13`, `UX1A`–`UX2A`, localization foundation, catalog
+  localization, seller comment translation, Seller Entry / contextual auth, Seller Trading Points Workspace.
 
-Фактический repository state при обновлении 2026-10-03: `origin/main = aadb6b2` (Search filters — sort «Ближе»/«Актуальнее» + distance; merge `aadb6b2` — PR #74, slice-коммит `9634178`),
-merged-main CI green (run `37071285541`), manual acceptance **PASS**. Checkpoint annotated tag `v0.0.46-search-sort-distance`
-создаётся этим docs-коммитом сразу после green CI и пушится на remote; **до фактического создания тег не считать существующим**.
-На момент записи последним фактически существующим verified checkpoint остаётся `v0.0.45-nearby-result-first` на `0bdfc3a`. Перед новой работой состояние всё равно перепроверяется.
+Перед новой работой состояние всё равно перепроверяется по git/GitHub/CI.
 
 ---
 
@@ -123,9 +133,9 @@ Feature freeze сохраняется: новые product capabilities вне э
 
 ### Название товара — свободное до формирования каталога (решение PO, 2026-09-25)
 
-Продавец пишет название своими словами; карточка публикуется под этим названием без выбора из каталога. Наличие
-editorial workbook само по себе ничего не меняет: сопоставление с каталогом KAIDA начинается только после S15A/S15B
-и утверждённых contracts. Для этапа 1 это означает: состояние «товара нет в
+Продавец пишет название своими словами; карточка публикуется под этим названием без выбора из каталога. Каталог
+теперь существует (Production KB v1, `v0.0.52`), но выбор из него остаётся необязательным: свободное название
+продолжает работать как в закрытых contracts. Для этапа 1 это означает: состояние «товара нет в
 каталоге» в редакторе не нужно; контракт пункта 3 должен определить, как карточка со свободным названием находится
 в поиске (сейчас поиск идёт через каталог и aliases — закрытые S6/S7), и это ревизия закрытых contracts по
 `PROJECT_RULES.md` §4.
@@ -163,8 +173,8 @@ green) сохраняется неизменной как evidence; новая �
 **6A–6D и Stage 6 Rev 3 закрыты** (6B: PR #84, tag `v0.0.48-first-entry-correction`; 6C: PR #86, tag
 `v0.0.49-search-home-last-state`; 6D: PR #88, tag `v0.0.50-inline-language`; Rev 3: PR #90, manual acceptance PASS,
 checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-коммите после green merged-main CI, до фактического
-создания тег не считать существующим). **Следующий незакрытый шаг — 6F** (минимальный Search Query Log; контракт ещё не
-подготовлен, реализацию не начинать без решения PO). Порядок 6D → 6 был выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
+создания тег не считать существующим). **6F снята до реализации** (решение PO 2026-10-05, см. «Verified base и ближайшая последовательность»); следующий
+шаг — Catalog-backed Seller → Buyer runtime loop. Порядок 6D → 6 был выбран потому, что First Entry/Search Home меняют ту же поверхность Search, что и popover Rev 3: popover не строится
 внутри структуры, которую сразу заменят.
 
 Решения PO (2026-10-04), которые должны войти в соответствующие Slice Contracts, не сокращаясь:
@@ -180,7 +190,7 @@ checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-комм
   (`<7d` eligibility остаётся), actuality — tie-breaker, затем id; цена — номинальная KZT без нормализации единиц;
   geo-less после geo-known в обоих направлениях distance; по умолчанию actuality, свежие первыми; повторный выбор
   активного критерия меняет направление. Радиус, цена от–до, чипы фильтров, sheet «Фильтры» и `sort=cheaper` удаляются.
-- **6F/6G:** только осознанные submit; без user-id и постоянного/сессионного идентификатора, пока контракт не докажет
+- **6F/6G** (решения 2026-10-04 сохраняются как входные требования к S15C/D0 и будущим canonical-Product чипам; сами 6F/6G как отдельные slices сняты 2026-10-05): только осознанные submit; без user-id и постоянного/сессионного идентификатора, пока контракт не докажет
   необходимость; событие — нормализованный запрос, время и нужный исход поиска; raw-события не дольше 90 дней
   (конфигурируемо); окно популярности по умолчанию 14 дней (конфигурируемо), порог повторов конфигурируем, ≤5 чипов,
   curated fallback; сырые запросы продавцу не показываются; модель общая с S15C, второй не создаётся.
@@ -202,14 +212,15 @@ checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-комм
 | 6C | ~~Search Home + состояние последнего поиска (поле по центру, ≤5 чипов, восстановление запроса/сортировки при возврате)~~ — **закрыт** (PR #86, manual acceptance PASS) | `docs/slices/search-home-last-state/SLICE_CONTRACT.md` |
 | 6D | ~~Inline-язык в `Ещё` (покупатель и продавец): компактная таблетка `РУС \| ҚАЗ` в строке «Язык», сразу, без Sheet/Done~~ — **закрыт** (PR #88, manual acceptance PASS) | `docs/slices/inline-language/SLICE_CONTRACT.md` |
 | 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 — **закрыт** (PR #90, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-rev3/SLICE_CONTRACT.md` |
-| 6F | Search Query Log — минимальный срез, одна модель с будущим S15C D0 | future Slice Contract; privacy/retention risk |
-| 6G | Динамические популярные запросы (≤5, окно по конфигу, curated fallback) | future Slice Contract, после 6F |
+| 6F | ~~Search Query Log~~ — **снята до реализации** (2026-10-05); цель переходит в S15C/D0 после S15B | — |
+| 6G | ~~Динамические популярные запросы~~ — убрана из ближней очереди; переосмыслена как readiness-gated популярные canonical Product чипы (≤5, curated fallback) после S15C/D0/D1; сырые/unresolved запросы Products не становятся | future Slice Contract |
 | 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
-| 10A | S15A — Catalog bootstrap: контролируемо принять утверждённое RU-ядро, без автоматического импорта workbook | Feature Map / future Slice Contract |
-| 10B | S15B — Search System revision: каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
-| 10C | S15C — Demand Data Foundation: D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
+| 10A | ~~S15A — Catalog bootstrap~~ — **закрыт** (Production KB v1, `v0.0.52-production-kb-importer-v1`) | `docs/slices/production-kb-importer/SLICE_CONTRACT.md` |
+| 10A+ | **NEXT:** Catalog-backed Seller → Buyer runtime loop (интеграционное доказательство на Production KB v1) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` (DRAFT) |
+| 10B | S15B — Search System revision (после runtime loop; малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
+| 10C | S15C — Demand Data Foundation (после стабилизации S15B; включает цель старой 6F): D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
 | 11A | Backoffice foundation planning: Requirement Inventory → Operations Map → minimum roles/Permissions → Domain states/invariants; first operational target = Catalog Operations | `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` |
 | 11B | Commercial & Monetization Readiness: утвердить domain semantics/operations до Backoffice IA/UX, без Billing/Boost implementation | `KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md` |
@@ -269,7 +280,12 @@ billing tables, Boost, Business или seller-facing paid Demand. Stage 12 не 
 Подготовленные источники фиксируют целевую модель, но не являются Slice Contracts и не разрешают реализацию раньше
 stage 10.
 
-#### S15A — Catalog bootstrap
+#### S15A — Catalog bootstrap — CLOSED
+
+**Выполнено Production KB v1** (`v0.0.52-production-kb-importer-v1`, `docs/slices/production-kb-importer/SLICE_CONTRACT.md`):
+в KAIDA PostgreSQL установлены 682 Products, 210 aliases, 35 categories. Workbook остаётся историческим/редакторским
+источником, не runtime-bootstrap. Текст ниже — историческое описание исходного замысла.
+
 
 Входной artifact `KAIDA.KZ_initial_product_catalog_v0.1.xlsx` содержит 787 кандидатов: 682 `include_v01=YES` и 105
 `REVIEW`; RU — canonical/editorial basis, KK — draft, отдельно даны aliases, editorial categories и source metadata.
@@ -287,6 +303,8 @@ Products. `Category` остаётся полноценной сущностью 
 рубрикатор KAIDA. Вычитка KK отложена и не блокирует RU bootstrap.
 
 #### S15B — Search System revision
+
+Зависит от установленной базы Production KB v1; идёт после Catalog-backed Seller → Buyer runtime loop.
 
 `SEARCH_SYSTEM_SPEC_v0.1.md` перенесён на текущий `main` как target source. Перед implementation нужно сверить его с
 текущим кодом и закрытыми S0/S6/S7/S9/S13, учесть историю ветки `docs/search-system-spec-v0.1`, затем выпустить
