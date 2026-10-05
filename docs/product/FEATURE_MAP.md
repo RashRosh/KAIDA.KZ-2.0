@@ -286,7 +286,7 @@ S15 теперь является workstream из трёх частей:
   фиксируют итоговую canonical / unresolved / zero-result семантику.
 
 **Текущая база каталога:** 682 Products / 210 aliases / 35 categories установлены в KAIDA PostgreSQL (Production KB v1);
-runtime не зависит от workbook, corpus или внешней KB. Ближайший шаг — Catalog-backed Seller → Buyer runtime loop
+runtime не зависит от workbook, corpus или внешней KB. Catalog-backed Seller → Buyer runtime loop закрыт (`v0.0.53-catalog-runtime-loop`); ближайший шаг — S15B, первый кандидат — релевантность и достижимость подсказок каталога. Proof-контракт
 (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`), затем S15B.
 
 **Динамические популярные чипы Search Home** — только популярные **canonical Product** чипы, ≤5, готовые к запуску по

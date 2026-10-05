@@ -4,8 +4,8 @@
 
 ## Verified base и ближайшая последовательность
 
-- `main`: `5b2171035c058f8337671b30222c7a247cb33b79`; checkpoint `v0.0.52-production-kb-importer-v1`;
-  merged-main `KAIDA verify` run `37293540946` SUCCESS.
+- `main`: `c0d1749ba352b662299708e0ce466c2916bababa`; checkpoint `v0.0.53-catalog-runtime-loop`;
+  merged-main `KAIDA verify` run `37305378999` SUCCESS (предыдущий: `v0.0.52`, run `37293540946`).
 - **Production KB Importer v1 — CLOSED.** Production KB v1 — нормальная runtime-база KAIDA: 682 Products, 210 aliases,
   35 categories в KAIDA PostgreSQL; runtime Product UUID / Offer FK сохранены; внешней KB/corpus-зависимости в runtime нет.
 - Stage 6 Rev 3 закрыт на `v0.0.51-search-sort-rev3`.
@@ -13,8 +13,9 @@
 Порядок работ после решения PO (2026-10-05):
 
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
-2. **NEXT: Catalog-backed Seller → Buyer runtime loop** — integration/user-flow proof, не импорт каталога
-   (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`, APPROVED).
+2. ~~Catalog-backed Seller → Buyer runtime loop~~ — **CLOSED** (`v0.0.53`, PR #93; integration/user-flow proof, production-код не менялся)
+   (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`).
+   **NEXT: S15B** — первый кандидат: релевантность и достижимость подсказок каталога (top-5 по алфавиту не доводит «бар» до «Баранина»).
 3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
 4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
 5. Начать production-like накопление demand-данных.
@@ -56,7 +57,7 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.52-production-kb-importer-v1`; checkpoint commit `5b21710`; merged-main CI run `37293540946` green;
+- tag: `v0.0.53-catalog-runtime-loop`; checkpoint commit `c0d1749`; merged-main CI run `37305378999` green; предыдущий `v0.0.52-production-kb-importer-v1` (`5b21710`);
 - до него закрыты: Stage 6 Rev 3 (`v0.0.51-search-sort-rev3`), 6B–6D (`v0.0.48`–`v0.0.50`), 5A
   (`v0.0.47-search-visibility-without-coordinates`), `v0.0.46-search-sort-distance` и более ранние checkpoints;
 - **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
@@ -202,7 +203,7 @@ checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-комм
 перенумеровываются и не задают очередность. **Фактический ближайший порядок единственный** (решение PO 2026-10-05, см.
 «Verified base и ближайшая последовательность»):
 
-`v0.0.52` → Catalog-backed Seller → Buyer runtime loop → S15B → S15C/D0 → production-like accumulation →
+`v0.0.53` (runtime loop закрыт) → S15B → S15C/D0 → production-like accumulation →
 AI Input / AI-модерация (пока копятся данные) → D1 / readiness → canonical Product чипы.
 
 Stages 7, 8, 9 (AI Input, AI-модерация, S14) стоят в таблице по историческим номерам; AI Input и AI-модерация идут по
@@ -227,8 +228,8 @@ Product Owner decision и обновления этого файла.
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
 | 10A | ~~S15A — Catalog bootstrap~~ — **закрыт** (Production KB v1, `v0.0.52-production-kb-importer-v1`) | `docs/slices/production-kb-importer/SLICE_CONTRACT.md` |
-| 10A+ | **NEXT:** Catalog-backed Seller → Buyer runtime loop (интеграционное доказательство на Production KB v1) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` (APPROVED) |
-| 10B | S15B — Search System revision (после runtime loop; малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
+| 10A+ | ~~Catalog-backed Seller → Buyer runtime loop~~ — **закрыт** (`v0.0.53-catalog-runtime-loop`, PR #93, manual acceptance PASS) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` |
+| 10B | **NEXT:** S15B — Search System revision (первый кандидат — catalog suggestion relevance / reachability; малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
 | 10C | S15C — Demand Data Foundation (после стабилизации S15B; включает цель старой 6F): D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
 | 11A | Backoffice foundation planning: Requirement Inventory → Operations Map → minimum roles/Permissions → Domain states/invariants; first operational target = Catalog Operations | `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` |

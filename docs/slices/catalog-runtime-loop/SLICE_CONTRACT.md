@@ -1,6 +1,6 @@
 # Catalog-backed Seller → Buyer runtime loop
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-05).
+**Status:** CLOSED. Checkpoint `v0.0.53-catalog-runtime-loop`; PR #93; `main` `c0d1749ba352b662299708e0ce466c2916bababa`; merged-main `KAIDA verify` run `37305378999` SUCCESS; manual acceptance PASS. Production-код не менялся; продуктового gap не найдено. Известная граница S15B: подсказки каталога — алфавитный top-5, поэтому «бар» не доводит до «Баранина».
 **Base:** `main` `7ebb67a5f09ea8b3d5229936ddc60df972961039` (после docs-нормализации PR #91; checkpoint `v0.0.52-production-kb-importer-v1`).
 **Branch:** contract PR (contract-only).
 **Plan:** следующий продуктовый шаг после Production KB v1 (`EXECUTION_PLAN.md`). Следом — S15B (отдельно).
