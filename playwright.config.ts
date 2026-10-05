@@ -7,6 +7,7 @@ const identityTestSecret = '1111111111111111111111111111111111111111111111111111
 
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: true,
   retries: 0,

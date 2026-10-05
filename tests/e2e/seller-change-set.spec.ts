@@ -79,7 +79,10 @@ test('Seller must price a proposal, confirms it once and buyer sees the KZT amou
     await completeOnboardingGeo(pool, phone);
     // seller-showcase-editor: «Сформировать карточки товаров» → «Заполнить вручную» opens the editor in place.
     const editor = await openNewCard(page);
-    await fillOfferFields(page, { product: 'Баранина', unit: 'kg' });
+    // With the full catalog the typed name opens suggestions; choosing the exact one keeps the same catalog link.
+    await fillOfferFields(page, { product: 'Баранина' });
+    await editor.getByRole('option', { name: 'Баранина', exact: true }).click();
+    await fillOfferFields(page, { unit: 'kg' });
     await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
     await expect(editor.getByText('Укажите цену больше 0 ₸', { exact: true })).toBeVisible();
     await expect(editor.getByRole('alert').filter({ hasText: 'Заполните 1 поле' })).toBeVisible();
