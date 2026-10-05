@@ -1,6 +1,6 @@
 # S15B-1 — Catalog suggestion relevance / reachability
 
-**Status:** DRAFT — CONTROLLER/PO REVIEW REQUIRED. Do not implement until `APPROVED — IMPLEMENTATION AUTHORIZED`.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Controller/PO, 2026-10-05; одобрено с одним уточнением eligibility — внесено).
 **Base:** `main` `dba8cd8f5939b20accb973d2bde3950c200fa306` (checkpoint `v0.0.53-catalog-runtime-loop`).
 **Plan:** первый vertical slice S15B (`EXECUTION_PLAN.md`). Остальной S15B этим контрактом не начинается.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
@@ -19,7 +19,9 @@
 
 ## 3. Behavior
 
-**Eligibility не меняется:** Product подходит ровно тогда, когда каждое набранное слово (≥ 2 букв, `ё→е`) — начало слова одного из его названий (канонического RU, localized RU/KK) или алиасов. Меняются только порядок и отбор top-5.
+**Semantic eligibility predicate не меняется:** существующая минимальная длина ввода; существующая нормализация (`ё→е` и т. п.); каждое слово запроса должно быть prefix одного из слов одного из canonical/localized names или aliases Product. Меняются только порядок и отбор top-5.
+
+Прежние `ORDER BY p.name, p.id LIMIT 100` до word-prefix фильтра **не входят** в eligibility contract: это implementation defect (преждевременное усечение кандидатов), и S15B-1 вправе его удалить. Поэтому фактически достижимый набор подсказок может расшириться, но Product не становится eligible по новому правилу сопоставления.
 
 **Правило релевантности** (по лучшему совпадению Product среди его названий и алиасов; меньший номер выше):
 
@@ -63,7 +65,7 @@ DB migration: no · public API: **limited** — форма ответа `GET /ap
 2. `бар` и `баран` возвращают `Баранина` в top-5; `баран` — первой по правилу.
 3. Сильное совпадение не вытесняется слабым из-за алфавита: полное название (`Баранина`, `Говядина`) — первым, раньше своих вариантов (`… для плова`); начало названия выше совпадения «в середине»; название выше алиаса того же уровня.
 4. Максимум 5 подсказок, один Product — одна подсказка; повторные вызовы и перемешанный порядок кандидатов дают идентичный результат.
-5. Eligibility не изменилась: те же Products, что подходили раньше; 1-буквенный ввод и `аранина` — пусто; алиасы (`мясо барана` → `Баранина`) и localized KK (`қой` → `Қой еті` при `locale=kk`) участвуют.
+5. Eligibility predicate не меняется: 1-буквенный ввод, substring без word-prefix (`аранина`) и другие ранее не-eligible запросы не становятся eligible; aliases и localized names продолжают участвовать по тому же word-prefix rule (`мясо барана` → `Баранина`; `қой` → `Қой еті` при `locale=kk`).
 6. Общая reachability: для каждого из 682 Products ввод его полного канонического RU названия возвращает его в top-5.
 7. Выбор подсказки возвращает runtime Product UUID и привязывает карточку (`Offer.product_id`); `мёд гор` → `Мёд горный` без регрессии; тесты runtime loop зелёные.
 8. Free-title путь, `resolveProduct`, buyer Search результаты и сортировка Rev 3 не изменены (существующие тесты зелёные без правки утверждений).
