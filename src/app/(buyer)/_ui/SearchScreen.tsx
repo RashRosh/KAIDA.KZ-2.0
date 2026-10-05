@@ -1,12 +1,13 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { offerCount } from '../../../i18n/format';
 import { buyerLocationSchema, type BuyerLocation } from '../../../modules/search/contracts/buyer-location.contract';
 import {
   NATURAL_SORT_DIRECTION,
+  searchProductIdSchema,
   searchQuerySchema,
   searchResponseSchema,
   type SearchResponse,
@@ -16,6 +17,7 @@ import {
 import { normalizeGeoDependentState, readLastSearchState, writeLastSearchState } from '../../../modules/search/last-search-state';
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
+import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } from './product-suggestions';
 import { SortPopover } from './SortPopover';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
@@ -34,12 +36,29 @@ type BuyerLocationState =
 
 // Stage 6C: at most five curated queries — the first five of the existing set; no popularity data is involved.
 const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс'] as const;
+
+function searchKey(query: string, productId: string | undefined) {
+  return productId ? `${query}\u0000${productId}` : query;
+}
 export function SearchScreen() {
   const { locale, t } = useI18n();
   // The query kept in the address (replaceState below is synced into the router), so Back from an offer page
   // reopens the same results even when the router restores this page from its cache.
-  const addressQuery = useSearchParams().get('q') ?? '';
+  const addressParams = useSearchParams();
+  const addressQuery = addressParams.get('q') ?? '';
+  // S15B-3: a Search by a selected catalog Product keeps its id in the address next to the display text.
+  const productParam = addressParams.get('product');
+  const addressProduct = productParam !== null && searchProductIdSchema.safeParse(productParam).success ? productParam : undefined;
+  const addressKey = addressQuery ? searchKey(addressQuery, addressProduct) : '';
   const [query, setQuery] = useState(addressQuery);
+  const [selected, setSelected] = useState<SuggestedProduct | null>(addressProduct ? { id: addressProduct, name: addressQuery } : null);
+  const [searchedProductId, setSearchedProductId] = useState<string | undefined>(addressProduct);
+  const [suggestFocused, setSuggestFocused] = useState(false);
+  const [suggestDismissed, setSuggestDismissed] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const touchSessionRef = useRef(false);
+  const scrolledRef = useRef(false);
   const [state, setState] = useState<SearchState>(addressQuery ? { kind: 'loading' } : { kind: 'initial' });
   // Stage 6C: the Search Home (field + chips, no feed) shows until a deliberate search starts; `ready` is false only
   // while a plain `/` still decides between the Home and the last Search of this tab (storage is read after mount).
@@ -55,7 +74,7 @@ export function SearchScreen() {
   // Shown after a geolocation denial for «Расстояние»: the order fell back to the actuality.
   const [distanceNotice, setDistanceNotice] = useState(false);
   const pending = useRef(false);
-  const lastSearch = useRef<{ query: string; location?: BuyerLocation; sort: SearchSortMode; direction: SearchSortDirection } | null>(null);
+  const lastSearch = useRef<{ query: string; productId?: string; location?: BuyerLocation; sort: SearchSortMode; direction: SearchSortDirection } | null>(null);
   const localeRef = useRef(locale);
   const previousLocaleRef = useRef(locale);
   const preferencesRef = useRef({ sort, direction });
@@ -77,10 +96,10 @@ export function SearchScreen() {
       ? fetch(`/api/search?locale=${locale}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: last.query, buyerLocation: last.location, sort: last.sort, direction: last.direction }),
+        body: JSON.stringify({ q: last.query, ...(last.productId ? { productId: last.productId } : {}), buyerLocation: last.location, sort: last.sort, direction: last.direction }),
         cache: 'no-store',
       })
-      : fetch(`/api/search?${new URLSearchParams({ q: last.query, locale, sort: last.sort, direction: last.direction })}`, { cache: 'no-store' });
+      : fetch(`/api/search?${new URLSearchParams({ q: last.query, ...(last.productId ? { product_id: last.productId } : {}), locale, sort: last.sort, direction: last.direction })}`, { cache: 'no-store' });
     void request
       .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
       .then((localized) => {
@@ -103,6 +122,7 @@ export function SearchScreen() {
     buyerLocation: BuyerLocation | undefined,
     requestedSort: SearchSortMode,
     requestedDirection: SearchSortDirection,
+    productId?: string,
   ) => {
     if (pending.current) return;
     // «Расстояние» needs coordinates: without them the request is never sent as `distance` (the API rejects it) — the
@@ -121,20 +141,21 @@ export function SearchScreen() {
       return;
     }
     pending.current = true;
-    lastSearch.current = { query: parsed.data, location: buyerLocation, sort: mode, direction: order };
+    lastSearch.current = { query: parsed.data, productId, location: buyerLocation, sort: mode, direction: order };
     setStarted(true);
     setSearchedQuery(parsed.data);
+    setSearchedProductId(productId);
     setState({ kind: 'loading' });
     try {
       const response = buyerLocation
         ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, buyerLocation, sort: mode, direction: order }),
+          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, sort: mode, direction: order }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, locale: localeRef.current, sort: mode, direction: order })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, sort: mode, direction: order })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
@@ -149,9 +170,10 @@ export function SearchScreen() {
       // Keep the query in the address so Back from an Offer page returns to the same results.
       // An address that already holds the query is left alone: a replaceState there would race a navigation that
       // started meanwhile (for example a tap on «Ещё» right after Back).
-      writtenQuery.current = parsed.data;
-      if (window.location.pathname === '/' && new URLSearchParams(window.location.search).get('q') !== parsed.data) {
-        window.history.replaceState(null, '', `/?${new URLSearchParams({ q: parsed.data })}`);
+      writtenQuery.current = searchKey(parsed.data, productId);
+      const current = new URLSearchParams(window.location.search);
+      if (window.location.pathname === '/' && (current.get('q') !== parsed.data || (current.get('product') ?? undefined) !== productId)) {
+        window.history.replaceState(null, '', `/?${new URLSearchParams({ q: parsed.data, ...(productId ? { product: productId } : {}) })}`);
       }
     } catch {
       // Cards of the previous query would read as results of this one: the error replaces them (as in S0).
@@ -167,13 +189,14 @@ export function SearchScreen() {
   // buyer coordinates every geo-dependent preference is normalized (UI and the tab state are rewritten alike) and the
   // geolocation is never requested here.
   useEffect(() => {
-    if (addressQuery === writtenQuery.current) return;
+    if (addressKey === writtenQuery.current) return;
     const timer = window.setTimeout(() => {
-      writtenQuery.current = addressQuery;
+      writtenQuery.current = addressKey;
       const stored = readLastSearchState();
       const hasCoordinates = locationRef.current !== undefined;
       if (addressQuery) {
         setQuery(addressQuery);
+        setSelected(addressProduct ? { id: addressProduct, name: addressQuery } : null);
         const preferences = stored && stored.query === addressQuery ? normalizeGeoDependentState(stored, hasCoordinates) : null;
         if (preferences) {
           setSort(preferences.sort);
@@ -181,16 +204,18 @@ export function SearchScreen() {
           preferencesRef.current = { sort: preferences.sort, direction: preferences.direction };
         }
         const next = preferences ?? preferencesRef.current;
-        void executeSearch(addressQuery, locationRef.current, next.sort, next.direction);
+        void executeSearch(addressQuery, locationRef.current, next.sort, next.direction, addressProduct);
       } else if (stored) {
         const preferences = normalizeGeoDependentState(stored, hasCoordinates);
         setQuery(preferences.query);
+        setSelected(preferences.productId ? { id: preferences.productId, name: preferences.query } : null);
         setSort(preferences.sort);
         setDirection(preferences.direction);
         preferencesRef.current = { sort: preferences.sort, direction: preferences.direction };
-        void executeSearch(preferences.query, locationRef.current, preferences.sort, preferences.direction);
+        void executeSearch(preferences.query, locationRef.current, preferences.sort, preferences.direction, preferences.productId);
       } else {
         setQuery('');
+        setSelected(null);
         setShown(null);
         setStarted(false);
         setSearchedQuery('');
@@ -199,13 +224,13 @@ export function SearchScreen() {
       setReady(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [executeSearch, addressQuery]);
+  }, [executeSearch, addressQuery, addressProduct, addressKey]);
 
   // Stage 6C + Rev 3: the last Search of this tab — query, sort and direction only; never results or coordinates.
   useEffect(() => {
     if (!searchedQuery) return;
-    writeLastSearchState({ query: searchedQuery, sort, direction });
-  }, [searchedQuery, sort, direction]);
+    writeLastSearchState({ query: searchedQuery, sort, direction, ...(searchedProductId ? { productId: searchedProductId } : {}) });
+  }, [searchedQuery, searchedProductId, sort, direction]);
 
   // Requesting the browser geolocation happens only through an explicit geo intent of the buyer — choosing «Расстояние».
   // On denial or unavailability the ordinary Search keeps working: the order falls back to the actuality.
@@ -235,21 +260,64 @@ export function SearchScreen() {
   const buyerLocation = locationState.kind === 'enabled' ? locationState.point : undefined;
   useEffect(() => { locationRef.current = buyerLocation; }, [buyerLocation]);
 
+  // S15B-3: the selection holds only while the text is exactly the selected name; any edit drops it.
+  const selectedProductId = selected && query.trim() === selected.name ? selected.id : undefined;
+  const suggestions = useProductSuggestions(query, locale, suggestFocused && !selectedProductId);
+  const suggestOpen = suggestFocused && !suggestDismissed && !selectedProductId && suggestions.length > 0;
+
+  // Search Home only: when the list first opens in a touch session, bring the field block near the top once (the
+  // keyboard would cover it otherwise). Mouse / keyboard focus never scrolls; the results view needs no scroll.
+  useEffect(() => {
+    if (!suggestOpen) { scrolledRef.current = false; return; }
+    if (started || scrolledRef.current || !touchSessionRef.current) return;
+    scrolledRef.current = true;
+    fieldRef.current?.scrollIntoView({ block: 'start' });
+  }, [suggestOpen, started]);
+
+  function changeQuery(value: string) {
+    setQuery(value);
+    setSuggestDismissed(false);
+    setActiveSuggestion(-1);
+    if (selected && value.trim() !== selected.name) setSelected(null);
+  }
+
+  function chooseSuggestion(suggestion: SuggestedProduct) {
+    if (loading) return;
+    setSelected(suggestion);
+    setQuery(suggestion.name);
+    setSuggestDismissed(true);
+    setActiveSuggestion(-1);
+    input.current?.blur();
+    void executeSearch(suggestion.name, buyerLocation, sort, direction, suggestion.id);
+  }
+
+  function onQueryKey(event: KeyboardEvent<HTMLInputElement>) {
+    if (!suggestOpen) return;
+    if (event.key === 'ArrowDown') { event.preventDefault(); setActiveSuggestion((index) => (index + 1) % suggestions.length); }
+    else if (event.key === 'ArrowUp') { event.preventDefault(); setActiveSuggestion((index) => (index <= 0 ? suggestions.length - 1 : index - 1)); }
+    else if (event.key === 'Enter' && activeSuggestion >= 0) { event.preventDefault(); chooseSuggestion(suggestions[activeSuggestion]!); }
+    else if (event.key === 'Escape') { event.preventDefault(); setSuggestDismissed(true); }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await executeSearch(query, buyerLocation, sort, direction);
+    // A submitted text closes the list (it would cover the first results); typing opens it again.
+    setSuggestDismissed(true);
+    setActiveSuggestion(-1);
+    await executeSearch(query, buyerLocation, sort, direction, selectedProductId);
   }
 
   function quickSearch(term: string) {
     if (loading) return;
     setQuery(term);
+    setSelected(null);
     void executeSearch(term, buyerLocation, sort, direction);
   }
 
   function applyOrder(nextSort: SearchSortMode, nextDirection: SearchSortDirection, location: BuyerLocation | undefined) {
     setSort(nextSort);
     setDirection(nextDirection);
-    if (lastSearch.current) void executeSearch(lastSearch.current.query, location, nextSort, nextDirection);
+    if (lastSearch.current) void executeSearch(lastSearch.current.query, location, nextSort, nextDirection, lastSearch.current.productId);
   }
 
   // A choice applies at once. A new criterion starts with its natural direction; the active one reverses its direction.
@@ -276,6 +344,7 @@ export function SearchScreen() {
     <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate
       style={{ display: 'flex', alignItems: 'center', gap: 8, flex: compact ? 1 : 'none', minWidth: 0 }}>
       <label htmlFor="product-query" className="vh">{t('search.question')}</label>
+      <div ref={fieldRef} style={{ position: 'relative', flex: 1, minWidth: 0, scrollMarginTop: 12 }}>
       <div className="inp" style={compact
         ? { flex: 1, minWidth: 0, height: 44, borderRadius: 999, background: 'var(--sunken)', borderColor: 'transparent' }
         : { flex: 1, minWidth: 0 }}>
@@ -288,7 +357,15 @@ export function SearchScreen() {
           placeholder={t('search.placeholder')}
           value={query}
           readOnly={loading}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => changeQuery(event.target.value)}
+          onKeyDown={onQueryKey}
+          onFocus={() => setSuggestFocused(true)}
+          onBlur={() => { setSuggestFocused(false); touchSessionRef.current = false; }}
+          onPointerDown={(event) => { touchSessionRef.current = event.pointerType === 'touch'; }}
+          // The field stays a searchbox (the existing accessible name and role); the list is announced through these.
+          aria-autocomplete="list"
+          aria-controls={suggestOpen ? 'product-suggestions' : undefined}
+          aria-activedescendant={activeSuggestion >= 0 && suggestOpen ? `product-suggestions-option-${activeSuggestion}` : undefined}
           aria-invalid={state.kind === 'validation'}
           aria-describedby={state.kind === 'validation' ? 'search-validation' : undefined}
           autoComplete="off"
@@ -296,8 +373,10 @@ export function SearchScreen() {
         />
         {query && !loading && (
           <button type="button" className="ib" aria-label={t('search.clear')} style={{ width: 44, height: 44, margin: '0 -12px 0 0' }}
-            onClick={() => { setQuery(''); input.current?.focus(); }}><Ic name="close" className="c2" /></button>
+            onClick={() => { setQuery(''); setSelected(null); input.current?.focus(); }}><Ic name="close" className="c2" /></button>
         )}
+      </div>
+      {suggestOpen && <ProductSuggestionList id="product-suggestions" label={t('card.suggestions')} suggestions={suggestions} activeIndex={activeSuggestion} onChoose={chooseSuggestion} />}
       </div>
       {withFilters && <SortPopover sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} />}
     </form>
@@ -359,7 +438,7 @@ export function SearchScreen() {
             <div style={{ display: 'flex', gap: 10 }}><Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('search.error')}</p></div>
             {lastSearch.current && (
               <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
-                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sort, lastSearch.current.direction)}>
+                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sort, lastSearch.current.direction, lastSearch.current.productId)}>
                 <Ic name="refresh" className="sm" />{t('cabinet.retry')}
               </button>
             )}

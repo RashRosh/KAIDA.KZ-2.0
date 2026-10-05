@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from './search.contract';
+import { searchProductIdSchema, searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from './search.contract';
 
 export const buyerLocationSchema = z.strictObject({
   latitude: z.number().finite().min(-90).max(90),
@@ -10,6 +10,8 @@ export type BuyerLocation = z.infer<typeof buyerLocationSchema>;
 
 export const geoSearchRequestSchema = z.strictObject({
   q: searchQuerySchema,
+  // S15B-3: with `productId` the Search runs on that Product only; `q` stays the display text.
+  productId: searchProductIdSchema.optional(),
   buyerLocation: buyerLocationSchema,
   // Stage 6 Rev 3: the sort criterion and its direction; numeric weights are not part of the public request contract
   // and are rejected by this strict schema.

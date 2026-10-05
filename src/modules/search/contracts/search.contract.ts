@@ -6,6 +6,9 @@ export const searchQuerySchema = z.string().trim().min(1, 'Введите наз
 
 // Stage 6 Rev 3 (slice contract §3.2/§3.5): the buyer chooses an explicit sort criterion and its direction; the selected
 // criterion is the primary ordering — there is no weighted score behind it. `distance` needs the buyer coordinates.
+// S15B-3: the canonical Product identity of a search by a selected catalog Product (`product_id` / `productId`).
+export const searchProductIdSchema = z.uuid();
+
 export const searchSortModeSchema = z.enum(['actuality', 'distance', 'price']);
 export const searchSortDirectionSchema = z.enum(['asc', 'desc']);
 
