@@ -1,8 +1,8 @@
 # Catalog-backed Seller → Buyer runtime loop
 
-**Status:** DRAFT — CONTROLLER/PO REVIEW REQUIRED. Do not implement until `APPROVED — IMPLEMENTATION AUTHORIZED`.
-**Base:** `main` `5b2171035c058f8337671b30222c7a247cb33b79` (`v0.0.52-production-kb-importer-v1`, merged-main `KAIDA verify` run `37293540946` SUCCESS) плюс docs-нормализация `docs/replan-after-production-kb-v1`.
-**Branch:** `docs/catalog-runtime-loop-contract` (contract-only).
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-05).
+**Base:** `main` `7ebb67a5f09ea8b3d5229936ddc60df972961039` (после docs-нормализации PR #91; checkpoint `v0.0.52-production-kb-importer-v1`).
+**Branch:** contract PR (contract-only).
 **Plan:** следующий продуктовый шаг после Production KB v1 (`EXECUTION_PLAN.md`). Следом — S15B (отдельно).
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
 
