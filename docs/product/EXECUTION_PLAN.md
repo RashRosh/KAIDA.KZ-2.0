@@ -408,7 +408,7 @@ willingness to pay: реакция на бесплатный сигнал сам
 # ISSUE REGISTER (reconciliation 2026-10-05)
 
 Порядок работ определяют разделы выше; Issues владеют подробными требованиями и сюда не копируются. Состояние каждого
-Issue — ровно одно. Строки с пометкой *proposed* — предложение reconciliation, ждут подтверждения PO.
+Issue — ровно одно (классификация принята PO).
 
 | Issue | Состояние | Owner / trigger |
 |---|---|---|
@@ -416,9 +416,9 @@ Issue — ровно одно. Строки с пометкой *proposed* — �
 | #55 Demand | input to scheduled workstream | S15A closed (`v0.0.52`) → S15B → S15C (stage 10C); D3–D6 — по gates в Feature Map |
 | #75 AI-правила обработки seller input | input to scheduled workstream | AI Input (stage 7, S17–S20): входные правила будущих Slice Contracts; AI-модерация — stage 8 |
 | #76 distance sensitivity в ranking | later / dependency-gated | после S15B + данных D0/D1. Не может влиять скрыто на явные `actuality | distance | price`; требует отдельного relevance/recommendation context и contract revision (Rev 3 закрыл скрытый score) |
-| #79 Price Intelligence | later / dependency-gated | Product resolution (S15B) + накопленные цены; не в ranking на MVP — *proposed* |
+| #79 Price Intelligence | later / dependency-gated | Product resolution (S15B) + накопленные цены; не в ranking на MVP |
 | #10 Market navigation | later / triggered | «Insertion candidates» ниже |
-| #54 категории товаров продавца | later / backlog | trigger: у продавцов много карточек; зависит от каталога/Category и решений PO — *proposed* |
+| #54 категории товаров продавца | later / backlog | trigger: у продавцов много карточек; зависит от каталога/Category и решений PO |
 | #83 Security automation | later / trigger-gated | триггеры внутри Issue (Dockerfile/registry/SBOM и т. д.) |
 | #13, #16, #17, #19, #27, #31, #32, #34, #35, #36, #37, #42 | covered / closed | реализовано или завершено, Issue закрыт |
 | #20–#23, #28, #29 | invalid / temp | не product requirements |

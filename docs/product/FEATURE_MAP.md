@@ -361,9 +361,9 @@ Seller-provided Offer media и AI media-input — разные capabilities. Н�
 
 Market — специализированный spatial container, а не центр архитектуры. Generic Location flow должен продолжать работать независимо от future Market scheme/MarketPlace capability.
 
-### Backlog capabilities, owned by Issues (proposed, 2026-10-05)
+### Backlog capabilities, owned by Issues (2026-10-05)
 
-Подробные требования — в Issues; здесь только capability и dependency. Ничего из этого не запланировано в очередь.
+Подробные требования — в Issues; здесь только capability и dependency. Таблица **не меняет execution order**: #75 уже является входным backlog/source requirements для запланированного AI Input S17–S20; остальные строки остаются later / dependency-gated / trigger-gated согласно `EXECUTION_PLAN.md`.
 
 | Capability | Issue | Dependency / trigger |
 |---|---|---|
