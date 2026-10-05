@@ -15,7 +15,7 @@
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
 2. ~~Catalog-backed Seller → Buyer runtime loop~~ — **CLOSED** (`v0.0.53`, PR #93; integration/user-flow proof, production-код не менялся)
    (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`).
-   **NEXT: S15B** — первый кандидат: релевантность и достижимость подсказок каталога (top-5 по алфавиту не доводит «бар» до «Баранина»).
+   **NEXT: S15B-1 — Catalog suggestion relevance / reachability** (`docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`, DRAFT); дальше остальной S15B малыми slices.
 3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
 4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
 5. Начать production-like накопление demand-данных.
@@ -229,7 +229,7 @@ Product Owner decision и обновления этого файла.
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
 | 10A | ~~S15A — Catalog bootstrap~~ — **закрыт** (Production KB v1, `v0.0.52-production-kb-importer-v1`) | `docs/slices/production-kb-importer/SLICE_CONTRACT.md` |
 | 10A+ | ~~Catalog-backed Seller → Buyer runtime loop~~ — **закрыт** (`v0.0.53-catalog-runtime-loop`, PR #93, manual acceptance PASS) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` |
-| 10B | **NEXT:** S15B — Search System revision (первый кандидат — catalog suggestion relevance / reachability; малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
+| 10B | S15B — Search System revision (**NEXT: S15B-1 catalog suggestion relevance / reachability**, DRAFT контракт; малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
 | 10C | S15C — Demand Data Foundation (после стабилизации S15B; включает цель старой 6F): D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
 | 11A | Backoffice foundation planning: Requirement Inventory → Operations Map → minimum roles/Permissions → Domain states/invariants; first operational target = Catalog Operations | `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` |
