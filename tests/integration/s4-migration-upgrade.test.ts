@@ -52,7 +52,7 @@ describe('S4 migration upgrade path on PostgreSQL 18', () => {
 
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
 
-      expect((await pool.query('SELECT * FROM products WHERE id=$1', [productId])).rows[0]).toEqual(before.product);
+      expect((await pool.query('SELECT * FROM products WHERE id=$1', [productId])).rows[0]).toEqual({ ...before.product, kb_product_id: null });
       expect((await pool.query('SELECT * FROM users WHERE id=$1', [userId])).rows[0]).toEqual(before.user);
       expect((await pool.query('SELECT id,display_name,owner_user_id FROM sellers WHERE id=$1', [sellerId])).rows[0]).toEqual(before.seller);
       expect((await pool.query('SELECT id,seller_id,name,address_text,type FROM locations WHERE id=$1', [locationId])).rows[0]).toEqual(before.location);

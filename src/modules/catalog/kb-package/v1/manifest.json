@@ -1,0 +1,68 @@
+{
+  "alias_eligibility": {
+    "product_must_be_exported": true,
+    "safe_for_auto_match": "YES",
+    "status": "ACTIVE"
+  },
+  "counts": {
+    "aliases_excluded_by_reason": {
+      "excluded_product": 15,
+      "non_active_status": 6
+    },
+    "categories": 35,
+    "exported_aliases": 210,
+    "exported_products": 682,
+    "products_excluded_by_status": {
+      "LEGACY_REVIEW": 105,
+      "PROVISIONAL_AI": 77,
+      "PROVISIONAL_USER": 4
+    },
+    "source_aliases": 231,
+    "source_products_total": 868
+  },
+  "excluded_datasets": [
+    "data/raw/**",
+    "data/extracted/observations.csv",
+    "seller/company data",
+    "unresolved queues",
+    "provisional mappings and Products",
+    "manual review queues",
+    "raw price observations and price aggregates",
+    "legacy workbook",
+    "official XLS snapshot",
+    "attribute_definitions.csv",
+    "official_mappings.csv"
+  ],
+  "file_hashes": {
+    "CONTRACT.md": "4e39e21bde4ab3dfef88f1e5b26dbd49820694b2147a60f060de9498a7c1e3f1",
+    "aliases.csv": "b96c4181f6b3efb8609aa9b7b0ba5b33471062200bb05335ad0c5f6e1ec49350",
+    "categories.csv": "a5f9291825b410e6132be32a8e792a764bf61268436046b5d7e9df39d2c71fe0",
+    "products.csv": "a32f3cf087e25db57740829afd7bb9c79152e8ff8a70374dc3a88ad31f43dd14"
+  },
+  "included_datasets": [
+    "products.csv",
+    "aliases.csv",
+    "categories.csv",
+    "CONTRACT.md"
+  ],
+  "observations_sha256": "7071860efc890ad0bb46a6bc02072b33fbb784004ea64c5a75c6876ba206a870",
+  "ordering": {
+    "aliases.csv": "alias_id ascending",
+    "categories.csv": "category_code ascending",
+    "products.csv": "product_id ascending"
+  },
+  "package_name": "kaida-kb-v1",
+  "package_schema_version": 1,
+  "package_version": "v1",
+  "product_eligibility": {
+    "status": "LEGACY_APPROVED"
+  },
+  "raw_tree_sha256": "2029db154b59b3a155c3caf602ad75c2cc9f90362631d9e042e283debf074666",
+  "source_checkpoint_tag": "v0.1.0-kb-foundation",
+  "source_commit_sha": "25a27637d3c131c6ab22f855e7d0d872745ea6e9",
+  "source_files": {
+    "aliases_sha256": "eb35da7641be69422fcc02fa9264102e1b132bf20ab77b24c31b47c631e2c1d1",
+    "products_sha256": "437a889f92c596ad4f0a74046d0cca18598f662363c45c0e3d0f41a8181e9a82"
+  },
+  "source_repository": "RashRosh/kaida-product-corpus"
+}

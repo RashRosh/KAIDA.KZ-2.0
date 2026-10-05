@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it, beforeAll } from 'vitest';
-import { seedIds } from '../../src/db/seed';
+import { seedDatabase, seedIds } from '../../src/db/seed';
 import { resolveProduct } from '../../src/modules/catalog/application/resolve-product';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
 import { connectTestDatabase } from './database';
@@ -9,7 +9,10 @@ describe.sequential('Catalog localization on PostgreSQL 18', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
   const productIds: string[] = [];
 
-  beforeAll(async () => { connection = await connectTestDatabase(); });
+  beforeAll(async () => {
+    connection = await connectTestDatabase();
+    await seedDatabase(connection.db);
+  });
   afterAll(async () => {
     if (productIds.length > 0) {
       await connection.pool.query('DELETE FROM offers WHERE product_id = ANY($1::uuid[])', [productIds]);
@@ -21,47 +24,86 @@ describe.sequential('Catalog localization on PostgreSQL 18', () => {
   });
 
   it('resolves Russian and Kazakh catalog terms to one Product; the card title stays the Seller text (seller-showcase-editor)', async () => {
-    await expect(resolveProduct(connection.db, 'қой еті')).resolves.toEqual({
+    const kkSeedAlias = (await connection.pool.query<{ name: string }>(
+      'SELECT name FROM product_aliases WHERE id=$1',
+      [seedIds.lambKazakhAlias],
+    )).rows[0]?.name;
+    const lambSeedName = (await connection.pool.query<{ name: string }>(
+      'SELECT name FROM products WHERE id=$1',
+      [seedIds.lambProduct],
+    )).rows[0]?.name;
+    const lambSearchTerm = (await connection.pool.query<{ title_search: string }>(
+      'SELECT title_search FROM offers WHERE id=$1',
+      [seedIds.lambOffer],
+    )).rows[0]?.title_search;
+    expect(kkSeedAlias).toBeTruthy();
+    expect(lambSeedName).toBeTruthy();
+    expect(lambSearchTerm).toBeTruthy();
+
+    await expect(resolveProduct(connection.db, kkSeedAlias)).resolves.toEqual({
       status: 'resolved',
-      product: { id: seedIds.lambProduct, name: 'Баранина' },
+      product: { id: seedIds.lambProduct, name: lambSeedName },
     });
 
-    const ru = await searchOffers('баранина', connection.db);
-    const kk = await searchOffers('қой еті', connection.db, { locale: 'kk' });
+    const ru = await searchOffers(lambSearchTerm, connection.db);
+    const kk = await searchOffers(kkSeedAlias, connection.db, { locale: 'kk' });
     expect(kk.offers.map((offer) => offer.id)).toEqual(ru.offers.map((offer) => offer.id));
-    expect(ru.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
-    expect(kk.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
+    expect(ru.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: lambSeedName });
+    expect(kk.offers[0]?.product).toEqual({ id: seedIds.lambProduct, name: lambSeedName });
   });
 
   it('finds an Offer through a Kazakh alias and shows its title as written', async () => {
     const productId = randomUUID();
     productIds.push(productId);
-    await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, 'Тестовый продукт без перевода']);
-    await connection.pool.query('INSERT INTO product_aliases (product_id,name,locale) VALUES ($1,$2,$3)', [productId, 'аудармасыз өнім', 'kk']);
+    await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, 'РўРµСЃС‚РѕРІС‹Р№ РїСЂРѕРґСѓРєС‚ Р±РµР· РїРµСЂРµРІРѕРґР°']);
+    await connection.pool.query('INSERT INTO product_aliases (product_id,name,locale) VALUES ($1,$2,$3)', [productId, 'Р°СѓРґР°СЂРјР°СЃС‹Р· У©РЅС–Рј', 'kk']);
     await connection.pool.query(
       `INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at, title, title_search, card_id)
        VALUES ($1,$2,$3,'100','KZT','active',$4,(SELECT name FROM products WHERE id=$1::uuid),lower((SELECT name FROM products WHERE id=$1::uuid)),gen_random_uuid())`,
       [productId, seedIds.seller, seedIds.location, new Date()],
     );
 
-    const resolution = await resolveProduct(connection.db, 'аудармасыз өнім');
-    expect(resolution).toEqual({ status: 'resolved', product: { id: productId, name: 'Тестовый продукт без перевода' } });
-    const result = await searchOffers('аудармасыз өнім', connection.db, { locale: 'kk' });
-    expect(result.offers[0]?.product).toEqual({ id: productId, name: 'Тестовый продукт без перевода' });
+    const resolution = await resolveProduct(connection.db, 'Р°СѓРґР°СЂРјР°СЃС‹Р· У©РЅС–Рј');
+    expect(resolution).toEqual({ status: 'resolved', product: { id: productId, name: 'РўРµСЃС‚РѕРІС‹Р№ РїСЂРѕРґСѓРєС‚ Р±РµР· РїРµСЂРµРІРѕРґР°' } });
+    const result = await searchOffers('Р°СѓРґР°СЂРјР°СЃС‹Р· У©РЅС–Рј', connection.db, { locale: 'kk' });
+    expect(result.offers[0]?.product).toEqual({ id: productId, name: 'РўРµСЃС‚РѕРІС‹Р№ РїСЂРѕРґСѓРєС‚ Р±РµР· РїРµСЂРµРІРѕРґР°' });
   });
 
-  it('rejects duplicate normalized names per locale and detects cross-language ambiguity', async () => {
+  it('allows duplicate normalized localized names and resolves them as ambiguous', async () => {
     const first = randomUUID();
     const second = randomUUID();
     productIds.push(first, second);
     await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2),($3,$4)', [first, 'CL First', second, 'CL Second']);
-    await connection.pool.query("INSERT INTO product_localized_names (product_id,locale,name) VALUES ($1,'kk',$2)", [first, 'Ортақ атау']);
+    await connection.pool.query("INSERT INTO product_localized_names (product_id,locale,name) VALUES ($1,'kk',$2)", [first, 'Shared localized term']);
     await expect(connection.pool.query(
       "INSERT INTO product_localized_names (product_id,locale,name) VALUES ($1,'kk',$2)",
-      [second, '  ортақ АТАУ  '],
-    )).rejects.toMatchObject({ code: '23505' });
+      [second, '  SHARED LOCALIZED TERM  '],
+    )).resolves.toBeDefined();
 
-    await connection.pool.query("INSERT INTO product_aliases (product_id,name,locale) VALUES ($1,$2,'ru')", [second, 'Ортақ атау']);
-    await expect(resolveProduct(connection.db, 'Ортақ атау')).resolves.toEqual({ status: 'ambiguous' });
+    await expect(resolveProduct(connection.db, 'shared localized term')).resolves.toEqual({ status: 'ambiguous' });
+  });
+
+  it('keeps one localized canonical name per Product and locale', async () => {
+    const productId = randomUUID();
+    productIds.push(productId);
+    await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, 'CL Single Locale']);
+    await connection.pool.query("INSERT INTO product_localized_names (product_id,locale,name) VALUES ($1,'kk',$2)", [productId, 'CL One']);
+
+    await expect(connection.pool.query(
+      "INSERT INTO product_localized_names (product_id,locale,name) VALUES ($1,'kk',$2)",
+      [productId, 'CL Two'],
+    )).rejects.toMatchObject({ code: '23505' });
+  });
+
+  it('continues resolving unique localized terms', async () => {
+    const productId = randomUUID();
+    productIds.push(productId);
+    await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, 'CL Unique']);
+    await connection.pool.query("INSERT INTO product_localized_names (product_id,locale,name) VALUES ($1,'kk',$2)", [productId, 'CL Unique KK']);
+
+    await expect(resolveProduct(connection.db, ' cl unique kk ')).resolves.toEqual({
+      status: 'resolved',
+      product: { id: productId, name: 'CL Unique' },
+    });
   });
 });

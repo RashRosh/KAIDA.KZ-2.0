@@ -30,6 +30,7 @@ The implementation slice must not modify `kaida-product-corpus`.
 ## 4. Closed contracts affected
 
 - **Catalog localization / resolution:** importer installs data behind the existing Catalog boundary. Resolution by canonical Product name, localized Product names and aliases remains the same.
+- **Localization contract correction authorized by Controller/Product decision:** localized Product names are search/display names, not Product identity. The global uniqueness constraint on normalized localized names is removed. `(product_id, locale)` remains unique, so one Product still has at most one canonical localized name per locale. If the same localized term matches multiple Products, existing resolver behavior applies: the result is `ambiguous`. No heuristic, fuzzy matching or automatic Product choice is introduced.
 - **Seller showcase/editor and batch input:** catalog suggestions and exact Product linking may see more catalog data, but suggestion/matching rules are not redesigned.
 - **Search S0/S6/S7/S9/Stage 5/6C/Stage 6 Rev 3:** buyer Search API, state, ranking, sorting, eligibility and closed UI behavior remain unchanged.
 - **Offer lifecycle and existing seed:** existing demo Products and Offers remain valid; Offer foreign keys are not rewritten.
@@ -59,7 +60,7 @@ Runtime identity remains `products.id` (UUID). Stable KB identity is a separate 
 - No safe existing match → create a new Product with a new runtime UUID and attach the KB ID.
 - Ambiguous/conflicting match → fail the entire import.
 
-For existing localized names, the package canonical RU/KK names become package-owned Product names. If an adopted Product already has a different non-empty RU/KK localized value, the importer must preserve existing closed search coverage by retaining that previous value as an alias on the same Product where safe. If that retention would violate uniqueness or point to another Product, the whole import fails instead of silently destroying behavior.
+For existing localized names, the package canonical RU/KK names become package-owned Product names. If an adopted Product already has a different non-empty RU/KK localized value, the importer must preserve existing closed search coverage by retaining that previous value as an alias on the same Product where safe. Duplicate normalized localized names across different Products are allowed and resolve as `ambiguous`; duplicate `(product_id, locale)` localized-name rows remain forbidden.
 
 ### Alias adoption
 
@@ -94,8 +95,8 @@ Verification depth must match these risks: package tamper checks, migration upgr
 5. All 35 categories are persisted with RU/KK labels and valid Product references.
 6. Existing matching Products such as `Баранина` and `Говядина` are adopted rather than replaced.
 7. Existing Offer → Product UUID references remain unchanged before and after import.
-8. Importing the same package twice leaves an equivalent persistent result: no duplicate Products, aliases, categories, localized names or package-install records.
-9. Deterministic conflicts — KB ID on another Product, normalized canonical match to multiple Products, existing Product already carrying another KB ID, alias collision to another Product or uniqueness violation — fail the whole import and roll back.
+8. Importing the same package twice leaves an equivalent persistent result: no duplicate Products, aliases, categories, `(product_id, locale)` localized names or package-install records.
+9. Deterministic conflicts — KB ID on another Product, normalized RU canonical match to multiple Products during adoption, existing Product already carrying another KB ID, alias collision to another Product or remaining identity/foreign-key uniqueness violation — fail the whole import and roll back. Duplicate localized display/search terms across different Products are not conflicts; they resolve as `ambiguous`.
 10. Runtime buyer/seller flows use only KAIDA PostgreSQL and have no dependency on corpus checkout, 2GIS, BNS/stat.gov.kz, GitHub or any external KB service.
 11. Existing Catalog/Search regression tests remain green; Search matching, sorting, ranking, state and public API semantics are unchanged.
 12. Installed package provenance can be read from DB and reports package identity plus imported counts.
@@ -116,7 +117,7 @@ Do not create UI solely for manual acceptance. Counts, exact runtime Product UUI
 
 - Package fixture validation tests: pinned `manifest.json` SHA-256 before trusting manifest contents; required files; manifest-listed file hashes; package/schema/source identity; Product ID format; uniqueness and references.
 - Negative package-integrity tests: direct manifest tampering is rejected before DB mutation; altering a package data file and updating its hash inside `manifest.json` is still rejected because the manifest no longer matches the externally pinned verified manifest SHA-256, and the DB remains unchanged.
-- Migration/upgrade tests for new persistence: KB ID uniqueness, category persistence, package provenance and backwards compatibility.
+- Migration/upgrade tests for new persistence: KB ID uniqueness, category persistence, package provenance, localized-name duplicate lookup behavior and backwards compatibility.
 - Import integration tests: valid package import counts; corrupted package fails before mutation; repeated import idempotent; deterministic conflict rolls back; concurrent imports do not create duplicates.
 - Adoption tests: seeded `Баранина` and `Говядина` keep their UUIDs; existing Offer FK values are unchanged.
 - Alias tests: package alias resolves through adopted/created runtime Product UUID; equivalent alias adoption is idempotent; conflicting alias fails.
@@ -127,9 +128,9 @@ Do not create UI solely for manual acceptance. Counts, exact runtime Product UUI
 
 Stop instead of implementation/design workaround if analysis discovers:
 
-1. verified package violates current uniqueness constraints in a way that cannot be deterministically adopted;
+1. verified package violates remaining identity or foreign-key uniqueness constraints in a way that cannot be deterministically adopted; duplicate localized search/display names across different Products are explicitly allowed;
 2. Product adoption is ambiguous;
-3. RU/KK mapping requires changing a closed localization contract;
+3. RU/KK mapping requires changing a closed localization contract beyond the authorized removal of global localized-name uniqueness;
 4. safe alias import would break the existing Catalog resolution contract;
 5. importer unexpectedly requires excluded hierarchy or official mappings;
 6. existing Offer UUID references cannot be preserved;

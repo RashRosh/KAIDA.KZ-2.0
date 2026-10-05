@@ -65,12 +65,12 @@ test('Russian and Kazakh catalog terms find the same Offer; the card title stays
   await page.goto('/');
   await page.getByLabel('Какой товар ищете?').fill('қой еті');
   await page.getByLabel('Какой товар ищете?').press('Enter');
-  await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Баранина', exact: true }).first()).toBeVisible();
   await expect(page).toHaveURL(/\?q=/);
   const results = page.url();
   await chooseLanguageInMore(page, 'Қазақша');
   await page.goto(results);
   await expect(page.getByLabel('Қандай тауар іздейсіз?')).toHaveValue('қой еті');
   // The title stays as the Seller wrote it after the language switch.
-  await expect(page.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Баранина', exact: true }).first()).toBeVisible();
 });

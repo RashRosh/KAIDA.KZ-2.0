@@ -60,7 +60,7 @@ describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
 
       await migrate(db, { migrationsFolder: './drizzle/migrations' });
 
-      expect((await pool.query('SELECT * FROM products WHERE id=$1', [productId])).rows[0]).toEqual(productBefore);
+      expect((await pool.query('SELECT * FROM products WHERE id=$1', [productId])).rows[0]).toEqual({ ...productBefore, kb_product_id: null });
       expect((await pool.query('SELECT * FROM offers WHERE id=$1', [offerId])).rows[0]).toEqual(withShowcaseCardOffer({ ...withStructuredPriceUnit(offerBefore, null), seller_comment_version: 1 }, 'S6 upgrade product'));
       expect((await pool.query('SELECT * FROM seller_change_items WHERE id=$1', [itemId])).rows[0]).toEqual(withShowcaseCardItem({ ...withStructuredPriceUnit(itemBefore, null), photos_specified: false }, 'S6 upgrade product', offerId));
       expect((await pool.query("SELECT to_regclass('public.product_aliases') AS table_name")).rows[0].table_name).toBe('product_aliases');
@@ -131,6 +131,7 @@ describe.sequential('S6 migration upgrade path on PostgreSQL 18', () => {
         { column_name: 'product_id', is_nullable: 'NO' },
         { column_name: 'name', is_nullable: 'NO' },
         { column_name: 'locale', is_nullable: 'YES' },
+        { column_name: 'kb_alias_id', is_nullable: 'YES' },
       ]);
 
       const constraints = await pool.query(`SELECT conname,contype FROM pg_constraint
