@@ -93,7 +93,7 @@ Feature freeze сохраняется: новые product capabilities вне э
 | 5 | Slice Contracts этапа 1 (ИИ выключен) | Все пять утверждены |
 | 6 | Реализация этапа 1 по контрактам | Этап 1 закрыт 2026-09-28 (`v0.0.36-actuality-reminders`) |
 
-### Этап 1 — продавец без ИИ (черновой состав, порядок утверждает PO на шаге 5)
+### Этап 1 — продавец без ИИ (**закрыт**; ниже исторический состав)
 
 Цель: продавец проходит ручной путь целевого макета от пустой витрины до опубликованной и изменённой карточки.
 
@@ -405,6 +405,24 @@ willingness to pay: реакция на бесплатный сигнал сам
 
 ---
 
+# ISSUE REGISTER (reconciliation 2026-10-05)
+
+Порядок работ определяют разделы выше; Issues владеют подробными требованиями и сюда не копируются. Состояние каждого
+Issue — ровно одно (классификация принята PO).
+
+| Issue | Состояние | Owner / trigger |
+|---|---|---|
+| #12 Search sorting | covered / closed (completed, Stage 6 Rev 3, `v0.0.51`) | будущие фильтры — не остаток этого Issue, см. «Additional Search filters» |
+| #55 Demand | input to scheduled workstream | S15A closed (`v0.0.52`) → S15B → S15C (stage 10C); D3–D6 — по gates в Feature Map |
+| #75 AI-правила обработки seller input | input to scheduled workstream | AI Input (stage 7, S17–S20): входные правила будущих Slice Contracts; AI-модерация — stage 8 |
+| #76 distance sensitivity в ranking | later / dependency-gated | после S15B + данных D0/D1. Не может влиять скрыто на явные `actuality | distance | price`; требует отдельного relevance/recommendation context и contract revision (Rev 3 закрыл скрытый score) |
+| #79 Price Intelligence | later / dependency-gated | Product resolution (S15B) + накопленные цены; не в ranking на MVP |
+| #10 Market navigation | later / triggered | «Insertion candidates» ниже |
+| #54 категории товаров продавца | later / backlog | trigger: у продавцов много карточек; зависит от каталога/Category и решений PO |
+| #83 Security automation | later / trigger-gated | триггеры внутри Issue (Dockerfile/registry/SBOM и т. д.) |
+| #13, #16, #17, #19, #27, #31, #32, #34, #35, #36, #37, #42 | covered / closed | реализовано или завершено, Issue закрыт |
+| #20–#23, #28, #29 | invalid / temp | не product requirements |
+
 # INSERTION CANDIDATES
 
 Insertion candidate не имеет жёсткого номера. Он рассматривается **только на checkpoint/re-evaluation boundary** и никогда не вклинивается внутрь уже открытого slice.
@@ -416,10 +434,11 @@ Insertion candidate не имеет жёсткого номера. Он расс
 - direction: Market directory → scheme/MarketPlaces → Location binding → buyer internal navigation;
 - default without trigger: остаётся unscheduled.
 
-## Additional Search filters
+## Additional Search filters (отдельно от #12)
 
-Состав фильтра у строки поиска решён PO (2026-09-25): сортировка, расстояние, цена от–до — они вошли в stages 5–6.
-Другие фильтры (тип точки, наличие фото, контактов и т. п.) не добавляются без нового решения PO.
+Сортировка «Расстояние / Цена / Актуальность» с направлением закрыта Stage 6 Rev 3 (`v0.0.51`). Радиус и цена от–до
+в Rev 3 **сняты**; отдельные фильтры (радиус, диапазон цены, тип точки, фото/контакты, rating) не добавляются без нового
+решения PO и своей data/usefulness-основы. Trigger: PO подтверждает конкретный filter use case.
 
 ## M2 — публичное видео предложения
 
