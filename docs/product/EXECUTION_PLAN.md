@@ -14,7 +14,7 @@
 
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
 2. **NEXT: Catalog-backed Seller → Buyer runtime loop** — integration/user-flow proof, не импорт каталога
-   (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`, DRAFT; реализация не начата).
+   (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`, APPROVED).
 3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
 4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
 5. Начать production-like накопление demand-данных.
@@ -227,7 +227,7 @@ Product Owner decision и обновления этого файла.
 | 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
 | 10A | ~~S15A — Catalog bootstrap~~ — **закрыт** (Production KB v1, `v0.0.52-production-kb-importer-v1`) | `docs/slices/production-kb-importer/SLICE_CONTRACT.md` |
-| 10A+ | **NEXT:** Catalog-backed Seller → Buyer runtime loop (интеграционное доказательство на Production KB v1) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` (DRAFT) |
+| 10A+ | **NEXT:** Catalog-backed Seller → Buyer runtime loop (интеграционное доказательство на Production KB v1) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` (APPROVED) |
 | 10B | S15B — Search System revision (после runtime loop; малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
 | 10C | S15C — Demand Data Foundation (после стабилизации S15B; включает цель старой 6F): D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
