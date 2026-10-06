@@ -16,7 +16,7 @@
 
 ## Next action
 
-1. Search sorting control UX refresh (до S15C): `docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md` (DRAFT; ждёт утверждения и ответа PO по design gaps); финальное решение PO записано в `EXECUTION_PLAN.md` («Deferred UX»): relevance по умолчанию без пункта «По соответствию», три явные сортировки, «Сбросить сортировку», внешний вид по design workflow (§18). Search sorting control UX refresh — deferred (см. план).
+1. Search sorting control UX refresh (до S15C): `docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md` (APPROVED, реализация: компактный ряд, × для сброса); финальное решение PO записано в `EXECUTION_PLAN.md` («Deferred UX»): relevance по умолчанию без пункта «По соответствию», три явные сортировки, «Сбросить сортировку», внешний вид по design workflow (§18). Search sorting control UX refresh — deferred (см. план).
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
