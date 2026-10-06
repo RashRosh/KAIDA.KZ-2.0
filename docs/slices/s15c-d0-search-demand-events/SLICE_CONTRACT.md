@@ -1,6 +1,6 @@
 # S15C / D0 — Search Demand Events
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-07; решения PO 1–8 и 1–4 по остатку внесены).
+**Status:** CLOSED. Checkpoint `v0.0.61-search-demand-events`; PRs #120 (contract), #121 (implementation); `main` `0232c2d07af55deb9b874a12b994f97f86849783`; merged-main `KAIDA verify` run `37527531918` SUCCESS; manual acceptance PASS (implementation `62560c5`). **Деплой-предусловие (организационное, не гарантия кода):** запись `organic` в боевом окружении (`SEARCH_EVENTS_ORIGIN=organic`) остаётся выключенной, пока ежедневная операторская очистка (`pnpm search-events:purge`) не настроена во внешнем планировщике и не проверена; фактическое хранение = 90 дней + интервал очистки при успешном выполнении. События `dev` / `test` / `synthetic` — не реальный спрос.
 **Base:** `main` после `v0.0.60-search-sorting-control` (S15B закрыт).
 **Plan:** первый slice Demand Data Foundation (`EXECUTION_PLAN.md`, 10C; Issue #55; `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` D0; `SEARCH_SYSTEM_SPEC_v0.1.md` §18). Цель — записывать осознанные поиски покупателей уже сейчас, чтобы реальный спрос можно было измерить, когда начнётся живое использование. D0 не требует существующих продавцов, трафика или накопленного спроса и **не вводит ожидание данных перед AI Input**. Только запись; **метрики D0 — это события поиска, не уникальные люди.** Вне slice: D1 аналитика, популярные чипы, Seller Demand UI, watch, AI, fuzzy, оценка поисковой системы.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
