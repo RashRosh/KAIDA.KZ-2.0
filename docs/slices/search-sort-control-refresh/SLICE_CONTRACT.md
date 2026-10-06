@@ -1,6 +1,6 @@
 # Search sorting control UX refresh
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-06). Превью `preview2.png` (320/360 px) и иконка-слайдеры утверждены; поправка PO по итогам ручной приёмки (весь ряд — один триггер, без ×, закрытие списка после выбора, семантика стрелок) заменяет прежние решения о кнопке сброса, реверсе по клику на ряд и постоянно открытом списке (§6). Казахские тексты — черновики на вычитку.
+**Status:** CLOSED. Checkpoint `v0.0.60-search-sorting-control`; PRs #117 (contract), #118 (implementation); `main` `23b6640dfa7dddfbeba66012f7997e6004370635`; merged-main `KAIDA verify` run `37510134880` SUCCESS; manual acceptance PASS (implementation `697f9fa`). Казахские тексты — черновики на вычитку, не утверждены.
 **Base:** `main` после `v0.0.59-search-relevance-default`.
 **Plan:** UX-slice между S15B и S15C (`EXECUTION_PLAN.md`, «Deferred UX»). Только интерфейс; backend, допуск, ранжирование, API и Nearby не меняются. Оценка поисковой системы отложена и в этот slice не входит.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).

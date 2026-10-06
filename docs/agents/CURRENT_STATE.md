@@ -5,8 +5,8 @@
 ## Verified base
 
 - Проверено: 2026-10-06.
-- `origin/main`: `8974acd0b3ecb9a6bcf43542a28bf0c8df3fc525`; checkpoint `v0.0.59-search-relevance-default` (S15B-4b, PR #114);
-  merged-main `KAIDA verify` run `37447048125` SUCCESS. Manual acceptance PASS. Предыдущие: `v0.0.58` (S15B-4a), `v0.0.57` (S15B-3), `v0.0.56`.
+- `origin/main`: `23b6640dfa7dddfbeba66012f7997e6004370635`; checkpoint `v0.0.60-search-sorting-control` (Search sorting control UX refresh, PR #118);
+  merged-main `KAIDA verify` run `37510134880` SUCCESS. Manual acceptance PASS. Предыдущие: `v0.0.59` (S15B-4b), `v0.0.58` (S15B-4a), `v0.0.57` (S15B-3).
 - Production KB v1 (682 / 210 / 35) — runtime-база; runtime loop Seller → Buyer доказан тестами (production-код не менялся).
   E2E-БД ставит KB через global setup существующим импортёром; пакет защищён `.gitattributes` (`-text`).
 
@@ -16,13 +16,13 @@
 
 ## Next action
 
-1. Search sorting control UX refresh (до S15C): `docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md` (APPROVED, реализация: компактный ряд, × для сброса); финальное решение PO записано в `EXECUTION_PLAN.md` («Deferred UX»): relevance по умолчанию без пункта «По соответствию», три явные сортировки, «Сбросить сортировку», внешний вид по design workflow (§18). Search sorting control UX refresh — deferred (см. план).
+1. S15B закрыт. Следующий — S15C / D0 (Search Demand Events): контракт не написан; начинать только по решению PO. Открытый Issue: #116 (CI flake «active connections»).
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
 
 - Старые 6F и 6G **не авторизованы** в прежнем виде: 6F снята до реализации (цель — в S15C/D0 после S15B), 6G
-  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15C, sorting UX refresh (до контракта), 6F/6G, AI.
+  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15C (без контракта), 6F/6G, AI.
 - Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
 - Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`.
 - `next-env.d.ts` перегенерируется next dev/build — в коммит не входит.
