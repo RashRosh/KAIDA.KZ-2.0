@@ -4,9 +4,9 @@
 
 ## Verified base
 
-- Проверено: 2026-10-05.
-- `origin/main`: `9383150d08943bb50de1d915193878352650c446`; checkpoint `v0.0.56-search-known-zero` (S15B-2, PR #105; merged-main run `37370761534` SUCCESS); предыдущий `v0.0.55`;
-  merged-main `KAIDA verify` run `37347918337` SUCCESS. Manual acceptance PASS. Предыдущие: `v0.0.54` (S15B-1), `v0.0.53`.
+- Проверено: 2026-10-06.
+- `origin/main`: `89722495a327a444d269af04abb4e23f9727abfc`; checkpoint `v0.0.57-buyer-autocomplete` (S15B-3, PR #108);
+  merged-main `KAIDA verify` run `37420287841` SUCCESS (rerun после флейка seller-showcase-editor). Manual acceptance PASS. Предыдущие: `v0.0.56` (S15B-2), `v0.0.55`, `v0.0.54`.
 - Production KB v1 (682 / 210 / 35) — runtime-база; runtime loop Seller → Buyer доказан тестами (production-код не менялся).
   E2E-БД ставит KB через global setup существующим импортёром; пакет защищён `.gitattributes` (`-text`).
 
@@ -16,7 +16,7 @@
 
 ## Next action
 
-1. S15B-3 buyer autocomplete + `product_id` (`docs/slices/s15b3-buyer-autocomplete/SLICE_CONTRACT.md`, DRAFT на approval); S15B-4 — решение PO позже. Search sorting control UX refresh — deferred (см. план).
+1. S15B-4: PO сначала решает по decision-записке (пересечение canonical Offers и title fallback); реализация не начата. Search sorting control UX refresh — deferred (см. план).
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
