@@ -26,3 +26,4 @@ export { pushSubscriptions } from '../modules/reminders/db/push-subscriptions.ta
 export { actualityRemindersSent } from '../modules/reminders/db/actuality-reminders-sent.table';
 export { addressDirectoryImports } from '../modules/address-directory/db/address-directory-imports.table';
 export { addressDirectoryEntries } from '../modules/address-directory/db/address-directory-entries.table';
+export { searchEvents } from '../modules/search-events/db/search-events.table';

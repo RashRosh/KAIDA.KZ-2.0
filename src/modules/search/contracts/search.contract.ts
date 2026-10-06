@@ -9,6 +9,11 @@ export const searchQuerySchema = z.string().trim().min(1, 'Введите наз
 // S15B-3: the canonical Product identity of a search by a selected catalog Product (`product_id` / `productId`).
 export const searchProductIdSchema = z.uuid();
 
+// S15C / D0: the optional marker of an intentional buyer search (an internal search event is recorded for it); never part of the
+// response. A request without it records nothing.
+export const searchIntentSchema = z.enum(['submit', 'suggestion', 'chip']);
+export type SearchIntent = z.infer<typeof searchIntentSchema>;
+
 // S15B-4b: `relevance` («По соответствию») is the default order of a Search with no sort; it has no direction.
 export const searchSortModeSchema = z.enum(['relevance', 'actuality', 'distance', 'price']);
 export const searchSortDirectionSchema = z.enum(['asc', 'desc']);

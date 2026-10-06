@@ -21,6 +21,7 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:import:production-kb": "tsx src/cli/import-production-kb.ts",
     "db:import:addresses": "tsx src/cli/import-address-directory.ts",
+    "search-events:purge": "tsx src/cli/purge-search-events.ts",
     "db:test:prepare": "tsx tests/integration/prepare-database.ts",
     "verify": "pnpm lint && pnpm typecheck && pnpm db:migrate && pnpm db:seed && pnpm db:test:prepare && pnpm test:unit && pnpm test:integration && pnpm build && pnpm test:e2e"
   },

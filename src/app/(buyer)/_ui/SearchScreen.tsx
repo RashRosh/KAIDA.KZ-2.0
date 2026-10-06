@@ -12,6 +12,7 @@ import {
   searchQuerySchema,
   searchResponseSchema,
   type SearchResponse,
+  type SearchIntent,
   type SearchSortDirection,
   type SearchSortMode,
 } from '../../../modules/search/contracts/search.contract';
@@ -20,6 +21,7 @@ import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
 import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } from './product-suggestions';
 import { SortControl } from './SortPopover';
+import { IntentSuppression, consumeFirstEntryHandoff, intentKey } from './search-intent';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
 // S0 / S7 / S9: explicit submit, optional transient buyer location, popular queries, the query kept in the address.
@@ -80,6 +82,9 @@ export function SearchScreen() {
   // Shown after a geolocation denial for «Расстояние»: the order fell back to the actuality.
   const [distanceNotice, setDistanceNotice] = useState(false);
   const pending = useRef(false);
+  // S15C / D0 (memory of this page only): the deliberate intent not yet spent by a successful request, and the 60 s repeat suppression.
+  const pendingIntent = useRef<{ entry: SearchIntent; key: string } | null>(null);
+  const suppression = useRef(new IntentSuppression());
   const lastSearch = useRef<{ query: string; productId?: string; location?: BuyerLocation; sort: SearchSortMode; direction: SearchSortDirection } | null>(null);
   const localeRef = useRef(locale);
   const previousLocaleRef = useRef(locale);
@@ -129,6 +134,8 @@ export function SearchScreen() {
     requestedSort: SearchSortMode,
     requestedDirection: SearchSortDirection,
     productId?: string,
+    // S15C / D0: set only by a deliberate action (submit, suggestion, chip); everything else — sort, language, restoration — is silent.
+    entry?: SearchIntent,
   ) => {
     if (pending.current) return;
     // «Расстояние» needs coordinates: without them the request is never sent as `distance` (the API rejects it) — the
@@ -146,6 +153,12 @@ export function SearchScreen() {
       input.current?.focus();
       return;
     }
+    // S15C / D0: the deliberate intent waits in memory until a request succeeds, so a retry after a failure carries it again; a
+    // repeat of the same key inside the suppression window is sent without it.
+    const intentId = intentKey(parsed.data, productId);
+    if (entry !== undefined) pendingIntent.current = { entry, key: intentId };
+    const carried = pendingIntent.current !== null && pendingIntent.current.key === intentId ? pendingIntent.current : null;
+    const intent = carried !== null && !suppression.current.isSuppressed(intentId) ? carried.entry : undefined;
     pending.current = true;
     lastSearch.current = { query: parsed.data, productId, location: buyerLocation, sort: mode, direction: order };
     setStarted(true);
@@ -157,20 +170,27 @@ export function SearchScreen() {
         ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, ...orderRequestFields(mode, order) }),
+          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, ...orderRequestFields(mode, order), ...(intent ? { intent } : {}) }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, ...orderParams(mode, order) })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, ...orderParams(mode, order), ...(intent ? { intent } : {}) })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
       if (response.status === 400) {
+        // an invalid request cannot succeed on a retry: its intent is dropped
+        if (carried !== null) pendingIntent.current = null;
         setState({ kind: 'validation' });
         return;
       }
       if (!response.ok) throw new Error('Search unavailable');
       const result = searchResponseSchema.parse(await response.json());
+      // The request succeeded: its intent is spent (recorded by the server, or suppressed as a repeat).
+      if (carried !== null) {
+        if (intent !== undefined) suppression.current.markRecorded(intentId);
+        pendingIntent.current = null;
+      }
       setState({ kind: 'success', result });
       setShown(result);
       // Keep the query in the address so Back from an Offer page returns to the same results.
@@ -210,6 +230,9 @@ export function SearchScreen() {
           preferencesRef.current = { sort: preferences.sort, direction: preferences.direction };
         }
         const next = preferences ?? preferencesRef.current;
+        // S15C / D0: an arrival from First Entry is the deliberate search; the one-shot handoff is consumed here (never replayed).
+        const arrived = consumeFirstEntryHandoff(addressQuery);
+        if (arrived !== null) pendingIntent.current = { entry: arrived, key: intentKey(addressQuery, addressProduct) };
         void executeSearch(addressQuery, locationRef.current, next.sort, next.direction, addressProduct);
       } else if (stored) {
         const preferences = normalizeGeoDependentState(stored, hasCoordinates);
@@ -294,7 +317,7 @@ export function SearchScreen() {
     setSuggestDismissed(true);
     setActiveSuggestion(-1);
     input.current?.blur();
-    void executeSearch(suggestion.name, buyerLocation, sort, direction, suggestion.id);
+    void executeSearch(suggestion.name, buyerLocation, sort, direction, suggestion.id, 'suggestion');
   }
 
   function onQueryKey(event: KeyboardEvent<HTMLInputElement>) {
@@ -310,14 +333,14 @@ export function SearchScreen() {
     // A submitted text closes the list (it would cover the first results); typing opens it again.
     setSuggestDismissed(true);
     setActiveSuggestion(-1);
-    await executeSearch(query, buyerLocation, sort, direction, selectedProductId);
+    await executeSearch(query, buyerLocation, sort, direction, selectedProductId, 'submit');
   }
 
   function quickSearch(term: string) {
     if (loading) return;
     setQuery(term);
     setSelected(null);
-    void executeSearch(term, buyerLocation, sort, direction);
+    void executeSearch(term, buyerLocation, sort, direction, undefined, 'chip');
   }
 
   function applyOrder(nextSort: SearchSortMode, nextDirection: SearchSortDirection, location: BuyerLocation | undefined) {

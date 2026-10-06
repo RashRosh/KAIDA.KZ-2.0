@@ -17,7 +17,7 @@ async function prepare() {
     await seedDatabase(db, seedNow);
 
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename");
-    const expected = ['actuality_reminders_sent', 'address_directory_entries', 'address_directory_imports', 'auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'contact_verification_challenges', 'kb_package_install', 'locations', 'offer_card_removals', 'offer_comment_translations', 'offer_drafts', 'offer_photos', 'offers', 'operator_feed_marks', 'photos', 'product_aliases', 'product_categories', 'product_category_links', 'product_localized_names', 'products', 'push_subscriptions', 'seller_change_item_photos', 'seller_change_items', 'seller_change_sets', 'seller_verified_phones', 'sellers', 'users'];
+    const expected = ['actuality_reminders_sent', 'address_directory_entries', 'address_directory_imports', 'auth_otp_challenges', 'auth_sessions', 'buyer_interests', 'contact_verification_challenges', 'kb_package_install', 'locations', 'offer_card_removals', 'offer_comment_translations', 'offer_drafts', 'offer_photos', 'offers', 'operator_feed_marks', 'photos', 'product_aliases', 'product_categories', 'product_category_links', 'product_localized_names', 'products', 'push_subscriptions', 'search_events', 'seller_change_item_photos', 'seller_change_items', 'seller_change_sets', 'seller_verified_phones', 'sellers', 'users'];
     if (JSON.stringify(tables.rows.map((row) => row.tablename)) !== JSON.stringify(expected)) {
       throw new Error('Current clean migration chain must contain exactly the expected application tables');
     }

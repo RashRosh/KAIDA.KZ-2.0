@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { searchProductIdSchema, searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from './search.contract';
+import { searchIntentSchema, searchProductIdSchema, searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from './search.contract';
 
 export const buyerLocationSchema = z.strictObject({
   latitude: z.number().finite().min(-90).max(90),
@@ -17,6 +17,8 @@ export const geoSearchRequestSchema = z.strictObject({
   // and are rejected by this strict schema.
   sort: searchSortModeSchema.optional(),
   direction: searchSortDirectionSchema.optional(),
+  // S15C / D0: the intentional-search marker.
+  intent: searchIntentSchema.optional(),
 }).refine((request) => request.sort !== 'relevance' || request.direction === undefined, {
   // S15B-4b: an explicit relevance order has no direction.
   path: ['direction'],

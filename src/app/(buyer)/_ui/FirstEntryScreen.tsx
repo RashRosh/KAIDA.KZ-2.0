@@ -8,6 +8,7 @@ import { searchQuerySchema } from '../../../modules/search/contracts/search.cont
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen } from './buyer-ui';
 import { writeIntroMarker } from './intro-marker';
+import { setFirstEntryHandoff } from './search-intent';
 import { useSellerEntry } from './seller-entry';
 
 // First Entry correction (stage 6B): `/welcome` is the onboarding start page (first-entry-mobile layout, demo, example
@@ -78,6 +79,8 @@ export function FirstEntryScreen() {
       return;
     }
     setLeaving(true);
+    // S15C / D0: this navigation is a deliberate search; the one-shot in-memory handoff tells Search so (never in the URL).
+    setFirstEntryHandoff(parsed.data);
     router.push(`/?${new URLSearchParams({ q: parsed.data })}`);
   }
 

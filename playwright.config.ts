@@ -42,6 +42,8 @@ export default defineConfig({
       IDENTITY_COOKIE_SECURE: 'false',
       NEXT_TELEMETRY_DISABLED: '1',
       OPERATOR_PHONES: '+77000038001,+77000039001',
+      // S15C / D0: events written by E2E runs are test data, never organic demand.
+      SEARCH_EVENTS_ORIGIN: 'test',
       // actuality-reminders: a test-only key pair (never used outside E2E) so the push button is shown.
       WEB_PUSH_VAPID_PUBLIC_KEY: 'BLqKKgoWp-Aio77mIlsfMm28kKhUg8cH52VsM5gMKE_WkKwy9jcxiz2S9ZaTA4QCL4_FXmgzOQd8BWlPYUvTpKE',
       WEB_PUSH_VAPID_PRIVATE_KEY: 'YSEabg270nHHi3ihJu2Pytv1hlIGROYZwnynExHsg7U',
