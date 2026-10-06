@@ -1,21 +1,22 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// S15B-3: buyer suggestions and Search by a selected catalog Product (`product_id`). «Баранина» (seed Offer) and
+// S15B-3 / S15B-4a: buyer suggestions; a selected catalog Product (`product_id`) is a signal that joins the candidate set, not a filter. «Баранина» (seed Offer) and
 // «Тунец» (Production KB v1, no Offers in any E2E flow) are the fixtures.
 
 const LAMB = '10000000-0000-4000-8000-000000000001';
 const field = (page: Page) => page.getByLabel('Какой товар ищете?');
 
-test('the API searches by Product id only: 400 for a non-uuid, an ordinary empty result for an unknown id', async ({ request }) => {
+test('the API takes a Product id as a signal: 400 for a non-uuid, a stale id falls through to the text search', async ({ request }) => {
   const byProduct = await (await request.get(`/api/search?q=Баранина&product_id=${LAMB}`)).json();
   expect(byProduct.resolvedProduct).toEqual({ id: LAMB, name: 'Баранина' });
   expect(byProduct.offers.length).toBeGreaterThan(0);
-  expect(byProduct.offers.every((offer: { product: { id: string | null } }) => offer.product.id === LAMB)).toBe(true);
+  const text = await (await request.get('/api/search?q=Баранина')).json();
+  expect(byProduct).toEqual(text);
 
   expect((await request.get('/api/search?q=Баранина&product_id=not-a-uuid')).status()).toBe(400);
   const unknown = await request.get('/api/search?q=Баранина&product_id=20000000-0000-4000-8000-0000000000aa');
   expect(unknown.status()).toBe(200);
-  expect(await unknown.json()).toEqual({ query: 'Баранина', resolvedProduct: null, offers: [] });
+  expect(await unknown.json()).toEqual(text);
 
   const post = await request.post('/api/search', { data: { q: 'Баранина', productId: LAMB, buyerLocation: { latitude: 43.25, longitude: 76.95 } } });
   expect(post.status()).toBe(200);
@@ -54,7 +55,7 @@ test('suggestions appear from two letters; choosing one searches by that Product
   await expect(page).toHaveURL(/q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD/);
 });
 
-test('a selected Product without Offers says so and does not fall back to the text', async ({ page }) => {
+test('a selected Product with an empty candidate set says there are no offers', async ({ page }) => {
   await page.goto('/');
   await field(page).fill('тунец');
   await page.getByRole('option', { name: 'Тунец', exact: true }).click();

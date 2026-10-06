@@ -54,7 +54,7 @@ describe('S1 offer lifecycle', () => {
     expect(mockedFindOffers).toHaveBeenCalledTimes(1);
     expect(mockedFindOffers).toHaveBeenCalledWith(
       database,
-      { productId: PRODUCT.id, words: ['баранина'] },
+      { productIds: [PRODUCT.id], words: ['баранина'] },
       new Date('2026-09-04T12:00:00.000Z'),
     );
   });
