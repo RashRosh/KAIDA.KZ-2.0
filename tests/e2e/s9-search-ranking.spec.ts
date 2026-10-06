@@ -172,32 +172,32 @@ test('Buyer location is explicit, transient and reached only through the «Ра�
   expect(searchRequests).toBe(1);
   expect(await geoCalls()).toBe(0);
 
-  // Rev 3 + S15B-4b: the sort popover holds the four criteria (relevance is the default); opening it and choosing price asks for no location.
+  // Rev 3 + the sorting control refresh: the sort list holds the three criteria (relevance is the unlabelled default); opening it and choosing price asks for no location.
   await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
   const popover = page.getByRole('group', { name: 'Сортировка' });
-  await expect(popover.getByRole('button')).toHaveCount(4);
-  await expect(popover.getByRole('button', { name: /^Расстояние/ })).toBeVisible();
-  await expect(popover.getByRole('button', { name: /^Цена/ })).toBeVisible();
-  await expect(popover.getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await popover.getByRole('button', { name: /^Цена/ }).click();
-  await expect(popover.getByRole('button', { name: 'Цена, дешевле первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(popover.getByRole('button')).toHaveCount(3);
+  await expect(popover.getByRole('button', { name: /^По расстоянию/ })).toBeVisible();
+  await expect(popover.getByRole('button', { name: /^По цене/ })).toBeVisible();
+  await expect(popover.getByRole('button', { name: /^По актуальности/ })).toHaveAttribute('aria-pressed', 'false');
+  await popover.getByRole('button', { name: /^По цене/ }).click();
+  await expect(popover.getByRole('button', { name: 'По цене, дешевле первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
   expect(await geoCalls()).toBe(0);
 
   // Choosing «Расстояние» is itself the explicit geo intent: the prompt fires without any other button, the request is a POST.
   const distanceRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/search'
     && (request.postData()?.includes('"sort":"distance"') ?? false));
-  await popover.getByRole('button', { name: /^Расстояние/ }).click();
+  await popover.getByRole('button', { name: /^По расстоянию/ }).click();
   expect((await distanceRequest).method()).toBe('POST');
   expect(await geoCalls()).toBe(1);
   await expectCardOrder(page, [nearLocationName, farLocationName, geolessLocationName]);
 
   // Tapping the active criterion reverses it: geo-known Offers farther first, the geo-less one still last.
-  await popover.getByRole('button', { name: /^Расстояние/ }).click();
+  await popover.getByRole('button', { name: /^По расстоянию/ }).click();
   await expectCardOrder(page, [farLocationName, nearLocationName, geolessLocationName]);
   expect(await geoCalls()).toBe(1);
 
   // Back to the actuality: the natural direction, fresher first; the location is kept only on this screen.
-  await popover.getByRole('button', { name: /^Актуальность/ }).click();
+  await popover.getByRole('button', { name: /^По актуальности/ }).click();
   await expectCardOrder(page, [geolessLocationName, farLocationName, nearLocationName]);
   expect(await geoCalls()).toBe(1);
 

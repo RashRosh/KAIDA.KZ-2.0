@@ -124,8 +124,8 @@ test('a restored distance sort falls back to the default relevance without coord
   await page.getByRole('button', { name: 'Баранина', exact: true }).click();
   await expect(page.getByRole('article').first()).toBeVisible();
   await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
-  await page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^Расстояние/ }).click();
-  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'Расстояние, ближе первыми', exact: true })).toBeVisible();
+  await page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^По расстоянию/ }).click();
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'По расстоянию, ближе первыми', exact: true })).toBeVisible();
   expect(await geoCalls(page)).toBe(1);
   expect(JSON.parse((await storedState(page)) ?? 'null')).toMatchObject({ sort: 'distance', direction: 'asc' });
 
@@ -135,12 +135,13 @@ test('a restored distance sort falls back to the default relevance without coord
   // The tab state and the screen agree on the normalized values; no prompt was triggered.
   await expect.poll(async () => JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'relevance' });
   await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
-  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Сбросить сортировку', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^По актуальности/ })).toHaveAttribute('aria-pressed', 'false');
   // Returning did not ask again: the counter is still the one explicit request made before leaving.
   expect(await geoCalls(page)).toBe(1);
 
   // A later explicit choice of «Расстояние» is a geolocation intent again.
-  await page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^Расстояние/ }).click();
+  await page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: /^По расстоянию/ }).click();
   await expect.poll(() => geoCalls(page)).toBe(2);
 });
 
@@ -153,7 +154,7 @@ test('a price sort and its direction are restored; a Stage 5 state degrades to t
   await page.goto('/');
   await expect(page.getByRole('article').first()).toBeVisible();
   await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
-  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'Цена, дороже первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'По цене, дороже первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
   // The Stage 5 / 6C value (query + sort + radius) keeps the query, drops the radius and falls back without coordinates.
   const legacy = await page.context().newPage();

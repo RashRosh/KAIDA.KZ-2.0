@@ -19,7 +19,7 @@ import { normalizeGeoDependentState, readLastSearchState, writeLastSearchState }
 import { Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
 import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } from './product-suggestions';
-import { SortPopover } from './SortPopover';
+import { SortControl } from './SortPopover';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
 // S0 / S7 / S9: explicit submit, optional transient buyer location, popular queries, the query kept in the address.
@@ -330,8 +330,6 @@ export function SearchScreen() {
   async function chooseCriterion(criterion: SearchSortMode) {
     if (loading || locationState.kind === 'requesting') return;
     setDistanceNotice(false);
-    // S15B-4b: «По соответствию» has no direction — tapping it while active does nothing.
-    if (criterion === 'relevance' && sort === 'relevance') return;
     const nextDirection = criterion === sort ? (direction === 'asc' ? 'desc' : 'asc') : NATURAL_SORT_DIRECTION[criterion];
     if (criterion === 'distance' && !buyerLocation) {
       const point = await requestBuyerLocation();
@@ -348,7 +346,15 @@ export function SearchScreen() {
     applyOrder(criterion, nextDirection, buyerLocation);
   }
 
-  const form = (compact: boolean, withFilters = true) => (
+  // Search sorting control UX refresh: × returns to the default relevance (no direction); only the sort changes — the query,
+  // the selected Product and the buyer location stay.
+  function resetSort() {
+    if (loading || locationState.kind === 'requesting' || sort === 'relevance') return;
+    setDistanceNotice(false);
+    applyOrder('relevance', NATURAL_SORT_DIRECTION.relevance, buyerLocation);
+  }
+
+  const form = (compact: boolean) => (
     <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate
       style={{ display: 'flex', alignItems: 'center', gap: 8, flex: compact ? 1 : 'none', minWidth: 0 }}>
       <label htmlFor="product-query" className="vh">{t('search.question')}</label>
@@ -386,7 +392,6 @@ export function SearchScreen() {
       </div>
       {suggestOpen && <ProductSuggestionList id="product-suggestions" label={t('card.suggestions')} suggestions={suggestions} activeIndex={activeSuggestion} onChoose={chooseSuggestion} />}
       </div>
-      {withFilters && <SortPopover sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} />}
     </form>
   );
 
@@ -410,7 +415,7 @@ export function SearchScreen() {
     return (
       <BuyerScreen section="search">
         <main className="body" style={{ justifyContent: 'center', gap: 16, padding: '0 16px 48px' }}>
-          {form(false, false)}
+          {form(false)}
           {validation}
           {chips}
         </main>
@@ -419,7 +424,6 @@ export function SearchScreen() {
   }
 
   const visibleOffers = shown?.offers ?? [];
-  const orderPhrase = t(`search.order.${sort}.${direction}` as 'search.order.price.asc');
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
@@ -431,10 +435,14 @@ export function SearchScreen() {
       section="search"
       top={<header className="bar" style={{ padding: '0 12px', gap: 8 }}>{form(true)}</header>}
     >
+      {visibleOffers.length > 0 && (
+        <div style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>
+          <SortControl sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
+        </div>
+      )}
       <div className="chips-row" style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>{chips}</div>
       <main className="body" style={{ gap: 12, padding: 12 }} aria-busy={loading || undefined}>
         {validation}
-        <p className="c">{t('search.orderCaption', { order: orderPhrase })}</p>
         {distanceNotice && (
           <div className="banner gray" role="alert" style={{ gap: 8, padding: 12, borderRadius: 14 }}>
             <div style={{ display: 'flex', gap: 10 }}><Ic name="locate" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t('search.distanceNeedsLocation')}</p></div>

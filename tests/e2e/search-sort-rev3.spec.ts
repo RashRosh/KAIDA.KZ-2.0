@@ -114,22 +114,19 @@ async function searchProduct(page: Page) {
 const trigger = (page: Page) => page.getByRole('button', { name: 'Сортировка', exact: true });
 const popover = (page: Page) => page.getByRole('group', { name: 'Сортировка' });
 
-test('the sort control is a popover of four criteria (S15B-4b adds relevance, the default); none of the old filter controls exist', async ({ page }) => {
+test('the sort list holds three criteria (the default relevance is not an item); none of the old filter controls exist', async ({ page }) => {
   await page.goto('/');
   // No sort control on the Search Home.
   await expect(trigger(page)).toHaveCount(0);
 
   await searchProduct(page);
   await trigger(page).click();
-  await expect(popover(page).getByRole('button')).toHaveCount(4);
-  await expect(popover(page).getByRole('button', { name: /^Расстояние/ })).toBeVisible();
-  await expect(popover(page).getByRole('button', { name: /^Цена/ })).toBeVisible();
-  // The default is «По соответствию»: it shows its order in words and no arrow (it has no direction).
-  const relevance = popover(page).getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true });
-  await expect(relevance).toHaveAttribute('aria-pressed', 'true');
-  await expect(relevance).not.toContainText('↓');
-  await expect(relevance).not.toContainText('↑');
-  await expect(popover(page).getByRole('button', { name: /^Актуальность/ })).toHaveAttribute('aria-pressed', 'false');
+  await expect(popover(page).getByRole('button')).toHaveCount(3);
+  await expect(popover(page).getByRole('button', { name: /^По расстоянию/ })).toBeVisible();
+  await expect(popover(page).getByRole('button', { name: /^По цене/ })).toBeVisible();
+  // The default (relevance) is not a selectable item and nothing in the list is active.
+  await expect(popover(page).getByRole('button', { name: /^По актуальности/ })).toHaveAttribute('aria-pressed', 'false');
+  await expect(popover(page).getByRole('button', { name: /соответств/ })).toHaveCount(0);
 
   // Nothing of the removed Stage 5 filters or the rejected Rev 2 price range.
   for (const gone of [/^Показать \d+ предложени/, 'Сбросить', 'Фильтры', 'Применить']) {
@@ -147,22 +144,20 @@ test('price sorts by the nominal amount across units; a second tap reverses; act
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
 
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^Цена/ }).click();
+  await popover(page).getByRole('button', { name: /^По цене/ }).click();
   // 800 ₸ / упак. precedes the 1000 ₸ Offers (per кг and per л — equal prices keep «fresher first»), then 2500 ₸.
   await expectOrder(page, [points.far1, points.geoless, points.near, points.far2]);
-  await expect(popover(page).getByRole('button', { name: 'Цена, дешевле первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByText('Порядок: дешевле первыми')).toBeVisible();
+  await expect(popover(page).getByRole('button', { name: 'По цене, дешевле первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
-  await popover(page).getByRole('button', { name: /^Цена/ }).click();
+  await popover(page).getByRole('button', { name: /^По цене/ }).click();
   await expectOrder(page, [points.far2, points.geoless, points.near, points.far1]);
-  await expect(popover(page).getByRole('button', { name: 'Цена, дороже первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(popover(page).getByRole('button', { name: 'По цене, дороже первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
   // Switching the criterion starts with its natural direction; the ageing Offer is no longer forced last.
-  await popover(page).getByRole('button', { name: /^Актуальность/ }).click();
+  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
-  await popover(page).getByRole('button', { name: /^Актуальность/ }).click();
+  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, [points.far1, points.near, points.far2, points.geoless]);
-  await expect(page.getByText('Порядок: старее первыми')).toBeVisible();
 
   // The popover stayed open after every choice; Escape closes it and returns the focus to the button.
   await expect(popover(page)).toBeVisible();
@@ -177,17 +172,16 @@ test('«Расстояние» is the explicit geo intent: nearer first, farther
   expect(await geoCalls(page)).toBe(0);
 
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^Цена/ }).click();
+  await popover(page).getByRole('button', { name: /^По цене/ }).click();
   expect(await geoCalls(page)).toBe(0);
 
-  await popover(page).getByRole('button', { name: /^Расстояние/ }).click();
+  await popover(page).getByRole('button', { name: /^По расстоянию/ }).click();
   await expectOrder(page, [points.near, points.far1, points.far2, points.geoless]);
   expect(await geoCalls(page)).toBe(1);
-  await expect(popover(page).getByRole('button', { name: 'Расстояние, ближе первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(popover(page).getByRole('button', { name: 'По расстоянию, ближе первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
-  await popover(page).getByRole('button', { name: /^Расстояние/ }).click();
+  await popover(page).getByRole('button', { name: /^По расстоянию/ }).click();
   await expectOrder(page, [points.far2, points.far1, points.near, points.geoless]);
-  await expect(page.getByText('Порядок: дальше первыми')).toBeVisible();
   // The coordinates are already known on this screen: no second prompt.
   expect(await geoCalls(page)).toBe(1);
 
@@ -207,13 +201,14 @@ test('a denied geolocation falls back to the default relevance with a short noti
   });
   await searchProduct(page);
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^Цена/ }).click();
+  await popover(page).getByRole('button', { name: /^По цене/ }).click();
   await expectOrder(page, [points.far1, points.geoless, points.near, points.far2]);
 
-  await popover(page).getByRole('button', { name: /^Расстояние/ }).click();
+  await popover(page).getByRole('button', { name: /^По расстоянию/ }).click();
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
-  // Back to the default relevance — in the visible state, the order and the tab state alike.
-  await expect(popover(page).getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  // Back to the default relevance — in the visible state (no criterion, no ×), the order and the tab state alike.
+  await expect(page.getByRole('button', { name: 'Сбросить сортировку', exact: true })).toHaveCount(0);
+  await expect(popover(page).locator('[aria-pressed="true"]')).toHaveCount(0);
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');
@@ -221,7 +216,7 @@ test('a denied geolocation falls back to the default relevance with a short noti
   expect(JSON.parse(stored ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
 
   // Choosing another criterion clears the notice; no further prompt without another «Расстояние» tap.
-  await popover(page).getByRole('button', { name: /^Цена/ }).click();
+  await popover(page).getByRole('button', { name: /^По цене/ }).click();
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toHaveCount(0);
   expect(await geoCalls(page)).toBe(1);
 });
@@ -230,7 +225,6 @@ test('a tap outside closes the popover', async ({ page }) => {
   await searchProduct(page);
   await trigger(page).click();
   await expect(popover(page)).toBeVisible();
-  await page.getByRole('article').first().click({ position: { x: 4, y: 4 }, trial: true });
   await page.mouse.click(10, 600);
   await expect(popover(page)).toHaveCount(0);
 });

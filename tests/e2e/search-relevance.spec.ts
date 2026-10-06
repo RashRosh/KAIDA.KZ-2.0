@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { createDatabase } from '../../src/db/client';
 import { testDatabaseUrl } from '../integration/database';
 
-// S15B-4b (docs/slices/s15b4b-relevance-sort): «По соответствию» is the default order; the explicit sorts keep their order.
+// S15B-4b (docs/slices/s15b4b-relevance-sort): relevance is the default order; the explicit sorts keep their order.
 // Three Offers of one query, uncorrelated with their freshness: the Product card (level 1) is the oldest, a free title with
 // whole words (level 2) is in the middle, a free title that matches only by a word start (level 3) is the freshest.
 test.beforeEach(({}, testInfo) => {
@@ -11,7 +11,6 @@ test.beforeEach(({}, testInfo) => {
 });
 
 const STORAGE_KEY = 'kaida:last-search';
-const RELEVANCE = 'По соответствию, лучшие совпадения первыми';
 
 let connection: ReturnType<typeof createDatabase>;
 let productId: string;
@@ -88,16 +87,17 @@ const trigger = (page: Page) => page.getByRole('button', { name: 'Сортиро
 const popover = (page: Page) => page.getByRole('group', { name: 'Сортировка' });
 const storedState = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STORAGE_KEY);
 
-test('the default order is «По соответствию»: the Product card, whole words, then a word start — not the freshest first', async ({ page }) => {
+test('the default order is relevance: the Product card, whole words, then a word start — not the freshest first', async ({ page }) => {
   await searchProduct(page);
   await expectOrder(page, ['linked', 'whole', 'prefix']);
   expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
   await trigger(page).click();
-  await expect(popover(page).getByRole('button')).toHaveCount(4);
-  await expect(popover(page).getByRole('button', { name: RELEVANCE, exact: true })).toHaveAttribute('aria-pressed', 'true');
+  // Relevance is the unlabelled default, never a list item.
+  await expect(popover(page).getByRole('button')).toHaveCount(3);
+  await expect(popover(page).locator('[aria-pressed="true"]')).toHaveCount(0);
 });
 
-test('explicit sorts keep their order and direction; «По соответствию» has no direction to reverse', async ({ page }) => {
+test('explicit sorts keep their order and direction; the reset × returns to relevance without a direction', async ({ page }) => {
   const searches: string[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
@@ -105,25 +105,18 @@ test('explicit sorts keep their order and direction; «По соответств
   });
   await searchProduct(page);
   await trigger(page).click();
-  // «Актуальность»: the freshest first — the order that relevance replaced as the default.
-  await popover(page).getByRole('button', { name: /^Актуальность/ }).click();
+  // «По актуальности»: the freshest first — the order that relevance replaced as the default.
+  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, ['prefix', 'whole', 'linked']);
-  await popover(page).getByRole('button', { name: /^Актуальность/ }).click();
+  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, ['linked', 'whole', 'prefix']);
   expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'actuality', direction: 'asc' });
 
-  // Back to «По соответствию»: no direction on the request, none in the tab state.
-  await popover(page).getByRole('button', { name: /^По соответствию/ }).click();
+  // The reset × is back to relevance: no direction on the request, none in the tab state.
+  await page.getByRole('button', { name: 'Сбросить сортировку', exact: true }).click();
   await expectOrder(page, ['linked', 'whole', 'prefix']);
   expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
-  const relevance = popover(page).getByRole('button', { name: RELEVANCE, exact: true });
-  await expect(relevance).toHaveAttribute('aria-pressed', 'true');
-  await expect(relevance).not.toContainText('↓');
-  await expect(relevance).not.toContainText('↑');
-  const before = searches.length;
-  await relevance.click();
-  await expectOrder(page, ['linked', 'whole', 'prefix']);
-  expect(searches.length).toBe(before);
+  await expect(page.getByRole('button', { name: 'Сбросить сортировку', exact: true })).toHaveCount(0);
   expect(searches.at(-1)).toContain('sort=relevance');
   expect(searches.at(-1)).not.toContain('direction');
 });
@@ -136,7 +129,7 @@ test('Back from an Offer keeps the relevance order; an explicit actuality is res
   await expectOrder(page, ['linked', 'whole', 'prefix']);
 
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^Актуальность/ }).click();
+  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, ['prefix', 'whole', 'linked']);
   await page.keyboard.press('Escape');
   await page.getByRole('article').first().getByRole('link').first().click();

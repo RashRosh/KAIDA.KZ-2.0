@@ -16,8 +16,8 @@ function overlaps(a: Box, b: Box) {
 async function expectResultsBar(page: Page) {
   const search = page.getByRole('search', { name: 'Поиск предложений' });
   const input = search.getByRole('searchbox', { name: 'Какой товар ищете?' });
-  // Stage 6 Rev 3: the sort button (a popover of three criteria) sits next to the search field.
-  const filters = search.getByRole('button', { name: 'Сортировка', exact: true });
+  // Search sorting control UX refresh: one compact sort row (default: «Сортировка» + indicator) directly below the search field.
+  const filters = page.getByRole('button', { name: 'Сортировка', exact: true });
 
   await expect(input).toBeVisible();
   await expect(filters).toBeVisible();
@@ -26,6 +26,7 @@ async function expectResultsBar(page: Page) {
   const filtersBox = (await filters.boundingBox())!;
   expect(filtersBox.height).toBeGreaterThanOrEqual(44);
   expect(overlaps((await input.boundingBox())!, filtersBox)).toBe(false);
+  expect(filtersBox.y).toBeGreaterThanOrEqual((await input.boundingBox())!.y + (await input.boundingBox())!.height);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   return { input };
 }
