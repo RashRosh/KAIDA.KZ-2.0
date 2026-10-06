@@ -172,13 +172,13 @@ test('Buyer location is explicit, transient and reached only through the «Ра�
   expect(searchRequests).toBe(1);
   expect(await geoCalls()).toBe(0);
 
-  // Rev 3: the sort popover holds exactly the three criteria; opening it and choosing price asks for no location.
+  // Rev 3 + S15B-4b: the sort popover holds the four criteria (relevance is the default); opening it and choosing price asks for no location.
   await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
   const popover = page.getByRole('group', { name: 'Сортировка' });
-  await expect(popover.getByRole('button')).toHaveCount(3);
+  await expect(popover.getByRole('button')).toHaveCount(4);
   await expect(popover.getByRole('button', { name: /^Расстояние/ })).toBeVisible();
   await expect(popover.getByRole('button', { name: /^Цена/ })).toBeVisible();
-  await expect(popover.getByRole('button', { name: 'Актуальность, свежее первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(popover.getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await popover.getByRole('button', { name: /^Цена/ }).click();
   await expect(popover.getByRole('button', { name: 'Цена, дешевле первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
   expect(await geoCalls()).toBe(0);

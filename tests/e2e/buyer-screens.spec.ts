@@ -56,7 +56,7 @@ test('a result card opens the offer page with seller, comment and interest; navi
   await page.getByRole('searchbox', { name: 'Какой товар ищете?' }).fill('баранина');
   await page.getByRole('button', { name: 'Искать' }).click();
   await expect(page.getByRole('searchbox', { name: 'Какой товар ищете?' })).toHaveValue('баранина');
-  await expect(page.getByText('Порядок: свежее первыми')).toBeVisible();
+  await expect(page.getByText('Порядок: лучшие совпадения первыми')).toBeVisible();
   const card = page.getByRole('article').filter({ hasText: SEED_POINT });
   await expect(card).toContainText(/4\s200\s₸/);
   await expect(card.getByRole('link', { name: /^Маршрут до Тестовая мясная точка/ })).toBeVisible();

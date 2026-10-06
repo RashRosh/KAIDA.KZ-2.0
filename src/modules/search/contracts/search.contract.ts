@@ -9,14 +9,17 @@ export const searchQuerySchema = z.string().trim().min(1, 'Введите наз
 // S15B-3: the canonical Product identity of a search by a selected catalog Product (`product_id` / `productId`).
 export const searchProductIdSchema = z.uuid();
 
-export const searchSortModeSchema = z.enum(['actuality', 'distance', 'price']);
+// S15B-4b: `relevance` («По соответствию») is the default order of a Search with no sort; it has no direction.
+export const searchSortModeSchema = z.enum(['relevance', 'actuality', 'distance', 'price']);
 export const searchSortDirectionSchema = z.enum(['asc', 'desc']);
 
 export type SearchSortMode = z.infer<typeof searchSortModeSchema>;
 export type SearchSortDirection = z.infer<typeof searchSortDirectionSchema>;
 
-// The natural direction of every criterion: fresher first, cheaper first, nearer first.
+// The natural direction of every criterion: fresher first, cheaper first, nearer first. `relevance` has no direction of its
+// own (best matches first): its `desc` is an internal placeholder that is never sent, stored or shown.
 export const NATURAL_SORT_DIRECTION: Record<SearchSortMode, SearchSortDirection> = {
+  relevance: 'desc',
   actuality: 'desc',
   price: 'asc',
   distance: 'asc',
@@ -24,6 +27,26 @@ export const NATURAL_SORT_DIRECTION: Record<SearchSortMode, SearchSortDirection>
 
 export function resolveSortDirection(sort: SearchSortMode, direction: SearchSortDirection | undefined): SearchSortDirection {
   return direction ?? NATURAL_SORT_DIRECTION[sort];
+}
+
+// S15B-4b: no `sort` and no `direction` → relevance; `direction` alone keeps its legacy meaning (actuality in that
+// direction); an explicit `relevance` has no direction, so combining them is not a valid request.
+export function resolveSearchOrder(
+  sort: SearchSortMode | undefined,
+  direction: SearchSortDirection | undefined,
+): { sort: SearchSortMode; direction: SearchSortDirection } | null {
+  if (sort === 'relevance') return direction === undefined ? { sort, direction: NATURAL_SORT_DIRECTION.relevance } : null;
+  if (sort === undefined) {
+    return direction === undefined
+      ? { sort: 'relevance', direction: NATURAL_SORT_DIRECTION.relevance }
+      : { sort: 'actuality', direction };
+  }
+  return { sort, direction: resolveSortDirection(sort, direction) };
+}
+
+// The order fields of a request: a relevance Search carries no direction.
+export function orderRequestFields(sort: SearchSortMode, direction: SearchSortDirection): { sort: SearchSortMode; direction?: SearchSortDirection } {
+  return sort === 'relevance' ? { sort } : { sort, direction };
 }
 
 export const searchOfferSchema = z.object({

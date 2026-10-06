@@ -111,14 +111,14 @@ test('the tab state holds only the query and the preferences — no results, no 
   await page.getByRole('button', { name: 'Баранина', exact: true }).click();
   await expect(page.getByRole('article').first()).toBeVisible();
   const raw = await storedState(page);
-  expect(JSON.parse(raw ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'actuality', direction: 'desc' });
+  expect(JSON.parse(raw ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'relevance' });
   for (const forbidden of ['offers', 'latitude', 'longitude', 'price', 'radius']) expect(raw).not.toContain(forbidden);
   expect(await page.evaluate((key) => window.localStorage.getItem(key), STORAGE_KEY)).toBeNull();
   expect((await context.cookies()).some((cookie) => cookie.name === STORAGE_KEY || cookie.value.includes('Баранина'))).toBe(false);
   expect(new URL(page.url()).search).toBe('?q=%D0%91%D0%B0%D1%80%D0%B0%D0%BD%D0%B8%D0%BD%D0%B0');
 });
 
-test('a restored distance sort falls back to the actuality without coordinates and without asking for geolocation', async ({ page }) => {
+test('a restored distance sort falls back to the default relevance without coordinates and without asking for geolocation', async ({ page }) => {
   await mockGeolocation(page);
   await page.goto('/');
   await page.getByRole('button', { name: 'Баранина', exact: true }).click();
@@ -133,9 +133,9 @@ test('a restored distance sort falls back to the actuality without coordinates a
   await nav(page, 'Поиск').click();
   await expect(page.getByRole('article').first()).toBeVisible();
   // The tab state and the screen agree on the normalized values; no prompt was triggered.
-  await expect.poll(async () => JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'actuality', direction: 'desc' });
+  await expect.poll(async () => JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'relevance' });
   await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
-  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'Актуальность, свежее первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('group', { name: 'Сортировка' }).getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
   // Returning did not ask again: the counter is still the one explicit request made before leaving.
   expect(await geoCalls(page)).toBe(1);
 
@@ -144,7 +144,7 @@ test('a restored distance sort falls back to the actuality without coordinates a
   await expect.poll(() => geoCalls(page)).toBe(2);
 });
 
-test('a price sort and its direction are restored; a Stage 5 state degrades to the actuality without a radius', async ({ page }) => {
+test('a price sort and its direction are restored; a Stage 5 state degrades to the default relevance without a radius', async ({ page }) => {
   await page.addInitScript((key) => {
     if (!window.sessionStorage.getItem(key)) {
       window.sessionStorage.setItem(key, JSON.stringify({ v: 2, query: 'Баранина', sort: 'price', direction: 'desc' }));
@@ -163,7 +163,7 @@ test('a price sort and its direction are restored; a Stage 5 state degrades to t
   await legacy.goto('/');
   await expect(legacy.getByRole('article').first()).toBeVisible();
   await expect(legacy.getByRole('searchbox', { name: 'Какой товар ищете?' })).toHaveValue('Баранина');
-  await expect.poll(async () => JSON.parse((await storedState(legacy)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'actuality', direction: 'desc' });
+  await expect.poll(async () => JSON.parse((await storedState(legacy)) ?? 'null')).toEqual({ v: 2, query: 'Баранина', sort: 'relevance' });
   await legacy.close();
 });
 

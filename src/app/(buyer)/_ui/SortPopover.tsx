@@ -6,10 +6,11 @@ import type { SearchSortDirection, SearchSortMode } from '../../../modules/searc
 import { Ic } from '../../seller/_kaida/ui';
 
 // Stage 6 Rev 3 (slice contract §3.1): the explicit sort control — a compact popover anchored to its button, with exactly
-// three criteria. A choice applies at once; tapping the active criterion reverses its direction. The popover stays open
+// four criteria (S15B-4b adds «По соответствию», which has no direction). A choice applies at once; tapping the active
+// directional criterion reverses its direction. The popover stays open
 // after a choice and closes by a tap outside, `Esc` or the button; focus moves in once on open and returns to the button
 // (PROJECT_RULES.md §18.4 «Overlay»), and it is never taken back while the popover is open.
-const CRITERIA: SearchSortMode[] = ['distance', 'price', 'actuality'];
+const CRITERIA: SearchSortMode[] = ['relevance', 'distance', 'price', 'actuality'];
 
 export function SortPopover({ sort, direction, busy, disabled, onChoose }: {
   sort: SearchSortMode;
@@ -97,7 +98,7 @@ export function SortPopover({ sort, direction, busy, disabled, onChoose }: {
                   <div className="ts" style={{ fontWeight: active ? 700 : 500 }}>{name}</div>
                   {active && <p className="c" style={{ color: 'inherit' }}>{order(criterion)}</p>}
                 </div>
-                {active && <span aria-hidden="true" style={{ fontSize: 18, fontWeight: 700 }}>{direction === 'asc' ? '↑' : '↓'}</span>}
+                {active && criterion !== 'relevance' && <span aria-hidden="true" style={{ fontSize: 18, fontWeight: 700 }}>{direction === 'asc' ? '↑' : '↓'}</span>}
               </button>
             );
           })}

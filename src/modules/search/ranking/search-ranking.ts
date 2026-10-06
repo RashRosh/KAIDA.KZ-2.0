@@ -3,8 +3,13 @@ import type { BuyerLocation } from '../contracts/buyer-location.contract';
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
 
+// S15B-4b: how well a candidate answers the query — 1 Product, 2 whole title words, 3 everything else eligible.
+export type SearchMatchLevel = 1 | 2 | 3;
+
 export type SearchRankingCandidate = {
   offer: SearchOffer;
+  // Needed by the `relevance` order only.
+  matchLevel?: SearchMatchLevel;
   lastConfirmedAt: Date;
   locationGeo: BuyerLocation | null;
 };
@@ -15,7 +20,7 @@ export type RankedSearchCandidate = SearchRankingCandidate & {
 };
 
 // Stage 6 Rev 3 (slice contract §3.2): the selected criterion is the primary ordering of all buyer-eligible Offers —
-// there is no tier and no weighted score behind it.
+// there is no tier and no weighted score behind an explicit one. S15B-4b: only `relevance` orders by match level first.
 export type SearchRankingOptions = {
   sort: SearchSortMode;
   direction: SearchSortDirection;
@@ -91,6 +96,12 @@ export function rankSearchOfferCandidates(
   }));
 
   ranked.sort((a, b) => {
+    if (options.sort === 'relevance') {
+      // Level first, then the existing actuality order (fresher first → stable Offer.id), exactly as the `actuality` desc mode.
+      return ((a.matchLevel ?? 3) - (b.matchLevel ?? 3))
+        || (b.lastConfirmedAt.getTime() - a.lastConfirmedAt.getTime())
+        || compareId(a, b);
+    }
     if (options.sort === 'actuality') {
       const byAge = a.lastConfirmedAt.getTime() - b.lastConfirmedAt.getTime();
       // asc = older first, desc = fresher first; equal actuality falls back to the stable id.

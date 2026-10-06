@@ -114,20 +114,22 @@ async function searchProduct(page: Page) {
 const trigger = (page: Page) => page.getByRole('button', { name: 'Сортировка', exact: true });
 const popover = (page: Page) => page.getByRole('group', { name: 'Сортировка' });
 
-test('the sort control is a popover of exactly three criteria; none of the old filter controls exist', async ({ page }) => {
+test('the sort control is a popover of four criteria (S15B-4b adds relevance, the default); none of the old filter controls exist', async ({ page }) => {
   await page.goto('/');
   // No sort control on the Search Home.
   await expect(trigger(page)).toHaveCount(0);
 
   await searchProduct(page);
   await trigger(page).click();
-  await expect(popover(page).getByRole('button')).toHaveCount(3);
+  await expect(popover(page).getByRole('button')).toHaveCount(4);
   await expect(popover(page).getByRole('button', { name: /^Расстояние/ })).toBeVisible();
   await expect(popover(page).getByRole('button', { name: /^Цена/ })).toBeVisible();
-  // The default is the actuality, fresher first; the active criterion shows its direction in words and an arrow.
-  const actuality = popover(page).getByRole('button', { name: 'Актуальность, свежее первыми', exact: true });
-  await expect(actuality).toHaveAttribute('aria-pressed', 'true');
-  await expect(actuality).toContainText('↓');
+  // The default is «По соответствию»: it shows its order in words and no arrow (it has no direction).
+  const relevance = popover(page).getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true });
+  await expect(relevance).toHaveAttribute('aria-pressed', 'true');
+  await expect(relevance).not.toContainText('↓');
+  await expect(relevance).not.toContainText('↑');
+  await expect(popover(page).getByRole('button', { name: /^Актуальность/ })).toHaveAttribute('aria-pressed', 'false');
 
   // Nothing of the removed Stage 5 filters or the rejected Rev 2 price range.
   for (const gone of [/^Показать \d+ предложени/, 'Сбросить', 'Фильтры', 'Применить']) {
@@ -195,7 +197,7 @@ test('«Расстояние» is the explicit geo intent: nearer first, farther
   expect(stored).not.toContain('latitude');
 });
 
-test('a denied geolocation falls back to the actuality with a short notice and never sends «distance» without coordinates', async ({ page }) => {
+test('a denied geolocation falls back to the default relevance with a short notice and never sends «distance» without coordinates', async ({ page }) => {
   await mockGeolocation(page, 'deny');
   const sorts: string[] = [];
   page.on('request', (request) => {
@@ -210,13 +212,13 @@ test('a denied geolocation falls back to the actuality with a short notice and n
 
   await popover(page).getByRole('button', { name: /^Расстояние/ }).click();
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
-  // Back to the actuality, fresher first — in the visible state, the order and the tab state alike.
-  await expect(popover(page).getByRole('button', { name: 'Актуальность, свежее первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  // Back to the default relevance — in the visible state, the order and the tab state alike.
+  await expect(popover(page).getByRole('button', { name: 'По соответствию, лучшие совпадения первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');
   const stored = await page.evaluate((key) => window.sessionStorage.getItem(key), STORAGE_KEY);
-  expect(JSON.parse(stored ?? 'null')).toEqual({ v: 2, query: productName, sort: 'actuality', direction: 'desc' });
+  expect(JSON.parse(stored ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
 
   // Choosing another criterion clears the notice; no further prompt without another «Расстояние» tap.
   await popover(page).getByRole('button', { name: /^Цена/ }).click();

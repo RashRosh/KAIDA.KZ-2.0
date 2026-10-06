@@ -7,6 +7,7 @@ import { offerCount } from '../../../i18n/format';
 import { buyerLocationSchema, type BuyerLocation } from '../../../modules/search/contracts/buyer-location.contract';
 import {
   NATURAL_SORT_DIRECTION,
+  orderRequestFields,
   searchProductIdSchema,
   searchQuerySchema,
   searchResponseSchema,
@@ -40,6 +41,11 @@ const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Ка
 function searchKey(query: string, productId: string | undefined) {
   return productId ? `${query}\u0000${productId}` : query;
 }
+// The order fields of a GET request: a relevance Search carries no direction.
+function orderParams(sort: SearchSortMode, direction: SearchSortDirection): Record<string, string> {
+  return sort === 'relevance' ? { sort } : { sort, direction };
+}
+
 export function SearchScreen() {
   const { locale, t } = useI18n();
   // The query kept in the address (replaceState below is synced into the router), so Back from an offer page
@@ -69,8 +75,8 @@ export function SearchScreen() {
   const writtenQuery = useRef<string | null>(null);
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
   // Stage 6 Rev 3: the applied sort criterion and its direction (default: actuality, fresher first).
-  const [sort, setSort] = useState<SearchSortMode>('actuality');
-  const [direction, setDirection] = useState<SearchSortDirection>(NATURAL_SORT_DIRECTION.actuality);
+  const [sort, setSort] = useState<SearchSortMode>('relevance');
+  const [direction, setDirection] = useState<SearchSortDirection>(NATURAL_SORT_DIRECTION.relevance);
   // Shown after a geolocation denial for «Расстояние»: the order fell back to the actuality.
   const [distanceNotice, setDistanceNotice] = useState(false);
   const pending = useRef(false);
@@ -96,10 +102,10 @@ export function SearchScreen() {
       ? fetch(`/api/search?locale=${locale}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: last.query, ...(last.productId ? { productId: last.productId } : {}), buyerLocation: last.location, sort: last.sort, direction: last.direction }),
+        body: JSON.stringify({ q: last.query, ...(last.productId ? { productId: last.productId } : {}), buyerLocation: last.location, ...orderRequestFields(last.sort, last.direction) }),
         cache: 'no-store',
       })
-      : fetch(`/api/search?${new URLSearchParams({ q: last.query, ...(last.productId ? { product_id: last.productId } : {}), locale, sort: last.sort, direction: last.direction })}`, { cache: 'no-store' });
+      : fetch(`/api/search?${new URLSearchParams({ q: last.query, ...(last.productId ? { product_id: last.productId } : {}), locale, ...orderParams(last.sort, last.direction) })}`, { cache: 'no-store' });
     void request
       .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
       .then((localized) => {
@@ -126,10 +132,10 @@ export function SearchScreen() {
   ) => {
     if (pending.current) return;
     // «Расстояние» needs coordinates: without them the request is never sent as `distance` (the API rejects it) — the
-    // order falls back to the actuality and the UI says so (it is the same state, not a hidden one).
+    // order falls back to the default relevance and the UI says so (it is the same state, not a hidden one).
     const fellBack = requestedSort === 'distance' && !buyerLocation;
-    const mode = fellBack ? 'actuality' : requestedSort;
-    const order = fellBack ? NATURAL_SORT_DIRECTION.actuality : requestedDirection;
+    const mode = fellBack ? 'relevance' : requestedSort;
+    const order = fellBack ? NATURAL_SORT_DIRECTION.relevance : requestedDirection;
     if (fellBack) {
       setSort(mode);
       setDirection(order);
@@ -151,11 +157,11 @@ export function SearchScreen() {
         ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, sort: mode, direction: order }),
+          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, ...orderRequestFields(mode, order) }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, sort: mode, direction: order })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, ...orderParams(mode, order) })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
@@ -324,6 +330,8 @@ export function SearchScreen() {
   async function chooseCriterion(criterion: SearchSortMode) {
     if (loading || locationState.kind === 'requesting') return;
     setDistanceNotice(false);
+    // S15B-4b: «По соответствию» has no direction — tapping it while active does nothing.
+    if (criterion === 'relevance' && sort === 'relevance') return;
     const nextDirection = criterion === sort ? (direction === 'asc' ? 'desc' : 'asc') : NATURAL_SORT_DIRECTION[criterion];
     if (criterion === 'distance' && !buyerLocation) {
       const point = await requestBuyerLocation();
@@ -331,8 +339,8 @@ export function SearchScreen() {
         applyOrder('distance', nextDirection, point);
       } else {
         setDistanceNotice(true);
-        if (sort !== 'actuality' || direction !== NATURAL_SORT_DIRECTION.actuality) {
-          applyOrder('actuality', NATURAL_SORT_DIRECTION.actuality, undefined);
+        if (sort !== 'relevance') {
+          applyOrder('relevance', NATURAL_SORT_DIRECTION.relevance, undefined);
         }
       }
       return;
