@@ -1,6 +1,7 @@
 # S15B-4a — Selected Product как сигнал, а не фильтр
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-06). Уточнения PO: новый prefix-поиск по alias/localized name в 4a не добавляется (существующий exact resolver сохраняется); при расхождении selected Product и resolver по `q` — union обоих без дублей.
+**Status:** CLOSED. Checkpoint `v0.0.58-product-as-search-signal`; PR #111; `main` `9245765299231ae0fa5887a0c6288211df8079b9`; merged-main `KAIDA verify` run `37432078991` SUCCESS; manual acceptance PASS (implementation `283b10a`).
+**Approved:** PO, 2026-10-06. Уточнения PO: новый prefix-поиск по alias/localized name в 4a не добавляется (существующий exact resolver сохраняется); при расхождении selected Product и resolver по `q` — union обоих без дублей.
 **Base:** `main` после `v0.0.57-buyer-autocomplete`.
 **Plan:** промежуточный slice S15B. **Не финальная Search-модель:** relevance tiers / eligibility threshold / их связь с `sort` — отдельный следующий slice S15B-4b. Прежняя идея S15B-4 (жёсткое разделение canonical и raw) отменена решением PO.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).
