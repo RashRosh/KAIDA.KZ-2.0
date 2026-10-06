@@ -32,11 +32,23 @@ type SearchLifecycleOptions = {
   productId?: string;
 };
 
+// S15C / D0: how the Search response was reached, for the internal search event only — never part of the public response.
+export type SearchResolutionKind = 'selected' | 'resolved' | 'ambiguous' | 'unresolved';
+export type SearchOutcome = { response: SearchResponse; resolution: SearchResolutionKind };
+
 export async function searchOffers(
   input: string,
   database?: Database,
   lifecycleOptions: SearchLifecycleOptions = {},
 ): Promise<SearchResponse> {
+  return (await searchOffersDetailed(input, database, lifecycleOptions)).response;
+}
+
+export async function searchOffersDetailed(
+  input: string,
+  database?: Database,
+  lifecycleOptions: SearchLifecycleOptions = {},
+): Promise<SearchOutcome> {
   const query = searchQuerySchema.parse(input);
   const now = (lifecycleOptions.clock ?? systemClock)();
   const validityPeriodHours = lifecycleOptions.validityPeriodHours === undefined
@@ -50,15 +62,19 @@ export async function searchOffers(
   const selected = lifecycleOptions.productId === undefined
     ? null
     : await findCatalogProductById(db, lifecycleOptions.productId);
-  const resolution = await resolveProduct(db, query);
-  const resolved = resolution.status === 'resolved' ? resolution.product : null;
+  const resolverResult = await resolveProduct(db, query);
+  const resolved = resolverResult.status === 'resolved' ? resolverResult.product : null;
   const known = selected ?? resolved;
+  // S15C / D0: a found selected Product wins (as for `resolvedProduct`); a stale id is ignored and the resolver decides.
+  const resolution: SearchResolutionKind = selected !== null ? 'selected'
+    : resolved !== null ? 'resolved'
+      : resolverResult.status === 'ambiguous' ? 'ambiguous' : 'unresolved';
   const resolvedProduct = known === null ? null : { id: known.id, name: known.name };
   const match = {
     productIds: [...new Set([selected?.id, resolved?.id].filter((id): id is string => id !== undefined))],
     words: queryWords(query),
   };
-  if (match.productIds.length === 0 && match.words.length === 0) return { query, resolvedProduct, offers: [] };
+  if (match.productIds.length === 0 && match.words.length === 0) return { response: { query, resolvedProduct, offers: [] }, resolution };
 
   const { locale, commentTranslationEnabled } = lifecycleOptions;
   const candidates = locale === undefined && commentTranslationEnabled === undefined
@@ -86,5 +102,5 @@ export async function searchOffers(
       ? { distanceMeters: rankingDistanceMeters }
       : {}),
   }));
-  return { query, resolvedProduct, offers };
+  return { response: { query, resolvedProduct, offers }, resolution };
 }

@@ -24,6 +24,7 @@
     { "idx": 19, "version": "7", "when": 1790179200000, "tag": "0019_actuality_reminders", "breakpoints": true },
     { "idx": 20, "version": "7", "when": 1790834400000, "tag": "0020_address_directory", "breakpoints": true },
     { "idx": 21, "version": "7", "when": 1791180000000, "tag": "0021_production_kb_importer", "breakpoints": true },
-    { "idx": 22, "version": "7", "when": 1791183600000, "tag": "0022_localized_name_duplicate_lookup", "breakpoints": true }
+    { "idx": 22, "version": "7", "when": 1791183600000, "tag": "0022_localized_name_duplicate_lookup", "breakpoints": true },
+    { "idx": 23, "version": "7", "when": 1791270000000, "tag": "0023_search_events", "breakpoints": true }
   ]
 }

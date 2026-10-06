@@ -644,25 +644,22 @@ Search demand фиксируется только после осознанно�
 - П1 сознательно выбрал `Искать как введено`;
 - П1 включил `Сообщить, когда появится`.
 
-Минимальная сущность:
+**D0 (S15C, решение PO 2026-10-07 — реализовано как `docs/slices/s15c-d0-search-demand-events/SLICE_CONTRACT.md`).** События записываются сервером после успешного осознанного поиска; метрики D0 — это **события поиска, не уникальные люди**. Минимальная сущность:
 
 ```text
 search_events
 
 id UUID PK
-occurred_at TIMESTAMPTZ NOT NULL
-user_id UUID NULL
-anonymous_session_key_hash TEXT NULL
-query_display TEXT NOT NULL
-query_normalized TEXT NOT NULL
-resolved_product_id UUID NULL
-resolution_kind catalog | alias | localized | fuzzy_selected | raw_fallback | unresolved
-result_count INT NOT NULL
-buyer_location GEOGRAPHY(Point,4326) NULL
-radius_m INT NULL
+occurred_at TIMESTAMPTZ NOT NULL        -- усечено до часа
+entry submit | suggestion | chip
+query_normalized TEXT NOT NULL          -- только нормализованный текст, ≤ 100 символов
+resolved_product_id UUID NULL           -- Product, о котором сообщил ответ Search
+resolution selected | resolved | ambiguous | unresolved
+result_count INT NOT NULL               -- число Offers в возвращённом ответе
+origin organic | dev | test | synthetic -- organic только при явной production-настройке
 ```
 
-`buyer_location` сохраняется только если П1 сам включил геолокацию для данного поиска.
+В D0 **нет**: `user_id`, `anonymous_session_key_hash` и любого другого постоянного/сессионного идентификатора; `query_display`; `buyer_location`, `radius_m` и любой геолокации спроса (использование геолокации для Search не разрешает сбор локации спроса; гео — только отдельным утверждённым контрактом); событий «Искать как введено» и watch. Целевая сущность выше этого блока (идентификаторы, гео, `resolution_kind`) остаётся ориентиром для будущих контрактов и в D0 не реализуется.
 
 Эти события являются внутренними. Публичный Seller API не должен возвращать индивидуальные search events, user_id, session key или точную позицию конкретного П1.
 
