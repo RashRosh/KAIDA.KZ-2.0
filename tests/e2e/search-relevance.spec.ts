@@ -83,8 +83,8 @@ async function searchProduct(page: Page) {
   await expect(page.getByRole('article').first()).toBeVisible();
 }
 
-const trigger = (page: Page) => page.getByRole('button', { name: 'Сортировка', exact: true });
-const popover = (page: Page) => page.getByRole('group', { name: 'Сортировка' });
+const trigger = (page: Page) => page.getByRole('button', { name: 'Порядок результатов', exact: true });
+const popover = (page: Page) => page.getByRole('group', { name: 'Порядок результатов' });
 const storedState = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STORAGE_KEY);
 
 test('the default order is relevance: the Product card, whole words, then a word start — not the freshest first', async ({ page }) => {
@@ -92,9 +92,9 @@ test('the default order is relevance: the Product card, whole words, then a word
   await expectOrder(page, ['linked', 'whole', 'prefix']);
   expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
   await trigger(page).click();
-  // Relevance is the unlabelled default, never a list item.
-  await expect(popover(page).getByRole('button')).toHaveCount(3);
-  await expect(popover(page).locator('[aria-pressed="true"]')).toHaveCount(0);
+  // Relevance is the default value of the list («По умолчанию»), never «По соответствию».
+  await expect(popover(page).getByRole('button')).toHaveCount(4);
+  await expect(popover(page).getByRole('button', { name: 'По умолчанию', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('explicit sorts keep their order and direction; the reset × returns to relevance without a direction', async ({ page }) => {

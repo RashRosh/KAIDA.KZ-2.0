@@ -435,12 +435,12 @@ export function SearchScreen() {
       section="search"
       top={<header className="bar" style={{ padding: '0 12px', gap: 8 }}>{form(true)}</header>}
     >
+      <div className="chips-row" style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>{chips}</div>
       {visibleOffers.length > 0 && (
-        <div style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>
+        <div style={{ padding: '4px 12px 0', flex: 'none', background: 'var(--bg)' }}>
           <SortControl sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
         </div>
       )}
-      <div className="chips-row" style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>{chips}</div>
       <main className="body" style={{ gap: 12, padding: 12 }} aria-busy={loading || undefined}>
         {validation}
         {distanceNotice && (

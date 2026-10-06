@@ -155,7 +155,7 @@ test('Buyer location is explicit, transient and reached only through the «Ра�
   await page.goto('/welcome');
   // First Entry: the start page has neither the removed pin control nor the sort control.
   await expect(page.getByRole('button', { name: 'Учитывать моё местоположение', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Сортировка', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Порядок результатов', exact: true })).toHaveCount(0);
   expect(await geoCalls()).toBe(0);
 
   const input = page.getByLabel('Какой товар ищете?');
@@ -173,9 +173,9 @@ test('Buyer location is explicit, transient and reached only through the «Ра�
   expect(await geoCalls()).toBe(0);
 
   // Rev 3 + the sorting control refresh: the sort list holds the three criteria (relevance is the unlabelled default); opening it and choosing price asks for no location.
-  await page.getByRole('button', { name: 'Сортировка', exact: true }).click();
-  const popover = page.getByRole('group', { name: 'Сортировка' });
-  await expect(popover.getByRole('button')).toHaveCount(3);
+  await page.getByRole('button', { name: 'Порядок результатов', exact: true }).click();
+  const popover = page.getByRole('group', { name: 'Порядок результатов' });
+  await expect(popover.getByRole('button')).toHaveCount(4);
   await expect(popover.getByRole('button', { name: /^По расстоянию/ })).toBeVisible();
   await expect(popover.getByRole('button', { name: /^По цене/ })).toBeVisible();
   await expect(popover.getByRole('button', { name: /^По актуальности/ })).toHaveAttribute('aria-pressed', 'false');

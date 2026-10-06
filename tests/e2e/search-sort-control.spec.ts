@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { createDatabase } from '../../src/db/client';
 import { testDatabaseUrl } from '../integration/database';
 
-// Search sorting control UX refresh (docs/slices/search-sort-control-refresh): one compact row under the search field — default
-// «Сортировка» + an indicator; explicit sort: criterion + direction arrow, a separate list trigger and × (reset). Mobile + Russian.
+// Search sorting control UX refresh (docs/slices/search-sort-control-refresh): one compact inline row below the chips — default:
+// sliders / «По умолчанию» / list trigger; explicit: sliders / criterion + arrow / list trigger / ×. Mobile + Russian.
 test.beforeEach(({}, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'The current delivery gate is mobile + Russian.');
 });
@@ -83,9 +83,9 @@ async function mockGeolocation(page: Page, mode: 'grant' | 'deny') {
 const geoCalls = (page: Page) => page.evaluate(() => (window as unknown as { __geoCalls: number }).__geoCalls);
 
 const field = (page: Page) => page.getByRole('searchbox', { name: 'Какой товар ищете?' });
-const sortButton = (page: Page) => page.getByRole('button', { name: 'Сортировка', exact: true });
+const sortButton = (page: Page) => page.getByRole('button', { name: 'Порядок результатов', exact: true });
 const reset = (page: Page) => page.getByRole('button', { name: 'Сбросить сортировку', exact: true });
-const list = (page: Page) => page.getByRole('group', { name: 'Сортировка' });
+const list = (page: Page) => page.getByRole('group', { name: 'Порядок результатов' });
 const storedState = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STORAGE_KEY);
 
 async function searchProduct(page: Page) {
@@ -116,22 +116,32 @@ async function expectOneLine(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 }
 
-test('the default row is «Сортировка» + an indicator under the field: no icon, no caption, no ×', async ({ page }) => {
+const defaultValue = (page: Page) => page.getByText('По умолчанию', { exact: true }).first();
+
+test('the default row is sliders / «По умолчанию» / a list trigger, below the chips and above the results: no pill, no caption, no ×', async ({ page }) => {
   await searchProduct(page);
   await expect(sortButton(page)).toHaveCount(1);
-  await expect(sortButton(page)).toHaveText('Сортировка');
+  await expect(defaultValue(page)).toBeVisible();
+  // The default value and the icon are not interactive; no old labels and no caption.
+  await expect(page.getByRole('button', { name: 'По умолчанию' })).toHaveCount(0);
   await expect(reset(page)).toHaveCount(0);
   await expect(page.getByText(/^Порядок:/)).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /соответств/ })).toHaveCount(0);
-  const input = (await field(page).boundingBox())!;
-  const row = (await sortButton(page).boundingBox())!;
-  expect(row.y).toBeGreaterThanOrEqual(input.y + input.height);
-  expect(row.height).toBeGreaterThanOrEqual(44);
+  await expect(page.getByText(/Сортировк|Сортировать|соответств/)).toHaveCount(0);
+  const chips = (await page.locator('.chips-row').boundingBox())!;
+  const trigger = (await sortButton(page).boundingBox())!;
+  const firstCard = (await page.getByRole('article').first().boundingBox())!;
+  expect(trigger.y).toBeGreaterThanOrEqual(chips.y + chips.height - 8);
+  expect(trigger.y + trigger.height).toBeLessThanOrEqual(firstCard.y + 8);
+  expect(trigger.width).toBeGreaterThanOrEqual(44);
+  expect(trigger.height).toBeGreaterThanOrEqual(44);
   await expectOneLine(page);
   await expectOrder(page, ['linked', 'whole', 'prefix']);
+  // A tap on the inert default value opens nothing.
+  await defaultValue(page).click();
+  await expect(list(page)).toHaveCount(0);
 });
 
-test('an explicit sort shows criterion + arrow, the list trigger and ×; the arrow reverses; × returns to relevance', async ({ page }) => {
+test('the list has four items; the active default does nothing; the list stays open after a choice', async ({ page }) => {
   const requests: string[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
@@ -139,37 +149,68 @@ test('an explicit sort shows criterion + arrow, the list trigger and ×; the arr
   });
   await searchProduct(page);
   await sortButton(page).click();
-  await expect(list(page).getByRole('button')).toHaveCount(3);
+  await expect(list(page).getByRole('button')).toHaveCount(4);
+  await expect(list(page).getByRole('button', { name: 'По умолчанию', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  const before = requests.length;
+  await list(page).getByRole('button', { name: 'По умолчанию', exact: true }).click();
+  await expect(list(page)).toBeVisible();
+  expect(requests.length).toBe(before);
   await list(page).getByRole('button', { name: /^По цене/ }).click();
   await expectOrder(page, ['whole', 'prefix', 'linked']);
-  await page.keyboard.press('Escape');
+  await expect(list(page)).toBeVisible();
+});
 
-  const criterion = page.getByRole('button', { name: 'По цене, дешевле первыми', exact: true });
-  await expect(criterion).toBeVisible();
-  await expect(criterion).toContainText('↑');
-  await expect(sortButton(page)).toHaveCount(1); // the list trigger
+test('an explicit sort: sliders / criterion + arrow / trigger / ×; the value and the active item reverse the direction; × and «По умолчанию» reset', async ({ page }) => {
+  const requests: string[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.pathname === '/api/search') requests.push(url.search);
+  });
+  await searchProduct(page);
+  await sortButton(page).click();
+  await list(page).getByRole('button', { name: /^По цене/ }).click();
+  await expectOrder(page, ['whole', 'prefix', 'linked']);
+  // the active item shows the arrow; choosing it again reverses
+  await expect(list(page).getByRole('button', { name: 'По цене, дешевле первыми', exact: true })).toContainText('↑');
+  await list(page).getByRole('button', { name: /^По цене/ }).click();
+  await expectOrder(page, ['linked', 'prefix', 'whole']);
+  await expect(list(page).getByRole('button', { name: 'По цене, дороже первыми', exact: true })).toContainText('↓');
+  await page.keyboard.press('Escape');
+  await expect(list(page)).toHaveCount(0);
+
+  const value = page.getByRole('button', { name: 'По цене, дороже первыми', exact: true });
+  await expect(value).toContainText('↓');
   await expect(reset(page)).toBeVisible();
   const resetBox = (await reset(page).boundingBox())!;
   expect(resetBox.width).toBeGreaterThanOrEqual(44);
   expect(resetBox.height).toBeGreaterThanOrEqual(44);
   await expectOneLine(page);
+  // The row value reverses the direction (the arrow is an indicator, not a separate action).
+  await value.click();
+  await expectOrder(page, ['whole', 'prefix', 'linked']);
+  expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'price', direction: 'asc' });
 
-  // A tap on the criterion (or its arrow) changes the direction.
-  await criterion.click();
-  await expectOrder(page, ['linked', 'prefix', 'whole']);
-  await expect(page.getByRole('button', { name: 'По цене, дороже первыми', exact: true })).toContainText('↓');
-  expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'price', direction: 'desc' });
-
+  // × returns to relevance with no direction.
   await reset(page).click();
   await expectOrder(page, ['linked', 'whole', 'prefix']);
   await expect(reset(page)).toHaveCount(0);
-  await expect(sortButton(page)).toHaveText('Сортировка');
+  await expect(defaultValue(page)).toBeVisible();
   expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
+  expect(requests.at(-1)).toContain('sort=relevance');
+  expect(requests.at(-1)).not.toContain('direction');
+
+  // «По умолчанию» chosen from the list does the same.
+  await sortButton(page).click();
+  await list(page).getByRole('button', { name: /^По актуальности/ }).click();
+  await expectOrder(page, ['prefix', 'whole', 'linked']);
+  await list(page).getByRole('button', { name: 'По умолчанию', exact: true }).click();
+  await expectOrder(page, ['linked', 'whole', 'prefix']);
+  await expect(reset(page)).toHaveCount(0);
   expect(requests.at(-1)).toContain('sort=relevance');
   expect(requests.at(-1)).not.toContain('direction');
 });
 
-test('the reset changes only the sort: the query and the selected Product stay', async ({ page }) => {
+test('returning to the default changes only the sort: the query and the selected Product stay', async ({ page }) => {
   const requests: string[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
@@ -221,7 +262,7 @@ test('«По расстоянию» without geolocation: a denied prompt gives t
   await list(page).getByRole('button', { name: /^По расстоянию/ }).click();
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
   await expect(reset(page)).toHaveCount(0);
-  await expect(sortButton(page)).toHaveText('Сортировка');
+  await expect(defaultValue(page)).toBeVisible();
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');
   expect(JSON.parse((await storedState(page)) ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
@@ -238,22 +279,27 @@ test('«По расстоянию» with geolocation: one explicit prompt; the r
   await expectOneLine(page);
   await reset(page).click();
   await expectOrder(page, ['linked', 'whole', 'prefix']);
-  await expect(sortButton(page)).toHaveText('Сортировка');
+  await expect(defaultValue(page)).toBeVisible();
   expect(await geoCalls(page)).toBe(1);
 });
 
-test('the row stays on one line at 320 px in every state', async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 640 });
-  await mockGeolocation(page, 'grant');
-  await searchProduct(page);
-  await expectOneLine(page);
-  await sortButton(page).click();
-  await list(page).getByRole('button', { name: /^По расстоянию/ }).click();
-  await expect.poll(() => geoCalls(page)).toBe(1);
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'По расстоянию, ближе первыми', exact: true })).toBeVisible();
-  await expectOneLine(page);
-});
+for (const width of [320, 360]) {
+  test(`the row stays on one line at ${width} px in every state`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 640 });
+    await mockGeolocation(page, 'grant');
+    await searchProduct(page);
+    await expectOneLine(page);
+    await sortButton(page).click();
+    await list(page).getByRole('button', { name: /^По расстоянию/ }).click();
+    await expect.poll(() => geoCalls(page)).toBe(1);
+    // the open list is as wide as its content and stays inside the screen
+    const box = (await list(page).boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'По расстоянию, ближе первыми', exact: true })).toBeVisible();
+    await expectOneLine(page);
+  });
+}
 
 test('Back from an Offer and «Поиск» keep the explicit sort with its × visible', async ({ page }) => {
   await searchProduct(page);

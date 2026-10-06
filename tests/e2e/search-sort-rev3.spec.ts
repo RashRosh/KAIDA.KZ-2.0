@@ -111,20 +111,21 @@ async function searchProduct(page: Page) {
   await expect(page.getByRole('article').first()).toBeVisible();
 }
 
-const trigger = (page: Page) => page.getByRole('button', { name: 'Сортировка', exact: true });
-const popover = (page: Page) => page.getByRole('group', { name: 'Сортировка' });
+const trigger = (page: Page) => page.getByRole('button', { name: 'Порядок результатов', exact: true });
+const popover = (page: Page) => page.getByRole('group', { name: 'Порядок результатов' });
 
-test('the sort list holds three criteria (the default relevance is not an item); none of the old filter controls exist', async ({ page }) => {
+test('the sort list holds «По умолчанию» and three criteria; none of the old filter controls exist', async ({ page }) => {
   await page.goto('/');
   // No sort control on the Search Home.
   await expect(trigger(page)).toHaveCount(0);
 
   await searchProduct(page);
   await trigger(page).click();
-  await expect(popover(page).getByRole('button')).toHaveCount(3);
+  await expect(popover(page).getByRole('button')).toHaveCount(4);
   await expect(popover(page).getByRole('button', { name: /^По расстоянию/ })).toBeVisible();
   await expect(popover(page).getByRole('button', { name: /^По цене/ })).toBeVisible();
-  // The default (relevance) is not a selectable item and nothing in the list is active.
+  // The default value (relevance) is the active item; there is no «По соответствию» anywhere.
+  await expect(popover(page).getByRole('button', { name: 'По умолчанию', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(popover(page).getByRole('button', { name: /^По актуальности/ })).toHaveAttribute('aria-pressed', 'false');
   await expect(popover(page).getByRole('button', { name: /соответств/ })).toHaveCount(0);
 
@@ -208,7 +209,7 @@ test('a denied geolocation falls back to the default relevance with a short noti
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
   // Back to the default relevance — in the visible state (no criterion, no ×), the order and the tab state alike.
   await expect(page.getByRole('button', { name: 'Сбросить сортировку', exact: true })).toHaveCount(0);
-  await expect(popover(page).locator('[aria-pressed="true"]')).toHaveCount(0);
+  await expect(popover(page).getByRole('button', { name: 'По умолчанию', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');

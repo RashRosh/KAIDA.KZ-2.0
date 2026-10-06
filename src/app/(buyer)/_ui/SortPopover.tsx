@@ -5,18 +5,33 @@ import { useI18n } from '../../../i18n/I18nProvider';
 import type { SearchSortDirection, SearchSortMode } from '../../../modules/search/contracts/search.contract';
 import { Ic } from '../../seller/_kaida/ui';
 
-// Search sorting control UX refresh (docs/slices/search-sort-control-refresh): one compact row under the search field, no
-// captions. Default (relevance): «Сортировка» + a list indicator. Explicit sort: the criterion with its direction arrow (a tap
-// reverses the direction), a separate list trigger and × (reset to relevance). The list is the anchored popover of Rev 3 with
-// three criteria; a choice applies at once, tapping the active one reverses its direction, and the list stays open after a choice
-// and closes by a tap outside or `Esc`; focus moves in once on open and returns to the trigger (PROJECT_RULES.md §18.4 «Overlay»).
-const CRITERIA: Array<Exclude<SearchSortMode, 'relevance'>> = ['actuality', 'price', 'distance'];
+// Search sorting control UX refresh (docs/slices/search-sort-control-refresh): one compact inline row below the chips, no
+// captions, no pill. Default (relevance): sliders icon / «По умолчанию» / list trigger. Explicit sort: sliders icon / the current
+// criterion + ↑ or ↓ / list trigger / ×. The value of the row is the current criterion: a tap on it reverses the direction (the
+// arrow is an indicator, not a separate action); the default value and the icon are not interactive. The list is the anchored
+// popover of Rev 3 with four items; a choice applies at once and the list stays open after it (closes by a tap outside, `Esc` or the
+// trigger); focus moves in once on open and returns to the trigger (PROJECT_RULES.md §18.4 «Overlay»). Touch targets are 44×44
+// through invisible padding; the visible row stays about 28 px high.
+type ExplicitSort = Exclude<SearchSortMode, 'relevance'>;
+const CRITERIA: ExplicitSort[] = ['price', 'distance', 'actuality'];
 
-const pill: React.CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 44, padding: '0 14px', borderRadius: 999,
-  border: '1px solid var(--line)', background: 'var(--raised)', color: 'var(--ink)', font: 'inherit', fontWeight: 600, cursor: 'pointer',
-  minWidth: 0,
+const hit: React.CSSProperties = {
+  // No `all: unset`: the global `:focus-visible` outline (PROJECT_RULES.md §18.4) must keep working.
+  boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', gap: 6, height: 44, margin: '-8px 0', padding: '0 6px', border: 0, background: 'none',
+  font: 'inherit', fontSize: 14, lineHeight: '20px', color: 'var(--ink)', cursor: 'pointer', textAlign: 'left',
 };
+
+// The sliders icon (PO-approved for this slice): drawn in the style of the mockup icon set — 24 px grid, 1.75 stroke, round caps.
+function SlidersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1" />
+      <circle cx="15" cy="7" r="2" />
+      <circle cx="9" cy="12" r="2" />
+      <circle cx="17" cy="17" r="2" />
+    </svg>
+  );
+}
 
 export function SortControl({ sort, direction, busy, disabled, onChoose, onReset }: {
   sort: SearchSortMode;
@@ -26,8 +41,9 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
   // True while a search is in flight: a choice made then would be lost, so the controls wait (as the field does) — they stay
   // focusable (aria-disabled) so a keyboard user keeps their place.
   disabled: boolean;
-  // A criterion chosen in the list or the active one tapped in the row (the active one reverses its direction).
+  // A criterion chosen in the list, or the active one tapped (in the row or in the list): the active one reverses its direction.
   onChoose: (criterion: SearchSortMode) => void;
+  // «По умолчанию» chosen in the list while an explicit sort is active, or ×: back to relevance without a direction.
   onReset: () => void;
 }) {
   const { t } = useI18n();
@@ -37,7 +53,7 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
   const popover = useRef<HTMLDivElement>(null);
   const explicit = sort !== 'relevance';
 
-  // Focus goes in once when the list opens (to the active criterion, else the first) and returns to the trigger when it closes.
+  // Focus goes in once when the list opens (to the active item) and returns to the trigger when it closes.
   useEffect(() => {
     if (!open) return;
     (popover.current?.querySelector<HTMLElement>('[aria-pressed="true"]') ?? popover.current?.querySelector<HTMLElement>('button'))?.focus();
@@ -62,93 +78,82 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
   const activeName = explicit ? t(`search.criterion.${sort}` as 'search.criterion.price') : '';
 
   return (
-    <div ref={root} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-      {explicit ? (
-        <>
-          <button
-            type="button"
-            style={{ ...pill, flex: '0 1 auto', overflow: 'hidden' }}
-            aria-label={`${activeName}, ${order(sort)}`}
-            aria-busy={sort === 'distance' && busy ? true : undefined}
-            aria-disabled={disabled || undefined}
-            onClick={() => onChoose(sort)}
-          >
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeName}</span>
-            <span aria-hidden="true" style={{ fontWeight: 700 }}>{arrow}</span>
-          </button>
-          <button
-            ref={trigger}
-            type="button"
-            className="ib"
-            aria-label={t('search.sorting')}
-            aria-haspopup="true"
-            aria-expanded={open}
-            title={t('search.sorting')}
-            style={{ width: 44, flex: 'none' }}
-            onClick={() => setOpen((current) => !current)}
-          >
-            <Ic name="down" />
-          </button>
-          <button
-            type="button"
-            className="ib"
-            aria-label={t('search.sortReset')}
-            aria-disabled={disabled || undefined}
-            title={t('search.sortReset')}
-            style={{ width: 44, flex: 'none' }}
-            onClick={onReset}
-          >
-            <Ic name="close" />
-          </button>
-        </>
-      ) : (
+    <div ref={root} style={{ position: 'relative', display: 'flex', alignItems: 'center', height: 28, minWidth: 0 }}>
+      <span style={{ ...hit, cursor: 'default', marginLeft: -6, padding: '0 6px', flex: 'none' }}>
+        <SlidersIcon />
+        {!explicit && <span>{t('search.criterion.default')}</span>}
+      </span>
+      {explicit && (
         <button
-          ref={trigger}
           type="button"
-          style={pill}
-          aria-label={t('search.sorting')}
-          aria-haspopup="true"
-          aria-expanded={open}
-          onClick={() => setOpen((current) => !current)}
+          style={{ ...hit, padding: '0 4px', minWidth: 0 }}
+          aria-label={`${activeName}, ${order(sort)}`}
+          aria-busy={sort === 'distance' && busy ? true : undefined}
+          aria-disabled={disabled || undefined}
+          onClick={() => onChoose(sort)}
         >
-          <span>{t('search.sorting')}</span>
-          <Ic name="down" />
+          <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeName}</span>
+          <b aria-hidden="true" style={{ color: 'var(--primary-text)', fontWeight: 700 }}>{arrow}</b>
+        </button>
+      )}
+      <button
+        ref={trigger}
+        type="button"
+        // 44×44 target; after the inert default value its padding overlaps only that inert text, so the row stays compact.
+        style={{ ...hit, minWidth: 44, justifyContent: 'center', padding: 0, flex: 'none', marginLeft: explicit ? 0 : -8 }}
+        aria-label={t('search.sortOrder')}
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <Ic name="down" className="sm c2" />
+      </button>
+      {explicit && (
+        <button
+          type="button"
+          style={{ ...hit, minWidth: 44, justifyContent: 'center', padding: 0, flex: 'none' }}
+          aria-label={t('search.sortReset')}
+          aria-disabled={disabled || undefined}
+          onClick={onReset}
+        >
+          <Ic name="close" className="sm c2" />
         </button>
       )}
       {open && (
         <div
           ref={popover}
           role="group"
-          aria-label={t('search.sorting')}
+          aria-label={t('search.sortOrder')}
           style={{
-            position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 4, width: 248, maxWidth: '100%', padding: 6,
-            background: 'var(--raised)', border: '1px solid var(--line)', borderRadius: 14, boxShadow: 'var(--shadow-md)',
+            position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 4, width: 'max-content', minWidth: 176, maxWidth: 'calc(100vw - 24px)', padding: 4,
+            background: 'var(--raised)', border: '1px solid var(--line)', borderRadius: 12, boxShadow: 'var(--shadow-md)',
             display: 'flex', flexDirection: 'column',
           }}
         >
-          {CRITERIA.map((criterion) => {
-            const active = criterion === sort;
-            const name = t(`search.criterion.${criterion}` as 'search.criterion.price');
+          {([null, ...CRITERIA] as Array<ExplicitSort | null>).map((criterion) => {
+            const active = criterion === null ? !explicit : criterion === sort;
+            const name = criterion === null ? t('search.criterion.default') : t(`search.criterion.${criterion}` as 'search.criterion.price');
             return (
               <button
-                key={criterion}
+                key={criterion ?? 'default'}
                 type="button"
-                className="li"
                 aria-pressed={active}
-                aria-label={active ? `${name}, ${order(criterion)}` : name}
+                aria-label={active && criterion !== null ? `${name}, ${order(criterion)}` : name}
                 aria-busy={criterion === 'distance' && busy ? true : undefined}
                 aria-disabled={disabled || undefined}
-                onClick={() => onChoose(criterion)}
+                onClick={() => {
+                  // The default value is a regular item: it does nothing while it is the active one.
+                  if (criterion === null) { if (explicit) onReset(); return; }
+                  onChoose(criterion);
+                }}
                 style={{
-                  minHeight: 48, padding: '4px 10px', border: 0, borderRadius: 10, textAlign: 'left', cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1,
-                  background: active ? 'var(--primary-soft)' : 'transparent', color: active ? 'var(--primary-text)' : 'var(--ink)',
+                  boxSizing: 'border-box', minHeight: 44, padding: '0 12px', border: 0, font: 'inherit', textAlign: 'left', borderRadius: 8, display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between', gap: 20, fontSize: 15, cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1,
+                  fontWeight: active ? 700 : 500, background: active ? 'var(--primary-soft)' : 'transparent', color: active ? 'var(--primary-text)' : 'var(--ink)',
                 }}
               >
-                <div className="mid">
-                  <div className="ts" style={{ fontWeight: active ? 700 : 500 }}>{name}</div>
-                  {active && <p className="c" style={{ color: 'inherit' }}>{order(criterion)}</p>}
-                </div>
-                {active && <span aria-hidden="true" style={{ fontSize: 18, fontWeight: 700 }}>{arrow}</span>}
+                <span>{name}</span>
+                {active && criterion !== null && <span aria-hidden="true" style={{ fontWeight: 700 }}>{arrow}</span>}
               </button>
             );
           })}

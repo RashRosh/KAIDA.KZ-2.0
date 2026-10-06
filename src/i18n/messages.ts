@@ -100,6 +100,9 @@ export const ru = {
   'search.criterion.actuality': 'По актуальности',
   // Search sorting control UX refresh: × returns to the default relevance (accessible name only, no visible text).
   'search.sortReset': 'Сбросить сортировку',
+  // Accessible name of the list trigger and the list (not visible labels); «По умолчанию» is the relevance value.
+  'search.sortOrder': 'Порядок результатов',
+  'search.criterion.default': 'По умолчанию',
   'search.order.actuality.desc': 'сначала актуальные',
   'search.order.actuality.asc': 'сначала менее актуальные',
   'search.order.price.asc': 'дешевле первыми',
@@ -901,6 +904,8 @@ export const kk = {
   'search.criterion.price': 'Баға бойынша',
   'search.criterion.actuality': 'Өзектілік бойынша',
   'search.sortReset': 'Сұрыптауды тастау',
+  'search.sortOrder': 'Нәтижелер реті',
+  'search.criterion.default': 'Әдепкі бойынша',
   'search.order.actuality.desc': 'алдымен өзектілері',
   'search.order.actuality.asc': 'алдымен өзектілігі төмені',
   'search.order.price.asc': 'алдымен арзаны',
