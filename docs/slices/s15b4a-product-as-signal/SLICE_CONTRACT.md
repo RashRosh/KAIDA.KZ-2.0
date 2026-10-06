@@ -1,6 +1,6 @@
 # S15B-4a — Selected Product как сигнал, а не фильтр
 
-**Status:** DRAFT — на approval PO.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-06). Уточнения PO: новый prefix-поиск по alias/localized name в 4a не добавляется (существующий exact resolver сохраняется); при расхождении selected Product и resolver по `q` — union обоих без дублей.
 **Base:** `main` после `v0.0.57-buyer-autocomplete`.
 **Plan:** промежуточный slice S15B. **Не финальная Search-модель:** relevance tiers / eligibility threshold / их связь с `sort` — отдельный следующий slice S15B-4b. Прежняя идея S15B-4 (жёсткое разделение canonical и raw) отменена решением PO.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5).

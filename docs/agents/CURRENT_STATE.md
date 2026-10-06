@@ -16,7 +16,7 @@
 
 ## Next action
 
-1. S15B-4a (`docs/slices/s15b4a-product-as-signal/SLICE_CONTRACT.md`, DRAFT на approval): Product как сигнал, без relevance-порядка; затем S15B-4b. Прежний S15B-4 отменён. Search sorting control UX refresh — deferred (см. план).
+1. S15B-4a (`docs/slices/s15b4a-product-as-signal/SLICE_CONTRACT.md`, APPROVED, реализация): Product как сигнал, без relevance-порядка; затем S15B-4b. Прежний S15B-4 отменён. Search sorting control UX refresh — deferred (см. план).
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
