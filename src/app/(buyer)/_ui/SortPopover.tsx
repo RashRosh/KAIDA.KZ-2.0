@@ -2,18 +2,21 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
-import type { SearchSortDirection, SearchSortMode } from '../../../modules/search/contracts/search.contract';
+import { NATURAL_SORT_DIRECTION, type SearchSortDirection, type SearchSortMode } from '../../../modules/search/contracts/search.contract';
 import { Ic } from '../../seller/_kaida/ui';
 
 // Search sorting control UX refresh (docs/slices/search-sort-control-refresh): one compact inline row below the chips, no
-// captions, no pill. Default (relevance): sliders icon / «По умолчанию» / list trigger. Explicit sort: sliders icon / the current
-// criterion + ↑ or ↓ / list trigger / ×. The value of the row is the current criterion: a tap on it reverses the direction (the
-// arrow is an indicator, not a separate action); the default value and the icon are not interactive. The list is the anchored
-// popover of Rev 3 with four items; a choice applies at once and the list stays open after it (closes by a tap outside, `Esc` or the
-// trigger); focus moves in once on open and returns to the trigger (PROJECT_RULES.md §18.4 «Overlay»). Touch targets are 44×44
-// through invisible padding; the visible row stays about 28 px high.
+// captions, no pill — and the WHOLE row is one dropdown trigger in every state (icon, text and indicator alike). Default
+// (relevance): sliders / «По умолчанию» / indicator. Explicit sort: sliders / the criterion and its CURRENT direction arrow /
+// indicator. The list is the anchored popover of Rev 3 with four items and closes at once after any selection (also the already
+// active default). Arrows in the list tell what a click will apply: the active explicit item shows the OPPOSITE direction, an
+// inactive explicit item its natural direction, «По умолчанию» none. The way back to relevance is that item only. Focus moves in
+// once on open and returns to the trigger (PROJECT_RULES.md §18.4 «Overlay»). The target is 44 px high through invisible padding;
+// the visible row stays about 28 px.
 type ExplicitSort = Exclude<SearchSortMode, 'relevance'>;
 const CRITERIA: ExplicitSort[] = ['price', 'distance', 'actuality'];
+const arrowOf = (direction: SearchSortDirection) => (direction === 'asc' ? '↑' : '↓');
+const opposite = (direction: SearchSortDirection): SearchSortDirection => (direction === 'asc' ? 'desc' : 'asc');
 
 const hit: React.CSSProperties = {
   // No `all: unset`: the global `:focus-visible` outline (PROJECT_RULES.md §18.4) must keep working.
@@ -41,9 +44,9 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
   // True while a search is in flight: a choice made then would be lost, so the controls wait (as the field does) — they stay
   // focusable (aria-disabled) so a keyboard user keeps their place.
   disabled: boolean;
-  // A criterion chosen in the list, or the active one tapped (in the row or in the list): the active one reverses its direction.
+  // A criterion chosen in the list: a different one starts in its natural direction, the active one reverses its direction.
   onChoose: (criterion: SearchSortMode) => void;
-  // «По умолчанию» chosen in the list while an explicit sort is active, or ×: back to relevance without a direction.
+  // «По умолчанию» chosen in the list while an explicit sort is active: back to relevance without a direction.
   onReset: () => void;
 }) {
   const { t } = useI18n();
@@ -73,52 +76,38 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
     };
   }, [open]);
 
-  const order = (criterion: SearchSortMode) => t(`search.order.${criterion}.${criterion === sort ? direction : 'asc'}` as 'search.order.price.asc');
-  const arrow = direction === 'asc' ? '↑' : '↓';
-  const activeName = explicit ? t(`search.criterion.${sort}` as 'search.criterion.price') : '';
+  const phrase = (criterion: ExplicitSort, order: SearchSortDirection) => t(`search.order.${criterion}.${order}` as 'search.order.price.asc');
+  const criterionName = (criterion: ExplicitSort) => t(`search.criterion.${criterion}` as 'search.criterion.price');
+  // The row shows the state; its accessible name says the current state, not an action.
+  const current = explicit ? `${criterionName(sort)}, ${phrase(sort, direction)}` : t('search.criterion.default');
+
+  function select(criterion: ExplicitSort | null) {
+    setOpen(false);
+    trigger.current?.focus();
+    // The default value is a regular item: it does nothing while it is the active one.
+    if (criterion === null) { if (explicit) onReset(); return; }
+    onChoose(criterion);
+  }
 
   return (
     <div ref={root} style={{ position: 'relative', display: 'flex', alignItems: 'center', height: 28, minWidth: 0 }}>
-      <span style={{ ...hit, cursor: 'default', marginLeft: -6, padding: '0 6px', flex: 'none' }}>
-        <SlidersIcon />
-        {!explicit && <span>{t('search.criterion.default')}</span>}
-      </span>
-      {explicit && (
-        <button
-          type="button"
-          style={{ ...hit, padding: '0 4px', minWidth: 0 }}
-          aria-label={`${activeName}, ${order(sort)}`}
-          aria-busy={sort === 'distance' && busy ? true : undefined}
-          aria-disabled={disabled || undefined}
-          onClick={() => onChoose(sort)}
-        >
-          <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeName}</span>
-          <b aria-hidden="true" style={{ color: 'var(--primary-text)', fontWeight: 700 }}>{arrow}</b>
-        </button>
-      )}
       <button
         ref={trigger}
         type="button"
-        // 44×44 target; after the inert default value its padding overlaps only that inert text, so the row stays compact.
-        style={{ ...hit, minWidth: 44, justifyContent: 'center', padding: 0, flex: 'none', marginLeft: explicit ? 0 : -8 }}
-        aria-label={t('search.sortOrder')}
+        style={{ ...hit, marginLeft: -6, minWidth: 44, maxWidth: '100%' }}
+        aria-label={t('search.sortCurrent', { value: current })}
         aria-haspopup="true"
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        aria-busy={sort === 'distance' && busy ? true : undefined}
+        onClick={() => setOpen((value) => !value)}
       >
+        <SlidersIcon />
+        <span style={{ fontWeight: explicit ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {explicit ? criterionName(sort) : t('search.criterion.default')}
+        </span>
+        {explicit && <b aria-hidden="true" style={{ color: 'var(--primary-text)', fontWeight: 700 }}>{arrowOf(direction)}</b>}
         <Ic name="down" className="sm c2" />
       </button>
-      {explicit && (
-        <button
-          type="button"
-          style={{ ...hit, minWidth: 44, justifyContent: 'center', padding: 0, flex: 'none' }}
-          aria-label={t('search.sortReset')}
-          aria-disabled={disabled || undefined}
-          onClick={onReset}
-        >
-          <Ic name="close" className="sm c2" />
-        </button>
-      )}
       {open && (
         <div
           ref={popover}
@@ -132,20 +121,18 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
         >
           {([null, ...CRITERIA] as Array<ExplicitSort | null>).map((criterion) => {
             const active = criterion === null ? !explicit : criterion === sort;
-            const name = criterion === null ? t('search.criterion.default') : t(`search.criterion.${criterion}` as 'search.criterion.price');
+            // What a click applies: the active explicit item reverses its direction, an inactive one starts in its natural direction.
+            const applies = criterion === null ? null : active ? opposite(direction) : NATURAL_SORT_DIRECTION[criterion];
+            const name = criterion === null ? t('search.criterion.default') : criterionName(criterion);
             return (
               <button
                 key={criterion ?? 'default'}
                 type="button"
                 aria-pressed={active}
-                aria-label={active && criterion !== null ? `${name}, ${order(criterion)}` : name}
+                aria-label={criterion === null || applies === null ? name : `${name}, ${t('search.sortApply', { order: phrase(criterion, applies) })}`}
                 aria-busy={criterion === 'distance' && busy ? true : undefined}
                 aria-disabled={disabled || undefined}
-                onClick={() => {
-                  // The default value is a regular item: it does nothing while it is the active one.
-                  if (criterion === null) { if (explicit) onReset(); return; }
-                  onChoose(criterion);
-                }}
+                onClick={() => select(criterion)}
                 style={{
                   boxSizing: 'border-box', minHeight: 44, padding: '0 12px', border: 0, font: 'inherit', textAlign: 'left', borderRadius: 8, display: 'flex', alignItems: 'center',
                   justifyContent: 'space-between', gap: 20, fontSize: 15, cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1,
@@ -153,7 +140,7 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
                 }}
               >
                 <span>{name}</span>
-                {active && criterion !== null && <span aria-hidden="true" style={{ fontWeight: 700 }}>{arrow}</span>}
+                {applies !== null && <span aria-hidden="true" style={{ fontWeight: 700 }}>{arrowOf(applies)}</span>}
               </button>
             );
           })}

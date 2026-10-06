@@ -111,8 +111,14 @@ async function searchProduct(page: Page) {
   await expect(page.getByRole('article').first()).toBeVisible();
 }
 
-const trigger = (page: Page) => page.getByRole('button', { name: 'Порядок результатов', exact: true });
+const trigger = (page: Page) => page.getByRole('button', { name: /^Порядок результатов: / });
 const popover = (page: Page) => page.getByRole('group', { name: 'Порядок результатов' });
+// The list closes after every choice: a choice opens it first (when it is not open yet).
+async function menu(page: Page) {
+  const group = popover(page);
+  if (!(await group.isVisible())) await trigger(page).click();
+  return group;
+}
 
 test('the sort list holds «По умолчанию» and three criteria; none of the old filter controls exist', async ({ page }) => {
   await page.goto('/');
@@ -131,7 +137,7 @@ test('the sort list holds «По умолчанию» and three criteria; none o
 
   // Nothing of the removed Stage 5 filters or the rejected Rev 2 price range.
   for (const gone of [/^Показать \d+ предложени/, 'Сбросить', 'Фильтры', 'Применить']) {
-    await expect(page.getByRole('button', { name: gone })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: gone, exact: typeof gone === 'string' })).toHaveCount(0);
   }
   await expect(page.getByRole('radio')).toHaveCount(0);
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -145,22 +151,24 @@ test('price sorts by the nominal amount across units; a second tap reverses; act
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
 
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^По цене/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По цене/ }).click();
   // 800 ₸ / упак. precedes the 1000 ₸ Offers (per кг and per л — equal prices keep «fresher first»), then 2500 ₸.
   await expectOrder(page, [points.far1, points.geoless, points.near, points.far2]);
-  await expect(popover(page).getByRole('button', { name: 'По цене, дешевле первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /^Порядок результатов: / })).toHaveAttribute('aria-label', 'Порядок результатов: По цене, дешевле первыми');
 
-  await popover(page).getByRole('button', { name: /^По цене/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По цене/ }).click();
   await expectOrder(page, [points.far2, points.geoless, points.near, points.far1]);
-  await expect(popover(page).getByRole('button', { name: 'По цене, дороже первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /^Порядок результатов: / })).toHaveAttribute('aria-label', 'Порядок результатов: По цене, дороже первыми');
 
   // Switching the criterion starts with its natural direction; the ageing Offer is no longer forced last.
-  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
-  await popover(page).getByRole('button', { name: /^По актуальности/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По актуальности/ }).click();
   await expectOrder(page, [points.far1, points.near, points.far2, points.geoless]);
 
-  // The popover stayed open after every choice; Escape closes it and returns the focus to the button.
+  // The list closed after every choice; Escape closes an open one and returns the focus to the row trigger.
+  await expect(popover(page)).toHaveCount(0);
+  await trigger(page).click();
   await expect(popover(page)).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(popover(page)).toHaveCount(0);
@@ -173,15 +181,15 @@ test('«Расстояние» is the explicit geo intent: nearer first, farther
   expect(await geoCalls(page)).toBe(0);
 
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^По цене/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По цене/ }).click();
   expect(await geoCalls(page)).toBe(0);
 
-  await popover(page).getByRole('button', { name: /^По расстоянию/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По расстоянию/ }).click();
   await expectOrder(page, [points.near, points.far1, points.far2, points.geoless]);
   expect(await geoCalls(page)).toBe(1);
-  await expect(popover(page).getByRole('button', { name: 'По расстоянию, ближе первыми', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /^Порядок результатов: / })).toHaveAttribute('aria-label', 'Порядок результатов: По расстоянию, ближе первыми');
 
-  await popover(page).getByRole('button', { name: /^По расстоянию/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По расстоянию/ }).click();
   await expectOrder(page, [points.far2, points.far1, points.near, points.geoless]);
   // The coordinates are already known on this screen: no second prompt.
   expect(await geoCalls(page)).toBe(1);
@@ -202,14 +210,13 @@ test('a denied geolocation falls back to the default relevance with a short noti
   });
   await searchProduct(page);
   await trigger(page).click();
-  await popover(page).getByRole('button', { name: /^По цене/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По цене/ }).click();
   await expectOrder(page, [points.far1, points.geoless, points.near, points.far2]);
 
-  await popover(page).getByRole('button', { name: /^По расстоянию/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По расстоянию/ }).click();
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
-  // Back to the default relevance — in the visible state (no criterion, no ×), the order and the tab state alike.
-  await expect(page.getByRole('button', { name: 'Сбросить сортировку', exact: true })).toHaveCount(0);
-  await expect(popover(page).getByRole('button', { name: 'По умолчанию', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  // Back to the default relevance — in the visible state (the row says «По умолчанию»), the order and the tab state alike.
+  await expect(trigger(page)).toHaveAttribute('aria-label', 'Порядок результатов: По умолчанию');
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');
@@ -217,7 +224,7 @@ test('a denied geolocation falls back to the default relevance with a short noti
   expect(JSON.parse(stored ?? 'null')).toEqual({ v: 2, query: productName, sort: 'relevance' });
 
   // Choosing another criterion clears the notice; no further prompt without another «Расстояние» tap.
-  await popover(page).getByRole('button', { name: /^По цене/ }).click();
+  await (await menu(page)).getByRole('button', { name: /^По цене/ }).click();
   await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toHaveCount(0);
   expect(await geoCalls(page)).toBe(1);
 });

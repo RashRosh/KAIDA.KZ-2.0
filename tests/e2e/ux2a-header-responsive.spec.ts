@@ -17,7 +17,7 @@ async function expectResultsBar(page: Page) {
   const search = page.getByRole('search', { name: 'Поиск предложений' });
   const input = search.getByRole('searchbox', { name: 'Какой товар ищете?' });
   // Search sorting control UX refresh: one compact sort row (sliders / «По умолчанию» / trigger) below the chips, above the results.
-  const filters = page.getByRole('button', { name: 'Порядок результатов', exact: true });
+  const filters = page.getByRole('button', { name: /^Порядок результатов: / });
 
   await expect(input).toBeVisible();
   await expect(filters).toBeVisible();
