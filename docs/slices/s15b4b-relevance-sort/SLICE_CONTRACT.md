@@ -1,6 +1,7 @@
 # S15B-4b — Search «По соответствию» (relevance) как режим по умолчанию
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-06; уточнения PO внесены). Казахские тексты — черновики на вычитку.
+**Status:** CLOSED. Checkpoint `v0.0.59-search-relevance-default`; PR #114; `main` `8974acd0b3ecb9a6bcf43542a28bf0c8df3fc525`; merged-main `KAIDA verify` run `37447048125` SUCCESS; manual acceptance PASS (implementation `6702e35`). Казахские тексты — черновики на вычитку, не утверждены. Выбираемый пункт «По соответствию» (§3.6) — временное решение: его заменит Search sorting control UX refresh (см. `EXECUTION_PLAN.md`, «Deferred UX»).
+**Approved:** PO, 2026-10-06 (уточнения PO внесены).
 **Base:** `main` после `v0.0.58-product-as-search-signal`.
 **Plan:** последний семантический slice S15B (`EXECUTION_PLAN.md`); следом — отдельный Search sorting control UX refresh, затем S15C. Классификация L1/L2/L3 отдельным slice не делается: она существует только как часть режима «По соответствию» (самостоятельного пользовательского результата у неё нет).
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5); казахский текст — в каталоге строк, перевод — на вычитку.
