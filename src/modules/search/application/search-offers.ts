@@ -1,5 +1,6 @@
 import { getDatabase, type Database } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
+import { findCatalogProductById } from '../../catalog/infrastructure/products.repository';
 import {
   readOfferValidityPeriodHours,
   validateOfferValidityPeriodHours,
@@ -26,6 +27,8 @@ type SearchLifecycleOptions = {
   // Stage 6 Rev 3: the explicit sort criterion (default actuality) and its direction (default: the natural one).
   sort?: SearchSortMode;
   direction?: SearchSortDirection;
+  // S15B-3: a Search by a selected catalog Product runs on that Product only — no text fallback of any kind.
+  productId?: string;
 };
 
 export async function searchOffers(
@@ -40,14 +43,25 @@ export async function searchOffers(
     : validateOfferValidityPeriodHours(lifecycleOptions.validityPeriodHours);
   const cutoff = calculateOfferCutoff(now, validityPeriodHours);
   const db = database ?? getDatabase();
-  // seller-showcase-editor: the catalog (names and aliases) and the words of the Seller's own titles both find Offers.
-  const resolution = await resolveProduct(db, query);
-  const match = {
-    productId: resolution.status === 'resolved' ? resolution.product.id : null,
-    words: queryWords(query),
-  };
-  const resolvedProduct = resolution.status === 'resolved' ? { id: resolution.product.id, name: resolution.product.name } : null;
-  if (match.productId === null && match.words.length === 0) return { query, resolvedProduct, offers: [] };
+  let resolvedProduct: { id: string; name: string } | null;
+  let match: { productId: string | null; words: string[] };
+  if (lifecycleOptions.productId !== undefined) {
+    // S15B-3 canonical path: only Offers of this Product.id; an unknown id or a Product without Offers never falls back
+    // to the text search.
+    const product = await findCatalogProductById(db, lifecycleOptions.productId);
+    if (!product) return { query, resolvedProduct: null, offers: [] };
+    resolvedProduct = { id: product.id, name: product.name };
+    match = { productId: product.id, words: [] };
+  } else {
+    // seller-showcase-editor: the catalog (names and aliases) and the words of the Seller's own titles both find Offers.
+    const resolution = await resolveProduct(db, query);
+    match = {
+      productId: resolution.status === 'resolved' ? resolution.product.id : null,
+      words: queryWords(query),
+    };
+    resolvedProduct = resolution.status === 'resolved' ? { id: resolution.product.id, name: resolution.product.name } : null;
+    if (match.productId === null && match.words.length === 0) return { query, resolvedProduct, offers: [] };
+  }
 
   const { locale, commentTranslationEnabled } = lifecycleOptions;
   const candidates = locale === undefined && commentTranslationEnabled === undefined

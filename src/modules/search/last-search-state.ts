@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   NATURAL_SORT_DIRECTION,
+  searchProductIdSchema,
   searchQuerySchema,
   searchSortDirectionSchema,
   searchSortModeSchema,
@@ -19,6 +20,8 @@ export type LastSearchState = {
   query: string;
   sort: SearchSortMode;
   direction: SearchSortDirection;
+  // S15B-3: the selected catalog Product of the last Search, when it was a search by Product.
+  productId?: string;
 };
 
 const storedSchema = z.object({
@@ -26,6 +29,15 @@ const storedSchema = z.object({
   query: searchQuerySchema,
   sort: searchSortModeSchema,
   direction: searchSortDirectionSchema,
+}).strict();
+
+// S15B-3: `v: 3` is `v: 2` plus the selected Product id; a Search without one is still written as `v: 2`.
+const productSchema = z.object({
+  v: z.literal(3),
+  query: searchQuerySchema,
+  sort: searchSortModeSchema,
+  direction: searchSortDirectionSchema,
+  productId: searchProductIdSchema,
 }).strict();
 
 // Stage 5/6C values (`v: 1`: query, sort and a distance radius) degrade minimally: the query stays, the obsolete radius is
@@ -43,6 +55,10 @@ export function parseLastSearchState(raw: string | null | undefined): LastSearch
     const value: unknown = JSON.parse(raw);
     const current = storedSchema.safeParse(value);
     if (current.success) return { query: current.data.query, sort: current.data.sort, direction: current.data.direction };
+    const withProduct = productSchema.safeParse(value);
+    if (withProduct.success) {
+      return { query: withProduct.data.query, sort: withProduct.data.sort, direction: withProduct.data.direction, productId: withProduct.data.productId };
+    }
     const legacy = legacySchema.safeParse(value);
     if (legacy.success) {
       return { query: legacy.data.query, sort: legacy.data.sort, direction: NATURAL_SORT_DIRECTION[legacy.data.sort] };
@@ -57,6 +73,10 @@ export function parseLastSearchState(raw: string | null | undefined): LastSearch
 export function serializeLastSearchState(state: LastSearchState): string | null {
   const query = searchQuerySchema.safeParse(state.query);
   if (!query.success) return null;
+  if (state.productId !== undefined) {
+    const productId = searchProductIdSchema.safeParse(state.productId);
+    if (productId.success) return JSON.stringify({ v: 3, query: query.data, sort: state.sort, direction: state.direction, productId: productId.data });
+  }
   return JSON.stringify({ v: FORMAT_VERSION, query: query.data, sort: state.sort, direction: state.direction });
 }
 
@@ -64,7 +84,7 @@ export function serializeLastSearchState(state: LastSearchState): string | null 
 // `actuality` and `price` need no coordinates and keep their direction. The geolocation is never requested on restore.
 export function normalizeGeoDependentState(state: LastSearchState, hasCoordinates: boolean): LastSearchState {
   if (hasCoordinates || state.sort !== 'distance') return state;
-  return { query: state.query, sort: 'actuality', direction: NATURAL_SORT_DIRECTION.actuality };
+  return { ...state, sort: 'actuality', direction: NATURAL_SORT_DIRECTION.actuality };
 }
 
 // The raw stored value, for subscribers that only need to react to a change of it (the navigation link).

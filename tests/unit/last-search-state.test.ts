@@ -65,3 +65,18 @@ describe('last Search state', () => {
     expect(normalizeGeoDependentState(geo, true)).toEqual(geo);
   });
 });
+
+describe('S15B-3 selected Product in the last Search state', () => {
+  const productId = '10000000-0000-4000-8000-000000000001';
+  it('writes v:3 with the Product id, reads it back, and still writes v:2 without one', () => {
+    const withProduct = serializeLastSearchState({ query: 'Баранина', sort: 'price', direction: 'asc', productId });
+    expect(JSON.parse(withProduct!)).toEqual({ v: 3, query: 'Баранина', sort: 'price', direction: 'asc', productId });
+    expect(parseLastSearchState(withProduct)).toEqual({ query: 'Баранина', sort: 'price', direction: 'asc', productId });
+    expect(JSON.parse(serializeLastSearchState({ query: 'Баранина', sort: 'price', direction: 'asc' })!).v).toBe(2);
+  });
+  it('ignores a damaged Product id and keeps the Product through the geo normalization', () => {
+    expect(parseLastSearchState(JSON.stringify({ v: 3, query: 'x', sort: 'price', direction: 'asc', productId: 'nope' }))).toBeNull();
+    expect(normalizeGeoDependentState({ query: 'Баранина', sort: 'distance', direction: 'asc', productId }, false))
+      .toEqual({ query: 'Баранина', sort: 'actuality', direction: 'desc', productId });
+  });
+});

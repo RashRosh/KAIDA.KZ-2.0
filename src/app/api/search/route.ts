@@ -1,6 +1,6 @@
 import { searchOffers } from '@/modules/search/application/search-offers';
 import { geoSearchRequestSchema } from '@/modules/search/contracts/buyer-location.contract';
-import { searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from '@/modules/search/contracts/search.contract';
+import { searchProductIdSchema, searchQuerySchema, searchSortDirectionSchema, searchSortModeSchema } from '@/modules/search/contracts/search.contract';
 import { localeFromApiRequest } from '../../../i18n/api';
 
 export const runtime = 'nodejs';
@@ -21,14 +21,17 @@ export async function GET(request: Request): Promise<Response> {
   // `distance` needs the buyer coordinates, which a GET cannot carry: it is rejected instead of being ordered otherwise.
   const sort = searchSortModeSchema.optional().safeParse(params.get('sort') ?? undefined);
   const direction = searchSortDirectionSchema.optional().safeParse(params.get('direction') ?? undefined);
-  if (!sort.success || !direction.success || sort.data === 'distance') {
+  // S15B-3: `product_id` (a canonical Product) is optional; when present it must be a uuid.
+  const productParam = params.get('product_id');
+  const productId = productParam === null ? undefined : searchProductIdSchema.safeParse(productParam);
+  if (!sort.success || !direction.success || sort.data === 'distance' || (productId !== undefined && !productId.success)) {
     return Response.json(
       { error: { code: 'INVALID_SEARCH_REQUEST', message: 'Проверьте параметры поиска.' } },
       { status: 400, headers: noStoreHeaders },
     );
   }
   try {
-    return Response.json(await searchOffers(parsed.data, undefined, { locale, sort: sort.data, direction: direction.data }), { headers: noStoreHeaders });
+    return Response.json(await searchOffers(parsed.data, undefined, { locale, sort: sort.data, direction: direction.data, productId: productId?.data }), { headers: noStoreHeaders });
   } catch {
     console.error('Search request failed');
     return Response.json(
@@ -60,7 +63,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     return Response.json(
-      await searchOffers(parsed.data.q, undefined, { buyerLocation: parsed.data.buyerLocation, locale, sort: parsed.data.sort, direction: parsed.data.direction }),
+      await searchOffers(parsed.data.q, undefined, { buyerLocation: parsed.data.buyerLocation, productId: parsed.data.productId, locale, sort: parsed.data.sort, direction: parsed.data.direction }),
       { headers: noStoreHeaders },
     );
   } catch {
