@@ -8,7 +8,7 @@ async function searchLamb(page: Page) {
   await page.goto('/');
   await page.getByLabel('Какой товар ищете?').fill('баранина');
   await page.getByLabel('Какой товар ищете?').press('Enter');
-  await expect(page.getByText('Порядок: свежее первыми', { exact: true })).toBeVisible();
+  await expect(page.getByText('Порядок: лучшие совпадения первыми', { exact: true })).toBeVisible();
   return page.getByRole('list', { name: 'Предложения', exact: true });
 }
 

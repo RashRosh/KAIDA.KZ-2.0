@@ -17,6 +17,9 @@ export const geoSearchRequestSchema = z.strictObject({
   // and are rejected by this strict schema.
   sort: searchSortModeSchema.optional(),
   direction: searchSortDirectionSchema.optional(),
+}).refine((request) => request.sort !== 'relevance' || request.direction === undefined, {
+  // S15B-4b: an explicit relevance order has no direction.
+  path: ['direction'],
 });
 
 export type GeoSearchRequest = z.infer<typeof geoSearchRequestSchema>;

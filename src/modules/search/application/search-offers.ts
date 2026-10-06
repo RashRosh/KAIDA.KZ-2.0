@@ -11,10 +11,11 @@ import {
   type Clock,
 } from '../../offers/lifecycle/offer-lifecycle';
 import type { BuyerLocation } from '../contracts/buyer-location.contract';
-import { resolveSortDirection, searchQuerySchema, type SearchResponse, type SearchSortDirection, type SearchSortMode } from '../contracts/search.contract';
+import { resolveSearchOrder, searchQuerySchema, type SearchResponse, type SearchSortDirection, type SearchSortMode } from '../contracts/search.contract';
 import { findOffersByProductOrTitleWords } from '../infrastructure/search.repository';
 import { queryWords } from '../../offers/title/offer-title';
 import { rankSearchOfferCandidates } from '../ranking/search-ranking';
+import { classifyMatchLevel } from '../ranking/search-relevance';
 import { buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import type { Locale } from '../../../i18n/config';
 
@@ -64,11 +65,18 @@ export async function searchOffers(
     ? await findOffersByProductOrTitleWords(db, match, cutoff)
     : await findOffersByProductOrTitleWords(db, match, cutoff, locale, commentTranslationEnabled);
   const policy = readActualityPolicy();
-  const sort = lifecycleOptions.sort ?? 'actuality';
-  const ranked = rankSearchOfferCandidates(candidates, lifecycleOptions.buyerLocation, {
-    sort,
-    direction: resolveSortDirection(sort, lifecycleOptions.direction),
-  });
+  // S15B-4b: no sort and no direction → relevance; a direction alone keeps its legacy meaning (actuality).
+  const order = resolveSearchOrder(lifecycleOptions.sort, lifecycleOptions.direction);
+  if (order === null) throw new Error('A relevance order has no direction');
+  const applicableProductId = resolved?.id ?? null;
+  const words = match.words;
+  const leveled = order.sort === 'relevance'
+    ? candidates.map((candidate) => ({
+      ...candidate,
+      matchLevel: classifyMatchLevel({ title: candidate.offer.product.name, productId: candidate.offer.product.id, applicableProductId, words }),
+    }))
+    : candidates;
+  const ranked = rankSearchOfferCandidates(leveled, lifecycleOptions.buyerLocation, order);
   const offers = ranked.map(({ offer, lastConfirmedAt, rankingDistanceMeters }) => ({
     ...offer,
     actuality: buyerActuality(lastConfirmedAt, now, policy),

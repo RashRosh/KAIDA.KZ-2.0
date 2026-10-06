@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import {
   NATURAL_SORT_DIRECTION,
+  orderRequestFields,
+  resolveSortDirection,
   searchProductIdSchema,
   searchQuerySchema,
   searchSortDirectionSchema,
@@ -24,21 +26,24 @@ export type LastSearchState = {
   productId?: string;
 };
 
+// S15B-4b: `relevance` is stored without a direction; every other sort keeps its direction.
+const orderIsConsistent = (value: { sort: SearchSortMode; direction?: SearchSortDirection }) => (value.sort === 'relevance') === (value.direction === undefined);
+
 const storedSchema = z.object({
   v: z.literal(FORMAT_VERSION),
   query: searchQuerySchema,
   sort: searchSortModeSchema,
-  direction: searchSortDirectionSchema,
-}).strict();
+  direction: searchSortDirectionSchema.optional(),
+}).strict().refine(orderIsConsistent);
 
 // S15B-3: `v: 3` is `v: 2` plus the selected Product id; a Search without one is still written as `v: 2`.
 const productSchema = z.object({
   v: z.literal(3),
   query: searchQuerySchema,
   sort: searchSortModeSchema,
-  direction: searchSortDirectionSchema,
+  direction: searchSortDirectionSchema.optional(),
   productId: searchProductIdSchema,
-}).strict();
+}).strict().refine(orderIsConsistent);
 
 // Stage 5/6C values (`v: 1`: query, sort and a distance radius) degrade minimally: the query stays, the obsolete radius is
 // discarded and the direction is the natural one of the stored sort. No migration framework.
@@ -54,10 +59,10 @@ export function parseLastSearchState(raw: string | null | undefined): LastSearch
   try {
     const value: unknown = JSON.parse(raw);
     const current = storedSchema.safeParse(value);
-    if (current.success) return { query: current.data.query, sort: current.data.sort, direction: current.data.direction };
+    if (current.success) return { query: current.data.query, sort: current.data.sort, direction: resolveSortDirection(current.data.sort, current.data.direction) };
     const withProduct = productSchema.safeParse(value);
     if (withProduct.success) {
-      return { query: withProduct.data.query, sort: withProduct.data.sort, direction: withProduct.data.direction, productId: withProduct.data.productId };
+      return { query: withProduct.data.query, sort: withProduct.data.sort, direction: resolveSortDirection(withProduct.data.sort, withProduct.data.direction), productId: withProduct.data.productId };
     }
     const legacy = legacySchema.safeParse(value);
     if (legacy.success) {
@@ -75,16 +80,16 @@ export function serializeLastSearchState(state: LastSearchState): string | null 
   if (!query.success) return null;
   if (state.productId !== undefined) {
     const productId = searchProductIdSchema.safeParse(state.productId);
-    if (productId.success) return JSON.stringify({ v: 3, query: query.data, sort: state.sort, direction: state.direction, productId: productId.data });
+    if (productId.success) return JSON.stringify({ v: 3, query: query.data, ...orderRequestFields(state.sort, state.direction), productId: productId.data });
   }
-  return JSON.stringify({ v: FORMAT_VERSION, query: query.data, sort: state.sort, direction: state.direction });
+  return JSON.stringify({ v: FORMAT_VERSION, query: query.data, ...orderRequestFields(state.sort, state.direction) });
 }
 
-// Without buyer coordinates a restored `distance` falls back to `actuality` with its natural direction (fresher first);
-// `actuality` and `price` need no coordinates and keep their direction. The geolocation is never requested on restore.
+// Without buyer coordinates a restored `distance` falls back to the default `relevance` (S15B-4b);
+// `relevance`, `actuality` and `price` need no coordinates and keep their order. The geolocation is never requested on restore.
 export function normalizeGeoDependentState(state: LastSearchState, hasCoordinates: boolean): LastSearchState {
   if (hasCoordinates || state.sort !== 'distance') return state;
-  return { ...state, sort: 'actuality', direction: NATURAL_SORT_DIRECTION.actuality };
+  return { ...state, sort: 'relevance', direction: NATURAL_SORT_DIRECTION.relevance };
 }
 
 // The raw stored value, for subscribers that only need to react to a change of it (the navigation link).

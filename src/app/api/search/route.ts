@@ -24,7 +24,7 @@ export async function GET(request: Request): Promise<Response> {
   // S15B-3: `product_id` (a canonical Product) is optional; when present it must be a uuid.
   const productParam = params.get('product_id');
   const productId = productParam === null ? undefined : searchProductIdSchema.safeParse(productParam);
-  if (!sort.success || !direction.success || sort.data === 'distance' || (productId !== undefined && !productId.success)) {
+  if (!sort.success || !direction.success || sort.data === 'distance' || (sort.data === 'relevance' && direction.data !== undefined) || (productId !== undefined && !productId.success)) {
     return Response.json(
       { error: { code: 'INVALID_SEARCH_REQUEST', message: 'Проверьте параметры поиска.' } },
       { status: 400, headers: noStoreHeaders },

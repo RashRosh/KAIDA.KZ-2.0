@@ -97,8 +97,11 @@ export const ru = {
   // Stage 6 Rev 3: the explicit sort criteria, their direction phrases and the geolocation feedback of «Расстояние».
   'search.criterion.distance': 'Расстояние',
   'search.criterion.price': 'Цена',
+  'search.criterion.relevance': 'По соответствию',
   'search.criterion.actuality': 'Актуальность',
   'search.order.actuality.desc': 'свежее первыми',
+  // S15B-4b: «По соответствию» has no direction; the key's `.desc` suffix is an internal placeholder.
+  'search.order.relevance.desc': 'лучшие совпадения первыми',
   'search.order.actuality.asc': 'старее первыми',
   'search.order.price.asc': 'дешевле первыми',
   'search.order.price.desc': 'дороже первыми',
@@ -897,8 +900,11 @@ export const kk = {
   'search.sortActuality': 'Алдымен өзекті',
   'search.criterion.distance': 'Қашықтық',
   'search.criterion.price': 'Баға',
+  // S15B-4b: draft Kazakh text, pending proofreading (not approved).
+  'search.criterion.relevance': 'Сәйкестік бойынша',
   'search.criterion.actuality': 'Өзектілік',
   'search.order.actuality.desc': 'алдымен жаңасы',
+  'search.order.relevance.desc': 'ең сәйкестері алдымен',
   'search.order.actuality.asc': 'алдымен ескісі',
   'search.order.price.asc': 'алдымен арзаны',
   'search.order.price.desc': 'алдымен қымбаты',

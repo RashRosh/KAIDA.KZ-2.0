@@ -59,15 +59,15 @@ const OFFERS = [
 
 describe('Rev 3 natural directions and defaults', () => {
   it('uses fresher / cheaper / nearer first and an omitted direction takes the natural one', () => {
-    expect(NATURAL_SORT_DIRECTION).toEqual({ actuality: 'desc', price: 'asc', distance: 'asc' });
+    expect(NATURAL_SORT_DIRECTION).toEqual({ relevance: 'desc', actuality: 'desc', price: 'asc', distance: 'asc' });
     expect(resolveSortDirection('actuality', undefined)).toBe('desc');
     expect(resolveSortDirection('price', undefined)).toBe('asc');
     expect(resolveSortDirection('distance', undefined)).toBe('asc');
     expect(resolveSortDirection('price', 'desc')).toBe('desc');
   });
 
-  it('accepts only the three criteria and the two directions; `cheaper` never existed', () => {
-    expect(searchSortModeSchema.options).toEqual(['actuality', 'distance', 'price']);
+  it('accepts only the four criteria (S15B-4b adds relevance) and the two directions; `cheaper` never existed', () => {
+    expect(searchSortModeSchema.options).toEqual(['relevance', 'actuality', 'distance', 'price']);
     expect(searchSortDirectionSchema.options).toEqual(['asc', 'desc']);
     expect(searchSortModeSchema.safeParse('cheaper').success).toBe(false);
     expect(searchSortDirectionSchema.safeParse('down').success).toBe(false);
