@@ -16,13 +16,13 @@
 
 ## Next action
 
-1. S15B-4: PO сначала решает по decision-записке (пересечение canonical Offers и title fallback); реализация не начата. Search sorting control UX refresh — deferred (см. план).
+1. S15B-4a (`docs/slices/s15b4a-product-as-signal/SLICE_CONTRACT.md`, DRAFT на approval): Product как сигнал, без relevance-порядка; затем S15B-4b. Прежний S15B-4 отменён. Search sorting control UX refresh — deferred (см. план).
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
 
 - Старые 6F и 6G **не авторизованы** в прежнем виде: 6F снята до реализации (цель — в S15C/D0 после S15B), 6G
-  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15B-4, S15C, 6F/6G, AI.
+  переосмыслена как readiness-gated canonical-Product чипы. Не начинать S15B-4a (до approval), S15B-4b, S15C, 6F/6G, AI.
 - Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
 - Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`.
 - `next-env.d.ts` перегенерируется next dev/build — в коммит не входит.
