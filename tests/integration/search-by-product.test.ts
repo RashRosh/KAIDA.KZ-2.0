@@ -5,9 +5,9 @@ import { searchOffers } from '../../src/modules/search/application/search-offers
 import { geoSearchRequestSchema } from '../../src/modules/search/contracts/buyer-location.contract';
 import { connectTestDatabase } from './database';
 
-// S15B-3: Search by a selected catalog Product runs on that Product.id only — no text fallback.
+// S15B-3 / S15B-4a: a selected catalog Product is a signal that joins the candidate set, never a filter.
 
-describe('Search by selected Product (S15B-3)', () => {
+describe('Search with a selected Product (S15B-3, S15B-4a)', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
   const freeOffer = randomUUID();
   beforeAll(async () => {
@@ -23,41 +23,60 @@ describe('Search by selected Product (S15B-3)', () => {
     await connection?.pool.end();
   });
 
-  it('returns only the Offers linked to the selected Product, never the free-title ones', async () => {
+  const ids = (response: { offers: { id: string }[] }) => response.offers.map((offer) => offer.id);
+
+  it('gives the selected Product and the typed text the same candidate set, free titles included', async () => {
     const text = await searchOffers('Баранина', connection.db);
-    expect(text.offers.map((offer) => offer.id)).toEqual(expect.arrayContaining([seedIds.lambOffer, freeOffer]));
-
-    const byProduct = await searchOffers('Баранина', connection.db, { productId: seedIds.lambProduct });
-    expect(byProduct.resolvedProduct).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
-    expect(byProduct.offers.map((offer) => offer.id)).toEqual([seedIds.lambOffer]);
+    const selected = await searchOffers('Баранина', connection.db, { productId: seedIds.lambProduct });
+    expect(selected.resolvedProduct).toEqual({ id: seedIds.lambProduct, name: 'Баранина' });
+    expect(ids(selected)).toEqual(expect.arrayContaining([seedIds.lambOffer, freeOffer]));
+    expect(selected).toEqual(text);
   });
 
-  it('does not use q to choose Offers when a Product is given', async () => {
-    const byProduct = await searchOffers('говядина', connection.db, { productId: seedIds.lambProduct });
-    expect(byProduct.query).toBe('говядина');
-    expect(byProduct.offers.map((offer) => offer.id)).toEqual([seedIds.lambOffer]);
+  it('adds the selected Product to the text sources without duplicates (union)', async () => {
+    const response = await searchOffers('говядина', connection.db, { productId: seedIds.lambProduct });
+    expect(response.query).toBe('говядина');
+    expect(ids(response)).toEqual(expect.arrayContaining([seedIds.lambOffer, seedIds.beefOffer]));
+    expect(new Set(ids(response)).size).toBe(ids(response).length);
+
+    const different = await searchOffers('Баранина', connection.db, { productId: seedIds.beefProduct });
+    expect(ids(different)).toEqual(expect.arrayContaining([seedIds.lambOffer, freeOffer, seedIds.beefOffer]));
+    expect(new Set(ids(different)).size).toBe(ids(different).length);
   });
 
-  it('answers an unknown Product id with an ordinary empty result and no text fallback', async () => {
+  it('lets a valid but unknown Product id fall through to the ordinary text search', async () => {
+    const text = await searchOffers('Баранина', connection.db);
     const unknown = await searchOffers('Баранина', connection.db, { productId: randomUUID() });
-    expect(unknown).toEqual({ query: 'Баранина', resolvedProduct: null, offers: [] });
+    expect(unknown).toEqual(text);
+    expect(ids(unknown)).toEqual(expect.arrayContaining([seedIds.lambOffer, freeOffer]));
   });
 
-  it('keeps a known Product without Offers resolved (known-zero) and never falls back to the text', async () => {
+  it('is known-zero only when the whole candidate set is empty', async () => {
     const product = randomUUID();
     try {
       await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [product, 'Баранина пустая']);
-      const response = await searchOffers('Баранина', connection.db, { productId: product });
-      expect(response).toEqual({ query: 'Баранина', resolvedProduct: { id: product, name: 'Баранина пустая' }, offers: [] });
+      // no linked Offers and nothing in the titles → the whole candidate set is empty
+      const empty = await searchOffers('Баранина пустая', connection.db, { productId: product });
+      expect(empty).toEqual({ query: 'Баранина пустая', resolvedProduct: { id: product, name: 'Баранина пустая' }, offers: [] });
+      // no linked Offers but free titles of the text → an ordinary result, not known-zero
+      const withFree = await searchOffers('Баранина', connection.db, { productId: product });
+      expect(withFree.resolvedProduct).toEqual({ id: product, name: 'Баранина пустая' });
+      expect(ids(withFree)).toEqual(expect.arrayContaining([seedIds.lambOffer, freeOffer]));
     } finally {
       await connection.pool.query('DELETE FROM products WHERE id = $1', [product]);
     }
   });
 
-  it('keeps the same Product-path sort, direction and public Offer shape as the text path', async () => {
+  it('leaves an unresolved query to the text search and never invents a Product', async () => {
+    const response = await searchOffers('свободная', connection.db);
+    expect(response.resolvedProduct).toBeNull();
+    expect(ids(response)).toEqual([freeOffer]);
+  });
+
+  it('keeps sort, direction and the public Offer shape of the text path', async () => {
     const byProduct = await searchOffers('Баранина', connection.db, { productId: seedIds.lambProduct, sort: 'price', direction: 'desc' });
     const text = await searchOffers('Баранина', connection.db, { sort: 'price', direction: 'desc' });
-    expect(byProduct.offers).toEqual(text.offers.filter((offer) => offer.id === seedIds.lambOffer));
+    expect(byProduct).toEqual(text);
   });
 
   it('accepts productId in the strict POST schema and rejects a non-uuid', () => {

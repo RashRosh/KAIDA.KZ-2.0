@@ -1,4 +1,4 @@
-import { and, asc, eq, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, eq, inArray, or, sql, type SQL } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { sellers } from '../../sellers/db/sellers.table';
 import { findVerifiedPhonesBySellers } from '../../locations/details/point-details.repository';
@@ -25,7 +25,7 @@ import type { SearchRankingCandidate } from '../ranking/search-ranking';
 // the start of one of its words (words are already normalized: letters and digits only).
 export async function findOffersByProductOrTitleWords(
   db: Database,
-  match: { productId: string | null; words: string[] },
+  match: { productIds: string[]; words: string[] },
   cutoff: Date,
   locale: 'ru' | 'kk' = 'ru',
   commentTranslationEnabled: boolean = isSellerCommentTranslationEnabled(),
@@ -42,9 +42,9 @@ function titleWordsMatch(words: string[]): SQL | undefined {
   return and(...words.map((word) => sql`(' ' || ${offers.titleSearch}) like ${`% ${word}%`}`));
 }
 
-function productOrWords(filter: { productId: string | null; words: string[] }): SQL {
+function productOrWords(filter: { productIds: string[]; words: string[] }): SQL {
   const conditions = [
-    filter.productId === null ? undefined : eq(offers.productId, filter.productId),
+    filter.productIds.length === 0 ? undefined : inArray(offers.productId, filter.productIds),
     titleWordsMatch(filter.words),
   ].filter((condition): condition is SQL => condition !== undefined);
   return conditions.length === 0 ? sql`false` : or(...conditions)!;
@@ -64,7 +64,7 @@ export async function findBuyerVisibleOfferById(
 
 async function findBuyerVisibleOffers(
   db: Database,
-  filter: { productId: string | null; words: string[] } | { offerId: string },
+  filter: { productIds: string[]; words: string[] } | { offerId: string },
   cutoff: Date,
   locale: 'ru' | 'kk',
   commentTranslationEnabled: boolean,
