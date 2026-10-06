@@ -16,7 +16,7 @@
 
 ## Next action
 
-1. S15B закрыт. Следующий — S15C / D0 (Search Demand Events): контракт не написан; начинать только по решению PO. Открытый Issue: #116 (CI flake «active connections»).
+1. S15B закрыт. S15C / D0 (Search Demand Events): `docs/slices/s15c-d0-search-demand-events/SLICE_CONTRACT.md` (DRAFT на approval; нерешённые решения PO — §12); реализация не начата. Открытый Issue: #116 (CI flake «active connections»).
 2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
 
 ## Current constraints
