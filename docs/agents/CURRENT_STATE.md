@@ -15,7 +15,7 @@ R2 (backup/restore БД и фото): контракт `docs/slices/backup-resto
 
 ## Next action
 
-1. После merge контракт-PR — реализация R2 на ветке `slice/backup-restore` строго в рамках контракта; до ручной приёмки PO не merge и не tag.
+1. Ручная приёмка PO (§9 контракта): агент держит изолированные источник (:3201) и цель (:3202), после приёмки — очистка по runbook §11, затем merge и tag по команде PO.
 2. Далее по `EXECUTION_PLAN.md`: R2 → R3 → R4 (агент предлагает следующий non-AI slice PO). UX/UI-обсуждение собрано отдельно для позднего pipeline review и в R-трек не входит.
 
 ## Current constraints

@@ -23,6 +23,9 @@
     "db:import:addresses": "tsx src/cli/import-address-directory.ts",
     "search-events:purge": "tsx src/cli/purge-search-events.ts",
     "bootstrap:smoke": "playwright test -c ops/local-bootstrap/playwright.config.ts",
+    "backup:create": "tsx ops/backup-restore/cli.ts create",
+    "backup:restore": "tsx ops/backup-restore/cli.ts restore",
+    "backup:verify": "tsx ops/backup-restore/cli.ts verify",
     "db:test:prepare": "tsx tests/integration/prepare-database.ts",
     "verify": "pnpm lint && pnpm typecheck && pnpm db:migrate && pnpm db:seed && pnpm db:test:prepare && pnpm test:unit && pnpm test:integration && pnpm build && pnpm test:e2e"
   },

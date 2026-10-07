@@ -1,0 +1,44 @@
+# R2 backup/restore rehearsal: two throwaway PostgreSQL servers (a source and an empty restore target), fully separate from the
+# development stack and from the R1 bootstrap stack. The fixed project name keeps every resource (containers, network, volumes)
+# apart from other compose projects, so `down -v` on THIS file removes only what this file created. Never use another project name.
+name: kaida-r2-check
+
+services:
+  source:
+    image: postgres:18
+    container_name: kaida-r2-source
+    environment:
+      POSTGRES_USER: kaida_r2
+      POSTGRES_PASSWORD: r2_local_only
+      POSTGRES_DB: kaida_r2_source
+    ports:
+      # Never 5432 (development stack). Override with KAIDA_R2_SOURCE_PORT / KAIDA_R2_TARGET_PORT only if these are taken.
+      - "127.0.0.1:${KAIDA_R2_SOURCE_PORT:-55433}:5432"
+    volumes:
+      - r2_source_pg:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaida_r2 -d kaida_r2_source"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+  target:
+    image: postgres:18
+    container_name: kaida-r2-target
+    environment:
+      POSTGRES_USER: kaida_r2
+      POSTGRES_PASSWORD: r2_local_only
+      POSTGRES_DB: kaida_r2_target
+    ports:
+      - "127.0.0.1:${KAIDA_R2_TARGET_PORT:-55434}:5432"
+    volumes:
+      - r2_target_pg:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaida_r2 -d kaida_r2_target"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  r2_source_pg:
+  r2_target_pg:
