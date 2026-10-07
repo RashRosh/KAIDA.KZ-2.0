@@ -5,8 +5,8 @@
 ## Verified base
 
 - Проверено: 2026-10-07.
-- `origin/main`: `7892d22b01cf2499d80a7cfbe92ba8dd0cba46e0` (R1, PR #124) плюс closing docs PR; `KAIDA verify` run `37573885183` SUCCESS, CodeQL и OpenSSF Scorecard SUCCESS.
-- Последний checkpoint: `v0.0.63-d0-e2e-marker-fix` (test-only fix Issue #125: буквенный маркер в D0 E2E; причина — случайный hex-маркер с цифровой серией ≥6 отсекался фильтром телефонов D0). Предыдущий product checkpoint: `v0.0.62-local-bootstrap-verification` (R1, `7892d22`).
+- `origin/main`: `a9c893f83bc7a2068ead983ae70cb7aaa4d222e3` (R2, PR #131) плюс closing docs PR; `KAIDA verify` run `37602904524` SUCCESS (attempt 2; attempt 1 упала на не связанном флейке Issue #130), CodeQL и OpenSSF Scorecard SUCCESS.
+- Последний checkpoint: `v0.0.64-backup-restore` на `a9c893f` (R2). Manual acceptance PASS. Предыдущие: `v0.0.63-d0-e2e-marker-fix`, `v0.0.62-local-bootstrap-verification` (R1).
 - Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
 
 ## Current task
@@ -15,8 +15,8 @@ R2 (backup/restore БД и фото): контракт `docs/slices/backup-resto
 
 ## Next action
 
-1. Ручная приёмка PO (§9 контракта): агент держит изолированные источник (:3201) и цель (:3202), после приёмки — очистка по runbook §11, затем merge и tag по команде PO.
-2. Далее по `EXECUTION_PLAN.md`: R2 → R3 → R4 (агент предлагает следующий non-AI slice PO). UX/UI-обсуждение собрано отдельно для позднего pipeline review и в R-трек не входит.
+1. PO отдельно решает: подготовка контракта R3; ограниченная диагностика флейка Issue #130 (`search-by-product` E2E, уже блокировал main-CI). Без команды PO ничего не начинать.
+2. Далее по `EXECUTION_PLAN.md`: R3 → R4 (агент предлагает следующий non-AI slice PO). UX/UI-обсуждение собрано отдельно для позднего pipeline review и в R-трек не входит.
 
 ## Current constraints
 
@@ -24,6 +24,7 @@ R2 (backup/restore БД и фото): контракт `docs/slices/backup-resto
 - Не добавлять без решения PO: настоящую аутентификацию/доставку OTP, abuse-защиту, юридические тексты, операторскую доставку OTP, allowlist, оповещения о free-title и прочие pilot-функции.
 - D0: `SEARCH_EVENTS_ORIGIN=organic` не включать, пока ежедневный `pnpm search-events:purge` не настроен и не проверен; `dev` / `test` / `synthetic` — не реальный спрос. Поведение D0 не менять без решения PO.
 - Границы приёмки R1: свежий запуск проверен только через Git Bash на Windows; PowerShell, Linux и CI-воспроизведение не проверены; нужен `IDENTITY_OTP_HMAC_SECRET_HEX`; `pnpm build` на слабой машине падал перемежающимся образом, причина не установлена.
+- Границы приёмки R2: проверено через Git Bash на Windows; PowerShell, Linux, неограниченная нагрузка записи, перенос между версиями PostgreSQL/приложения, push при смене VAPID-ключа не проверены; backup содержит ПД и действующие сессии (отзыва сессий нет); корректность backup без остановки записи держится на правиле «фото неизменяемы и не удаляются» — любой slice удаления/замены фото сначала пересматривает R2.
 - Проверки bootstrap/R2 не трогают dev-БД `kaida`/`kaida_test`, том `postgres_data`, порт 5432 и `.data/photos` рабочей копии; секреты не в Git.
 - Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
 - Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`; `next-env.d.ts` перегенерируется — в коммит не входит.
