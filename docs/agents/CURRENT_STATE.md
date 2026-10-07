@@ -4,29 +4,30 @@
 
 ## Verified base
 
-- Проверено: 2026-10-06.
-- `origin/main`: `0232c2d07af55deb9b874a12b994f97f86849783`; checkpoint `v0.0.61-search-demand-events` (S15C/D0, PR #121);
-  merged-main `KAIDA verify` run `37527531918` SUCCESS. Manual acceptance PASS. Предыдущие: `v0.0.60` (sorting control), `v0.0.59` (S15B-4b), `v0.0.58` (S15B-4a).
-- Production KB v1 (682 / 210 / 35) — runtime-база; runtime loop Seller → Buyer доказан тестами (production-код не менялся).
-  E2E-БД ставит KB через global setup существующим импортёром; пакет защищён `.gitattributes` (`-text`).
+- Проверено: 2026-10-07.
+- `origin/main`: `9ed1ba40c17dfda212fe17d2c9a43be67f862d0e` (closing docs PR #122; `KAIDA verify` run `37529680150` SUCCESS, CodeQL `37529680341` SUCCESS).
+- Последний product checkpoint: `v0.0.61-search-demand-events` на `0232c2d07af55deb9b874a12b994f97f86849783` (S15C/D0, PR #121; merged-main run `37527531918` SUCCESS). Manual acceptance PASS. Предыдущие: `v0.0.60`, `v0.0.59`, `v0.0.58`.
+- Production KB v1 (682 Products / 210 aliases / 35 categories) — runtime-база; `pnpm db:seed` её **не** ставит, только `pnpm db:import:production-kb`.
 
 ## Current task
 
-Нет активного slice.
+Решение PO 2026-10-07: «Local readiness track» (`EXECUTION_PLAN.md`, пункт 5). **R1 — Clean local bootstrap verification**: контракт `docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md` APPROVED (PO 2026-10-07). План и контракт — docs PR с ветки `docs/local-bootstrap-plan`; реализация R1 — отдельная ветка после его слияния.
 
 ## Next action
 
-1. S15B и S15C/D0 закрыты. Следующий шаг — по `EXECUTION_PLAN.md` (D1 и AI Input не начаты, контрактов нет). **Предусловие деплоя D0:** `SEARCH_EVENTS_ORIGIN=organic` не включать, пока ежедневный `pnpm search-events:purge` не настроен и не проверен; dev/test/synthetic-события — не спрос. Отдельно открыто: Issue #116 (CI flake «active connections»), KK-вычитка строк сортировки.
-2. Далее: S15C/D0 → накопление demand → AI Input / AI-модерация.
+1. Docs PR (план + контракт) → merge после green checks и scope audit.
+2. Реализация R1 на отдельной ветке → итоговый отчёт PO → STOP на приёмке (R1 не мержить и не тегировать до PASS).
+3. Далее по плану: R2 (backup/restore PostgreSQL + фото), R3 (подготовка развёртывания без хостинга), R4 (агент предлагает следующий non-AI slice PO).
 
 ## Current constraints
 
-- Старые 6F и 6G **не авторизованы** в прежнем виде: 6F снята до реализации (цель — в S15C/D0 после S15B), 6G
-  переосмыслена как readiness-gated canonical-Product чипы. Не начинать D1, 6F/6G, AI (без контракта).
+- Не начинать: D1, AI Input, AI-модерация, платная инфраструктура, 6F/6G, fuzzy, оценка поискового движка, Issue #116, KK-вычитка (отдельно). Публичный запуск без AI не разрешён.
+- Не добавлять без решения PO: настоящую аутентификацию/доставку OTP, abuse-защиту, юридические тексты, операторскую доставку OTP, allowlist, оповещения о free-title и прочие pilot-функции.
+- D0: `SEARCH_EVENTS_ORIGIN=organic` не включать, пока ежедневный `pnpm search-events:purge` не настроен и не проверен; `dev` / `test` / `synthetic` — не реальный спрос.
+- R1 и далее: не читать/менять dev-БД `kaida`/`kaida_test`, том `postgres_data`, порт 5432 и `.data/photos` рабочей копии; секреты не в Git.
 - Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
-- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`.
-- `next-env.d.ts` перегенерируется next dev/build — в коммит не входит.
+- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`; `next-env.d.ts` перегенерируется — в коммит не входит.
 - Граница доставки: mobile + русский (`PROJECT_RULES.md` §18.5).
 - Mimosa pre-commit scanner может ложно блокировать новые test-файлы с `pool.query($n)`; не менять код ради него.
-- Issue #12 остаётся OPEN.
+- Issue #12 остаётся OPEN. `FEATURE_MAP.md`: S15B закрыт, S15C — только D0 (D1+ data-gated).
 - Nearby (S11) использует `compareActualityTier` и `distanceMetersForRanking` из модуля ранжирования Search — не менять их поведение.
