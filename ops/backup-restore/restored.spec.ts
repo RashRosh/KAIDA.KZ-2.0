@@ -18,7 +18,7 @@ const SOURCE_SESSION = process.env.R2_SOURCE_SESSION_COOKIE;
 const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
 
 // the card name a buyer searches for is the Product name of the seller's Offer (for a free-title card, its title)
-type SellerOffer = { id: string; product: { name: string }; buyerVisible: boolean; photos?: { id: string }[] };
+type SellerOffer = { id: string; title?: string | null; product?: { name: string } | null; buyerVisible: boolean; photos?: { id: string }[] };
 
 test('the restored installation: login, seller cards, buyer search and image delivery', async ({ browser, baseURL }) => {
   test.setTimeout(120000);
@@ -36,13 +36,15 @@ test('the restored installation: login, seller cards, buyer search and image del
     expect(offers).toHaveLength(EXPECT_OFFERS);
   });
 
-  await test.step('a session issued by the source is still accepted (it is stored as a plain hash, not tied to the OTP secret)', async () => {
-    test.skip(!SOURCE_SESSION, 'R2_SOURCE_SESSION_COOKIE not provided');
-    const old = await browser.newContext({ baseURL, storageState: returningVisitorState, ...mobile });
-    await old.addCookies([{ name: 'kaida_session', value: SOURCE_SESSION!, url: baseURL! }]);
-    expect((await old.request.get('/api/seller/offers')).status()).toBe(200);
-    await old.close();
-  });
+  // only when the cookie of a source session was provided (test.skip inside a step would skip the whole test)
+  if (SOURCE_SESSION) {
+    await test.step('a session issued by the source is still accepted (it is stored as a plain hash, not tied to the OTP secret)', async () => {
+      const old = await browser.newContext({ baseURL, storageState: returningVisitorState, ...mobile });
+      await old.addCookies([{ name: 'kaida_session', value: SOURCE_SESSION!, url: baseURL! }]);
+      expect((await old.request.get('/api/seller/offers')).status()).toBe(200);
+      await old.close();
+    });
+  }
 
   await test.step('every photo is delivered as image/webp, byte-identical to the source file', async () => {
     const photoIds = offers.flatMap((offer) => (offer.photos ?? []).map((photo) => photo.id));
@@ -62,14 +64,15 @@ test('the restored installation: login, seller cards, buyer search and image del
     const buyer = await browser.newContext({ baseURL, storageState: returningVisitorState, ...mobile });
     const page = await buyer.newPage();
     for (const offer of offers.filter((candidate) => candidate.buyerVisible)) {
-      const name = offer.product.name;
-      const api = await buyer.request.get(`/api/search?q=${encodeURIComponent(name)}`);
+      const name = offer.product?.name ?? offer.title;
+      expect(name, 'the card has a name to search for').toBeTruthy();
+      const api = await buyer.request.get(`/api/search?q=${encodeURIComponent(name!)}`);
       expect(api.status()).toBe(200);
       expect((await api.json() as { offers: { id: string }[] }).offers.map((found) => found.id)).toContain(offer.id);
       if (!offer.photos?.length) continue;
       await page.goto('/');
-      await search(page, name);
-      const card = resultCard(page, name).first();
+      await search(page, name!);
+      const card = resultCard(page, name!).first();
       await expect(card).toBeVisible();
       const thumb = card.locator(`img[src="/media/photos/${offer.photos[0].id}/thumb"]`);
       await expect(thumb).toBeVisible();
