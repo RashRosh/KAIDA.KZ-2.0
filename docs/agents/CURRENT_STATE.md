@@ -5,8 +5,8 @@
 ## Verified base
 
 - Проверено: 2026-10-07.
-- `origin/main`: `a9c893f83bc7a2068ead983ae70cb7aaa4d222e3` (R2, PR #131) плюс closing docs PR; `KAIDA verify` run `37602904524` SUCCESS (attempt 2; attempt 1 упала на не связанном флейке Issue #130), CodeQL и OpenSSF Scorecard SUCCESS.
-- Последний checkpoint: `v0.0.64-backup-restore` на `a9c893f` (R2). Manual acceptance PASS. Предыдущие: `v0.0.63-d0-e2e-marker-fix`, `v0.0.62-local-bootstrap-verification` (R1).
+- `origin/main`: `b7d0b4beac2252c8155e5e6de97ba78216696a8b` (PR #133) плюс closing docs PR; `KAIDA verify` run `37609705127` SUCCESS, CodeQL SUCCESS.
+- Последний checkpoint: `v0.0.65-search-by-product-fixture` (test-only fix Issue #130: у API-теста `search-by-product` свои Product и Offer; причина — общая запись «Баранина», в которую публикуют другие spec'ы). Предыдущие: `v0.0.64-backup-restore` (R2, `a9c893f`), `v0.0.63`, `v0.0.62` (R1).
 - Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
 
 ## Current task
@@ -15,7 +15,7 @@ R2 (backup/restore БД и фото): контракт `docs/slices/backup-resto
 
 ## Next action
 
-1. PO отдельно решает: подготовка контракта R3; ограниченная диагностика флейка Issue #130 (`search-by-product` E2E, уже блокировал main-CI). Без команды PO ничего не начинать.
+1. PO ревьюит общий pipeline (с консолидированным UX/UI backlog) до утверждения контракта R3. Без команды PO ничего не начинать.
 2. Далее по `EXECUTION_PLAN.md`: R3 → R4 (агент предлагает следующий non-AI slice PO). UX/UI-обсуждение собрано отдельно для позднего pipeline review и в R-трек не входит.
 
 ## Current constraints
