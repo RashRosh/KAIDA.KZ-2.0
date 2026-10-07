@@ -21,7 +21,7 @@
 4. ~~S15C / D0 Search Demand Events~~ — **CLOSED** (`v0.0.61`).
 5. **Local readiness track (решение PO 2026-10-07).** Цель — продолжать разработку без платной инфраструктуры; это **не** запуск пилота, **не** разрешение публичного запуска без AI и **не** изменение границ Seller Change Set (ручной ввод или AI-предложения → Seller Change Set → подтверждение продавцом → Offer). Порядок:
    - **R1 — Clean local bootstrap verification — CLOSED** (`v0.0.62`, `docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md`, PR #124; runbook `docs/ops/LOCAL_BOOTSTRAP.md`, `ops/local-bootstrap/`). Границы приёмки: свежий запуск проверен только через Git Bash на Windows; команды PowerShell, воспроизведение на Linux и в CI **не проверены**. Demo-последовательность: миграции → seed → импорт KB (seed после импорта KB без предшествующего seed падает на `products_name_unique` — известное ограничение, не исправлялось). Обязателен `IDENTITY_OTP_HMAC_SECRET_HEX` (без него вход отвечает `503 AUTH_UNAVAILABLE`). Сборка `pnpm build` на слабой машине падала перемежающимся образом; причина не установлена (обход — `CIRCLE_NODE_TOTAL=2`).
-   - **R2 — Backup и restore** PostgreSQL **и фото** Offer с реальной проверкой восстановления в изолированном окружении — **следующий запланированный slice; контракт `docs/slices/backup-restore/SLICE_CONTRACT.md` (подход утверждён PO 2026-10-07), реализация — после merge контракта**.
+   - **R2 — Backup и restore — CLOSED** (`v0.0.64`, `docs/slices/backup-restore/SLICE_CONTRACT.md`, PR #131; runbook `docs/ops/BACKUP_RESTORE.md`, `ops/backup-restore/`, команды `backup:create|restore|verify`). Границы приёмки: проверено через Git Bash на Windows; PowerShell, Linux, неограниченная нагрузка записи, перенос между версиями и push при смене VAPID-ключа **не проверены**; backup содержит ПД и действующие сессии, отзыва сессий нет; согласованность без остановки записи держится на неизменяемости и неудаляемости файлов фото.
    - **R3 — Воспроизводимая подготовка развёртывания** без покупки и создания хостинга (контракт — после R2).
    - **R4 — Следующий полезный non-AI product slice** из существующего плана: агент предлагает PO кандидата на решение; до решения не выбран и не начинается.
 6. **Отложено** (решение PO 2026-10-07): AI Input (stage 7), AI-модерация (stage 8), любая платная инфраструктура (хостинг, GPU, SMS-провайдер). Правило запуска PO 2026-09-25 не меняется: публичный запуск без актуальности и без AI-ввода/AI-модерации не проводится.
@@ -207,7 +207,7 @@ checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-комм
 перенумеровываются и не задают очередность. **Фактический ближайший порядок единственный** (решение PO 2026-10-05, см.
 «Verified base и ближайшая последовательность»):
 
-`v0.0.62` (S15B, S15C/D0 и R1 закрыты) → Local readiness track R2 → R3 → R4 (предложение PO) →
+`v0.0.64` (S15B, S15C/D0, R1 и R2 закрыты) → Local readiness track R3 → R4 (предложение PO) →
 D1 / readiness и canonical Product чипы при появлении данных; AI Input / AI-модерация отложены (PO 2026-10-07).
 
 Stages 7, 8, 9 (AI Input, AI-модерация, S14) стоят в таблице по историческим номерам; AI Input и AI-модерация
