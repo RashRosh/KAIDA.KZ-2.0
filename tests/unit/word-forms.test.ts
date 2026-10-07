@@ -4,12 +4,14 @@ import { getWordFormDictionary, parseWordForms, wordEvidence } from '../../src/m
 
 // search-word-forms (docs/slices/search-word-forms): the reviewed dictionary file, its rules and the E/F/P evidence.
 const FILE = 'src/modules/search/word-forms/word-forms.v1.csv';
-const rows = readFileSync(FILE, 'utf8').split('\n').slice(1).filter(Boolean).map((line) => line.split(','));
+// a Windows checkout may turn the file's LF into CRLF (autocrlf); the dictionary itself is committed with LF
+const lines = readFileSync(FILE, 'utf8').split(/\r?\n/u);
+const rows = lines.slice(1).filter(Boolean).map((line) => line.split(','));
 const dictionary = getWordFormDictionary();
 
 describe('word-forms.v1.csv rules (contract 3.1, 3.9)', () => {
   it('has the header, two columns everywhere, sorted unique rows', () => {
-    expect(readFileSync(FILE, 'utf8').split('\n')[0]).toBe('group,form');
+    expect(lines[0]).toBe('group,form');
     expect(rows.every((row) => row.length === 2)).toBe(true);
     const keys = rows.map((row) => row.join(','));
     expect(new Set(keys).size).toBe(keys.length);

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  hoursLine,
   openingHoursSchema,
   openingState,
   templateOpeningHours,
@@ -72,24 +71,5 @@ describe('opening state', () => {
   it('merges 24h days with an adjacent interval into one opening', () => {
     const merged = hours({ sat: { kind: '24h' }, sun: iv(['00:00', '10:00']) });
     expect(openingState(merged, at('2026-09-26T23:30'))).toEqual({ state: 'open', closesAt: { weekday: 'sun', time: '10:00' } });
-  });
-});
-
-describe('buyer hours line', () => {
-  it('puts the common schedule first, then differing days, then closed days', () => {
-    expect(hoursLine(hours({ fri: iv(['13:00', '18:00']) }), 'Круглосуточно')).toEqual([
-      { days: null, text: '9.00–18.00', closed: false },
-      { days: ['fri'], text: '13.00–18.00', closed: false },
-      { days: ['sat', 'sun'], text: null, closed: true },
-    ]);
-  });
-
-  it('joins breaks with a comma and names around-the-clock days', () => {
-    expect(hoursLine(hours({ mon: iv(['09:00', '13:00'], ['14:00', '18:00']), tue: iv(['09:00', '13:00'], ['14:00', '18:00']), sat: { kind: '24h' } }), 'Круглосуточно')).toEqual([
-      { days: null, text: '9.00–18.00', closed: false },
-      { days: ['mon', 'tue'], text: '9.00–13.00, 14.00–18.00', closed: false },
-      { days: ['sat'], text: 'Круглосуточно', closed: false },
-      { days: ['sun'], text: null, closed: true },
-    ]);
   });
 });

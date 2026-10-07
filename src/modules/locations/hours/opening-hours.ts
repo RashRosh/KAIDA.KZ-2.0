@@ -121,39 +121,3 @@ export function openingState(hours: OpeningHours, now: Date): OpeningState {
     opensAt: { ...pointOf(next[0]), sameDay: Math.floor(next[0] / DAY) === Math.floor(current / DAY) },
   };
 }
-
-// ---- Buyer line: «9.00–18.00 | ПТ 13.00–18.00 | СБ ВС» ----
-
-export type HoursLinePart = { days: Weekday[] | null; text: string | null; closed: boolean };
-
-export function formatTime(time: string): string {
-  const [hours, minutes] = time.split(':');
-  return `${Number(hours)}.${minutes}`;
-}
-
-function dayText(schedule: DaySchedule, aroundTheClock: string): string | null {
-  if (schedule.kind === 'closed') return null;
-  if (schedule.kind === '24h') return aroundTheClock;
-  return schedule.intervals.map((interval) => `${formatTime(interval.open)}–${formatTime(interval.close)}`).join(', ');
-}
-
-// The most common open schedule goes first without a day label; days that differ follow; closed days last.
-export function hoursLine(hours: OpeningHours, aroundTheClock: string): HoursLinePart[] {
-  const texts = WEEKDAYS.map((day) => dayText(hours.days[day], aroundTheClock));
-  const counts = new Map<string, number>();
-  for (const text of texts) if (text) counts.set(text, (counts.get(text) ?? 0) + 1);
-  let base: string | null = null;
-  for (const [text, count] of counts) if (base === null || count > counts.get(base)!) base = text;
-
-  const parts: HoursLinePart[] = [];
-  if (base) parts.push({ days: null, text: base, closed: false });
-  const others = new Map<string, Weekday[]>();
-  WEEKDAYS.forEach((day, index) => {
-    const text = texts[index];
-    if (text && text !== base) others.set(text, [...(others.get(text) ?? []), day]);
-  });
-  for (const [text, days] of others) parts.push({ days, text, closed: false });
-  const closed = WEEKDAYS.filter((_, index) => texts[index] === null);
-  if (closed.length > 0) parts.push({ days: closed, text: null, closed: true });
-  return parts;
-}

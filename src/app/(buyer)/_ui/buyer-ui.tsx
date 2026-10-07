@@ -10,7 +10,7 @@ import type { SearchOffer } from '../../../modules/search/contracts/search.contr
 import { buildContactActions } from '../../../modules/sellers/contact/build-contact-actions';
 import { actualityText } from '../../_components/actuality-text';
 import { formatAmount } from '../../_components/format-amount';
-import { OpeningHoursLine } from '../../_components/OpeningHoursLine';
+import { OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { Ic, Phone } from '../../seller/_kaida/ui';
 
 // buyer-screens-mockup: the buyer app frame and the result card of the accepted mockup (B01), from its own classes.
@@ -173,9 +173,10 @@ export function ResultCard({ offer, distanceMeters }: { offer: SearchOffer; dist
           <PriceLine offer={offer} />
           <p className="c c2" style={{ marginTop: 2 }}>{offer.location.name}</p>
           {place && <p className="c">{place}</p>}
-          <OpeningHoursLine hours={offer.location.openingHours} />
         </div>
       </div>
+      {/* card-opening-hours: only the status, on its own full-width line; the schedule is on the Offer page. */}
+      <OpeningStatusLine hours={offer.location.openingHours} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         {/* stage 5A: the route action is honest — shown only when the route capability is available. */}
         {offer.routeAvailable && <RouteButton offer={offer} />}

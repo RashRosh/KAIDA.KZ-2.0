@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { photoUrl } from '@/modules/media/contracts/photo.contract';
 import type { BuyerOfferPage } from '@/modules/search/application/get-buyer-offer';
 import { useI18n } from '@/i18n/I18nProvider';
-import { OpeningHoursLine } from '../../../_components/OpeningHoursLine';
+import { OpeningSchedule, OpeningStatusLine } from '../../../_components/OpeningHoursLine';
 import { Ic } from '../../../seller/_kaida/ui';
 import { BuyerScreen, cameFromList, ContactIcons, FreshPlaque, PriceLine, RouteButton } from '../../_ui/buyer-ui';
 import { useInterest } from '../../_ui/use-interest';
@@ -164,8 +164,11 @@ export function BuyerOfferView({ offer }: { offer: BuyerOfferPage }) {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <div className="ts">{offer.location.name}</div>
                 <p className="c">{offer.location.addressText}</p>
-                <OpeningHoursLine hours={offer.location.openingHours} />
               </div>
+            </div>
+            <div>
+              <OpeningStatusLine hours={offer.location.openingHours} />
+              <OpeningSchedule hours={offer.location.openingHours} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               {/* stage 5A: the route action is honest — shown only when the route capability is available. */}
