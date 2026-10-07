@@ -20,13 +20,21 @@ describe('match levels', () => {
     expect(classifyMatchLevel({ title: 'Баранина на кости', productId: null, applicableProductId: null, words: ['баранина', 'на', 'кости'] })).toBe(2);
     expect(classifyMatchLevel({ title: 'Ёлка', productId: null, applicableProductId: null, words: ['елка'] })).toBe(2);
   });
-  it('level 3: prefix-only matches and candidates only a non-applicable Product brought in', () => {
-    expect(classifyMatchLevel({ title: 'Баранина', productId: null, applicableProductId: null, words: ['бара'] })).toBe(3);
-    expect(classifyMatchLevel({ title: 'Баранки', productId: null, applicableProductId: null, words: ['бара'] })).toBe(3);
+  it('level 3: every word is a whole word or another form of it (reviewed dictionary), at least one by form', () => {
+    expect(classifyMatchLevel({ title: 'Копченые груши', productId: null, applicableProductId: null, words: ['груша'] })).toBe(3);
+    expect(classifyMatchLevel({ title: 'Копченые груши', productId: null, applicableProductId: null, words: ['груша', 'копченые'] })).toBe(3);
+    expect(classifyMatchLevel({ title: 'Огурцы свежие', productId: null, applicableProductId: null, words: ['огурец', 'свежие'] })).toBe(3);
+    // a form match never lifts a word that is only a prefix: гру is not a dictionary word
+    expect(classifyMatchLevel({ title: 'Копченые груши', productId: null, applicableProductId: null, words: ['гру'] })).toBe(4);
+    expect(classifyMatchLevel({ title: 'Копченые груши', productId: null, applicableProductId: null, words: ['груша', 'коп'] })).toBe(4);
+  });
+  it('level 4: prefix-only matches and candidates only a non-applicable Product brought in', () => {
+    expect(classifyMatchLevel({ title: 'Баранина', productId: null, applicableProductId: null, words: ['бара'] })).toBe(4);
+    expect(classifyMatchLevel({ title: 'Баранки', productId: null, applicableProductId: null, words: ['бара'] })).toBe(4);
     // a selected Product that the text does not agree with: no applicable Product, the title does not match the words
-    expect(classifyMatchLevel({ title: 'Баранина', productId: LAMB, applicableProductId: null, words: ['баранина', 'на', 'кости'] })).toBe(3);
+    expect(classifyMatchLevel({ title: 'Баранина', productId: LAMB, applicableProductId: null, words: ['баранина', 'на', 'кости'] })).toBe(4);
     // a Product-linked card of another Product than the applicable one
-    expect(classifyMatchLevel({ title: 'Говядина', productId: BEEF, applicableProductId: LAMB, words })).toBe(3);
+    expect(classifyMatchLevel({ title: 'Говядина', productId: BEEF, applicableProductId: LAMB, words })).toBe(4);
   });
 });
 
