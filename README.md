@@ -94,7 +94,7 @@ SQLite/mock database не заменяет PostgreSQL integration environment. D
 
 ## Локальный запуск
 
-Требуется Node.js 24.x (`.node-version`, `engines`), Docker с Compose и Git. Проверка запуска **с нуля** в изолированном окружении (чистая БД без вымышленных данных, production build, smoke ручного пути) — `docs/ops/LOCAL_BOOTSTRAP.md`.
+Требуется Node.js 24.x (`.node-version`, `engines`), Docker с Compose и Git. Проверка запуска **с нуля** в изолированном окружении (чистая БД без вымышленных данных, production build, smoke ручного пути) — `docs/ops/LOCAL_BOOTSTRAP.md`. Резервная копия базы и фото и восстановление в чистое окружение — `docs/ops/BACKUP_RESTORE.md`.
 
 ```bash
 git clone https://github.com/RashRosh/KAIDA.KZ-2.0.git
