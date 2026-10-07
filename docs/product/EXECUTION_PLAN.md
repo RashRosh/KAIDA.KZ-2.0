@@ -4,7 +4,7 @@
 
 ## Verified base и ближайшая последовательность
 
-- `main`: `9ed1ba40c17dfda212fe17d2c9a43be67f862d0e` (closing docs PR #122 поверх checkpoint; `KAIDA verify` run `37529680150` SUCCESS); последний product checkpoint `v0.0.61-search-demand-events` на `0232c2d07af55deb9b874a12b994f97f86849783` (S15C/D0, PR #121; contract PR #120; merged-main run `37527531918` SUCCESS); предыдущий `v0.0.60-search-sorting-control` (PR #118, run `37510134880`); `v0.0.59-search-relevance-default` (S15B-4b, PR #114, run `37447048125`); `v0.0.58-product-as-search-signal` (S15B-4a, PR #111, run `37432078991`); `v0.0.57-buyer-autocomplete` (S15B-3, PR #108, run `37420287841` после rerun флейка seller-showcase-editor); `v0.0.56-search-known-zero` (S15B-2, PR #105, run `37370761534`); `v0.0.55-card-editor-suggestion-scroll` (PR #101, run `37347918337`); `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
+- `main`: `7892d22b01cf2499d80a7cfbe92ba8dd0cba46e0` (R1, PR #124; `KAIDA verify` run `37573885183`, CodeQL и OpenSSF Scorecard SUCCESS); последний product checkpoint `v0.0.62-local-bootstrap-verification` на `7892d22` (R1; предыдущий `v0.0.61-search-demand-events` на `0232c2d07af55deb9b874a12b994f97f86849783`, S15C/D0, PR #121, run `37527531918`); `v0.0.60-search-sorting-control` (PR #118, run `37510134880`); `v0.0.59-search-relevance-default` (S15B-4b, PR #114, run `37447048125`); `v0.0.58-product-as-search-signal` (S15B-4a, PR #111, run `37432078991`); `v0.0.57-buyer-autocomplete` (S15B-3, PR #108, run `37420287841` после rerun флейка seller-showcase-editor); `v0.0.56-search-known-zero` (S15B-2, PR #105, run `37370761534`); `v0.0.55-card-editor-suggestion-scroll` (PR #101, run `37347918337`); `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
   merged-main `KAIDA verify` run `37326497017` SUCCESS (rerun; первый запуск cancelled инфраструктурой). Предыдущие: `v0.0.53` (run `37305378999`), `v0.0.52` (run `37293540946`).
 - **Production KB Importer v1 — CLOSED.** Production KB v1 — нормальная runtime-база KAIDA: 682 Products, 210 aliases,
   35 categories в KAIDA PostgreSQL; runtime Product UUID / Offer FK сохранены; внешней KB/corpus-зависимости в runtime нет.
@@ -20,8 +20,8 @@
 3. ~~S15B — Search System revision~~ — **CLOSED** (`v0.0.54`–`v0.0.60`).
 4. ~~S15C / D0 Search Demand Events~~ — **CLOSED** (`v0.0.61`).
 5. **Local readiness track (решение PO 2026-10-07).** Цель — продолжать разработку без платной инфраструктуры; это **не** запуск пилота, **не** разрешение публичного запуска без AI и **не** изменение границ Seller Change Set (ручной ввод или AI-предложения → Seller Change Set → подтверждение продавцом → Offer). Порядок:
-   - **R1 — Clean local bootstrap verification** (`docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md`, APPROVED 2026-10-07): свежий checkout, изолированные БД и хранилище фото, секреты, миграции, Production KB, чистый bootstrap отдельно от demo seed, production-smoke ручного пути Seller → Buyer, воспроизводимая инструкция и evidence.
-   - **R2 — Backup и restore** PostgreSQL и фото Offer с реальной локальной проверкой восстановления (контракт — после R1).
+   - **R1 — Clean local bootstrap verification — CLOSED** (`v0.0.62`, `docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md`, PR #124; runbook `docs/ops/LOCAL_BOOTSTRAP.md`, `ops/local-bootstrap/`). Границы приёмки: свежий запуск проверен только через Git Bash на Windows; команды PowerShell, воспроизведение на Linux и в CI **не проверены**. Demo-последовательность: миграции → seed → импорт KB (seed после импорта KB без предшествующего seed падает на `products_name_unique` — известное ограничение, не исправлялось). Обязателен `IDENTITY_OTP_HMAC_SECRET_HEX` (без него вход отвечает `503 AUTH_UNAVAILABLE`). Сборка `pnpm build` на слабой машине падала перемежающимся образом; причина не установлена (обход — `CIRCLE_NODE_TOTAL=2`).
+   - **R2 — Backup и restore** PostgreSQL **и фото** Offer с реальной проверкой восстановления в изолированном окружении — **следующий запланированный slice; контракта и реализации ещё нет, не начат**.
    - **R3 — Воспроизводимая подготовка развёртывания** без покупки и создания хостинга (контракт — после R2).
    - **R4 — Следующий полезный non-AI product slice** из существующего плана: агент предлагает PO кандидата на решение; до решения не выбран и не начинается.
 6. **Отложено** (решение PO 2026-10-07): AI Input (stage 7), AI-модерация (stage 8), любая платная инфраструктура (хостинг, GPU, SMS-провайдер). Правило запуска PO 2026-09-25 не меняется: публичный запуск без актуальности и без AI-ввода/AI-модерации не проводится.
@@ -61,7 +61,7 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.61-search-demand-events`; checkpoint commit `0232c2d`; merged-main CI run `37527531918` green; предыдущие `v0.0.60-search-sorting-control`, `v0.0.59-search-relevance-default`, `v0.0.58-product-as-search-signal`, `v0.0.57-buyer-autocomplete`, `v0.0.56-search-known-zero`, `v0.0.55-card-editor-suggestion-scroll` (`ff8f08e`), `v0.0.54-catalog-suggestion-relevance` (`b3432e4`), `v0.0.53-catalog-runtime-loop` (`c0d1749`), `v0.0.52-production-kb-importer-v1` (`5b21710`);
+- tag: `v0.0.62-local-bootstrap-verification`; checkpoint commit `7892d22`; merged-main CI run `37573885183` green; предыдущие `v0.0.61-search-demand-events` (`0232c2d`, run `37527531918`), `v0.0.60-search-sorting-control`, `v0.0.59-search-relevance-default`, `v0.0.58-product-as-search-signal`, `v0.0.57-buyer-autocomplete`, `v0.0.56-search-known-zero`, `v0.0.55-card-editor-suggestion-scroll` (`ff8f08e`), `v0.0.54-catalog-suggestion-relevance` (`b3432e4`), `v0.0.53-catalog-runtime-loop` (`c0d1749`), `v0.0.52-production-kb-importer-v1` (`5b21710`);
 - до него закрыты: Stage 6 Rev 3 (`v0.0.51-search-sort-rev3`), 6B–6D (`v0.0.48`–`v0.0.50`), 5A
   (`v0.0.47-search-visibility-without-coordinates`), `v0.0.46-search-sort-distance` и более ранние checkpoints;
 - **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
@@ -207,7 +207,7 @@ checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-комм
 перенумеровываются и не задают очередность. **Фактический ближайший порядок единственный** (решение PO 2026-10-05, см.
 «Verified base и ближайшая последовательность»):
 
-`v0.0.61` (S15B и S15C/D0 закрыты) → Local readiness track R1 → R2 → R3 → R4 (предложение PO) →
+`v0.0.62` (S15B, S15C/D0 и R1 закрыты) → Local readiness track R2 → R3 → R4 (предложение PO) →
 D1 / readiness и canonical Product чипы при появлении данных; AI Input / AI-модерация отложены (PO 2026-10-07).
 
 Stages 7, 8, 9 (AI Input, AI-модерация, S14) стоят в таблице по историческим номерам; AI Input и AI-модерация
