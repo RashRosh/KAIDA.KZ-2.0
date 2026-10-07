@@ -11,11 +11,11 @@
 
 ## Current task
 
-Нет активной реализации. Готовится Slice Contract блока UX/search, пункт 1 (search word forms); контракта в репозитории ещё нет.
+Блок UX/search, пункт 1 (search word forms): контракт `docs/slices/search-word-forms/SLICE_CONTRACT.md` утверждён PO (rev 5; лицензионный гейт закрыт решением PO, follow-up: перепроверить opencorpora.org до публичного распространения). Путь: contract PR → merge on green → реализация на ветке `feat/search-word-forms` → manual acceptance PO. Реализация не сливается и не тегируется до приёмки.
 
 ## Next action
 
-1. PO утверждает (или правит) контракт search word forms; реализация — только после утверждения.
+1. Merge contract PR; затем реализация по контракту (без миграций, без семантических пар, без команды расширения словаря); при добавке p95 >40 мс — STOP с доказательствами.
 2. Порядок блока (PO 2026-10-07; каждый пункт — отдельный slice и контракт): word forms → opening hours → price and packaging → empty states → typo suggestions → post-publication buyer preview → R3. Источник порядка — `EXECUTION_PLAN.md`.
 
 ## Current constraints
