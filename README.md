@@ -122,12 +122,12 @@ IDENTITY_OTP_HMAC_SECRET_HEX=<64 hex characters>
 ```bash
 docker compose up -d --wait
 pnpm db:migrate
+pnpm db:seed                   # только demo: вымышленные продавец, точка и две карточки — строго ДО импорта KB
 pnpm db:import:production-kb   # Production KB v1: 682 Products, 210 aliases, 35 categories (идемпотентно)
-pnpm db:seed                   # только demo: вымышленные продавец, точка и две карточки
 pnpm dev
 ```
 
-`pnpm db:seed` каталог не ставит и в реальное окружение не входит: там только миграции и `pnpm db:import:production-kb`.
+`pnpm db:seed` каталог не ставит и в реальное окружение не входит: там только миграции и `pnpm db:import:production-kb`. Порядок важен: импорт KB подхватывает Products seed («Баранина», «Говядина») по названию, а `pnpm db:seed` после импорта падает на `products_name_unique`.
 
 Приложение: `http://localhost:3000`.
 

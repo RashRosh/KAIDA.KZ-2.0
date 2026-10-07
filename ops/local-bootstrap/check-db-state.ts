@@ -5,7 +5,7 @@ import { assertIsolatedDatabase } from './isolation';
 
 // R1: explicit database-state checks for the two bootstrap modes (docs/ops/LOCAL_BOOTSTRAP.md). Read-only.
 //   clean — migrations + Production KB import only: the catalog is installed and every business-data table is empty.
-//   demo  — clean + `pnpm db:seed`: the fictional demo records exist; seed/KB name overlaps are reported.
+//   demo  — migrations, then `pnpm db:seed`, then the KB import (this order only): the fictional demo records exist.
 // Catalog tables are the Production KB content; `kb_package_install` is the importer's own technical record.
 const CATALOG_TABLES = ['products', 'product_aliases', 'product_localized_names', 'product_categories', 'product_category_links'];
 const TECHNICAL_TABLES = ['kb_package_install'];
@@ -52,6 +52,8 @@ async function main() {
     const filled = business.filter((table) => (counts.get(table) ?? 0) > 0);
     expect(filled.length === 0, `all ${business.length} business-data tables are empty${filled.length ? ` (not empty: ${filled.join(', ')})` : ''}`);
   } else {
+    // Order matters: the seed runs BEFORE the KB import, which adopts the seed Products by name (no duplicates).
+    expect(counts.get('products') === kb.products, `products = ${kb.products}, seed Products adopted by the KB import (found ${counts.get('products')})`);
     expect((counts.get('sellers') ?? 0) === 1 && (counts.get('locations') ?? 0) === 1, 'demo seller and point present');
     expect((counts.get('offers') ?? 0) === 2, 'two demo offers present');
     const duplicates = (await pool.query<{ name: string; n: string }>(

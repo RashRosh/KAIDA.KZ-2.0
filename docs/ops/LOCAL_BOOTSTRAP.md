@@ -43,12 +43,13 @@ docker compose -f ops/local-bootstrap/docker-compose.yml exec -T postgres create
 `.env` создаётся **с нуля**, не копированием `.env.example`: тот указывает на dev-стек. Секрет генерируется в момент проверки и нигде не сохраняется, кроме этого неотслеживаемого `.env`.
 
 ```bash
+WORKW="$(cygpath -m "$WORK" 2>/dev/null || echo "$WORK")"   # Git Bash на Windows: Node понимает путь только в виде C:/...
 SECRET="$(node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))")"
 cat > .env <<EOF
 DATABASE_URL=postgresql://kaida_bootstrap:bootstrap_local_only@127.0.0.1:55432/kaida_bootstrap
 IDENTITY_OTP_HMAC_SECRET_HEX=$SECRET
 IDENTITY_COOKIE_SECURE=false
-PHOTO_STORAGE_DIR=$WORK/photos
+PHOTO_STORAGE_DIR=$WORKW/photos
 OPERATOR_PHONES=+77000090002
 SEARCH_EVENTS_ORIGIN=test
 NEXT_TELEMETRY_DISABLED=1
@@ -74,9 +75,9 @@ PowerShell: сгенерировать значение через `node -e "...
 | Режим | Состав | Назначение |
 |---|---|---|
 | **Clean bootstrap** | миграции + `pnpm db:import:production-kb`, больше ничего | основа любого реального окружения |
-| **Demo bootstrap** | Clean + `pnpm db:seed` | только локальная демонстрация/разработка; вымышленные продавец, точка, две карточки, Products «Баранина»/«Говядина» |
+| **Demo bootstrap** | миграции → `pnpm db:seed` → `pnpm db:import:production-kb` (именно в таком порядке) | только локальная демонстрация/разработка; вымышленные продавец, точка, две карточки, Products «Баранина»/«Говядина» |
 
-`pnpm db:seed` **не входит** в реальное окружение и не ставит каталог.
+`pnpm db:seed` **не входит** в реальное окружение и не ставит каталог. Порядок demo важен: импорт KB подхватывает Products seed по названию (без дублей); `pnpm db:seed` **после** импорта KB падает на `products_name_unique` (см. раздел 9).
 
 ### 5.1 Clean bootstrap
 
@@ -92,17 +93,17 @@ pnpm exec tsx ops/local-bootstrap/check-db-state.ts clean
 
 ```bash
 DATABASE_URL=postgresql://kaida_bootstrap:bootstrap_local_only@127.0.0.1:55432/kaida_bootstrap_demo sh -c \
-  'pnpm db:migrate && pnpm db:import:production-kb && pnpm db:seed && pnpm exec tsx ops/local-bootstrap/check-db-state.ts demo'
+  'pnpm db:migrate && pnpm db:seed && pnpm db:import:production-kb && pnpm exec tsx ops/local-bootstrap/check-db-state.ts demo'
 ```
 
-PowerShell: задать `$env:DATABASE_URL` на время этих команд и затем вернуть значение. Отчёт `demo` перечисляет совпадения канонических названий seed и KB — это информация для PO, не автоисправление.
+PowerShell: задать `$env:DATABASE_URL` на время этих команд и затем вернуть значение. Перед первым запуском demo-базу нужно создать (раздел 3); чтобы повторить demo с нуля — `dropdb`/`createdb` той же командой `docker compose -f ops/local-bootstrap/docker-compose.yml exec -T postgres ...`. Проверка `demo` требует 682 Products (Products seed подхвачены импортом, дублей названий нет).
 
 ## 6. Production build и smoke
 
 Выполняется на **clean** базе (`.env` из раздела 4):
 
 ```bash
-pnpm build
+pnpm build                  # на хосте с малым запасом памяти: CIRCLE_NODE_TOTAL=2 pnpm build (см. раздел 9)
 pnpm bootstrap:smoke
 ```
 
@@ -125,4 +126,10 @@ SHA; версии Node/pnpm/Docker; точные команды; время ша
 
 ## 9. Наблюдения прогона
 
-_Заполняется по результату прогона._
+Факты первого полного прогона из свежего checkout (Windows 11, Docker Desktop, Node 24.14.1, pnpm 11.19.0); числа и SHA итогового прогона — в отчёте PR.
+
+1. **`pnpm db:seed` после импорта KB падает.** Seed вставляет Products «Баранина»/«Говядина» с фиксированными UUID; в каталоге KB эти названия уже есть под другими UUID, и вставка нарушает `products_name_unique`. Сообщение seed при этом общее («Check PostgreSQL, DATABASE_URL and migrations»). Рабочий порядок — seed **до** импорта KB (так же собирается E2E-БД); продуктовое поведение seed/KB не менялось.
+2. **Пустой `IDENTITY_OTP_HMAC_SECRET_HEX`:** сервер стартует, но `POST /api/auth/otp/request` отвечает `503 AUTH_UNAVAILABLE`, в логе `Auth OTP request failed` — ошибки на старте нет.
+3. **Сборка на хосте с малой свободной памятью.** На машине с 7,9 ГБ ОЗУ и ~340 МБ свободной памяти `pnpm build` трижды упал во время сборки страниц (код `3221226505`, ошибка записи `UNKNOWN`, `JavaScript heap out of memory` в worker). С `CIRCLE_NODE_TOTAL=2` (штатная переменная Next, ограничивает число worker) сборка прошла за ~35 с. Причина падений не доказана; связь с нехваткой памяти — правдоподобная гипотеза по замеру, не установленный факт.
+4. **Smoke:** весь сценарий раздела 6 проходит; ссылка маршрута строится как `dgis://2gis.ru/routeSearch/rsType/car/to/76.889709,43.238949`.
+5. **Защита изоляции:** `check-db-state` и `bootstrap:smoke` отказываются запускаться, если `DATABASE_URL` указывает на порт 5432 или базы `kaida`/`kaida_test` (проверено без подключения).
