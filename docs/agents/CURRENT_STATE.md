@@ -5,22 +5,23 @@
 ## Verified base
 
 - Проверено: 2026-10-07.
-- `origin/main`: `b7d0b4beac2252c8155e5e6de97ba78216696a8b` (PR #133) плюс closing docs PR; `KAIDA verify` run `37609705127` SUCCESS, CodeQL SUCCESS.
+- `origin/main`: `eba91aace5c70da6da0f446c7391c30aea9b04c9` (state-docs PR #134) поверх checkpoint'а ниже; плюс планировочный PR этого обновления. Checkpoint `b7d0b4b`: `KAIDA verify` run `37609705127` SUCCESS, CodeQL SUCCESS.
 - Последний checkpoint: `v0.0.65-search-by-product-fixture` (test-only fix Issue #130: у API-теста `search-by-product` свои Product и Offer; причина — общая запись «Баранина», в которую публикуют другие spec'ы). Предыдущие: `v0.0.64-backup-restore` (R2, `a9c893f`), `v0.0.63`, `v0.0.62` (R1).
 - Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
 
 ## Current task
 
-R2 (backup/restore БД и фото): контракт `docs/slices/backup-restore/SLICE_CONTRACT.md` — подход утверждён PO 2026-10-07; контракт-PR на ветке `docs/r2-backup-restore-contract`. Реализации нет.
+Нет активной реализации. Готовится Slice Contract блока UX/search, пункт 1 (search word forms); контракта в репозитории ещё нет.
 
 ## Next action
 
-1. PO ревьюит общий pipeline (с консолидированным UX/UI backlog) до утверждения контракта R3. Без команды PO ничего не начинать.
-2. Далее по `EXECUTION_PLAN.md`: R3 → R4 (агент предлагает следующий non-AI slice PO). UX/UI-обсуждение собрано отдельно для позднего pipeline review и в R-трек не входит.
+1. PO утверждает (или правит) контракт search word forms; реализация — только после утверждения.
+2. Порядок блока (PO 2026-10-07; каждый пункт — отдельный slice и контракт): word forms → opening hours → price and packaging → empty states → typo suggestions → post-publication buyer preview → R3. Источник порядка — `EXECUTION_PLAN.md`.
 
 ## Current constraints
 
-- Не начинать: D1, AI Input, AI-модерация, платная инфраструктура, 6F/6G, fuzzy, оценка поискового движка, Issue #116, KK-вычитка (отдельно). Публичный запуск без AI не разрешён.
+- Не начинать: D1, AI Input, AI-модерация, платная инфраструктура, 6F/6G, **typo/fuzzy matching** (ограничение не снято; word forms — отдельная задача: допускаются исследование и подготовка контракта, реализация после утверждения), оценка и выбор поискового движка, Issue #116, KK-вычитка (отдельно). Публичный запуск без AI-ввода и AI-модерации **не утверждён** (до отдельного решения PO).
+- Верификация каждого UI-slice блока UX/search включает читаемость на реальном телефоне, длинные KK-подписи и крупный системный шрифт; консолидированный UX/UI-документ — история обсуждения, его неутверждённые предложения не принимаются молча.
 - Не добавлять без решения PO: настоящую аутентификацию/доставку OTP, abuse-защиту, юридические тексты, операторскую доставку OTP, allowlist, оповещения о free-title и прочие pilot-функции.
 - D0: `SEARCH_EVENTS_ORIGIN=organic` не включать, пока ежедневный `pnpm search-events:purge` не настроен и не проверен; `dev` / `test` / `synthetic` — не реальный спрос. Поведение D0 не менять без решения PO.
 - Границы приёмки R1: свежий запуск проверен только через Git Bash на Windows; PowerShell, Linux и CI-воспроизведение не проверены; нужен `IDENTITY_OTP_HMAC_SECRET_HEX`; `pnpm build` на слабой машине падал перемежающимся образом, причина не установлена.
