@@ -29,6 +29,15 @@ describe('word-forms.v1.csv rules (contract 3.1, 3.9)', () => {
     for (const word of ['на', 'для', 'из', 'без', 'под', 'над', 'при', 'про', 'или', 'не', 'по', 'от', 'до', 'за', 'он', 'она', 'мой', 'этот'])
       expect(dictionary.formsOf(word), word).toBeNull();
   });
+  it('R4: «из» (also a form of the noun «иза») is removed; «хрен» and «апорт» stay as reviewed product names', () => {
+    expect(dictionary.formsOf('из')).toBeNull();
+    expect(dictionary.formsOf('иза') ?? []).not.toContain('из');
+    expect(dictionary.formsOf('хрен')).toEqual(expect.arrayContaining(['хрен', 'хрена']));
+    expect(dictionary.formsOf('апорт')).toContain('апорт');
+    // no form of the dictionary equals a Russian preposition, conjunction or particle
+    for (const word of ['в', 'во', 'и', 'а', 'но', 'то', 'ли', 'же', 'бы', 'ни', 'у', 'о', 'об', 'со', 'ко', 'вы', 'мы', 'ты', 'им', 'их', 'ее', 'его', 'нам', 'вам', 'нас', 'вас', 'это', 'что', 'как', 'так', 'все', 'вот', 'уж', 'ей', 'ему', 'ним', 'нее', 'тут', 'там'])
+      expect(dictionary.formsOf(word), word).toBeNull();
+  });
   it('applies the reviewed merges and the exclusion of shared forms', () => {
     expect(dictionary.formsOf('сом')).toEqual(expect.arrayContaining(['сом', 'сома', 'сомы']));
     expect(dictionary.formsOf('белые')).toContain('белый');

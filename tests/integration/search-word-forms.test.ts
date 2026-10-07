@@ -18,6 +18,8 @@ describe('Search word forms (search-word-forms)', () => {
     'Копченые груши', 'Грушевый сок', 'Огурцы свежие', 'Зеленый чай', 'Макаронные изделия', 'Макароны рожки', 'Говяжья вырезка',
     'Зелень свежая', 'Печенье овсяное', 'Мука в/с 2 кг', 'Яйца С1 10 шт', 'Сыр 200г', 'Coca-Cola 0,5л', 'Қымыз кумыс', 'Груши на меду',
     'Куриные яйца', 'Рис длиннозерный', 'Мука рисовая', 'Перцы болгарские', 'Баранина на кости', 'Мясо барана домашнее', 'Колбаса вареная',
+    // irregular forms (stem changes, fleeting vowels, collective plurals)
+    'Курица копченая', 'Куры гриль', 'Яблоко зеленое', 'Яблок мешок', 'Яйцо куриное', 'Морковь свежая', 'Моркови пучок', 'Ребро говяжье', 'Муки 1 кг', 'Тунец консервированный', 'Перец болгарский',
   ];
   const offerIds = new Map(titles.map((title) => [title, randomUUID()]));
   const pearProduct = randomUUID();
@@ -56,6 +58,29 @@ describe('Search word forms (search-word-forms)', () => {
     expect(ids(await search('огурцы'))).toContain(idOf('Огурцы свежие'));
     expect(ids(await search('перец'))).toContain(idOf('Перцы болгарские'));
     expect(ids(await search('яйцо'))).toContain(idOf('Яйца С1 10 шт'));
+  });
+
+  it('finds irregular forms in both directions', async () => {
+    const pairs: [string, string][] = [
+      ['огурец', 'Огурцы свежие'], ['огурцов', 'Огурцы свежие'], ['перцы', 'Перец болгарский'], ['перец', 'Перцы болгарские'], ['перца', 'Перец болгарский'],
+      ['куры', 'Курица копченая'], ['курица', 'Куры гриль'], ['яблок', 'Яблоко зеленое'], ['яблоко', 'Яблок мешок'], ['яиц', 'Яйцо куриное'], ['яйцо', 'Яйца С1 10 шт'],
+      ['моркови', 'Морковь свежая'], ['морковь', 'Моркови пучок'], ['ребра', 'Ребро говяжье'], ['ребро', 'Ребро говяжье'], ['муку', 'Муки 1 кг'], ['мука', 'Муки 1 кг'], ['тунца', 'Тунец консервированный'], ['тунец', 'Тунец консервированный'],
+    ];
+    for (const [query, title] of pairs) expect(ids(await search(query)), query + ' -> ' + title).toContain(idOf(title));
+  });
+
+  it('multiword queries mix prefix, exact and form evidence, and every word stays required', async () => {
+    const fresh = idOf('Огурцы свежие');
+    // form + prefix, form + exact, exact + prefix, prefix + prefix, form + form
+    for (const query of ['огурец свеж', 'огурец свежие', 'огурцы свеж', 'огур свеж', 'огурец свежий']) expect(ids(await search(query)), query).toContain(fresh);
+    expect(ids(await search('огурец свежий'))).toEqual([fresh]);
+    // a missing or foreign word removes the card, whichever evidence the other words have
+    for (const query of ['огурец молоко', 'огурец свеж молоко', 'огурцы сыр', 'огурец свежие зеленый', 'огур свеж 55']) expect(ids(await search(query)), query).not.toContain(fresh);
+    // three words: form + prefix + exact
+    expect(ids(await search('груша мед на'))).toEqual([idOf('Груши на меду')]);
+    expect(ids(await search('груша мед на кости'))).toEqual([]);
+    expect(ids(await search('перец болг'))).toEqual(expect.arrayContaining([idOf('Перцы болгарские'), idOf('Перец болгарский')]));
+    expect(ids(await search('перцы болгарский'))).toEqual(expect.arrayContaining([idOf('Перец болгарский')]));
   });
 
   it('does not merge different words (harmful merges stay apart)', async () => {

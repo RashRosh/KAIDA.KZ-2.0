@@ -9,7 +9,10 @@ Rules (contract R1-R5):
       the top such parse of a source word.
   R2  forms are normalized like `searchWords`: lower case, e -> yo folded, letters a-ya only, length >= 2.
   R3  a form that belongs to two groups is removed from both, except the reviewed same-lexeme merges below.
-  R4  function words never enter a group (guaranteed by the part-of-speech filter, checked by the tests).
+  R4  function words never enter a group: a form that the dictionary ALSO reads as a preposition, conjunction, particle,
+      pronoun, interjection or predicative (PREP, CONJ, PRCL, NPRO, INTJ, PRED) is removed from its group. Reviewed exceptions
+      kept because they are catalogue product names: KEEP_AS_PRODUCT = хрен (horseradish), апорт (an apple variety).
+      Found by the tests: without this rule the stop word «из» was a form of the noun «иза» (a KB alias).
   R5  no semantic expansion: only grammatical forms of one lexeme.
 """
 import csv

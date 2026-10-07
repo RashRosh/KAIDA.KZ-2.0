@@ -62,7 +62,7 @@ function wordMatch(word: string): SQL {
   return sql`(${sql.join([prefix, ...formMatches], sql` or `)})`;
 }
 
-function titleWordsMatch(words: string[]): SQL | undefined {
+export function titleWordsMatch(words: string[]): SQL | undefined {
   if (words.length === 0) return undefined;
   return and(...words.map(wordMatch));
 }

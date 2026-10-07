@@ -20,3 +20,7 @@ The script refuses to run on other package versions. It reads the Russian words 
 3. Keep `src/modules/search/word-forms/PROVENANCE.md` in sync (source, versions, licence).
 
 Rules, caps (15,000 forms, 100 per group), reviewed merges and the licence notice are in the contract and in `PROVENANCE.md`.
+
+## Function words (rule R4)
+
+A form that the dictionary also reads as a function word (preposition, conjunction, particle, pronoun, interjection, predicative) is removed from its group, so a stop word of a query never matches through a form of an unrelated noun. The generator prints the removed forms (currently only «из», a form of the noun «иза»). Reviewed exceptions kept because they are catalogue products: «хрен» (horseradish) and «апорт» (an apple variety) — the set `KEEP_AS_PRODUCT` in `generate.py`. Adding to that set is a reviewed change like any dictionary change. Covered by `tests/unit/word-forms.test.ts`.
