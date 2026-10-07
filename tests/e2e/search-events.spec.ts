@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { createDatabase } from '../../src/db/client';
 import { testDatabaseUrl } from '../integration/database';
@@ -12,7 +12,8 @@ test.beforeEach(({}, testInfo) => {
 });
 
 let connection: ReturnType<typeof createDatabase>;
-const marker = randomUUID().slice(0, 8);
+// Letters only: a digit run in the query text would trip D0's phone-number filter and the event would (correctly) not be recorded (Issue #125).
+const marker = Array.from(randomBytes(8), (byte) => String.fromCharCode(97 + (byte % 26))).join('');
 const cleanupTexts: string[] = [];
 // One Product with an Offer (the results to sort, open and come back to) and one Product without Offers (known-zero).
 let productId = '';
