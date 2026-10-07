@@ -11,12 +11,11 @@
 
 ## Current task
 
-Блок UX/search, пункт 1 (search word forms): контракт `docs/slices/search-word-forms/SLICE_CONTRACT.md` утверждён и слит (PR #136). Реализация на ветке `feat/search-word-forms`: словарь форм (`src/modules/search/word-forms`, генератор `ops/word-forms`), условие в `search.repository.ts`, уровень L3/L4, тесты; миграций нет. Проверки: unit 412, integration 265, build, E2E выборочно локально; полный CI ветки. Ждёт ручной приёмки PO; не сливать и не тегировать до приёмки. Follow-up: перед публичным распространением перепроверить лицензию OpenCorpora (opencorpora.org недоступен 2026-10-07).
+Блок UX/search, пункт 2 (card opening-hours readability): контракт `docs/slices/card-opening-hours/SLICE_CONTRACT.md` утверждён и слит (PR #139). Реализация на ветке `feat/card-opening-hours`: статус словами на карточке, сгруппированное расписание на странице Offer, без изменения расчёта и данных. Ждёт ручной приёмки PO; не сливать и не тегировать до приёмки. Follow-up по word forms: перепроверить лицензию OpenCorpora до публичного распространения. Известное ограничение opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус сдвинется на час); расчёт не меняется по решению PO.
 
 ## Next action
 
-1. PO: ручная приёмка по `SLICE_CONTRACT.md` §10; затем merge, tag, обновление этого файла.
-2. Порядок блока (PO 2026-10-07; каждый пункт — отдельный slice и контракт): opening hours → price and packaging → empty states → typo suggestions → post-publication buyer preview → R3. Источник порядка — `EXECUTION_PLAN.md`.
+1. Ручная приёмка PO по `SLICE_CONTRACT.md` §10; затем merge, tag, закрывающий docs-PR. Порядок блока (PO 2026-10-07): ~~word forms~~ → opening hours → price and packaging → empty states → typo suggestions → post-publication buyer preview → R3 (`EXECUTION_PLAN.md`).
 
 ## Current constraints
 

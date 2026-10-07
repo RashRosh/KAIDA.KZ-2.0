@@ -110,13 +110,28 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await expect(offer.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toHaveCount(0);
     await expect(offer.getByRole('link', { name: 'Написать в WhatsApp', exact: true })).toHaveAttribute('href', `https://wa.me/${phone.slice(1)}`);
     await expect(offer.getByRole('link', { name: `Маршрут до ${pointName}`, exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
+    // card-opening-hours: the card shows only the status in words (no schedule, no button) ...
     const hours = offer.getByTestId('opening-hours');
-    await expect(hours).toContainText('9.00–18.00');
-    await expect(hours).toContainText('ВС Круглосуточно');
-    await expect(hours.locator('s')).toHaveText('СБ');
-    await expect(hours.getByRole('img', { name: 'Закрывается в 18:00' })).toBeVisible();
+    await expect(hours).toHaveText('Закрывается в 18:00');
     await expect(hours).toHaveAttribute('data-state', 'closing');
+    await expect(offer.getByTestId('opening-schedule')).toHaveCount(0);
+    await expect(offer.getByRole('button', { name: 'Расписание' })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    // ... and the Offer page shows the whole week, consecutive identical days grouped, today (Monday) in bold.
+    await offer.getByRole('link', { name: 'Баранина', exact: true }).click();
+    await expect(page).toHaveURL(/\/offers\//);
+    const schedule = page.getByTestId('opening-schedule');
+    await expect(schedule.getByRole('listitem')).toHaveCount(3);
+    await expect(schedule.getByRole('listitem').nth(0)).toContainText('ПН–ПТ');
+    await expect(schedule.getByRole('listitem').nth(0)).toContainText('9:00–18:00');
+    await expect(schedule.getByRole('listitem').nth(0)).toHaveAttribute('aria-current', 'date');
+    await expect(schedule.getByRole('listitem').nth(1)).toContainText('СБ');
+    await expect(schedule.getByRole('listitem').nth(1)).toContainText('выходной');
+    await expect(schedule.getByRole('listitem').nth(2)).toContainText('ВС');
+    await expect(schedule.getByRole('listitem').nth(2)).toContainText('Круглосуточно');
+    await expect(page.getByTestId('opening-hours')).toHaveText('Закрывается в 18:00');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.goBack();
 
     // Confirm the call number with the code shown on screen (test delivery).
     await page.goto('/seller/points');
