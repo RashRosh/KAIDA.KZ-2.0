@@ -1,6 +1,6 @@
 # Local Bootstrap Verification — чистый локальный запуск KAIDA без AI и платной инфраструктуры
 
-**Status:** APPROVED (PO 2026-10-07, с решениями и уточнениями в §12). Реализация — отдельная ветка после слияния этого контракта.
+**Status:** CLOSED. Checkpoint `v0.0.62-local-bootstrap-verification`; PR #124 (contract — PR #123); `main` `7892d22b01cf2499d80a7cfbe92ba8dd0cba46e0`; merged-main `KAIDA verify` run `37573885183` SUCCESS; manual acceptance PASS (`1467a47`). Границы приёмки: свежий запуск проверен только через Git Bash на Windows; команды PowerShell, воспроизведение на Linux и в CI **не проверены**. Demo-последовательность: миграции → seed → импорт KB (seed после импорта KB без предшествующего seed падает на `products_name_unique` — известное ограничение, не исправлялось). Обязателен `IDENTITY_OTP_HMAC_SECRET_HEX` (без него вход отвечает `503 AUTH_UNAVAILABLE`). Сборка `pnpm build` на слабой машине падала перемежающимся образом; причина не установлена (обход — `CIRCLE_NODE_TOTAL=2`).
 **Base:** `main` `9ed1ba40c17dfda212fe17d2c9a43be67f862d0e` (checkpoint `v0.0.61-search-demand-events`; после него смержены только docs).
 **Plan:** шаг R1 «Local readiness track» (`EXECUTION_PLAN.md`, решение PO 2026-10-07): продолжать разработку без платной инфраструктуры. Это **не** подготовка к немедленному пилоту и **не** разрешение публичного запуска без AI.
 **Граница доставки:** mobile + русский (`PROJECT_RULES.md` §18.5). UI не меняется.
