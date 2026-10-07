@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -18,7 +18,8 @@ const HOUR = 3_600_000;
 
 describe('Search events (S15C / D0)', () => {
   let connection: Awaited<ReturnType<typeof connectTestDatabase>>;
-  const marker = randomUUID().slice(0, 8);
+  // Letters only: a run of six or more digits in the query text trips D0's phone-number filter and no event is recorded (Issue #125).
+  const marker = Array.from(randomBytes(8), (byte) => String.fromCharCode(97 + (byte % 26))).join('');
   const products: string[] = [];
   const query = (suffix: string) => `evt${marker} ${suffix}`;
   const events = async (text: string) => (await connection.pool.query(
