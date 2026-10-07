@@ -4,9 +4,9 @@
 
 ## Verified base
 
-- Проверено: 2026-10-07.
-- `origin/main`: `eba91aace5c70da6da0f446c7391c30aea9b04c9` (state-docs PR #134) поверх checkpoint'а ниже; плюс планировочный PR этого обновления. Checkpoint `b7d0b4b`: `KAIDA verify` run `37609705127` SUCCESS, CodeQL SUCCESS.
-- Последний checkpoint: `v0.0.65-search-by-product-fixture` (test-only fix Issue #130: у API-теста `search-by-product` свои Product и Offer; причина — общая запись «Баранина», в которую публикуют другие spec'ы). Предыдущие: `v0.0.64-backup-restore` (R2, `a9c893f`), `v0.0.63`, `v0.0.62` (R1).
+- Проверено: 2026-10-08.
+- `origin/main`: `7d1e721c479edf9e3450c94ac3d9c3df1d6551eb` (merge PR #137, search word forms); `KAIDA verify` main run `37679370719` SUCCESS, CodeQL SUCCESS; плюс docs-PR закрытия.
+- Последний checkpoint: `v0.0.66-search-word-forms` (`7d1e721`): Search находит другую грамматическую форму слова по проверенному офлайн-словарю (`src/modules/search/word-forms`, генератор `ops/word-forms`), без миграций, независимо от языка интерфейса; новый уровень relevance L3 (старый L3 = L4). Предыдущие: `v0.0.65-search-by-product-fixture`, `v0.0.64-backup-restore` (R2), `v0.0.63`, `v0.0.62` (R1).
 - Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
 
 ## Current task
