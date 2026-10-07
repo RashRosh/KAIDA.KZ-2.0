@@ -4,7 +4,7 @@
 
 ## Verified base и ближайшая последовательность
 
-- `main`: `0232c2d07af55deb9b874a12b994f97f86849783`; checkpoint `v0.0.61-search-demand-events` (S15C/D0, PR #121; contract PR #120; merged-main run `37527531918` SUCCESS); предыдущий `v0.0.60-search-sorting-control` (PR #118, run `37510134880`); `v0.0.59-search-relevance-default` (S15B-4b, PR #114, run `37447048125`); `v0.0.58-product-as-search-signal` (S15B-4a, PR #111, run `37432078991`); `v0.0.57-buyer-autocomplete` (S15B-3, PR #108, run `37420287841` после rerun флейка seller-showcase-editor); `v0.0.56-search-known-zero` (S15B-2, PR #105, run `37370761534`); `v0.0.55-card-editor-suggestion-scroll` (PR #101, run `37347918337`); `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
+- `main`: `9ed1ba40c17dfda212fe17d2c9a43be67f862d0e` (closing docs PR #122 поверх checkpoint; `KAIDA verify` run `37529680150` SUCCESS); последний product checkpoint `v0.0.61-search-demand-events` на `0232c2d07af55deb9b874a12b994f97f86849783` (S15C/D0, PR #121; contract PR #120; merged-main run `37527531918` SUCCESS); предыдущий `v0.0.60-search-sorting-control` (PR #118, run `37510134880`); `v0.0.59-search-relevance-default` (S15B-4b, PR #114, run `37447048125`); `v0.0.58-product-as-search-signal` (S15B-4a, PR #111, run `37432078991`); `v0.0.57-buyer-autocomplete` (S15B-3, PR #108, run `37420287841` после rerun флейка seller-showcase-editor); `v0.0.56-search-known-zero` (S15B-2, PR #105, run `37370761534`); `v0.0.55-card-editor-suggestion-scroll` (PR #101, run `37347918337`); `v0.0.54-catalog-suggestion-relevance` (S15B-1, PR #97, `b3432e4`);
   merged-main `KAIDA verify` run `37326497017` SUCCESS (rerun; первый запуск cancelled инфраструктурой). Предыдущие: `v0.0.53` (run `37305378999`), `v0.0.52` (run `37293540946`).
 - **Production KB Importer v1 — CLOSED.** Production KB v1 — нормальная runtime-база KAIDA: 682 Products, 210 aliases,
   35 categories в KAIDA PostgreSQL; runtime Product UUID / Offer FK сохранены; внешней KB/corpus-зависимости в runtime нет.
@@ -15,16 +15,18 @@
 1. ~~Production KB v1 / S15A~~ — **CLOSED** (`v0.0.52`).
 2. ~~Catalog-backed Seller → Buyer runtime loop~~ — **CLOSED** (`v0.0.53`, PR #93; integration/user-flow proof, production-код не менялся)
    (`docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md`).
-   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **S15B-2 — Search state: resolved Product + known-zero — CLOSED** (`v0.0.56`, `docs/slices/s15b2-known-zero/SLICE_CONTRACT.md`). **S15B-3 — Buyer autocomplete + Search по `product_id` — CLOSED** (`v0.0.57`, `docs/slices/s15b3-buyer-autocomplete/SLICE_CONTRACT.md`). Прежний S15B-4 (жёсткое разделение canonical/raw) **отменён** решением PO: Product — сигнал, не фильтр. **S15B-4a — selected Product как сигнал в общем candidate set, без relevance-порядка — CLOSED** (`v0.0.58`, `docs/slices/s15b4a-product-as-signal/SLICE_CONTRACT.md`). **S15B-4b — Search «По соответствию» (relevance) как режим по умолчанию — CLOSED** (`v0.0.59`, `docs/slices/s15b4b-relevance-sort/SLICE_CONTRACT.md`): детерминированные уровни L1/L2/L3, допуск E1 не изменён. **Search sorting control UX refresh — CLOSED** (`v0.0.60`, `docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md`). **S15B закрыт.** **S15C / D0 — Search Demand Events — CLOSED** (`v0.0.61`, `docs/slices/s15c-d0-search-demand-events/SLICE_CONTRACT.md`): внутренние best-effort события осознанных поисков без идентификаторов и гео. **Деплой-предусловие (организационное, не гарантия кода):** запись `organic` в боевом окружении (`SEARCH_EVENTS_ORIGIN=organic`) остаётся выключенной, пока ежедневная операторская очистка (`pnpm search-events:purge`) не настроена во внешнем планировщике и не проверена; фактическое хранение = 90 дней + интервал очистки при успешном выполнении. События `dev` / `test` / `synthetic` — не реальный спрос. **Дальше** — по порядку плана ниже (накопление demand и launch-critical AI Input идут параллельно; D1 и AI не начаты); fuzzy — позже.
+   **S15B-1 — Catalog suggestion relevance / reachability — CLOSED** (`v0.0.54`, `docs/slices/s15b1-catalog-suggestion-relevance/SLICE_CONTRACT.md`). UX-slice «Card editor — mobile visibility of catalog suggestions» — **CLOSED** (`v0.0.55`, `docs/slices/card-editor-suggestion-scroll/SLICE_CONTRACT.md`). **S15B-2 — Search state: resolved Product + known-zero — CLOSED** (`v0.0.56`, `docs/slices/s15b2-known-zero/SLICE_CONTRACT.md`). **S15B-3 — Buyer autocomplete + Search по `product_id` — CLOSED** (`v0.0.57`, `docs/slices/s15b3-buyer-autocomplete/SLICE_CONTRACT.md`). Прежний S15B-4 (жёсткое разделение canonical/raw) **отменён** решением PO: Product — сигнал, не фильтр. **S15B-4a — selected Product как сигнал в общем candidate set, без relevance-порядка — CLOSED** (`v0.0.58`, `docs/slices/s15b4a-product-as-signal/SLICE_CONTRACT.md`). **S15B-4b — Search «По соответствию» (relevance) как режим по умолчанию — CLOSED** (`v0.0.59`, `docs/slices/s15b4b-relevance-sort/SLICE_CONTRACT.md`): детерминированные уровни L1/L2/L3, допуск E1 не изменён. **Search sorting control UX refresh — CLOSED** (`v0.0.60`, `docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md`). **S15B закрыт.** **S15C / D0 — Search Demand Events — CLOSED** (`v0.0.61`, `docs/slices/s15c-d0-search-demand-events/SLICE_CONTRACT.md`): внутренние best-effort события осознанных поисков без идентификаторов и гео. **Деплой-предусловие (организационное, не гарантия кода):** запись `organic` в боевом окружении (`SEARCH_EVENTS_ORIGIN=organic`) остаётся выключенной, пока ежедневная операторская очистка (`pnpm search-events:purge`) не настроена во внешнем планировщике и не проверена; фактическое хранение = 90 дней + интервал очистки при успешном выполнении. События `dev` / `test` / `synthetic` — не реальный спрос. **Дальше** — «Local readiness track» ниже (решение PO 2026-10-07); D1 и AI не начаты, AI Input и AI-модерация отложены; fuzzy — позже.
    **Search sorting control UX refresh — финальный дизайн (PO, 2026-10-06; реализован в `v0.0.60`):** один компактный inline-ряд ниже чипов над выдачей; весь ряд — один dropdown-триггер (иконка-слайдеры / «По умолчанию» или критерий + текущая стрелка / индикатор); список из четырёх пунктов («По умолчанию» — relevance без direction, «По цене», «По расстоянию», «По актуальности») закрывается после выбора; активный явный пункт показывает противоположное направление, неактивный — естественное; отдельной кнопки сброса нет; accessible names различают состояние и действие.
-3. S15B — Search System revision; раскладывается на малые vertical slices после аудита актуального кода.
-4. Только после стабилизации семантики S15B — S15C / D0 Search Demand Events.
-5. Начать production-like накопление demand-данных.
-6. Параллельно накоплению — launch-critical AI Input / AI-модерация.
-7. D1 / internal demand validation, когда появятся данные.
-8. Динамические чипы Search Home — готовые к запуску только по readiness-gate популярные **canonical Product** чипы,
-   ≤5, curated fallback.
-9. Затем остальной Discovery / Demand / Operations / commercial readiness по зависимостям.
+3. ~~S15B — Search System revision~~ — **CLOSED** (`v0.0.54`–`v0.0.60`).
+4. ~~S15C / D0 Search Demand Events~~ — **CLOSED** (`v0.0.61`).
+5. **Local readiness track (решение PO 2026-10-07).** Цель — продолжать разработку без платной инфраструктуры; это **не** запуск пилота, **не** разрешение публичного запуска без AI и **не** изменение границ Seller Change Set (ручной ввод или AI-предложения → Seller Change Set → подтверждение продавцом → Offer). Порядок:
+   - **R1 — Clean local bootstrap verification** (`docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md`, APPROVED 2026-10-07): свежий checkout, изолированные БД и хранилище фото, секреты, миграции, Production KB, чистый bootstrap отдельно от demo seed, production-smoke ручного пути Seller → Buyer, воспроизводимая инструкция и evidence.
+   - **R2 — Backup и restore** PostgreSQL и фото Offer с реальной локальной проверкой восстановления (контракт — после R1).
+   - **R3 — Воспроизводимая подготовка развёртывания** без покупки и создания хостинга (контракт — после R2).
+   - **R4 — Следующий полезный non-AI product slice** из существующего плана: агент предлагает PO кандидата на решение; до решения не выбран и не начинается.
+6. **Отложено** (решение PO 2026-10-07): AI Input (stage 7), AI-модерация (stage 8), любая платная инфраструктура (хостинг, GPU, SMS-провайдер). Правило запуска PO 2026-09-25 не меняется: публичный запуск без актуальности и без AI-ввода/AI-модерации не проводится.
+7. **Data-gated:** production-like накопление demand начнётся только в реальном окружении; запись `organic` остаётся выключенной до настройки и проверки ежедневного `pnpm search-events:purge`; события `dev` / `test` / `synthetic` — не спрос. D1 / internal demand validation и динамические чипы Search Home (readiness-gate, ≤5 canonical Product, curated fallback) ждут данных. Остальной Discovery / Demand / Operations / commercial readiness — по зависимостям.
+8. **Не запланировано и не добавляется этим решением** (нужны отдельные решения PO до допуска реальных пользователей): настоящая аутентификация / доставка OTP, защита от злоупотреблений, юридические тексты, объём пилота; операторская доставка OTP, allowlist, оповещения о free-title карточках и прочие pilot-функции.
 
 Старая `6F` (отдельная модель «нормализованный сырой запрос + время») **снята до реализации**: её законная цель
 переходит в S15C/D0 после S15B, чтобы события фиксировали итоговую canonical / unresolved / zero-result семантику.
@@ -59,7 +61,7 @@
 
 ## Последний verified product checkpoint
 
-- tag: `v0.0.55-card-editor-suggestion-scroll`; checkpoint commit `ff8f08e`; merged-main CI run `37347918337` green; предыдущие `v0.0.54-catalog-suggestion-relevance` (`b3432e4`), `v0.0.53-catalog-runtime-loop` (`c0d1749`), `v0.0.52-production-kb-importer-v1` (`5b21710`);
+- tag: `v0.0.61-search-demand-events`; checkpoint commit `0232c2d`; merged-main CI run `37527531918` green; предыдущие `v0.0.60-search-sorting-control`, `v0.0.59-search-relevance-default`, `v0.0.58-product-as-search-signal`, `v0.0.57-buyer-autocomplete`, `v0.0.56-search-known-zero`, `v0.0.55-card-editor-suggestion-scroll` (`ff8f08e`), `v0.0.54-catalog-suggestion-relevance` (`b3432e4`), `v0.0.53-catalog-runtime-loop` (`c0d1749`), `v0.0.52-production-kb-importer-v1` (`5b21710`);
 - до него закрыты: Stage 6 Rev 3 (`v0.0.51-search-sort-rev3`), 6B–6D (`v0.0.48`–`v0.0.50`), 5A
   (`v0.0.47-search-visibility-without-coordinates`), `v0.0.46-search-sort-distance` и более ранние checkpoints;
 - **этап 1 закрыт**: `offer-photos`, `point-contacts-hours`, `seller-showcase-editor`, `operator-post-check`, Motion,
@@ -205,11 +207,11 @@ checkpoint tag `v0.0.51-search-sort-rev3` создаётся на merge-комм
 перенумеровываются и не задают очередность. **Фактический ближайший порядок единственный** (решение PO 2026-10-05, см.
 «Verified base и ближайшая последовательность»):
 
-`v0.0.53` (runtime loop закрыт) → S15B → S15C/D0 → production-like accumulation →
-AI Input / AI-модерация (пока копятся данные) → D1 / readiness → canonical Product чипы.
+`v0.0.61` (S15B и S15C/D0 закрыты) → Local readiness track R1 → R2 → R3 → R4 (предложение PO) →
+D1 / readiness и canonical Product чипы при появлении данных; AI Input / AI-модерация отложены (PO 2026-10-07).
 
-Stages 7, 8, 9 (AI Input, AI-модерация, S14) стоят в таблице по историческим номерам; AI Input и AI-модерация идут по
-порядку выше, S14 — среди «остального Discovery» после него. Перескочить этот порядок можно только после отдельного
+Stages 7, 8, 9 (AI Input, AI-модерация, S14) стоят в таблице по историческим номерам; AI Input и AI-модерация
+**отложены** (см. «Local readiness track»), S14 — среди «остального Discovery». Перескочить этот порядок можно только после отдельного
 Product Owner decision и обновления этого файла.
 
 | # | Stage | Owner |
@@ -226,13 +228,13 @@ Product Owner decision и обновления этого файла.
 | 6 | Поиск, сортировка Rev 3 — **один vertical slice**: «Расстояние / Цена / Актуальность» с направлением, public API, порядок, anchored popover; заменяет отклонённую Rev 2 — **закрыт** (PR #90, manual acceptance PASS) | Issue #12, `docs/slices/search-sort-rev3/SLICE_CONTRACT.md` |
 | 6F | ~~Search Query Log~~ — **снята до реализации** (2026-10-05); цель переходит в S15C/D0 после S15B | — |
 | 6G | ~~Динамические популярные запросы~~ — убрана из ближней очереди; переосмыслена как readiness-gated популярные canonical Product чипы (≤5, curated fallback) после S15C/D0/D1; сырые/unresolved запросы Products не становятся | future Slice Contract |
-| 7 | AI Input — видео / фото / голос → черновики карточек | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
-| 8 | AI-модерация (спорное — человеку) | `FEATURE_MAP.md` / future Slice Contract |
+| 7 | AI Input — видео / фото / голос → черновики карточек — **отложен** (PO 2026-10-07) | `FEATURE_MAP.md` S17–S20 / future Slice Contracts |
+| 8 | AI-модерация (спорное — человеку) — **отложена** (PO 2026-10-07) | `FEATURE_MAP.md` / future Slice Contract |
 | 9 | S14 — Discovery / `Для вас` | Feature Map |
 | 10A | ~~S15A — Catalog bootstrap~~ — **закрыт** (Production KB v1, `v0.0.52-production-kb-importer-v1`) | `docs/slices/production-kb-importer/SLICE_CONTRACT.md` |
 | 10A+ | ~~Catalog-backed Seller → Buyer runtime loop~~ — **закрыт** (`v0.0.53-catalog-runtime-loop`, PR #93, manual acceptance PASS) | `docs/slices/catalog-runtime-loop/SLICE_CONTRACT.md` |
-| 10B | S15B — Search System revision (**S15B-1 catalog suggestion relevance — закрыт, `v0.0.54`**; дальше малые vertical slices после аудита кода): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
-| 10C | S15C — Demand Data Foundation (после стабилизации S15B; включает цель старой 6F): D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
+| 10B | S15B — Search System revision — **закрыт** (`v0.0.54`–`v0.0.60`): каталоговый `product_id`, suggestions, resolved search отдельно от seller-title fallback, known-zero отдельно от unknown | `SEARCH_SYSTEM_SPEC_v0.1.md` / future contract revisions |
+| 10C | S15C — Demand Data Foundation (**D0 закрыт, `v0.0.61`**; D1 data-gated; включает цель старой 6F): D0/D1 и только необходимая база D2; internal/privacy-safe, без seller Demand UI | Issue #55 / `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` |
 | 11 | S16 — Operations (остаток после этапа 1) + MVP boundary review + Demand readiness assessment | Feature Map |
 | 11A | Backoffice foundation planning: Requirement Inventory → Operations Map → minimum roles/Permissions → Domain states/invariants; first operational target = Catalog Operations | `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` |
 | 11B | Commercial & Monetization Readiness: утвердить domain semantics/operations до Backoffice IA/UX, без Billing/Boost implementation | `KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md` |

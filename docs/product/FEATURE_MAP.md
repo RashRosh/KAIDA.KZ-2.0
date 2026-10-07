@@ -63,8 +63,8 @@ Parent sources для будущих cross-cutting workstreams:
 | S13 | Interests | Buyer отмечает Product как интересующий | S2, S6 | MVP | CLOSED |
 | S14 | Discovery | Buyer видит Offers по явно указанным интересам | S7, S13 | MVP | PLANNED |
 | S15A | Catalog bootstrap | Утверждённое RU-ядро стартового каталога проходит staging, merge и контролируемый import без дублей | S6 + PO-approved rows | Stage 10 | CLOSED (Production KB v1, `v0.0.52-production-kb-importer-v1`) |
-| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A (установленная Production KB v1), S7, S9; идёт после Catalog-backed Seller → Buyer runtime loop | Stage 10 | PLANNED |
-| S15C | Demand Data Foundation | KAIDA собирает conscious canonical/unresolved/zero-result demand и privacy-safe internal aggregates | S15B | Stage 10 | PLANNED |
+| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A (установленная Production KB v1), S7, S9; идёт после Catalog-backed Seller → Buyer runtime loop | Stage 10 | CLOSED (`v0.0.54`–`v0.0.60`) |
+| S15C | Demand Data Foundation | KAIDA собирает conscious canonical/unresolved/zero-result demand и privacy-safe internal aggregates | S15B | Stage 10 | PARTIAL: D0 CLOSED (`v0.0.61`); D1 и далее — data-gated, не начаты |
 | S16 | Operations | Оператор может отключить ошибочный Offer/Seller; первая часть — снятие карточки по факту публикации | S7 | Этап 1 (снятие) / MVP | PLANNED |
 | S17 | AI Input | Свободный текст предлагает Seller Change Set | S12 | После этапа 1 | PLANNED |
 | S18 | AI Input | Voice предлагает Seller Change Set | S17 | После этапа 1 | PLANNED |
