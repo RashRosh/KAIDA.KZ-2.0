@@ -3,8 +3,9 @@ import type { BuyerLocation } from '../contracts/buyer-location.contract';
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
 
-// S15B-4b: how well a candidate answers the query — 1 Product, 2 whole title words, 3 everything else eligible.
-export type SearchMatchLevel = 1 | 2 | 3;
+// S15B-4b + search-word-forms: how well a candidate answers the query — 1 Product, 2 whole title words,
+// 3 whole words or reviewed word forms, 4 everything else eligible.
+export type SearchMatchLevel = 1 | 2 | 3 | 4;
 
 export type SearchRankingCandidate = {
   offer: SearchOffer;
@@ -98,7 +99,7 @@ export function rankSearchOfferCandidates(
   ranked.sort((a, b) => {
     if (options.sort === 'relevance') {
       // Level first, then the existing actuality order (fresher first → stable Offer.id), exactly as the `actuality` desc mode.
-      return ((a.matchLevel ?? 3) - (b.matchLevel ?? 3))
+      return ((a.matchLevel ?? 4) - (b.matchLevel ?? 4))
         || (b.lastConfirmedAt.getTime() - a.lastConfirmedAt.getTime())
         || compareId(a, b);
     }

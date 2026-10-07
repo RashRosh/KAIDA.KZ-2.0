@@ -279,3 +279,7 @@ Approved defaults (2026-09-27, written into §2):
   one.
 - f. Price must be greater than 0 (today 0 is accepted); existing offers with price 0 stay until edited.
 - g. Word matching ignores 1-letter query words.
+
+## Ревизия: search-word-forms (2026-10-07)
+
+- h. Правило слова дополнено: слово запроса подходит названию также, когда оно — **другая грамматическая форма** слова названия по проверенному словарю форм (точное равенство формы; слова вне словаря — только по префиксу, как раньше; все слова запроса обязательны; язык интерфейса не участвует). См. `docs/slices/search-word-forms/SLICE_CONTRACT.md`.

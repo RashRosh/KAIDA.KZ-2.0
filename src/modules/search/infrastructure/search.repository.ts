@@ -18,11 +18,13 @@ import {
 import { isSellerCommentTranslationEnabled } from '../../offers/translation/seller-comment-translation.config';
 import type { SearchOffer } from '../contracts/search.contract';
 import type { SearchRankingCandidate } from '../ranking/search-ranking';
+import { getWordFormDictionary } from '../word-forms/word-forms';
 
 // A read projection across the four owning modules; lifecycle and buyer-visibility semantics stay outside Search.
 // S9 private ranking metadata remains beside, never inside, the public SearchOffer payload.
 // seller-showcase-editor: Offers linked to the resolved catalog product, or whose own title has every query word as
-// the start of one of its words (words are already normalized: letters and digits only).
+// the start of one of its words or is one of the reviewed forms of a word of the title
+// (words are already normalized: letters and digits only).
 export async function findOffersByProductOrTitleWords(
   db: Database,
   match: { productIds: string[]; words: string[] },
@@ -37,9 +39,32 @@ function withPack(pack: string | null) {
   return pack === null ? {} : { pack };
 }
 
+// search-word-forms: a query word matches by prefix (as before) OR, when the reviewed dictionary knows it, when the title
+// has exactly one of the forms of its group. A word outside the dictionary matches by prefix only; every word is required.
+// No locale takes part here.
+// Cost (contract 3.6): forms are grouped by their first three letters and each group is guarded by a plain substring test
+// of that core, so the title is split into words only for rows that contain a candidate core. A title that holds a form
+// always holds the form's core, so the guard never changes the result. Forms are letters only (searchWords), safe in a
+// `{a,b}` array literal that is still passed as one bound parameter.
+function wordMatch(word: string): SQL {
+  const prefix = sql`(' ' || ${offers.titleSearch}) like ${`% ${word}%`}`;
+  const forms = getWordFormDictionary().formsOf(word);
+  if (forms === null) return prefix;
+  const byCore = new Map<string, string[]>();
+  for (const form of forms) {
+    const core = form.slice(0, 3);
+    const list = byCore.get(core);
+    if (list === undefined) byCore.set(core, [form]);
+    else list.push(form);
+  }
+  const formMatches = [...byCore].map(([core, list]) =>
+    sql`(strpos(${offers.titleSearch}, ${core}) > 0 and string_to_array(${offers.titleSearch}, ' ') && ${`{${list.join(',')}}`}::text[])`);
+  return sql`(${sql.join([prefix, ...formMatches], sql` or `)})`;
+}
+
 function titleWordsMatch(words: string[]): SQL | undefined {
   if (words.length === 0) return undefined;
-  return and(...words.map((word) => sql`(' ' || ${offers.titleSearch}) like ${`% ${word}%`}`));
+  return and(...words.map(wordMatch));
 }
 
 function productOrWords(filter: { productIds: string[]; words: string[] }): SQL {
