@@ -127,7 +127,7 @@ pnpm db:import:production-kb   # Production KB v1: 682 Products, 210 aliases, 35
 pnpm dev
 ```
 
-`pnpm db:seed` каталог не ставит и в реальное окружение не входит: там только миграции и `pnpm db:import:production-kb`. Порядок важен: импорт KB подхватывает Products seed («Баранина», «Говядина») по названию, а `pnpm db:seed` после импорта падает на `products_name_unique`.
+`pnpm db:seed` каталог не ставит и в реальное окружение не входит: там только миграции и `pnpm db:import:production-kb`. Порядок важен: импорт KB подхватывает Products seed («Баранина», «Говядина») по названию, а `pnpm db:seed` на базе, куда KB уже импортирована без seed, падает на `products_name_unique` (повторный seed после порядка seed → импорт безопасен).
 
 Приложение: `http://localhost:3000`.
 
