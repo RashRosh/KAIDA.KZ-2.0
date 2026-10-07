@@ -1,4 +1,7 @@
+import { randomBytes, randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
+import { createDatabase } from '../../src/db/client';
+import { testDatabaseUrl } from '../integration/database';
 
 // S15B-3 / S15B-4a: buyer suggestions; a selected catalog Product (`product_id`) is a signal that joins the candidate set, not a filter. «Баранина» (seed Offer) and
 // «Тунец» (Production KB v1, no Offers in any E2E flow) are the fixtures.
@@ -7,21 +10,48 @@ const LAMB = '10000000-0000-4000-8000-000000000001';
 const field = (page: Page) => page.getByLabel('Какой товар ищете?');
 
 test('the API takes a Product id as a signal: 400 for a non-uuid, a stale id falls through to the text search', async ({ request }) => {
-  const byProduct = await (await request.get(`/api/search?q=Баранина&product_id=${LAMB}`)).json();
-  expect(byProduct.resolvedProduct).toEqual({ id: LAMB, name: 'Баранина' });
-  expect(byProduct.offers.length).toBeGreaterThan(0);
-  const text = await (await request.get('/api/search?q=Баранина')).json();
-  expect(byProduct).toEqual(text);
+  // Issue #130: this test compares several separate responses, so it owns its Product and Offer. Other specs publish to the shared
+  // «Баранина» entry and delete it again while this one runs; a fixture of its own cannot change under it. Letters only in the
+  // name, a fresh one per execution (the mobile and desktop projects and parallel workers never share it); only these rows are removed.
+  const suffix = Array.from(randomBytes(8), (byte) => String.fromCharCode(97 + (byte % 26))).join('');
+  const productName = `Pbsignal ${suffix}`;
+  const productId = randomUUID();
+  const sellerId = randomUUID();
+  const locationId = randomUUID();
+  const connection = createDatabase(testDatabaseUrl());
+  try {
+    await connection.pool.query('INSERT INTO products (id,name) VALUES ($1,$2)', [productId, productName]);
+    await connection.pool.query('INSERT INTO sellers (id,display_name) VALUES ($1,$2)', [sellerId, `Pbsignal seller ${suffix}`]);
+    await connection.pool.query("INSERT INTO locations (id,seller_id,name,address_text,type) VALUES ($1,$2,$3,$4,'shop')", [locationId, sellerId, `Pbsignal point ${suffix}`, 'Pbsignal address']);
+    await connection.pool.query(
+      `INSERT INTO offers (id,product_id,seller_id,location_id,price_amount,price_currency,price_unit_code,status,last_confirmed_at,created_at,updated_at,title,title_search,card_id)
+       VALUES (gen_random_uuid(),$1,$2,$3,'1000','KZT','kg','active',now(),now(),now(),$4,lower($4),gen_random_uuid())`,
+      [productId, sellerId, locationId, productName],
+    );
 
-  expect((await request.get('/api/search?q=Баранина&product_id=not-a-uuid')).status()).toBe(400);
-  const unknown = await request.get('/api/search?q=Баранина&product_id=20000000-0000-4000-8000-0000000000aa');
-  expect(unknown.status()).toBe(200);
-  expect(await unknown.json()).toEqual(text);
+    const q = encodeURIComponent(productName);
+    const byProduct = await (await request.get(`/api/search?q=${q}&product_id=${productId}`)).json();
+    expect(byProduct.resolvedProduct).toEqual({ id: productId, name: productName });
+    expect(byProduct.offers.length).toBeGreaterThan(0);
+    const text = await (await request.get(`/api/search?q=${q}`)).json();
+    expect(byProduct).toEqual(text);
 
-  const post = await request.post('/api/search', { data: { q: 'Баранина', productId: LAMB, buyerLocation: { latitude: 43.25, longitude: 76.95 } } });
-  expect(post.status()).toBe(200);
-  expect((await post.json()).resolvedProduct).toEqual({ id: LAMB, name: 'Баранина' });
-  expect((await request.post('/api/search', { data: { q: 'Баранина', productId: 'nope', buyerLocation: { latitude: 43.25, longitude: 76.95 } } })).status()).toBe(400);
+    expect((await request.get(`/api/search?q=${q}&product_id=not-a-uuid`)).status()).toBe(400);
+    const unknown = await request.get(`/api/search?q=${q}&product_id=20000000-0000-4000-8000-0000000000aa`);
+    expect(unknown.status()).toBe(200);
+    expect(await unknown.json()).toEqual(text);
+
+    const post = await request.post('/api/search', { data: { q: productName, productId, buyerLocation: { latitude: 43.25, longitude: 76.95 } } });
+    expect(post.status()).toBe(200);
+    expect((await post.json()).resolvedProduct).toEqual({ id: productId, name: productName });
+    expect((await request.post('/api/search', { data: { q: productName, productId: 'nope', buyerLocation: { latitude: 43.25, longitude: 76.95 } } })).status()).toBe(400);
+  } finally {
+    await connection.pool.query('DELETE FROM offers WHERE seller_id = $1', [sellerId]);
+    await connection.pool.query('DELETE FROM locations WHERE seller_id = $1', [sellerId]);
+    await connection.pool.query('DELETE FROM sellers WHERE id = $1', [sellerId]);
+    await connection.pool.query('DELETE FROM products WHERE id = $1', [productId]);
+    await connection.pool.end();
+  }
 });
 
 test('suggestions appear from two letters; choosing one searches by that Product; an edit returns to the text search', async ({ page }) => {
