@@ -1,0 +1,424 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opening hours — final visual preview</title>
+<link rel="stylesheet" href="/node_modules/@fontsource/roboto/400.css"><link rel="stylesheet" href="/node_modules/@fontsource/roboto/500.css"><link rel="stylesheet" href="/node_modules/@fontsource/roboto/700.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/400.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/500.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/600.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/700.css">
+<link rel="stylesheet" href="/src/app/globals.css"><link rel="stylesheet" href="/src/app/seller/kaida.css"><link rel="stylesheet" href="/src/app/seller/kaida-app.css"><style>
+body{margin:0;background:#e9e5ec;font-family:system-ui,sans-serif;color:#19161b}
+h1.t{font:600 20px/26px system-ui;margin:16px 16px 4px} .lead{margin:0 16px 12px;font:14px/20px system-ui;color:#4d474f;max-width:760px}
+h2{font:600 16px/22px system-ui;margin:24px 16px 8px;max-width:760px}
+.row{display:flex;flex-wrap:wrap;gap:16px;padding:0 16px 8px;align-items:flex-start}
+.pv{margin:0} .pv figcaption{font:600 13px/18px system-ui;margin:0 0 6px;max-width:340px} .pv figcaption small{display:block;font-weight:400;color:#4d474f}
+.pv-screen{background:#faf8fb;border:1px solid #c9c3cc;border-radius:12px;overflow:hidden}
+.kaida .plaque{position:absolute;left:6px;bottom:6px;background:#fff;border:1px solid var(--line-control);border-radius:10px;padding:0 6px;font:600 11px/16px var(--sans);color:var(--ink)}
+.kaida .linkcard .ct{position:relative;z-index:1}
+.kaida .h1{font:700 22px/28px var(--display)}
+.oh{margin-top:2px}
+.oh-status{display:flex;align-items:flex-start;gap:6px;margin:0;font:600 13px/18px var(--sans);font-variant-numeric:tabular-nums;color:var(--ink)}
+.oh-status svg{width:16px;height:16px;flex:none;margin-top:1px}
+.oh-status[data-state='open']{color:var(--fresh)} .oh-status[data-state='closing']{color:var(--stale)} .oh-status[data-state='closed']{color:var(--error)}
+.oh-muted{color:var(--ink2);font-weight:400}
+.oh-rows{list-style:none;margin:10px 0 0;padding:0;font:400 13px/18px var(--sans);font-variant-numeric:tabular-nums}
+.oh-rows li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 12px;padding:6px 0;border-top:1px solid var(--line)}
+.oh-day{color:var(--ink2)} .oh-times{color:var(--ink);text-align:right;margin-left:auto}
+.oh-rows .is-today .oh-day,.oh-rows .is-today .oh-times{font-weight:700;color:var(--ink)}
+.oh-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.oh-today{display:inline-block;margin-left:2px;border:1px solid var(--line-control);border-radius:9px;padding:0 6px;font:600 11px/16px var(--sans);color:var(--ink)}
+.oh-int{white-space:nowrap}
+.oh-off,.oh-next{color:var(--ink2);font-weight:400}
+</style></head><body>
+<h1 class="t">Режим работы: карточка выдачи и страница предложения — макет для утверждения (не приложение)</h1>
+<p class="lead">Статический прототип на настоящих стилях и шрифтах приложения (Roboto, Geologica). Карточка выдачи показывает только строку статуса; полное расписание — на странице предложения, развёрнуто и со сгруппированными днями. Плашка «1 день» на фото — актуальность Offer, она не связана со строкой режима работы.</p>
+<h2>A · Карточка выдачи: только строка статуса, на всю ширину (RU, 360 px). Кнопки расписания на карточке нет</h2><div class="row"><figure class="pv"><figcaption>Открыто · пн 11:00</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 18:00</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Закрывается · пн 17:20</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closing"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Закрывается в 18:00</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Закрыто, откроется завтра · пн 19:00</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, откроется в 9:00 ВТ</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Перерыв · пн 13:30</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, откроется в 14:00</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Ночная смена · вс 22:00, закрытие в ПН 3:00<small>показан реальный день закрытия по времени точки</small></figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 3:00 ПН</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Ночная смена · пн 01:30 (закрытие сегодня, дня нет)</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closing"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Закрывается в 3:00</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Круглосуточно (все 7 дней)</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто круглосуточно</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Все дни выходные (открытия нет в принципе)</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, рабочих дней нет</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>Нет данных (защитный случай)</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status oh-muted">Режим работы не указан</p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure></div>
+<h2>B · Страница предложения: расписание раскрыто, одинаковые соседние дни сгруппированы (RU, 360 px). Сегодня отмечен внутри группы</h2><div class="row"><figure class="pv"><figcaption>Будни + пятница короче + выходные · сегодня среда (внутри группы «ПН–ЧТ», группа выделена жирным)</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 18:00</span></p><ul class="oh-rows" aria-label="Режим работы"><li class="is-today" aria-current="date"><span class="oh-day">ПН–ЧТ<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li><span class="oh-day">ПТ</span><span class="oh-times"><span class="oh-int">13:00–18:00</span></span></li><li><span class="oh-day">СБ–ВС</span><span class="oh-times"><span class="oh-off">выходной</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure><figure class="pv"><figcaption>Перерыв в будни, суббота короче · сегодня пятница (последний день группы)</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, откроется в 14:00</span></p><ul class="oh-rows" aria-label="Режим работы"><li class="is-today" aria-current="date"><span class="oh-day">ПН–ПТ<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-int">9:00–13:00</span>, <span class="oh-int">14:00–18:00</span></span></li><li><span class="oh-day">СБ</span><span class="oh-times"><span class="oh-int">9:00–14:00</span></span></li><li><span class="oh-day">ВС</span><span class="oh-times"><span class="oh-off">выходной</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure><figure class="pv"><figcaption>Ночные смены: пятница–суббота одинаковые, воскресенье другое · сегодня воскресенье, 22:00</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 3:00 ПН</span></p><ul class="oh-rows" aria-label="Режим работы"><li><span class="oh-day">ПН–ЧТ</span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li><span class="oh-day">ПТ–СБ</span><span class="oh-times"><span class="oh-int">18:00–2:00</span></span></li><li class="is-today" aria-current="date"><span class="oh-day">ВС<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-int">20:00–3:00</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure><figure class="pv"><figcaption>Круглосуточные и выходные группы вперемешку · сегодня суббота</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 16:00</span></p><ul class="oh-rows" aria-label="Режим работы"><li><span class="oh-day">ПН–ВТ</span><span class="oh-times">Круглосуточно</span></li><li><span class="oh-day">СР–ПТ</span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li class="is-today" aria-current="date"><span class="oh-day">СБ<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-int">10:00–16:00</span></span></li><li><span class="oh-day">ВС</span><span class="oh-times"><span class="oh-off">выходной</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure><figure class="pv"><figcaption>Круглосуточно все 7 дней — одна строка · сегодня вторник</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто круглосуточно</span></p><ul class="oh-rows" aria-label="Режим работы"><li class="is-today" aria-current="date"><span class="oh-day">ПН–ВС<span class="oh-sr">, сегодня</span></span><span class="oh-times">Круглосуточно</span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure><figure class="pv"><figcaption>Все дни выходные — одна строка · сегодня четверг</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, рабочих дней нет</span></p><ul class="oh-rows" aria-label="Режим работы"><li class="is-today" aria-current="date"><span class="oh-day">ПН–ВС<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-off">выходной</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure></div>
+<h2>C · Казахский: карточка и страница предложения (360 px)</h2><div class="row"><figure class="pv"><figcaption>KK · карточка · закрыто, ВТ</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Қой еті, жауырын</a></h3>
+        <p class="c c2" style="font-weight:500">1 келі</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ келі</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p>
+        <p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Жабық, ДС 9:00 ашылады</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>KK · карточка · ночь, день закрытия</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Қой еті, жауырын</a></h3>
+        <p class="c c2" style="font-weight:500">1 келі</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ келі</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p>
+        <p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>ДС 3:00 дейін ашық</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>KK · страница предложения · будни, сегодня сәрсенбі</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Қой еті, жауырын</h1>
+    <p class="ts c2" style="margin:0">1 келі</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ келі</span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>18:00 дейін ашық</span></p><ul class="oh-rows" aria-label="Жұмыс уақыты"><li class="is-today" aria-current="date"><span class="oh-day">ДС–БС<span class="oh-sr">, бүгін</span></span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li><span class="oh-day">ЖМ</span><span class="oh-times"><span class="oh-int">13:00–18:00</span></span></li><li><span class="oh-day">СН–ЖС</span><span class="oh-times"><span class="oh-off">демалыс</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ЖК</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button>
+  </article></div></div></figure><figure class="pv"><figcaption>KK · страница предложения · ночные смены, сегодня жексенбі</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Қой еті, жауырын</h1>
+    <p class="ts c2" style="margin:0">1 келі</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ келі</span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>ДС 3:00 дейін ашық</span></p><ul class="oh-rows" aria-label="Жұмыс уақыты"><li><span class="oh-day">ДС–БС</span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li><span class="oh-day">ЖМ–СН</span><span class="oh-times"><span class="oh-int">18:00–2:00</span></span></li><li class="is-today" aria-current="date"><span class="oh-day">ЖС<span class="oh-sr">, бүгін</span></span><span class="oh-times"><span class="oh-int">20:00–3:00</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ЖК</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button>
+  </article></div></div></figure></div>
+<h2>D · Узкая ширина 320 px (RU и KK)</h2><div class="row"><figure class="pv"><figcaption>RU · карточка · самый длинный статус</figcaption>
+    <div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, откроется в 9:00 ВС</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>KK · карточка · закрыто, ЖС</figcaption>
+    <div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Қой еті, жауырын</a></h3>
+        <p class="c c2" style="font-weight:500">1 келі</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ келі</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p>
+        <p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+      </div>
+    </div>
+    <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Жабық, ЖС 9:00 ашылады</span></p></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>KK · страница предложения · смешанное расписание · сегодня сенбі</figcaption>
+    <div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Қой еті, жауырын</h1>
+    <p class="ts c2" style="margin:0">1 келі</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ келі</span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>16:00 дейін ашық</span></p><ul class="oh-rows" aria-label="Жұмыс уақыты"><li><span class="oh-day">ДС–СС</span><span class="oh-times">Тәулік бойы</span></li><li><span class="oh-day">СР–ЖМ</span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li class="is-today" aria-current="date"><span class="oh-day">СН<span class="oh-sr">, бүгін</span></span><span class="oh-times"><span class="oh-int">10:00–16:00</span></span></li><li><span class="oh-day">ЖС</span><span class="oh-times"><span class="oh-off">демалыс</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ЖК</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button>
+  </article></div></div></figure><figure class="pv"><figcaption>RU · страница предложения · ночные смены · сегодня пятница</figcaption>
+    <div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 2:00</span></p><ul class="oh-rows" aria-label="Режим работы"><li><span class="oh-day">ПН–ЧТ</span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li class="is-today" aria-current="date"><span class="oh-day">ПТ–СБ<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-int">18:00–2:00</span></span></li><li><span class="oh-day">ВС</span><span class="oh-times"><span class="oh-int">20:00–3:00</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure></div>
+<h2>E · Крупный шрифт: блок режима работы увеличен ×1,5 и ×2 при ширине 360 px (остальная карточка без изменений)</h2><div class="row"><figure class="pv"><figcaption>×1,5 · RU · карточка · закрыто, ВТ</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+        <p class="c c2" style="font-weight:500">1 кг</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ кг</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p>
+        <p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+      </div>
+    </div>
+    <div style="zoom:1.5"><div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Закрыто, откроется в 9:00 ВТ</span></p></div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>×2 · KK · карточка · закрыто, ДС</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative">
+    <div style="display:flex;gap:12px">
+      <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Қой еті, жауырын</a></h3>
+        <p class="c c2" style="font-weight:500">1 келі</p>
+        <div><span class="pr">4 200 ₸</span> <span class="c2" style="font-size:14px">/ келі</span></div>
+        <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p>
+        <p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+      </div>
+    </div>
+    <div style="zoom:2"><div class="oh" data-testid="opening-hours"><p class="oh-status" data-state="closed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Жабық, ДС 9:00 ашылады</span></p></div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#" aria-label="Маршрут"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+  </article></div></div></figure><figure class="pv"><figcaption>×1,5 · RU · страница предложения · будни</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Баранина, лопатка</h1>
+    <p class="ts c2" style="margin:0">1 кг</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div>
+      <div class="oh" data-testid="opening-hours"><div style="zoom:1.5"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>Открыто до 18:00</span></p></div><ul class="oh-rows" style="zoom:1.5" aria-label="Режим работы"><li class="is-today" aria-current="date"><span class="oh-day">ПН–ЧТ<span class="oh-sr">, сегодня</span></span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li><span class="oh-day">ПТ</span><span class="oh-times"><span class="oh-int">13:00–18:00</span></span></li><li><span class="oh-day">СБ–ВС</span><span class="oh-times"><span class="oh-off">выходной</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ИП</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button>
+  </article></div></div></figure><figure class="pv"><figcaption>×2 · KK · страница предложения · ночные смены</figcaption>
+    <div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:200px;border-radius:0;align-items:flex-end"><span class="ic lg i-logo" style="position:absolute;inset:0;margin:auto;width:56px;height:56px;opacity:.35"></span><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Қой еті, жауырын</h1>
+    <p class="ts c2" style="margin:0">1 келі</p>
+    <div><span class="pr-lg">4 200 ₸</span> <span class="c2">/ келі</span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px">
+      <div style="display:flex;gap:10px"><span class="ic pt i-pin"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div>
+      <div class="oh" data-testid="opening-hours"><div style="zoom:2"><p class="oh-status" data-state="open"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg><span>ДС 3:00 дейін ашық</span></p></div><ul class="oh-rows" style="zoom:2" aria-label="Жұмыс уақыты"><li><span class="oh-day">ДС–БС</span><span class="oh-times"><span class="oh-int">9:00–18:00</span></span></li><li><span class="oh-day">ЖМ–СН</span><span class="oh-times"><span class="oh-int">18:00–2:00</span></span></li><li class="is-today" aria-current="date"><span class="oh-day">ЖС<span class="oh-sr">, бүгін</span></span><span class="oh-times"><span class="oh-int">20:00–3:00</span></span></li></ul></div>
+      <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div>
+    </div>
+    <p class="c" style="display:flex;align-items:center;gap:6px;margin:0"><span class="ic sm c2 i-store"></span>Асыл Ет, ЖК</p>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button>
+  </article></div></div></figure></div>
+</body></html>
