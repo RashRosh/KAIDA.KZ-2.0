@@ -22,6 +22,7 @@ Parent sources для будущих cross-cutting workstreams:
   `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
 - Backoffice planning/decomposition → `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
 - Demand product/readiness → `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`.
+- AI / semantic technology candidates → `docs/product/AI_TECH_CANDIDATES.md`.
 
 Они задают direction и dependencies, но не являются Slice Contracts и не разрешают implementation.
 
@@ -274,6 +275,12 @@ https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4.
 AI — способ сформировать черновики карточек (Seller Change Set). AI не пишет Offer напрямую: продавец проверяет
 черновики и явно отправляет их.
 
+Technology choice is deliberately deferred. `docs/product/AI_TECH_CANDIDATES.md` tracks benchmark candidates, currently
+including EmbeddingGemma 2 for local multimodal/semantic Product candidate generation and Jev/System-One-like typed
+decision models for shortlist resolution / confidence gates. These are **candidates, not dependencies**. External
+providers that process data outside Kazakhstan are production-ineligible unless the data-residency constraint is
+satisfied; they may be evaluated only on synthetic/non-production data.
+
 ### Search learning
 
 S15 теперь является workstream из трёх частей:
@@ -315,6 +322,11 @@ collisions, idempotency, rollback/correction и пакетный acceptance repo
 становится финальной taxonomy автоматически. Отложенная KK proofreading не блокирует RU bootstrap.
 
 #### Search System target
+
+Semantic Product resolution is a future benchmark path, not an automatic replacement for the current catalog/alias/fuzzy
+semantics. If existing resolution quality becomes the limiting factor, evaluate the candidate stack in
+`docs/product/AI_TECH_CANDIDATES.md` against the current deterministic baseline before adding embeddings, rerankers or
+`pgvector`.
 
 `docs/product/SEARCH_SYSTEM_SPEC_v0.1.md` — target product source, не действующий Slice Contract. Перед S15B его нужно
 сверить с текущим кодом и closed S0/S6/S7/S9/S13, учесть историю ветки `docs/search-system-spec-v0.1` и оформить
