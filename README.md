@@ -94,6 +94,8 @@ SQLite/mock database не заменяет PostgreSQL integration environment. D
 
 ## Локальный запуск
 
+Требуется Node.js 24.x (`.node-version`, `engines`), Docker с Compose и Git. Проверка запуска **с нуля** в изолированном окружении (чистая БД без вымышленных данных, production build, smoke ручного пути) — `docs/ops/LOCAL_BOOTSTRAP.md`.
+
 ```bash
 git clone https://github.com/RashRosh/KAIDA.KZ-2.0.git
 cd KAIDA.KZ-2.0
@@ -120,9 +122,12 @@ IDENTITY_OTP_HMAC_SECRET_HEX=<64 hex characters>
 ```bash
 docker compose up -d --wait
 pnpm db:migrate
-pnpm db:seed
+pnpm db:import:production-kb   # Production KB v1: 682 Products, 210 aliases, 35 categories (идемпотентно)
+pnpm db:seed                   # только demo: вымышленные продавец, точка и две карточки
 pnpm dev
 ```
+
+`pnpm db:seed` каталог не ставит и в реальное окружение не входит: там только миграции и `pnpm db:import:production-kb`.
 
 Приложение: `http://localhost:3000`.
 

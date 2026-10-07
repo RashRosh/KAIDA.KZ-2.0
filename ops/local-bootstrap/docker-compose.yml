@@ -1,0 +1,25 @@
+# R1 local bootstrap check: a throwaway PostgreSQL, fully separate from the development stack in the repository root.
+# The fixed project name below keeps every resource (container, network, volume) apart from the default compose project,
+# so `down -v` on THIS file only removes what this file created. Never run it with another project name.
+name: kaida-bootstrap-check
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: kaida_bootstrap
+      POSTGRES_PASSWORD: bootstrap_local_only
+      POSTGRES_DB: kaida_bootstrap
+    ports:
+      # Never 5432 (development stack). Override with KAIDA_BOOTSTRAP_DB_PORT only if 55432 is taken.
+      - "127.0.0.1:${KAIDA_BOOTSTRAP_DB_PORT:-55432}:5432"
+    volumes:
+      - bootstrap_pg:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaida_bootstrap -d kaida_bootstrap"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  bootstrap_pg:
