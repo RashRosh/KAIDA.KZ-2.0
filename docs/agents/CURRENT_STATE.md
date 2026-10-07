@@ -11,12 +11,12 @@
 
 ## Current task
 
-Решение PO 2026-10-07: «Local readiness track» (`EXECUTION_PLAN.md`, пункт 5). **R1 — Clean local bootstrap verification**: контракт `docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md` APPROVED (PO 2026-10-07). План и контракт — docs PR с ветки `docs/local-bootstrap-plan`; реализация R1 — отдельная ветка после его слияния.
+Решение PO 2026-10-07: «Local readiness track» (`EXECUTION_PLAN.md`, пункт 5). **R1 — Clean local bootstrap verification**: контракт `docs/slices/local-bootstrap-verification/SLICE_CONTRACT.md` APPROVED (PO 2026-10-07). Docs PR #123 слит (`main` `801370193c25571040de53139ccba4a1813b469c`). Реализация R1 — ветка `slice/local-bootstrap-verification` (runbook `docs/ops/LOCAL_BOOTSTRAP.md`, `ops/local-bootstrap/`, README): готова к приёмке PO, не слита, не тегирована.
 
 ## Next action
 
-1. Docs PR (план + контракт) → merge после green checks и scope audit.
-2. Реализация R1 на отдельной ветке → итоговый отчёт PO → STOP на приёмке (R1 не мержить и не тегировать до PASS).
+1. PO принимает отчёт R1. До явного PASS R1 не мержить и не тегировать.
+2. После PASS: implementation PR → аудит итогового дерева → merge на green → merged-main CI → тег → минимальный closing docs PR → STOP.
 3. Далее по плану: R2 (backup/restore PostgreSQL + фото), R3 (подготовка развёртывания без хостинга), R4 (агент предлагает следующий non-AI slice PO).
 
 ## Current constraints
