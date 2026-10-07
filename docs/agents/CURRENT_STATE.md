@@ -11,11 +11,11 @@
 
 ## Current task
 
-Нет активного slice. R1 закрыт. Следующий запланированный slice — R2 (backup/restore PostgreSQL **и фото**, проверка в изолированном окружении); контракта нет, не начат.
+R2 (backup/restore БД и фото): контракт `docs/slices/backup-restore/SLICE_CONTRACT.md` — подход утверждён PO 2026-10-07; контракт-PR на ветке `docs/r2-backup-restore-contract`. Реализации нет.
 
 ## Next action
 
-1. PO отдельно решает подготовку контракта R2. Без команды PO ничего не начинать.
+1. После merge контракт-PR — реализация R2 на ветке `slice/backup-restore` строго в рамках контракта; до ручной приёмки PO не merge и не tag.
 2. Далее по `EXECUTION_PLAN.md`: R2 → R3 → R4 (агент предлагает следующий non-AI slice PO). UX/UI-обсуждение собрано отдельно для позднего pipeline review и в R-трек не входит.
 
 ## Current constraints
