@@ -11,13 +11,13 @@
 
 ## Current task
 
-Нет активной реализации. Блок UX/search, пункты 1 (word forms), 2 (opening hours) и 3 (price and packaging) приняты PO и закрыты. Следующий — пункт 4 (search empty states): контракт не начат, ждёт отдельного поручения PO.
+Пункт 4 блока UX/search (search empty states): Slice Contract rev 2 утверждён PO (2026-10-08), идёт реализация на ветке `feat/search-empty-states`; сначала contract PR. Приёмка PO — вручную, до неё не мержить и не тегировать.
 
 Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms и opening hours ждут KK-вычитки (отдельное дело; price and packaging новых слов не добавил).
 
 ## Next action
 
-1. По поручению PO подготовить Slice Contract пункта 4 блока UX/search (search empty states). Порядок блока: ~~word forms~~ → ~~opening hours~~ → ~~price and packaging~~ → empty states → typo suggestions → post-publication buyer preview → R3 (`EXECUTION_PLAN.md`).
+1. Contract PR → merge on green; реализация по контракту (блок состояния вместо серой строки, два действия, RU/KK строки, тесты), `pnpm verify`, branch CI, изолированная сборка для приёмки, тестовые данные (при необходимости; записать для очистки). Далее по порядку блока: typo suggestions → post-publication buyer preview → R3.
 
 ## Current constraints
 
