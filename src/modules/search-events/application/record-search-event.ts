@@ -20,6 +20,9 @@ export type SearchEventInput = {
   resolution: SearchResolution;
   // The number of Offers in the returned response.
   resultCount: number;
+  // search-typo-suggestions: the automatic correction of this one search (the fields above stay the ORIGINAL outcome). It is
+  // kept only when the corrected text is itself a valid event query that differs from the original and has Offers.
+  corrected?: { query: string; resultCount: number };
 };
 
 export type RecordSearchEventStatus = 'written' | 'pending' | 'skipped' | 'failed' | 'ignored';
@@ -77,6 +80,10 @@ export async function recordSearchEvent(
   try {
     const queryNormalized = eventQueryOf(input.query);
     if (queryNormalized === null) return 'ignored';
+    const correctedNormalized = input.corrected === undefined ? null : eventQueryOf(input.corrected.query);
+    const corrected = correctedNormalized !== null && correctedNormalized !== queryNormalized && input.corrected !== undefined && input.corrected.resultCount >= 1
+      ? { queryNormalized: correctedNormalized, resultCount: Math.trunc(input.corrected.resultCount) }
+      : null;
     const config = options.config ?? readSearchEventsConfig();
     const db = options.database ?? getDatabase();
     const now = (options.now ?? (() => new Date()))();
@@ -96,6 +103,8 @@ export async function recordSearchEvent(
           resolution: input.resolution,
           resultCount: Math.max(0, Math.trunc(input.resultCount)),
           origin: config.origin,
+          correctedQueryNormalized: corrected?.queryNormalized ?? null,
+          correctedResultCount: corrected?.resultCount ?? null,
         });
       });
       // A backstop only (the operator-run command is the retention mechanism): now and then a small expired batch goes too.

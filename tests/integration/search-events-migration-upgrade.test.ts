@@ -36,7 +36,8 @@ describe('search_events migration upgrade path on PostgreSQL 18', () => {
 
       expect((await pool.query('SELECT name FROM products WHERE id=$1', [productId])).rows[0].name).toBe('Search events migration product');
       const columns = await pool.query<{ column_name: string }>("SELECT column_name FROM information_schema.columns WHERE table_name = 'search_events' ORDER BY column_name");
-      expect(columns.rows.map((row) => row.column_name)).toEqual(['entry', 'id', 'occurred_at', 'origin', 'query_normalized', 'resolution', 'resolved_product_id', 'result_count']);
+      // search-typo-suggestions (0024) added the two nullable correction columns
+      expect(columns.rows.map((row) => row.column_name)).toEqual(['corrected_query_normalized', 'corrected_result_count', 'entry', 'id', 'occurred_at', 'origin', 'query_normalized', 'resolution', 'resolved_product_id', 'result_count']);
 
       const insert = (entry: string, resolution: string, origin: string, text: string, count = 1, product: string | null = null) => pool.query(
         'INSERT INTO search_events (occurred_at, entry, query_normalized, resolved_product_id, resolution, result_count, origin) VALUES (now(), $1, $2, $5, $3, $6, $4)',
@@ -49,6 +50,17 @@ describe('search_events migration upgrade path on PostgreSQL 18', () => {
       await expect(insert('submit', 'resolved', 'dev', '')).rejects.toThrow();
       await expect(insert('submit', 'resolved', 'dev', 'x'.repeat(101))).rejects.toThrow();
       await expect(insert('submit', 'resolved', 'dev', 'баранина', -1)).rejects.toThrow();
+
+      // the correction pair of 0024: set together, at least one Offer, a text different from the original
+      const corrected = (text: string | null, count: number | null) => pool.query(
+        "INSERT INTO search_events (occurred_at, entry, query_normalized, resolution, result_count, origin, corrected_query_normalized, corrected_result_count) VALUES (now(),'submit','малако','unresolved',0,'dev',$1,$2)",
+        [text, count],
+      );
+      await corrected('молоко', 2);
+      await expect(corrected('молоко', null)).rejects.toThrow();
+      await expect(corrected(null, 2)).rejects.toThrow();
+      await expect(corrected('молоко', 0)).rejects.toThrow();
+      await expect(corrected('малако', 2)).rejects.toThrow();
 
       // removing a catalog Product keeps the event as unresolved demand instead of blocking or deleting it
       await pool.query('DELETE FROM products WHERE id=$1', [productId]);

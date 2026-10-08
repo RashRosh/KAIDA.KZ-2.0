@@ -19,6 +19,8 @@ export const geoSearchRequestSchema = z.strictObject({
   direction: searchSortDirectionSchema.optional(),
   // S15C / D0: the intentional-search marker.
   intent: searchIntentSchema.optional(),
+  // search-typo-suggestions: ask for the automatic correction of a mistyped query that found nothing.
+  correct: z.boolean().optional(),
 }).refine((request) => request.sort !== 'relevance' || request.direction === undefined, {
   // S15B-4b: an explicit relevance order has no direction.
   path: ['direction'],

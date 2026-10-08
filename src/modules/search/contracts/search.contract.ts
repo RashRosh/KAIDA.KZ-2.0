@@ -110,6 +110,9 @@ export const searchResponseSchema = z.object({
   // S15B-2: the catalog Product the query resolved to (exact canonical / localized name / alias), else null.
   resolvedProduct: z.object({ id: z.uuid(), name: z.string() }).nullable().optional(),
   offers: z.array(searchOfferSchema),
+  // search-typo-suggestions: present only when the original text found nothing and its confident correction was searched
+  // instead (`from` is what the buyer typed, `to` the corrected text the Offers belong to); only with the `correct` flag.
+  correction: z.object({ from: z.string(), to: z.string() }).optional(),
 });
 
 export type SearchOffer = z.infer<typeof searchOfferSchema>;
