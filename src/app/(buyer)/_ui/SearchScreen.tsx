@@ -41,8 +41,15 @@ type BuyerLocationState =
 // Stage 6C: at most five curated queries — the first five of the existing set; no popularity data is involved.
 const popularSearches = ['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс'] as const;
 
-function searchKey(query: string, productId: string | undefined) {
-  return productId ? `${query}\u0000${productId}` : query;
+function searchKey(query: string, productId: string | undefined, typed = false) {
+  const base = productId ? `${query}\u0000${productId}` : query;
+  return typed ? `${base}\u0000typed` : base;
+}
+// search-typo-suggestions: the message with `{query}` set in bold (the corrected query is emphasised in the first line).
+const QUERY_MARK = '\u0001';
+function withBoldQuery(template: string, query: string) {
+  const [before = '', after = ''] = template.split(QUERY_MARK);
+  return <>{before}<strong>{query}</strong>{after}</>;
 }
 // The order fields of a GET request: a relevance Search carries no direction.
 function orderParams(sort: SearchSortMode, direction: SearchSortDirection): Record<string, string> {
@@ -58,7 +65,9 @@ export function SearchScreen() {
   // S15B-3: a Search by a selected catalog Product keeps its id in the address next to the display text.
   const productParam = addressParams.get('product');
   const addressProduct = productParam !== null && searchProductIdSchema.safeParse(productParam).success ? productParam : undefined;
-  const addressKey = addressQuery ? searchKey(addressQuery, addressProduct) : '';
+  // search-typo-suggestions: `typed=1` is the buyer's choice «search as typed» for this very query (never a silent default).
+  const addressTyped = addressParams.get('typed') === '1';
+  const addressKey = addressQuery ? searchKey(addressQuery, addressProduct, addressTyped) : '';
   const [query, setQuery] = useState(addressQuery);
   const [selected, setSelected] = useState<SuggestedProduct | null>(addressProduct ? { id: addressProduct, name: addressQuery } : null);
   const [searchedProductId, setSearchedProductId] = useState<string | undefined>(addressProduct);
@@ -74,6 +83,7 @@ export function SearchScreen() {
   const [started, setStarted] = useState(Boolean(addressQuery));
   const [ready, setReady] = useState(Boolean(addressQuery));
   const [searchedQuery, setSearchedQuery] = useState('');
+  const [searchedTyped, setSearchedTyped] = useState(false);
   const [shown, setShown] = useState<SearchResponse | null>(null);
   const writtenQuery = useRef<string | null>(null);
   const [locationState, setLocationState] = useState<BuyerLocationState>({ kind: 'not_enabled' });
@@ -86,7 +96,7 @@ export function SearchScreen() {
   // S15C / D0 (memory of this page only): the deliberate intent not yet spent by a successful request, and the 60 s repeat suppression.
   const pendingIntent = useRef<{ entry: SearchIntent; key: string } | null>(null);
   const suppression = useRef(new IntentSuppression());
-  const lastSearch = useRef<{ query: string; productId?: string; location?: BuyerLocation; sort: SearchSortMode; direction: SearchSortDirection } | null>(null);
+  const lastSearch = useRef<{ query: string; productId?: string; location?: BuyerLocation; sort: SearchSortMode; direction: SearchSortDirection; typed?: boolean } | null>(null);
   const localeRef = useRef(locale);
   const previousLocaleRef = useRef(locale);
   const preferencesRef = useRef({ sort, direction });
@@ -108,10 +118,10 @@ export function SearchScreen() {
       ? fetch(`/api/search?locale=${locale}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: last.query, ...(last.productId ? { productId: last.productId } : {}), buyerLocation: last.location, ...orderRequestFields(last.sort, last.direction) }),
+        body: JSON.stringify({ q: last.query, ...(last.productId ? { productId: last.productId } : {}), buyerLocation: last.location, ...orderRequestFields(last.sort, last.direction), ...(last.typed ? {} : { correct: true }) }),
         cache: 'no-store',
       })
-      : fetch(`/api/search?${new URLSearchParams({ q: last.query, ...(last.productId ? { product_id: last.productId } : {}), locale, ...orderParams(last.sort, last.direction) })}`, { cache: 'no-store' });
+      : fetch(`/api/search?${new URLSearchParams({ q: last.query, ...(last.productId ? { product_id: last.productId } : {}), locale, ...orderParams(last.sort, last.direction), ...(last.typed ? {} : { correct: '1' }) })}`, { cache: 'no-store' });
     void request
       .then(async (response) => response.ok ? searchResponseSchema.parse(await response.json()) : null)
       .then((localized) => {
@@ -137,6 +147,8 @@ export function SearchScreen() {
     productId?: string,
     // S15C / D0: set only by a deliberate action (submit, suggestion, chip); everything else — sort, language, restoration — is silent.
     entry?: SearchIntent,
+    // search-typo-suggestions: «search as typed» — the request carries no `correct` flag; a deliberate search (entry) never keeps it.
+    typed?: boolean,
   ) => {
     if (pending.current) return;
     // «Расстояние» needs coordinates: without them the request is never sent as `distance` (the API rejects it) — the
@@ -161,9 +173,11 @@ export function SearchScreen() {
     const carried = pendingIntent.current !== null && pendingIntent.current.key === intentId ? pendingIntent.current : null;
     const intent = carried !== null && !suppression.current.isSuppressed(intentId) ? carried.entry : undefined;
     pending.current = true;
-    lastSearch.current = { query: parsed.data, productId, location: buyerLocation, sort: mode, direction: order };
+    const asTyped = typed === true && entry === undefined;
+    lastSearch.current = { query: parsed.data, productId, location: buyerLocation, sort: mode, direction: order, ...(asTyped ? { typed: true } : {}) };
     setStarted(true);
     setSearchedQuery(parsed.data);
+    setSearchedTyped(asTyped);
     setSearchedProductId(productId);
     setState({ kind: 'loading' });
     try {
@@ -171,11 +185,11 @@ export function SearchScreen() {
         ? await fetch(`/api/search?locale=${localeRef.current}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, ...orderRequestFields(mode, order), ...(intent ? { intent } : {}) }),
+          body: JSON.stringify({ q: parsed.data, ...(productId ? { productId } : {}), buyerLocation, ...orderRequestFields(mode, order), ...(intent ? { intent } : {}), ...(asTyped ? {} : { correct: true }) }),
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         })
-        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, ...orderParams(mode, order), ...(intent ? { intent } : {}) })}`, {
+        : await fetch(`/api/search?${new URLSearchParams({ q: parsed.data, ...(productId ? { product_id: productId } : {}), locale: localeRef.current, ...orderParams(mode, order), ...(intent ? { intent } : {}), ...(asTyped ? {} : { correct: '1' }) })}`, {
           cache: 'no-store',
           signal: AbortSignal.timeout(15000),
         });
@@ -197,10 +211,10 @@ export function SearchScreen() {
       // Keep the query in the address so Back from an Offer page returns to the same results.
       // An address that already holds the query is left alone: a replaceState there would race a navigation that
       // started meanwhile (for example a tap on «Ещё» right after Back).
-      writtenQuery.current = searchKey(parsed.data, productId);
+      writtenQuery.current = searchKey(parsed.data, productId, asTyped);
       const current = new URLSearchParams(window.location.search);
-      if (window.location.pathname === '/' && (current.get('q') !== parsed.data || (current.get('product') ?? undefined) !== productId)) {
-        window.history.replaceState(null, '', `/?${new URLSearchParams({ q: parsed.data, ...(productId ? { product: productId } : {}) })}`);
+      if (window.location.pathname === '/' && (current.get('q') !== parsed.data || (current.get('product') ?? undefined) !== productId || (current.get('typed') === '1') !== asTyped)) {
+        window.history.replaceState(null, '', `/?${new URLSearchParams({ q: parsed.data, ...(productId ? { product: productId } : {}), ...(asTyped ? { typed: '1' } : {}) })}`);
       }
     } catch {
       // Cards of the previous query would read as results of this one: the error replaces them (as in S0).
@@ -234,7 +248,7 @@ export function SearchScreen() {
         // S15C / D0: an arrival from First Entry is the deliberate search; the one-shot handoff is consumed here (never replayed).
         const arrived = consumeFirstEntryHandoff(addressQuery);
         if (arrived !== null) pendingIntent.current = { entry: arrived, key: intentKey(addressQuery, addressProduct) };
-        void executeSearch(addressQuery, locationRef.current, next.sort, next.direction, addressProduct);
+        void executeSearch(addressQuery, locationRef.current, next.sort, next.direction, addressProduct, undefined, addressTyped);
       } else if (stored) {
         const preferences = normalizeGeoDependentState(stored, hasCoordinates);
         setQuery(preferences.query);
@@ -242,7 +256,7 @@ export function SearchScreen() {
         setSort(preferences.sort);
         setDirection(preferences.direction);
         preferencesRef.current = { sort: preferences.sort, direction: preferences.direction };
-        void executeSearch(preferences.query, locationRef.current, preferences.sort, preferences.direction, preferences.productId);
+        void executeSearch(preferences.query, locationRef.current, preferences.sort, preferences.direction, preferences.productId, undefined, preferences.typed === true);
       } else {
         setQuery('');
         setSelected(null);
@@ -254,13 +268,13 @@ export function SearchScreen() {
       setReady(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [executeSearch, addressQuery, addressProduct, addressKey]);
+  }, [executeSearch, addressQuery, addressProduct, addressKey, addressTyped]);
 
   // Stage 6C + Rev 3: the last Search of this tab — query, sort and direction only; never results or coordinates.
   useEffect(() => {
     if (!searchedQuery) return;
-    writeLastSearchState({ query: searchedQuery, sort, direction, ...(searchedProductId ? { productId: searchedProductId } : {}) });
-  }, [searchedQuery, searchedProductId, sort, direction]);
+    writeLastSearchState({ query: searchedQuery, sort, direction, ...(searchedProductId ? { productId: searchedProductId } : {}), ...(searchedTyped ? { typed: true as const } : {}) });
+  }, [searchedQuery, searchedProductId, searchedTyped, sort, direction]);
 
   // Requesting the browser geolocation happens only through an explicit geo intent of the buyer — choosing «Расстояние».
   // On denial or unavailability the ordinary Search keeps working: the order falls back to the actuality.
@@ -347,7 +361,7 @@ export function SearchScreen() {
   function applyOrder(nextSort: SearchSortMode, nextDirection: SearchSortDirection, location: BuyerLocation | undefined) {
     setSort(nextSort);
     setDirection(nextDirection);
-    if (lastSearch.current) void executeSearch(lastSearch.current.query, location, nextSort, nextDirection, lastSearch.current.productId);
+    if (lastSearch.current) void executeSearch(lastSearch.current.query, location, nextSort, nextDirection, lastSearch.current.productId, undefined, lastSearch.current.typed);
   }
 
   // A choice applies at once. A new criterion starts with its natural direction; the active one reverses its direction.
@@ -474,6 +488,17 @@ export function SearchScreen() {
             <div style={{ display: 'flex', gap: 10 }}><Ic name="locate" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t('search.distanceNeedsLocation')}</p></div>
           </div>
         )}
+        {shown?.correction && (
+          // search-typo-suggestions: two plain text lines (no panel, no buttons). The second one is a real link that turns on «search as typed».
+          <div role="status" style={{ display: 'flex', flexDirection: 'column', padding: '2px 4px 0' }}>
+            <p className="t" style={{ margin: 0, overflowWrap: 'anywhere' }}>{withBoldQuery(t('search.correctionShown', { query: QUERY_MARK }), shown.correction.to)}</p>
+            <Link
+              href={`/?${new URLSearchParams({ q: shown.correction.from, ...(searchedProductId ? { product: searchedProductId } : {}), typed: '1' })}`}
+              className="t"
+              style={{ margin: '-10px 0', padding: '10px 0', display: 'block', textDecoration: 'underline', overflowWrap: 'anywhere' }}
+            >{t('search.correctionInstead', { query: shown.correction.from })}</Link>
+          </div>
+        )}
         {/* One persistent live region: the empty-state title and hint (search-empty-states) or the count line. */}
         <div role="status" aria-live="polite" aria-atomic="true" className={emptyKind ? undefined : visibleOffers.length > 0 && !loading ? 'vh' : undefined}
           style={emptyKind ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center', padding: '24px 8px 0' } : undefined}>
@@ -497,7 +522,7 @@ export function SearchScreen() {
             <div style={{ display: 'flex', gap: 10 }}><Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('search.error')}</p></div>
             {lastSearch.current && (
               <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
-                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sort, lastSearch.current.direction, lastSearch.current.productId)}>
+                onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sort, lastSearch.current.direction, lastSearch.current.productId, undefined, lastSearch.current.typed)}>
                 <Ic name="refresh" className="sm" />{t('cabinet.retry')}
               </button>
             )}

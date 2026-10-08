@@ -49,7 +49,7 @@ describe('Search events (S15C / D0)', () => {
       expect(new Date(row.occurred_at).toISOString()).toBe('2026-10-07T10:00:00.000Z');
       // no identifier, no location, no raw spelling: the table has exactly these columns
       const columns = await connection.pool.query<{ column_name: string }>("SELECT column_name FROM information_schema.columns WHERE table_name = 'search_events' ORDER BY column_name");
-      expect(columns.rows.map((column) => column.column_name)).toEqual(['entry', 'id', 'occurred_at', 'origin', 'query_normalized', 'resolution', 'resolved_product_id', 'result_count']);
+      expect(columns.rows.map((column) => column.column_name)).toEqual(['corrected_query_normalized', 'corrected_result_count', 'entry', 'id', 'occurred_at', 'origin', 'query_normalized', 'resolution', 'resolved_product_id', 'result_count']);
     });
 
     it('ignores queries the filter refuses and writes nothing', async () => {

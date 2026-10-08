@@ -24,6 +24,8 @@ export type LastSearchState = {
   direction: SearchSortDirection;
   // S15B-3: the selected catalog Product of the last Search, when it was a search by Product.
   productId?: string;
+  // search-typo-suggestions: the buyer chose «search as typed» for this query; the correction is not applied again on restore.
+  typed?: true;
 };
 
 // S15B-4b: `relevance` is stored without a direction; every other sort keeps its direction.
@@ -45,6 +47,17 @@ const productSchema = z.object({
   productId: searchProductIdSchema,
 }).strict().refine(orderIsConsistent);
 
+// search-typo-suggestions: `v: 4` is `v: 2/3` plus `typed: true` («search as typed» was chosen for this query); written only
+// while that mode is on, so every other Search is still written as `v: 2/3`.
+const typedSchema = z.object({
+  v: z.literal(4),
+  query: searchQuerySchema,
+  sort: searchSortModeSchema,
+  direction: searchSortDirectionSchema.optional(),
+  productId: searchProductIdSchema.optional(),
+  typed: z.literal(true),
+}).strict().refine(orderIsConsistent);
+
 // Stage 5/6C values (`v: 1`: query, sort and a distance radius) degrade minimally: the query stays, the obsolete radius is
 // discarded and the direction is the natural one of the stored sort. No migration framework.
 const legacySchema = z.object({
@@ -64,6 +77,16 @@ export function parseLastSearchState(raw: string | null | undefined): LastSearch
     if (withProduct.success) {
       return { query: withProduct.data.query, sort: withProduct.data.sort, direction: resolveSortDirection(withProduct.data.sort, withProduct.data.direction), productId: withProduct.data.productId };
     }
+    const typed = typedSchema.safeParse(value);
+    if (typed.success) {
+      return {
+        query: typed.data.query,
+        sort: typed.data.sort,
+        direction: resolveSortDirection(typed.data.sort, typed.data.direction),
+        ...(typed.data.productId ? { productId: typed.data.productId } : {}),
+        typed: true,
+      };
+    }
     const legacy = legacySchema.safeParse(value);
     if (legacy.success) {
       return { query: legacy.data.query, sort: legacy.data.sort, direction: NATURAL_SORT_DIRECTION[legacy.data.sort] };
@@ -78,6 +101,10 @@ export function parseLastSearchState(raw: string | null | undefined): LastSearch
 export function serializeLastSearchState(state: LastSearchState): string | null {
   const query = searchQuerySchema.safeParse(state.query);
   if (!query.success) return null;
+  if (state.typed === true) {
+    const productId = state.productId === undefined ? undefined : searchProductIdSchema.safeParse(state.productId);
+    return JSON.stringify({ v: 4, query: query.data, ...orderRequestFields(state.sort, state.direction), ...(productId?.success ? { productId: productId.data } : {}), typed: true });
+  }
   if (state.productId !== undefined) {
     const productId = searchProductIdSchema.safeParse(state.productId);
     if (productId.success) return JSON.stringify({ v: 3, query: query.data, ...orderRequestFields(state.sort, state.direction), productId: productId.data });

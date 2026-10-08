@@ -44,7 +44,7 @@ export function BuyerNav({ active }: { active: BuyerSection }) {
   const { t } = useI18n();
   const lastSearchRaw = useSyncExternalStore(subscribeToNothing, readLastSearchRaw, () => null);
   const lastSearch = parseLastSearchState(lastSearchRaw);
-  const searchHref = lastSearch ? `/?${new URLSearchParams({ q: lastSearch.query })}` : '/';
+  const searchHref = lastSearch ? `/?${new URLSearchParams({ q: lastSearch.query, ...(lastSearch.typed ? { typed: '1' } : {}) })}` : '/';
   const items: { key: BuyerSection; href: string; icon: string; label: string }[] = [
     { key: 'search', href: searchHref, icon: 'search', label: t('nav.search') },
     { key: 'nearby', href: '/nearby', icon: 'pin', label: t('nav.nearby') },

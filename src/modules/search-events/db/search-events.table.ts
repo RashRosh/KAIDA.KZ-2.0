@@ -18,6 +18,10 @@ export const searchEvents = pgTable('search_events', {
   resultCount: integer('result_count').notNull(),
   // organic = real production demand; dev / test / synthetic must never be read as demand.
   origin: text('origin').notNull(),
+  // search-typo-suggestions: set together when the original text was automatically corrected (the columns above keep the
+  // ORIGINAL outcome: unresolved, 0 Offers); otherwise both are NULL.
+  correctedQueryNormalized: text('corrected_query_normalized'),
+  correctedResultCount: integer('corrected_result_count'),
 }, (table) => [
   index('search_events_origin_occurred_at_idx').on(table.origin, table.occurredAt),
   check('search_events_entry_check', sql`${table.entry} IN ('submit','suggestion','chip')`),
@@ -25,4 +29,7 @@ export const searchEvents = pgTable('search_events', {
   check('search_events_origin_check', sql`${table.origin} IN ('organic','dev','test','synthetic')`),
   check('search_events_query_check', sql`length(${table.queryNormalized}) BETWEEN 1 AND 100`),
   check('search_events_result_count_check', sql`${table.resultCount} >= 0`),
+  check('search_events_correction_check', sql`(${table.correctedQueryNormalized} IS NULL AND ${table.correctedResultCount} IS NULL)
+    OR (${table.correctedQueryNormalized} IS NOT NULL AND ${table.correctedResultCount} IS NOT NULL AND ${table.correctedResultCount} >= 1
+      AND length(${table.correctedQueryNormalized}) BETWEEN 1 AND 100 AND ${table.correctedQueryNormalized} <> ${table.queryNormalized})`),
 ]);
