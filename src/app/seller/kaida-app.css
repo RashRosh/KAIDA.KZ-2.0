@@ -102,3 +102,14 @@
 .kaida.kaida-portal{position:fixed;inset:0;z-index:50;background:transparent;display:flex;justify-content:center}
 .kaida.kaida-portal>.portal-col{position:relative;width:100%;max-width:480px;height:100%}
 .kaida.kaida-portal .sheet{z-index:3}
+
+/* post-publication-buyer-preview: the two icons approved by the PO as exceptions to the no-new-icons rule (2026-10-09) —
+   «глаз» and «частичное редактирование»; kaida.css stays a mechanical port of the mockup. */
+.kaida .i-eye{--m:url(/kaida/icons/f9457c2d5281cc8a8b7b15f37f827b07.svg)}
+.kaida .i-pencilpart{--m:url(/kaida/icons/93c67af98ee957bb11d2d1eeceffb365.svg)}
+/* A quiet action of a card (a real control): grey regular underlined text with an icon, a 44 px target, stacked edge to edge. */
+.kaida .act{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink2);font:400 14px/20px var(--sans);text-decoration:underline;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.kaida a.act{text-decoration:underline}
+.kaida .act .ic{flex:none;text-decoration:none}
+.kaida .act:disabled{color:var(--ink3);cursor:default}
+.kaida .act:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
