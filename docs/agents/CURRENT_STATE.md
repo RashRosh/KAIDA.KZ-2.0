@@ -5,19 +5,19 @@
 ## Verified base
 
 - Проверено: 2026-10-08.
-- `origin/main`: `f6b4ad80f6c27cc91ae3b835c8051fbba0f4cc02` (merge PR #144, card price and packaging clarity); `KAIDA verify` main run SUCCESS, CodeQL SUCCESS; плюс docs-PR закрытия.
-- Последний checkpoint: `v0.0.68-card-price-packaging` (`f6b4ad8`): строка цены на карточке и странице Offer — «/ количество» при заданном количестве упаковки (ровно 1 единица — «/ л», «/ кг», без пересчёта), иначе «/ единица» продавца, иначе только цена; отдельная строка упаковки убрана; DTO, данные, ярлыки, сортировка, экраны продавца/оператора не менялись. Предыдущие: `v0.0.67-card-opening-hours`, `v0.0.66-search-word-forms`, `v0.0.65-search-by-product-fixture`, `v0.0.64-backup-restore` (R2), `v0.0.63`, `v0.0.62` (R1).
+- `origin/main`: `7c8963aec7785ac0e686b08f03500177206b7f91` (merge PR #147, search empty states); `KAIDA verify` main run SUCCESS, CodeQL SUCCESS; плюс docs-PR закрытия.
+- Последний checkpoint: `v0.0.69-search-empty-states` (`7c8963a`): при нуле Offers после успешного поиска — блок с заголовком (слова покупателя), пояснением и двумя действиями («Изменить запрос» — фокус и выделение поля без запроса; «Посмотреть рядом» — вкладка «Рядом»), отдельные тексты для известного товара и неизвестного запроса, RU/KK, без иллюстраций; API, ранжирование, D0, сортировка не менялись. Предыдущие: `v0.0.68-card-price-packaging`, `v0.0.67-card-opening-hours`, `v0.0.66-search-word-forms`, `v0.0.65-search-by-product-fixture`, `v0.0.64-backup-restore` (R2), `v0.0.63`, `v0.0.62` (R1).
 - Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
 
 ## Current task
 
-Пункт 4 блока UX/search (search empty states): Slice Contract rev 2 утверждён PO (2026-10-08), идёт реализация на ветке `feat/search-empty-states`; сначала contract PR. Приёмка PO — вручную, до неё не мержить и не тегировать.
+Нет активной реализации. Блок UX/search, пункты 1–4 (word forms, opening hours, price and packaging, search empty states) приняты PO и закрыты. Следующий — пункт 5 (typo suggestions): контракт не начат, ждёт отдельного поручения PO; ограничение на fuzzy не снято.
 
-Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms и opening hours ждут KK-вычитки (отдельное дело; price and packaging новых слов не добавил).
+Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms, opening hours и search empty states ждут KK-вычитки (отдельное дело; price and packaging новых слов не добавил).
 
 ## Next action
 
-1. Contract PR → merge on green; реализация по контракту (блок состояния вместо серой строки, два действия, RU/KK строки, тесты), `pnpm verify`, branch CI, изолированная сборка для приёмки, тестовые данные (при необходимости; записать для очистки). Далее по порядку блока: typo suggestions → post-publication buyer preview → R3.
+1. По поручению PO подготовить Slice Contract пункта 5 блока UX/search (typo-correction suggestions; снятие ограничения на fuzzy — отдельное решение PO для этого slice). Порядок блока: ~~word forms~~ → ~~opening hours~~ → ~~price and packaging~~ → ~~empty states~~ → typo suggestions → post-publication buyer preview → R3 (`EXECUTION_PLAN.md`).
 
 ## Current constraints
 
