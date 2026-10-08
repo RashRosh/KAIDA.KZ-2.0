@@ -70,7 +70,7 @@ test('a submitted search is recorded once, with only the minimal fields', async 
   await expect.poll(() => count(text)).toBe(1);
   expect(event).toMatchObject({ entry: 'submit', resolution: 'unresolved', resolved_product_id: null, result_count: 0, origin: 'test' });
   expect(new Date(event.occurred_at).getTime() % 3_600_000).toBe(0);
-  expect(Object.keys(event).sort()).toEqual(['entry', 'id', 'occurred_at', 'origin', 'query_normalized', 'resolution', 'resolved_product_id', 'result_count']);
+  expect(Object.keys(event).sort()).toEqual(['corrected_query_normalized', 'corrected_result_count', 'entry', 'id', 'occurred_at', 'origin', 'query_normalized', 'resolution', 'resolved_product_id', 'result_count']);
 });
 
 test('choosing a Product from the suggestions is recorded as `suggestion` with the Product', async ({ page }) => {
