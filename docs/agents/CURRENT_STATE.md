@@ -11,13 +11,13 @@
 
 ## Current task
 
-Нет активной реализации. Блок UX/search, пункты 1 (word forms) и 2 (opening hours) приняты PO и закрыты. Следующий — пункт 3 (card price and packaging clarity): готовится Slice Contract, реализации нет.
+Пункт 3 блока UX/search (card price and packaging clarity): Slice Contract rev 3 утверждён PO (2026-10-08), идёт реализация на ветке `feat/card-price-packaging`; сначала contract PR. Приёмка PO — вручную, до неё не мержить и не тегировать.
 
 Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms и opening hours ждут KK-вычитки (отдельное дело).
 
 ## Next action
 
-1. Подготовить Slice Contract пункта 3 блока UX/search. Порядок блока (PO 2026-10-07): ~~word forms~~ → ~~opening hours~~ → price and packaging → empty states → typo suggestions → post-publication buyer preview → R3 (`EXECUTION_PLAN.md`).
+1. Contract PR → merge on green; реализация по контракту (чистая функция строки цены, `PriceLine`, страница Offer, тесты), `pnpm verify`, branch CI, изолированная сборка для приёмки на порту 3000, тестовые карточки (ID записать). Далее по порядку блока: empty states → typo suggestions → post-publication buyer preview → R3.
 
 ## Current constraints
 
