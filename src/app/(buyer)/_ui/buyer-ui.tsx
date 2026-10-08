@@ -10,6 +10,7 @@ import type { SearchOffer } from '../../../modules/search/contracts/search.contr
 import { buildContactActions } from '../../../modules/sellers/contact/build-contact-actions';
 import { actualityText } from '../../_components/actuality-text';
 import { formatAmount } from '../../_components/format-amount';
+import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
 import { OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { Ic, Phone } from '../../seller/_kaida/ui';
 
@@ -135,10 +136,12 @@ export function RouteButton({ offer }: { offer: SearchOffer }) {
 }
 
 export function PriceLine({ offer, large = false }: { offer: SearchOffer; large?: boolean }) {
+  // card-price-packaging: one line; the amount never breaks, the basis («/ 800 г», «/ л», «/ упак.») wraps by words.
+  const basis = priceBasisText(offer.price.unit, offer.pack);
   return (
     <div>
-      <span className={large ? 'pr-lg' : 'pr'}>{formatAmount(offer.price.amount)} ₸</span>
-      {offer.price.unit && <> <span className="c2" style={large ? undefined : { fontSize: 14 }}>/ {offer.price.unit}</span></>}
+      <span className={large ? 'pr-lg' : 'pr'} style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.price.amount)}{' '}₸</span>
+      {basis && <> <span className="c2" style={large ? { overflowWrap: 'anywhere' } : { fontSize: 14, overflowWrap: 'anywhere' }}>{basis}</span></>}
     </div>
   );
 }
@@ -169,7 +172,6 @@ export function ResultCard({ offer, distanceMeters }: { offer: SearchOffer; dist
           <h3 className="h3 clamp2" style={{ fontSize: 16, lineHeight: '21px', margin: 0 }} id={`offer-${offer.id}`} lang={offer.product.nameLocale}>
             <Link href={`/offers/${offer.id}`} className="stretch" onClick={() => { openedFromList = true; }}>{offer.product.name}</Link>
           </h3>
-          {offer.pack && <p className="c c2" style={{ fontWeight: 500 }}>{offer.pack}</p>}
           <PriceLine offer={offer} />
           <p className="c c2" style={{ marginTop: 2 }}>{offer.location.name}</p>
           {place && <p className="c">{place}</p>}
