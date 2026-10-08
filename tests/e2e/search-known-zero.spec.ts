@@ -52,7 +52,7 @@ test('«Изменить запрос» focuses and selects the field and sends 
   await page.getByRole('button', { name: 'Изменить запрос' }).click();
   const field = page.getByRole('searchbox');
   await expect(field).toBeFocused();
-  expect(await field.evaluate((element: HTMLInputElement) => [element.selectionStart, element.selectionEnd, element.value.length])).toEqual([0, 7, 7]);
+  expect(await field.evaluate((element: HTMLInputElement) => [element.selectionStart, element.selectionEnd, element.value.length])).toEqual([0, 8, 8]);
   expect(requests).toEqual([]);
 
   await page.getByRole('link', { name: 'Посмотреть рядом' }).click();
