@@ -140,7 +140,7 @@ export function PriceLine({ offer, large = false }: { offer: SearchOffer; large?
   const basis = priceBasisText(offer.price.unit, offer.pack);
   return (
     <div>
-      <span className={large ? 'pr-lg' : 'pr'} style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.price.amount)}{' '}₸</span>
+      <span className={large ? 'pr-lg' : 'pr'} style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.price.amount)} ₸</span>
       {basis && <> <span className="c2" style={large ? { overflowWrap: 'anywhere' } : { fontSize: 14, overflowWrap: 'anywhere' }}>{basis}</span></>}
     </div>
   );
