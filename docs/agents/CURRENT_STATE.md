@@ -5,19 +5,19 @@
 ## Verified base
 
 - Проверено: 2026-10-08.
-- `origin/main`: `2b17168331f93e192dd618cd92d18534de154ff3` (merge PR #140, card opening hours); `KAIDA verify` main run SUCCESS, CodeQL SUCCESS; плюс docs-PR закрытия.
-- Последний checkpoint: `v0.0.67-card-opening-hours` (`2b17168`): на карточке выдачи статус режима работы словами (иконка + слова; закрыто — всегда когда откроется; день закрытия называется, если не сегодня), на странице Offer — расписание недели со сгруппированными днями; расчёт и данные расписания не менялись. Предыдущие: `v0.0.66-search-word-forms`, `v0.0.65-search-by-product-fixture`, `v0.0.64-backup-restore` (R2), `v0.0.63`, `v0.0.62` (R1).
+- `origin/main`: `f6b4ad80f6c27cc91ae3b835c8051fbba0f4cc02` (merge PR #144, card price and packaging clarity); `KAIDA verify` main run SUCCESS, CodeQL SUCCESS; плюс docs-PR закрытия.
+- Последний checkpoint: `v0.0.68-card-price-packaging` (`f6b4ad8`): строка цены на карточке и странице Offer — «/ количество» при заданном количестве упаковки (ровно 1 единица — «/ л», «/ кг», без пересчёта), иначе «/ единица» продавца, иначе только цена; отдельная строка упаковки убрана; DTO, данные, ярлыки, сортировка, экраны продавца/оператора не менялись. Предыдущие: `v0.0.67-card-opening-hours`, `v0.0.66-search-word-forms`, `v0.0.65-search-by-product-fixture`, `v0.0.64-backup-restore` (R2), `v0.0.63`, `v0.0.62` (R1).
 - Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
 
 ## Current task
 
-Пункт 3 блока UX/search (card price and packaging clarity): Slice Contract rev 3 утверждён PO (2026-10-08), идёт реализация на ветке `feat/card-price-packaging`; сначала contract PR. Приёмка PO — вручную, до неё не мержить и не тегировать.
+Нет активной реализации. Блок UX/search, пункты 1 (word forms), 2 (opening hours) и 3 (price and packaging) приняты PO и закрыты. Следующий — пункт 4 (search empty states): контракт не начат, ждёт отдельного поручения PO.
 
-Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms и opening hours ждут KK-вычитки (отдельное дело).
+Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms и opening hours ждут KK-вычитки (отдельное дело; price and packaging новых слов не добавил).
 
 ## Next action
 
-1. Contract PR → merge on green; реализация по контракту (чистая функция строки цены, `PriceLine`, страница Offer, тесты), `pnpm verify`, branch CI, изолированная сборка для приёмки на порту 3000, тестовые карточки (ID записать). Далее по порядку блока: empty states → typo suggestions → post-publication buyer preview → R3.
+1. По поручению PO подготовить Slice Contract пункта 4 блока UX/search (search empty states). Порядок блока: ~~word forms~~ → ~~opening hours~~ → ~~price and packaging~~ → empty states → typo suggestions → post-publication buyer preview → R3 (`EXECUTION_PLAN.md`).
 
 ## Current constraints
 
