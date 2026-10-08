@@ -17,7 +17,9 @@ async function search(page: Page, query: string) {
   await input.press('Enter');
 }
 
-test('a mistyped query shows the corrected results with two text lines; «search as typed» survives reload, Back and the tab; D0 counts one event', async ({ page }) => {
+test('a mistyped query shows the corrected results with two text lines; «search as typed» survives reload, Back and the tab; D0 counts one event', async ({ page }, testInfo) => {
+  // the two projects run in parallel: each one searches its own mistyped spelling, so the D0 rows never mix
+  const typo = testInfo.project.name === 'mobile' ? 'малако' : 'малоко';
   const marker = Array.from(randomBytes(8), (byte) => String.fromCharCode(97 + (byte % 26))).join('');
   const connection = createDatabase(testDatabaseUrl());
   const offerIds: string[] = [];
@@ -31,25 +33,25 @@ test('a mistyped query shows the corrected results with two text lines; «search
     );
     return title;
   };
-  const events = async () => (await connection.pool.query("SELECT * FROM search_events WHERE query_normalized = 'малако' ORDER BY occurred_at")).rows;
+  const events = async () => (await connection.pool.query("SELECT * FROM search_events WHERE query_normalized = $1 ORDER BY occurred_at", [typo])).rows;
   try {
     const milk = await insert(`Молоко фермерское ${marker}`);
     await insert(`Малина свежая ${marker}`);
     const before = (await events()).length;
 
     await page.goto('/');
-    await search(page, 'малако');
+    await search(page, typo);
     // two compact text lines above the results: the corrected query in bold, then the link to the original
     const status = page.getByRole('status').filter({ hasText: 'Показаны результаты по запросу' });
     await expect(status).toBeVisible();
     await expect(status.locator('strong')).toHaveText('молоко');
-    const instead = page.getByRole('link', { name: 'Искать вместо этого «малако»' });
+    const instead = page.getByRole('link', { name: `Искать вместо этого «${typo}»` });
     await expect(instead).toBeVisible();
-    await expect(instead).toHaveAttribute('href', '/?q=%D0%BC%D0%B0%D0%BB%D0%B0%D0%BA%D0%BE&typed=1');
+    await expect(instead).toHaveAttribute('href', `/?${new URLSearchParams({ q: typo, typed: '1' })}`);
     await expect(page.getByRole('article').filter({ hasText: milk })).toHaveCount(1);
     // the original text stays in the field and in the address; the corrected one is never written there
-    await expect(page.getByRole('search').locator('input[type="search"]').first()).toHaveValue('малако');
-    expect(new URL(page.url()).searchParams.get('q')).toBe('малако');
+    await expect(page.getByRole('search').locator('input[type="search"]').first()).toHaveValue(typo);
+    expect(new URL(page.url()).searchParams.get('q')).toBe(typo);
     expect(new URL(page.url()).searchParams.get('typed')).toBeNull();
     // no panel, no button: the lines are plain text and a link
     await expect(status.getByRole('button')).toHaveCount(0);
@@ -62,19 +64,19 @@ test('a mistyped query shows the corrected results with two text lines; «search
     // «search as typed»: the ordinary zero state, no correction lines, no new event
     await instead.click();
     await expect(page).toHaveURL(/typed=1/);
-    await expect(page.getByRole('status').filter({ hasText: 'Ничего не найдено по запросу «малако»' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
     await expect(page.getByText('Показаны результаты по запросу')).toHaveCount(0);
     await expect(page.getByRole('article')).toHaveCount(0);
     expect((await events()).length).toBe(before + 1);
     // reload keeps the choice
     await page.reload();
-    await expect(page.getByRole('status').filter({ hasText: 'Ничего не найдено по запросу «малако»' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
     await expect(page.getByText('Показаны результаты по запросу')).toHaveCount(0);
     // the «Поиск» tab after another tab keeps it too (the last Search of this tab, version 4)
     await page.goto('/more');
     await page.getByRole('navigation').getByRole('link', { name: 'Поиск' }).click();
     await expect(page).toHaveURL(/typed=1/);
-    await expect(page.getByRole('status').filter({ hasText: 'Ничего не найдено по запросу «малако»' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
     // Back from the typed state returns to the corrected results
     await page.goBack();
     await expect(page).toHaveURL(/\/more/);
@@ -84,7 +86,7 @@ test('a mistyped query shows the corrected results with two text lines; «search
     await expect(page).toHaveURL(/\/\?q=[^&]*$/);
     await expect(page.getByText('Показаны результаты по запросу')).toBeVisible();
     // a new deliberate search with the same text switches the correction on again
-    await search(page, 'малако');
+    await search(page, typo);
     await expect(page.getByText('Показаны результаты по запросу')).toBeVisible();
     expect(new URL(page.url()).searchParams.get('typed')).toBeNull();
   } finally {
