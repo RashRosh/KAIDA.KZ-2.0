@@ -82,6 +82,8 @@ test('a mistyped query shows the corrected results with two text lines; «search
     await expect(page).toHaveURL(/\/more/);
     await page.goBack();
     await expect(page).toHaveURL(/typed=1/);
+    // let the restored search finish before the next Back (an earlier request in flight is ignored by design)
+    await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
     await page.goBack();
     await expect(page).toHaveURL(/\/\?q=[^&]*$/);
     await expect(page.getByText('Показаны результаты по запросу')).toBeVisible();
