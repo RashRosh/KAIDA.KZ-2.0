@@ -72,6 +72,15 @@ test('the preview from the editor: new card, several points, edit; private, iner
     await expect(open).toHaveText('Как увидят покупатели');
     await expect(open).toBeDisabled();
     await expect(editor.getByTestId('preview-reason')).toContainText('Укажите название и цену');
+    // the price field refuses letters when typed and when pasted whole; a valid amount with a comma is kept as typed
+    const priceField = editor.getByRole('textbox', { name: 'Цена', exact: true });
+    await priceField.pressSequentially('12abc3,4');
+    await expect(priceField).toHaveValue('123,4');
+    await priceField.fill('12abc34');
+    await expect(priceField).toHaveValue('123,4');
+    await priceField.fill('1 200,50');
+    await expect(priceField).toHaveValue('1 200,50');
+    await expect(priceField).toHaveAttribute('inputmode', 'decimal');
     await fillOfferFields(page, { product: `Предпросмотр новая ${tag}`, price: '1200', unit: 'kg', comment: 'Свежая партия' });
     await expect(open).toBeDisabled();
     await expect(editor.getByTestId('preview-reason')).toContainText('Выберите точку');

@@ -9,6 +9,7 @@ import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { useI18n } from '@/i18n/I18nProvider';
 import { Ic, shakeErrors } from '../_kaida/ui';
 import { PriceUnitField, emptyPriceUnitDraft, priceUnitDraftFrom, priceUnitFromDraft, type PriceUnitDraft } from './PriceUnitField';
+import { acceptAmountInput } from './card-editor-state';
 
 type Action = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer';
 type ApiError = { error?: { code?: string; message?: string } };
@@ -230,7 +231,7 @@ export function SellerBatchChangeSetCreate({ seller }: { seller: SellerView }) {
             <>
               <div className="fld">
                 <label htmlFor={`batch-price-${item.key}`}>{t('offerCreate.price')}</label>
-                <input id={`batch-price-${item.key}`} className="inp num" value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: event.target.value })} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
+                <input id={`batch-price-${item.key}`} className="inp num" value={item.priceAmount} onChange={(event) => updateItem(item.key, { priceAmount: acceptAmountInput(item.priceAmount, event.target.value) })} inputMode="decimal" disabled={submitting} placeholder={t('offerCreate.required')} aria-required="true" />
               </div>
               <PriceUnitField id={`batch-unit-${item.key}`} draft={item.priceUnit} onChange={(priceUnit) => updateItem(item.key, { priceUnit })} disabled={submitting} showError={unitChecked} />
               <div className="fld">

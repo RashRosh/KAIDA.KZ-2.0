@@ -25,6 +25,7 @@ import {
   emptyCardValues,
   FIELD_ORDER,
   keepsLink,
+  acceptAmountInput,
   normalizeAmount,
   packAllowed,
   previewAvailability,
@@ -595,7 +596,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
           <div className="fld">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><label htmlFor={`${ids}-own`} style={{ flex: 1 }}>Цена</label>{point?.ownPrice !== null && <span className="bd bd-p">Своё значение</span>}</div>
             <div className="inp num"><input id={`${ids}-own`} value={point?.ownPrice ?? values.amount} inputMode="decimal" autoFocus
-              onChange={(event) => setOwn(event.target.value)} aria-invalid={errors.ownPrice && point?.ownPrice !== null ? true : undefined} /><span className="c2">₸</span></div>
+              onChange={(event) => setOwn(acceptAmountInput(point?.ownPrice ?? values.amount, event.target.value))} aria-invalid={errors.ownPrice && point?.ownPrice !== null ? true : undefined} /><span className="c2">₸</span></div>
             {point?.ownPrice !== null && (
               <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => setOwn(null)}><Ic name="history" className="sm" />Вернуть общее значение · {commonPriceText}</button>
             )}
@@ -656,7 +657,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               <div className="fld">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><label htmlFor={`${ids}-price`} style={{ flex: 1 }}>{t('card.price')}</label></div>
                 <div className={`inp num${errors.price ? ' er' : ''}`}>
-                  <input id={`${ids}-price`} value={values.amount} onChange={(event) => update({ amount: event.target.value })} inputMode="decimal" autoComplete="off"
+                  <input id={`${ids}-price`} value={values.amount} onChange={(event) => update({ amount: acceptAmountInput(values.amount, event.target.value) })} inputMode="decimal" autoComplete="off"
                     aria-invalid={errors.price ? true : undefined} aria-describedby={[err('price'), `${ids}-price-previous`].filter(Boolean).join(' ')} disabled={disabled} />
                   <span className="c2">₸</span>
                 </div>
@@ -722,7 +723,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               <div className="fld">
                 <label htmlFor={`${ids}-price`}>{t('card.price')}</label>
                 <div className={`inp num${errors.price ? ' er' : ''}`}>
-                  <input id={`${ids}-price`} value={values.amount} onChange={(event) => update({ amount: event.target.value })} inputMode="decimal" autoComplete="off"
+                  <input id={`${ids}-price`} value={values.amount} onChange={(event) => update({ amount: acceptAmountInput(values.amount, event.target.value) })} inputMode="decimal" autoComplete="off"
                     placeholder={t('card.pricePlaceholder')} aria-invalid={errors.price ? true : undefined}
                     aria-describedby={[err('price'), mode.kind === 'edit' ? `${ids}-price-previous` : ''].filter(Boolean).join(' ') || undefined} disabled={disabled} />
                   <span className="c2">₸</span>

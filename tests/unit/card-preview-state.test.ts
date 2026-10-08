@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cardPreviewBodySchema } from '../../src/modules/seller-input/contracts/card-preview.contract';
-import { emptyCardValues, previewAvailability, previewBody, type CardValues } from '../../src/app/seller/_components/card-editor-state';
+import { acceptAmountInput, emptyCardValues, previewAvailability, previewBody, priceError, type CardValues } from '../../src/app/seller/_components/card-editor-state';
 
 // pre-publication-buyer-preview §3.2 / §3.8 (unit): when the preview is available and what the request carries.
 
@@ -66,5 +66,27 @@ describe('previewBody', () => {
   it('leaves out an unusable pack instead of failing the preview', () => {
     const body = previewBody(values({ packOpen: true, packAmount: 'abc', unit: { code: 'package', custom: '' } }), { kind: 'create' }, []);
     expect(body.pack).toBeNull();
+  });
+});
+
+// Price fields refuse stray characters as a whole, never repairing them into another price; validity stays with priceError.
+describe('acceptAmountInput', () => {
+  it('lets valid amounts and their in-progress forms through, with comma or point and group spaces', () => {
+    for (const text of ['', '1', '1200', '1 200', '1 200', '1200.5', '1200,50', '12.', '0', '.5', ',5']) {
+      expect(acceptAmountInput('x', text), text).toBe(text);
+    }
+  });
+
+  it('keeps the previous text when letters, signs, a second separator or other characters come in (typing or paste)', () => {
+    for (const text of ['12abc34', 'abc', '12a', '-5', '+5', '1e5', '12.3.4', '1,2,3', '1.2,3', '12₸', '1_000', '١٢']) {
+      expect(acceptAmountInput('120', text), text).toBe('120');
+    }
+  });
+
+  it('does not change what priceError says about valid and invalid amounts', () => {
+    expect(priceError('1 200,50')).toBeNull();
+    expect(priceError('4500')).toBeNull();
+    expect(priceError('12.345')).toBe('card.priceInvalid');
+    expect(priceError('')).toBe('card.priceRequired');
   });
 });

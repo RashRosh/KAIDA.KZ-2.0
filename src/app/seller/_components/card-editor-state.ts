@@ -41,6 +41,15 @@ export function emptyCardValues(): CardValues {
   };
 }
 
+// What a price field may contain while it is typed or pasted: digits, group spaces and at most one decimal separator (. or ,).
+// A change that brings in anything else (a letter, a sign, a second separator) is refused as a whole — the field keeps its previous
+// text, so «12abc34» is never turned into another price. Whether the amount is valid (range, two decimals) is judged by priceError
+// and, on the server, by SELLER_INPUT_PRICE_AMOUNT_PATTERN; this only keeps stray characters out.
+const AMOUNT_TYPING = /^[\d\s  ]*(?:[.,][\d\s  ]*)?$/u;
+export function acceptAmountInput(previous: string, next: string): string {
+  return AMOUNT_TYPING.test(next) ? next : previous;
+}
+
 export function normalizeAmount(value: string): string {
   return value.replace(/[\s  ]/g, '').replace(',', '.');
 }
