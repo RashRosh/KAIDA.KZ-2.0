@@ -106,7 +106,12 @@ test('the preview from the editor: new card, several points, edit; private, iner
     await expect(editor.getByRole('combobox', { name: 'Название товара' })).toHaveValue(`Предпросмотр новая ${tag}`);
 
     // several points: a list with the price at each point, then the page of the chosen one, then back to the list
-    await choosePoints(page, [points[1]!]);
+    // the chosen point opens the same sheet: add the second one
+    await editor.getByRole('button', { name: new RegExp('^' + points[0]!) }).first().click();
+    const sheet = page.getByRole('dialog', { name: 'Торговые точки' });
+    await sheet.getByRole('checkbox', { name: new RegExp(points[1]!) }).check();
+    await sheet.getByRole('button', { name: 'Готово' }).click();
+    await expect(sheet).toHaveCount(0);
     await open.click();
     const rows = page.getByTestId('preview-point');
     await expect(rows).toHaveCount(2);
@@ -132,13 +137,12 @@ test('the preview from the editor: new card, several points, edit; private, iner
     await expect(page.getByRole('note')).toContainText('Покупатели видят прежнюю версию');
     await expect(page.getByTestId('card-preview').getByText(/9\s?900\s?₸/).first()).toBeVisible();
     const real = await (await page.request.get(`/api/search?q=${encodeURIComponent(existing.title)}`)).json();
-    expect(real.offers.find((item: { id: string }) => item.id === existing.offer).price.amount).toBe('4500.00');
+    expect(Number(real.offers.find((item: { id: string }) => item.id === existing.offer).price.amount)).toBe(4500);
 
     // Kazakh on a narrow screen with large text: the note and the page wrap, nothing sideways
     await setLocaleCookie(page.context(), 'kk');
     await page.setViewportSize({ width: 320, height: 800 });
     await page.reload();
-    await page.getByRole('button', { name: /^(Өзгерту|Барлық нүктеде өзгерту|Редактировать)/ }).first().click();
     const kk = offerEditor(page);
     await kk.getByRole('textbox', { name: /^Баға/ }).fill('9900');
     await kk.getByTestId('preview-open').click();
