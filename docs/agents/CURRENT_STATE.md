@@ -11,13 +11,13 @@
 
 ## Current task
 
-Нет активной реализации. Блок UX/search, пункты 1–4 (word forms, opening hours, price and packaging, search empty states) приняты PO и закрыты. Следующий — пункт 5 (typo suggestions): контракт не начат, ждёт отдельного поручения PO; ограничение на fuzzy не снято.
+Пункт 5 блока UX/search (search typo correction, автоматическое исправление): Slice Contract rev 3 утверждён PO (2026-10-09), идёт реализация на ветке `feat/search-typo-correction`; сначала contract PR. Приёмка PO — вручную, до неё не мержить и не тегировать. Ограничение на fuzzy снято только для этого slice (автоисправление по утверждённым правилам).
 
 Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms, opening hours и search empty states ждут KK-вычитки (отдельное дело; price and packaging новых слов не добавил).
 
 ## Next action
 
-1. По поручению PO подготовить Slice Contract пункта 5 блока UX/search (typo-correction suggestions; снятие ограничения на fuzzy — отдельное решение PO для этого slice). Порядок блока: ~~word forms~~ → ~~opening hours~~ → ~~price and packaging~~ → ~~empty states~~ → typo suggestions → post-publication buyer preview → R3 (`EXECUTION_PLAN.md`).
+1. Contract PR → merge on green; реализация по контракту (словарь и правила исправления, `/api/search?correct=1`, миграция D0, UI две строки, `typed`/last-state v4), `pnpm verify`, branch CI, изолированная сборка для приёмки, записанные тестовые карточки. Далее по порядку блока: post-publication buyer preview → R3.
 
 ## Current constraints
 
