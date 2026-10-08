@@ -246,7 +246,7 @@ test('the row is hidden with no Offers and comes back with the chosen sort', asy
 
   await field(page).fill('zzzzxq');
   await field(page).press('Enter');
-  await expect(page.getByText('По вашему запросу ничего не найдено.')).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено по запросу/)).toBeVisible();
   await expect(trigger(page)).toHaveCount(0);
 
   await field(page).fill(productName);

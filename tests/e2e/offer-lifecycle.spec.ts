@@ -57,7 +57,7 @@ test('fresh active is visible; expired and inactive are hidden without lifecycle
     );
     await input.press('Enter');
     await expect(page.getByRole('article')).toHaveCount(0);
-    await expect(page.getByRole('status')).toHaveText('Сейчас предложений нет.');
+    await expect(page.getByRole('status')).toContainText('сейчас нет предложений');
 
     await pool.query(
       'UPDATE offers SET status = $1, last_confirmed_at = $2 WHERE id = $3',
@@ -65,7 +65,7 @@ test('fresh active is visible; expired and inactive are hidden without lifecycle
     );
     await input.press('Enter');
     await expect(page.getByRole('article')).toHaveCount(0);
-    await expect(page.getByRole('status')).toHaveText('Сейчас предложений нет.');
+    await expect(page.getByRole('status')).toContainText('сейчас нет предложений');
   } finally {
     await pool.query('DELETE FROM offers WHERE id = $1', [fixture.offerId]);
     await pool.query('DELETE FROM products WHERE id = $1', [fixture.productId]);

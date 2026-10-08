@@ -58,7 +58,7 @@ const settle = (page: Page) => page.waitForTimeout(600);
 async function search(page: Page, text: string) {
   await field(page).fill(text);
   await field(page).press('Enter');
-  await expect(page.getByText(/ничего не найдено|Сейчас предложений нет|Найдено|предложен/i).first()).toBeVisible();
+  await expect(page.getByText(/ничего не найдено|сейчас нет предложений|Найдено|предложен/i).first()).toBeVisible();
 }
 
 test('a submitted search is recorded once, with only the minimal fields', async ({ page }) => {
@@ -79,7 +79,7 @@ test('choosing a Product from the suggestions is recorded as `suggestion` with t
   await page.goto('/');
   await field(page).fill(`evtzero ${marker}`.slice(0, 12));
   await page.getByRole('option', { name: zeroProductName, exact: true }).click();
-  await expect(page.getByText(/Сейчас предложений нет/)).toBeVisible();
+  await expect(page.getByText(/сейчас нет предложений/)).toBeVisible();
   await settle(page);
   const [event] = await events(normalized);
   await expect.poll(() => count(normalized)).toBe(1);
@@ -90,7 +90,7 @@ test('a chip click is recorded as `chip`', async ({ page }) => {
   await page.goto('/');
   const before = (await connection.pool.query("SELECT count(*)::int AS n FROM search_events WHERE entry = 'chip' AND query_normalized = 'кумыс'")).rows[0].n;
   await page.getByRole('button', { name: 'Кумыс', exact: true }).click();
-  await expect(page.getByText(/ничего не найдено|Сейчас предложений нет|предложен/i).first()).toBeVisible();
+  await expect(page.getByText(/ничего не найдено|сейчас нет предложений|предложен/i).first()).toBeVisible();
   await settle(page);
   const after = (await connection.pool.query("SELECT count(*)::int AS n FROM search_events WHERE entry = 'chip' AND query_normalized = 'кумыс'")).rows[0].n;
   expect(after - before).toBe(1);
@@ -149,7 +149,7 @@ test('two quick Enters give one event', async ({ page }) => {
   await field(page).fill(text);
   await field(page).press('Enter');
   await field(page).press('Enter');
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await expect.poll(() => count(text)).toBe(1);
   await settle(page);
   await expect.poll(() => count(text)).toBe(1);
@@ -164,19 +164,19 @@ test('First Entry: the first search is recorded once; reload, Back and restorati
   await page.getByRole('searchbox').first().fill(text);
   await page.getByRole('searchbox').first().press('Enter');
   await expect(page).toHaveURL(/\/\?q=/);
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await settle(page);
   await expect.poll(() => count(text)).toBe(1);
   expect(new URL(page.url()).search).toBe(`?q=${encodeURIComponent(text).replace(/%20/g, '+')}`);
 
   await page.reload();
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await page.goBack();
   await page.goForward();
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await page.getByRole('navigation').getByRole('link', { name: 'Ещё', exact: true }).click();
   await page.getByRole('navigation').getByRole('link', { name: 'Поиск', exact: true }).click();
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await settle(page);
   await expect.poll(() => count(text)).toBe(1);
   await context.close();
@@ -196,7 +196,7 @@ test('a failed search records nothing; the retry records the deliberate search o
   await settle(page);
   expect(await count(text)).toBe(0);
   await page.getByRole('button', { name: 'Повторить' }).click();
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await settle(page);
   await expect.poll(() => count(text)).toBe(1);
 });
@@ -218,7 +218,7 @@ test('a lost response followed by a retry can duplicate the event — the docume
   await field(page).press('Enter');
   await expect(page.getByRole('button', { name: 'Повторить' })).toBeVisible();
   await page.getByRole('button', { name: 'Повторить' }).click();
-  await expect(page.getByText(/ничего не найдено/).first()).toBeVisible();
+  await expect(page.getByText(/Ничего не найдено/).first()).toBeVisible();
   await settle(page);
   await expect.poll(() => count(text)).toBe(2);
 });
