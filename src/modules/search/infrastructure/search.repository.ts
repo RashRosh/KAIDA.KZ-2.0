@@ -2,11 +2,8 @@ import { and, asc, eq, inArray, or, sql, type SQL } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { sellers } from '../../sellers/db/sellers.table';
 import { findVerifiedPhonesBySellers } from '../../locations/details/point-details.repository';
-import { projectPointPublicContacts } from '../../locations/details/point-public-contacts';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
-import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
-import { formatPack, packFromColumns } from '../../offers/pack/pack';
 import { offerCoverPhotoIdSelection } from '../../offers/infrastructure/offer-cover-photo.projection';
 import { buyerVisibleOffersPredicate } from '../../offers/visibility/buyer-offer-visibility';
 import { offerCommentTranslations } from '../../offers/db/offer-comment-translations.table';
@@ -16,9 +13,9 @@ import {
   projectBuyerCommentTranslation,
 } from '../../offers/translation/buyer-comment-translation.projection';
 import { isSellerCommentTranslationEnabled } from '../../offers/translation/seller-comment-translation.config';
-import type { SearchOffer } from '../contracts/search.contract';
 import type { SearchRankingCandidate } from '../ranking/search-ranking';
 import { getWordFormDictionary } from '../word-forms/word-forms';
+import { projectBuyerOffer } from '../projection/buyer-offer-projection';
 
 // A read projection across the four owning modules; lifecycle and buyer-visibility semantics stay outside Search.
 // S9 private ranking metadata remains beside, never inside, the public SearchOffer payload.
@@ -35,9 +32,6 @@ export async function findOffersByProductOrTitleWords(
   return findBuyerVisibleOffers(db, match, cutoff, locale, commentTranslationEnabled);
 }
 
-function withPack(pack: string | null) {
-  return pack === null ? {} : { pack };
-}
 
 // search-word-forms: a query word matches by prefix (as before) OR, when the reviewed dictionary knows it, when the title
 // has exactly one of the forms of its group. A word outside the dictionary matches by prefix only; every word is required.
@@ -150,25 +144,26 @@ async function findBuyerVisibleOffers(
       throw new Error('Buyer-visible Offer has invalid price');
     }
 
-    const locationGeo = locationLatitude === null || locationLongitude === null
-      ? null
-      : { latitude: locationLatitude, longitude: locationLongitude };
-
-    const offer: SearchOffer = {
-      ...rest,
-      // The card title is the Seller's own text in every interface language; id is the optional catalog link.
-      product: { id: selectedProductId, name: title },
-      ...withPack(formatPack(packFromColumns(packAmount, packUnit), locale)),
-      location: {
-        ...rest.location,
-        ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),
-      },
-      price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
-      // stage 5A: public route capability, derived from the existing route prerequisite (complete Location
-      // coordinates); the coordinates themselves never enter the public payload.
-      routeAvailable: locationGeo !== null,
-      ...(coverPhotoId ? { coverPhotoId } : {}),
-    };
+    // the buyer's public view of the Offer: one pure projection shared with the Seller's pre-publication preview
+    const { offer, locationGeo } = projectBuyerOffer({
+      id: rest.id,
+      productId: selectedProductId,
+      title,
+      packAmount,
+      packUnit,
+      seller: rest.seller,
+      location: rest.location,
+      locationPhoneE164,
+      locationWhatsappPhoneE164,
+      verifiedPhones: verifiedBySeller.get(rest.seller.id),
+      priceAmount,
+      priceUnitCode,
+      priceUnitValue,
+      sellerComment: rest.sellerComment,
+      coverPhotoId: coverPhotoId ?? null,
+      locationLatitude,
+      locationLongitude,
+    }, locale);
     const sellerCommentTranslation = projectBuyerCommentTranslation({
       enabled: commentTranslationEnabled,
       locale,

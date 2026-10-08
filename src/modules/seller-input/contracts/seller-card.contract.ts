@@ -22,9 +22,9 @@ export const cardUnitSchema = z.union([
   z.object({ code: z.literal('other'), value: z.string().trim().regex(/^\p{L}{1,20}$/u) }).strict(),
 ]).transform((value): PriceUnit => value);
 
-const commentSchema = z.string().trim().max(500).transform((value) => value === '' ? null : value).nullable();
+export const cardCommentSchema = z.string().trim().max(500).transform((value) => value === '' ? null : value).nullable();
 
-const photoIdsSchema = z.array(z.uuid()).max(5)
+export const cardPhotoIdsSchema = z.array(z.uuid()).max(5)
   .refine((ids) => new Set(ids).size === ids.length, 'Photo ids must be unique');
 
 const sharedFields = {
@@ -34,8 +34,8 @@ const sharedFields = {
   price: cardPriceAmountSchema,
   unit: cardUnitSchema,
   pack: packInputSchema.nullable(),
-  sellerComment: commentSchema,
-  photoIds: photoIdsSchema,
+  sellerComment: cardCommentSchema,
+  photoIds: cardPhotoIdsSchema,
 };
 
 function packFitsUnit(value: { unit: PriceUnit; pack: unknown }) {
