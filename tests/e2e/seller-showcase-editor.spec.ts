@@ -142,11 +142,11 @@ test('a new card in two of three points with an own price is published after the
       [points[2], '5200', true],
     ]);
 
-    // Buyers find it by the start of a word and see the pack.
+    // Buyers find it by the start of a word; the pack is the price basis («/ 600 г»), card-price-packaging.
     await page.goto('/?q=' + encodeURIComponent('лопат'));
     const result = page.getByRole('article').filter({ hasText: points[2]! });
     await expect(result).toContainText('Баранина, лопатка');
-    await expect(result).toContainText('600 г');
+    await expect(result).toContainText(/₸\s*\/\s*600\s*г/u);
   } finally {
     await cleanup(phone);
   }
