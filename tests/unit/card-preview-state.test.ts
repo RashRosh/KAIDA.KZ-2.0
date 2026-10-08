@@ -50,7 +50,7 @@ describe('previewBody', () => {
       { kind: 'create' },
       [P1],
     );
-    expect(body.kind).toBe('create');
+    if (body.kind !== 'create') throw new Error('create expected');
     expect(body.photoIds).toEqual([P1]);
     expect(body.points.map((point) => point.locationId)).toEqual([LA, LB]);
     expect(body.points[0]).not.toHaveProperty('ownPrice');
