@@ -1,0 +1,319 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Price and packaging — mobile preview</title>
+<link rel="stylesheet" href="/node_modules/@fontsource/roboto/400.css"><link rel="stylesheet" href="/node_modules/@fontsource/roboto/500.css"><link rel="stylesheet" href="/node_modules/@fontsource/roboto/700.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/400.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/500.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/600.css"><link rel="stylesheet" href="/node_modules/@fontsource/geologica/700.css">
+<link rel="stylesheet" href="/src/app/globals.css"><link rel="stylesheet" href="/src/app/seller/kaida.css"><link rel="stylesheet" href="/src/app/seller/kaida-app.css"><style>
+body{margin:0;background:#e9e5ec;font-family:system-ui,sans-serif;color:#19161b}
+h1.t{font:600 20px/26px system-ui;margin:16px 16px 4px} .lead{margin:0 16px 12px;font:14px/20px system-ui;color:#4d474f;max-width:760px}
+h2{font:600 16px/22px system-ui;margin:24px 16px 8px;max-width:760px}
+.row{display:flex;flex-wrap:wrap;gap:16px;padding:0 16px 8px;align-items:flex-start}
+.pv{margin:0} .pv figcaption{font:600 13px/18px system-ui;margin:0 0 6px;max-width:340px} .pv figcaption small{display:block;font-weight:400;color:#4d474f}
+.pv-screen{background:#faf8fb;border:1px solid #c9c3cc;border-radius:12px;overflow:hidden}
+.kaida .plaque{position:absolute;left:6px;bottom:6px;background:#fff;border:1px solid var(--line-control);border-radius:10px;padding:0 6px;font:600 11px/16px var(--sans);color:var(--ink)}
+.kaida .linkcard .ct{position:relative;z-index:1}
+.kaida .h1{font:700 22px/28px var(--display)}
+/* proposed: the amount never breaks; the unit and the pack follow and may wrap */
+.pl{display:block}
+.amt{white-space:nowrap}
+.pq{font-size:14px;line-height:20px;overflow-wrap:anywhere}
+.pq.lg{font-size:16px;line-height:22px}
+.pk{white-space:nowrap}
+</style></head><body>
+<h1 class="t">Цена и упаковка: карточка выдачи и страница предложения — макет для утверждения (не приложение)</h1>
+<p class="lead">Статический прототип на настоящих стилях и шрифтах приложения (Roboto, Geologica). Названия, цены, единицы и размер упаковки — данные продавца, они не меняются и не пересчитываются; меняется только то, как цена связана с количеством.</p>
+<h2>0 · Сейчас (для сравнения): отдельная строка с упаковкой над ценой, «/ упак.» без размера</h2><div class="row"><figure class="pv"><figcaption>Сейчас · мёд: «1 литр» в названии, «1 л» отдельной строкой, «/ упак.»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Мёд липовый 1 литр</a></h3>
+      <p class="c c2" style="font-weight:500;margin:0">1 л</p><div><span class="pr">4 500 ₸</span> <span class="c2" style="font-size:14px">/ упак.</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Сейчас · сыр: «500 г» в названии и отдельной строкой</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Сыр Российский 500 г</a></h3>
+      <p class="c c2" style="font-weight:500;margin:0">500 г</p><div><span class="pr">2 100 ₸</span> <span class="c2" style="font-size:14px">/ упак.</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Сейчас · упаковка без размера: «/ упак.»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Сок яблочный</a></h3>
+      <div><span class="pr">800 ₸</span> <span class="c2" style="font-size:14px">/ упак.</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure></div>
+<h2>A · Предложение: количество упаковки становится основой цены через «/», ярлык тары скрыт; ровно 1 единица — без числа (карточка, RU, 360 px)</h2><div class="row"><figure class="pv"><figcaption>Упаковка 800 г, 4 000 ₸ → «/ 800 г»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Творог домашний</a></h3>
+      <div class="pl"><span class="pr amt">4 000 ₸</span> <span class="pq c2"><span class="pk">/ 800 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Упаковка 250 мл, 1 500 ₸ → «/ 250 мл»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Сок гранатовый</a></h3>
+      <div class="pl"><span class="pr amt">1 500 ₸</span> <span class="pq c2"><span class="pk">/ 250 мл</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Мёд, упаковка 1 л → «/ л» (без числа)<small>«1 литр» в названии — текст продавца, он не меняется</small></figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Мёд липовый 1 литр</a></h3>
+      <div class="pl"><span class="pr amt">4 500 ₸</span> <span class="pq c2"><span class="pk">/ л</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Упаковка 1 кг → «/ кг»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Орехи грецкие</a></h3>
+      <div class="pl"><span class="pr amt">4 500 ₸</span> <span class="pq c2"><span class="pk">/ кг</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>1000 г остаётся «/ 1000 г», не «/ кг»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Мука пшеничная</a></h3>
+      <div class="pl"><span class="pr amt">900 ₸</span> <span class="pq c2"><span class="pk">/ 1000 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Сыр, упаковка 500 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Сыр Российский 500 г</a></h3>
+      <div class="pl"><span class="pr amt">2 100 ₸</span> <span class="pq c2"><span class="pk">/ 500 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Штука с весом: 250 ₸ / 200 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Курага сушёная</a></h3>
+      <div class="pl"><span class="pr amt">250 ₸</span> <span class="pq c2"><span class="pk">/ 200 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Обычная цена за килограмм сохраняется</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Баранина, лопатка</a></h3>
+      <div class="pl"><span class="pr amt">4 200 ₸</span> <span class="pq c2">/ кг</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Мёд, цена за литр сохраняется</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Мёд липовый</a></h3>
+      <div class="pl"><span class="pr amt">4 500 ₸</span> <span class="pq c2">/ л</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Упаковка без количества → единица продавца «/ упак.»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Сок яблочный</a></h3>
+      <div class="pl"><span class="pr amt">800 ₸</span> <span class="pq c2">/ упак.</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Своя единица: пучок</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Укроп свежий</a></h3>
+      <div class="pl"><span class="pr amt">150 ₸</span> <span class="pq c2">/ пучок</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Своя единица: коробка</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Яйца фермерские</a></h3>
+      <div class="pl"><span class="pr amt">1 800 ₸</span> <span class="pq c2">/ коробка</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Ни единицы, ни количества: только цена</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Яйца куриные</a></h3>
+      <div class="pl"><span class="pr amt">1 200 ₸</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>Длинное название (2 строки, дальше обрезается как сейчас)</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Говядина вырезка охлаждённая высший сорт в вакуумной упаковке, 1 кусок около 1,5 кг</a></h3>
+      <div class="pl"><span class="pr amt">5 900 ₸</span> <span class="pq c2">/ кг</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure></div>
+<h2>B · Страница предложения (RU, 360 px): та же строка, крупная цена; ни отдельной строки, ни пометки о размере</h2><div class="row"><figure class="pv"><figcaption>Творог · упаковка 800 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Творог домашний</h1><div class="pl"><span class="pr-lg amt">4 000 ₸</span> <span class="pq c2 lg"><span class="pk">/ 800 г</span></span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>Сыр · упаковка 500 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Сыр Российский 500 г</h1><div class="pl"><span class="pr-lg amt">2 100 ₸</span> <span class="pq c2 lg"><span class="pk">/ 500 г</span></span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>Упаковка без количества</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Сок яблочный</h1><div class="pl"><span class="pr-lg amt">800 ₸</span> <span class="pq c2 lg">/ упак.</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>Штука с весом</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Курага сушёная</h1><div class="pl"><span class="pr-lg amt">250 ₸</span> <span class="pq c2 lg"><span class="pk">/ 200 г</span></span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>Длинная своя единица</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Зелень свежая</h1><div class="pl"><span class="pr-lg amt">1 150 ₸</span> <span class="pq c2 lg">/ связка из трёх больших пучков зелени</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>Длинное название · кг</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Говядина вырезка охлаждённая высший сорт в вакуумной упаковке, 1 кусок около 1,5 кг</h1><div class="pl"><span class="pr-lg amt">5 900 ₸</span> <span class="pq c2 lg">/ кг</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure></div>
+<h2>C · Казахский (360 px)</h2><div class="row"><figure class="pv"><figcaption>KK · килограмм</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Қой еті, жауырын</a></h3>
+      <div class="pl"><span class="pr amt">4 200 ₸</span> <span class="pq c2">/ кг</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · қаптама 500 г → «/ 500 г»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Ресей ірімшігі 500 г</a></h3>
+      <div class="pl"><span class="pr amt">2 100 ₸</span> <span class="pq c2"><span class="pk">/ 500 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · қаптама 1 л → «/ л»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Жайлау балы 1 литр</a></h3>
+      <div class="pl"><span class="pr amt">4 500 ₸</span> <span class="pq c2"><span class="pk">/ л</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · 1000 г → «/ 1000 г»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Бидай ұны</a></h3>
+      <div class="pl"><span class="pr amt">900 ₸</span> <span class="pq c2"><span class="pk">/ 1000 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · қаптама 250 мл</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Анар шырыны</a></h3>
+      <div class="pl"><span class="pr amt">1 500 ₸</span> <span class="pq c2"><span class="pk">/ 250 мл</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · дана 200 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Кептірілген өрік</a></h3>
+      <div class="pl"><span class="pr amt">250 ₸</span> <span class="pq c2"><span class="pk">/ 200 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · көлемі жоқ қаптама → «/ қапт.»</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Алма шырыны</a></h3>
+      <div class="pl"><span class="pr amt">800 ₸</span> <span class="pq c2">/ қапт.</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · өз бірлігі: қорап</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Фермерлік жұмыртқа</a></h3>
+      <div class="pl"><span class="pr amt">1 800 ₸</span> <span class="pq c2">/ қорап</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · страница предложения · қаптама 500 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Ресей ірімшігі 500 г</h1><div class="pl"><span class="pr-lg amt">2 100 ₸</span> <span class="pq c2 lg"><span class="pk">/ 500 г</span></span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button></article></div></div></figure><figure class="pv"><figcaption>KK · страница предложения · көлемі жоқ қаптама</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Алма шырыны</h1><div class="pl"><span class="pr-lg amt">800 ₸</span> <span class="pq c2 lg">/ қапт.</span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button></article></div></div></figure></div>
+<h2>D · Узкая ширина 320 px</h2><div class="row"><figure class="pv"><figcaption>RU · мёд, упаковка 1 л</figcaption><div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Мёд липовый 1 литр</a></h3>
+      <div class="pl"><span class="pr amt">4 500 ₸</span> <span class="pq c2"><span class="pk">/ л</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>RU · длинная своя единица</figcaption><div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Зелень свежая</a></h3>
+      <div class="pl"><span class="pr amt">1 150 ₸</span> <span class="pq c2">/ связка из трёх больших пучков зелени</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · длинная своя единица</figcaption><div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Жаңа жасыл көкөніс</a></h3>
+      <div class="pl"><span class="pr amt">1 150 ₸</span> <span class="pq c2">/ үш үлкен бума көкөністен тұратын шоқ</span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>KK · қаптама 500 г</figcaption><div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Ресей ірімшігі 500 г</a></h3>
+      <div class="pl"><span class="pr amt">2 100 ₸</span> <span class="pq c2"><span class="pk">/ 500 г</span></span></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>RU · страница · длинная своя единица</figcaption><div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Зелень свежая</h1><div class="pl"><span class="pr-lg amt">1 150 ₸</span> <span class="pq c2 lg">/ связка из трёх больших пучков зелени</span></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>KK · страница · көлемі жоқ қаптама</figcaption><div class="pv-screen" style="width:320px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Алма шырыны</h1><div class="pl"><span class="pr-lg amt">800 ₸</span> <span class="pq c2 lg">/ қапт.</span></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button></article></div></div></figure></div>
+<h2>E · Крупный шрифт: блок цены увеличен ×1,5 и ×2 на карточке 360 px (остальное без изменений)</h2><div class="row"><figure class="pv"><figcaption>×1.5 · RU · cheese</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Сыр Российский 500 г</a></h3>
+      <div style="zoom:1.5"><div class="pl"><span class="pr amt">2 100 ₸</span> <span class="pq c2"><span class="pk">/ 500 г</span></span></div></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>×1.5 · RU · longcustom</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Зелень свежая</a></h3>
+      <div style="zoom:1.5"><div class="pl"><span class="pr amt">1 150 ₸</span> <span class="pq c2">/ связка из трёх больших пучков зелени</span></div></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>×2 · KK · cheese</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 күн</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Ресей ірімшігі 500 г</a></h3>
+      <div style="zoom:2"><div class="pl"><span class="pr amt">2 100 ₸</span> <span class="pq c2"><span class="pk">/ 500 г</span></span></div></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Жасыл базар</p><p class="c">Алматы, Жасыл базар, 12-павильон · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>×2 · RU · piece</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:10px"><article class="card linkcard" style="gap:10px;position:relative"><div style="display:flex;gap:12px">
+    <div class="img fb" style="width:112px;height:112px;border-radius:12px;flex:none"><span class="ic i-logo"></span><span class="plaque">1 день</span></div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <h3 class="h3 clamp2" style="font-size:16px;line-height:21px;margin:0"><a href="#" class="stretch">Курага сушёная</a></h3>
+      <div style="zoom:2"><div class="pl"><span class="pr amt">250 ₸</span> <span class="pq c2"><span class="pk">/ 200 г</span></span></div></div>
+      <p class="c c2" style="margin-top:2px">Асыл Ет · Зелёный базар</p><p class="c">Алматы, Зелёный базар, павильон 12 · 1,2 км</p>
+    </div></div>
+    <div style="display:flex;align-items:center;gap:4px"><a class="ct route" href="#"><span class="ic sm i-route"></span>Маршрут</a><span class="sp"></span></div></article></div></div></figure><figure class="pv"><figcaption>×1,5 · страница · сыр 500 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 день</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Сыр Российский 500 г</h1><div style="zoom:1.5"><div class="pl"><span class="pr-lg amt">2 100 ₸</span> <span class="pq c2 lg"><span class="pk">/ 500 г</span></span></div></div>
+    <p class="t c2" style="margin:0">Свежий привоз.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Зелёный базар</div><p class="c">Алматы, Зелёный базар, павильон 12</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>В избранное</button></article></div></div></figure><figure class="pv"><figcaption>×2 · страница · KK қаптама 500 г</figcaption><div class="pv-screen" style="width:360px"><div class="kaida" style="background:var(--bg);"><div class="img fb" style="width:100%;height:160px;border-radius:0;align-items:flex-end"><span class="plaque">1 күн</span></div>
+  <article style="display:flex;flex-direction:column;gap:14px;padding:16px">
+    <h1 class="h1" style="margin:0">Ресей ірімшігі 500 г</h1><div style="zoom:2"><div class="pl"><span class="pr-lg amt">2 100 ₸</span> <span class="pq c2 lg"><span class="pk">/ 500 г</span></span></div></div>
+    <p class="t c2" style="margin:0">Жаңа әкелінген.</p>
+    <div class="card p16" style="gap:10px"><div style="display:flex;gap:10px"><span class="ic pt i-pin"></span><div style="flex:1;min-width:0"><div class="ts" style="font-weight:600">Асыл Ет · Жасыл базар</div><p class="c">Алматы, Жасыл базар, 12-павильон</p></div></div></div>
+    <button type="button" class="btn btn-o w"><span class="ic sm i-star"></span>Таңдаулыларға қосу</button></article></div></div></figure></div>
+</body></html>
