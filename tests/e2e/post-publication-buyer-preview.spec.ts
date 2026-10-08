@@ -9,7 +9,7 @@ import { setLocaleCookie } from './buyer-helpers';
 // the Offer; the page is the buyer's own (a note and a way back are added, the interest action is gone).
 
 function phoneFor(projectName: string) {
-  return `+7700003${projectName === 'mobile' ? '8' : '9'}0000`;
+  return `+7700003${projectName === 'mobile' ? '8' : '9'}000`;
 }
 async function withPool<T>(run: (pool: Pool) => Promise<T>) {
   const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
