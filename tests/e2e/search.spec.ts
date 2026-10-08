@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('lamb: search by the arrow, full offer, responsive layout and refresh', async ({ page }, testInfo) => {
   await page.goto('/welcome');
-  await expect(page.getByText('По вашему запросу ничего не найдено.')).toHaveCount(0);
+  await expect(page.getByText(/Ничего не найдено по запросу/)).toHaveCount(0);
   const searchRegion = page.getByRole('search', { name: 'Поиск предложений' });
   // The arrow appears only while there is text in the field (First Entry).
   await expect(searchRegion.getByRole('button', { name: 'Искать', exact: true })).toHaveCount(0);
@@ -55,7 +55,7 @@ test('popular shortcut under an empty result executes the same real Search flow'
   // The start page carries the example instead of the shortcuts; they wait under a result with nothing in it.
   await page.getByLabel('Какой товар ищете?').fill('единорог');
   await page.getByLabel('Какой товар ищете?').press('Enter');
-  await expect(page.getByRole('status')).toHaveText('По вашему запросу ничего не найдено.');
+  await expect(page.getByRole('status')).toContainText('Ничего не найдено по запросу');
   const responsePromise = page.waitForResponse((response) => response.url().includes('/api/search?'));
   await page.getByRole('group', { name: 'Популярные запросы' }).getByRole('button', { name: 'Баранина', exact: true }).click();
   const response = await responsePromise;
@@ -74,7 +74,7 @@ test('unknown product clears the previous result', async ({ page }) => {
   await expect(seedCard).toHaveCount(1);
   await input.fill('единорог');
   await input.press('Enter');
-  await expect(page.getByRole('status')).toHaveText('По вашему запросу ничего не найдено.');
+  await expect(page.getByRole('status')).toContainText('Ничего не найдено по запросу');
   await expect(page.getByRole('article')).toHaveCount(0);
 });
 

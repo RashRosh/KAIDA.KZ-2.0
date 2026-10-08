@@ -27,7 +27,7 @@ export function cameFromList() {
 export type BuyerSection = 'search' | 'nearby' | 'more';
 
 // «Рядом» from the navigation starts locating at once (UX1C); a modified click just opens the page.
-function markNearbyIntent(event: MouseEvent<HTMLAnchorElement>) {
+export function markNearbyIntent(event: MouseEvent<HTMLAnchorElement>) {
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   try {
     window.sessionStorage.setItem(NEARBY_NAV_INTENT_KEY, '1');

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
@@ -18,7 +19,7 @@ import {
 } from '../../../modules/search/contracts/search.contract';
 import { normalizeGeoDependentState, readLastSearchState, writeLastSearchState } from '../../../modules/search/last-search-state';
 import { Ic } from '../../seller/_kaida/ui';
-import { BuyerScreen, ResultCard, ResultSkeletons } from './buyer-ui';
+import { BuyerScreen, markNearbyIntent, ResultCard, ResultSkeletons } from './buyer-ui';
 import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } from './product-suggestions';
 import { SortControl } from './SortPopover';
 import { IntentSuppression, consumeFirstEntryHandoff, intentKey } from './search-intent';
@@ -450,8 +451,10 @@ export function SearchScreen() {
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
-      ? visibleOffers.length === 0 ? t(shown?.resolvedProduct ? 'search.emptyKnown' : 'search.empty') : offerCount(locale, visibleOffers.length)
+      ? visibleOffers.length === 0 ? '' : offerCount(locale, visibleOffers.length)
       : '';
+  // search-empty-states: a finished search with no Offers; known Product and unresolved query keep their own words.
+  const emptyKind = !loading && state.kind === 'success' && visibleOffers.length === 0 && shown ? (shown.resolvedProduct ? 'Known' : 'Unknown') : null;
 
   return (
     <BuyerScreen
@@ -471,7 +474,24 @@ export function SearchScreen() {
             <div style={{ display: 'flex', gap: 10 }}><Ic name="locate" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t('search.distanceNeedsLocation')}</p></div>
           </div>
         )}
-        <p className={visibleOffers.length > 0 && !loading ? 'vh' : 'c'} role="status" aria-live="polite" aria-atomic="true">{feedback}</p>
+        {/* One persistent live region: the empty-state title and hint (search-empty-states) or the count line. */}
+        <div role="status" aria-live="polite" aria-atomic="true" className={emptyKind ? undefined : visibleOffers.length > 0 && !loading ? 'vh' : undefined}
+          style={emptyKind ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center', padding: '24px 8px 0' } : undefined}>
+          {emptyKind && shown ? (
+            <>
+              <h2 className="h3" style={{ margin: 0, overflowWrap: 'anywhere', textWrap: 'balance' }}>{t(`search.empty${emptyKind}Title`, { query: shown.query })}</h2>
+              <p className="t c2" style={{ margin: 0, maxWidth: '34ch' }}>{t(`search.empty${emptyKind}Hint`)}</p>
+            </>
+          ) : (
+            <p className="c">{feedback}</p>
+          )}
+        </div>
+        {emptyKind && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: '0 8px' }}>
+            <button type="button" className="btn btn-p w" onClick={() => { input.current?.focus(); input.current?.select(); }}><Ic name="pencil" className="sm" />{t('search.editQuery')}</button>
+            <Link href="/nearby" className="btn btn-o w" onClick={markNearbyIntent}><Ic name="pin" className="sm" />{t('search.seeNearby')}</Link>
+          </div>
+        )}
         {state.kind === 'error' && (
           <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14, gap: 8 }}>
             <div style={{ display: 'flex', gap: 10 }}><Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('search.error')}</p></div>

@@ -89,7 +89,7 @@ test('a selected Product with an empty candidate set says there are no offers', 
   await page.goto('/');
   await field(page).fill('тунец');
   await page.getByRole('option', { name: 'Тунец', exact: true }).click();
-  await expect(page.getByRole('status')).toHaveText('Сейчас предложений нет.');
+  await expect(page.getByRole('status')).toContainText('сейчас нет предложений');
 });
 
 test('keyboard: arrows move the active option and Enter chooses it; Escape closes the list', async ({ page }) => {
