@@ -121,7 +121,101 @@ Therefore:
 
 This restriction applies to equivalent hosted decision services as well.
 
-## 4. Candidate architecture, not a commitment
+## 4. Liquid AI — local decision / generation candidates
+
+Sources:
+- https://www.liquid.ai/blog/d1-open
+- https://huggingface.co/LiquidAI/d1-3B
+- https://huggingface.co/LiquidAI/d1-3B-GGUF
+- https://huggingface.co/LiquidAI/LFM2.5-2.6B
+- https://huggingface.co/LiquidAI/LFM2.5-Embedding-350M
+- https://huggingface.co/LiquidAI/d1-omni-600M
+- https://www.liquid.ai/lfm-license
+
+### d1-3B — preferred local decision-model candidate
+
+Liquid released `d1-3B` as a 3.12B-parameter multimodal decision model. It takes a state (text, JSON, image, or a mix) plus typed questions and returns calibrated answers such as yes/no, one choice from named options, or an ordered score. It is not a chat model and does not generate prose.
+
+This matches several KAIDA needs unusually well:
+
+- choose one `Product` from a short candidate list;
+- answer `none / ambiguous / confident match`;
+- check whether an extracted price/status/product interpretation contradicts the raw seller input;
+- produce a confidence gate before a row enters `SellerChangeSet` preview;
+- act as a local second-opinion / guard without sending data to an external decision API.
+
+Candidate path:
+
+```text
+seller input
+→ extraction
+→ lexical / embedding top-K Product candidates
+→ d1-3B typed decision
+→ Product / none / ambiguity + confidence
+→ proposed SellerChangeItem
+→ seller review
+```
+
+Important operational advantage over Jev: `d1-3B` is open-weight and can run locally. Liquid publishes GGUF builds; the current `Q4_K_M` artifact is about 1.67 GB and is documented for `llama.cpp` and Ollama. This makes it a plausible Kazakhstan-hosted production candidate if its KAIDA benchmark is good enough.
+
+Language support must **not** be assumed from the generic “16 languages” model tag. The d1 model card currently does not enumerate Russian/Kazakh support in enough detail to waive testing. KAIDA must benchmark Russian, Kazakh and mixed-language seller input explicitly.
+
+### LFM2.5-2.6B — generative competitor to the selected Qwen-class extractor
+
+`LFM2.5-2.6B` is a 2.69B general-purpose text model with local GGUF/ONNX deployment options and an official language list that includes Russian but does not include Kazakh.
+
+Use it as a benchmark candidate for:
+- seller text → structured facts;
+- latency / CPU / RAM comparison against Qwen-class models;
+- lightweight fallback or specialist tasks where Russian performance is sufficient.
+
+Do **not** replace the Qwen/Kazakh-oriented candidate by default. Kazakh and mixed RU/KK performance remain a mandatory test.
+
+### LFM2.5-Embedding-350M / ColBERT-350M — low priority for KAIDA today
+
+Liquid's retrieval models are compact and explicitly target semantic product search, but their documented supported languages currently do **not** include Russian or Kazakh.
+
+Therefore they are not first-line KAIDA embedding candidates today. They may be retested later if language support expands or a KAIDA-specific fine-tune becomes justified by evidence.
+
+### d1-omni-600M — interesting future multimodal guard, not a voice solution today
+
+`d1-omni-600M` accepts text/image and text/audio and is intended for typed decisions such as routing, classification, reranking and checks. However, Liquid states that the audio capability was trained on requests between an English speaker and an assistant.
+
+Therefore it is **not** a validated RU/KK Seller Voice solution. Keep it as a future experiment only.
+
+### License risk
+
+Liquid models use the **LFM Open License v1.0**, not Apache 2.0.
+
+Current terms allow commercial use without a separate paid license while company annual revenue is below USD 10 million. Above that threshold, commercial use requires a commercial license from Liquid AI.
+
+For KAIDA this is not a current blocker, but it is a real future vendor/licensing constraint and must be included in any production decision. Apache-2.0 alternatives retain lower licensing risk.
+
+### Current ranking of roles
+
+As of 2026-10-08, the working benchmark order is:
+
+```text
+Structured Seller extraction:
+Qwen/Kazakh-oriented local model
+vs LFM2.5-2.6B
+vs other current small local models
+
+Semantic Product candidate generation:
+EmbeddingGemma 2
+vs other RU/KK-capable local embeddings
+vs deterministic aliases/fuzzy baseline
+
+Typed Product resolution / confidence:
+d1-3B
+vs Jev on synthetic data
+vs generative LLM resolver
+vs other local decision models
+```
+
+This ranking is a research hypothesis only. Benchmark results, not model reputation, decide adoption.
+
+## 5. Candidate architecture, not a commitment
 
 A useful future pipeline to benchmark is:
 
@@ -163,7 +257,7 @@ query
 
 This is a benchmark hypothesis, not an approved implementation design.
 
-## 5. Mandatory evaluation gate
+## 6. Mandatory evaluation gate
 
 When the relevant Search or AI Input slice starts, compare at least:
 
@@ -172,7 +266,8 @@ When the relevant Search or AI Input slice starts, compare at least:
 3. other strong local multilingual embedding models available at that date;
 4. generative local resolver (for example the selected Qwen-class model);
 5. Jev or similar typed-decision service **only on synthetic data unless residency becomes compliant**;
-6. local/open alternatives to Jev available at that date.
+6. Liquid d1-3B and other local/open alternatives to Jev available at that date;
+7. LFM2.5-2.6B and other small local generative competitors to the selected Qwen-class extractor.
 
 Evaluation corpus must include:
 - Russian;
@@ -197,7 +292,7 @@ Metrics should be task-specific, for example:
 
 A more expensive or larger model is accepted only if it materially improves the metric that blocks product quality.
 
-## 6. Storage / infrastructure hypothesis
+## 7. Storage / infrastructure hypothesis
 
 If semantic vectors are proven useful, prefer the smallest architecture that works:
 
@@ -209,7 +304,7 @@ PostgreSQL
 
 Do not introduce a separate vector database, external semantic-search SaaS, or AI orchestration platform without measured need.
 
-## 7. Trigger points
+## 8. Trigger points
 
 Revisit this note when one of these begins:
 
