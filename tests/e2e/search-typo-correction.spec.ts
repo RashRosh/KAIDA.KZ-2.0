@@ -77,8 +77,11 @@ test('a mistyped query shows the corrected results with two text lines; «search
     await expect(page.getByRole('status').filter({ hasText: 'Ничего не найдено по запросу «малако»' })).toBeVisible();
     // Back from the typed state returns to the corrected results
     await page.goBack();
+    await expect(page).toHaveURL(//more/);
     await page.goBack();
+    await expect(page).toHaveURL(/typed=1/);
     await page.goBack();
+    await expect(page).toHaveURL(//?q=[^&]*$/);
     await expect(page.getByText('Показаны результаты по запросу')).toBeVisible();
     // a new deliberate search with the same text switches the correction on again
     await search(page, 'малако');
