@@ -10,10 +10,12 @@ import { PRICE_UNIT_LABELS } from '../../../modules/offers/price-unit/price-unit
 import type { SellerChangeSetView } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
+import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/format-amount';
 import { Bar, Check, ErrorLine, focusPointEditLabel, Ic, Phone, PointEditLabel, Radio, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { CommentTranslationAssist } from './CommentTranslationAssist';
 import { PhotoField, readyPhotoIds, readyTiles, type PhotoTile } from './PhotoField';
+import { CardPreviewScreen, type PreviewState } from './CardPreviewScreen';
 import { SellerTradingPoints } from './SellerTradingPoints';
 import { AddressSuggestionInput } from './AddressSuggestionInput';
 import { pluralKey, type SellerCard } from './card-model';
@@ -25,6 +27,8 @@ import {
   keepsLink,
   normalizeAmount,
   packAllowed,
+  previewAvailability,
+  previewBody,
   priceError,
   sameCardValues,
   unitDraftFrom,
@@ -122,6 +126,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const [overlay, setOverlay] = useState<'discard' | 'deleteDraft' | 'unit' | 'points' | null>(null);
   // Full-screen steps of the editor: the form, the per-point prices (AI-S11), one point's price, a new point.
   const [view, setView] = useState<'form' | 'prices' | 'newPoint' | { pricePoint: string } | { editPoint: string }>('form');
+  // pre-publication-buyer-preview: the Seller's private preview of this card (a screen of the editor; the form stays mounted)
+  const [preview, setPreview] = useState<PreviewState | null>(null);
   const [pointAdded, setPointAdded] = useState(false);
   const [pointSaved, setPointSaved] = useState(false);
   const [newPoint, setNewPoint] = useState<NewPoint>({ name: '', addressText: '', addressDirectoryEntryId: null, type: 'shop', sellerName: '' });
@@ -154,6 +160,41 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const dirty = !sameCardValues(values, start) || photosChanged;
   const cardOffers = mode.kind === 'create' ? [] : mode.card.offers;
   const cardLocationIds = new Set(cardOffers.map((offer) => offer.location.id));
+
+  // pre-publication-buyer-preview §3.2: the button is available when a buyer page can be shown at all
+  const previewCheck = previewAvailability(values, mode.kind, {
+    activePoints: cardOffers.filter((offer) => offer.status === 'active').length,
+    uploading: photos.some((tile) => tile.status === 'uploading'),
+  });
+  async function openPreview() {
+    if (!previewCheck.ok || busyRef.current) return;
+    const body = previewBody(values, mode.kind === 'create' ? { kind: 'create' } : { kind: 'edit', offerIds: cardOffers.map((offer) => offer.id) }, currentPhotoIds);
+    const missing: MessageKey[] = [];
+    if (currentPhotoIds.length === 0) missing.push('showcase.noPhoto');
+    if (values.comment.trim() === '') missing.push('showcase.noComment');
+    // one history entry: the device Back closes the preview first (contract §3.9)
+    if (preview === null) window.history.pushState({ ...(window.history.state as object | null), kaidaPreview: true }, '');
+    setPreview({ status: 'loading' });
+    try {
+      const response = await fetch(`/api/seller/card-preview?locale=${locale}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
+      if (!response.ok) throw new Error('preview');
+      const result = await response.json() as { previews: Extract<PreviewState, { status: 'ready' }>['pages'] };
+      setPreview({ status: 'ready', pages: result.previews, change: mode.kind === 'edit', missing });
+    } catch {
+      setPreview({ status: 'error' });
+    }
+  }
+  function closePreview() {
+    if ((window.history.state as { kaidaPreview?: boolean } | null)?.kaidaPreview) window.history.back();
+    else setPreview(null);
+  }
+  const previewOpen = preview !== null;
+  useEffect(() => {
+    if (!previewOpen) return;
+    const onPop = () => setPreview(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [previewOpen]);
   // Options are chosen on mousedown, so choosing never blurs the field first.
   const suggestOpen = titleFocused && !suggestDismissed && suggestions.length > 0;
 
@@ -571,6 +612,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
     );
   }
 
+  if (preview !== null) return <CardPreviewScreen state={preview} onClose={closePreview} onRetry={() => void openPreview()} />;
+
   // ---- The form ----
   const unitText = unitLabel(values.unit.code, values.unit.custom);
   return (
@@ -845,6 +888,18 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
           </>
         ) : (
           <>
+            {!isPoint && (
+              <>
+                <button type="button" className="btn btn-o w" onClick={() => void openPreview()} disabled={disabled || !previewCheck.ok} data-testid="preview-open">
+                  <Ic name="eye" className="sm" />{t('preview.future')}
+                </button>
+                {!previewCheck.ok && (
+                  <p className="c c2" style={{ margin: 0 }} data-testid="preview-reason">
+                    {previewCheck.reasons.map((reason) => t(reason === 'titlePrice' ? 'preview.needTitlePrice' : reason === 'point' ? 'preview.needPoint' : 'photos.waitUpload')).join('. ')}
+                  </p>
+                )}
+              </>
+            )}
             <button type="button" className="btn btn-p lg w" onClick={() => void send()} disabled={disabled}>
               {failure === 'send' ? <><Ic name="refresh" className="sm" />{t('editor.retry')}</> : isCreate ? t('card.review') : t('card.reviewEdit')}
             </button>

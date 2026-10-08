@@ -230,3 +230,62 @@ export function valuesFromChangeSet(
     ...(first.photos ? { photoIds: first.photos.map((photo) => photo.id) } : {}),
   };
 }
+
+// pre-publication-buyer-preview (docs/slices/pre-publication-buyer-preview §3.2): the minimum that makes a card worth showing as a
+// buyer would see it — a valid title, a valid price, at least one point on the showcase and no photo still uploading. Everything
+// else (unit, pack, comment, photos) may be empty, as for buyers. Pure; the reasons are shown under the button.
+export type PreviewReason = 'titlePrice' | 'point' | 'upload';
+
+export function previewAvailability(
+  values: CardValues,
+  mode: CardMode,
+  context: { activePoints: number; uploading: boolean },
+): { ok: boolean; reasons: PreviewReason[] } {
+  const reasons: PreviewReason[] = [];
+  const title = normalizeOfferTitle(values.title);
+  const titleOk = title.length >= OFFER_TITLE_MIN_LENGTH && title.length <= OFFER_TITLE_MAX_LENGTH;
+  if (!titleOk || priceError(values.amount) !== null) reasons.push('titlePrice');
+  const chosen = Object.values(values.points).filter((point) => point.selected).length;
+  if (mode === 'create' ? chosen === 0 : context.activePoints + chosen === 0) reasons.push('point');
+  if (context.uploading) reasons.push('upload');
+  return { ok: reasons.length === 0, reasons };
+}
+
+// The body of the preview request: the editor values as they are right now. An unusable unit or pack is simply left out (a
+// preview shows what can be shown; the publication still validates them).
+export function previewBody(
+  values: CardValues,
+  mode: { kind: 'create' } | { kind: 'edit'; offerIds: string[] },
+  photoIds: string[],
+) {
+  const price = validPrice(values.amount);
+  const unit = unitValue(values.unit);
+  const packAmount = normalizeAmount(values.packAmount);
+  const packOk = values.packOpen && unit !== null && (unit.code === 'package' || unit.code === 'piece')
+    && PACK_AMOUNT_PATTERN.test(packAmount) && Number(packAmount) > 0;
+  const shared = {
+    title: normalizeOfferTitle(values.title),
+    price,
+    unit,
+    pack: packOk ? { amount: packAmount, unit: values.packUnit } : null,
+    sellerComment: values.comment,
+    photoIds,
+  };
+  const chosen = Object.entries(values.points).filter(([, point]) => point.selected);
+  if (mode.kind === 'create') {
+    return {
+      kind: 'create' as const,
+      ...shared,
+      points: chosen.map(([locationId, point]) => ({
+        locationId,
+        ...(point.ownPrice !== null && validPrice(point.ownPrice) ? { ownPrice: validPrice(point.ownPrice)! } : {}),
+      })),
+    };
+  }
+  return {
+    kind: 'update' as const,
+    ...shared,
+    offers: mode.offerIds.map((offerId) => ({ offerId, applyPrice: values.applyPrice[offerId] ?? true })),
+    addPoints: chosen.map(([locationId]) => locationId),
+  };
+}
