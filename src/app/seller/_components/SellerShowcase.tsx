@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { SellerOfferView } from '../../../modules/offers/contracts/seller-offer.contract';
 import type { OfferDraftView } from '../../../modules/offers/drafts/offer-draft.contract';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
+import { previewHref } from '../../../modules/offers/preview/preview-link';
 import type { SellerChangeSetView } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
@@ -232,6 +233,8 @@ function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; 
   const lead = card.lead;
   const cover = lead.photos?.[0];
   const missing: MessageKey[] = [];
+  // the Offers buyers can open right now (the same visibility as Search); only these can be previewed
+  const previewable = card.offers.filter((offer) => offer.buyerVisible);
   if (!cover) missing.push('showcase.noPhoto');
   if (!lead.sellerComment) missing.push('showcase.noComment');
   return (
@@ -267,6 +270,14 @@ function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; 
       )}
       {missing.length > 0 && (
         <p className="c" style={{ paddingLeft: 68 }}>{missing.map((key) => t(key)).join(' · ')}. {t('showcase.incomplete')}</p>
+      )}
+      {/* post-publication-buyer-preview §3.2 (3): right after publishing — one point opens the buyer page, several points open the card screen with its points. */}
+      {highlighted && !card.removal && previewable.length > 0 && (
+        <div style={{ paddingLeft: 68 }}>
+          {previewable.length === 1 && card.offers.length === 1
+            ? <Link href={previewHref(previewable[0]!.id, '/seller')} className="act" data-testid="preview-action"><Ic name="eye" className="sm" /><span>{t('preview.action')}</span></Link>
+            : <button type="button" className="act" data-testid="preview-action" onClick={onOpen}><Ic name="eye" className="sm" /><span>{t('preview.action')}</span></button>}
+        </div>
       )}
     </article>
   );
@@ -488,7 +499,8 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
   const lead = card.lead;
   const cover = lead.photos?.[0];
   const title = `${lead.product.name}${lead.packLabel ? ` · ${lead.packLabel}` : ''}`;
-  const priceText = (offer: SellerOfferView) => offer.price ? `${formatAmount(offer.price.amount)} ₸${offer.price.unit ? ` / ${offer.price.unit}` : ''}` : '';
+  // the amount with «₸» never breaks; the unit follows by words (large text)
+  const priceParts = (offer: SellerOfferView) => offer.price ? <><span style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.price.amount)} ₸</span>{offer.price.unit ? ` / ${offer.price.unit}` : ''}</> : null;
   const badge = (offer: SellerOfferView) => offer.status === 'active'
     ? <span className="bd bd-ok"><Ic name="check" />{t('showcase.statusLive')}{!offer.buyerVisible ? ` · ${t('offers.hidden')}` : ''}</span>
     : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>;
@@ -556,6 +568,12 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
               <button type="button" className="li" onClick={() => go(`edit=${card.cardId}`)} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
                 <Ic name="pencil" className="c2" /><div className="mid"><div className="ts">{t('cardScreen.edit')}</div></div>
               </button>
+              {/* post-publication-buyer-preview §3.2 (1): the real buyer page, only while buyers can see the Offer */}
+              {offer.buyerVisible && (
+                <Link href={previewHref(offer.id, `/seller?card=${card.cardId}`)} className="li" data-testid="preview-action" style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)', textDecoration: 'none', color: 'var(--ink)' }}>
+                  <Ic name="eye" className="c2" /><div className="mid"><div className="ts">{t('preview.action')}</div></div>
+                </Link>
+              )}
               <button type="button" className="li" onClick={() => void toggle(offer)} disabled={busyId !== null} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
                 <Ic name="power" className="c2" /><div className="mid"><div className="ts">{t('offerManage.disable')}</div><p className="c">{t('cardScreen.disableHint')}</p></div>
               </button>
@@ -597,25 +615,31 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
           </button>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="btn btn-o sm" style={{ flex: 1 }} onClick={() => go(`edit=${card.cardId}`)}><Ic name="pencil" className="sm" />{t('cardScreen.editAll')}</button>
+          <button type="button" className="btn btn-o sm" style={{ flex: 1, whiteSpace: 'normal', height: 'auto', minHeight: 44, paddingBlock: 8, textAlign: 'center' }} onClick={() => go(`edit=${card.cardId}`)}><Ic name="pencil" className="sm" /><span>{t('cardScreen.editAll')}</span></button>
         </div>
         {errorBanner}
         {reconfirmError}
         <h2 className="ov">{t('cardScreen.inPoints', { count: card.offers.length })}</h2>
         {card.offers.map((offer) => (
-          <div key={offer.id} className="card" style={{ gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <div className="ts">{offer.location.name}</div>
-                <p className="c num">{priceText(offer)}{offer.priceOwn ? ` · ${t('cardScreen.own')}` : ''}</p>
+          <div key={offer.id} className="card" style={{ gap: 4 }}>
+            {/* large text: the header wraps (the badge goes under the name), the name breaks by words, the amount is never broken */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px' }}>
+              <div style={{ flex: '1 1 11em', minWidth: 0 }}>
+                <div className="ts" style={{ overflowWrap: 'anywhere' }}>{offer.location.name}</div>
+                <p className="c num">{priceParts(offer)}{offer.priceOwn ? ` · ${t('cardScreen.own')}` : ''}</p>
               </div>
-              {badge(offer)}
+              <span style={{ flex: 'none' }}>{badge(offer)}</span>
               <PointEditLabel label={t('points.editNamed', { name: offer.location.name })} focusKey={`card:${offer.id}`} onClick={() => editPoint(offer.location.id, `card:${offer.id}`)} />
             </div>
-            <div style={{ display: 'flex', gap: 16 }}>
-              <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => go(`point=${offer.id}`)}>{t('cardScreen.editPoint')}</button>
-              <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0, color: 'var(--ink2)' }} onClick={() => void toggle(offer)} disabled={busyId !== null}>
-                {offer.status === 'active' ? t('offerManage.disable') : t('offerManage.enable')}
+            {!offer.buyerVisible && <p className="c c2" style={{ margin: 0 }} data-testid="preview-unavailable">{t('preview.notShown')}</p>}
+            {/* post-publication-buyer-preview §3.2 (2): a compact stack of quiet actions, 44 px targets edge to edge */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0 }}>
+              <button type="button" className="act" onClick={() => go(`point=${offer.id}`)}><Ic name="pencilpart" className="sm" /><span>{t('cardScreen.editPoint')}</span></button>
+              {offer.buyerVisible && (
+                <Link href={previewHref(offer.id, `/seller?card=${card.cardId}`)} className="act" data-testid="preview-action"><Ic name="eye" className="sm" /><span>{t('preview.action')}</span></Link>
+              )}
+              <button type="button" className="act" onClick={() => void toggle(offer)} disabled={busyId !== null}>
+                <span>{offer.status === 'active' ? t('offerManage.disable') : t('offerManage.enable')}</span>
               </button>
             </div>
           </div>
