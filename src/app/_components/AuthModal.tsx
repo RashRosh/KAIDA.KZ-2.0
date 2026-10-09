@@ -1,15 +1,16 @@
 'use client';
 
-import { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type User = { id: string; phone: string };
-type ErrorPayload = { error?: { code?: string; message?: string } };
+type ErrorPayload = { error?: { code?: string; message?: string; retryAfterSeconds?: number } };
 type RequestSuccess = {
   challenge: { id: string; expiresAt: string };
   delivery: { mode: 'test'; code: string };
+  retryAfterSeconds: number;
 };
 type VerifySuccess = { user: User };
 
@@ -40,8 +41,39 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unusableCode, setUnusableCode] = useState(false);
+  const [retryPhone, setRetryPhone] = useState('');
+  const [retryAt, setRetryAt] = useState(0);
+  const [remaining, setRemaining] = useState(0);
+  const operation = useRef(0);
+  const pending = useRef(false);
+  const invalidateOperation = useCallback(() => { operation.current++; pending.current = false; }, []);
+  let phoneKey = '';
+  try { phoneKey = normalizeKzPhone(step === 'otp' ? canonicalPhone : phone); } catch { /* Existing input validation handles this. */ }
+  const wait = phoneKey === retryPhone ? remaining : 0;
+
+  function recordWait(seconds: number | undefined, requestedPhone: string) {
+    if (!Number.isSafeInteger(seconds) || !seconds || seconds < 0) return;
+    setRetryPhone(requestedPhone);
+    setRetryAt(Date.now() + seconds * 1000);
+    setRemaining(seconds);
+  }
+
+  useEffect(() => {
+    if (!open) { invalidateOperation(); return; }
+    return invalidateOperation;
+  }, [open, invalidateOperation]);
+
+  useEffect(() => {
+    if (!open) return;
+    const timer = setInterval(() => setRemaining(Math.max(0, Math.ceil((retryAt - Date.now()) / 1000))), 1000);
+    return () => clearInterval(timer);
+  }, [open, retryAt]);
 
   const resetAndClose = useCallback(() => {
+    operation.current++;
+    pending.current = false;
+    setUnusableCode(false);
     setStep('phone');
     setPhone('');
     setCanonicalPhone('');
@@ -73,36 +105,58 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
     if (event.target === event.currentTarget) resetAndClose();
   }
 
-  async function requestCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function requestCode(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    if (pending.current || wait > 0) return;
+    const requestedPhone = step === 'otp' ? canonicalPhone : phone;
+    let normalizedPhone: string;
+    try { normalizedPhone = normalizeKzPhone(requestedPhone); } catch { setError(t('error.INVALID_PHONE')); return; }
+    const current = ++operation.current;
+    pending.current = true;
     setError('');
     setLoading(true);
     try {
       const response = await fetch('/api/auth/otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: requestedPhone }),
       });
       const data = await response.json() as RequestSuccess & ErrorPayload;
+      if (current !== operation.current) return;
       if (!response.ok) {
+        if (data.error?.code === 'OTP_REQUEST_THROTTLED') {
+          recordWait(data.error.retryAfterSeconds, normalizedPhone);
+          setError(t('error.OTP_REQUEST_THROTTLED'));
+          return;
+        }
+        if (response.status >= 500 && step === 'otp') {
+          setUnusableCode(true); setTestCode(''); setError(t('error.requestCodeUncertain')); return;
+        }
         const key = data.error?.code === 'INVALID_PHONE' ? 'error.INVALID_PHONE' : data.error?.code === 'AUTH_UNAVAILABLE' ? 'error.AUTH_UNAVAILABLE' : 'error.requestCode';
         setError(t(key));
         return;
       }
-      setCanonicalPhone(normalizeKzPhone(phone));
+      setCanonicalPhone(normalizedPhone);
       setChallengeId(data.challenge.id);
       setTestCode(data.delivery.code);
       setCode('');
+      setUnusableCode(false);
+      recordWait(data.retryAfterSeconds, normalizedPhone);
       setStep('otp');
     } catch {
-      setError(t('error.requestCode'));
+      if (current !== operation.current) return;
+      if (step === 'otp') { setUnusableCode(true); setTestCode(''); }
+      setError(t('error.requestCodeUncertain'));
     } finally {
-      setLoading(false);
+      if (current === operation.current) { pending.current = false; setLoading(false); }
     }
   }
 
   async function verifyCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending.current || unusableCode) return;
+    const current = ++operation.current;
+    pending.current = true;
     setError('');
     setLoading(true);
     try {
@@ -112,20 +166,33 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
         body: JSON.stringify({ challengeId, code }),
       });
       const data = await response.json() as VerifySuccess & ErrorPayload;
+      if (current !== operation.current) return;
       if (!response.ok) {
+        const terminal = {
+          OTP_ATTEMPTS_EXHAUSTED: 'error.OTP_ATTEMPTS_EXHAUSTED', OTP_EXPIRED: 'error.OTP_EXPIRED',
+          OTP_NOT_ACTIVE: 'error.OTP_NOT_ACTIVE', INVALID_OTP_CHALLENGE: 'error.INVALID_OTP_CHALLENGE',
+        } as const;
+        if (data.error?.code && Object.hasOwn(terminal, data.error.code)) {
+          setUnusableCode(true);
+          setError(t(terminal[data.error.code as keyof typeof terminal]));
+          return;
+        }
         const key = data.error?.code === 'INVALID_AUTH_REQUEST' ? 'error.INVALID_AUTH_REQUEST' : data.error?.code === 'INVALID_OTP' ? 'error.INVALID_OTP' : data.error?.code === 'OTP_EXPIRED' ? 'error.OTP_EXPIRED' : data.error?.code === 'AUTH_UNAVAILABLE' ? 'error.AUTH_UNAVAILABLE' : 'error.signIn';
         setError(t(key));
         return;
       }
       onAuthenticated(data.user);
     } catch {
-      setError(t('error.signIn'));
+      if (current === operation.current) setError(t('error.signIn'));
     } finally {
-      setLoading(false);
+      if (current === operation.current) { pending.current = false; setLoading(false); }
     }
   }
 
   function changePhone() {
+    operation.current++;
+    pending.current = false;
+    setUnusableCode(false);
     setStep('phone');
     setChallengeId('');
     setTestCode('');
@@ -167,7 +234,8 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
                   />
                 </div>
                 {error && <div className="fld"><p className="emsg" role="alert"><span className="ic i-alert" aria-hidden="true" />{error}</p></div>}
-                <button type="submit" className="btn btn-p lg w" disabled={loading}>{loading ? t('auth.gettingCode') : t('auth.getCode')}</button>
+                {wait > 0 && <p className="c c2" role="status">{t('auth.resendWait', { seconds: wait })}</p>}
+                <button type="submit" className="btn btn-p lg w" disabled={loading || wait > 0}>{loading ? t('auth.gettingCode') : t('auth.getCode')}</button>
               </form>
             </>
           ) : (
@@ -175,7 +243,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
               <p id="auth-description" className="c c2">{t('auth.codeFor', { phone: canonicalPhone })}</p>
               <div className="banner info" role="status" style={{ padding: '10px 12px', borderRadius: 12, gap: 2 }}>
                 <span className="c">{t('auth.testMode')}</span>
-                <strong className="ts">{t('auth.testCode', { code: testCode })}</strong>
+                {testCode && <strong className="ts">{t('auth.testCode', { code: testCode })}</strong>}
               </div>
               <form onSubmit={verifyCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div className="fld">
@@ -190,12 +258,14 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
                     value={code}
                     onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    disabled={loading}
+                    disabled={loading || unusableCode}
                     autoFocus
                   />
                 </div>
                 {error && <div className="fld"><p className="emsg" role="alert"><span className="ic i-alert" aria-hidden="true" />{error}</p></div>}
-                <button type="submit" className="btn btn-p lg w" disabled={loading || code.length !== 6}>{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
+                <button type="submit" className="btn btn-p lg w" disabled={loading || unusableCode || code.length !== 6}>{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
+                {wait > 0 && <p className="c c2" role="status">{t('auth.resendWait', { seconds: wait })}</p>}
+                <button type="button" className="btn btn-g w" onClick={() => void requestCode()} disabled={loading || wait > 0}>{loading ? t('auth.gettingCode') : t('auth.resendCode')}</button>
                 <button type="button" className="btn btn-g w" onClick={changePhone} disabled={loading}>{t('auth.changePhone')}</button>
               </form>
             </>

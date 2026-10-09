@@ -35,15 +35,17 @@ describe('S2 Identity concurrency guarantees', () => {
   it('serializes concurrent OTP requests per canonical phone and leaves one unfinished challenge', async () => {
     const phone = '+77000000201';
     await cleanupPhone(phone);
-    const [a, b] = await Promise.all([
+    const results = await Promise.allSettled([
       requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => NOW, config: CONFIG, generateCode: () => '111111' }),
       requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => NOW, config: CONFIG, generateCode: () => '222222' }),
     ]);
     const rows = await pool.query('SELECT id, superseded_at, consumed_at FROM auth_otp_challenges WHERE phone_e164 = $1', [phone]);
-    expect(rows.rowCount).toBe(2);
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter((r) => r.status === 'rejected' && r.reason.code === 'OTP_REQUEST_THROTTLED')).toHaveLength(1);
+    expect(rows.rowCount).toBe(1);
     const unfinished = rows.rows.filter((row) => row.superseded_at === null && row.consumed_at === null);
     expect(unfinished).toHaveLength(1);
-    expect([a.challenge.id, b.challenge.id]).toContain(unfinished[0].id);
+    expect(results.some((r) => r.status === 'fulfilled' && r.value.challenge.id === unfinished[0].id)).toBe(true);
     await cleanupPhone(phone);
   });
 

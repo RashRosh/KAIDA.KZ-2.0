@@ -4,7 +4,9 @@ import type { Database } from '../../../db/client';
 import { authOtpChallenges } from '../db/auth-otp-challenges.table';
 import { authSessions } from '../db/auth-sessions.table';
 import { users } from '../db/users.table';
-import type { CurrentUser } from '../contracts/auth.contract';
+import { AuthError, type CurrentUser } from '../contracts/auth.contract';
+import { requestRetryAfterSeconds, type OtpPolicy } from '../application/otp-policy';
+import type { IdentityClock } from '../time/identity-clock';
 
 export interface NewOtpChallenge {
   id: string;
@@ -28,10 +30,20 @@ function phoneAdvisoryLockKey(phoneE164: string): bigint {
   return digest.readBigInt64BE(0);
 }
 
-export async function replaceOtpChallenge(db: Database, challenge: NewOtpChallenge): Promise<void> {
-  await db.transaction(async (tx) => {
-    const lockKey = phoneAdvisoryLockKey(challenge.phoneE164).toString();
+export async function replaceOtpChallenge(
+  db: Database, phoneE164: string, clock: IdentityClock, policy: OtpPolicy,
+  createChallenge: (now: Date) => NewOtpChallenge,
+) {
+  return db.transaction(async (tx) => {
+    const lockKey = phoneAdvisoryLockKey(phoneE164).toString();
     await tx.execute(sql`SELECT pg_advisory_xact_lock(${lockKey}::bigint)`);
+    const now = clock();
+    const history = await tx.select({ createdAt: authOtpChallenges.createdAt }).from(authOtpChallenges)
+      .where(and(eq(authOtpChallenges.phoneE164, phoneE164),
+        gt(authOtpChallenges.createdAt, new Date(now.getTime() - Math.max(policy.windowSeconds, policy.intervalSeconds) * 1000))));
+    const retryAfterSeconds = requestRetryAfterSeconds(history.map((row) => row.createdAt), now, policy);
+    if (retryAfterSeconds) throw new AuthError('OTP_REQUEST_THROTTLED', 429, 'Подождите перед запросом нового кода.', retryAfterSeconds);
+    const challenge = createChallenge(now);
     await tx.update(authOtpChallenges)
       .set({ supersededAt: challenge.createdAt })
       .where(and(
@@ -40,6 +52,7 @@ export async function replaceOtpChallenge(db: Database, challenge: NewOtpChallen
         isNull(authOtpChallenges.supersededAt),
       ));
     await tx.insert(authOtpChallenges).values(challenge);
+    return { challenge, retryAfterSeconds: requestRetryAfterSeconds([...history.map((row) => row.createdAt), now], now, policy) };
   });
 }
 
@@ -48,13 +61,33 @@ export async function findOtpChallenge(db: Database, id: string) {
   return challenge ?? null;
 }
 
-export async function consumeChallengeCreateSession(
+export async function verifyChallengeCreateSession(
   db: Database,
   challengeId: string,
-  verifyNow: Date,
-  session: NewSession,
-): Promise<CurrentUser | null> {
-  return db.transaction(async (tx) => {
+  clock: IdentityClock,
+  maxFailures: number,
+  matchesCode: (challenge: typeof authOtpChallenges.$inferSelect) => boolean,
+  createSession: (now: Date) => NewSession,
+) {
+  const initial = await findOtpChallenge(db, challengeId);
+  if (!initial) throw new AuthError('INVALID_OTP_CHALLENGE', 400, 'Код больше недоступен. Запросите новый.');
+  const result = await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(${phoneAdvisoryLockKey(initial.phoneE164).toString()}::bigint)`);
+    const verifyNow = clock();
+    const [challenge] = await tx.select().from(authOtpChallenges).where(eq(authOtpChallenges.id, challengeId)).limit(1);
+    if (!challenge) return { error: new AuthError('INVALID_OTP_CHALLENGE', 400, 'Код больше недоступен. Запросите новый.') };
+    if (challenge.consumedAt || challenge.supersededAt) return { error: new AuthError('OTP_NOT_ACTIVE', 409, 'Код больше недействителен. Запросите новый.') };
+    if (verifyNow.getTime() >= challenge.expiresAt.getTime()) return { error: new AuthError('OTP_EXPIRED', 410, 'Срок действия кода истёк. Запросите новый.') };
+    if (challenge.failedAttempts >= maxFailures) return { error: new AuthError('OTP_ATTEMPTS_EXHAUSTED', 409, 'Попытки исчерпаны. Запросите новый код.') };
+    if (!matchesCode(challenge)) {
+      const failedAttempts = challenge.failedAttempts + 1;
+      await tx.update(authOtpChallenges).set({ failedAttempts }).where(eq(authOtpChallenges.id, challengeId));
+      // Returning the error commits the counter. Throw only after the transaction completes.
+      return { error: failedAttempts >= maxFailures
+        ? new AuthError('OTP_ATTEMPTS_EXHAUSTED', 409, 'Попытки исчерпаны. Запросите новый код.')
+        : new AuthError('INVALID_OTP', 401, 'Неверный код.') };
+    }
+    const session = createSession(verifyNow);
     const [consumed] = await tx.update(authOtpChallenges)
       .set({ consumedAt: verifyNow })
       .where(and(
@@ -65,7 +98,7 @@ export async function consumeChallengeCreateSession(
       ))
       .returning({ phoneE164: authOtpChallenges.phoneE164 });
 
-    if (!consumed) return null;
+    if (!consumed) return { error: new AuthError('OTP_NOT_ACTIVE', 409, 'Код больше недействителен. Запросите новый.') };
 
     const [created] = await tx.insert(users)
       .values({ id: randomUUID(), phoneE164: consumed.phoneE164, createdAt: verifyNow })
@@ -79,8 +112,10 @@ export async function consumeChallengeCreateSession(
     if (!user) throw new Error('User conflict resolved without visible user');
 
     await tx.insert(authSessions).values({ ...session, userId: user.id });
-    return user;
+    return { user, sessionExpiresAt: session.expiresAt };
   });
+  if ('error' in result) throw result.error;
+  return result;
 }
 
 export async function getOrCreateUserForPhone(db: Database, phoneE164: string, createdAt: Date): Promise<CurrentUser> {

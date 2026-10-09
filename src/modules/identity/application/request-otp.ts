@@ -8,6 +8,7 @@ import type { OtpDelivery } from '../delivery/otp-delivery';
 import { replaceOtpChallenge } from '../infrastructure/identity.repository';
 import { InvalidPhoneError, normalizeKzPhone } from '../phone/normalize-phone';
 import { systemIdentityClock, type IdentityClock } from '../time/identity-clock';
+import { otpPolicy } from './otp-policy';
 
 export interface RequestOtpDependencies<Receipt> {
   delivery: OtpDelivery<Receipt>;
@@ -21,7 +22,7 @@ export interface RequestOtpDependencies<Receipt> {
 export async function requestOtp<Receipt>(
   input: { phone: string },
   dependencies: RequestOtpDependencies<Receipt>,
-): Promise<{ challenge: { id: string; expiresAt: Date }; delivery: Receipt }> {
+): Promise<{ challenge: { id: string; expiresAt: Date }; delivery: Receipt; retryAfterSeconds: number }> {
   let phoneE164: string;
   try {
     phoneE164 = normalizeKzPhone(input.phone);
@@ -33,15 +34,17 @@ export async function requestOtp<Receipt>(
   const db = dependencies.database ?? getDatabase();
   const clock = dependencies.clock ?? systemIdentityClock;
   const config = dependencies.config ?? loadIdentityConfig();
-  const now = clock();
   const challengeId = (dependencies.generateChallengeId ?? randomUUID)();
   const code = (dependencies.generateCode ?? generateOtp)();
   if (!/^[0-9]{6}$/.test(code)) throw new Error('OTP generator returned invalid code');
-  const expiresAt = new Date(now.getTime() + config.otpTtlSeconds * 1000);
   const otpDigest = createOtpDigest(config.otpHmacSecret, challengeId, phoneE164, code);
 
-  await replaceOtpChallenge(db, { id: challengeId, phoneE164, otpDigest, createdAt: now, expiresAt });
+  const { challenge, retryAfterSeconds } = await replaceOtpChallenge(db, phoneE164, clock, otpPolicy(config), (now) => ({
+    id: challengeId, phoneE164, otpDigest, createdAt: now,
+    expiresAt: new Date(now.getTime() + config.otpTtlSeconds * 1000),
+  }));
+  const expiresAt = challenge.expiresAt;
   const delivery = await dependencies.delivery.deliver({ challengeId, phoneE164, code, expiresAt });
 
-  return { challenge: { id: challengeId, expiresAt }, delivery };
+  return { challenge: { id: challengeId, expiresAt }, delivery, retryAfterSeconds };
 }

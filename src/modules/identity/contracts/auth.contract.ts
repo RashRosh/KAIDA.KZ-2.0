@@ -15,13 +15,16 @@ export type AuthErrorCode =
   | 'INVALID_OTP_CHALLENGE'
   | 'INVALID_OTP'
   | 'OTP_EXPIRED'
-  | 'OTP_NOT_ACTIVE';
+  | 'OTP_NOT_ACTIVE'
+  | 'OTP_REQUEST_THROTTLED'
+  | 'OTP_ATTEMPTS_EXHAUSTED';
 
 export class AuthError extends Error {
   constructor(
     public readonly code: AuthErrorCode,
     public readonly status: number,
     message: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = 'AuthError';

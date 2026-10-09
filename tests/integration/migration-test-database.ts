@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { setTimeout as wait } from 'node:timers/promises';
 import { testDatabaseUrl } from './database';
 
 type MigrationDatabase = ReturnType<typeof drizzle>;
@@ -39,13 +40,21 @@ async function closeTargetPool(pool: Pool, admin: Pool, name: string) {
     if (expectedRemovals > 0) pool.off('remove', onRemove);
   }
 
-  const remaining = await admin.query<{ count: string }>(
-    'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = $1',
-    [name],
-  );
-  if (remaining.rows[0]?.count !== '0') {
+  // Client socket closure can precede PostgreSQL observing the disconnect. Await
+  // that bounded teardown, retaining the zero-connection assertion and normal DROP.
+  let remainingCount: string | undefined;
+  for (let attempt = 0; attempt < 21; attempt++) {
+    const remaining = await admin.query<{ count: string }>(
+      'SELECT count(*)::text AS count FROM pg_stat_activity WHERE datname = $1',
+      [name],
+    );
+    remainingCount = remaining.rows[0]?.count;
+    if (remainingCount === '0') return;
+    if (attempt < 20) await wait(100);
+  }
+  if (remainingCount !== '0') {
     throw new Error(
-      `Migration test target ${name} still has active connections after pool shutdown: ${remaining.rows[0]?.count ?? 'unknown'}`,
+      `Migration test target ${name} still has active connections after pool shutdown: ${remainingCount ?? 'unknown'}`,
     );
   }
 }

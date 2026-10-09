@@ -12,6 +12,10 @@ export interface IdentityConfig {
   sessionTtlSeconds: number;
   otpHmacSecret: Buffer;
   cookieSecure: boolean;
+  otpRequestIntervalSeconds?: number;
+  otpRequestWindowSeconds?: number;
+  otpRequestLimit?: number;
+  otpMaxFailedAttempts?: number;
 }
 
 function positiveSafeInteger(raw: string | undefined, fallback: number, name: string): number {
@@ -40,6 +44,10 @@ export function parseIdentityConfig(environment: IdentityEnvironment): IdentityC
     sessionTtlSeconds: positiveSafeInteger(environment.IDENTITY_SESSION_TTL_SECONDS, 2_592_000, 'IDENTITY_SESSION_TTL_SECONDS'),
     otpHmacSecret: Buffer.from(secretHex, 'hex'),
     cookieSecure: cookieSecure(environment.IDENTITY_COOKIE_SECURE, environment.NODE_ENV),
+    otpRequestIntervalSeconds: positiveSafeInteger(environment.IDENTITY_OTP_REQUEST_INTERVAL_SECONDS, 60, 'IDENTITY_OTP_REQUEST_INTERVAL_SECONDS'),
+    otpRequestWindowSeconds: positiveSafeInteger(environment.IDENTITY_OTP_REQUEST_WINDOW_SECONDS, 900, 'IDENTITY_OTP_REQUEST_WINDOW_SECONDS'),
+    otpRequestLimit: positiveSafeInteger(environment.IDENTITY_OTP_REQUEST_LIMIT, 5, 'IDENTITY_OTP_REQUEST_LIMIT'),
+    otpMaxFailedAttempts: positiveSafeInteger(environment.IDENTITY_OTP_MAX_FAILED_ATTEMPTS, 5, 'IDENTITY_OTP_MAX_FAILED_ATTEMPTS'),
   };
 }
 

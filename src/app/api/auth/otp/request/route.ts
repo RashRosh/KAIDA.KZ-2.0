@@ -19,10 +19,14 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({
       challenge: { id: result.challenge.id, expiresAt: result.challenge.expiresAt.toISOString() },
       delivery: result.delivery,
+      retryAfterSeconds: result.retryAfterSeconds,
     }, { status: 201, headers: noStore });
   } catch (error) {
     if (error instanceof AuthError) {
-      return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: error.status, headers: noStore });
+      return NextResponse.json({ error: { code: error.code, message: error.message, ...(error.retryAfterSeconds === undefined ? {} : { retryAfterSeconds: error.retryAfterSeconds }) } }, {
+        status: error.status,
+        headers: { ...noStore, ...(error.retryAfterSeconds === undefined ? {} : { 'Retry-After': String(error.retryAfterSeconds) }) },
+      });
     }
     console.error('Auth OTP request failed');
     return NextResponse.json({ error: { code: 'AUTH_UNAVAILABLE', message: 'Не удалось выполнить вход. Попробуйте ещё раз.' } }, { status: 503, headers: noStore });

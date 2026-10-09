@@ -46,6 +46,9 @@ async function cleanup(phones: string[]) {
 }
 
 async function login(request: APIRequestContext, phone: string) {
+  // Re-entering roles is a workflow prerequisite. Make only this isolated phone's
+  // previous request eligible, without changing the server's approved OTP policy.
+  await withPool((pool) => pool.query("UPDATE auth_otp_challenges SET created_at=created_at-interval '61 seconds' WHERE phone_e164=$1", [phone]));
   const requested = await (await request.post('/api/auth/otp/request', { data: { phone } })).json();
   expect((await request.post('/api/auth/otp/verify', { data: { challengeId: requested.challenge.id, code: requested.delivery.code } })).ok()).toBe(true);
 }

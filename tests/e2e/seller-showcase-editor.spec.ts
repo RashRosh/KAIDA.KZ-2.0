@@ -264,6 +264,8 @@ test('a change made on another device is caught at review; «Обновить» 
 
     const other = await browser.newContext({ baseURL: testInfo.project.use.baseURL });
     try {
+      // Model an eligible second login for this isolated fixture; keep real OTP limits active.
+      await withPool((pool) => pool.query("UPDATE auth_otp_challenges SET created_at=created_at-interval '61 seconds' WHERE phone_e164=$1", [phone]));
       await login(other.request, phone);
       const [offer] = (await (await other.request.get('/api/seller/offers')).json()).offers;
       const change = await (await other.request.post(`/api/seller/offers/${offer.id}/price-change-sets`, { data: { revision: offer.revision, price: '4100' } })).json();
