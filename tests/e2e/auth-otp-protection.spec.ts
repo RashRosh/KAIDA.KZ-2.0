@@ -90,7 +90,59 @@ test('a late issued-code response cannot reopen a closed auth modal', async ({ p
     await page.route('**/api/auth/otp/request', async (route) => { const response = await route.fetch(); reached(); await held; await route.fulfill({ response }); });
     await openEntry(page, 'more'); const dialog = page.getByRole('dialog'); await dialog.locator('#auth-phone').fill(phone);
     await dialog.locator('button[type=submit]').click(); await received;
-    await dialog.getByRole('button', { name: 'Закрыть', exact: true }).click(); release();
+    const delivered = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await dialog.getByRole('button', { name: 'Закрыть', exact: true }).click(); release(); await delivered;
     await expect(dialog).toBeHidden(); expect((await (await page.request.get('/api/auth/me')).json()).user).toBeNull();
+    await page.getByRole('button', { name: /^Войти/ }).click();
+    await expect(dialog.locator('#auth-phone')).toBeVisible(); await expect(dialog.locator('#auth-otp')).toBeHidden();
   } finally { release(); await cleanup(phone); }
+});
+
+test('browser time cannot bypass the server wait; an expired code offers fresh-code recovery', async ({ page }, info) => {
+  const phone = fixture(info.project.name, 8); await cleanup(phone);
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    await page.clock.install(); await page.goto('/login'); const dialog = page.getByRole('dialog');
+    await dialog.locator('#auth-phone').fill(phone);
+    const initial = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await dialog.locator('button[type=submit]').click(); const first = await (await initial).json();
+    const resend = dialog.getByRole('button', { name: 'Запросить новый код', exact: true });
+    await page.clock.fastForward(61000); await expect(resend).toBeEnabled();
+    const denied = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await resend.click(); expect((await denied).status()).toBe(429); await expect(resend).toBeDisabled();
+    await expect(dialog.getByText(`Тестовый код: ${first.delivery.code}`, { exact: true })).toBeVisible();
+    await pool.query("UPDATE auth_otp_challenges SET expires_at=now()-interval '1 second',created_at=created_at-interval '61 seconds' WHERE id=$1", [first.challenge.id]);
+    await dialog.locator('#auth-otp').fill(first.delivery.code); const expired = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/verify'));
+    await dialog.locator('button[type=submit]').click(); expect((await expired).status()).toBe(410);
+    await expect(dialog.locator('#auth-otp')).toBeDisabled(); await expect(dialog.getByRole('alert')).toContainText('Срок действия кода');
+    await page.clock.fastForward(61000); const replacement = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await resend.click(); expect((await replacement).status()).toBe(201); await expect(dialog.locator('#auth-otp')).toBeEnabled();
+  } finally { await pool.end(); await cleanup(phone); }
+});
+
+test('a lost committed resend response hides the old code and recovers through the same request limit', async ({ page }, info) => {
+  const phone = fixture(info.project.name, 9); await cleanup(phone);
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    await page.clock.install(); await page.goto('/login'); const dialog = page.getByRole('dialog');
+    await dialog.locator('#auth-phone').fill(phone); const initial = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await dialog.locator('button[type=submit]').click(); const first = await (await initial).json();
+    await pool.query("UPDATE auth_otp_challenges SET created_at=created_at-interval '61 seconds' WHERE id=$1", [first.challenge.id]);
+    await page.clock.fastForward(61000); const resend = dialog.getByRole('button', { name: 'Запросить новый код', exact: true });
+    await page.route('**/api/auth/otp/request', async (route) => {
+      const committed = await route.fetch(); expect(committed.status()).toBe(201);
+      await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: { code: 'AUTH_UNAVAILABLE' } }) });
+    });
+    await resend.click(); await expect(dialog.locator('#auth-otp')).toBeDisabled();
+    await expect(dialog.getByRole('alert')).toContainText('Не удалось подтвердить запрос');
+    await expect(dialog.getByText(`Тестовый код: ${first.delivery.code}`, { exact: true })).toBeHidden();
+    await page.unroute('**/api/auth/otp/request'); const denied = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await resend.click(); expect((await denied).status()).toBe(429); await expect(resend).toBeDisabled();
+    expect((await page.request.post('/api/auth/otp/verify', { data: { challengeId: first.challenge.id, code: first.delivery.code } })).status()).toBe(409);
+    await pool.query("UPDATE auth_otp_challenges SET created_at=created_at-interval '61 seconds' WHERE phone_e164=$1", [phone]);
+    await page.clock.fastForward(61000); const replacement = page.waitForResponse((r) => r.url().endsWith('/api/auth/otp/request'));
+    await resend.click(); const fresh = await (await replacement).json(); await dialog.locator('#auth-otp').fill(fresh.delivery.code);
+    await dialog.locator('button[type=submit]').click(); await expect(dialog).toBeHidden();
+    expect((await (await page.request.get('/api/auth/me')).json()).user.phone).toBe(phone);
+  } finally { await pool.end(); await cleanup(phone); }
 });
