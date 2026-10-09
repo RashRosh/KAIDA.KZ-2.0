@@ -1,6 +1,6 @@
 # R3 verification and acceptance evidence
 
-Implementation PR: [#163](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/163). Contract/docs PR [#162](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/162) merged at 9ff2f7a1f505fc46713f90d7a2df0b28a010bb83 after green checks. Implementation remains unmerged and untagged.
+Implementation PR: [#163](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/163). Contract/docs PR [#162](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/162) merged at 9ff2f7a1f505fc46713f90d7a2df0b28a010bb83 after green checks. PO manual acceptance PASS at ca1b30ae8fb9972c6d6af12080e68b7ccf094039 on 2026-10-09. PR #163 merged at c2d9968efe24a4f93161eb9f0f387f7bc87886eb; merged-main CI 37920568293 passed and annotated checkpoint v0.0.73-r3-deployment-preparation is pushed.
 
 ## Executable verification
 
@@ -62,4 +62,4 @@ Only the recorded Windows/Git Bash/Docker Linux amd64 platform is verified. No h
 3. In a private browser window, find that card as Buyer and open its photo.
 4. Request a restart of only R3, then confirm the card/photo remain. Review this report and its limits before manual acceptance.
 
-Implementation merge and checkpoint tag require later explicit manual acceptance.
+R3 is CLOSED after explicit PO manual acceptance. All security exceptions remain isolated-local-only; closure does not authorize public deployment. Evidence and a confidential final fixture backup are preserved; disposable stack cleanup is recorded in CURRENT_STATE.
