@@ -7,10 +7,10 @@
 Сначала самостоятельно проверь фактический repository state: текущий `main`, relevant branch/PR, последний verified checkpoint/tag и CI evidence. Затем прочитай:
 
 1. `docs/PROJECT_RULES.md` — процесс, verification, устойчивые boundaries, роли документов (§2), handoff (§21), reasoning effort (§22);
-2. `docs/product/EXECUTION_PLAN.md` — единственный канонический текущий порядок работ и decision gates;
+2. `docs/product/EXECUTION_PLAN.md` — общий production plan: текущее положение, утверждённый порядок, все оставшиеся workstreams и задачи с состоянием, зависимостями и следующим действием, соответствие открытым Issues. **Единственный источник очерёдности; не разрешение на реализацию;**
 3. `docs/agents/CURRENT_STATE.md` — операционный снимок текущей задачи; сверь с git/GitHub, он может устареть;
 4. `docs/product/FEATURE_MAP.md` — обзор capabilities и зависимостей (по необходимости);
-5. `docs/product/REQUIREMENTS_REGISTER.md` — найти невыполненное требование, его статус, зависимости и ссылку на владельца подробностей. **Индекс, не очередь и не разрешение на реализацию.**
+5. `docs/product/REQUIREMENTS_REGISTER.md` — только когда нужен индекс требований: ID → источники → вспомогательные подробности. Требования по существу остаются в первоисточниках (спецификациях, контрактах, Issues). Состояний, приоритетов и порядка там нет (всё это в плане).
 
 `docs/product/EXECUTION_HISTORY.md` (архив) и `docs/product/REQUIREMENTS_SOURCE_MAP.md` (снимок инвентаризации) читать только когда нужна история или трассировка источника.
 
