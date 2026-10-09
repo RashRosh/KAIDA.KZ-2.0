@@ -44,7 +44,7 @@ Parent sources для будущих cross-cutting workstreams:
 
 ## Numbered capability map
 
-Таблица описывает capability и зависимости. Статус (закрыта / запланирована / в разработке) здесь **не ведётся**: закрытые capabilities — Slice Contracts, `docs/agents/CURRENT_STATE.md` и `docs/product/EXECUTION_HISTORY.md`; невыполненные требования — `docs/product/REQUIREMENTS_REGISTER.md`; порядок — `docs/product/EXECUTION_PLAN.md`. Row order не является execution order. S0–S15B закрыты; S15C — D0 закрыт, D1 и далее data-gated; S25 — устаревшая форма (см. ниже).
+Таблица описывает capability и зависимости. Статус (закрыта / запланирована / в разработке) здесь **не ведётся**: закрытые capabilities — Slice Contracts, `docs/agents/CURRENT_STATE.md` и `docs/product/EXECUTION_HISTORY.md`; порядок, состояние и невыполненные задачи — `docs/product/EXECUTION_PLAN.md` (справочник ID → источники — `REQUIREMENTS_REGISTER.md`). Row order не является execution order. S0–S15B закрыты; S15C — D0 закрыт, D1 и далее data-gated; S25 — устаревшая форма (см. ниже).
 
 | ID | Область | Законченное поведение | Зависит от | Этап |
 |---|---|---|---|---|
@@ -375,7 +375,7 @@ Market — специализированный spatial container, а не це�
 
 ### Backlog capabilities, owned by Issues
 
-Подробные требования — в Issues (#10, #54, #55, #75, #76, #79, #83, #116); сопоставление Issue → запись и их зависимости/триггеры ведёт `docs/product/REQUIREMENTS_REGISTER.md` (раздел «Issues → записи реестра»). Эти capabilities остаются later / dependency-gated / trigger-gated и не меняют execution order.
+Подробные требования — в Issues (#10, #54, #55, #75, #76, #79, #83, #116); суть, поставленное, остаток и следующее действие по каждому Issue — `docs/product/EXECUTION_PLAN.md` §3 (технический указатель — `REQUIREMENTS_REGISTER.md`, «Issues → записи реестра»). Эти capabilities остаются later / dependency-gated / trigger-gated и не меняют execution order.
 
 ### Commercial model / Monetization
 
