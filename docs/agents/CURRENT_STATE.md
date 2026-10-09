@@ -12,7 +12,7 @@ R3 implementation authorized. Branch feat/r3-deployment-preparation has unfinish
 
 ## Last completed
 
-Verified docs PR, main CI and isolated stack inventory. Prior trial build succeeded with 1536 MiB heap/two workers, but does not prove final SHA.
+Verified docs PR, main CI and isolated stack inventory. Implementation committed locally: 1c22b99fac844adf5fb01f319200b7147104a35d. Clean clone lint/typecheck and 18 targeted tests passed; nine offline refusal cases passed. Both clean images built (tools 267s; runtime 589s), no OOM. Online preflight positives/negatives and idempotency passed. TLS cookies and large-photo boundaries passed. Smoke caught missing runtime word-form CSV; correcting packaging and browser-launch harness.
 
 ## Verification
 
@@ -20,7 +20,7 @@ Pending final build, preflight negatives, TLS smoke, persistence, R2 restore, Ha
 
 ## Next action
 
-Complete R3 audit and verification; commit/push approved files, open implementation PR, obtain exact-head CI and fresh-checkout evidence. Record security findings and required exceptions. Stop with acceptance package.
+Complete clean-image build, isolated first start/negative preflight/TLS/persistence/R2 and final scans. Implementation push/PR explicitly authorized by PO after initial auto-review rejection. Draft PR #163 open; branch CI running. Final security exceptions require explicit PO approval. Stop with acceptance package once gates pass.
 
 ## Local constraints
 

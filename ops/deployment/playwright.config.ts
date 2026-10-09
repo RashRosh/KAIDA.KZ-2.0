@@ -21,6 +21,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     storageState: returningVisitorState,
     browserName: 'chromium',
+    launchOptions: { args: ['--host-resolver-rules=MAP kaida.test 127.0.0.1', '--no-proxy-server'] },
     viewport: { width: 390, height: 844 },
     isMobile: true,
     hasTouch: true,

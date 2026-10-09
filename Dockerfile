@@ -32,7 +32,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
-COPY . .
+COPY next.config.ts tsconfig.json ./
+COPY src ./src
+COPY public ./public
 # Memory-conscious build settings for a small Docker VM; override with --build-arg when the host has room.
 ARG BUILD_NODE_OPTIONS=--max-old-space-size=1536
 ARG BUILD_CPUS=2
@@ -53,6 +55,8 @@ WORKDIR /app
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/.next ./.next
 COPY --from=build --chown=node:node /app/public ./public
+# Search reads this immutable dictionary by path at request time; keep its attribution alongside it.
+COPY --chown=node:node src/modules/search/word-forms/word-forms.v1.csv src/modules/search/word-forms/PROVENANCE.md ./src/modules/search/word-forms/
 COPY --chown=node:node package.json next.config.ts ./
 RUN mkdir -p /data/photos && chown node:node /data/photos \
     && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn* \

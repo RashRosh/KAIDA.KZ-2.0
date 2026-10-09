@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { chromium, expect, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import sharp from 'sharp';
 
 test('TLS cookies and the photo body limit survive the Caddy proxy', async ({ request }) => {
@@ -21,12 +21,12 @@ test('TLS cookies and the photo body limit survive the Caddy proxy', async ({ re
   expect((await rejected.json()).error.code).toBe('PHOTO_TOO_LARGE');
 });
 
-test('a Secure session cannot be established on ordinary HTTP', async () => {
+test('a Secure session cannot be established on ordinary HTTP', async ({ browser }) => {
+  test.setTimeout(60000);
   // Chromium exempts localhost from some Secure-cookie restrictions. Use a non-trustworthy
   // test hostname resolved directly to loopback; no DNS or LAN/public publication is involved.
-  const browser = await chromium.launch({ args: ['--host-resolver-rules=MAP kaida.test 127.0.0.1', '--no-proxy-server'] });
+  const context = await browser.newContext();
   try {
-    const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto(`http://kaida.test:${process.env.KAIDA_HTTP_TEST_PORT ?? '3400'}/`);
     const result = await page.evaluate(async () => {
@@ -40,6 +40,6 @@ test('a Secure session cannot be established on ordinary HTTP', async () => {
     expect((await context.cookies()).some((cookie) => cookie.name === 'kaida_session')).toBe(false);
     expect(result.me.user).toBeNull();
   } finally {
-    await browser.close();
+    await context.close();
   }
 });
