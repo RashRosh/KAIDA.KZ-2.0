@@ -4,7 +4,7 @@
 #   tools   - full dependencies and sources: migrations, Production KB import, search-events purge, deploy preflight.
 # Secrets are never build arguments or image content: configuration comes from the environment at run time.
 ARG NODE_IMAGE=node:24.19.0-trixie-slim@sha256:ab3eebe934147fee049b5eb83c570f68c849a13c930bdfa482de99fcdfa3b3de
-ARG PNPM_VERSION=11.19.0
+ARG PNPM_VERSION=11.28.5
 
 FROM ${NODE_IMAGE} AS os-base
 # Exact available security fixes from the R3 Trivy assessment; no host packages are changed.

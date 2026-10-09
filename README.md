@@ -84,7 +84,7 @@ Seller Input
 ## Технологический стек
 
 - Node.js 24;
-- pnpm 11.19.0;
+- pnpm 11.28.5;
 - Next.js 16 App Router / Route Handlers;
 - React 19;
 - TypeScript strict;
@@ -104,7 +104,7 @@ SQLite/mock database не заменяет PostgreSQL integration environment. D
 git clone https://github.com/RashRosh/KAIDA.KZ-2.0.git
 cd KAIDA.KZ-2.0
 corepack enable
-corepack prepare pnpm@11.19.0 --activate
+corepack prepare pnpm@11.28.5 --activate
 pnpm install --frozen-lockfile
 cp .env.example .env
 ```

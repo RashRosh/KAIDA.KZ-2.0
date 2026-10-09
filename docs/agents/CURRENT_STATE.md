@@ -8,7 +8,7 @@
 
 ## Current task
 
-R3 implementation authorized. Branch feat/r3-deployment-preparation has unfinished uncommitted implementation. Audit: correcting photo bind mount to named volume and adapting R1 smoke in a separate R3 spec. Implementation merge and checkpoint prohibited until PO manual acceptance.
+R3 implementation authorized. Branch feat/r3-deployment-preparation / draft PR #163. Head 61fd6fedcc554aef12e4e5d1f2fd9475ed48db66; additional tools security patches in progress. Implementation merge and checkpoint prohibited until PO manual acceptance.
 
 ## Last completed
 
@@ -20,7 +20,7 @@ Pending final build, preflight negatives, TLS smoke, persistence, R2 restore, Ha
 
 ## Next action
 
-Complete clean-image build, isolated first start/negative preflight/TLS/persistence/R2 and final scans. Implementation push/PR explicitly authorized by PO after initial auto-review rejection. Draft PR #163 open; branch CI running. Final security exceptions require explicit PO approval. Stop with acceptance package once gates pass.
+Apply brace-expansion patch overrides, pnpm 11.28.5 (patched bundled undici), and esbuild 0.28.2; assess Go findings still present upstream. Then rebuild, complete TLS/persistence/R2 and final scans. Implementation push/PR explicitly authorized by PO after initial auto-review rejection. Draft PR #163 open; branch CI running. Final security exceptions require explicit PO approval. Stop with acceptance package once gates pass.
 
 ## Local constraints
 
