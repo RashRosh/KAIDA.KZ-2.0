@@ -90,7 +90,7 @@ describe('S2 Identity auth on PostgreSQL 18', () => {
     const phone = '+77000000105';
     await cleanupPhone(phone);
     const first = await requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => NOW, config: CONFIG, generateCode: () => '111111' });
-    const secondNow = new Date(NOW.getTime() + 1000);
+    const secondNow = new Date(NOW.getTime() + 60_000);
     const second = await requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => secondNow, config: CONFIG, generateCode: () => '222222' });
     await expect(verifyOtp({ challengeId: first.challenge.id, code: '111111' }, { database: db, clock: () => secondNow, config: CONFIG }))
       .rejects.toMatchObject({ code: 'OTP_NOT_ACTIVE', status: 409 });
@@ -105,7 +105,7 @@ describe('S2 Identity auth on PostgreSQL 18', () => {
     await cleanupPhone(phone);
     const firstRequest = await requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => NOW, config: CONFIG });
     const first = await verifyOtp({ challengeId: firstRequest.challenge.id, code: firstRequest.delivery.code }, { database: db, clock: () => NOW, config: CONFIG });
-    const secondNow = new Date(NOW.getTime() + 10_000);
+    const secondNow = new Date(NOW.getTime() + 60_000);
     const secondRequest = await requestOtp({ phone }, { delivery: testOtpDelivery, database: db, clock: () => secondNow, config: CONFIG });
     const second = await verifyOtp({ challengeId: secondRequest.challenge.id, code: secondRequest.delivery.code }, { database: db, clock: () => secondNow, config: CONFIG });
 

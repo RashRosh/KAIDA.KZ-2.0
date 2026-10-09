@@ -65,6 +65,10 @@ test('buyer interest survives reload and a later login, then can be removed', as
     await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
 
     await signOutInMore(page);
+    // The original regression relogged immediately. Make its isolated challenge history eligible under the approved cooldown.
+    const admissionPool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+    try { await admissionPool.query("UPDATE auth_otp_challenges SET created_at=created_at-interval '61 seconds' WHERE phone_e164=$1", [phone]); }
+    finally { await admissionPool.end(); }
     await login(page, phone);
 
     await openSeedOffer(page);
