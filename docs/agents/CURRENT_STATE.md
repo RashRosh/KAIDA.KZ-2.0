@@ -1,32 +1,32 @@
 # Current verified state
 
-## Verified base / active task
+## Verified checkpoint / current task
 
-- Remote main 49fe8095d3d6fa1e1d12b52619fa0f087fb143b1: approved auth contract/plan/state docs PR #165 merged after green checks. Merged-main verify 37964923564 / CodeQL 37964923799 passed.
-- Latest checkpoint: annotated v0.0.73-r3-deployment-preparation -> c2d9968efe24a4f93161eb9f0f387f7bc87886eb. R3 is closed; queue owner is docs/product/EXECUTION_PLAN.md.
-- Auth-otp-protection implementation ACTIVE in tmp/auth-otp-implementation, branch slice/auth-otp-protection, based on the docs merge. Implementation PR #166 open. Prior candidate 0f9e54c exposed a migration-harness disconnect race in push CI and stale immediate re-login fixtures in local full E2E. Repair only those test prerequisites; publish a new final candidate and run full exact-head CI. No product code changes are needed.
-- Approved policy: 60s request interval, 5 accepted requests/rolling 15min per normalized phone, 5 wrong guesses/challenge; recovery through fresh code under the same request limits, no permanent lock. Scope/revisions: docs/slices/auth-otp-protection/SLICE_CONTRACT.md.
+- auth-otp-protection CLOSED: PO manual acceptance PASS at 2df2f5dd82e6b1805f863548f71ab0c2ea0df067 on 2026-10-10; PR #166 merged as 11eb7f12943c25749b9dfb125b72686400b93e1d. Accepted and resulting merge trees identical: d6dbb02c9049d9e9ca0a8f497435e1d25555f1ef.
+- Annotated checkpoint v0.0.74-auth-otp-protection points to that implementation merge. Full merged-main verify 37983129452 and CodeQL 37983129520 green before tag. Closure docs follow separately; actual git/GitHub supersede this snapshot.
+- Contract: docs/slices/auth-otp-protection/SLICE_CONTRACT.md. Approved S2/UX1A2 behavior revisions implemented; original closed sources preserved. No dependency changes or new security exceptions.
+- Current task: publish this closure handoff; no new work. Queue owner docs/product/EXECUTION_PLAN.md; future queue unchanged, next candidate requires separate PO decision.
 
-## Last completed / verification
+## Verification / evidence
 
-- Atomic persisted admission/failure counters, additive migration 0025, shared modal resend/countdown/terminal recovery and stale-response guards implemented. Existing login entry points use the same enforcement.
-- Local targeted proof: 25 unit; 15 original+new integration, expanded 9 migration/race cases; typecheck/lint and production build passed. Focused Chromium E2E: 30 passed. Full unit: 508 passed. Full integration: 294 passed after clean isolated fixture preparation and required test-secret configuration. Final lint/typecheck/production build passed. Initial full browser run:262 passed/54 skipped/4 stale-fixture failures; failure traces retained. Repair regression and final-SHA CI/manual acceptance pending.
-- Verification/fixtures/manual checklist: docs/slices/auth-otp-protection/VERIFICATION.md. Historical malformed migration snapshots remain unchanged; handwritten SQL/journal matches the existing convention and has executable upgrade/fresh-chain proof.
-- No dependency changes, new security exception, real SMS/provider or purchase. Phone-based protection does not close wider O-AUTH/O-ABUSE or public-launch gates.
+- Accepted-head push verify 37969475036 / PR verify 37969480788: 508 unit, 294 integration, 266 E2E passed / 54 existing skipped. CodeQL 37969480786 and dependency review 37969480819 green; branch open CodeQL alerts 0.
+- Canonical phone budgets 60s / 5 accepted requests per rolling 15min / 5 wrong guesses; atomic request/guess/consume races, old-code invalidation, denied-request preservation, recovery, restart persistence and all login entry points verified. No permanent account lock.
+- Windows 11, Node 24.14.1 / pnpm 11.28.5, PostgreSQL18 Linux amd64; Chromium mobile 390x844 / desktop1440x900. Local 508 unit / final20 risk integration passed; earlier294 full integration passed.
+- Local final E2E 265 passed / 54 skipped / 1 existing seller-motion timing miss; same-SHA sequential repeats3/3 passed, full Linux branch CI passed. KK copy remains provisional; PO manual acceptance covered mobile RU.
+- Durable verification boundaries: docs/slices/auth-otp-protection/VERIFICATION.md. Retained local logs, CI artifacts, raw traces, acceptance receipt, final private DB dump, closure audit and integrity manifests: tmp/auth-otp-evidence and tmp/auth-otp-closure-private (never upload private dumps/env/photos).
 
-## Isolated resources / protected environment
+## Served checkpoint / cleanup / preservation
 
-- Docker container kaida-auth-otp-postgres ID 092d1a60b81011710c464aea28526da970e5fb059ff2f09f6a149172b22f0072, loopback 55434, volume kaida-auth-otp-pg. Verification DBs kaida / kaida_test; acceptance DB kaida_auth_acceptance migrated/seeded. Planned manual server loopback 3200; synthetic phones +77009916601 / +77009916602 with User IDs 16600000-0000-4000-8000-000000000601 / 16600000-0000-4000-8000-000000000602. Manual server running on loopback3200 PID18812; use http://auth-otp.localhost:3200/login for separate dev cookies. Separate smoke phone+77009916603/challenge356771c2-209a-416e-9858-f52c51d3fc63 proves real runtime restart preserves failure count1 and request429 (acceptance-restart.json). PO fixtures have no pre-issued challenges.
-- Evidence tmp/auth-otp-evidence; dev-photo-baseline.json seals all 1648 dev photo sizes/SHA256s. Preserve dev container kaidakz-20-postgres-1 ID 82a3a1b991062bc1cbef29ddb60f8c756fff18d67ab3116770a08ccdb1387772, start 2026-10-05T08:59:06.038744639Z, volume kaidakz-20_postgres_data, port5432; port3000 PID26500; .data/photos and personal files. Final read-only preservation proof: tmp/auth-otp-evidence/preservation-final.json; all1648 photo hashes, dev container identity/start/mounts and port3000 PID26500 unchanged. No dev DB command issued; Docker/resource settings unchanged.
-- Root checkout docs/r3-closure at 9303db1 has unrelated voice research staged locally; no recordings are committed/pushed in auth PRs. Its index and personal files are untouched. Do not stage .mimosa/, .pnpm-store/, .vscode/, scripts/, tmp/, e2e.pid, docs/reviews/localization-foundation-kk-review.docx or nested .mimosa/.
+- http://localhost:3000: isolated production artifact for accepted executable source; checkout tmp/checkpoint-3000 at 11eb7f12943c25749b9dfb125b72686400b93e1d. PID23892, loopback127.0.0.1, build ID AxHCKHzLSCXhxDWmcjZVP. Home/login/DB health/sample photo all200.
+- Reused the already-tested accepted production artifact in a separate checkout; relocated only its two external-dependency junctions to locked local dependencies. No new compilation: available physical memory438-608MiB; no resource settings changed. Artifact origin/log: tmp/auth-otp-implementation/.next and tmp/auth-otp-evidence/final-build.log.
+- Retained checkpoint DB: kaida-checkpoint-3000-postgres IDbe1a29cda204d8535640e79f9d3e2bfaf17f5e3457e248fc0009385409943578; volume kaida-checkpoint-3000-pg, loopback55435, DB kaida_checkpoint. Private dev snapshot restored, migration0025 applied only to clone. All public-table rows identical excluding new failure column; all1648 original/copied photo hashes matched. New local edits affect this isolated copy, not original dev data.
+- After verified port3000 cutover, retired acceptance PID18812/port3200 and probe PID19248/port3201. Removed recorded kaida-auth-otp-postgres ID092d1a60b81011710c464aea28526da970e5fb059ff2f09f6a149172b22f0072 and volume kaida-auth-otp-pg, including its two acceptance Users16600000-0000-4000-8000-000000000601/602, four challenges, zero sessions and verification DBs. Evidence preserved first.
+- Original dev PostgreSQL ID82a3a1b991062bc1cbef29ddb60f8c756fff18d67ab3116770a08ccdb1387772 remains healthy, started2026-10-05T08:59:06.038744639Z, volume kaidakz-20_postgres_data unchanged; original photos unchanged. Only authorized original Next server PID26500 retired. Docker memory3962191872B unchanged.
+- Root remains docs/r3-closure at9303db18791f1dbe018e82749842fb044bc189a2;195 unrelated research files staged, index/personal files preserved. No research audio committed by auth work. Avoid committing .mimosa/, .pnpm-store/, .vscode/, scripts/, tmp/, e2e.pid or localization-foundation-kk-review.docx.
 
-## Voice pause / launch boundaries
+## Remaining limits / voice pause / STOP
 
-- Voice feasibility study PAUSED at PO request. Evidence docs/research/voice-input/local-feasibility-2026-10-09/README.md and small-comparison/REPORT.md; raw results/prompts/schema/licences, 18 synthetic WAVs and memory evidence retained locally/staged. Weights/caches/confidential audio excluded; no small download/inference/parser benchmark ran.
-- PO audition gate passed: intelligible with wrong word stress in places, no content mismatch; synthetic benchmark only. Memory blocker: final physical available 460MiB vs planned ~2GiB; commit headroom19382.9MiB. Detailed consumers in small-comparison/memory-followup.json. Docker memory unchanged3962191872B.
-- Resume ONLY on explicit PO instruction followed by fresh physical/commit headroom preflight (~2GiB planned); stop if insufficient. AI still required for launch, implementation order deferred. Manual/voice/photo/video unchanged; no typed-AI/manual-editor AI. First voice implementation must include safe retries, late results and approved private-audio lifecycle.
-- AI moderation deferred; public launch unauthorized. R3 E-R3-OS / E-R3-GO and other approved exceptions stay isolated-local-only, with review triggers in ops/deployment/security-exceptions.md. R3 evidence links/cleanup retained; confidential backup stays outside Git under C:/Users/RoboRash/AppData/Local/Temp/kaida-r3-codex-check.
-
-## Next action / stop
-
-Finish full regression and branch CI on the final executable SHA, prepare/record isolated fixtures, preserve environment evidence, and STOP with English acceptance package. No implementation merge/tag, new task, SMS purchase or voice-study resume.
+- Test-code delivery only; real SMS/purchases excluded. Many-phone distributed abuse and targeted allowance exhaustion remain unsolved. Wider abuse/legal/pilot/public launch remain gated. Existing R3 exceptions, especially E-R3-OS/E-R3-GO, remain isolated-local-only; no public deployment authorization. R3 evidence/confidential backup retained.
+- Voice study PAUSED at PO request; AI still required for launch, implementation order deferred. Local evidence docs/research/voice-input/local-feasibility-2026-10-09 retained/staged; weights/caches/confidential audio excluded. Audition intelligible with wrong stress, no content mismatch; synthetic only. Approved heavier comparison/source-grounded parser has not run.
+- Memory blocker460MiB physical vs planned~2GiB, commit headroom19382.9MiB. Resume ONLY explicit PO instruction plus fresh sufficient physical/commit preflight. Manual/voice/photo/video unchanged. First voice implementation requires safe retries, late results and approved private-audio lifecycle. AI moderation deferred; public launch unauthorized.
+- Next action: STOP after closure evidence publication; start no task and do not alter future queue.

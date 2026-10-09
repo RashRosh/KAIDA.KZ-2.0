@@ -1,7 +1,7 @@
 # Local OTP request and verification protection
 
-**Status: APPROVED - IMPLEMENTATION AUTHORIZED; implementation merge/tag require manual acceptance.**
-PO approved this as the next local development slice and approved the four policy rules below. PO approved the final wording and explicitly authorized implementation after the docs PR. Verified remote main: `c4b19c082f8242b766a5c8b3a6515916a20f4174`; current checkout `9303db18791f1dbe018e82749842fb044bc189a2`. No product code changed.
+**Status: CLOSED (PO manual acceptance PASS, 2026-10-10).**
+Accepted implementation: `2df2f5dd82e6b1805f863548f71ab0c2ea0df067`; PR #166 merge: `11eb7f12943c25749b9dfb125b72686400b93e1d`; checkpoint `v0.0.74-auth-otp-protection`. Merged-main full verify 37983129452 and CodeQL 37983129520 passed before tagging. Approved S2/UX1A2 revisions are implemented within this contract; historical closed source documents are preserved. Real SMS and public launch remain excluded.
 
 ## 1. One user task
 
@@ -20,7 +20,7 @@ A user signs in through the existing phone/test-code modal, can recover by reque
 
 **Approval provenance:** the latest PO instruction approves this next slice, the 60-second / five-request / 15-minute / five-wrong-code policy, fresh-code recovery without permanent lockout, and the explicitly listed closed-contract revisions. These are PO decisions, not values discovered in earlier sources. PO subsequently approved this final wording and authorized implementation, with isolated verification and final branch CI before manual acceptance. OWASP's [login-throttling guidance](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#login-throttling) supports choosing attempt/window/recovery rules and considering denial-of-service tradeoffs; it does not prescribe these values or authorize this scope.
 
-Code inspection: `requestOtp` currently replaces a challenge on every valid request; `verifyOtp` rejects wrong codes without recording a failure count. The auth table has no failure counter. `AuthModal` uses these real endpoints, shows the test code and offers change-number; it has no dedicated resend action/countdown. These are inspected facts, not a fresh execution/regression claim.
+Pre-implementation inspection: `requestOtp` replaced a challenge on every valid request; `verifyOtp` rejected wrong codes without recording a failure count. The auth table had no failure counter. `AuthModal` used these real endpoints, showed the test code and offered change-number; it had no dedicated resend action/countdown. These describe the inspected starting point, not the closed implementation.
 
 ## 3. Approved initial policy and explicit enforcement contract
 
