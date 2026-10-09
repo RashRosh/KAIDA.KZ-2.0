@@ -1,6 +1,6 @@
 # Slice Contract — R3: Воспроизводимая подготовка развёртывания (без хостинга)
 
-**Статус: APPROVED — IMPLEMENTATION AUTHORIZED (PO, 2026-10-09; одобрен после уточнений §3.2–§3.5).** Контейнерный образ как формат поставки, локальные Hadolint и Trivy в рамках R3 и минимальный `GET /api/health` одобрены. Реализация — в отдельной ветке; merge и checkpoint tag — только после ручной приёмки PO. При нехватке памяти сборки: отчёт с доказательствами и минимальным предложением; ресурсы Docker Desktop без одобрения PO не менять; обычные настройки сборки в границах scope допустимы. Часть Local readiness track (`EXECUTION_PLAN.md`, R3); продолжение R1 (`v0.0.62`) и R2 (`v0.0.64`). Рекомендуемый reasoning effort реализации: **high** (инфраструктура, секреты, security).
+**Status: CLOSED (PO manual acceptance PASS on 2026-10-09 at ca1b30ae8fb9972c6d6af12080e68b7ccf094039).** Контейнерный образ как формат поставки, локальные Hadolint и Trivy в рамках R3 и минимальный `GET /api/health` одобрены. Реализация — в отдельной ветке; merge и checkpoint tag — только после ручной приёмки PO. При нехватке памяти сборки: отчёт с доказательствами и минимальным предложением; ресурсы Docker Desktop без одобрения PO не менять; обычные настройки сборки в границах scope допустимы. Часть Local readiness track (`EXECUTION_PLAN.md`, R3); продолжение R1 (`v0.0.62`) и R2 (`v0.0.64`). Рекомендуемый reasoning effort реализации: **high** (инфраструктура, секреты, security).
 
 ## 1. Цель
 
@@ -116,3 +116,9 @@
 ## 10. STOP conditions
 
 Нужно подключиться к dev-БД/фото/портам; секрет в образе, Git, build-arg, логах или bundle; найден секрет сканером; потребовалось изменить схему, миграции или закрытое поведение; потребовалась ревизия R2 (guards, формат bundle) или R1; образ нельзя собрать без платного/внешнего сервиса или на доступной памяти; сканер не выполнен, а требуется «пройдено»; потребовался прокси-специфичный код в приложении; предложение открыть стек во внешнюю сеть, использовать `0.0.0.0` или публичный адрес; включение `organic`; выбор хостинг-провайдера.
+
+## 11. Closure evidence
+
+[PR #163](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/163) merged at c2d9968efe24a4f93161eb9f0f387f7bc87886eb; resulting tree equals the accepted head. [Merged-main verification](https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/37920568293) passed; annotated checkpoint `v0.0.73-r3-deployment-preparation`. Scope, dependency patches, verification reports and limits remain in the PR evidence.
+
+PO confirmed card/photo visibility after the isolated R3 restart, then explicitly accepted the SHA and authorized closure. All approved exceptions, especially E-R3-OS and E-R3-GO, remain limited to isolated local testing; closure authorizes neither public deployment nor broader exception scope. Remaining launch/environment gates and the unscheduled queue remain in EXECUTION_PLAN.
