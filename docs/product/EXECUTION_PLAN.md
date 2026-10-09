@@ -6,7 +6,7 @@
 
 ## Общая дорожная карта
 
-**The approved queue is complete: R3 CLOSED at v0.0.73-r3-deployment-preparation (PO manual acceptance, 2026-10-09).** No work after R3 is scheduled or authorized. The candidates below retain their existing dependencies and statuses; PO decides the next task.
+**The approved queue is complete: auth-otp-protection CLOSED at v0.0.74-auth-otp-protection (PO manual acceptance, 2026-10-10).** No subsequent implementation is scheduled or authorized. The candidates below retain their existing dependencies and statuses; PO decides the next task.
 
 **Утверждено**
 1. **Фундамент — завершён.** Поиск и карточка предложения для покупателя, кабинет продавца и редактор карточки, актуальность, Production KB, справочник адресов, события D0, локальный bootstrap (R1), backup/restore (R2), блок UX/search 1–6 (последний checkpoint `v0.0.72`).
@@ -72,10 +72,10 @@
 
 1. Закрытая работа — в истории и тегах; здесь статусы закрытого не ведутся.
 2. **R3 - CLOSED:** completed at v0.0.73-r3-deployment-preparation; contract and PR #163 hold the evidence.
-3. **auth-otp-protection — SCHEDULED by PO:** next local development slice. Scope, initial policy and listed closed-contract revisions approved; final contract approved and implementation authorized after the docs PR. Implementation merge/tag await manual acceptance.
+3. **auth-otp-protection — CLOSED:** PO manual acceptance PASS at `2df2f5dd82e6b1805f863548f71ab0c2ea0df067`; PR #166 merged at `11eb7f12943c25749b9dfb125b72686400b93e1d`; merged-main CI green, checkpoint `v0.0.74-auth-otp-protection`.
 4. After auth-otp-protection, the next candidate requires a separate PO decision.
 
-**Approved bounded scope (2026-10-09):** [auth-otp-protection Slice Contract](../slices/auth-otp-protection/SLICE_CONTRACT.md) covers login OTP request throttling, failed-code attempts and same-modal resend/recovery. Approved initial policy: 60 seconds between requests; five accepted requests per canonical phone per rolling 15 minutes; five incorrect attempts per issued code; fresh-code recovery subject to the same limits, no permanent account lock. This covers O-OTP-RESEND and only the phone-based login portion of O-ABUSE. O-AUTH real delivery and broader anti-abuse remain open, including distributed many-phone abuse and deliberate exhaustion of another person's allowance. Approved final contract/docs PR precedes separate implementation branch, isolated verification/final CI and manual acceptance/closure. Real SMS/purchases excluded.
+**Approved bounded scope (2026-10-09):** [auth-otp-protection Slice Contract](../slices/auth-otp-protection/SLICE_CONTRACT.md) covers login OTP request throttling, failed-code attempts and same-modal resend/recovery. Approved initial policy: 60 seconds between requests; five accepted requests per canonical phone per rolling 15 minutes; five incorrect attempts per issued code; fresh-code recovery subject to the same limits, no permanent account lock. This covers O-OTP-RESEND and only the phone-based login portion of O-ABUSE. O-AUTH real delivery and broader anti-abuse remain open, including distributed many-phone abuse and deliberate exhaustion of another person's allowance. Approved final contract/docs PR #165, separate implementation PR #166, isolated verification, full branch/main CI and PO manual acceptance are complete; the slice is CLOSED. Real SMS/purchases excluded.
 
 **PO research pause:** voice feasibility is PAUSED; evidence and memory blocker are retained in `docs/research/voice-input/local-feasibility-2026-10-09/`. Resume requires explicit PO instruction and sufficient memory preflight; do not resume automatically when memory frees. AI input remains required for launch; its implementation order is deferred. Existing manual/voice/photos/video channels, AI moderation deferral and public-launch gate are unchanged. The auth proposal is independently feasible locally and does not satisfy or remove the AI launch requirement.
 
@@ -112,7 +112,7 @@ Issues владеют подробным обсуждением; здесь — 
 | Вопрос | ID | Что нужно решить |
 |---|---|---|
 | Настоящая аутентификация и доставка OTP | O-AUTH | Способ входа для реальных пользователей; SMS-провайдер (платная инфраструктура отложена). |
-| Повторная отправка OTP и таймер | O-OTP-RESEND | Final bounded auth-otp-protection contract approved; implementation authorized, merge/tag gated on acceptance. |
+| Повторная отправка OTP и таймер | O-OTP-RESEND | CLOSED: accepted local test-delivery implementation at v0.0.74-auth-otp-protection; real delivery remains separate. |
 | Защита от злоупотреблений | O-ABUSE | Phone-based login scope approved; broader abuse scope and timing remain undecided. |
 | Юридические тексты | O-LEGAL | Политика, согласие рядом с отправкой, раздел об ответственности; кто даёт текст. |
 | Пилот | O-PILOT | Режим доступа (по приглашениям / SMS / Telegram-бот), язык пилота, размер, роль оператора. |
@@ -146,7 +146,7 @@ Issues владеют подробным обсуждением; здесь — 
 |---|---|---|---|---|---|
 | O-LAUNCH | Публичный запуск. Условие: AI-ввод (S17–S20) готов; AI-модерация условием не является. Нужны отдельные решения PO — O-AUTH, O-ABUSE, O-LEGAL, O-PILOT. Ручной путь работает при недоступном AI (`PROJECT_RULES.md` §10.1); ручные требования модерации сохраняются. Других условий запуска не выводилось. | Ops · GATED | DECIDED · FM:AI-first п.12; EP:п.6,п.8; CS:constraints; PR:§10.1,§16; AUD; RD:Авторизация и public launch | S-AI-INPUT; решения раздела 4. | Нет; зависит от решений раздела 4. |
 | O-AUTH | Настоящая аутентификация и доставка OTP (S22), SMS-провайдер. Test OTP не production-ready. Требования определяют launch-контракты. | Dev · NEEDS-DECISION | DOCUMENTED · FM:S22; EP:п.6,п.8; PR:§16; UXR:spot-check | Платная инфраструктура отложена; delivery, abuse/rate-limit, секреты и Secure-cookie проверяют отдельные launch-контракты. | Решение PO (раздел 4). |
-| O-OTP-RESEND | Resend/timer and server-enforced request/failed-code limits; local test delivery only. | Dev · SCHEDULED | DECIDED · PO; SL:auth-otp-protection; SL:S2-auth | Final contract/implementation approved; docs PR first, separate branch; merge/tag require manual acceptance. | Docs PR, then implement and verify; STOP for acceptance. |
+| O-OTP-RESEND | Resend/timer and server-enforced request/failed-code limits; local test delivery only. | Dev · CLOSED | DECIDED · PO; SL:auth-otp-protection; SL:S2-auth | Manual acceptance PASS; PR #166 merged, branch/main CI green; v0.0.74-auth-otp-protection. | No further local work authorized; real delivery/broader abuse need separate PO decisions. |
 | O-OTP-AUTOFILL | Автоподстановка OTP; не имитировать будущий SMS-сценарий. | Dev · GATED | DOCUMENTED · UXD:§7 | Проверять вместе с реальным способом авторизации (O-AUTH) | Нет. |
 | O-ABUSE | Защита от злоупотреблений. | Dev · NEEDS-DECISION | DOCUMENTED · EP:п.8; PR:§16 | Отдельное решение PO до допуска реальных пользователей | Решение PO. |
 | O-LEGAL | Юридические тексты: политика, согласие рядом с отправкой, раздел об ответственности (Privacy/ToS в приложении нет). Пока AI недоступен — информационный текст об ответственности продавца при каждой публикации/правке (RV §3.1). Не придумывать юридические обещания. | Ops · NEEDS-DECISION | DOCUMENTED · EP:п.8; UXR:consent GAP; FM:AI-first п.5 | Решение PO; delivery, abuse, секреты, Secure-cookie проверяются отдельно. | Решение PO. |
