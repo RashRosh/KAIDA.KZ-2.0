@@ -1,39 +1,31 @@
 # Current verified state
 
-Короткий операционный snapshot. Перед работой сверить его с фактическими git/GitHub; история хранится в Git/PR/CI, не здесь.
-
 ## Verified base
 
-- Проверено: 2026-10-09.
-- Продуктовый код: `1d6891ef58e6b74e26d13778a953366a6bddfa22` (merge PR #156, buyer preview 6b), CI SUCCESS. Последующие PR (#158, #159, упрощение системы планирования) — docs-only, продукт не меняют; текущий `main` и CI проверять напрямую.
-- Последний checkpoint: `v0.0.72-pre-publication-buyer-preview` (`1d6891e`): кнопка «Как увидят покупатели» в редакторе (новая карточка, черновик, правка опубликованной), приватный просмотр через `POST /api/seller/card-preview` и общий `OfferDetails`, постоянная строка «не опубликовано», список точек с ценой каждой, системная «Назад» закрывает просмотр; ничего не сохраняется, id синтетические; денежные поля продавца не принимают буквы (`acceptAmountInput`). Предыдущие: `v0.0.71-post-publication-buyer-preview`, `v0.0.70-search-typo-correction`, `v0.0.69-search-empty-states`, `v0.0.68-card-price-packaging`, `v0.0.67-card-opening-hours`, `v0.0.66-search-word-forms`, `v0.0.64-backup-restore` (R2), `v0.0.62` (R1).
-- Production KB v1 (682 / 210 / 35) — runtime-база; ставится `pnpm db:import:production-kb`. Demo-последовательность: миграции → `pnpm db:seed` → импорт KB; seed после импорта KB (без предшествующего seed) падает на `products_name_unique` — известное ограничение.
+- Verified 2026-10-09: remote main 9ff2f7a1f505fc46713f90d7a2df0b28a010bb83; docs PR #162 merged, PR and merged-main CI successful.
+- Last product checkpoint: v0.0.72-pre-publication-buyer-preview, 1d6891ef58e6b74e26d13778a953366a6bddfa22.
+- Queue owner: docs/product/EXECUTION_PLAN.md. Scope: docs/slices/r3-deployment-preparation/SLICE_CONTRACT.md.
 
 ## Current task
 
-Блок UX/search закрыт (пункты 1–6). Активной реализации нет; следующий пункт — R3 (подготовка развёртывания), начинается только по прямому поручению PO. Роли документов — `PROJECT_RULES.md` §2: оставшиеся задачи, их состояние и порядок ведёт `docs/product/EXECUTION_PLAN.md` (общий production plan; не разрешение на реализацию), `docs/product/REQUIREMENTS_REGISTER.md` — только технический указатель ID → источники → ограничения, архив — `docs/product/EXECUTION_HISTORY.md`, снимок инвентаризации — `docs/product/REQUIREMENTS_SOURCE_MAP.md` (не обновляется). Документация упрощена, общий production plan пересмотрен без изменения очереди, решений PO и R3 hold; рутинное закрытие slice обновляет только контракт, этот файл и план (`PROJECT_RULES.md` §19.1); подготовка контракта R3 приостановлена на время ревью плана, не отменена. Ожидает подтверждения PO применение утверждённого текста во внешних инструкциях ChatGPT-проекта (D-EXT; не блокер, не изменялось).
+R3 implementation authorized. Branch feat/r3-deployment-preparation has unfinished uncommitted implementation. Audit: correcting photo bind mount to named volume and adapting R1 smoke in a separate R3 spec. Implementation merge and checkpoint prohibited until PO manual acceptance.
 
-Записанные ограничения: (1) лицензия OpenCorpora (словарь word forms, CC BY-SA) — перепроверить по первоисточнику opencorpora.org и сохранить копию с датой до публичного распространения (сайт был недоступен 2026-10-07); (2) opening hours: tz-база старых устройств может давать для Asia/Almaty смещение +6 вместо +5 (статус и «сегодня» сдвинутся на час), расчёт не менялся по решению PO; (3) новые KK-строки word forms, opening hours, search empty states и typo correction (две строки «Показаны результаты…» / «Оның орнына…») ждут KK-вычитки (отдельное дело; price and packaging новых слов не добавил); (4) typo correction: замер задержки сделан на малой dev-БД, критерий «добавка p95 ≤ 150 мс» полностью не подтверждён (разность двух p95, а не p95 добавки; холодный старт ≈ 0,4 с) — предложен ограниченный парный замер на данных до границы словаря (см. контракт typo §8); утверждение «0 ложных исправлений» ограничено документированными корпусами; слоты прохода исправления — на процесс (при нескольких процессах лимит у каждого свой); исправление KK-орфографии и замены согласных у слов из 5–7 букв не поддерживаются.
+## Last completed
 
-## Active work (2026-10-09)
+Verified docs PR, main CI and isolated stack inventory. Prior trial build succeeded with 1536 MiB heap/two workers, but does not prove final SHA.
 
-**R3 — контракт утверждён PO, реализация разрешена** (`docs/slices/r3-deployment-preparation/SLICE_CONTRACT.md`). Реализация идёт в отдельной ветке `feat/r3-deployment-preparation`; merge в `main` и checkpoint tag — только после ручной приёмки PO. Изолированный стек (проект `kaida-deploy-check`); dev-БД, фото, сервер на порту 3000 и личные файлы не трогать; ресурсы Docker Desktop без одобрения PO не менять. Вне R3: хостинг, публичный запуск, `organic` и purge D0 (O-D0-ORG).
+## Verification
+
+Pending final build, preflight negatives, TLS smoke, persistence, R2 restore, Hadolint/Trivy and branch full CI. Docker Desktop 4.91.0 / Engine 29.8.0, Linux amd64 VM, 3,962,191,872 bytes available. Resources unchanged.
 
 ## Next action
 
-1. R3 (`EXECUTION_PLAN.md`) — по поручению PO. Записанные follow-up: KK-вычитка новых строк (6a и 6b: «Сатып алушылар қалай көретін болады» и др.), лицензия OpenCorpora, tz-база старых устройств; поле «количество в упаковке» не получило фильтра ввода (это не цена).
+Complete R3 audit and verification; commit/push approved files, open implementation PR, obtain exact-head CI and fresh-checkout evidence. Record security findings and required exceptions. Stop with acceptance package.
 
-## Current constraints
+## Local constraints
 
-- Не начинать: D1, AI Input, AI-модерация, платная инфраструктура, 6F/6G, **любое иное fuzzy/typo-расширение сверх принятого `v0.0.70`** (автоисправление по утверждённым правилам принято; новые классы правок, KK-морфология, синонимы, поисковый движок — только отдельным решением PO), оценка и выбор поискового движка, Issue #116, KK-вычитка (отдельно). **AI-ввод — обязательное предварительное условие публичного запуска** (решение PO): внутренняя разработка и тестирование продолжаются без AI, запуск — нет; AI-модерация условием запуска не является и остаётся отложенной; ручные требования модерации сохраняются; это условие запуска, а не разрешение реализовать AI или публиковать без модерации.
-- Верификация каждого UI-slice блока UX/search включает читаемость на реальном телефоне, длинные KK-подписи и крупный системный шрифт; консолидированный UX/UI-документ — история обсуждения, его неутверждённые предложения не принимаются молча.
-- Не добавлять без решения PO: настоящую аутентификацию/доставку OTP, abuse-защиту, юридические тексты, операторскую доставку OTP, allowlist, оповещения о free-title и прочие pilot-функции.
-- D0: `SEARCH_EVENTS_ORIGIN=organic` не включать, пока ежедневный `pnpm search-events:purge` не настроен и не проверен; `dev` / `test` / `synthetic` — не реальный спрос. Поведение D0 не менять без решения PO.
-- Границы приёмки R1: свежий запуск проверен только через Git Bash на Windows; PowerShell, Linux и CI-воспроизведение не проверены; нужен `IDENTITY_OTP_HMAC_SECRET_HEX`; `pnpm build` на слабой машине падал перемежающимся образом, причина не установлена.
-- Границы приёмки R2: проверено через Git Bash на Windows; PowerShell, Linux, неограниченная нагрузка записи, перенос между версиями PostgreSQL/приложения, push при смене VAPID-ключа не проверены; backup содержит ПД и действующие сессии (отзыва сессий нет); корректность backup без остановки записи держится на правиле «фото неизменяемы и не удаляются» — любой slice удаления/замены фото сначала пересматривает R2.
-- Проверки bootstrap/R2 не трогают dev-БД `kaida`/`kaida_test`, том `postgres_data`, порт 5432 и `.data/photos` рабочей копии; секреты не в Git.
-- Выбор товара из каталога у продавца не обязателен; free-title путь не менять.
-- Не коммитить: `.mimosa/`, `.pnpm-store/`, `.vscode/`, `scripts/`, `tmp/`, `e2e.pid`, `docs/slices/search-sort-distance/.mimosa/`; `next-env.d.ts` перегенерируется — в коммит не входит.
-- Граница доставки: mobile + русский (`PROJECT_RULES.md` §18.5).
-- Mimosa pre-commit scanner может ложно блокировать новые test-файлы с `pool.query($n)`; не менять код ради него.
-- Issue #12 закрыт (2026-10-05, completed). Nearby (S11) использует `compareActualityTier` и `distanceMetersForRanking` из модуля ранжирования Search — не менять их поведение.
+- Preserve dev DB kaida/kaida_test, kaidakz-20-postgres-1, kaidakz-20_postgres_data, port 5432, .data/photos, PID 26500 on port 3000, ports 3100/3101.
+- Dev container baseline: 82a3a1b991062bc1cbef29ddb60f8c756fff18d67ab3116770a08ccdb1387772, started 2026-10-05T08:59:06.038744639Z.
+- Only isolated deployment resources may change. No Docker Desktop resource changes without approval; no hosting/public exposure/organic.
+- Never stage personal/unrelated files: .mimosa/, .pnpm-store/, .vscode/, scripts/, tmp/, e2e.pid, docs/reviews/localization-foundation-kk-review.docx, nested .mimosa/.
+- Known follow-ups remain in the plan: KK proofreading, OpenCorpora license evidence, old-device timezone behavior, typo-correction performance limits.

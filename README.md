@@ -145,6 +145,8 @@ pnpm verify
 
 ## Авторизация и public launch
 
+Воспроизводимый контейнерный стек для приватной проверки (R3), конфигурация, TLS, обновление и R2 restore: [Deployment reference](docs/ops/DEPLOYMENT.md). Хостинг и публичный запуск не входят в R3.
+
 На закрытом тесте используется phone → dynamic test OTP → database-backed session. Реальный SMS provider подключается отдельным launch-stage изменением; test OTP нельзя считать production-ready механизмом.
 
 Public launch требует отдельной проверки delivery, abuse/rate-limit, secrets и Secure-cookie поведения. Точные launch requirements должны подтверждаться актуальными contracts и Execution Plan, а не историческим README.

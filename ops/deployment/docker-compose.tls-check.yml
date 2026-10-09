@@ -1,0 +1,15 @@
+# R3 acceptance only: a local TLS-terminating proxy in front of the reference stack (docs/ops/DEPLOYMENT.md, "TLS check").
+# Use together with docker-compose.yml:  docker compose -f docker-compose.yml -f docker-compose.tls-check.yml ...
+# Caddy's internal CA issues a certificate for `localhost`; nothing is installed in the host trust store. This verifies the
+# application behind a TLS proxy, NOT any hosting provider's proxy (headers, body limits, timeouts, certificates, DNS).
+services:
+  tls-proxy:
+    image: caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+    ports:
+      - "127.0.0.1:${KAIDA_TLS_PORT:-8443}:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      app:
+        condition: service_healthy
