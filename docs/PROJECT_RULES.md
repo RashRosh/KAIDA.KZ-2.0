@@ -24,11 +24,16 @@ UI → API → business logic → DB → tests → manual acceptance
 - `PROJECT_RULES.md` — процесс и устойчивые boundaries;
 - `docs/product/EXECUTION_PLAN.md` — единственный текущий execution order;
 - `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости;
+- `docs/product/REQUIREMENTS_REGISTER.md` — индекс требований (вид работы, статус, зависимости, ссылка на владельца подробностей); не копирует Issues и документы, не задаёт порядок;
+- `docs/product/EXECUTION_HISTORY.md` — закрытая история плана, не источник очередности;
+- `docs/agents/CURRENT_STATE.md` — verified checkpoint, SHA, tag, CI и операционный снимок;
 - `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md` — parent semantics Free / Pro / Boost / Business;
 - `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` — parent planning/decomposition Backoffice;
 - принятые макеты по §18.1 — визуальный стиль и композиция; обязательные UI-правила — §18.4 этого файла;
 - GitHub Issues — подробные требования к незакрытой работе;
 - `docs/slices/**/SLICE_CONTRACT.md` — точное поведение конкретного slice.
+
+**Статус в реестре требований, место в плане или триггер пересмотра не являются разрешением на реализацию**: реализацию разрешают только прямая команда PO и утверждённый Slice Contract; триггер пересмотра — повод вынести решение PO. Очерёдность определяют зависимости, readiness-условия, явные решения PO и проверенные checkpoints, а не календарные даты: даты в документах — свидетельство, а не условие порядка (правила runtime-дат, хранения и истечения безопасности это не затрагивает). Вид работы (Development / Research / Operations) не отменяет workflow slice: любое изменение кода, в том числе внутри Operations- или Research-задачи, идёт как Development.
 
 Фактический repository state, tags и CI всегда проверяются напрямую. Исторический статус внутри README, Feature Map, старого issue или чата не заменяет текущий evidence.
 
