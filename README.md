@@ -52,9 +52,11 @@ UI → API → business logic → DB → tests → manual acceptance
 Основные документы имеют разные роли:
 
 - [`docs/PROJECT_RULES.md`](docs/PROJECT_RULES.md) — процесс разработки, verification и устойчивые архитектурные/product boundaries;
-- [`docs/product/EXECUTION_PLAN.md`](docs/product/EXECUTION_PLAN.md) — текущий checkpoint, NEXT и committed/insertion-candidate очередь;
+- [`docs/product/EXECUTION_PLAN.md`](docs/product/EXECUTION_PLAN.md) — текущий и следующий порядок работ и decision gates;
 - [`docs/product/FEATURE_MAP.md`](docs/product/FEATURE_MAP.md) — долгосрочная capability/dependency map;
-- [`docs/product/REQUIREMENTS_REGISTER.md`](docs/product/REQUIREMENTS_REGISTER.md) — индекс требований (вид, статус, зависимости, источники); не очередь и не разрешение на реализацию; [`docs/product/EXECUTION_HISTORY.md`](docs/product/EXECUTION_HISTORY.md) — закрытая история плана;
+- [`docs/product/REQUIREMENTS_REGISTER.md`](docs/product/REQUIREMENTS_REGISTER.md) — компактные записи невыполненных требований (вид, статус, зависимости, источники, Issues); не очередь и не разрешение на реализацию;
+- [`docs/agents/CURRENT_STATE.md`](docs/agents/CURRENT_STATE.md) — verified checkpoint, активная работа и операционные ограничения;
+- [`docs/product/EXECUTION_HISTORY.md`](docs/product/EXECUTION_HISTORY.md) и [`docs/product/REQUIREMENTS_SOURCE_MAP.md`](docs/product/REQUIREMENTS_SOURCE_MAP.md) — архив и сохранённый снимок инвентаризации (читать при необходимости истории или трассировки);
 - [`docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md`](docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md) и ревизия 1 — целевой UX продавца; какой макет главный — `PROJECT_RULES.md` §18.1;
 - [`docs/product/UX_REFERENCE_INDEX.md`](docs/product/UX_REFERENCE_INDEX.md) — маршрутизация по внешним UX references;
 - `docs/slices/**/SLICE_CONTRACT.md` — точное поведение отдельного slice и историческое evidence закрытых contracts;
