@@ -34,23 +34,7 @@
 
 ## Source ownership
 
-- process / verification / stable boundaries, включая обязательные UI-правила → `docs/PROJECT_RULES.md`;
-- current execution order → этот файл;
-- long-range capability/dependency map и продуктовые решения PO → `docs/product/FEATURE_MAP.md`;
-- target product sources для будущих contracts → `docs/product/SEARCH_SYSTEM_SPEC_v0.1.md`,
-  `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md` и
-  `docs/product/KAIDA.KZ_initial_product_catalog_v0.1.xlsx`;
-- growth / marketplace-liquidity strategy → `docs/product/GROWTH_STRATEGY.md`: **STRATEGY BACKLOG — NOT IMPLEMENTATION AUTHORIZATION**; не меняет execution order и gates этого файла; Demand workstream (S15C / D0–D5) остаётся owning implementation workstream для G3–G7;
-- commercial semantics → `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
-- Backoffice planning/decomposition → `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
-- целевой UX продавца → `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md` + `SELLER_AI_FIRST_DESIGN_REVISION_1.md` + макет
-  (`PROJECT_RULES.md` §18.1);
-- exact slice behavior → `docs/slices/**/SLICE_CONTRACT.md`;
-- unresolved detailed requirements → GitHub Issues;
-- индекс требований (вид работы, статус, зависимости, где живёт подробность) → `docs/product/REQUIREMENTS_REGISTER.md`: **индекс, не очередь и не разрешение на реализацию**;
-- verified checkpoint, SHA, tag, CI и операционный снимок → `docs/agents/CURRENT_STATE.md`;
-- закрытая история плана → `docs/product/EXECUTION_HISTORY.md`.
-
+Роли документов и владельцы информации — `docs/PROJECT_RULES.md` §2. Этот файл владеет только текущим и следующим порядком работ и decision gates; target product sources (`SEARCH_SYSTEM_SPEC_v0.1.md`, `KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`, `KAIDA.KZ_initial_product_catalog_v0.1.xlsx`), growth-стратегия (`GROWTH_STRATEGY.md`: **STRATEGY BACKLOG — NOT IMPLEMENTATION AUTHORIZATION**, не меняет порядок и gates; Demand workstream S15C / D0–D5 владеет реализацией G3–G7), commercial и Backoffice parent sources, целевой UX продавца и невыполненные требования ведутся в своих документах и `REQUIREMENTS_REGISTER.md`.
 
 Перед началом работы исполнитель обязан самостоятельно проверить фактический `main`, tags и CI; SHA и run id в этом файле не ведутся.
 
@@ -222,99 +206,11 @@ willingness to pay: реакция на бесплатный сигнал сам
 
 ---
 
-# Issues → записи реестра
+# Issues и кандидаты на вставку
 
-Порядок работ определяют разделы выше; статусы Issues и их условия пересмотра ведёт `REQUIREMENTS_REGISTER.md` (прежняя таблица состояний перенесена в `EXECUTION_HISTORY.md`). Issues владеют подробными требованиями и сюда не копируются.
+Сопоставление Issues с записями — `REQUIREMENTS_REGISTER.md` (раздел «Issues → записи реестра»). Невыполненные кандидаты на вставку (Market navigation #10, дополнительные фильтры, M2 видео, отзывы/рейтинг, архив, OTP resend, промо-баннер, тема, правки экранов продавца, остаток аналитики/First Entry, единый вход поиска) — записи реестра; исходные формулировки дословно — `EXECUTION_HISTORY.md`, «Former INSERTION CANDIDATES».
 
-| Issue | Запись реестра |
-|---|---|
-| #10 Market navigation | B-MARKET-NAV |
-| #54 категории товаров продавца | S-CATEGORIES |
-| #55 Demand | M-D1, M-D2, M-D3, M-D4-6, M-PRIVACY |
-| #75 AI-правила seller input | S-AI-INPUT |
-| #76 distance sensitivity | B-DISTANCE |
-| #79 Price Intelligence | B-PRICE-INTEL |
-| #83 Security automation | O-SEC-AUTO |
-| #116 CI flake | O-CI-FLAKE |
-| закрытые Issues (#12, #13, #16, #17, #19, #27, #31, #32, #34, #35, #36, #37, #42, #125, #130) и случайные (#20–#23, #28, #29) | DELIVERED / REJECTED записи (V-*, X-*) |
-
-# INSERTION CANDIDATES
-
-Insertion candidate не имеет жёсткого номера. Он рассматривается **только на checkpoint/re-evaluation boundary** и никогда не вклинивается внутрь уже открытого slice.
-
-## Market internal navigation — Issue #10
-
-- earliest sensible point: после этапа 1;
-- trigger: пилот на крупных рынках показывает, что обычного route до Location недостаточно;
-- direction: Market directory → scheme/MarketPlaces → Location binding → buyer internal navigation;
-- default without trigger: остаётся unscheduled.
-
-## Additional Search filters (отдельно от #12)
-
-Сортировка «Расстояние / Цена / Актуальность» с направлением закрыта Stage 6 Rev 3 (`v0.0.51`). Радиус и цена от–до
-в Rev 3 **сняты**; отдельные фильтры (радиус, диапазон цены, тип точки, фото/контакты, rating) не добавляются без нового
-решения PO и своей data/usefulness-основы. Trigger: PO подтверждает конкретный filter use case.
-
-## M2 — публичное видео предложения
-
-- earliest: после фото этапа 1;
-- целевой макет предусматривает до 5 фото + 1 публичное видео;
-- trigger: Product Owner подтверждает, что видео нужно покупателю, а не только как вход для ИИ.
-
-## Отзывы, рейтинг, жалобы на фото
-
-В целевом макете (AI-S20–S22, AI-B03–B06, AI-M03–M05). Отдельный committed slice не определён.
-
-- trigger: Product Owner утверждает trust/review use case, antifraud и moderation semantics;
-- до этого нельзя показывать fake rating/reviews;
-- решение PO (2026-09-25): жалоба — **на карточку целиком**, не только на фото; причина выбирается после нажатия
-  (`FEATURE_MAP.md`, «Seller AI-first model», п. 9). Макет AI-B05 / AI-B06 / AI-M03 и brief §14.3 перерабатываются
-  при подготовке этого этапа.
-
-## Архив и удаление карточек
-
-В целевом макете (AI-S15–S17): архив с восстановлением и сроком хранения — раздел архива с датой переноса и остатком срока, «Подтвердить и восстановить», исчезновение через 30 дней после переноса, необратимое «Удалить». Требует server jobs, точной temporal semantics и пересмотра R2 (фото неизменяемы и не удаляются). Поставлено частично: стадия актуальности `archived` (≥ 336 ч без подтверждения) как статус карточки продавца. Не поставлено: всё перечисленное выше. Подробности и открытые решения — `REQUIREMENTS_REGISTER.md`, запись S-ARCHIVE.
-
-## OTP resend + timer
-
-`AuthModal.tsx` не имеет resend-механизма; `S2-auth/FEATURE_SPEC.md` выносит resend/throttling за scope S2.
-
-- earliest: unscheduled — требует product/security решения;
-- trigger: Product Owner выбирает naive resend или отдельный slice с throttling ближе к launch.
-
-## Промо-баннер над строкой поиска (решение PO, 2026-09-29)
-
-Место над строкой поиска у покупателя под акции, новинки и другую информирующую / вовлекающую маркетинговую
-информацию.
-
-- earliest: после экранов покупателя по макету;
-- экраны покупателя не реализуют баннер, но их вёрстка не должна мешать вставить его над строкой поиска;
-- перед контрактом: кадр дизайнера, кто и как управляет содержимым (оператор), правила маркировки рекламы и связь с
-  монетизацией / продвижением (stage 12, S28–S29).
-
-## Стартовая страница сервиса — First Entry (остаток)
-
-Мобильная часть поставлена (`v0.0.38-first-entry-mobile`, `v0.0.48-first-entry-correction`); исходный текст решений PO 2026-09-29 перенесён в `EXECUTION_HISTORY.md`. Остаток: недавние запросы на повторном визите не спроектированы; финальный слоган; десктоп ≥ 1280 (PO: не берём, в последнюю очередь); промо-баннер над поиском (см. выше); казахские строки — черновик, нужна вычитка.
-
-## Тёмная / светлая тема (пожелание PO, 2026-09-29)
-
-Переключатель темы в «Ещё» (у покупателя и у продавца), рядом с «Язык». Срок не назначен. В макете и токенах только
-светлая тема — нужны тёмные токены и кадры дизайнера (`PROJECT_RULES.md` §18.1); палитру агент не придумывает.
-
-## Правки экранов продавца после ручного просмотра PO (остаток)
-
-Поставлены `seller-photo-tiles` (`v0.0.39`) и `seller-card-point-link` (`v0.0.41`); исходный текст перенесён в `EXECUTION_HISTORY.md`. Без кадра/контракта пока: контакты точки «по умолчанию» (показать мой номер, проверка номера — расширение point-contacts-hours), избранное покупателя, жалоба на карточку (этап отзывов и жалоб).
-
-## Аналитика поиска и живой главный экран покупателя (остаток)
-
-Поставлено: запись поисковых событий D0 (`v0.0.61`), Search Home с curated-чипами (`v0.0.49`), объяснение при опечатке (`v0.0.70`); исходный текст решения перенесён в `EXECUTION_HISTORY.md`. Остаток: выдача сразу на главном экране (ближайшее при геолокации, иначе популярное) и популярное из реальных данных — по readiness-gate D0/D1 (динамические чипы). Кнопка поиска: решение PO — только «→» в поле при наличии текста.
-
-## Unify buyer Search entry points
-
-`HeaderSearch` (full-page GET) и `SearchForm` (client-side fetch) на `/` ведут себя по-разному.
-
-- earliest: unscheduled;
-- direction: унифицировать submission behavior, не меняя closed Search semantics (S0/S6/S7/S9).
+Правило вставки: кандидат рассматривается **только на checkpoint/re-evaluation boundary** и никогда не вклинивается внутрь уже открытого slice; триггер пересмотра — повод вынести решение PO, а не разрешение.
 
 ---
 
@@ -329,7 +225,7 @@ AI остаётся способом сформировать черновики
 
 # Re-evaluation gates
 
-Проверять insertion candidates и новые approved requirements:
+Проверять записи реестра (кандидаты на вставку) и новые approved requirements:
 
 - после этапа 1;
 - после актуальности + Search Sorting;
@@ -339,7 +235,7 @@ AI остаётся способом сформировать черновики
 - после Commercial & Monetization Readiness и Backoffice slice decomposition (stages 11A–11C);
 - после каждого independently closed commercial/Backoffice checkpoint stage 12, а не после одного mega-release.
 
-Если утверждённое требование не имеет места ни в COMMITTED, ни в INSERTION CANDIDATES, ни в Feature Map, оно получает статус **UNPLACED GAP** и разбирается явно.
+Если утверждённое требование не имеет места ни в COMMITTED, ни в `REQUIREMENTS_REGISTER.md`, ни в Feature Map, оно получает статус **UNPLACED GAP** и разбирается явно.
 
 ---
 

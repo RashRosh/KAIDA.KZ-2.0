@@ -44,46 +44,46 @@ Parent sources для будущих cross-cutting workstreams:
 
 ## Numbered capability map
 
-Статус здесь показывает только whether capability уже закрыта как product contract; row order не является текущим execution order.
+Таблица описывает capability и зависимости. Статус (закрыта / запланирована / в разработке) здесь **не ведётся**: закрытые capabilities — Slice Contracts, `docs/agents/CURRENT_STATE.md` и `docs/product/EXECUTION_HISTORY.md`; невыполненные требования — `docs/product/REQUIREMENTS_REGISTER.md`; порядок — `docs/product/EXECUTION_PLAN.md`. Row order не является execution order. S0–S15B закрыты; S15C — D0 закрыт, D1 и далее data-gated; S25 — устаревшая форма (см. ниже).
 
-| ID | Область | Законченное поведение | Зависит от | Этап | Статус |
-|---|---|---|---|---|---|
-| S0 | Search/Core | Покупатель вводит товар и видит актуальное тестовое предложение | — | Foundation | CLOSED |
-| S1 | Offer lifecycle | Просроченный Offer перестаёт показываться | S0 | Foundation | CLOSED |
-| S2 | Auth | Пользователь входит по телефону через test OTP | S0 | Foundation | CLOSED |
-| S3 | Seller / Location | Продавец создаёт первую торговую точку | S2 | Foundation | CLOSED |
-| S4 | Seller Input | Один Change Set создаёт Offer после подтверждения | S3 | Foundation | CLOSED |
-| S5 | Offer management | Продавец обновляет/выключает Offer через Change Set | S4 | Foundation | CLOSED |
-| S6 | Catalog | Search понимает canonical Product и aliases | S0 | Foundation | CLOSED |
-| S7 | Search | Buyer находит реальные seller Offers | S4, S6 | MVP | CLOSED |
-| S8 | Geo / Location | Seller сохраняет валидные coordinates; raw geo не публикуется | S3, S7 | MVP | CLOSED |
-| S9 | Search ranking | Transient buyer geo может влиять на deterministic ranking | S1, S8 | MVP | CLOSED |
-| S10 | Buyer action | Из Offer можно связаться с продавцом | S7 | MVP | CLOSED |
-| S11 | Discovery | Buyer видит Offers рядом | S8, S9 | MVP | CLOSED |
-| S12 | Seller Input | Один Change Set содержит несколько Change Items | S5 | MVP | CLOSED |
-| S13 | Interests | Buyer отмечает Product как интересующий | S2, S6 | MVP | CLOSED |
-| S14 | Discovery | Buyer видит Offers по явно указанным интересам | S7, S13 | MVP | PLANNED |
-| S15A | Catalog bootstrap | Утверждённое RU-ядро стартового каталога проходит staging, merge и контролируемый import без дублей | S6 + PO-approved rows | Stage 10 | CLOSED (Production KB v1, `v0.0.52-production-kb-importer-v1`) |
-| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A (установленная Production KB v1), S7, S9; идёт после Catalog-backed Seller → Buyer runtime loop | Stage 10 | CLOSED (`v0.0.54`–`v0.0.60`) |
-| S15C | Demand Data Foundation | KAIDA собирает conscious canonical/unresolved/zero-result demand и privacy-safe internal aggregates | S15B | Stage 10 | PARTIAL: D0 CLOSED (`v0.0.61`); D1 и далее — data-gated, не начаты |
-| S16 | Operations | Оператор может отключить ошибочный Offer/Seller; первая часть — снятие карточки по факту публикации | S7 | Этап 1 (снятие) / MVP | PLANNED |
-| S17 | AI Input | Свободный текст предлагает Seller Change Set | S12 | После этапа 1 | PLANNED |
-| S18 | AI Input | Voice предлагает Seller Change Set | S17 | После этапа 1 | PLANNED |
-| S19 | AI Input | Photo input предлагает Seller Change Set | S17 | После этапа 1 | PLANNED |
-| S20 | AI Input | Video input предлагает batch Change Set | S17, S12 | После этапа 1 | PLANNED |
-| S21 | Input channels | Telegram использует ту же seller-input logic | S17 | После MVP | PLANNED |
-| S22 | Auth | Test OTP заменяется real SMS delivery | S2 | До публичного запуска | PLANNED |
-| S23 | Notifications | Buyer получает уведомление о новом Offer интересующего Product | S14 | После MVP | PLANNED |
-| S24 | Recommendations | Детерминированная personalized feed без ML | S14 + data | После MVP | PLANNED |
-| S25 | Monetization policy | **STALE FORM:** hard active-Offer tariff cap удалён из текущего направления; вернуться можно только по pilot evidence и новому явному PO decision | pilot evidence + commercial parent source | Stage 12 review gate | REVIEW REQUIRED |
-| S26 | Commercial foundation | Первый конкретный paid use case получает server-side CommercialAccount / Plan / Entitlements / Limits / EffectiveEntitlements minimum, без generic framework заранее | approved commercial parent source + owning use case | Stage 12, отдельные slices | PLANNED / NOT AUTHORIZED |
-| S27 | Pro | Один sellable Pro объединяет AI + full Demand + Performance и запускается только после минимально полезной готовности всех трёх capabilities | S17–S20 + D4 readiness + S33 + S26 + Billing foundation | Stage 12, readiness-gated | PLANNED |
-| S28 | Boost | Eligible Offer получает отдельные Purchase / PromotionCampaign semantics; one-off Boost доступен независимо от Pro, не меняет organic ranking и не гарантирует продажу | S26 + buyer visibility/moderation policy + future payment foundation | Stage 12, отдельный workstream | PLANNED |
-| S29 | Boost delivery | Paid Offer получает маркированный дополнительный охват на approved sponsored surfaces, отдельно от organic и Editorial Featured | S28 + delivery/measurement contract | Stage 12, readiness-gated | PLANNED |
-| S30 | Recommendations | Behavioral ranking учитывает реальные interactions | S24 + data | Позднее | PLANNED |
-| S31 | Discovery | Редкость товара влияет на показ | data | Позднее | PLANNED |
-| S32 | Trust | ИИ-модерация проверяет новые карточки и правки до публикации; спорное — человеку | S17 | После AI Input | PLANNED |
-| S33 | Seller performance | Free: views/opens/route/contact actions и basic totals; Pro: breakdown/trends/history/Demand linkage/funnel-like/Boost analytics; proxy action не называется продажей | instrumentation + S26; S28–S29 для Boost metrics | Stage 12 / позднее | PLANNED |
+| ID | Область | Законченное поведение | Зависит от | Этап |
+|---|---|---|---|---|
+| S0 | Search/Core | Покупатель вводит товар и видит актуальное тестовое предложение | — | Foundation |
+| S1 | Offer lifecycle | Просроченный Offer перестаёт показываться | S0 | Foundation |
+| S2 | Auth | Пользователь входит по телефону через test OTP | S0 | Foundation |
+| S3 | Seller / Location | Продавец создаёт первую торговую точку | S2 | Foundation |
+| S4 | Seller Input | Один Change Set создаёт Offer после подтверждения | S3 | Foundation |
+| S5 | Offer management | Продавец обновляет/выключает Offer через Change Set | S4 | Foundation |
+| S6 | Catalog | Search понимает canonical Product и aliases | S0 | Foundation |
+| S7 | Search | Buyer находит реальные seller Offers | S4, S6 | MVP |
+| S8 | Geo / Location | Seller сохраняет валидные coordinates; raw geo не публикуется | S3, S7 | MVP |
+| S9 | Search ranking | Transient buyer geo может влиять на deterministic ranking | S1, S8 | MVP |
+| S10 | Buyer action | Из Offer можно связаться с продавцом | S7 | MVP |
+| S11 | Discovery | Buyer видит Offers рядом | S8, S9 | MVP |
+| S12 | Seller Input | Один Change Set содержит несколько Change Items | S5 | MVP |
+| S13 | Interests | Buyer отмечает Product как интересующий | S2, S6 | MVP |
+| S14 | Discovery | Buyer видит Offers по явно указанным интересам | S7, S13 | MVP |
+| S15A | Catalog bootstrap | Утверждённое RU-ядро стартового каталога проходит staging, merge и контролируемый import без дублей | S6 + PO-approved rows | Stage 10 |
+| S15B | Search System revision | Buyer выбирает canonical Product; resolved выдача, unknown fallback и empty states имеют разную семантику | S15A (установленная Production KB v1), S7, S9; идёт после Catalog-backed Seller → Buyer runtime loop | Stage 10 |
+| S15C | Demand Data Foundation | KAIDA собирает conscious canonical/unresolved/zero-result demand и privacy-safe internal aggregates | S15B | Stage 10 |
+| S16 | Operations | Оператор может отключить ошибочный Offer/Seller; первая часть — снятие карточки по факту публикации | S7 | Этап 1 (снятие) / MVP |
+| S17 | AI Input | Свободный текст предлагает Seller Change Set | S12 | После этапа 1 |
+| S18 | AI Input | Voice предлагает Seller Change Set | S17 | После этапа 1 |
+| S19 | AI Input | Photo input предлагает Seller Change Set | S17 | После этапа 1 |
+| S20 | AI Input | Video input предлагает batch Change Set | S17, S12 | После этапа 1 |
+| S21 | Input channels | Telegram использует ту же seller-input logic | S17 | После MVP |
+| S22 | Auth | Test OTP заменяется real SMS delivery | S2 | До публичного запуска |
+| S23 | Notifications | Buyer получает уведомление о новом Offer интересующего Product | S14 | После MVP |
+| S24 | Recommendations | Детерминированная personalized feed без ML | S14 + data | После MVP |
+| S25 | Monetization policy | **STALE FORM:** hard active-Offer tariff cap удалён из текущего направления; вернуться можно только по pilot evidence и новому явному PO decision | pilot evidence + commercial parent source | Stage 12 review gate |
+| S26 | Commercial foundation | Первый конкретный paid use case получает server-side CommercialAccount / Plan / Entitlements / Limits / EffectiveEntitlements minimum, без generic framework заранее (реализация не авторизована) | approved commercial parent source + owning use case | Stage 12, отдельные slices |
+| S27 | Pro | Один sellable Pro объединяет AI + full Demand + Performance и запускается только после минимально полезной готовности всех трёх capabilities | S17–S20 + D4 readiness + S33 + S26 + Billing foundation | Stage 12, readiness-gated |
+| S28 | Boost | Eligible Offer получает отдельные Purchase / PromotionCampaign semantics; one-off Boost доступен независимо от Pro, не меняет organic ranking и не гарантирует продажу | S26 + buyer visibility/moderation policy + future payment foundation | Stage 12, отдельный workstream |
+| S29 | Boost delivery | Paid Offer получает маркированный дополнительный охват на approved sponsored surfaces, отдельно от organic и Editorial Featured | S28 + delivery/measurement contract | Stage 12, readiness-gated |
+| S30 | Recommendations | Behavioral ranking учитывает реальные interactions | S24 + data | Позднее |
+| S31 | Discovery | Редкость товара влияет на показ | data | Позднее |
+| S32 | Trust | ИИ-модерация проверяет новые карточки и правки до публикации; спорное — человеку | S17 | После AI Input |
+| S33 | Seller performance | Free: views/opens/route/contact actions и basic totals; Pro: breakdown/trends/history/Demand linkage/funnel-like/Boost analytics; proxy action не называется продажей | instrumentation + S26; S28–S29 для Boost metrics | Stage 12 / позднее |
 
 ## Inserted / cross-cutting capabilities
 
@@ -373,17 +373,9 @@ Seller-provided Offer media и AI media-input — разные capabilities. Н�
 
 Market — специализированный spatial container, а не центр архитектуры. Generic Location flow должен продолжать работать независимо от future Market scheme/MarketPlace capability.
 
-### Backlog capabilities, owned by Issues (2026-10-05)
+### Backlog capabilities, owned by Issues
 
-Подробные требования — в Issues; здесь только capability и dependency. Таблица **не меняет execution order**: #75 уже является входным backlog/source requirements для запланированного AI Input S17–S20; остальные строки остаются later / dependency-gated / trigger-gated согласно `EXECUTION_PLAN.md`.
-
-| Capability | Issue | Dependency / trigger |
-|---|---|---|
-| AI-правила разбора seller input (Product vs Offer-атрибуты, confidence, provenance, дубли, `product_candidate`) | #75 | AI Input S17–S20; Product KB v1 установлен |
-| Distance sensitivity товара/категории в ranking | #76 | S15B + D0/D1 данные; без скрытого score под явной сортировкой |
-| Price Intelligence (benchmark цены к рынку для покупателя и продавца) | #79 | Product resolution (S15B), сопоставимые единицы/фасовка, накопленные актуальные цены; не в ranking на MVP |
-| Группировка товаров продавца по категориям на «Моей витрине» | #54 | Category/каталог, решения PO (чьи категории, видит ли покупатель) |
-| Security automation (Trivy/Hadolint, SBOM, SLSA, Semgrep, OSV) | #83 | триггеры в Issue |
+Подробные требования — в Issues (#10, #54, #55, #75, #76, #79, #83, #116); сопоставление Issue → запись и их зависимости/триггеры ведёт `docs/product/REQUIREMENTS_REGISTER.md` (раздел «Issues → записи реестра»). Эти capabilities остаются later / dependency-gated / trigger-gated и не меняют execution order.
 
 ### Commercial model / Monetization
 

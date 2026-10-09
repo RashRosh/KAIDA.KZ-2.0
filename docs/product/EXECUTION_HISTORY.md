@@ -324,3 +324,125 @@ Issue — ровно одно (классификация принята PO).
 | #116 CI flake (migration-test) | UNSCHEDULED Development, вне R3 (решение PO) | правило триажа сбоев — `PROJECT_RULES.md` §7–§8 |
 | #13, #16, #17, #19, #27, #31, #32, #34, #35, #36, #37, #42 | covered / closed | реализовано или завершено, Issue закрыт |
 | #20–#23, #28, #29 | invalid / temp | не product requirements |
+
+## Архив записей реестра требований (поставлено / отклонено)
+
+_Источник: `REQUIREMENTS_REGISTER.md` на `67113c9`; строки перенесены дословно при упрощении системы планирования. Идентификаторы стабильны. Снимок, не очередь и не разрешение на реализацию. Источники — коды из `REQUIREMENTS_SOURCE_MAP.md` §1._
+
+| ID | Capability | Вид | Статус | Метка | Источники | Зависимости / триггер / свидетельство | Ограничения и примечания |
+|---|---|---|---|---|---|---|---|
+| O-REVIEW-FILE | Файл docs/reviews/localization-foundation-kk-review.docx отслеживался Git вопреки правилу AGENTS.md — снят с индекса (единое решение D-REVIEW-FILE) | Operations | DELIVERED |  | AG:Git и среда; KKR | Свидетельство: docs-PR этой консолидации (index-only удаление, `git rm --cached`); локальная копия сохранена; авторитетный .md-пакет остаётся в Git. Проверка зависимостей: на .docx не ссылался ни один отслеживаемый документ, кроме запрета AGENTS.md:147; содержимое .docx дублировало .md (265 строк, 0 заполненных решений) | Правило AGENTS.md сохраняется; файл добавлен коммитом 0c41f2a вместе с несвязанными правками |
+| V-CORE | S0–S13: поиск, lifecycle Offer, auth, Seller/Location, Change Set, управление Offer, каталог/алиасы, реальный поиск, geo, ranking, контакты, discovery, batch, интересы | Development | DELIVERED |  | FM; SL:S0..S13 | v0.0.1-s0 … v0.0.14-s13 |  |
+| V-UX1 | UX1A–UX2A: app shell, визуальное выравнивание, auth modal, карточки, Nearby, actionability, seller onboarding, адаптивный header | Development | DELIVERED |  | SL:UX1A..UX2A; UXR | v0.0.15-ux1a … v0.0.22-ux2a | Объединённый UX1 — см. X-UX1 |
+| V-STAGE1 | Этап 1 продавца без ИИ: цена обязательна, вход/точки продавца, локализация RU/KK, кабинет, единица цены, редактор, витрина, пост-проверка, актуальность, напоминания, экраны покупателя, First Entry (mobile), плитки фото, shortcut фото, связь карточка↔точка | Development | DELIVERED |  | EP; EH; SL; IC:#13,#31,#32,#35,#36 | v0.0.23 … v0.0.41 (теги по именам); offer-photos и point-contacts-hours закрыты по записям EP/EH без отдельного тега | Закрытые Issues #13, #31, #32, #35, #36 — выполнены |
+| V-GEO | Seller geo fallback, справочник адресов на открытых данных, видимость Offers без координат, Nearby result-first | Development | DELIVERED |  | UXR:spot-check №1; SL:seller-location-geo-fallback; SL:address-directory; SL:search-visibility-without-coordinates; SL:UX1C-nearby-geo-intent; SL:UX2-seller-onboarding; IC:#34 | v0.0.43, v0.0.44, v0.0.45, v0.0.47 | Закрывает: «address autocomplete — отдельное будущее решение» (UX2) и UX-010 (UX1C) |
+| V-GUEST-INTEREST | Кнопка интереса видна гостям | Development | DELIVERED |  | UXR:spot-check №3; SL:buyer-interest-guest-visibility | v0.0.26-buyer-interest-guest-visibility |  |
+| V-MARKET-TEXT | Текущая текстовая адресация места: тип точки market/pavilion, подсказка названия «Рынок, павильон, ряд или ориентир», адрес — свободный текст ≤ 500, справочник адресов с marketplace-записями | Development | DELIVERED |  | CODE:locations; SL:seller-trading-points-workspace; SL:address-directory; CSB:recovery report | Свидетельство: DB check типов (`market`,`shop`,`pavilion`,`home`,`other`), строки points.nameHint/type.*, locations.addressText; справочник адресов v0.0.44 (по снимку CS 2026-10-02: 63 marketplace, «Зелёный Базар» найден; не перепроверено) | Это описание существующего, а не оценка достаточности для пилота и не замена #10 (B-MARKET-NAV). Не проверено: находит ли поиск по тексту ряда/места |
+| V-PHONE-GROUP | Группировка цифр телефона при вводе (#42) | Development | DELIVERED |  | IC:#42 | В коде: formatKzPhoneInput в AuthModal.tsx (отдельного тега нет; точный slice не установлен) | Issue закрыт как COMPLETED |
+| V-SORT | Явная сортировка Расстояние/Цена/Актуальность с направлением; компактный контрол сортировки | Development | DELIVERED |  | FM:AI-first п.11; IC:#12; UXD:§3 | v0.0.46, v0.0.51, v0.0.60 | Закрытое поведение не пересматривать без нового основания (UXD §3) |
+| V-S15 | Production KB v1, catalog runtime loop, S15B (suggestions, known-zero, autocomplete, product-as-signal, relevance default), S15C/D0 | Development | DELIVERED |  | EP; EH; FM; SS:§24; DM:D0; GS:G3 | v0.0.52 … v0.0.61 | Закрывает пункты SS §24: suggestions, product_id, без OR, raw_fallback, known-zero, search_events, sort. Не закрыто: unresolved interest/watch (M-D2) |
+| V-R1R2 | R1 локальный bootstrap и R2 backup/restore | Operations | DELIVERED |  | EP; SL:local-bootstrap-verification; SL:backup-restore | v0.0.62, v0.0.64 (+v0.0.63, v0.0.65 как test-fix) | Границы приёмки — O-LIMITS |
+| V-UXSEARCH | Блок UX/search: словоформы, режим работы на карточке, цена и упаковка, пустые состояния, исправление опечаток | Development | DELIVERED |  | UXD:§4.1,§4.2,§5,§8; EP; AUD | v0.0.66 … v0.0.70 | Ранее записывались как backlog в UXD; не считать открытыми. Typo-slice закрывает также submit-time предложение исправленного запроса из SS §7 B2–B4 в принятой форме (автоисправление, rev 3); fuzzy-подсказки при вводе — B-FUZZY-SUGGEST |
+| V-PREVIEW | Просмотр «как видят покупатели»: опубликованная (6a) и до публикации (6b) карточка; ввод цены без букв | Development | DELIVERED |  | UXD:§4.3; EP; EH | v0.0.71, v0.0.72 | Закрывает кандидата UXD §4.3 |
+| X-PASS3 | Направление seller UI «Pass 3» и wireframe как UX target | Development | REJECTED |  | EH; FM:AI-first; MEM; CNV:VEioj7KKfjKfhD1RZpivdQ | Признано неверным PO (2026-09-24/25). Замена: AI-first макет rev 1 (PR §18.1) | Историческая палитра Pass 3 не переносится |
+| X-FILTER-SHEET | Кнопка/sheet «Фильтры», радиус, цена от–до, sort=cheaper | Development | REJECTED |  | EH; FM:AI-first п.11; IC:#12 | Сняты решением PO при Rev 3. Замена: сортировка Rev 3 (v0.0.51); отдельные фильтры — B-FILTERS |  |
+| X-6F | 6F Search Query Log как отдельный slice | Development | REJECTED |  | EP:п.6F/6G; EH | Снята до реализации. Замена: S15C/D0 (v0.0.61) |  |
+| X-6G | 6G динамические популярные запросы как отдельный slice | Development | REJECTED |  | EP:п.6F/6G | Переосмыслена. Замена: B-CHIPS |  |
+| X-S25 | S25 — hard cap активных Offer / «первые N бесплатно» | Development | REJECTED |  | FM:S25; EP:Commercial correction; CM:§4; DM:§40; CPA:§9 (устаревшее описание лимита); SJ:Деньги | Замена: нет hard cap — Free сохраняет полноценную ручную витрину (решение PO 2026-09-30, подтверждено в PO-сообщении о коммерческих решениях п.13: «не вводить hard commercial assortment cap»; в коде cap не реализован — поиск по src не нашёл). Возврат — только по pilot evidence и новому явному решению PO; допустимы technical/anti-abuse/fair-use limits | Идентификаторы S25–S29 сохранены ради истории; прежняя линейная схема hard cap → subscription → bulk → promotion устарела |
+| X-OFFER-WORKSPACE | Seller Offer Workspace (#27) и slice seller-points-contacts | Development | REJECTED |  | IC:#27; SL:seller-cabinet-overview | #27 закрыт NOT_PLANNED. Замена: seller-showcase-editor, seller-trading-points-workspace, point-contacts-hours | Контракты seller-offer-workspace и seller-points-contacts отсутствуют в репозитории |
+| X-PHOTO-MANDATORY | Фото обязательно для публикации | Development | REJECTED |  | FM:AI-first п.4; MEM | Отменено PO 2026-09-25. Замена: публикация без фото с напоминанием «карточка неполная» |  |
+| X-UX1 | Объединённый UX1 (marketplace shell) | Development | REJECTED |  | SL:UX1-marketplace-shell | Superseded before implementation. Замена: UX1A…UX2A |  |
+| X-LANG-URL | Языковые URL /ru, /kk и «РУС / ҚАЗ» в макете First Entry; отдельный языковой экран/gate | Development | REJECTED |  | EP:First Entry; SL:inline-language | Решение PO: язык выбирается один раз и меняется в «Ещё». Замена: inline-язык (v0.0.50) |  |
+| X-SEARCH-BUTTON | Кнопка поиска где-либо, кроме «→» в поле при наличии текста | Development | REJECTED |  | EP:First Entry; HO29:§5 | Замена: «→» в поле при наличии текста (решение PO 2026-09-29) |  |
+| X-MAP-PIN | Интерактивная карта/pin для seller geo как обязательный путь | Development | REJECTED | NON-GOAL | BR:§21.10; FM:address directory | Исключена как обязательный путь (не вечный запрет): может вернуться только явной contract revision без обязательной зависимости core от платного SaaS. Замена: справочник адресов + разбор ссылки на карту (mockup S12A — Proposed) |  |
+| X-TILE-44 | Цели касания 44×44 для ☆/× на плитках фото | Development | REJECTED | LIMIT | HO29:§8; SL:seller-photo-tiles (§6.5) | Осознанное решение PO: 36×44. Замена: нет (принятое отклонение от §18.4) |  |
+| X-DESIGN-SYSTEM | Отдельный DESIGN_SYSTEM.md | Development | REJECTED |  | EP:Отменено; HO25:§6; UXB | Удалён 2026-09-25. Замена: принятый макет + PROJECT_RULES §18.1/§18.4 | Ссылки на него остались — O-DOC-DEBT |
+| X-DEMAND-V1 | Вне Demand v1 (DM §38, §25): доступ к individual buyers, buyer leads, «этот человек ищет ваш товар», точные координаты, heatmap с деанонимизацией, raw query log для продавца, закупочный прогноз в кг/шт, AI forecast, dynamic pricing, координация цен, выручка/склад конкурентов, Opportunity Score, ad auction, CPC/CPM, sponsored ranking, citywide Business heatmap, export/API, ML recommendations | Development | REJECTED | NON-GOAL | DM:§25,§38 | Ограниченный по объёму non-goal (не вечный запрет): исключены из v1 Demand; возврат — только явным решением PO и новым contract. Замена: не требуется | Demand v1 — market signal, не прогноз закупок |
+| X-BO-NONGOALS | Вне этапа планирования Backoffice (BO §8): giant Backoffice, отдельный admin backend, generic CRUD, Billing UI/провайдер/subscription engine, новые billing tables, Boost/Business implementation, seller-facing paid Demand, hard active-Offer cap, generic enterprise RBAC/финальные меню/permission matrix до Operations Map | Development | REJECTED | NON-GOAL | BO:§8 | Ограниченный по объёму non-goal этапа планирования (не вечный запрет); реализация — отдельными slices после K-PLANNING. Замена: не требуется |  |
+| X-GROWTH-DONOTS | Чего не делать на запуске (GS §6): оптимизировать регистрации; распылять первых продавцов по всему Алматы; покупать трафик до ликвидности supply; автоматически создавать Products из запросов; автоматизировать Bounty до ручной экономики; публиковать счётчики спроса без реальных данных; массово генерировать SEO-страницы без свежих Offers; смешивать sponsored placement с organic | Operations | REJECTED | NON-GOAL | GS:§6 | Ограниченные принципы strategy backlog (не вечный запрет); пересмотр — решением PO. Замена: не требуется |  |
+| X-UXR-REJECTS | Отклонено в аудите UX-корпуса (UX_REFERENCE_INDEX, #37): авто-sticky Search/header как универсальное требование; популярность/рейтинг/новизна как сортировка по умолчанию; спекулятивные крупные панели фильтров; корзина, оформление, доставка, оплата, add-to-cart; скидки/старая цена/клубная цена без контракта; фальшивые рейтинги/отзывы; обязательное реальное фото до M1 и выдача демо-медиа за фото продавца; копирование соцвитрин/маркетинговых механик; использование UX-советов («без CAPTCHA», альтернативные входы) для ослабления будущей anti-abuse | Development | REJECTED | NON-GOAL | UXR:Issue #37 audit conclusions | Ограниченные по объёму решения аудита (не вечный запрет); пересмотр — решением PO. Замена: не требуется | ADAPT-пункты аудита (автозаполнение телефона, читаемое форматирование и краткое пояснение про OTP как presentation) — не требования; формат телефона поставлен (V-PHONE-GROUP) |
+| X-CANONICAL-ONLY | Жёсткий canonical-only поиск: выбранный Product режет выдачу только по offers.product_id; отдельный raw fallback только по явному «Искать как введено» (SS §1, §4, §7, S15B-3) | Development | REJECTED |  | SS:§1,§4,§7,§19.4,§20; ATT:d1b687b0; SL:s15b4a-product-as-signal | Заменено решением PO: единая модель релевантности, Product — сильный сигнал, а не фильтр; свободные названия не исчезают. Замена: v0.0.58-product-as-search-signal, v0.0.59-search-relevance-default | Fuzzy-часть spec — B-FUZZY-SUGGEST. Также заменены: режимы mode=catalog\|raw_fallback и параметр mode=raw_fallback (SS §19.4, §20) единой выдачей; radiusM (SS §19.3) снят в Rev 3. Поставлено из SS §19–§20: разрешённый Product в ответе (resolvedProduct) и различение «известный Product, ноль» / «неизвестный» |
+| X-TEMP-ISSUES | Случайные Issues #20–#23, #28, #29 | Operations | REJECTED |  | IC | Закрыты NOT_PLANNED как случайные. Замена: нет |  |
+| X-UXD-NOT-ADOPTED | Не принято автоматически из UX-обзора (UXD §6) и замечания к сортировке (UXD §3) | Development | REJECTED | NON-GOAL | UXD:§3,§6; UXA:§2.3,§2.10,§3,§6 | Не принято из-за отсутствия доказательного основания (не вечный запрет):  перенос поиска в верхнюю треть; удаление чипов; фотокатегории только под свежие продукты; удаление двух названий/типа точки без проверки функций; автоудаление пустых черновиков (риск потери данных); удаление стрелок галереи без проверки доступности; скрытие юридического предупреждения после первого показа; переименование подтверждения актуальности в обещание свежести; замена «Маршрута» контактом; выводы о retention без данных; переоткрытие slice сортировки из-за названия default и стрелок | Каждый пункт может быть пересмотрен только новым основанием/данными и решением PO. Замена: не требуется |
+
+## Former «INSERTION CANDIDATES» плана — оставшиеся требования (дословно)
+
+_Источник: `EXECUTION_PLAN.md` на `67113c9`. Невыполненные требования ведёт `REQUIREMENTS_REGISTER.md` (EP:insertion в столбце «Источники» реестра указывает на этот раздел). Правило вставки сохранено в плане._
+
+### INSERTION CANDIDATES
+
+Insertion candidate не имеет жёсткого номера. Он рассматривается **только на checkpoint/re-evaluation boundary** и никогда не вклинивается внутрь уже открытого slice.
+
+#### Market internal navigation — Issue #10
+
+- earliest sensible point: после этапа 1;
+- trigger: пилот на крупных рынках показывает, что обычного route до Location недостаточно;
+- direction: Market directory → scheme/MarketPlaces → Location binding → buyer internal navigation;
+- default without trigger: остаётся unscheduled.
+
+#### Additional Search filters (отдельно от #12)
+
+Сортировка «Расстояние / Цена / Актуальность» с направлением закрыта Stage 6 Rev 3 (`v0.0.51`). Радиус и цена от–до
+в Rev 3 **сняты**; отдельные фильтры (радиус, диапазон цены, тип точки, фото/контакты, rating) не добавляются без нового
+решения PO и своей data/usefulness-основы. Trigger: PO подтверждает конкретный filter use case.
+
+#### M2 — публичное видео предложения
+
+- earliest: после фото этапа 1;
+- целевой макет предусматривает до 5 фото + 1 публичное видео;
+- trigger: Product Owner подтверждает, что видео нужно покупателю, а не только как вход для ИИ.
+
+#### Отзывы, рейтинг, жалобы на фото
+
+В целевом макете (AI-S20–S22, AI-B03–B06, AI-M03–M05). Отдельный committed slice не определён.
+
+- trigger: Product Owner утверждает trust/review use case, antifraud и moderation semantics;
+- до этого нельзя показывать fake rating/reviews;
+- решение PO (2026-09-25): жалоба — **на карточку целиком**, не только на фото; причина выбирается после нажатия
+  (`FEATURE_MAP.md`, «Seller AI-first model», п. 9). Макет AI-B05 / AI-B06 / AI-M03 и brief §14.3 перерабатываются
+  при подготовке этого этапа.
+
+#### Архив и удаление карточек
+
+В целевом макете (AI-S15–S17): архив с восстановлением и сроком хранения — раздел архива с датой переноса и остатком срока, «Подтвердить и восстановить», исчезновение через 30 дней после переноса, необратимое «Удалить». Требует server jobs, точной temporal semantics и пересмотра R2 (фото неизменяемы и не удаляются). Поставлено частично: стадия актуальности `archived` (≥ 336 ч без подтверждения) как статус карточки продавца. Не поставлено: всё перечисленное выше. Подробности и открытые решения — `REQUIREMENTS_REGISTER.md`, запись S-ARCHIVE.
+
+#### OTP resend + timer
+
+`AuthModal.tsx` не имеет resend-механизма; `S2-auth/FEATURE_SPEC.md` выносит resend/throttling за scope S2.
+
+- earliest: unscheduled — требует product/security решения;
+- trigger: Product Owner выбирает naive resend или отдельный slice с throttling ближе к launch.
+
+#### Промо-баннер над строкой поиска (решение PO, 2026-09-29)
+
+Место над строкой поиска у покупателя под акции, новинки и другую информирующую / вовлекающую маркетинговую
+информацию.
+
+- earliest: после экранов покупателя по макету;
+- экраны покупателя не реализуют баннер, но их вёрстка не должна мешать вставить его над строкой поиска;
+- перед контрактом: кадр дизайнера, кто и как управляет содержимым (оператор), правила маркировки рекламы и связь с
+  монетизацией / продвижением (stage 12, S28–S29).
+
+#### Стартовая страница сервиса — First Entry (остаток)
+
+Мобильная часть поставлена (`v0.0.38-first-entry-mobile`, `v0.0.48-first-entry-correction`); исходный текст решений PO 2026-09-29 перенесён в `EXECUTION_HISTORY.md`. Остаток: недавние запросы на повторном визите не спроектированы; финальный слоган; десктоп ≥ 1280 (PO: не берём, в последнюю очередь); промо-баннер над поиском (см. выше); казахские строки — черновик, нужна вычитка.
+
+#### Тёмная / светлая тема (пожелание PO, 2026-09-29)
+
+Переключатель темы в «Ещё» (у покупателя и у продавца), рядом с «Язык». Срок не назначен. В макете и токенах только
+светлая тема — нужны тёмные токены и кадры дизайнера (`PROJECT_RULES.md` §18.1); палитру агент не придумывает.
+
+#### Правки экранов продавца после ручного просмотра PO (остаток)
+
+Поставлены `seller-photo-tiles` (`v0.0.39`) и `seller-card-point-link` (`v0.0.41`); исходный текст перенесён в `EXECUTION_HISTORY.md`. Без кадра/контракта пока: контакты точки «по умолчанию» (показать мой номер, проверка номера — расширение point-contacts-hours), избранное покупателя, жалоба на карточку (этап отзывов и жалоб).
+
+#### Аналитика поиска и живой главный экран покупателя (остаток)
+
+Поставлено: запись поисковых событий D0 (`v0.0.61`), Search Home с curated-чипами (`v0.0.49`), объяснение при опечатке (`v0.0.70`); исходный текст решения перенесён в `EXECUTION_HISTORY.md`. Остаток: выдача сразу на главном экране (ближайшее при геолокации, иначе популярное) и популярное из реальных данных — по readiness-gate D0/D1 (динамические чипы). Кнопка поиска: решение PO — только «→» в поле при наличии текста.
+
+#### Unify buyer Search entry points
+
+`HeaderSearch` (full-page GET) и `SearchForm` (client-side fetch) на `/` ведут себя по-разному.
+
+- earliest: unscheduled;
+- direction: унифицировать submission behavior, не меняя closed Search semantics (S0/S6/S7/S9).

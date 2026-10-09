@@ -18,20 +18,22 @@ UI → API → business logic → DB → tests → manual acceptance
 
 ## 2. Источники истины
 
-Роли документов разделены:
+Роли документов разделены; у каждого типа информации один владелец, остальные документы на него ссылаются, а не копируют:
 
-- `AGENTS.md` — маршрутизатор: что читать;
-- `PROJECT_RULES.md` — процесс и устойчивые boundaries;
-- `docs/product/EXECUTION_PLAN.md` — единственный текущий execution order;
-- `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости;
-- `docs/product/REQUIREMENTS_REGISTER.md` — индекс требований (вид работы, статус, зависимости, ссылка на владельца подробностей); не копирует Issues и документы, не задаёт порядок;
-- `docs/product/EXECUTION_HISTORY.md` — закрытая история плана, не источник очередности;
-- `docs/agents/CURRENT_STATE.md` — verified checkpoint, SHA, tag, CI и операционный снимок;
+- `AGENTS.md` — короткий маршрутизатор и критичные входные инструкции; правила не повторяет;
+- `PROJECT_RULES.md` — процесс, verification и устойчивые boundaries (в том числе §19.1, §21–§22);
+- `docs/product/EXECUTION_PLAN.md` — только текущий и следующий порядок работ и decision gates;
+- `docs/agents/CURRENT_STATE.md` — verified checkpoint, SHA, tag, CI, активная работа и операционные ограничения;
+- `docs/product/REQUIREMENTS_REGISTER.md` — компактные записи невыполненных требований (вид, статус, зависимости, условия пересмотра, ссылки на источник и Issue); не копирует Issues и документы, не задаёт порядок; поставленные и отклонённые записи — компактный архив с полными строками в `EXECUTION_HISTORY.md`;
+- `docs/product/REQUIREMENTS_SOURCE_MAP.md` — сохранённый снимок инвентаризации источников и трассировки на 2026-10-09; не поддерживается регулярно;
+- `docs/product/EXECUTION_HISTORY.md` — архив: закрытая история плана и архив записей реестра; не источник очередности;
+- `docs/product/FEATURE_MAP.md` — обзор capabilities и доменные зависимости, продуктовые решения PO; очередь и статусы не ведёт;
+- `docs/slices/**/SLICE_CONTRACT.md` — точное утверждённое поведение конкретного slice;
+- GitHub Issues — подробное обсуждение; записи реестра ссылаются на Issues;
+- `docs/ops/*` — операционные runbooks;
 - `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md` — parent semantics Free / Pro / Boost / Business;
 - `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` — parent planning/decomposition Backoffice;
-- принятые макеты по §18.1 — визуальный стиль и композиция; обязательные UI-правила — §18.4 этого файла;
-- GitHub Issues — подробные требования к незакрытой работе;
-- `docs/slices/**/SLICE_CONTRACT.md` — точное поведение конкретного slice.
+- принятые макеты по §18.1 — визуальный стиль и композиция; обязательные UI-правила — §18.4 этого файла.
 
 **Статус в реестре требований, место в плане или триггер пересмотра не являются разрешением на реализацию**: реализацию разрешают только прямая команда PO и утверждённый Slice Contract; триггер пересмотра — повод вынести решение PO. Очерёдность определяют зависимости, readiness-условия, явные решения PO и проверенные checkpoints, а не календарные даты: даты в документах — свидетельство, а не условие порядка (правила runtime-дат, хранения и истечения безопасности это не затрагивает). Вид работы (Development / Research / Operations) не отменяет workflow slice: любое изменение кода, в том числе внутри Operations- или Research-задачи, идёт как Development.
 
@@ -456,6 +458,17 @@ acceptance — **mobile + русский язык**.
 - Существующая регрессия остаётся, пока проходит. Обновляется или снимается только проверка, которая напрямую
   утверждает поведение, отменённое утверждённой ревизией контракта; продукт под неё не подгоняется.
 
+### 18.6 Сборка экранов продавца
+
+Экраны продавца собираются из разметки и классов макета, а не из своих стилей:
+
+- `src/app/seller/kaida.css` — механический порт `docs/product/mockup/seller-ai-first-rev1/kaida.css` (всё под `.kaida`, `/_blob/<id>` → `/kaida/icons/<id>.svg`); вручную не править — пере-генерировать из макета;
+- `src/app/seller/kaida-app.css` — только рамка экрана и реальные контролы (input/select/checkbox);
+- `src/app/seller/_kaida/ui.tsx` — общие блоки (`Phone`, `Bar`, `Nav`, `Sheet`, `Toast`, `Check`, …);
+- иконки берутся из макета (`public/kaida/icons`), новые рисованные иконки не добавляются.
+
+Для продавца дополнительно читать `docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md`, `SELLER_AI_FIRST_DESIGN_REVISION_1.md` и сам макет; внешние UX references — `docs/product/UX_REFERENCE_INDEX.md` (advisory, `KEEP / ADAPT / REJECT / GAP`, §18). Если `EXECUTION_PLAN.md` содержит незакрытый обязательный UX/design maintenance gate, следующий UI/UX product slice не начинается до его закрытия.
+
 ## 19. Git и checkpoints
 
 `main` содержит только проверенное состояние.
@@ -476,6 +489,17 @@ targeted proof
 
 Всегда должна сохраняться возможность быстро вернуться к последнему verified checkpoint.
 
+### 19.1 Рутинное закрытие slice: какие документы обновляются
+
+Обновляются только документы, чьи факты изменились:
+
+- Slice Contract — статус и свидетельство закрытия;
+- `docs/agents/CURRENT_STATE.md` — checkpoint, активная работа, ограничения (как overwrite-snapshot);
+- соответствующая запись `REQUIREMENTS_REGISTER.md` — статус и свидетельство (tag / контракт); поставленную запись допустимо оставить в активной таблице до следующей правки реестра, затем перенести в архив;
+- `EXECUTION_PLAN.md` — только если изменились очередь или decision gates;
+- `FEATURE_MAP.md` — только если изменились capability или доменная зависимость;
+- `REQUIREMENTS_SOURCE_MAP.md` не обновляется (снимок); полный отчёт о закрытии не дублируется — достаточно ссылки на tag, контракт и PR.
+
 ## 20. Главный запрет
 
 Не писать весь MVP одним заходом по большому ТЗ.
@@ -494,3 +518,36 @@ Product vision
 ```
 
 Если Slice Contract нельзя однозначно проверить человеком за один проход, его нужно разделить.
+
+## 21. Handoff между агентами: `CURRENT_STATE.md`
+
+`docs/agents/CURRENT_STATE.md` — общая операционная память между агентами и сессиями. Сессия может оборваться в любой момент из-за usage/context limits, поэтому handoff не откладывается на конец сессии.
+
+В начале сессии:
+
+1. сверить `CURRENT_STATE.md` с фактическими `git status`, `git diff`, последними commits, relevant branch/PR, checkpoint/tag и CI;
+2. прочитать текущий Slice Contract, если работа относится к slice;
+3. если snapshot устарел, сначала исправить его по repository evidence, не продолжать из предположения;
+4. не перепроектировать закрытую работу и не перепроверять старые checkpoints без конкретной причины.
+
+Перед каждым следующим **существенным** шагом, если его потеря сделает восстановление неоднозначным: обновить `Current task` / `Next action` до начала действия; кратко зафиксировать ожидаемый результат и существенные ограничения шага; не превращать файл в подробный план или лог.
+
+После логически законченного шага или repository gate: обновить `Last completed` и фактический verification status/evidence; зафиксировать следующий `Next action` **до** начала следующего существенного шага.
+
+`CURRENT_STATE.md` хранит только текущее восстановимое состояние: verified base, active branch/task, last completed, verification, blocker при наличии, next action и локальные ограничения. История и длинная очередь туда не копируются: очередью владеет только `EXECUTION_PLAN.md`.
+
+**Compactness policy.** Файл — overwrite-style operational snapshot, а не append-only log. При каждом обновлении: удалять superseded facts, закрытые blockers, obsolete failures, duplicate CI evidence и historical diagnosis (история — Git, PR, Issues, CI artifacts); оставлять старый failure только если он причинно объясняет текущий blocker, — краткой ссылкой и актуальным выводом; при переходе к новой задаче переписывать snapshot под неё; держать файл примерно в пределах 50–80 строк и не более ~6 KB, а при превышении сжать до следующего существенного шага. Компактность не имеет права скрывать незакрытый risk, непроверенную работу, dirty worktree или STOP condition.
+
+Фактический код сильнее snapshot: намерение предыдущего агента читается из `CURRENT_STATE.md`, реально успевшие изменения — из git diff/status/commits. Нельзя утверждать, что незакоммиченная или непроверенная работа уже в remote/CI.
+
+## 22. Reasoning effort
+
+Минимальный достаточный уровень, если клиент позволяет им управлять:
+
+- `low` — механические docs/copy changes и узкие детерминированные правки без product/architecture решения;
+- `medium` — default для реализации утверждённого Slice Contract и понятных тестовых исправлений;
+- `high` — DB migration, public API, auth/security/privacy, concurrency/atomicity, data loss, external service, contract revision, архитектурное решение или неясный regression;
+- `high` / `xhigh` — Controller, closed-contract audit, checkpoint readiness и сложный cross-module review; `xhigh` только если клиент поддерживает и сложность это оправдывает;
+- `max` — только по явной объективной причине, когда более низкий уровень недостаточен.
+
+Это routing policy, а не повод изображать переключение: если клиент не умеет менять effort или уровень недоступен, не заявлять переключение; работать в доступном режиме.
