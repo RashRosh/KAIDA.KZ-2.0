@@ -13,6 +13,11 @@
 3. `docs/product/FEATURE_MAP.md` — долгосрочные capabilities и зависимости;
 4. `docs/agents/CURRENT_STATE.md` — операционный снимок текущей задачи (сверь с git/GitHub, он может устареть).
 
+По необходимости (планирование, поиск «где живёт требование», разбор backlog):
+
+- `docs/product/REQUIREMENTS_REGISTER.md` — индекс требований: вид работы, статус, зависимости, ссылки на владельца. **Индекс, не очередь и не разрешение на реализацию:** статус в реестре не заменяет `EXECUTION_PLAN.md` и прямую команду PO;
+- `docs/product/EXECUTION_HISTORY.md` — закрытая история плана; не источник очередности, читать только когда нужен исторический контекст.
+
 Не используй chat memory, старый README, historical status line или номер следующего `Sxx` как замену актуальному `EXECUTION_PLAN.md`.
 
 ## Persistent work state / handoff между агентами
@@ -125,6 +130,7 @@ Controller не проектирует и не реализует slice. Он п
 
 - процесс и boundaries → `PROJECT_RULES.md`;
 - текущая очередь → `EXECUTION_PLAN.md`;
+- индекс требований (вид / статус / зависимости / ссылка на владельца) → `REQUIREMENTS_REGISTER.md`; закрытая история плана → `EXECUTION_HISTORY.md`;
 - долгосрочная capability map → `FEATURE_MAP.md`;
 - commercial semantics Free / Pro / Boost / Business → `KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`;
 - Backoffice planning/decomposition → `KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md`;
