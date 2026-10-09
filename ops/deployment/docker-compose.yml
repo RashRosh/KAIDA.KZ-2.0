@@ -1,0 +1,73 @@
+# R3 reference stack (docs/ops/DEPLOYMENT.md): application + PostgreSQL + persistent photo volume.
+# A reference example, not a provider configuration. Fixed project name: every resource (containers, network, volume) is
+# separate from the development stack in the repository root, so `down` on THIS file removes only what it created.
+# Published ports are loopback by default; PostgreSQL is never published. Start it with `pnpm deploy:up`.
+name: kaida-deploy-check
+
+x-app-environment: &app-environment
+  DATABASE_URL: postgresql://${KAIDA_DB_USER}:${KAIDA_DB_PASSWORD}@postgres:5432/${KAIDA_DB_NAME}
+  IDENTITY_OTP_HMAC_SECRET_HEX: ${IDENTITY_OTP_HMAC_SECRET_HEX}
+  IDENTITY_COOKIE_SECURE: ${IDENTITY_COOKIE_SECURE:-true}
+  OPERATOR_PHONES: ${OPERATOR_PHONES:-}
+  SEARCH_EVENTS_ORIGIN: ${SEARCH_EVENTS_ORIGIN:-dev}
+  SELLER_COMMENT_TRANSLATOR: ${SELLER_COMMENT_TRANSLATOR:-off}
+  WEB_PUSH_VAPID_PUBLIC_KEY: ${WEB_PUSH_VAPID_PUBLIC_KEY:-}
+  WEB_PUSH_VAPID_PRIVATE_KEY: ${WEB_PUSH_VAPID_PRIVATE_KEY:-}
+  WEB_PUSH_SUBJECT: ${WEB_PUSH_SUBJECT:-}
+  INTERNAL_JOB_SECRET: ${INTERNAL_JOB_SECRET:-}
+  PHOTO_STORAGE_DIR: /data/photos
+  KAIDA_BIND_ADDRESS: ${KAIDA_BIND_ADDRESS:-127.0.0.1}
+  KAIDA_PRIVATE_TEST_ACK: ${KAIDA_PRIVATE_TEST_ACK:-}
+
+services:
+  postgres:
+    image: postgres:18@sha256:fc973eb97c9fd04bfa1840e0f510719a584ccb3be8debfe6a4144637a9dfe8cf
+    environment:
+      POSTGRES_USER: ${KAIDA_DB_USER}
+      POSTGRES_PASSWORD: ${KAIDA_DB_PASSWORD}
+      POSTGRES_DB: ${KAIDA_DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  # One-off commands (migrate, import-kb, preflight, purge): `docker compose run --rm tools <command>`.
+  tools:
+    profiles: ["tools"]
+    image: kaida-tools:${KAIDA_IMAGE_TAG:-local}
+    build:
+      context: ../..
+      target: tools
+      args:
+        GIT_SHA: ${KAIDA_GIT_SHA:-unknown}
+    environment: *app-environment
+    volumes:
+      - photos:/data/photos
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    image: kaida-app:${KAIDA_IMAGE_TAG:-local}
+    build:
+      context: ../..
+      target: runtime
+      args:
+        GIT_SHA: ${KAIDA_GIT_SHA:-unknown}
+    environment: *app-environment
+    ports:
+      # Loopback unless a private address is chosen deliberately (see preflight-rules.ts); never 0.0.0.0.
+      - "${KAIDA_BIND_ADDRESS:-127.0.0.1}:${KAIDA_APP_PORT:-3400}:3000"
+    volumes:
+      - photos:/data/photos
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  photos:

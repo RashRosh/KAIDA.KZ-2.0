@@ -1,0 +1,21 @@
+# R3: nothing personal, generated or secret enters a build context.
+.git
+.github
+node_modules
+.next
+out
+.env*
+.data
+tmp
+scripts
+.vscode
+.mimosa
+**/.mimosa
+.pnpm-store
+playwright-report
+test-results
+coverage
+*.log
+*.tsbuildinfo
+e2e.pid
+docs/reviews

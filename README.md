@@ -84,7 +84,7 @@ Seller Input
 ## Технологический стек
 
 - Node.js 24;
-- pnpm 11.19.0;
+- pnpm 11.28.5;
 - Next.js 16 App Router / Route Handlers;
 - React 19;
 - TypeScript strict;
@@ -104,7 +104,7 @@ SQLite/mock database не заменяет PostgreSQL integration environment. D
 git clone https://github.com/RashRosh/KAIDA.KZ-2.0.git
 cd KAIDA.KZ-2.0
 corepack enable
-corepack prepare pnpm@11.19.0 --activate
+corepack prepare pnpm@11.28.5 --activate
 pnpm install --frozen-lockfile
 cp .env.example .env
 ```
@@ -144,6 +144,8 @@ pnpm verify
 `pnpm verify` включает lint, typecheck, migrations, seed, clean test DB preparation, unit, integration, production build и E2E.
 
 ## Авторизация и public launch
+
+Воспроизводимый контейнерный стек для приватной проверки (R3), конфигурация, TLS, обновление и R2 restore: [Deployment reference](docs/ops/DEPLOYMENT.md). Хостинг и публичный запуск не входят в R3.
 
 На закрытом тесте используется phone → dynamic test OTP → database-backed session. Реальный SMS provider подключается отдельным launch-stage изменением; test OTP нельзя считать production-ready механизмом.
 

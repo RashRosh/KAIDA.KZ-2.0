@@ -1,0 +1,11 @@
+{
+	# Acceptance proxy: local CA, no public ACME, no redirects.
+	local_certs
+	auto_https disable_redirects
+	admin off
+}
+
+https://localhost:8443 {
+	tls internal
+	reverse_proxy app:3000
+}

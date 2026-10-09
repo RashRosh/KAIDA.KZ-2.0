@@ -1,0 +1,33 @@
+# Disposable R2 restore proof. No published ports. Never point it at development data.
+name: kaida-deploy-restore-check
+services:
+  postgres:
+    image: postgres:18@sha256:fc973eb97c9fd04bfa1840e0f510719a584ccb3be8debfe6a4144637a9dfe8cf
+    environment:
+      POSTGRES_USER: ${KAIDA_DB_USER:?required}
+      POSTGRES_PASSWORD: ${KAIDA_DB_PASSWORD:?required}
+      POSTGRES_DB: ${KAIDA_DB_NAME:?required}
+    volumes:
+      - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  app:
+    image: kaida-app:${KAIDA_IMAGE_TAG:?required}
+    environment:
+      DATABASE_URL: postgresql://${KAIDA_DB_USER}:${KAIDA_DB_PASSWORD}@postgres:5432/${KAIDA_DB_NAME}
+      IDENTITY_OTP_HMAC_SECRET_HEX: ${IDENTITY_OTP_HMAC_SECRET_HEX:?required}
+      IDENTITY_COOKIE_SECURE: "true"
+      SEARCH_EVENTS_ORIGIN: test
+      PHOTO_STORAGE_DIR: /data/photos
+      SELLER_COMMENT_TRANSLATOR: off
+    volumes:
+      - photos:/data/photos
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  pg_data:
+  photos:

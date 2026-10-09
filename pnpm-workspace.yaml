@@ -2,3 +2,8 @@ allowBuilds:
   esbuild: true
   sharp: true
   unrs-resolver: true
+overrides:
+  source-map-js: 1.2.2
+  "brace-expansion@1": 1.1.20
+  "brace-expansion@5": 5.0.11
+  esbuild: 0.28.2
