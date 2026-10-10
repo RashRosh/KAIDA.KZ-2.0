@@ -1,0 +1,115 @@
+{
+  "method": "Local Chromium; 320px viewport, normal and explicitly doubled text/line height; scrollable bodies, fixed reachable footers. Not an OS screen-reader/device test.",
+  "checks": [
+    {
+      "width": 320,
+      "textScale": 1,
+      "metrics": [
+        {
+          "screen": 0,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 777,
+          "footerFits": true
+        },
+        {
+          "screen": 1,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 704,
+          "footerFits": true
+        },
+        {
+          "screen": 2,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 704,
+          "footerFits": true
+        },
+        {
+          "screen": 3,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 704,
+          "footerFits": true
+        },
+        {
+          "screen": 4,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 777,
+          "footerFits": true
+        },
+        {
+          "screen": 5,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 652,
+          "footerFits": true
+        },
+        {
+          "screen": 6,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 704,
+          "footerFits": true
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "textScale": 2,
+      "metrics": [
+        {
+          "screen": 0,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 677,
+          "footerFits": true
+        },
+        {
+          "screen": 1,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 616,
+          "footerFits": true
+        },
+        {
+          "screen": 2,
+          "horizontalOverflow": [],
+          "bodyScrollable": false,
+          "bodyHeight": 568,
+          "footerFits": true
+        },
+        {
+          "screen": 3,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 616,
+          "footerFits": true
+        },
+        {
+          "screen": 4,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 725,
+          "footerFits": true
+        },
+        {
+          "screen": 5,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 446,
+          "footerFits": true
+        },
+        {
+          "screen": 6,
+          "horizontalOverflow": [],
+          "bodyScrollable": true,
+          "bodyHeight": 574,
+          "footerFits": true
+        }
+      ]
+    }
+  ]
+}
