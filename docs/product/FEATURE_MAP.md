@@ -228,6 +228,7 @@ https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4.
    Выбор конкретного фото (кадр AI-B05) — не первый шаг жалобы: он появляется только после причины «Фото не
    соответствует товару» и только если у карточки больше одного фото; при одном фото шаг пропускается (решение
    2026-09-26). Нужна правка кадров дизайнером.
+     Delivered bounded local reporting at `v0.0.75-buyer-offer-reports`: [approved closed contract](../slices/buyer-offer-reports/SLICE_CONTRACT.md), immediate reason navigation, optional comments, draft-preserving login and explicit Send; operator reported/current comparison and historical disposition through existing whole-card moderation. Private buyer text is not forwarded to sellers; historical-photo reads are report-scoped/operator-only. Broader reviews/ratings/appeals remain outside delivery; real-user reporting and production retention remain unauthorized.
 10. **Название товара — свободное название остаётся допустимым; каталог теперь существует** (решение 2026-09-25;
     обновлено 2026-10-05). Production KB v1 установлен в KAIDA PostgreSQL (`v0.0.52`), подсказки каталога берутся из
     runtime-каталога. Выбор из каталога **не обязателен**: продавец по-прежнему может написать название своими
