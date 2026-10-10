@@ -15,7 +15,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const result = await requestOtp(parsed.data, { delivery: testOtpDelivery });
+    const result = await requestOtp({ ...parsed.data, sourceIp: request.headers.get('x-kaida-client-ip') ?? undefined }, { delivery: testOtpDelivery });
     return NextResponse.json({
       challenge: { id: result.challenge.id, expiresAt: result.challenge.expiresAt.toISOString() },
       delivery: result.delivery,
@@ -23,7 +23,7 @@ export async function POST(request: Request): Promise<Response> {
     }, { status: 201, headers: noStore });
   } catch (error) {
     if (error instanceof AuthError) {
-      return NextResponse.json({ error: { code: error.code, message: error.message, ...(error.retryAfterSeconds === undefined ? {} : { retryAfterSeconds: error.retryAfterSeconds }) } }, {
+      return NextResponse.json({ error: { code: error.code, message: error.message, ...(error.retryAfterSeconds === undefined ? {} : { retryAfterSeconds: error.retryAfterSeconds }), ...(error.preservesCurrentCode ? { preservesCurrentCode: true } : {}) } }, {
         status: error.status,
         headers: { ...noStore, ...(error.retryAfterSeconds === undefined ? {} : { 'Retry-After': String(error.retryAfterSeconds) }) },
       });

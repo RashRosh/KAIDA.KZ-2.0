@@ -1,0 +1,695 @@
+{
+  "appNodeDependencyChanges": [],
+  "ingressChanges": {
+    "caddy": {
+      "from": "2.10.2",
+      "to": "2.11.7",
+      "licence": "Apache-2.0",
+      "officialRelease": "https://github.com/caddyserver/caddy/releases/tag/v2.11.7"
+    },
+    "go": {
+      "from": "1.25.0 (old image);1.26.8 (official2.11.7)",
+      "to": "1.26.9",
+      "licence": "BSD-3-Clause"
+    },
+    "xNet": {
+      "from": [
+        "v0.42.0"
+      ],
+      "officialLatest": "v0.59.0",
+      "to": "v0.60.0",
+      "licence": "BSD-3-Clause"
+    },
+    "originalHighCriticalOccurrences": 87,
+    "latestOfficialFixableHigh": [
+      {
+        "id": "CVE-2026-78669",
+        "package": "golang.org/x/net",
+        "version": "v0.59.0",
+        "fixed": "0.60.0"
+      },
+      {
+        "id": "CVE-2026-78667",
+        "package": "stdlib",
+        "version": "v1.26.8",
+        "fixed": "1.26.9, 1.27.2"
+      },
+      {
+        "id": "CVE-2026-78669",
+        "package": "stdlib",
+        "version": "v1.26.8",
+        "fixed": "1.26.9, 1.27.2"
+      },
+      {
+        "id": "CVE-2026-97031",
+        "package": "stdlib",
+        "version": "v1.26.8",
+        "fixed": "1.26.9, 1.27.2"
+      }
+    ],
+    "compatibility": "Same standard Caddy modules, unchanged plain-HTTP local Caddyfile/JSON auth endpoints. Final real-peer/header/source/restart checks passed. This is not public/TLS/CDN verification.",
+    "build": {
+      "vmAvailableKiBBefore": 2208476,
+      "unchangedVmMemoryBytes": 3962191872,
+      "singleWorker": true,
+      "goSoftMemoryMiB": 768,
+      "gogc": 25,
+      "firstColdStepSeconds": 611.1,
+      "memoryLimitHit": false
+    },
+    "zlib": {
+      "from": "1.3.2-r0",
+      "to": "1.3.2-r1",
+      "addresses": "CVE-2026-85091 (MEDIUM)"
+    }
+  },
+  "hadolint": {
+    "repositoryDockerfile": "PASS",
+    "referenceRuntime": "PASS",
+    "referenceWorker": "PASS",
+    "referenceEdge": "PASS"
+  },
+  "exceptions": {
+    "scope": "ISOLATED LOCAL ONLY; no new or expanded exception",
+    "os": "E-R3-OS:43 HIGH OS occurrences/8 distinct CVEs per app/tools image, no supplied fix",
+    "braces": "E-R3-BRACES:braces3.0.3/CVE-2026-93687 HIGH tools-only, no supplied fix",
+    "go": "E-R3-GO:inherited7 potential HIGH findings in tools esbuild0.28.2/Go1.26.5; current Trivy cannot detect its Go metadata. No claim of a clean Go scan.",
+    "toolsHealth": "One-off tools exception NOT extended: persistent worker image/service has real DB healthcheck and passes configuration scanning."
+  },
+  "scans": {
+    "runtime-final-trivy": {
+      "createdAt": "2026-10-10T22:22:45.145255634Z",
+      "image": "kaida-auth-source-app:local",
+      "os": {
+        "Family": "debian",
+        "Name": "13.6"
+      },
+      "counts": {
+        "LOW": 60,
+        "HIGH": 43,
+        "MEDIUM": 62,
+        "UNKNOWN": 3
+      },
+      "highCritical": [
+        {
+          "id": "CVE-2026-76642",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-54369",
+          "package": "libacl1",
+          "version": "2.3.2-2+b1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-16742",
+          "package": "libsystemd0",
+          "version": "257.13-1~deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2025-69720",
+          "package": "libtinfo6",
+          "version": "6.5+20250216-2",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-16742",
+          "package": "libudev1",
+          "version": "257.13-1~deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2025-69720",
+          "package": "ncurses-base",
+          "version": "6.5+20250216-2",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2025-69720",
+          "package": "ncurses-bin",
+          "version": "6.5+20250216-2",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-9538",
+          "package": "perl-base",
+          "version": "5.40.1-6+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        }
+      ],
+      "configFailures": []
+    },
+    "tools-trivy": {
+      "createdAt": "2026-10-10T22:14:04.104375034Z",
+      "image": "kaida-auth-source-tools:local",
+      "os": {
+        "Family": "debian",
+        "Name": "13.6"
+      },
+      "counts": {
+        "LOW": 60,
+        "HIGH": 44,
+        "MEDIUM": 64,
+        "UNKNOWN": 3
+      },
+      "highCritical": [
+        {
+          "id": "CVE-2026-76642",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "bsdutils",
+          "version": "1:2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-54369",
+          "package": "libacl1",
+          "version": "2.3.2-2+b1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libblkid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "liblastlog2-2",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libmount1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libsmartcols1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-16742",
+          "package": "libsystemd0",
+          "version": "257.13-1~deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2025-69720",
+          "package": "libtinfo6",
+          "version": "6.5+20250216-2",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-16742",
+          "package": "libudev1",
+          "version": "257.13-1~deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "libuuid1",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "login",
+          "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "mount",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2025-69720",
+          "package": "ncurses-base",
+          "version": "6.5+20250216-2",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2025-69720",
+          "package": "ncurses-bin",
+          "version": "6.5+20250216-2",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-9538",
+          "package": "perl-base",
+          "version": "5.40.1-6+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-76642",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78408",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78409",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-78410",
+          "package": "util-linux",
+          "version": "2.41.5-0+deb13u1",
+          "fixed": null
+        },
+        {
+          "id": "CVE-2026-93687",
+          "package": "braces",
+          "version": "3.0.3",
+          "fixed": null
+        }
+      ],
+      "configFailures": []
+    },
+    "edge-patched-trivy": {
+      "createdAt": "2026-10-10T22:45:27.954953921Z",
+      "image": "kaida-auth-source-edge:local",
+      "os": {
+        "Family": "alpine",
+        "Name": "3.23.6"
+      },
+      "counts": {
+        "MEDIUM": 1,
+        "UNKNOWN": 1
+      },
+      "highCritical": [],
+      "otherIngressFindings": [
+        {
+          "id": "CVE-2026-85091",
+          "package": "zlib",
+          "version": "1.3.2-r0",
+          "severity": "MEDIUM",
+          "fixed": "1.3.2-r1"
+        },
+        {
+          "id": "GO-2026-5932",
+          "package": "golang.org/x/crypto",
+          "version": "v0.57.0",
+          "severity": "UNKNOWN",
+          "fixed": null
+        }
+      ],
+      "configFailures": []
+    },
+    "worker-config-trivy": {
+      "createdAt": "2026-10-10T22:26:40.526619995Z",
+      "image": "kaida-auth-source-worker:local",
+      "os": {
+        "Family": "debian",
+        "Name": "13.6"
+      },
+      "counts": {},
+      "highCritical": [],
+      "configFailures": []
+    },
+    "edge-acceptance-trivy": {
+      "createdAt": "2026-10-10T23:00:06.591716116Z",
+      "image": "kaida-auth-source-edge:local",
+      "counts": {
+        "UNKNOWN": 1
+      },
+      "findings": [
+        {
+          "id": "GO-2026-5932",
+          "package": "golang.org/x/crypto",
+          "version": "v0.57.0",
+          "severity": "UNKNOWN",
+          "fixed": null
+        }
+      ],
+      "configFailures": []
+    }
+  }
+}
