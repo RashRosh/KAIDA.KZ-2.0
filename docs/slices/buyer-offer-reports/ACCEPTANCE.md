@@ -1,6 +1,8 @@
+> **CLOSED (2026-10-10).** PO manual acceptance PASS at `6988c273227c787f617e6f5ecd47d7831eb27083`; PR #169 merged at `51b2425ad099458e7c92aff30952745bdb818aa0`, main verification/CodeQL green, annotated checkpoint `v0.0.75-buyer-offer-reports`. The following checklist/fixture IDs document the completed acceptance; port3200 and disposable databases/photos have been retired after preserving evidence. Port3000 now serves the accepted executable build against its existing private snapshot, with reporting OFF.
+
 # Buyer Offer reports — isolated acceptance handoff
 
-Implementation PR: [#169](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/169). Executable commit: `48c905c4566301b25861d31cae7b48672fe9105c`; later handoff-only commits do not change executable files. Use the final PR head and its checks for manual acceptance. Implementation is **not merged or tagged**; the contract remains approved, not CLOSED.
+Implementation PR: [#169](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/169). Executable commit: `48c905c4566301b25861d31cae7b48672fe9105c`; later handoff-only commits do not change executable files. Use the final PR head and its checks for manual acceptance. Implementation closure is complete; the original acceptance evidence follows.
 
 Reporting defaults off (`BUYER_REPORTS_LOCAL_TESTING=0`); the separate acceptance instance enables it for synthetic fixtures only. Real-user reporting, production evidence retention and public deployment remain unauthorized. No SMS delivery, purchase or voice research resume.
 
@@ -44,4 +46,4 @@ Source container/volume: `kaida-buyer-reports-postgres` / `kaida-buyer-reports-p
 3. **Seller:** log in separately at `/seller`. See only the operator reason/comment, never buyer text/phone. Replace the disputed photo and confirm the edit. In the closed report, the operator still sees the old evidence/photo separately from current content. The prebuilt restore-proof report already demonstrates old1200/two photos versus current1400/one photo.
 4. **No action:** buyer reports `/offers/47075974-6301-44cf-b45a-316f5799d657` with any non-photo reason; optional text may be blank. Operator chooses no action, records a private rationale and confirms. The report closes; the Offer remains visible.
 
-STOP for PO manual acceptance. No implementation merge, checkpoint tag or future queue change is authorized by this handoff.
+Acceptance passed; authorized closure is complete. No future queue change or new task is authorized.

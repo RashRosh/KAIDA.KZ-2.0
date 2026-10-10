@@ -1,8 +1,10 @@
 # Buyer Offer reports and operator handling
 
-**Status: APPROVED — IMPLEMENTATION AUTHORIZED by PO, 2026-10-10.**
+**Status: CLOSED — PO manual acceptance PASS, 2026-10-10.**
 
-PO approved the policy in §3, navigation, buyer/operator previews, closed-contract extensions in §5 and queue insertion. This is isolated local development and synthetic acceptance only: real-user reporting and production evidence retention remain unauthorized. Implementation merge/checkpoint require separate manual acceptance.
+Accepted SHA `6988c273227c787f617e6f5ecd47d7831eb27083`; PR #169 merge `51b2425ad099458e7c92aff30952745bdb818aa0`; identical accepted/merge tree `8ccc5b211c7f028ecc7bab2cef559ed2f871fce5`. Merged-main full verification [38040284192](https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/38040284192) and CodeQL [38040284189](https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/38040284189) passed before annotated checkpoint `v0.0.75-buyer-offer-reports`. Approved operator/report-photo/contextual-auth extensions are delivered; existing unrelated closed behavior is preserved. Production retention and real-user reporting remain unauthorized.
+
+PO approved the policy in §3, navigation, buyer/operator previews, closed-contract extensions in §5 and queue insertion. This is isolated local development and synthetic acceptance only: real-user reporting and production evidence retention remain unauthorized. Manual acceptance and authorized implementation closure are complete.
 Verified main `6b1fa708759b034bbaed62db92aed6e9e808f911`; checkpoint `v0.0.74-auth-otp-protection` at `11eb7f12943c25749b9dfb125b72686400b93e1d`. This proposal does not authorize public launch.
 
 ## 1. One complete task
