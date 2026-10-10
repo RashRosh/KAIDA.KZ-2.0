@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReportsLink } from './ReportsLink';
 import { formatAmount } from '../../_components/format-amount';
 import { Bar, Ic, LoadError, Phone, Radio, SkeletonRows, Thumb, Toast, TOAST_MS } from '../../seller/_kaida/ui';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
@@ -47,12 +48,12 @@ async function send(url: string, init: RequestInit): Promise<OperatorCardView> {
 
 type View = { kind: 'feed' } | { kind: 'card'; cardId: string } | { kind: 'remove'; cardId: string; title: string; coverPhotoId: string | null };
 
-export function OperatorApp() {
+export function OperatorApp({ reporting=false, initialCardId=null }: {reporting?:boolean;initialCardId?:string|null}) {
   const [tab, setTab] = useState<'new' | 'all'>('new');
   const [page, setPage] = useState<OperatorFeedPage | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [attempt, setAttempt] = useState(0);
-  const [view, setView] = useState<View>({ kind: 'feed' });
+  const [view, setView] = useState<View>(initialCardId ? {kind:'card',cardId:initialCardId} : { kind: 'feed' });
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState(false);
@@ -189,6 +190,7 @@ export function OperatorApp() {
     <Phone>
       <Bar title="Опубликовано недавно" />
       <main className="body" style={{ gap: 12 }}>
+        {reporting && <ReportsLink />}
         <div className="chips" role="group" aria-label="Какие карточки показать">
           <button type="button" className={`chip${tab === 'new' ? ' on' : ''}`} aria-pressed={tab === 'new'} onClick={() => setTab('new')}>
             Новые с моего последнего просмотра{page ? ` · ${page.newCount}` : ''}

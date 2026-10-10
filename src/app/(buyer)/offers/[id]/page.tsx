@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { getRequestLocale } from '@/i18n/server';
 import { getBuyerOffer, type BuyerOfferPage } from '@/modules/search/application/get-buyer-offer';
 import { BuyerOfferView, OfferUnavailable } from './BuyerOfferView';
+import { reportsEnabled } from '@/modules/moderation/contracts/report.contract';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,5 +20,5 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
       failed = true;
     }
   }
-  return offer ? <BuyerOfferView offer={offer} /> : <OfferUnavailable failed={failed} />;
+  return offer ? <BuyerOfferView offer={offer} reporting={reportsEnabled()} /> : <OfferUnavailable failed={failed} />;
 }

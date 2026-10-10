@@ -7,8 +7,8 @@ export default defineConfig({
   },
   test: {
     projects: [
-      { test: { name: 'unit', environment: 'node', include: ['tests/unit/**/*.test.ts'] } },
-      { test: { name: 'integration', environment: 'node', include: ['tests/integration/**/*.test.ts'], fileParallelism: false, hookTimeout: 30000 } },
+      { extends: true, test: { name: 'unit', environment: 'node', include: ['tests/unit/**/*.test.ts'] } },
+      { extends: true, test: { name: 'integration', environment: 'node', include: ['tests/integration/**/*.test.ts'], fileParallelism: false, hookTimeout: 30000 } },
     ],
   },
 });
