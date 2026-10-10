@@ -42,6 +42,7 @@ for (const kind of ['source-limit', 'unavailable'] as const) {
       if (kind === 'source-limit') {
         await expect(dialog.getByText('С этой сети запрошено слишком много кодов.', { exact: true })).toBeVisible();
         await expect(dialog.getByText('Повторить можно через 02:37', { exact: true })).toBeVisible();
+        await expect(dialog.locator('.vh[role=status]')).toHaveText('Новый код можно запросить через 157 сек.');
         await expect(resend).toBeDisabled(); await expect(resend).toHaveAttribute('aria-disabled', 'true');
         expect(await resend.evaluate(e => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
         await resend.evaluate((e: HTMLButtonElement) => e.click()); expect(requests).toBe(1);
@@ -51,6 +52,7 @@ for (const kind of ['source-limit', 'unavailable'] as const) {
       } else {
         await expect(dialog.getByText('Новый код сейчас недоступен. Попробуйте позже.', { exact: true })).toBeVisible();
         await expect(dialog.getByText(/^Повторить можно через/)).toHaveCount(0);
+        await expect(dialog.locator('.vh[role=status]')).toBeEmpty();
       }
       await dialog.locator('button[type=submit]').click(); await expect(dialog).toBeHidden();
       expect((await (await page.request.get('/api/auth/me')).json()).user.phone).toBe(phone);

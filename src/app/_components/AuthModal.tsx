@@ -48,6 +48,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
   const [sourceRetryAt, setSourceRetryAt] = useState(0);
   const [sourceRemaining, setSourceRemaining] = useState(0);
   const [sourceGuidance, setSourceGuidance] = useState(false);
+  const [announcedSourceWait, setAnnouncedSourceWait] = useState(0);
   const operation = useRef(0);
   const pending = useRef(false);
   const invalidateOperation = useCallback(() => { operation.current++; pending.current = false; }, []);
@@ -89,6 +90,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
     setCode('');
     setError('');
     setSourceGuidance(false); setSourceRetryAt(0); setSourceRemaining(0);
+    setAnnouncedSourceWait(0);
     setLoading(false);
     onClose();
   }, [onClose]);
@@ -136,10 +138,12 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
           const seconds = data.error.retryAfterSeconds;
           if (Number.isSafeInteger(seconds) && seconds! > 0) {
             setSourceRetryAt(Date.now() + seconds! * 1000); setSourceRemaining(seconds!);
+            setAnnouncedSourceWait(seconds!);
           }
           setSourceGuidance(true); setError(t('error.OTP_SOURCE_THROTTLED')); return;
         }
         if (data.error?.code === 'AUTH_UNAVAILABLE' && data.error.preservesCurrentCode) {
+          setAnnouncedSourceWait(0);
           setSourceGuidance(true); setError(t('error.sourceUnavailable')); return;
         }
         if (data.error?.code === 'OTP_REQUEST_THROTTLED') {
@@ -160,6 +164,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
       setCode('');
       setUnusableCode(false);
       setSourceGuidance(false); setSourceRetryAt(0); setSourceRemaining(0);
+      setAnnouncedSourceWait(0);
       recordWait(data.retryAfterSeconds, normalizedPhone);
       setStep('otp');
     } catch {
@@ -229,7 +234,8 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
         <div className="scrim" data-testid="auth-backdrop" onMouseDown={handleBackdrop} />
         <section className="sheet" role="dialog" aria-modal="true" aria-labelledby="auth-title" aria-describedby="auth-description">
           <div className="grab" />
-          <p className="vh" role="status" aria-live="polite">{sourceGuidance && wait === 0 ? t('auth.resendCode') : ''}</p>
+          <p className="vh" role="status" aria-live="polite">{sourceGuidance && announcedSourceWait > 0 && !loading
+            ? wait === 0 ? t('auth.resendCode') : t('auth.resendWait', { seconds: announcedSourceWait }) : ''}</p>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h2 className="h3" id="auth-title" style={{ flex: 1 }}>{t('auth.title')}</h2>
             <button type="button" className="ib" onClick={resetAndClose} aria-label={t('auth.close')}><span className="ic i-close" aria-hidden="true" /></button>
