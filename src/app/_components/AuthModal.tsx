@@ -6,7 +6,7 @@ import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type User = { id: string; phone: string };
-type ErrorPayload = { error?: { code?: string; message?: string; retryAfterSeconds?: number } };
+type ErrorPayload = { error?: { code?: string; message?: string; retryAfterSeconds?: number; preservesCurrentCode?: boolean } };
 type RequestSuccess = {
   challenge: { id: string; expiresAt: string };
   delivery: { mode: 'test'; code: string };
@@ -45,12 +45,16 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
   const [retryPhone, setRetryPhone] = useState('');
   const [retryAt, setRetryAt] = useState(0);
   const [remaining, setRemaining] = useState(0);
+  const [sourceRetryAt, setSourceRetryAt] = useState(0);
+  const [sourceRemaining, setSourceRemaining] = useState(0);
+  const [sourceGuidance, setSourceGuidance] = useState(false);
   const operation = useRef(0);
   const pending = useRef(false);
   const invalidateOperation = useCallback(() => { operation.current++; pending.current = false; }, []);
   let phoneKey = '';
   try { phoneKey = normalizeKzPhone(step === 'otp' ? canonicalPhone : phone); } catch { /* Existing input validation handles this. */ }
-  const wait = phoneKey === retryPhone ? remaining : 0;
+  const wait = Math.max(phoneKey === retryPhone ? remaining : 0, sourceRemaining);
+  const waitMessage = sourceRemaining > 0 ? t('auth.sourceRetryWait', { time: `${Math.floor(wait / 60).toString().padStart(2, '0')}:${(wait % 60).toString().padStart(2, '0')}` }) : t('auth.resendWait', { seconds: wait });
 
   function recordWait(seconds: number | undefined, requestedPhone: string) {
     if (!Number.isSafeInteger(seconds) || !seconds || seconds < 0) return;
@@ -66,9 +70,12 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
 
   useEffect(() => {
     if (!open) return;
-    const timer = setInterval(() => setRemaining(Math.max(0, Math.ceil((retryAt - Date.now()) / 1000))), 1000);
+    const timer = setInterval(() => {
+      setRemaining(Math.max(0, Math.ceil((retryAt - Date.now()) / 1000)));
+      setSourceRemaining(Math.max(0, Math.ceil((sourceRetryAt - Date.now()) / 1000)));
+    }, 1000);
     return () => clearInterval(timer);
-  }, [open, retryAt]);
+  }, [open, retryAt, sourceRetryAt]);
 
   const resetAndClose = useCallback(() => {
     operation.current++;
@@ -81,6 +88,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
     setTestCode('');
     setCode('');
     setError('');
+    setSourceGuidance(false); setSourceRetryAt(0); setSourceRemaining(0);
     setLoading(false);
     onClose();
   }, [onClose]);
@@ -124,6 +132,16 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
       const data = await response.json() as RequestSuccess & ErrorPayload;
       if (current !== operation.current) return;
       if (!response.ok) {
+        if (data.error?.code === 'OTP_SOURCE_THROTTLED') {
+          const seconds = data.error.retryAfterSeconds;
+          if (Number.isSafeInteger(seconds) && seconds! > 0) {
+            setSourceRetryAt(Date.now() + seconds! * 1000); setSourceRemaining(seconds!);
+          }
+          setSourceGuidance(true); setError(t('error.OTP_SOURCE_THROTTLED')); return;
+        }
+        if (data.error?.code === 'AUTH_UNAVAILABLE' && data.error.preservesCurrentCode) {
+          setSourceGuidance(true); setError(t('error.sourceUnavailable')); return;
+        }
         if (data.error?.code === 'OTP_REQUEST_THROTTLED') {
           recordWait(data.error.retryAfterSeconds, normalizedPhone);
           setError(t('error.OTP_REQUEST_THROTTLED'));
@@ -141,6 +159,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
       setTestCode(data.delivery.code);
       setCode('');
       setUnusableCode(false);
+      setSourceGuidance(false); setSourceRetryAt(0); setSourceRemaining(0);
       recordWait(data.retryAfterSeconds, normalizedPhone);
       setStep('otp');
     } catch {
@@ -210,6 +229,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
         <div className="scrim" data-testid="auth-backdrop" onMouseDown={handleBackdrop} />
         <section className="sheet" role="dialog" aria-modal="true" aria-labelledby="auth-title" aria-describedby="auth-description">
           <div className="grab" />
+          <p className="vh" role="status" aria-live="polite">{sourceGuidance && wait === 0 ? t('auth.resendCode') : ''}</p>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h2 className="h3" id="auth-title" style={{ flex: 1 }}>{t('auth.title')}</h2>
             <button type="button" className="ib" onClick={resetAndClose} aria-label={t('auth.close')}><span className="ic i-close" aria-hidden="true" /></button>
@@ -234,7 +254,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
                   />
                 </div>
                 {error && <div className="fld"><p className="emsg" role="alert"><span className="ic i-alert" aria-hidden="true" />{error}</p></div>}
-                {wait > 0 && <p className="c c2" role="status">{t('auth.resendWait', { seconds: wait })}</p>}
+                {wait > 0 && <p className="c c2" {...(sourceRemaining > 0 ? { 'aria-live': 'off' as const } : { role: 'status' })}>{waitMessage}</p>}
                 <button type="submit" className="btn btn-p lg w" disabled={loading || wait > 0}>{loading ? t('auth.gettingCode') : t('auth.getCode')}</button>
               </form>
             </>
@@ -263,9 +283,10 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
                   />
                 </div>
                 {error && <div className="fld"><p className="emsg" role="alert"><span className="ic i-alert" aria-hidden="true" />{error}</p></div>}
+                {sourceGuidance && !unusableCode && <p className="c c2">{t('auth.existingCodeUsable')}</p>}
                 <button type="submit" className="btn btn-p lg w" disabled={loading || unusableCode || code.length !== 6}>{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
-                {wait > 0 && <p className="c c2" role="status">{t('auth.resendWait', { seconds: wait })}</p>}
-                <button type="button" className="btn btn-g w" onClick={() => void requestCode()} disabled={loading || wait > 0}>{loading ? t('auth.gettingCode') : t('auth.resendCode')}</button>
+                {wait > 0 && <p className="c c2" {...(sourceRemaining > 0 ? { 'aria-live': 'off' as const } : { role: 'status' })}>{waitMessage}</p>}
+                <button type="button" className="btn btn-g w" data-source-resend="true" onClick={() => void requestCode()} disabled={loading || wait > 0} aria-disabled={loading || wait > 0}>{loading ? t('auth.gettingCode') : t('auth.resendCode')}</button>
                 <button type="button" className="btn btn-g w" onClick={changePhone} disabled={loading}>{t('auth.changePhone')}</button>
               </form>
             </>

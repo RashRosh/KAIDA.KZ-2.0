@@ -7,6 +7,8 @@ import { users } from '../db/users.table';
 import { AuthError, type CurrentUser } from '../contracts/auth.contract';
 import { requestRetryAfterSeconds, type OtpPolicy } from '../application/otp-policy';
 import type { IdentityClock } from '../time/identity-clock';
+import type { SourceAdmission } from '../source/source-protection';
+import { chargeSource, lockSourceAdmission, sourceAdmissionWait } from '../source/source.repository';
 
 export interface NewOtpChallenge {
   id: string;
@@ -33,16 +35,21 @@ function phoneAdvisoryLockKey(phoneE164: string): bigint {
 export async function replaceOtpChallenge(
   db: Database, phoneE164: string, clock: IdentityClock, policy: OtpPolicy,
   createChallenge: (now: Date) => NewOtpChallenge,
+  source?: SourceAdmission,
 ) {
   return db.transaction(async (tx) => {
+    if (source) await lockSourceAdmission(tx, source);
     const lockKey = phoneAdvisoryLockKey(phoneE164).toString();
     await tx.execute(sql`SELECT pg_advisory_xact_lock(${lockKey}::bigint)`);
     const now = clock();
     const history = await tx.select({ createdAt: authOtpChallenges.createdAt }).from(authOtpChallenges)
       .where(and(eq(authOtpChallenges.phoneE164, phoneE164),
         gt(authOtpChallenges.createdAt, new Date(now.getTime() - Math.max(policy.windowSeconds, policy.intervalSeconds) * 1000))));
-    const retryAfterSeconds = requestRetryAfterSeconds(history.map((row) => row.createdAt), now, policy);
-    if (retryAfterSeconds) throw new AuthError('OTP_REQUEST_THROTTLED', 429, 'Подождите перед запросом нового кода.', retryAfterSeconds);
+    const phoneWait = requestRetryAfterSeconds(history.map((row) => row.createdAt), now, policy);
+    const sourceWait = source ? await sourceAdmissionWait(tx, source, now) : 0;
+    const retryAfterSeconds = Math.max(phoneWait, sourceWait);
+    if (retryAfterSeconds) throw new AuthError(sourceWait ? 'OTP_SOURCE_THROTTLED' : 'OTP_REQUEST_THROTTLED', 429,
+      sourceWait ? 'С этой сети запрошено слишком много кодов.' : 'Подождите перед запросом нового кода.', retryAfterSeconds, true);
     const challenge = createChallenge(now);
     await tx.update(authOtpChallenges)
       .set({ supersededAt: challenge.createdAt })
@@ -52,6 +59,7 @@ export async function replaceOtpChallenge(
         isNull(authOtpChallenges.supersededAt),
       ));
     await tx.insert(authOtpChallenges).values(challenge);
+    if (source) await chargeSource(tx, source, now);
     return { challenge, retryAfterSeconds: requestRetryAfterSeconds([...history.map((row) => row.createdAt), now], now, policy) };
   });
 }
