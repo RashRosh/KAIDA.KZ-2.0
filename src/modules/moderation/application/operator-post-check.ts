@@ -1,4 +1,5 @@
 import { getDatabase, type Database } from '../../../db/client';
+import { lockCards } from '../infrastructure/card-lock';
 import { formatPack, packFromColumns } from '../../offers/pack/pack';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
 import {
@@ -133,15 +134,21 @@ export async function removeCard(
   dependencies: { database?: Database } = {},
 ): Promise<OperatorCardView> {
   const database = dependencies.database ?? getDatabase();
-  const sellerId = await findSellerOfCard(database, cardId);
-  if (!sellerId) throw new OperatorCardNotFoundError();
-  await insertRemoval(database, { cardId, sellerId, reason: input.reason, comment: input.comment, operatorUserId });
+  await database.transaction(async tx => {
+    await lockCards(tx, [cardId]);
+    const sellerId = await findSellerOfCard(tx, cardId);
+    if (!sellerId) throw new OperatorCardNotFoundError();
+    await insertRemoval(tx, { cardId, sellerId, reason: input.reason, comment: input.comment, operatorUserId });
+  });
   return loadOperatorCard(cardId, { database });
 }
 
 export async function restoreCard(operatorUserId: string, cardId: string, dependencies: { database?: Database } = {}): Promise<OperatorCardView> {
   const database = dependencies.database ?? getDatabase();
-  if (!await findSellerOfCard(database, cardId)) throw new OperatorCardNotFoundError();
-  await restoreRemoval(database, cardId, operatorUserId);
+  await database.transaction(async tx => {
+    await lockCards(tx, [cardId]);
+    if (!await findSellerOfCard(tx, cardId)) throw new OperatorCardNotFoundError();
+    await restoreRemoval(tx, cardId, operatorUserId);
+  });
   return loadOperatorCard(cardId, { database });
 }

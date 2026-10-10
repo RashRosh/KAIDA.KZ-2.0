@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { BuyerReportFlow } from './BuyerReportFlow';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { safePreviewReturn } from '@/modules/offers/preview/preview-link';
 import type { BuyerOfferPage } from '@/modules/search/application/get-buyer-offer';
@@ -64,11 +66,13 @@ function BackButton({ returnTo }: { returnTo: string | null }) {
   );
 }
 
-export function BuyerOfferView({ offer }: { offer: BuyerOfferPage }) {
+export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOfferPage; reporting?: boolean }) {
+  const [reportOpen, setReportOpen] = useState(false);
   const { t } = useI18n();
   const returnTo = usePreviewReturn();
   // in the Seller's preview there is no interest action and no request for it
   const interest = useInterest(returnTo === null ? offer.product.id : null);
+  if (reportOpen) return <BuyerReportFlow offerId={offer.id} onClose={() => { setReportOpen(false); requestAnimationFrame(() => document.getElementById('report-entry')?.focus()); }} />;
   return (
     <BuyerScreen section="search" overlay={interest.modal}>
       <main className="body np" style={{ gap: 0 }}>
@@ -78,6 +82,7 @@ export function BuyerOfferView({ offer }: { offer: BuyerOfferPage }) {
           back={<BackButton returnTo={returnTo} />}
           footer={(
             <>
+              {reporting && returnTo === null && <button id="report-entry" type="button" className="btn btn-o w" onClick={() => setReportOpen(true)}>{t('report.title')}</button>}
               {interest.available && (
                 <button type="button" className="btn btn-o w" aria-pressed={interest.active} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
                   <Ic name={interest.active ? 'starf' : 'star'} className="sm" />

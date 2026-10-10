@@ -1,4 +1,5 @@
 import type { Database } from '../../../db/client';
+import { lockCards } from '../../moderation/infrastructure/card-lock';
 import { getDatabase } from '../../../db/client';
 import {
   applyOfferActivation,
@@ -111,6 +112,7 @@ export async function confirmSellerChangeSet(
       return { view: await loadFinalView(tx, changeSet.id, seller.id), comments: [] as PublishedSellerComment[] };
     }
 
+    await lockCards(tx, items.map(item => item.cardId));
     const targetIds = new Set<string>();
     for (const item of items) {
       if (item.action === 'create_offer') {

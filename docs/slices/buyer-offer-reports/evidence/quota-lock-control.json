@@ -1,0 +1,9 @@
+{
+  "oldExecutable": "b05d0426ff669b398441c1b9ae16caf99de1ab62",
+  "control": "Temporarily restored FOR UPDATE in the current same-User report/moderation regression; restored fixed source in finally.",
+  "negativeExitCode": 1,
+  "sqlState": "40P01",
+  "databaseMessage": "deadlock detected",
+  "fixedLock": "FOR NO KEY UPDATE: serializes User admission while permitting foreign-key KEY SHARE",
+  "positiveEvidence": "Nine reporting integration cases pass; tracked same-User concurrency case retains the race. Raw negative output is preserved privately in tmp/buyer-reports-evidence/old-quota-lock-negative.log."
+}
