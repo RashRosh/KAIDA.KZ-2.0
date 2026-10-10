@@ -10,7 +10,9 @@ RUN go mod init local/source-ingress \
     && go build -p 1 -trimpath -ldflags="-s -w" -o /usr/bin/caddy .
 FROM caddy:2.11.7-alpine@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f
 COPY --from=build /usr/bin/caddy /usr/bin/caddy
-RUN chown -R 1000:1000 /config /data
+# Supplied Alpine fix for CVE-2026-85091 (MEDIUM); the static Go proxy binary is unchanged.
+RUN apk add --no-cache zlib=1.3.2-r1 \
+    && chown -R 1000:1000 /config /data
 USER 1000:1000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
   CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/health"]
