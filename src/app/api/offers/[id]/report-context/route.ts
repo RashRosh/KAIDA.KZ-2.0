@@ -10,6 +10,8 @@ export async function GET(request:NextRequest,context:{params:Promise<{id:string
   if(!id.success) return missing();
   try {
     const result=await loadReportContext(id.data,request.nextUrl.searchParams.get('locale')==='kk'?'kk':'ru');
-    return result.available ? NextResponse.json({evidence:result.evidence},{headers:privateHeaders}) : missing();
+    // Match the buyer's existing Offer-page boundary: other points, including switched-off ones, stay private.
+    const evidence={...result.evidence,points:result.evidence.points.filter(p=>p.offerId===id.data)};
+    return result.available ? NextResponse.json({evidence},{headers:privateHeaders}) : missing();
   } catch(error) {return reportFailure(error);}
 }

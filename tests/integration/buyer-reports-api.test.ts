@@ -5,6 +5,7 @@ import { connectTestDatabase } from './database';
 import { digestSessionToken } from '../../src/modules/identity/crypto/session-token';
 import { SESSION_COOKIE_NAME } from '../../src/modules/identity/session/session-cookie';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
+import { createOwnedLocation } from '../../src/modules/locations/application/create-owned-location';
 import { createCardChangeSet } from '../../src/modules/seller-input/application/card-change-sets';
 import { confirmSellerChangeSet } from '../../src/modules/seller-input/application/confirm-seller-change-set';
 import { cardCreateBodySchema } from '../../src/modules/seller-input/contracts/seller-card.contract';
@@ -35,10 +36,13 @@ beforeAll(async()=>{
     await conn.pool.query('INSERT INTO auth_sessions(id,user_id,token_digest,created_at,expires_at) VALUES($1,$2,$3,$4,$5)',[randomUUID(),ids[i],digestSessionToken(tokens[i]!),now,new Date(now.getTime()+3600000)]);
   }
   const seller=await setupSeller(ids[0]!,{seller:{displayName:'API synthetic'},location:{name:'API point',type:'shop',addressText:'Synthetic'}},{database:conn.db});
+  const hidden=await createOwnedLocation(ids[0]!,{name:'PRIVATE switched-off point',type:'shop',addressText:'PRIVATE address'},{database:conn.db});
   photoId=randomUUID();await conn.pool.query('INSERT INTO photos(id,owner_user_id,width,height) VALUES($1,$2,600,400)',[photoId,ids[0]]);
   await getPhotoStorage().write(photoId,'thumb',Buffer.from('synthetic-private-photo'));
-  const set=await createCardChangeSet(ids[0]!,cardCreateBodySchema.parse({title:'API report',productId:null,unit:{code:'piece'},pack:null,sellerComment:null,price:'1200',photoIds:[photoId],points:[{locationId:seller.locations[0]!.id}]}),{database:conn.db});
-  offerId=(await confirmSellerChangeSet(ids[0]!,set.id,{database:conn.db})).items[0]!.resultOffer!.id;
+  const set=await createCardChangeSet(ids[0]!,cardCreateBodySchema.parse({title:'API report',productId:null,unit:{code:'piece'},pack:null,sellerComment:null,price:'1200',photoIds:[photoId],points:[{locationId:seller.locations[0]!.id},{locationId:hidden.id}]}),{database:conn.db});
+  const confirmed=await confirmSellerChangeSet(ids[0]!,set.id,{database:conn.db});
+  offerId=confirmed.items.find(i=>i.location.id===seller.locations[0]!.id)!.resultOffer!.id;
+  await conn.pool.query("UPDATE offers SET status='inactive' WHERE location_id=$1",[hidden.id]);
   const ctx=await loadReportContext(offerId,'ru',{database:conn.db});
   receipt=(await submitReport(ids[1]!,submitReportSchema.parse({submissionId:randomUUID(),offerId,version:ctx.evidence.version,locale:'ru',reason:'photo_mismatch',photoId,text:'PRIVATE identity text +77000000000'}),{database:conn.db})).receipt;
 });
@@ -49,7 +53,7 @@ afterAll(async()=>{
   await conn.pool.query(`DELETE FROM seller_change_item_photos WHERE item_id IN (SELECT i.id FROM seller_change_items i JOIN seller_change_sets cs ON cs.id=i.change_set_id WHERE cs.seller_id IN (${own}))`,[ids[0]]);
   await conn.pool.query(`DELETE FROM seller_change_items WHERE change_set_id IN (SELECT id FROM seller_change_sets WHERE seller_id IN (${own}))`,[ids[0]]);
   await conn.pool.query(`DELETE FROM seller_change_sets WHERE seller_id IN (${own})`,[ids[0]]);
-  await conn.pool.query('DELETE FROM offer_photos WHERE offer_id=$1',[offerId]);await conn.pool.query('DELETE FROM offers WHERE id=$1',[offerId]);
+  await conn.pool.query(`DELETE FROM offer_photos WHERE offer_id IN (SELECT id FROM offers WHERE seller_id IN (${own}))`,[ids[0]]);await conn.pool.query(`DELETE FROM offers WHERE seller_id IN (${own})`,[ids[0]]);
   await conn.pool.query(`DELETE FROM locations WHERE seller_id IN (${own})`,[ids[0]]);await conn.pool.query('DELETE FROM sellers WHERE owner_user_id=$1',[ids[0]]);
   await conn.pool.query('DELETE FROM photos WHERE id=$1',[photoId]);await conn.pool.query('DELETE FROM auth_sessions WHERE user_id=ANY($1::uuid[])',[ids]);await conn.pool.query('DELETE FROM users WHERE id=ANY($1::uuid[])',[ids]);await conn.pool.end();
 });
@@ -72,6 +76,7 @@ it('requires auth and same origin for writes, rejects forged fields, and public 
   expect((await resolve(req('/api/operator/reports/'+receipt,2,{}, {origin:'https://foreign.invalid'}),params())).status).toBe(403);
   const publicRead=await context(req('/api/offers/'+offerId+'/report-context'),{params:Promise.resolve({id:offerId})});expect(publicRead.status).toBe(200);
   const data=await publicRead.json();expect(JSON.stringify(data)).not.toContain('PRIVATE');expect(JSON.stringify(data)).not.toContain('reporter');
+  expect(data.evidence.points).toHaveLength(1);expect(data.evidence.points[0].offerId).toBe(offerId);
   const forged={submissionId:randomUUID(),offerId,version:data.evidence.version,locale:'ru',reason:'other',reporterUserId:ids[2],evidence:{title:'forged'}};
   expect((await send(req('/api/reports',1,forged))).status).toBe(400);
 });
