@@ -11,6 +11,7 @@ import '../../../_components/report.css';
 export function BuyerReportFlow({offerId,onClose}:{offerId:string;onClose:()=>void}) {
   const {t,locale}=useI18n();
   const [step,setStep]=useState<'reason'|'comment'|'sent'>('reason');
+  const [duplicate,setDuplicate]=useState(false);
   const [context,setContext]=useState<Evidence|null>(null),[reason,setReason]=useState<ReportReason|null>(null);
   const [text,setText]=useState(''),[photoId,setPhotoId]=useState<string|null>(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[auth,setAuth]=useState(false),[attempt,setAttempt]=useState(0);
@@ -45,13 +46,13 @@ export function BuyerReportFlow({offerId,onClose}:{offerId:string;onClose:()=>vo
     lastRequest.current=input;pending.current=true;setBusy(true);setError('');
     try {
       const response=await fetch('/api/reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),cache:'no-store'});
-      const result=await response.json() as {receipt?:string;error?:{code:string}};
+      const result=await response.json() as {receipt?:string;duplicate?:boolean;error?:{code:string}};
       if(!alive.current) return;
       if(response.status===401) {setAuth(true);return;}
       if(result.error?.code==='STALE_CONTEXT') {setError('report.stale');setAttempt(v=>v+1);return;}
       if(result.error?.code==='REPORT_QUOTA') {setError('report.quota');return;}
       if(!response.ok || !result.receipt) throw Error('send');
-      setStep('sent');
+      setDuplicate(result.duplicate===true);setStep('sent');
     }catch{if(alive.current) setError('report.sendError');}
     finally{pending.current=false;if(alive.current) setBusy(false);}
   }
@@ -60,7 +61,7 @@ export function BuyerReportFlow({offerId,onClose}:{offerId:string;onClose:()=>vo
     <div ref={heading} tabIndex={-1}><Bar title={t(step==='sent'?'report.sent':step==='reason'?'report.title':photoStep?'report.whichPhoto':'report.commentTitle')}
       onBack={()=>{if(step==='comment'){setStep('reason');setError('');}else onClose();}} backDisabled={busy}/></div>
     <main className="body" style={{gap:16}}>
-      {step==='sent'?<><div className="report-success" aria-hidden="true">✓</div><p role="status" className="t">{t('report.thanks')}</p></>:<>
+      {step==='sent'?<><div className="report-success" aria-hidden="true">✓</div><p role="status" className="t">{t('report.thanks')}</p>{duplicate && <p className="c">{t('report.duplicate')}</p>}</>:<>
         {!context?<SkeletonRows/>:<>
           <ReportEvidence evidence={context} compact/>
           {step==='reason'?<><h2 className="h3">{t('report.whatWrong')}</h2>{REPORT_REASONS.map(r=><button key={r} type="button" className="report-reason" onClick={()=>choose(r)}><span>{t(`report.reason.${r}`)}</span><Ic name="right"/></button>)}</>:<>

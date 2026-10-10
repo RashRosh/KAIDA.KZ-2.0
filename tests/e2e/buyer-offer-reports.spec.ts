@@ -57,6 +57,9 @@ test('buyer draft survives Back/login; operator disposition keeps buyer text pri
     await op.goto('/operator/reports');await op.getByRole('button',{name:'Закрытые',exact:true}).click();await op.getByRole('article').filter({hasText:'Абрикосы отчётэ2е'}).getByRole('button',{name:'Рассмотреть'}).click();
     await expect(op.getByRole('region',{name:'Исторический итог'})).toContainText('Карточка снята');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('На витрине');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('Позднее возвращена оператором');
     await info.attach('operator-returned-card-closed-report',{body:await op.screenshot(),contentType:'image/png'});
+    await page.goto(`/offers/${offerId}`);await page.getByRole('button',{name:'Пожаловаться на карточку'}).click();await page.getByRole('button',{name:'Другое',exact:true}).click();await page.getByLabel('Комментарий · необязательно').fill('Повторное сообщение');await page.getByRole('button',{name:'Отправить жалобу',exact:true}).click();
+    await expect(page.getByText('Вы уже сообщили об этом предложении. Первое сообщение сохранено.',{exact:true})).toBeVisible();
+    const saved=await pool.query('SELECT buyer_text FROM offer_reports WHERE card_id=$1',[cardId]);expect(saved.rows).toHaveLength(1);expect(saved.rows[0].buyer_text).toBe(privateText);
   }finally{
     await operator.close();
     if(cardId){await pool.query('DELETE FROM offer_reports WHERE card_id=$1',[cardId]);await pool.query('DELETE FROM offer_card_removals WHERE card_id=$1',[cardId]);}
