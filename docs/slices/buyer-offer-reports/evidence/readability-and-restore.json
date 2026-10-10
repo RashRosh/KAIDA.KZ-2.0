@@ -1,0 +1,46 @@
+{
+  "restore": {
+    "3200": {
+      "hash": "0f642e9516c561c1678e7765f286a3530ebbd13ffc3a90b85f86731e75803c03",
+      "closedReport": true,
+      "guestDenied": true,
+      "sellerDenied": true,
+      "unrelatedPhotoDenied": true,
+      "ordinaryHistoricalUrlDenied": true
+    },
+    "3202": {
+      "hash": "0f642e9516c561c1678e7765f286a3530ebbd13ffc3a90b85f86731e75803c03",
+      "closedReport": true,
+      "guestDenied": true,
+      "sellerDenied": true,
+      "unrelatedPhotoDenied": true,
+      "ordinaryHistoricalUrlDenied": true
+    }
+  },
+  "readability": [
+    {
+      "screen": "buyer",
+      "scale": 1,
+      "viewport": 320,
+      "content": 290
+    },
+    {
+      "screen": "buyer",
+      "scale": 2,
+      "viewport": 320,
+      "content": 290
+    },
+    {
+      "screen": "operator",
+      "scale": 1,
+      "viewport": 320,
+      "content": 290
+    },
+    {
+      "screen": "operator",
+      "scale": 2,
+      "viewport": 320,
+      "content": 290
+    }
+  ]
+}
