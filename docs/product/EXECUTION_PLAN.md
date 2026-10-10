@@ -123,6 +123,10 @@ Issues владеют подробным обсуждением; здесь — 
 | Оповещение оператору о карточке вне каталога | B-FREETITLE-ALERT | Feature Map говорит «входит в stage 10», план — «pilot-функция, не добавлять». Кто получает и каким каналом — решает контракт. |
 | Постановка в порядок кандидатов | раздел 5 | Любой UNSCHEDULED получает место в порядке только решением PO. |
 
+### 4.2 O-ABUSE: approved local source-wide OTP slice
+
+PO2026-10-11 approves [auth-otp-source-protection](../slices/auth-otp-source-protection/SLICE_CONTRACT.md), final actual-component previews and separate implementation after docs publication. This contract owns the exact atomic admission, source trust, cleanup/key/retention and UI boundary. Local reference only; production proxy/backup/WAL/log verification remains gated. No future queue change beyond this authorized insertion; voice and translation experiments remain paused. STOP for manual acceptance before implementation merge/tag.
+
 ## 5. Workstreams и задачи
 
 102 remaining tasks plus the retained Q-R3 CLOSED marker: 103 indexed rows (102 previous register records plus B-MARKET-TEXT), with 33 previously archived IDs, 136 total IDs. Q-R3 remains here as a closure marker until the next register/archive maintenance; it is outside the active queue.
