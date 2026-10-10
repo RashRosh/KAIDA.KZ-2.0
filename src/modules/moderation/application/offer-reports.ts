@@ -16,7 +16,7 @@ type Dependencies = { database?: Database; clock?: () => Date };
 const digest = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 type CardRow = {
   id: string; card_id: string; seller_id: string; title: string; pack_amount: string | null; pack_unit: string | null;
-  price_amount: string; price_currency: string; price_unit_code: string | null; price_unit_value: string | null;
+  price_amount: string | null; price_currency: string | null; price_unit_code: string | null; price_unit_value: string | null;
   seller_comment: string | null; display_comment: string | null; status: string; last_confirmed_at: Date; revision: number;
   location_id: string; location_name: string; address_text: string; photo_ids: string[];
 };
@@ -67,7 +67,7 @@ async function contextOf(db: Db, offerId: string, locale: 'ru' | 'kk', now: Date
       amount:r.price_amount, currency:r.price_currency,
       basis:formatPack(packFromColumns(r.pack_amount,r.pack_unit),locale) ?? formatPriceUnit(priceUnitFromColumns(r.price_unit_code,r.price_unit_value),locale) })),
   };
-  const available = chosen.status === 'active' && new Date(chosen.last_confirmed_at).getTime() > now.getTime()-readOfferValidityPeriodHours()*3600000 && !active;
+  const available = chosen.status === 'active' && chosen.price_amount!==null && chosen.price_currency==='KZT' && new Date(chosen.last_confirmed_at).getTime() > now.getTime()-readOfferValidityPeriodHours()*3600000 && !active;
   return { evidence, available, token:digest({ version, rows:rows.map(r=>[r.id,r.status,r.revision]), history:history.rows, available }),
     removal:active ? {id:active.id,reason:active.reason,comment:active.comment,at:new Date(active.removed_at).toISOString()} : null };
 }

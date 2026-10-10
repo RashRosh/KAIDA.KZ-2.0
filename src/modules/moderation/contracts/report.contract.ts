@@ -19,7 +19,7 @@ export const resolveReportSchema = z.object({
   .refine(v => !['returned', 'no_action'].includes(v.disposition) || v.rationale.length > 0)
   .refine(v => v.disposition === 'removed' || (v.reason === null && v.sellerComment === ''));
 export type ResolveReport = z.infer<typeof resolveReportSchema>;
-export type ReportPoint = { offerId: string; locationId: string; name: string; address: string; amount: string; currency: string; basis: string | null };
+export type ReportPoint = { offerId: string; locationId: string; name: string; address: string; amount: string | null; currency: string | null; basis: string | null };
 export type ReportEvidence = {
   cardId: string; offerId: string; locale: 'ru' | 'kk'; version: string;
   title: string; pack: string | null; originalComment: string | null; displayedComment: string | null;

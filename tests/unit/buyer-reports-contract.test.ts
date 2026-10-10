@@ -1,4 +1,7 @@
 import { expect, it } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { ReportEvidence } from '../../src/app/_components/ReportEvidence';
 import { REPORT_REASONS, resolveReportSchema, submitReportSchema } from '../../src/modules/moderation/contracts/report.contract';
 
 const base={submissionId:'a9040000-0000-4000-8000-000000000001',offerId:'a9040000-0000-4000-8000-000000000002',version:'a'.repeat(64),locale:'ru'};
@@ -18,4 +21,8 @@ it('requires an independently chosen removal reason and private rationale for re
     expect(resolveReportSchema.safeParse({token,disposition,rationale:'Проверено',sellerComment:'Private buyer text'}).success).toBe(false);
     expect(resolveReportSchema.safeParse({token,disposition,rationale:'Проверено'}).success).toBe(true);
   }
+});
+it('renders valid legacy switched-off points without crashing or inventing a zero price',()=>{
+  const html=renderToStaticMarkup(createElement(ReportEvidence,{evidence:{cardId:base.offerId,offerId:base.offerId,locale:'ru',version:base.version,title:'Legacy card',pack:null,originalComment:null,displayedComment:null,photoIds:[],points:[{offerId:base.offerId,locationId:base.offerId,name:'Unpriced legacy point',address:'Synthetic',amount:null,currency:null,basis:null}]}}));
+  expect(html).toContain('Unpriced legacy point');expect(html).not.toContain('report-amount');expect(html).not.toContain('₸');
 });

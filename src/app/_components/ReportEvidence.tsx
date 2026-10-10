@@ -11,7 +11,7 @@ export function ReportEvidence({ evidence, reportId, compact=false }: {evidence:
       <img key={id} src={reportId?`/api/operator/reports/${reportId}/photos/${id}/thumb`:photoUrl(id,'thumb')} alt={`${evidence.title} · ${i+1}`} />
     ))}</div>}
     <div><b>{evidence.title}</b>{points.map(p=><div key={p.offerId} className="report-point">
-      <p><span className="report-amount">{formatAmount(p.amount)}&nbsp;₸</span>{p.basis && <> <span className="report-basis">/&nbsp;{p.basis.replaceAll(' ','\u00a0')}</span></>}</p>
+      {p.amount!==null && <p><span className="report-amount">{formatAmount(p.amount)}&nbsp;₸</span>{p.basis && <> <span className="report-basis">/&nbsp;{p.basis.replaceAll(' ','\u00a0')}</span></>}</p>}
       <p className="c">{p.name}{!compact && <> · {p.address}</>}</p>
     </div>)}{!compact && evidence.displayedComment && <p className="t">{evidence.displayedComment}</p>}
     {!compact && evidence.originalComment!==evidence.displayedComment && <p className="c">{evidence.originalComment}</p>}</div>
