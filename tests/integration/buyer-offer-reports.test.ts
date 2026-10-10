@@ -61,6 +61,20 @@ async function edit(c:Awaited<ReturnType<typeof publish>>,price='1400',photoIds:
   await confirmSellerChangeSet(seller,set.id,deps());
 }
 describe('atomic buyer report and operator handling',()=>{
+  it('the same User can report and moderate concurrently without quota/FK lock inversion',async()=>{
+    const c=await publish();const {receipt}=await submitReport(buyer,input(c),deps());const report=await loadReport(receipt,deps());
+    // Pause only this synthetic card's insert so concurrent admission can acquire its User quota lock.
+    await connection.pool.query(`CREATE FUNCTION reports_race_delay() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN PERFORM pg_sleep(0.15); RETURN NEW; END $$; CREATE TRIGGER reports_race_delay BEFORE INSERT ON offer_card_removals FOR EACH ROW WHEN (NEW.card_id='${c.cardId}') EXECUTE FUNCTION reports_race_delay()`);
+    try {
+      const outcomes=await Promise.allSettled([
+        resolveReport(operator,receipt,resolveReportSchema.parse({token:report.current!.token,disposition:'removed',reason:'other'}),deps()),
+        submitReport(operator,input(c),deps()),
+      ]);
+      expect(outcomes[0].status).toBe('fulfilled');
+      if(outcomes[1].status==='rejected')expect(outcomes[1].reason).toMatchObject({code:'STALE_CONTEXT'});
+      expect((await loadReport(receipt,deps())).disposition).toBe('removed');
+    } finally {await connection.pool.query('DROP TRIGGER reports_race_delay ON offer_card_removals; DROP FUNCTION reports_race_delay()');}
+  });
   it('language, actuality and off/on do not renew duplicate allowance; invalid photo references cannot create evidence',async()=>{
     const c=await publish('Синтетические абрикосы',photos);
     await expect(submitReport(buyer,input(c,{reason:'photo_mismatch',photoId:randomUUID()}),deps())).rejects.toMatchObject({code:'INVALID_PHOTO'});

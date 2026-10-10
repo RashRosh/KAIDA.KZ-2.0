@@ -84,7 +84,8 @@ export async function submitReport(userId: string, input: SubmitReport, deps: De
   const db=deps.database ?? getDatabase(), now=(deps.clock ?? (()=>new Date()))(), inputDigest=digest(input);
   return db.transaction(async tx=>{
     // Serializes quota/receipt admission for this authenticated User across every card and process.
-    const user=await tx.execute(sql`select id from users where id=${userId} for update`);
+    // NO KEY UPDATE still serializes admissions, while permitting FK KEY SHARE reads by moderation/session writes.
+    const user=await tx.execute(sql`select id from users where id=${userId} for no key update`);
     if (!user.rows.length) throw new ReportError('NOT_FOUND',404);
     const previous=await tx.execute<{ report_id:string; input_digest:string }>(sql`select report_id,input_digest from offer_report_receipts where user_id=${userId} and submission_id=${input.submissionId}`);
     if(previous.rows[0]) {
