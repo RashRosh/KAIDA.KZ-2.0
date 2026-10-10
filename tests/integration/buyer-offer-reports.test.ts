@@ -83,6 +83,7 @@ describe('atomic buyer report and operator handling',()=>{
     const review=await loadReport(second.receipt,deps());
     const returned=await resolveReport(operator,second.receipt,resolveReportSchema.parse({token:review.current!.token,disposition:'returned',rationale:'Проверено исправление'}),deps());
     expect(returned.disposition).toBe('returned');expect(returned.current!.available).toBe(true);
+    expect(returned.laterCardEvent?.kind).toBe('returned');
     expect((await loadReport(receipt,deps())).disposition).toBe('already_removed');
     expect((await connection.pool.query('SELECT count(*)::int n FROM offer_card_removals WHERE card_id=$1',[c.cardId])).rows[0].n).toBe(1);
     await connection.pool.query('DELETE FROM offer_reports WHERE id=$1',[second.receipt]);

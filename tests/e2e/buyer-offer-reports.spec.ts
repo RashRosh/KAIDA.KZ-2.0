@@ -55,7 +55,7 @@ test('buyer draft survives Back/login; operator disposition keeps buyer text pri
     }finally{await sellerBrowser.close();}
     await op.getByRole('link',{name:'Открыть текущую карточку'}).click();await op.getByRole('button',{name:'Вернуть на витрину',exact:true}).click();
     await op.goto('/operator/reports');await op.getByRole('button',{name:'Закрытые',exact:true}).click();await op.getByRole('article').filter({hasText:'Абрикосы отчётэ2е'}).getByRole('button',{name:'Рассмотреть'}).click();
-    await expect(op.getByRole('region',{name:'Исторический итог'})).toContainText('Карточка снята');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('На витрине');
+    await expect(op.getByRole('region',{name:'Исторический итог'})).toContainText('Карточка снята');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('На витрине');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('Позднее возвращена оператором');
     await info.attach('operator-returned-card-closed-report',{body:await op.screenshot(),contentType:'image/png'});
   }finally{
     await operator.close();

@@ -31,6 +31,7 @@ export type OperatorReport = {
   evidence: ReportEvidence; current: ReportContext | null;
   closedAt: string | null; disposition: ResolveReport['disposition'] | null; rationale: string | null;
   moderationId: string | null;
+  laterCardEvent: { kind: 'returned' | 'republished'; at: string } | null;
 };
 export type ReportPage = { rows: Pick<OperatorReport, 'id' | 'at' | 'reason' | 'evidence' | 'closedAt' | 'disposition'>[]; hasMore: boolean; openCount: number };
 export class ReportError extends Error {

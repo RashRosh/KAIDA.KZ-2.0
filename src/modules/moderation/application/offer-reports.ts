@@ -118,10 +118,10 @@ async function findReport(db: Db,id:string,lock=false) {
   if(!result.rows[0]) throw new ReportError('NOT_FOUND',404);
   return result.rows[0];
 }
-function view(row:ReportRow,current:ReportContext|null):OperatorReport {
+function view(row:ReportRow,current:ReportContext|null,laterCardEvent:OperatorReport['laterCardEvent']):OperatorReport {
   // Explicit privacy projection: no reporter User ID, phone or receipt input digest.
   return {id:row.id,at:new Date(row.created_at).toISOString(),reason:row.reason,text:row.buyer_text,photoId:row.selected_photo_id,evidence:row.evidence,current,
-    closedAt:row.closed_at ? new Date(row.closed_at).toISOString():null,disposition:row.disposition,rationale:row.rationale,moderationId:row.moderation_id};
+    closedAt:row.closed_at ? new Date(row.closed_at).toISOString():null,disposition:row.disposition,rationale:row.rationale,moderationId:row.moderation_id,laterCardEvent};
 }
 export async function loadReport(id:string,deps:Dependencies={}) {
   const db=deps.database ?? getDatabase();
@@ -129,7 +129,14 @@ export async function loadReport(id:string,deps:Dependencies={}) {
     const first=await findReport(tx,id);
     await lockCards(tx,[first.card_id]);
     const row=await findReport(tx,id);
-    return view(row,await contextOf(tx,row.offer_id,row.evidence.locale,(deps.clock ?? (()=>new Date()))()));
+    let laterCardEvent:OperatorReport['laterCardEvent']=null;
+    if(row.moderation_id) {
+      const event=await tx.execute<{restored_at:Date|null;cleared_at:Date|null}>(sql`select restored_at,cleared_at from offer_card_removals where id=${row.moderation_id}`);
+      const e=event.rows[0];
+      if(e?.restored_at)laterCardEvent={kind:'returned',at:new Date(e.restored_at).toISOString()};
+      else if(e?.cleared_at)laterCardEvent={kind:'republished',at:new Date(e.cleared_at).toISOString()};
+    }
+    return view(row,await contextOf(tx,row.offer_id,row.evidence.locale,(deps.clock ?? (()=>new Date()))()),laterCardEvent);
   });
 }
 export async function listReports(state:'open'|'closed',offset:number,deps:Dependencies={}):Promise<ReportPage> {
