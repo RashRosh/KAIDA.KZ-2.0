@@ -1,0 +1,199 @@
+{
+  "sourceSha": "51b2425ad099458e7c92aff30952745bdb818aa0",
+  "actualComponent": "src/app/_components/AuthModal.tsx",
+  "hashes": {
+    "src/app/_components/AuthModal.tsx": "a8c6516be6eaa1eb9cf4763dd73441dc183f462e2dc093ce990171a1ba020351",
+    "src/i18n/messages.ts": "c3cee19327448b9134c7a7dffb933e36b0ddfd1ac4808a5bb25b90c7f831e8bc",
+    "src/app/globals.css": "de23e763ae74c5c77c17a4693eff7f159e7e04a785625aeb2209e04886efad30",
+    "src/app/seller/kaida.css": "10b2d64ddfd094abdccb171dd99abbf6b438acc8f26c87d580cf33f78f8cf8e2",
+    "src/app/seller/kaida-app.css": "24b657b3ea22b80a95e0c07843305bf259f8d0471c30532b03e6bfc610e82ee3"
+  },
+  "sourceFilesUnchanged": true,
+  "renderedActualComponent": true,
+  "proposalChanges": "Message/countdown/disabled states plus PO-requested preview-only transparent muted disabled-resend selector; current product sources/styles unchanged",
+  "requestsToApp": 0,
+  "syntheticReceiptOnly": true,
+  "staticFinalHtml": true,
+  "priorApproximationsSuperseded": true,
+  "checks": [
+    {
+      "locale": "ru",
+      "state": "phone",
+      "width": 390,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "ru",
+      "state": "phone",
+      "width": 320,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "ru",
+      "state": "code",
+      "width": 390,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "ru",
+      "state": "code",
+      "width": 320,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "ru",
+      "state": "unavailable",
+      "width": 390,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "ru",
+      "state": "unavailable",
+      "width": 320,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "kk",
+      "state": "phone",
+      "width": 390,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "kk",
+      "state": "phone",
+      "width": 320,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "kk",
+      "state": "code",
+      "width": 390,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "kk",
+      "state": "code",
+      "width": 320,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "kk",
+      "state": "unavailable",
+      "width": 390,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    },
+    {
+      "locale": "kk",
+      "state": "unavailable",
+      "width": 320,
+      "overflow": false,
+      "sheetStyleUnchanged": true,
+      "style": {
+        "font": "16px / 24px Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontFamily": "Roboto, Geologica, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "padding": "8px 16px 20px",
+        "borderRadius": "28px 28px 0px 0px"
+      }
+    }
+  ],
+  "mutedDisabledResendChecks": [
+    {
+      "locale": "ru",
+      "disabled": true,
+      "ariaDisabled": "true",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(110, 104, 113)",
+      "height": "44px",
+      "activationCount": 0,
+      "nativeClickBlocked": true
+    },
+    {
+      "locale": "kk",
+      "disabled": true,
+      "ariaDisabled": "true",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(110, 104, 113)",
+      "height": "44px",
+      "activationCount": 0,
+      "nativeClickBlocked": true
+    }
+  ],
+  "finalVisualApproval": false
+}
