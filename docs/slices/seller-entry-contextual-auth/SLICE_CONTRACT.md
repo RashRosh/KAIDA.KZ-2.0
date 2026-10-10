@@ -143,3 +143,9 @@ Mobile + desktop:
 ## Review gate
 
 Product Owner / Controller approved this Slice Contract. Implementation разрешена; merge и checkpoint остаются заблокированы до automated verification, branch CI, manual acceptance и Controller gate.
+
+
+## Approved buyer-offer-reports extension (PO, 2026-10-10)
+
+[Buyer reporting contract](../buyer-offer-reports/SLICE_CONTRACT.md) adds the bounded local report flow. Existing promises above remain unchanged except for the explicit extensions in that contract. Real-user reporting and production evidence retention remain unauthorized.
+Shared authentication gains a report caller intent preserving the in-progress reason/comment/photo/context. Successful login returns to the draft without submitting. OTP/session and existing seller/ordinary destinations remain unchanged.

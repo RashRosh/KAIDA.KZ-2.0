@@ -170,3 +170,9 @@ cover — the card page opens; swipe through three photos, go back — the same 
    kept.
 
 7. No-photo reminder wording: `Карточки с фото выбирают чаще` / `Сфотографируйте товар — это займёт минуту`.
+
+
+## Approved buyer-offer-reports extension (PO, 2026-10-10)
+
+[Buyer reporting contract](../buyer-offer-reports/SLICE_CONTRACT.md) adds the bounded local report flow. Existing promises above remain unchanged except for the explicit extensions in that contract. Real-user reporting and production evidence retention remain unauthorized.
+An allowlisted operator may read an immutable report-referenced historical photo through a report-scoped private/no-store route, including after detachment. Every read rechecks report and operator access; outsiders receive404. Ordinary/public/owner photo URLs and physical retention are unchanged.

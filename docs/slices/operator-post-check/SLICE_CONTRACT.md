@@ -137,3 +137,9 @@ d. Reasons as in `M06`, with Seller texts:
    - `Контакты или реклама` (shortened by PO at manual acceptance 2026-09-27; M06 had «Контакты или реклама в фото или тексте») → «В фото или тексте есть контакты или реклама.»
    - `Другое` → «Карточка не подходит для витрины.» (the operator comment explains).
    Plus an optional operator comment shown to the Seller.
+
+
+## Approved buyer-offer-reports extension (PO, 2026-10-10)
+
+[Buyer reporting contract](../buyer-offer-reports/SLICE_CONTRACT.md) adds the bounded local report flow. Existing promises above remain unchanged except for the explicit extensions in that contract. Real-user reporting and production evidence retention remain unauthorized.
+Operator-only report reads and atomic resolution reuse whole-card removal/return and their audit. Historical report disposition stays closed after return/republish; existing feed marks/order are unchanged.
