@@ -2,16 +2,16 @@
 
 ## Verified checkpoint / current task
 
-- buyer-offer-reports CLOSED: PO manual acceptance PASS at 6988c273227c787f617e6f5ecd47d7831eb27083 (2026-10-10); implementation PR169 merged as 51b2425ad099458e7c92aff30952745bdb818aa0. Accepted/resulting merge trees identical: 8ccc5b211c7f028ecc7bab2cef559ed2f871fce5. No dependency versions changed or new security exceptions.
-- Annotated checkpoint v0.0.75-buyer-offer-reports targets the verified implementation merge. Main full verify38040284192 and CodeQL38040284189 GREEN before tagging. Branch verify38031070867/38031066909 GREEN:511 unit,307 integration,267 E2E passed/55 skipped; lint/types/migration/seed/build passed. CodeQL has no open alerts on the slice ref; inherited old Scorecard findings are not a clean security bill.
-- Current task: publish closure documentation/evidence; no product work. Next action: confirm closure-doc PR/main CI, then STOP. EXECUTION_PLAN owns the unchanged future queue; no new task authorized.
+- buyer-offer-reports CLOSED: PO manual acceptance PASS at 6988c273227c787f617e6f5ecd47d7831eb27083 (2026-10-10); implementation PR169 merged as 51b2425ad099458e7c92aff30952745bdb818aa0. Accepted/merge trees identical; no dependency changes/new exceptions.
+- Annotated checkpoint v0.0.75-buyer-offer-reports targets the verified implementation merge. Main full verify38040284192 and CodeQL38040284189 GREEN before tagging. Branch verify38031070867/38031066909 GREEN; CodeQL no open slice alerts; inherited Scorecard findings remain.
+- Closure docs PR170 MERGED at84e033d6bcb3cd34a674e2ba2488bb6b5acc95ae. Docs-only main verify38041419650 / CodeQL38041419649 GREEN at84e033d6bcb3cd34a674e2ba2488bb6b5acc95ae (511 unit/307 integration/267 E2E/55 skipped). Current task: approved auth-otp-source-protection; publish docs PR from tmp/auth-source-docs, then separate implementation branch.
 
 ## Evidence / cleanup
 
-- Approved immediate reason navigation, Back/login preservation, optional text and explicit Send delivered. Atomic duplicate/rolling quota, stale/concurrent disposition, moderation/audit rollback and additive migration verified. Existing operator removal/return, owner/public media and login behavior preserved; closed report does not reopen on return.
+- Buyer-report acceptance/scope/fixture IDs and privacy/concurrency/migration proof: docs/slices/buyer-offer-reports/ACCEPTANCE.md and evidence/.
 - R2 isolated backup/restore verified detached historical-photo bytes, frozen/private evidence and closed audit versus edited/current content. Durable synthetic screenshots/tests/checklist/fixture IDs: docs/slices/buyer-offer-reports/ACCEPTANCE.md and evidence/. Mobile RU accepted;320px/explicit2x text checked; not physical-device/OS scaling/screen-reader evidence; KK copy provisional. CI Ubuntu; local Windows x64 Node24.14.1/pnpm11.28.5/Chromium/PostgreSQL18.
 - Private accepted DB dump, photos/bundle archive/hashes, raw logs/browser artifacts, pre-upgrade private snapshot dump, scope audit and response receipts retained in tmp/buyer-reports-evidence and tmp/auth-otp-closure-private; never upload private dumps/env/photos.
-- Removed only manifest-recorded kaida-buyer-reports-postgres IDdb562f7d1a5fa8238e49aba3851a908c9323ed87d32e3b8e7b21e2b50d56404d / volume kaida-buyer-reports-pg (kaida_reports/kaida_test,55436) and restore IDd842b47d54ff52dc3963ac26c676d4772c721d2fa209991e449284df5e2d71da / kaida-buyer-reports-restore-pg (55437), including all synthetic acceptance fixtures. Removed their exact Windows TEMP/kaida-buyer-reports-20261010 photo directory after archival. Port3200 PID29108 and temporary3203 PID28608 retired; no other apps terminated.
+- Recorded synthetic acceptance/restore databases, volumes, temporary photos and ports3200/3203 were retired after evidence preservation. Exact IDs/fixture manifest/cleanup receipts remain in tmp/buyer-reports-evidence/resources.json and closure-result.json; original/private-snapshot resources retained.
 
 ## Port3000: explicit PRIVATE snapshot data source
 
@@ -24,4 +24,6 @@
 
 - Real-user reporting/public launch and production evidence retention/erase/backup-expiry policy UNAPPROVED. Test OTP only; real SMS/purchases excluded. Broader abuse protection remains separate. Existing R3 exceptions, especially E-R3-OS/E-R3-GO, explicitly remain isolated-local-only. No automatic forwarding of private text; authorized operator manual disclosure/cached formerly public images remain documented limits.
 - Voice research PAUSED by PO; tracked-location evidence retained locally/staged. Audition synthetic intelligible with stress errors; heavier comparison not run. Memory blocker460MiB physical versus planned~2GiB; resume ONLY explicit PO instruction plus sufficient new preflight, no resource changes. AI remains required for launch, implementation order deferred; manual/voice/photos/video unchanged, safe retries/late results/private-audio lifecycle required from first voice implementation. AI moderation deferred.
-- Start no task; STOP after closure docs CI confirmation.
+- Translation B-CATNAME-LOCALE/O-TRANSL proposal and RU/KK detail/results/original/fallback previews preserved; manually drafted, not working AI; visual approval pending, full feature NOT delivered. Runtime PAUSED:539MiB available physical/13.96GiB commit versus unmeasured proposed6/7GiB envelope. No model download/run or fixture-only extension authorized.
+- Last completed: PO2026-10-11 approves contract/final previews and implementation, bounded local source protection only. Docs branch docs/auth-otp-source-contract from main84e033d6; no executable changes yet. Root staged research untouched; unrelated translation proposal remains locally uncommitted.
+- Next action: commit/push approved contract/plan/state and open docs PR; merge docs after green required checks, then implement in isolated separate branch. No implementation merge/tag before manual acceptance; production trust/retention gates remain.
