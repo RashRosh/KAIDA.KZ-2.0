@@ -102,6 +102,8 @@
 .kaida.kaida-portal{position:fixed;inset:0;z-index:50;background:transparent;display:flex;justify-content:center}
 .kaida.kaida-portal>.portal-col{position:relative;width:100%;max-width:480px;height:100%}
 .kaida.kaida-portal .sheet{z-index:3}
+/* Approved source-protection state: resend remains a text action when disabled. */
+.kaida .btn-g[data-source-resend][disabled]{background:transparent;color:var(--ink3);border-color:transparent;cursor:not-allowed}
 
 /* post-publication-buyer-preview: the two icons approved by the PO as exceptions to the no-new-icons rule (2026-10-09) —
    «глаз» and «частичное редактирование»; kaida.css stays a mechanical port of the mockup. */

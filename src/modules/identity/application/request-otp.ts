@@ -8,9 +8,11 @@ import type { OtpDelivery } from '../delivery/otp-delivery';
 import { replaceOtpChallenge } from '../infrastructure/identity.repository';
 import { InvalidPhoneError, normalizeKzPhone } from '../phone/normalize-phone';
 import { systemIdentityClock, type IdentityClock } from '../time/identity-clock';
+import { loadSourceProtection, sourceAdmission, type SourceProtection } from '../source/source-protection';
 import { otpPolicy } from './otp-policy';
 
 export interface RequestOtpDependencies<Receipt> {
+  sourceProtection?: SourceProtection | false;
   delivery: OtpDelivery<Receipt>;
   database?: Database;
   clock?: IdentityClock;
@@ -20,7 +22,7 @@ export interface RequestOtpDependencies<Receipt> {
 }
 
 export async function requestOtp<Receipt>(
-  input: { phone: string },
+  input: { phone: string; sourceIp?: string },
   dependencies: RequestOtpDependencies<Receipt>,
 ): Promise<{ challenge: { id: string; expiresAt: Date }; delivery: Receipt; retryAfterSeconds: number }> {
   let phoneE164: string;
@@ -32,6 +34,8 @@ export async function requestOtp<Receipt>(
   }
 
   const db = dependencies.database ?? getDatabase();
+  const protection = dependencies.sourceProtection ?? loadSourceProtection();
+  const source = protection ? sourceAdmission(protection, input.sourceIp) : undefined;
   const clock = dependencies.clock ?? systemIdentityClock;
   const config = dependencies.config ?? loadIdentityConfig();
   const challengeId = (dependencies.generateChallengeId ?? randomUUID)();
@@ -42,7 +46,7 @@ export async function requestOtp<Receipt>(
   const { challenge, retryAfterSeconds } = await replaceOtpChallenge(db, phoneE164, clock, otpPolicy(config), (now) => ({
     id: challengeId, phoneE164, otpDigest, createdAt: now,
     expiresAt: new Date(now.getTime() + config.otpTtlSeconds * 1000),
-  }));
+  }), source);
   const expiresAt = challenge.expiresAt;
   const delivery = await dependencies.delivery.deliver({ challengeId, phoneE164, code, expiresAt });
 

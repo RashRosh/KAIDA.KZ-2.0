@@ -1,0 +1,63 @@
+{
+  "platform": "Windows x64 / Docker Linux amd64 / PostgreSQL18 / Node24",
+  "resources": [
+    {
+      "name": "kaida-auth-source-client-a",
+      "id": "8f98dc936a490e630c6a6a179d832f6ba28e3e68243bee95d989f185fe06e991"
+    },
+    {
+      "name": "kaida-auth-source-client-b",
+      "id": "cbf211f3c57ff337c87dc4c7d9f312e76b5ffd0f86a137aeb01d08e4d91f9289"
+    }
+  ],
+  "challengeIds": [
+    "5172e6ca-e6a3-46cb-a668-1cdee8cf818d",
+    "a1879014-fb2e-405c-9014-a3769b0a7793",
+    "6267263d-2217-41c5-8e8d-7356c87503ca",
+    "3d2cd701-e578-43f9-84a9-91e3c021bfff",
+    "b775b0e2-3f5b-4043-8fa8-3372c0d5abaf",
+    "4e9de863-cedf-4396-b9a8-e1d152e74464",
+    "6b568825-5982-42c2-aa45-2fa6c9cabeeb",
+    "96d57d90-7ab8-4cf8-9360-ff94bc78b74e",
+    "e687f55d-9400-45a2-af8f-9d95c9670ac5",
+    "23f8da76-fefb-4835-b059-a8978098a2e7",
+    "19fbf758-fa76-44c9-b7a4-cc50e7cf8bfb",
+    "4251c499-9669-4194-be8f-4b2727c2ed33",
+    "b029310f-61f6-43b0-bef9-00e4e8759b4a",
+    "66747bb3-3f4f-4376-ac9d-47fcce0e1f4a",
+    "ce0899f9-d7d9-49e0-b6f8-48c81f9799cc",
+    "46a28be5-fcf2-4d09-96f7-2621549741cb",
+    "6a062759-dac5-471a-997a-fc1a0a047a08",
+    "d8d20e36-b6f2-42ed-9c2a-ae22c2ca8365",
+    "718d80d0-ed94-42a6-8aa7-7321c83dc250",
+    "fa7cd3f4-ace1-48e9-b507-28e4c8f702b2"
+  ],
+  "otherChallengeId": "0e55e450-bd33-489a-af3f-a3c9080815e0",
+  "twentyAdmitted": true,
+  "forgedHeaderCannotCreateBudgets": true,
+  "deniedConsumesNeither": true,
+  "oldCodeUsable": true,
+  "sourceSeparation": true,
+  "directBackendBlocked": true,
+  "missingMalformedSourceBlocked": true,
+  "appRestartPersistence": true,
+  "cleanupRestartCount": {
+    "before": 0,
+    "after": 1
+  },
+  "staleBlockingVerificationAndRecovery": true,
+  "noTrafficProof": {
+    "started": "2026-10-10T22:21:54.187Z",
+    "pending": false,
+    "agedEvents": 23,
+    "note": "No issuance after completion of real-proxy UI fixture capture; client-source records aged before this period. Independent scheduled sweep must remove them; no purge command.",
+    "finished": "2026-10-10T22:24:26.397Z",
+    "remainingEvents": 0,
+    "lastSuccessfulSweep": "2026-10-10T22:24:09.673Z",
+    "scheduledIntervalSeconds": 300,
+    "startupSweep": "2026-10-10T22:19:09.517Z",
+    "deletedEvents": 23
+  },
+  "createdAt": "2026-10-10T22:19:15.404Z",
+  "setupLimitation": "Initial operational proof used an obsolete cached OS base; final acceptance replaces it with current patched Debian13. Exact OS and image IDs are in final scans/manifest; app executable and Next16.3.8 unchanged during correction."
+}

@@ -1,0 +1,8 @@
+:8080 {
+  # Reference edge only. No upstream CDN/proxy is trusted in this local configuration.
+  reverse_proxy app:3000 {
+    # Setting this header overwrites all caller-supplied values.
+    header_up X-Kaida-Client-IP {http.request.remote.host}
+    header_up -Forwarded
+  }
+}

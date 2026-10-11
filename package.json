@@ -22,6 +22,7 @@
     "db:import:production-kb": "tsx src/cli/import-production-kb.ts",
     "db:import:addresses": "tsx src/cli/import-address-directory.ts",
     "search-events:purge": "tsx src/cli/purge-search-events.ts",
+    "otp-source:maintenance": "tsx src/cli/otp-source-maintenance.ts",
     "bootstrap:smoke": "playwright test -c ops/local-bootstrap/playwright.config.ts",
     "deploy:up": "tsx ops/deployment/up.ts",
     "deploy:preflight": "tsx ops/deployment/preflight.ts",

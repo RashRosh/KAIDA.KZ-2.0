@@ -17,6 +17,8 @@ export type AuthErrorCode =
   | 'OTP_EXPIRED'
   | 'OTP_NOT_ACTIVE'
   | 'OTP_REQUEST_THROTTLED'
+  | 'OTP_SOURCE_THROTTLED'
+  | 'AUTH_UNAVAILABLE'
   | 'OTP_ATTEMPTS_EXHAUSTED';
 
 export class AuthError extends Error {
@@ -25,6 +27,7 @@ export class AuthError extends Error {
     public readonly status: number,
     message: string,
     public readonly retryAfterSeconds?: number,
+    public readonly preservesCurrentCode = false,
   ) {
     super(message);
     this.name = 'AuthError';

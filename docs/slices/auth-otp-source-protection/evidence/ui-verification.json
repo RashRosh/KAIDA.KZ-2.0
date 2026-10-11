@@ -1,0 +1,57 @@
+{
+  "realProxyResponses": true,
+  "responseFixtures": false,
+  "denialHeaders": {
+    "retryAfter": "157",
+    "cacheControl": "no-store"
+  },
+  "initialAnnouncement": "Новый код можно запросить через 157 сек.",
+  "syntheticFixtures": true,
+  "phones": [
+    "+77000017401..+77000017421"
+  ],
+  "challengeIds": [
+    "80601e7d-d2d1-4f0c-bf4b-707318fa16d0",
+    "30794a5d-676f-488d-8f6d-bc91047c4c11",
+    "2f6541d0-1a36-4264-afdc-65e5bb6dd6d6",
+    "f9e2711d-29ed-4404-afbf-f93f0347c8f1",
+    "d6b9c5f3-61de-4db8-9aae-774895b9d474",
+    "e7438e88-f936-46d6-891c-3286e1b1df34",
+    "8340dcad-496e-4f47-bd87-d7d8d30d1851",
+    "c3df4334-0cc4-41a4-bef5-80e9affae41a",
+    "7eb7dc71-9785-4f05-8226-f84a7765d8b9",
+    "0d465c7b-4bd2-44ab-987f-fe68bbe4fe2d",
+    "06cc3d7a-036c-4da8-ba1e-17947c05f1c8",
+    "1ad373f8-e759-4ae7-87fa-21e2b17d0df0",
+    "dcfb877c-9504-459d-b1fa-7428fabf5101",
+    "de2c5518-4bbd-48d5-9c0d-05222a07ed53",
+    "4b04f8a8-5aaf-4b28-8940-6141f08d4eae",
+    "384e2127-f428-4d43-8d9b-b165a190b871",
+    "e6a40b7e-0a08-42d6-9575-72adc3acf099",
+    "be14eae3-80cc-4d7f-a006-de0ca4763628",
+    "c66bc696-9672-49cf-bccf-950a0d56603d",
+    "4f6b650d-a212-4733-8d14-7f4458fa0555"
+  ],
+  "codeVerifiedDuringSourceLimit": true,
+  "syntheticAdjustments": "Only owned challenge created_at -61s and source accepted_at -743s; browser clock advanced61s for its existing phone countdown.",
+  "readability": [
+    {
+      "mode": "narrow",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "scrollHeight": 614,
+      "clientHeight": 614,
+      "bodyOverflow": false
+    },
+    {
+      "mode": "large-text",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "scrollHeight": 1339,
+      "clientHeight": 776,
+      "bodyOverflow": false
+    }
+  ],
+  "limits": "Chromium emulation and explicit text enlargement, not physical-device or screen-reader proof.",
+  "createdAt": "2026-10-10T22:50:12.374Z"
+}

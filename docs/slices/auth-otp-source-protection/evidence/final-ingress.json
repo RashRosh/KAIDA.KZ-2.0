@@ -1,0 +1,49 @@
+{
+  "finalIngress": true,
+  "twentyAccepted": true,
+  "twentyFirstDenied": true,
+  "variableForgedCanonicalForwardedHeadersRejected": true,
+  "anotherRealPeerIndependent": true,
+  "deniedNeitherCharge": true,
+  "oldCodeVerified": true,
+  "restartPersistence": true,
+  "backendBypassBlocked": true,
+  "httpRetryAfterNoStore": true,
+  "syntheticPhones": [
+    "+77000017801..+77000017822",
+    "+77000017901"
+  ],
+  "challengeIds": [
+    "7d827c14-07e6-43d8-85e3-206216aa4fb5",
+    "56827e1a-80e2-4f5d-b113-50638ad0a920",
+    "2856f724-208e-442e-a5e6-d5bf3bd9dc78",
+    "b9de3884-4f27-4f77-b3b0-16cb8994f249",
+    "eeffe722-1c2a-4c41-aebe-dd52d3d9c097",
+    "5d7c97a9-4a2e-4dcd-ac21-27536daf2da4",
+    "450390ba-ac9d-4744-b58f-7cb856d329d2",
+    "4aebca72-7b2e-4356-9c15-98695423c44e",
+    "ffaab385-06de-4e6c-a3f6-a33faf8f105e",
+    "692ba362-45b9-449a-9af5-53338a28cdf8",
+    "30f516e1-71b6-470e-a039-cebe6e1ba361",
+    "0cf5d846-7955-47f3-903d-99544214731b",
+    "b63e6816-2ec7-45dc-ba14-8f343b573abb",
+    "1ffeda0d-a7e6-413c-a64e-3a6618b9f3d3",
+    "41fbc2e6-ad9c-41f7-ba1d-94769198e7c1",
+    "1636394c-fb83-408e-a3cb-020f7a9b4984",
+    "b44c741f-c923-4393-90b4-fb90df1099fb",
+    "bf6d9df9-ace0-4d98-a0c1-7f070a51ffc7",
+    "5d0d978e-cee9-466d-8f41-60ac51f671cd",
+    "a5ad7059-a962-467c-aee6-8702b855fa24"
+  ],
+  "ingressImage": "sha256:31c2ddffb75ed112791ad4fb7a9189df0ac18609a7040d3c4fbdb22520ce2dd5",
+  "buildId": "13wD7vmnIA9tamRJbSuMl",
+  "createdAt": "2026-10-10T23:05:49.548Z",
+  "postgresRestart": {
+    "container": "kaida-auth-source-postgres",
+    "sameVolume": "kaida-auth-source-pg",
+    "sourceEventsRetained": 20,
+    "challengesRetained": 20,
+    "nextRequestDenied": true,
+    "verifiedAt": "2026-10-10T22:51:24.320Z"
+  }
+}

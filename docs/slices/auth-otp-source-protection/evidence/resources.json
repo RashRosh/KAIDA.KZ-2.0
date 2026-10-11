@@ -1,0 +1,546 @@
+{
+  "slice": "auth-otp-source-protection",
+  "disposable": true,
+  "postgresContainer": "kaida-auth-source-postgres",
+  "postgresContainerId": "16e40d684bf692cfed708b73631bc9319a56a360ebc72e4506c22c2150d5bc32",
+  "postgresVolume": "kaida-auth-source-pg",
+  "postgresPort": 55436,
+  "databases": [
+    "kaida",
+    "kaida_test"
+  ],
+  "fixtureOrigin": "synthetic only, no private snapshot copy",
+  "preserved": [
+    "kaidakz-20-postgres-1",
+    "kaida-checkpoint-3000-postgres",
+    "port3000",
+    "original .data/photos",
+    "tmp/auth-otp-closure-private/photos",
+    "personal files",
+    "195 staged research files"
+  ],
+  "worktree": "C:/dev/KAIDA.KZ-2.0/tmp/auth-source-implementation",
+  "branch": "slice/auth-otp-source-protection",
+  "docsMerge": "60f1f4a4f4b8e2661389dc1a145a931f8b6613c3",
+  "compose": "ops/auth-otp-source/compose.yml",
+  "ingressPort": 3200,
+  "originalPort3000Preserved": true,
+  "clients": [
+    {
+      "name": "kaida-auth-source-client-a",
+      "id": "8f98dc936a490e630c6a6a179d832f6ba28e3e68243bee95d989f185fe06e991"
+    },
+    {
+      "name": "kaida-auth-source-client-b",
+      "id": "cbf211f3c57ff337c87dc4c7d9f312e76b5ffd0f86a137aeb01d08e4d91f9289"
+    }
+  ],
+  "resources": [
+    {
+      "name": "/kaida-auth-source-app-1",
+      "id": "053456fae0ddb34a09b860390fddee59f611f40517037da9c81f7875d2540f6a",
+      "image": "sha256:96ee82233b7b8924896ec41da2e4aa3e3164bd9412cdd3d492166cb75c60626f"
+    },
+    {
+      "name": "/kaida-auth-source-cleanup-1",
+      "id": "ab0b97f1fa9b06be2a823ab8a523516b943cd7bba0cbaffee7994bcb0871ce94",
+      "image": "sha256:1b114dce63ba22d150e5f1a9c2ff0c9535211f2664a6c1b41cc536c75e473418"
+    },
+    {
+      "name": "/kaida-auth-source-edge-1",
+      "id": "d1dada97b952cf40862c6cff7ef904fe2a9c41b84263312678d37b50fd83d5c9",
+      "image": "sha256:31c2ddffb75ed112791ad4fb7a9189df0ac18609a7040d3c4fbdb22520ce2dd5"
+    }
+  ],
+  "images": [
+    {
+      "id": "sha256:96ee82233b7b8924896ec41da2e4aa3e3164bd9412cdd3d492166cb75c60626f",
+      "tags": [
+        "kaida-auth-source-app:local"
+      ]
+    },
+    {
+      "id": "sha256:1b114dce63ba22d150e5f1a9c2ff0c9535211f2664a6c1b41cc536c75e473418",
+      "tags": [
+        "kaida-auth-source-worker:local"
+      ]
+    },
+    {
+      "id": "sha256:655d4787d1ebe5c35f69bb9e242d64e5083c6aa7416c0322ba7108f8fd9b97f9",
+      "tags": [
+        "kaida-auth-source-tools:local"
+      ]
+    },
+    {
+      "id": "sha256:20749815584db13d688a71f37293f91590abd0f30dd4db66c0ef91ec1e862408",
+      "tags": [
+        "kaida-auth-source-prod-deps:local"
+      ]
+    },
+    {
+      "id": "sha256:0515debea510c643b36ff6628cb161ca08c35c789ef449d2307bad307089d86c",
+      "tags": [
+        "kaida-auth-source-os:local"
+      ]
+    },
+    {
+      "id": "sha256:3aef1c67bcc7095e848b298f6e6a94f87d4f18f4d126944f5030c471fe641616",
+      "tags": [
+        "kaida-auth-source-edge:local"
+      ]
+    }
+  ],
+  "fixturePhones": [
+    "+77000017101..+77000017120",
+    "+77000017199",
+    "+77000017201",
+    "+77000017301..+77000017304",
+    "+77000017401..+77000017421",
+    "+77000017601..+77000017603",
+    "+77000017700..+77000017719",
+    "+77000017801..+77000017823",
+    "+77000017901"
+  ],
+  "photosVolume": "kaida-auth-source_photos",
+  "fixtureChallengeIds": [
+    "5172e6ca-e6a3-46cb-a668-1cdee8cf818d",
+    "a1879014-fb2e-405c-9014-a3769b0a7793",
+    "6267263d-2217-41c5-8e8d-7356c87503ca",
+    "3d2cd701-e578-43f9-84a9-91e3c021bfff",
+    "b775b0e2-3f5b-4043-8fa8-3372c0d5abaf",
+    "4e9de863-cedf-4396-b9a8-e1d152e74464",
+    "6b568825-5982-42c2-aa45-2fa6c9cabeeb",
+    "96d57d90-7ab8-4cf8-9360-ff94bc78b74e",
+    "e687f55d-9400-45a2-af8f-9d95c9670ac5",
+    "23f8da76-fefb-4835-b059-a8978098a2e7",
+    "19fbf758-fa76-44c9-b7a4-cc50e7cf8bfb",
+    "4251c499-9669-4194-be8f-4b2727c2ed33",
+    "b029310f-61f6-43b0-bef9-00e4e8759b4a",
+    "66747bb3-3f4f-4376-ac9d-47fcce0e1f4a",
+    "ce0899f9-d7d9-49e0-b6f8-48c81f9799cc",
+    "46a28be5-fcf2-4d09-96f7-2621549741cb",
+    "6a062759-dac5-471a-997a-fc1a0a047a08",
+    "d8d20e36-b6f2-42ed-9c2a-ae22c2ca8365",
+    "718d80d0-ed94-42a6-8aa7-7321c83dc250",
+    "fa7cd3f4-ace1-48e9-b507-28e4c8f702b2"
+  ],
+  "backendNetworkId": "337a99d10529c009e666d9bf827eeeb010a26c961e9fd9fd4900b448b8bb84f2",
+  "ingressNetworkId": "b519fa2a536d63b49d0023ad5f6b25eb9eb01428c583dff26e2bd80c9aa9f3a1",
+  "resourcesPrevious": [
+    {
+      "name": "/kaida-auth-source-app-1",
+      "id": "495e6ade74cd702a1373b57d16013b7e21a4097cebbe7a8a40ca51a670ff1f12"
+    },
+    {
+      "name": "/kaida-auth-source-cleanup-1",
+      "id": "5876941c1f07b54478723990de164ab4e84649506fe7f169e6137211f37fdd56"
+    },
+    {
+      "name": "/kaida-auth-source-edge-1",
+      "id": "a905fc8a5c7572b6ce852fd9cd333d242467d4f461bd2068b2756affc469ec66"
+    },
+    {
+      "name": "/kaida-auth-source-app-1",
+      "id": "053456fae0ddb34a09b860390fddee59f611f40517037da9c81f7875d2540f6a"
+    },
+    {
+      "name": "/kaida-auth-source-cleanup-1",
+      "id": "ab0b97f1fa9b06be2a823ab8a523516b943cd7bba0cbaffee7994bcb0871ce94"
+    },
+    {
+      "name": "/kaida-auth-source-edge-1",
+      "id": "a905fc8a5c7572b6ce852fd9cd333d242467d4f461bd2068b2756affc469ec66"
+    }
+  ],
+  "control": {
+    "port": 3204,
+    "pid": 27664,
+    "path": "tmp/auth-source-acceptance-control.cjs",
+    "previousPid": 28040
+  },
+  "buildId": "13wD7vmnIA9tamRJbSuMl",
+  "activeFixtureIds": {
+    "users": [
+      {
+        "id": "e9725576-67d3-4032-9a3d-334c55459af3",
+        "phone_e164": "+77000017101"
+      },
+      {
+        "id": "003f8e4c-5285-4edc-a672-1454c0251418",
+        "phone_e164": "+77000017401"
+      },
+      {
+        "id": "e15695f0-5b37-4265-92e4-c13f6efd001f",
+        "phone_e164": "+77000017601"
+      },
+      {
+        "id": "e163f554-bc9b-4cfa-9f1b-be1a11873734",
+        "phone_e164": "+77000017801"
+      }
+    ],
+    "challenges": [
+      {
+        "id": "5172e6ca-e6a3-46cb-a668-1cdee8cf818d",
+        "phone_e164": "+77000017101"
+      },
+      {
+        "id": "a7b03bcb-f428-4a09-9462-3f4e92c50fe9",
+        "phone_e164": "+77000017101"
+      },
+      {
+        "id": "a1879014-fb2e-405c-9014-a3769b0a7793",
+        "phone_e164": "+77000017102"
+      },
+      {
+        "id": "6267263d-2217-41c5-8e8d-7356c87503ca",
+        "phone_e164": "+77000017103"
+      },
+      {
+        "id": "3d2cd701-e578-43f9-84a9-91e3c021bfff",
+        "phone_e164": "+77000017104"
+      },
+      {
+        "id": "b775b0e2-3f5b-4043-8fa8-3372c0d5abaf",
+        "phone_e164": "+77000017105"
+      },
+      {
+        "id": "4e9de863-cedf-4396-b9a8-e1d152e74464",
+        "phone_e164": "+77000017106"
+      },
+      {
+        "id": "6b568825-5982-42c2-aa45-2fa6c9cabeeb",
+        "phone_e164": "+77000017107"
+      },
+      {
+        "id": "96d57d90-7ab8-4cf8-9360-ff94bc78b74e",
+        "phone_e164": "+77000017108"
+      },
+      {
+        "id": "e687f55d-9400-45a2-af8f-9d95c9670ac5",
+        "phone_e164": "+77000017109"
+      },
+      {
+        "id": "23f8da76-fefb-4835-b059-a8978098a2e7",
+        "phone_e164": "+77000017110"
+      },
+      {
+        "id": "19fbf758-fa76-44c9-b7a4-cc50e7cf8bfb",
+        "phone_e164": "+77000017111"
+      },
+      {
+        "id": "4251c499-9669-4194-be8f-4b2727c2ed33",
+        "phone_e164": "+77000017112"
+      },
+      {
+        "id": "b029310f-61f6-43b0-bef9-00e4e8759b4a",
+        "phone_e164": "+77000017113"
+      },
+      {
+        "id": "66747bb3-3f4f-4376-ac9d-47fcce0e1f4a",
+        "phone_e164": "+77000017114"
+      },
+      {
+        "id": "ce0899f9-d7d9-49e0-b6f8-48c81f9799cc",
+        "phone_e164": "+77000017115"
+      },
+      {
+        "id": "46a28be5-fcf2-4d09-96f7-2621549741cb",
+        "phone_e164": "+77000017116"
+      },
+      {
+        "id": "6a062759-dac5-471a-997a-fc1a0a047a08",
+        "phone_e164": "+77000017117"
+      },
+      {
+        "id": "d8d20e36-b6f2-42ed-9c2a-ae22c2ca8365",
+        "phone_e164": "+77000017118"
+      },
+      {
+        "id": "718d80d0-ed94-42a6-8aa7-7321c83dc250",
+        "phone_e164": "+77000017119"
+      },
+      {
+        "id": "fa7cd3f4-ace1-48e9-b507-28e4c8f702b2",
+        "phone_e164": "+77000017120"
+      },
+      {
+        "id": "0e55e450-bd33-489a-af3f-a3c9080815e0",
+        "phone_e164": "+77000017201"
+      },
+      {
+        "id": "36896db3-7da9-42b6-8648-43d1f3bc3e73",
+        "phone_e164": "+77000017304"
+      },
+      {
+        "id": "80601e7d-d2d1-4f0c-bf4b-707318fa16d0",
+        "phone_e164": "+77000017401"
+      },
+      {
+        "id": "30794a5d-676f-488d-8f6d-bc91047c4c11",
+        "phone_e164": "+77000017402"
+      },
+      {
+        "id": "2f6541d0-1a36-4264-afdc-65e5bb6dd6d6",
+        "phone_e164": "+77000017403"
+      },
+      {
+        "id": "f9e2711d-29ed-4404-afbf-f93f0347c8f1",
+        "phone_e164": "+77000017404"
+      },
+      {
+        "id": "d6b9c5f3-61de-4db8-9aae-774895b9d474",
+        "phone_e164": "+77000017405"
+      },
+      {
+        "id": "e7438e88-f936-46d6-891c-3286e1b1df34",
+        "phone_e164": "+77000017406"
+      },
+      {
+        "id": "8340dcad-496e-4f47-bd87-d7d8d30d1851",
+        "phone_e164": "+77000017407"
+      },
+      {
+        "id": "c3df4334-0cc4-41a4-bef5-80e9affae41a",
+        "phone_e164": "+77000017408"
+      },
+      {
+        "id": "7eb7dc71-9785-4f05-8226-f84a7765d8b9",
+        "phone_e164": "+77000017409"
+      },
+      {
+        "id": "0d465c7b-4bd2-44ab-987f-fe68bbe4fe2d",
+        "phone_e164": "+77000017410"
+      },
+      {
+        "id": "06cc3d7a-036c-4da8-ba1e-17947c05f1c8",
+        "phone_e164": "+77000017411"
+      },
+      {
+        "id": "1ad373f8-e759-4ae7-87fa-21e2b17d0df0",
+        "phone_e164": "+77000017412"
+      },
+      {
+        "id": "dcfb877c-9504-459d-b1fa-7428fabf5101",
+        "phone_e164": "+77000017413"
+      },
+      {
+        "id": "de2c5518-4bbd-48d5-9c0d-05222a07ed53",
+        "phone_e164": "+77000017414"
+      },
+      {
+        "id": "4b04f8a8-5aaf-4b28-8940-6141f08d4eae",
+        "phone_e164": "+77000017415"
+      },
+      {
+        "id": "384e2127-f428-4d43-8d9b-b165a190b871",
+        "phone_e164": "+77000017416"
+      },
+      {
+        "id": "e6a40b7e-0a08-42d6-9575-72adc3acf099",
+        "phone_e164": "+77000017417"
+      },
+      {
+        "id": "be14eae3-80cc-4d7f-a006-de0ca4763628",
+        "phone_e164": "+77000017418"
+      },
+      {
+        "id": "c66bc696-9672-49cf-bccf-950a0d56603d",
+        "phone_e164": "+77000017419"
+      },
+      {
+        "id": "4f6b650d-a212-4733-8d14-7f4458fa0555",
+        "phone_e164": "+77000017420"
+      },
+      {
+        "id": "6a1ab227-c0d9-410c-804a-c2cf4a5ac069",
+        "phone_e164": "+77000017601"
+      },
+      {
+        "id": "965f181b-3eee-434f-ad23-8e04ccabcd9d",
+        "phone_e164": "+77000017801"
+      },
+      {
+        "id": "bb760db2-92d1-498e-aec8-05aa07601937",
+        "phone_e164": "+77000017801"
+      },
+      {
+        "id": "27e09072-cd3d-4021-8882-42f73a933797",
+        "phone_e164": "+77000017802"
+      },
+      {
+        "id": "8e4abcf5-8c84-4816-b17e-0a1efade46d8",
+        "phone_e164": "+77000017803"
+      },
+      {
+        "id": "158aa849-ad1c-4ada-b634-91ca1e90b885",
+        "phone_e164": "+77000017804"
+      },
+      {
+        "id": "bba7f37d-438e-43d5-b869-3ef5afa254a7",
+        "phone_e164": "+77000017805"
+      },
+      {
+        "id": "544fb0af-4dcb-48a0-b7ec-5cc7a44240ee",
+        "phone_e164": "+77000017806"
+      },
+      {
+        "id": "3efd0197-42c2-46a1-91ad-d3751e548289",
+        "phone_e164": "+77000017807"
+      },
+      {
+        "id": "1987970a-c193-4e0c-9ba1-49cd532f9626",
+        "phone_e164": "+77000017808"
+      },
+      {
+        "id": "f0604866-b762-460f-8d5a-8a2203c979e5",
+        "phone_e164": "+77000017809"
+      },
+      {
+        "id": "7609a531-594a-4f0b-aa52-4bab03b5e8f5",
+        "phone_e164": "+77000017810"
+      },
+      {
+        "id": "76824de0-e5ec-4128-a5c3-7c9e3e07878c",
+        "phone_e164": "+77000017811"
+      },
+      {
+        "id": "bb90e8d5-a316-4c6a-8f8d-36926e767e96",
+        "phone_e164": "+77000017812"
+      },
+      {
+        "id": "664fd241-b706-46ad-be9d-adca58c52606",
+        "phone_e164": "+77000017813"
+      },
+      {
+        "id": "00795145-65ac-4ed2-badb-083593462844",
+        "phone_e164": "+77000017814"
+      },
+      {
+        "id": "5ed3bd68-1e7e-4393-92af-99fa48bfdf83",
+        "phone_e164": "+77000017815"
+      },
+      {
+        "id": "399ea4e7-062a-4dc7-b023-b3a403f08f20",
+        "phone_e164": "+77000017816"
+      },
+      {
+        "id": "74c12b8b-e1ba-46d4-994d-22ff746d799d",
+        "phone_e164": "+77000017817"
+      },
+      {
+        "id": "b08f8940-88bd-4d94-a3a0-e1641d480c6e",
+        "phone_e164": "+77000017818"
+      },
+      {
+        "id": "df789b7e-360a-41e0-98ee-cef6b22d64fb",
+        "phone_e164": "+77000017819"
+      },
+      {
+        "id": "d185f80a-1e5d-4425-acb7-530bca49285d",
+        "phone_e164": "+77000017820"
+      },
+      {
+        "id": "824b24f3-3844-4d26-ac70-79dc5e81b251",
+        "phone_e164": "+77000017901"
+      }
+    ],
+    "sessions": [
+      {
+        "id": "16042841-9605-4fe7-9ee2-d506d9b2a741"
+      },
+      {
+        "id": "47421299-4698-4d55-a521-c5aaa7f38287"
+      },
+      {
+        "id": "536adb7e-41d8-400a-8ad1-56408708bd38"
+      },
+      {
+        "id": "5d0034bc-3fff-4402-b93f-effb1f6799da"
+      },
+      {
+        "id": "71404819-7ef8-462c-8e68-c75b643ec7e1"
+      },
+      {
+        "id": "7d19b648-1527-4401-b335-f320ee0308e8"
+      },
+      {
+        "id": "7dc17450-d8ef-439f-920f-038c341a5bb5"
+      },
+      {
+        "id": "ce30e468-5efb-483f-ae6b-2246bad553d2"
+      }
+    ],
+    "sourceEvents": [
+      {
+        "id": "0c3038ea-dd28-4520-93fe-da8d3ca9c3d8"
+      },
+      {
+        "id": "28d75173-ecc5-48ab-9c81-0de5ddaa420c"
+      },
+      {
+        "id": "3d24c63b-8265-436f-8dee-0cbd8b12e3c7"
+      },
+      {
+        "id": "515044d8-229f-4c7b-a508-5835f63a321d"
+      },
+      {
+        "id": "550e1e00-630d-4680-9e54-a9600590e4da"
+      },
+      {
+        "id": "5d1a0245-d68d-455d-84ef-aee5c5ffd1f5"
+      },
+      {
+        "id": "872bf1a7-63ed-4ca2-bdfe-7740c321cefb"
+      },
+      {
+        "id": "90d3fdac-9710-4a41-a000-aeb531dba6fb"
+      },
+      {
+        "id": "9621f403-6e4d-408f-9f65-876f41e6b14b"
+      },
+      {
+        "id": "a51be4cd-4e43-4d9c-b925-27e5e27a6364"
+      },
+      {
+        "id": "a621a2cd-f902-4f22-92db-aa3b755f7b01"
+      },
+      {
+        "id": "b73d759f-fccc-4fba-bdd7-381aa94fbef8"
+      },
+      {
+        "id": "bf85b4dd-154e-4fac-a8c9-4bc1c7a03cdc"
+      },
+      {
+        "id": "c8a5361e-b7ea-433a-b67a-7415b17b8522"
+      },
+      {
+        "id": "cdfd6d55-19c5-4b92-984f-c0c941b276df"
+      },
+      {
+        "id": "cfca5966-75c6-4c12-a487-7392ca384a3a"
+      },
+      {
+        "id": "d211fdeb-33e4-4a93-a70a-224dada4f52b"
+      },
+      {
+        "id": "de324333-edec-4f1a-9f23-8eee5c74cc3e"
+      },
+      {
+        "id": "e0054892-685d-4ac6-8f54-b3855964e3d8"
+      },
+      {
+        "id": "e0fe7cba-6616-4f9f-a8b2-01a9d0ef6a71"
+      },
+      {
+        "id": "e2a0fe44-65f6-4225-8ab8-2881cb627017"
+      },
+      {
+        "id": "e5ca7c7b-5935-4a5a-a4df-a644952cc69b"
+      },
+      {
+        "id": "f8131383-1857-446c-9e82-7e5872ac1d7a"
+      }
+    ]
+  },
+  "finalBuildId": "13wD7vmnIA9tamRJbSuMl"
+}

@@ -1,0 +1,9 @@
+{
+  "realResponse": true,
+  "challengeId": "6a1ab227-c0d9-410c-804a-c2cf4a5ac069",
+  "syntheticPhone": "+77000017601",
+  "existingCodeVerifiedDuringStaleCleanup": true,
+  "unknownRetryHasNoCountdown": true,
+  "fixtureAdjustment": "Owned heartbeat synthetically aged901s while its worker paused; owned phone created_at aged61s and browser clock advanced61s. Recovery unpaused worker and performed real sweep, without deleting active quotas.",
+  "createdAt": "2026-10-10T22:50:17.186Z"
+}

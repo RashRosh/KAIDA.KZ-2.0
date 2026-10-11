@@ -1,0 +1,55 @@
+# Isolated local acceptance only. No app port is published, and app is not on the client network.
+name: kaida-auth-source
+x-source-env: &source-env
+  DATABASE_URL: ${DATABASE_URL}
+  IDENTITY_OTP_HMAC_SECRET_HEX: ${IDENTITY_OTP_HMAC_SECRET_HEX}
+  IDENTITY_COOKIE_SECURE: "false"
+  IDENTITY_OTP_SOURCE_PROTECTION: trusted-proxy
+  IDENTITY_OTP_SOURCE_INGRESS: isolated-proxy
+  IDENTITY_OTP_SOURCE_HMAC_SECRET_HEX: ${IDENTITY_OTP_SOURCE_HMAC_SECRET_HEX}
+  IDENTITY_OTP_SOURCE_KEY_GENERATION: ${IDENTITY_OTP_SOURCE_KEY_GENERATION}
+  NEXT_TELEMETRY_DISABLED: "1"
+  SEARCH_EVENTS_ORIGIN: synthetic
+  PHOTO_STORAGE_DIR: /data/photos
+services:
+  app:
+    image: ${KAIDA_SOURCE_APP_IMAGE:?Set the exact locked-dependency acceptance runtime image}
+    environment: *source-env
+    networks: [backend]
+    volumes:
+      - ../../.next:/app/.next:ro
+      - ../../public:/app/public:ro
+      - photos:/data/photos
+    depends_on:
+      cleanup:
+        condition: service_healthy
+  cleanup:
+    image: ${KAIDA_SOURCE_TOOLS_IMAGE:?Set the exact locked-dependency acceptance tools image}
+    environment: *source-env
+    command: [node, node_modules/tsx/dist/cli.mjs, src/cli/otp-source-maintenance.ts, worker]
+    restart: unless-stopped
+    networks: [backend]
+    volumes:
+      - ../../src:/app/src:ro
+    healthcheck:
+      test: [CMD, node, node_modules/tsx/dist/cli.mjs, src/cli/otp-source-maintenance.ts, health]
+      interval: 15s
+      timeout: 10s
+      retries: 2
+      start_period: 15s
+  edge:
+    image: ${KAIDA_SOURCE_EDGE_IMAGE:?Set the security-patched local reference ingress image}
+    ports: ["127.0.0.1:3200:8080"]
+    networks: [backend, ingress]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      app:
+        condition: service_healthy
+networks:
+  backend:
+    external: true
+    name: kaida-auth-source-backend
+  ingress: {}
+volumes:
+  photos: {}
