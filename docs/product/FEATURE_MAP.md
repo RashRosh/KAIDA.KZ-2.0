@@ -50,7 +50,7 @@ Parent sources для будущих cross-cutting workstreams:
 |---|---|---|---|---|
 | S0 | Search/Core | Покупатель вводит товар и видит актуальное тестовое предложение | — | Foundation |
 | S1 | Offer lifecycle | Просроченный Offer перестаёт показываться | S0 | Foundation |
-| S2 | Auth | Пользователь входит по телефону через test OTP | S0 | Foundation |
+| S2 | Auth | Пользователь входит по телефону через test OTP ; bounded local phone/source protection delivered at v0.0.76 ([closed contract](../slices/auth-otp-source-protection/SLICE_CONTRACT.md)); real SMS remains S22 | S0 | Foundation |
 | S3 | Seller / Location | Продавец создаёт первую торговую точку | S2 | Foundation |
 | S4 | Seller Input | Один Change Set создаёт Offer после подтверждения | S3 | Foundation |
 | S5 | Offer management | Продавец обновляет/выключает Offer через Change Set | S4 | Foundation |

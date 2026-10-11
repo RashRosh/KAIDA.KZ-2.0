@@ -1,6 +1,6 @@
 # Source-wide login OTP protection — Slice Contract
 
-**APPROVED by PO2026-10-11; implementation authorized after normal docs PR publication.** Initial policy and final previews approved. Temporary shared-network blocking is an accepted tradeoff. Voice/translation experiments remain paused; test delivery only.
+**CLOSED (PO2026-10-11).** Manual acceptance PASS at 0c771f7b8b364d733bdfc6581ce75f8aaf56e80f; PR172 merged f99dfe982e1098ffb0b6aa16454a882499f27663, accepted/result trees identical. Main verify38110544117/CodeQL38110544085 GREEN before annotated checkpoint v0.0.76-auth-otp-source-protection. Isolated-local delivery only; production proxy/retention approval remains separate. Real SMS excluded; voice/translation paused.
 
 ## 1. One task / authoritative sources
 
@@ -82,4 +82,6 @@ Manual scenario: isolated synthetic phones/source exhaust the source quota; see 
 
 ## 8. Implementation / acceptance boundary
 
-PO2026-10-11 approves this contract, final previews and implementation. Publish through the normal docs PR process, then implement on a separate branch using isolated resources with recorded IDs. Run required regression/final-SHA branch CI and return exact SHA, evidence, screenshots and a manual checklist; STOP for acceptance. Do not merge implementation or tag before manual acceptance. Production enablement remains gated on trusted-proxy verification and approved backup/WAL/log retention; no real SMS/purchases/public launch. Preserve dev data/photos/personals/port3000 private snapshot. Voice/translation research remain paused.
+Approved implementation and authorized closure are complete: manual acceptance PASS, identical accepted/merge tree, green branch/main verification and annotated checkpoint v0.0.76-auth-otp-source-protection. Recorded disposable acceptance resources retired after archival; port3000 uses the accepted build with source protection explicitly OFF on its existing private snapshot. Production enablement remains gated on actual trusted-proxy verification and approved backup/WAL/log retention. Real SMS/purchases/public launch remain excluded; voice/translation paused. Future queue unchanged; STOP, no new task.
+
+Closure: [sanitized receipt](evidence/closure.json).

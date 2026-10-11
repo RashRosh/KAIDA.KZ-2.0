@@ -1,6 +1,10 @@
+> **CLOSED (PO2026-10-11).** Manual acceptance PASS at 0c771f7b8b364d733bdfc6581ce75f8aaf56e80f; PR172 merged f99dfe982e1098ffb0b6aa16454a882499f27663, accepted/result trees identical. Main verify38110544117/CodeQL38110544085 GREEN before annotated checkpoint v0.0.76-auth-otp-source-protection. Isolated-local delivery only; production proxy/retention approval remains separate. Real SMS excluded; voice/translation paused.
+
+Recorded acceptance resources/fixtures and ports3200/3204 were retired after evidence preservation. Port3000 serves the same private snapshot with source protection OFF and no proxy/cleanup arrangement. Checklist below is historical evidence.
+
 # auth-otp-source-protection — acceptance handoff
 
-Implementation PR: [172](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/172), based on approved docs merge60f1f4a4f4b8e2661389dc1a145a931f8b6613c3 (PR171). Manual acceptance is PENDING; no implementation merge or checkpoint tag is authorized. Exact final head and CI receipts are recorded in CURRENT_STATE/the PR, rather than embedding this file's own commit hash.
+Implementation PR: [172](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/172), based on approved docs merge60f1f4a4f4b8e2661389dc1a145a931f8b6613c3 (PR171). Authorized closure complete. Exact final head and CI receipts are recorded in CURRENT_STATE/the PR, rather than embedding this file's own commit hash.
 
 ## Scope and evidence
 
@@ -35,6 +39,6 @@ Use a fresh private browser window for each login scenario, or log out through t
 
 ## Preserved data and remaining gates
 
-Port3000 remains the accepted buyer-report checkpoint/private snapshot: build nQyjy2OyyBc-9HyRYFK5V, checkout tmp/buyer-reports-checkpoint-3000 at51b2425ad099458e7c92aff30952745bdb818aa0, DB kaida_checkpoint/container kaida-checkpoint-3000-postgres, photos tmp/auth-otp-closure-private/photos. Reporting/source protection remain OFF there. Original dev database/photos, personal files and195 staged research files are untouched.
+Port3000 serves build13wD7vmnIA9tamRJbSuMl, checkout tmp/auth-source-checkpoint-3000 atf99dfe982e1098ffb0b6aa16454a882499f27663, DB kaida_checkpoint/container kaida-checkpoint-3000-postgres, photos tmp/auth-otp-closure-private/photos. Reporting/source protection remain OFF there. Original dev database/photos, personal files and195 staged research files are untouched.
 
-Production source enablement needs verified trusted-proxy/perimeter topology and approved backup/WAL/log retention/erase policy. Live-table deletion is not erasure of backups or logs. Shared networks may temporarily block each other (approved tradeoff); distributed IPs, IPv6 rotation, deliberate victim-phone exhaustion and general traffic flooding remain outside this protection. Real SMS, real-user reporting/public launch remain unauthorized. Voice and translation research remain paused. STOP for PO manual acceptance.
+Production source enablement needs verified trusted-proxy/perimeter topology and approved backup/WAL/log retention/erase policy. Live-table deletion is not erasure of backups or logs. Shared networks may temporarily block each other (approved tradeoff); distributed IPs, IPv6 rotation, deliberate victim-phone exhaustion and general traffic flooding remain outside this protection. Real SMS, real-user reporting/public launch remain unauthorized. Voice and translation research remain paused. Closure complete; STOP, no new task.
