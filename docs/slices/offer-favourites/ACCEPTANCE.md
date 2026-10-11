@@ -12,7 +12,7 @@ Both new mobile browser flows pass against the production build: guest cancellat
 
 ## Isolated local acceptance
 
-- App: <http://127.0.0.1:3300/favourites>. Controls: <http://127.0.0.1:3304/>. The controls are local test tooling, separate from product UI.
+- App: <http://127.0.0.2:3300/favourites>. Controls: <http://127.0.0.2:3304/>. The controls are local test tooling, separate from product UI. Dedicated loopback host `127.0.0.2` isolates acceptance login cookies from the private snapshot on `127.0.0.1`/`localhost:3000`.
 - Buyer: `+7 700 028 03 01`; use the test OTP shown by the existing login dialog. Seller fixture: `+7 700 028 03 02`. No real SMS.
 - PostgreSQL container `kaida-favourites-pg`, ID `04a607f2911750ee8c2e2b350ce24d13b96fc73b388138300c04a1e577f2af32`, volume `kaida-favourites-pg`, loopback `55437`, acceptance database `kaida_favourites`, test database `kaida_test`.
 - Complete local manifest, written before fixture mutations: root `tmp/favourites-acceptance-manifest.json`. UUID prefix `fb280000-0000-4000-8000-`: buyer `000000000001`, seller owner `000000000002`, seller `000000000003`, points `000000000004`/`000000000005`, card `000000000006`, Offers `000000000007`/`000000000008`, synthetic photo `000000000009`, expired `000000000010`, switched-off `000000000011`, operator-removed `000000000012`, deleted `000000000013`. Initial saved-entry suffixes `000000000100`–`000000000105`. Saved IDs created by later manual actions are ordinary generated UUIDs.

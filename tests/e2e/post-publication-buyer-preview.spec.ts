@@ -44,28 +44,34 @@ test('the buyer page in preview mode: a note and a way back, no interest action;
   expect(offer).toBeTruthy();
   const url = `/offers/${offer.id}`;
   const interestRequests: string[] = [];
+  const favouriteRequests: string[] = [];
   page.on('request', (item) => { if (item.url().includes('/api/interests')) interestRequests.push(item.url()); });
+  page.on('request', (item) => { if (item.url().includes('/api/favourites')) favouriteRequests.push(item.url()); });
 
   // without parameters: the ordinary buyer page, the interest action is there
   await page.goto(url);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('button', { name: /избранное|Таңдаулыларға/ })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('button', { name: /^(Добавить в избранное|Таңдаулыларға қосу)$/ })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole('note')).toHaveCount(0);
 
   // preview mode: the note, the way back, no interest action and no interest request
   interestRequests.length = 0;
+  favouriteRequests.length = 0;
   await page.goto(`${url}?preview=1&return=${encodeURIComponent('/seller?card=abc')}`);
   const note = page.getByRole('note');
   await expect(note).toContainText('Так карточку видят покупатели');
   await expect(note.getByRole('link', { name: 'Вернуться к карточке' })).toHaveAttribute('href', '/seller?card=abc');
-  await expect(page.getByRole('button', { name: /избранное|Таңдаулыларға/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^(Добавить в избранное|Таңдаулыларға қосу)$/ })).toHaveCount(0);
+  await expect(page.getByTestId('favourite-heart')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   expect(interestRequests).toEqual([]);
+  expect(favouriteRequests).toEqual([]);
 
   // an unsafe or missing return ignores the preview mode as a whole
   for (const query of ['?preview=1', `?preview=1&return=${encodeURIComponent('https://evil.example/seller')}`, `?preview=1&return=${encodeURIComponent('//evil.example')}`, `?preview=1&return=${encodeURIComponent('/offers/x')}`, `?return=${encodeURIComponent('/seller')}`]) {
     await page.goto(url + query);
-    await expect(page.getByRole('button', { name: /избранное|Таңдаулыларға/ }), query).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('button', { name: /^(Добавить в избранное|Таңдаулыларға қосу)$/ }), query).toBeVisible({ timeout: 20_000 });
+    if (query.includes('preview=1')) await expect(page.getByTestId('favourite-heart'), query).toHaveCount(0);
     await expect(page.getByRole('note'), query).toHaveCount(0);
   }
 

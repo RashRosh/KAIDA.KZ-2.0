@@ -77,7 +77,7 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
   const returnTo = previewReturn ?? (params.get('preview') === '1' ? null : favouritesReturn(params.get('return')));
   // in the Seller's preview there is no interest action and no request for it
   const preview = params.get('preview') === '1';
-  const interest = useInterest(!preview ? offer.product.id : null);
+  const interest = useInterest(previewReturn === null ? offer.product.id : null);
   const fav = useFavourites({ offerId: offer.id, locationId: offer.location.id }, !preview);
   if (fav.unavailable) return <OfferUnavailable failed={false} />;
   if (reportOpen) return <BuyerReportFlow offerId={offer.id} onClose={() => { setReportOpen(false); requestAnimationFrame(() => document.getElementById('report-entry')?.focus()); }} />;
@@ -90,8 +90,8 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
           back={<BackButton returnTo={returnTo} />}
           footer={(
             <>
-              {reporting && !preview && <button id="report-entry" type="button" className="btn btn-o w" onClick={() => setReportOpen(true)}>{t('report.title')}</button>}
-              {!preview && <button data-testid="favourite-heart" type="button" className="btn btn-o w" aria-pressed={fav.active} disabled={!fav.available || fav.pendingId !== null} onClick={fav.toggle}><FavouriteHeart active={fav.active} />{fav.active ? t('fav.saved') : t('fav.save')}</button>}
+              {reporting && previewReturn === null && <button id="report-entry" type="button" className="btn btn-o w" onClick={() => setReportOpen(true)}>{t('report.title')}</button>}
+              {!preview && <button data-testid="favourite-heart" type="button" className="btn btn-o w" aria-pressed={fav.active} aria-busy={fav.pendingId !== null} disabled={!fav.available || fav.pendingId !== null} onClick={fav.toggle}><FavouriteHeart active={fav.active} />{fav.pendingId !== null ? (fav.active ? t('fav.removing') : t('offer.saving')) : (fav.active ? t('fav.saved') : t('fav.save'))}</button>}
               {fav.error && <p className="emsg" role="alert">{t('fav.writeError')}</p>}
               {!preview && fav.state.kind === 'error' && <div role="alert"><p className="emsg">{t('fav.loadError')}</p><button type="button" className="btn btn-o w" onClick={() => void fav.reload()}>{t('cabinet.retry')}</button></div>}
               {fav.unavailable && <p className="b" role="status">{t('fav.unavailable')}</p>}

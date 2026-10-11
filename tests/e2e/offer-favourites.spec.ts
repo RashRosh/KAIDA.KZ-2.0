@@ -17,13 +17,14 @@ test('private favourites: guest intent, two points, current price, unavailable/r
     await pool.query('INSERT INTO buyer_interests(user_id,product_id) VALUES($1,$2)',[ids.user,seedIds.beefProduct]);
     await pool.query("INSERT INTO sellers(id,owner_user_id,display_name) VALUES($1,$2,'Тестовый продавец избранного')",[ids.seller,ids.sellerOwner]);
     for(const [id,name] of [[ids.point,'Павильон «Мёд»'],[ids.point2,'Вторая точка']])await pool.query("INSERT INTO locations(id,seller_id,name,type,address_text,latitude,longitude) VALUES($1,$2,$3,'shop','Синтетический адрес',43.2,76.9)",[id,ids.seller,name]);
-    for(const [id,point] of [[ids.offer,ids.point],[ids.offer2,ids.point2]])await pool.query("INSERT INTO offers(id,card_id,product_id,title,title_search,seller_id,location_id,price_amount,price_currency,price_unit_code,pack_amount,pack_unit,seller_comment,status,last_confirmed_at) VALUES($1,$2,$3,'Мёд цветочный тестизбранное','мёд цветочный тестизбранное',$4,$5,1200,'KZT','package',500,'g','Тестовый комментарий','active',now())",[id,ids.card,seedIds.lambProduct,ids.seller,point]);
+    for(const [id,point] of [[ids.offer,ids.point],[ids.offer2,ids.point2]])await pool.query("INSERT INTO offers(id,card_id,product_id,title,title_search,seller_id,location_id,price_amount,price_currency,price_unit_code,pack_amount,pack_unit,seller_comment,status,last_confirmed_at) VALUES($1,$2,$3,'Мёд цветочный тестизбранное','мёд цветочный тестизбранное',$4,$5,1200,'KZT','package',500,'g','Тестовый комментарий','active',now())",[id,ids.card,null,ids.seller,point]);
     await pool.query('INSERT INTO photos(id,owner_user_id,width,height) VALUES($1,$2,800,600)',[ids.photo,ids.sellerOwner]);
     const image=await sharp({create:{width:800,height:600,channels:3,background:'#e4bb59'}}).webp().toBuffer();
     const storage=createDiskPhotoStorage();for(const variant of ['thumb','display'] as const)await storage.write(ids.photo,variant,image);
     await pool.query('INSERT INTO offer_photos(offer_id,photo_id,position) VALUES($1,$3,0),($2,$3,0)',[ids.offer,ids.offer2,ids.photo]);
     await page.goto('/favourites');await expect(page.getByText('Войдите, чтобы открыть избранное')).toBeVisible();
     await page.goto(`/offers/${ids.offer}`);const heart=page.getByTestId('favourite-heart');await expect(heart).toBeEnabled();
+    await expect(page.getByRole('button',{name:'Добавить в избранное',exact:true})).toHaveCount(0);
     await heart.click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'Закрыть',exact:true}).click();
     expect((await pool.query('SELECT * FROM buyer_offer_favourites WHERE user_id=$1',[ids.user])).rows).toHaveLength(0);
     await heart.click();await page.getByLabel('Телефон', {exact:true}).fill(buyerPhone);
