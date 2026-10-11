@@ -58,11 +58,11 @@ test('buyer interest survives reload and a later login, then can be removed', as
     await login(page, phone);
 
     await openSeedOffer(page);
-    await page.getByRole('button', { name: 'Добавить в избранное' }).click();
-    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'Отслеживать товар', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Отслеживать товар', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
     await page.reload();
-    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Отслеживать товар', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
     await signOutInMore(page);
     // The original regression relogged immediately. Make its isolated challenge history eligible under the approved cooldown.
@@ -72,9 +72,9 @@ test('buyer interest survives reload and a later login, then can be removed', as
     await login(page, phone);
 
     await openSeedOffer(page);
-    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
-    await page.getByRole('button', { name: 'В избранном' }).click();
-    await expect(page.getByRole('button', { name: 'Добавить в избранное' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByRole('button', { name: 'Отслеживать товар', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'Отслеживать товар', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Отслеживать товар', exact: true })).toHaveAttribute('aria-pressed', 'false');
   } finally {
     await cleanup(phone);
   }
@@ -85,9 +85,9 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
   await cleanup(phone);
   try {
     await openSeedOffer(page);
-    const heart = page.getByRole('button', { name: /Добавить в избранное|В избранном|Сохраняем/ });
-    await expect(heart).toBeVisible();
-    await expect(heart).toHaveAttribute('aria-pressed', 'false');
+    const productSelection = page.getByRole('button', { name: 'Отслеживать товар', exact: true });
+    await expect(productSelection).toBeVisible();
+    await expect(productSelection).toHaveAttribute('aria-pressed', 'false');
 
     const interestRequests: string[] = [];
     page.on('request', (request) => {
@@ -96,16 +96,16 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
 
     const dialog = page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' });
 
-    await heart.click();
+    await productSelection.click();
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Чтобы добавить товар в избранное, войдите по номеру телефона.')).toBeVisible();
+    await expect(dialog.getByText('Чтобы отслеживать товар, войдите по номеру телефона.')).toBeVisible();
 
     await dialog.getByRole('button', { name: 'Закрыть' }).click();
     await expect(dialog).toBeHidden();
-    await expect(heart).toHaveAttribute('aria-pressed', 'false');
+    await expect(productSelection).toHaveAttribute('aria-pressed', 'false');
     expect(interestRequests).toHaveLength(0);
 
-    await heart.click();
+    await productSelection.click();
     await expect(dialog).toBeVisible();
     await dialog.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
     const requestResponse = page.waitForResponse((response) => response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST');
@@ -115,7 +115,7 @@ test('anonymous buyer sees the interest control, cancelling auth makes no API ca
     await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
 
     await expect(dialog).toBeHidden();
-    await expect(page.getByRole('button', { name: 'В избранном' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Отслеживать товар', exact: true })).toHaveAttribute('aria-pressed', 'true');
     expect(interestRequests.some((url) => /\/api\/interests\/[^/]+$/.test(url))).toBe(true);
   } finally {
     await cleanup(phone);

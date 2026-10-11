@@ -1,6 +1,6 @@
 ﻿# Unavailable favourites — unified final proposal, APPROVED PO 2026-10-12
 
-Approval and implementation instruction, PO 2026-10-12. Supersedes expired-only and all-state tombstone proposals. Docs PR publication and separate-branch implementation authorized; STOP before implementation merge/tag. Legacy S13 Product-interest labels, star, API, data and login intent remain unchanged; no conversion/subscription/notifications.
+Approval and implementation instruction, PO 2026-10-12. Supersedes expired-only and all-state tombstone proposals. Docs PR publication and separate-branch implementation authorized; STOP before implementation merge/tag. PO wording revision: Product action «Отслеживать товар», heart «Добавить в избранное»/«В избранном». No notices or forced disablement. Existing S13 star, API, data, selection behavior and login intent remain unchanged; no conversion/subscription/notifications.
 
 ## One policy
 

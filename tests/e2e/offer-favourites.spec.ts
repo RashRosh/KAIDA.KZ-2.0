@@ -23,15 +23,15 @@ test('private favourites: guest intent, two points, current price, unavailable/r
     const storage=createDiskPhotoStorage();for(const variant of ['thumb','display'] as const)await storage.write(ids.photo,variant,image);
     await pool.query('INSERT INTO offer_photos(offer_id,photo_id,position) VALUES($1,$3,0),($2,$3,0)',[ids.offer,ids.offer2,ids.photo]);
     await page.goto('/favourites');await expect(page.getByText('Войдите, чтобы открыть избранное')).toBeVisible();
-    await page.goto(`/offers/${ids.offer}`);const heart=page.getByTestId('favourite-heart');await expect(heart).toBeEnabled();
-    await expect(page.getByRole('button',{name:'Добавить в избранное',exact:true})).toHaveCount(0);
+    await page.goto(`/offers/${ids.offer}`);const heart=page.getByTestId('favourite-heart');await expect(heart).toBeEnabled();await expect(heart).toHaveAccessibleName('Добавить в избранное');
+    await expect(page.getByRole('button',{name:'Отслеживать товар',exact:true})).toHaveCount(0);
     await heart.click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'Закрыть',exact:true}).click();
     expect((await pool.query('SELECT * FROM buyer_offer_favourites WHERE user_id=$1',[ids.user])).rows).toHaveLength(0);
     await heart.click();await page.getByLabel('Телефон', {exact:true}).fill(buyerPhone);
     const issuedResponse=page.waitForResponse(r=>r.url().endsWith('/api/auth/otp/request'));
     await page.getByRole('button',{name:'Получить код',exact:true}).click();const issued=await(await issuedResponse).json();
     await page.getByLabel('Код из 6 цифр',{exact:true}).fill(issued.delivery.code);await page.getByRole('dialog').getByRole('button',{name:'Войти',exact:true}).click();
-    await expect(heart).toHaveAttribute('aria-pressed','true');await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(heart).toHaveAttribute('aria-pressed','true');await expect(heart).toHaveAccessibleName('В избранном');await expect(page.getByRole('dialog')).toHaveCount(0);
     await info.attach('heart-saved',{body:await page.screenshot(),contentType:'image/png'});
     const beforeInterest=await(await page.request.get('/api/interests')).json();expect(beforeInterest.interests.map((i:{product:{id:string}})=>i.product.id)).toEqual([seedIds.beefProduct]);
     await page.goto(`/offers/${ids.offer2}`);await page.getByTestId('favourite-heart').click();await expect(page.getByTestId('favourite-heart')).toHaveAttribute('aria-pressed','true');

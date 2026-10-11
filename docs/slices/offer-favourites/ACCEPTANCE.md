@@ -2,7 +2,7 @@
 
 PO approval is recorded in the owning contract and the explicit S1/S5, actuality and offer-photos revisions. Docs PR [174](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/174) is merged at `09768f80bec3fc4fc2e35c0e8d4ac8f4819fb80a`. Implementation remains on `slice/offer-favourites`; manual acceptance, implementation merge and checkpoint are separate gates.
 
-The new heart and private list use current Offer data. An owner-only unavailable projection retains only title, public seller name and point name. Expired-active uses the current cover only through existing public media authorization; switched-off never returns a photo locator. Deleted/operator-removed entries are absent from both list and count. The additive `0028` table retains only the approved internal reference and cascades on account erasure. S13 storage, controls and notifications remain unchanged. Public Search, Nearby, detail and media predicates are unchanged.
+The new heart and private list use current Offer data. An owner-only unavailable projection retains only title, public seller name and point name. Expired-active uses the current cover only through existing public media authorization; switched-off never returns a photo locator. Deleted/operator-removed entries are absent from both list and count. The additive `0028` table retains only the approved internal reference and cascades on account erasure. PO wording revision supersedes previous disable/notice/temporary-label instructions: Product button «Отслеживать товар» in both selected/unselected states, heart «Добавить в избранное»/«В избранном». Authentication/error/accessibility wording follows these labels. Existing S13 selection behavior/API/data remain intact; no tracking notifications are activated. Public Search, Nearby, detail and media predicates are unchanged.
 
 ## Automated proof
 
@@ -21,7 +21,7 @@ Both new mobile browser flows pass against the production build: guest cancellat
 
 ## Manual checklist
 
-1. Open a fixture Offer signed out. Heart → cancel changes nothing; repeat and log in: the same Offer is saved once. The existing Product-interest action keeps its previous behaviour.
+1. Open a fixture Offer signed out. Heart «Добавить в избранное» → cancel changes nothing; repeat and log in: the same Offer is saved once, labelled «В избранном». On the isolated seed lamb Offer `40000000-0000-4000-8000-000000000001` (Product `10000000-0000-4000-8000-000000000001`), «Отслеживать товар» stays enabled when idle, keeps the same label in both selection states, and preserves the existing selection/login/reload/removal behaviour. No «Скоро» or notice is added.
 2. Open **More → Favourites**. Two points remain separate. Open a card and use Back to return to Favourites.
 3. Use **Change first-point price** in controls, then refresh the list: current price becomes 1,750; no notification appears.
 4. Use **Expire first-point confirmation**, then refresh: “Сейчас недоступно”, authorized current cover, no price or sales/detail actions. Removal remains usable.
@@ -32,6 +32,8 @@ Both new mobile browser flows pass against the production build: guest cancellat
 Acceptance scope: mobile Russian UI; Kazakh text remains provisional under the existing localization gate. STOP for PO acceptance of the exact final SHA. Do not merge the implementation or tag. Voice/translation remain paused; tracking, paid services and public launch are unauthorized.
 
 ## Implemented screenshots
+
+![Approved Product action and Offer heart labels](evidence/product-action.png)
 
 ![Private list with current point-specific prices](evidence/private-list.png)
 
