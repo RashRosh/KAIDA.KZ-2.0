@@ -3,6 +3,7 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 import { setLocaleCookie } from './buyer-helpers';
+import { seedIds } from '../../src/db/seed';
 
 // post-publication-buyer-preview (docs/slices/post-publication-buyer-preview, contract rev 3): the Seller opens the REAL buyer
 // Offer page of an own published card with `preview=1&return=/seller…`; the cabinet offers the action only while buyers can see
@@ -40,8 +41,9 @@ async function login(request: APIRequestContext, phone: string) {
 test('the buyer page in preview mode: a note and a way back, no interest action; a bad return or none leaves the page as it is', async ({ page, request }) => {
   // a seed Offer linked to a catalog Product (it has the interest action for buyers)
   const search = await (await request.get('/api/search?q=' + encodeURIComponent('Баранина'))).json();
-  const offer = search.offers.find((item: { product: { id: string | null } }) => item.product.id !== null);
+  const offer = search.offers.find((item: { id: string }) => item.id === seedIds.lambOffer);
   expect(offer).toBeTruthy();
+  expect(offer.product.id).toBe(seedIds.lambProduct);
   const url = `/offers/${offer.id}`;
   const interestRequests: string[] = [];
   const favouriteRequests: string[] = [];
