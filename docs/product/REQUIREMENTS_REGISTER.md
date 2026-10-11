@@ -177,3 +177,8 @@
 | X-CANONICAL-ONLY | REJECTED | Жёсткий canonical-only поиск: выбранный Product режет выдачу только по offers.product_id; отдельный raw fallback только по явному «Искать как введено» (SS §1, §4, §7, S15B-3) | Заменено решением PO: единая модель релевантности, Product — сильный сигнал, а не фильтр; свободные названия не исчезают … |
 | X-TEMP-ISSUES | REJECTED | Случайные Issues #20–#23, #28, #29 | Закрыты NOT_PLANNED как случайные. Замена: нет |
 | X-UXD-NOT-ADOPTED | REJECTED | Не принято автоматически из UX-обзора (UXD §6) и замечания к сортировке (UXD §3) | Не принято из-за отсутствия доказательного основания (не вечный запрет):  перенос поиска в верхнюю треть; удаление чипов; фотокатегории только под свежие продукты … |
+
+
+### B-FAV-OFFER — approved requirement (PO 2026-10-12)
+
+Private exact Offer+point favourites/current price/removal/login intent/safe return; limited unavailable metadata and minimal retention, no broadening public access or changing S13. [Owning contract](../slices/offer-favourites/SLICE_CONTRACT.md). Order/status owned only by EXECUTION_PLAN.

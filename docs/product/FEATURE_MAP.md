@@ -507,3 +507,8 @@ privacy-usable aggregates, соответствие supply buyer-visible reality
 только по собственным gates. Для D3 заранее измеряется цепочка `signal → seller reaction → Product added/activated →
 buyer-visible Offer → unmet demand received supply`; численные критерии назначаются после реального трафика. D4 требует
 как доказанной ценности этой цепочки, так и отдельного willingness-to-pay evidence.
+
+
+## Offer favourites — approved scope (PO 2026-10-12)
+
+B-FAV-OFFER: heart saves exact Offer+point for authenticated owner, private current-price list/removal; login intent and safe return. Expiry and seller switch-off retain only approved identifying fields/status; switched-off uses neutral placeholder/no media locator, expired-active current authorized cover only. Deleted/operator-removed excluded, minimal internal reference retained until removal, same eligible identity restores. No Product-interest data/labels/API changes or notification consent. [Approved contract](../slices/offer-favourites/SLICE_CONTRACT.md) owns exact behaviour and exceptions.
