@@ -37,16 +37,17 @@ export function useFavourites(target: Target | null = null, enabled = true) {
   useEffect(() => {
     if (!enabled) return;
     let mounted = true;
+    let sessionChanging = false;
     const lifetime = epoch;
-    const invalidate = () => {
+    const invalidate = (revalidate = true) => {
       epoch.current++; busy.current = false; intent.current = null;
       setState({ kind: 'loading' }); setPendingId(null); setAuthOpen(false); setError(false); setUnavailable(false);
-      if (mounted) void load();
+      if (mounted && revalidate) void load();
     };
-    const focus = () => invalidate();
-    const off = watchSessionChanges(invalidate);
+    const focus = () => invalidate(!sessionChanging);
+    const off = watchSessionChanges(revalidate => { sessionChanging = !revalidate; invalidate(revalidate); });
     window.addEventListener('focus', focus);
-    const visibility = () => { if (document.visibilityState === 'hidden') { epoch.current++; setState({ kind: 'loading' }); intent.current = null; setAuthOpen(false); } else invalidate(); };
+    const visibility = () => { if (document.visibilityState === 'hidden') { epoch.current++; setState({ kind: 'loading' }); intent.current = null; setAuthOpen(false); } else focus(); };
     document.addEventListener('visibilitychange', visibility);
     queueMicrotask(() => { if (mounted) void load(); });
     return () => { mounted = false; lifetime.current++; busy.current = false; intent.current = null; off(); window.removeEventListener('focus', focus); document.removeEventListener('visibilitychange', visibility); };

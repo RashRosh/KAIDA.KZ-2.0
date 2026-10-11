@@ -35,16 +35,16 @@ export function SellerMore() {
 
   async function logout() {
     setLoggingOut(true);
-    announceSessionChange();
+    announceSessionChange(false);
     try {
       await forgetPushOnThisDevice();
       const response = await fetch('/api/auth/logout', { method: 'POST' });
       if (response.ok) {
-        announceSessionChange();
         router.push('/more');
         router.refresh();
       }
     } finally {
+      announceSessionChange();
       setLoggingOut(false);
     }
   }

@@ -65,8 +65,9 @@ test('private favourites: guest intent, two points, current price, unavailable/r
     let done!:()=>void;const delivered=new Promise<void>(r=>done=r);let delayFirst=true;
     await page.route('**/api/favourites?locale=ru',async route=>{if(!delayFirst){await route.continue();return;}delayFirst=false;const response=await route.fetch();seen();await wait;await route.fulfill({response});done();});
     await page.reload({waitUntil:'domcontentloaded'});await intercepted;
-    await page.request.post('/api/auth/logout');await page.evaluate(()=>window.dispatchEvent(new Event('kaida-session-change')));release();
-    await delivered;await page.unroute('**/api/favourites?locale=ru');await expect(page.getByText('Войдите, чтобы открыть избранное')).toBeVisible();await expect(rows).toHaveCount(0);
+    await page.evaluate(()=>window.dispatchEvent(new CustomEvent('kaida-session-change',{detail:{revalidate:false}})));release();
+    await delivered;await page.unroute('**/api/favourites?locale=ru');await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(rows).toHaveCount(0);
+    await page.request.post('/api/auth/logout');await page.evaluate(()=>window.dispatchEvent(new Event('kaida-session-change')));await expect(page.getByText('Войдите, чтобы открыть избранное')).toBeVisible();await expect(rows).toHaveCount(0);
     await page.goto(`/offers/${ids.offer}?preview=1&return=%2Fseller`);await expect(page.getByTestId('favourite-heart')).toHaveCount(0);
     await page.goto(`/offers/${ids.offer}?return=https%3A%2F%2Fevil.invalid`);await page.getByRole('link',{name:'Назад',exact:true}).click();expect(new URL(page.url()).hostname).toBe('127.0.0.1');
   }finally{
