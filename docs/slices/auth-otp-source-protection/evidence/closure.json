@@ -1,0 +1,148 @@
+{
+  "accepted": "0c771f7b8b364d733bdfc6581ce75f8aaf56e80f",
+  "merge": "f99dfe982e1098ffb0b6aa16454a882499f27663",
+  "tree": "ead92c1c29cd46be3c6b1f85e7665f587dd5a99d",
+  "tag": "v0.0.76-auth-otp-source-protection",
+  "mainCiGreen": true,
+  "mainVerify": 38110544117,
+  "mainCodeql": 38110544085,
+  "tagPushed": true,
+  "cleanupComplete": true,
+  "cleanup": {
+    "createdAt": "2026-10-11T04:17:17.353Z",
+    "receipts": [
+      {
+        "type": "container",
+        "name": "kaida-auth-source-app-1",
+        "id": "053456fae0ddb34a09b860390fddee59f611f40517037da9c81f7875d2540f6a"
+      },
+      {
+        "type": "container",
+        "name": "kaida-auth-source-cleanup-1",
+        "id": "ab0b97f1fa9b06be2a823ab8a523516b943cd7bba0cbaffee7994bcb0871ce94"
+      },
+      {
+        "type": "container",
+        "name": "kaida-auth-source-edge-1",
+        "id": "d1dada97b952cf40862c6cff7ef904fe2a9c41b84263312678d37b50fd83d5c9"
+      },
+      {
+        "type": "container",
+        "name": "kaida-auth-source-client-a",
+        "id": "8f98dc936a490e630c6a6a179d832f6ba28e3e68243bee95d989f185fe06e991"
+      },
+      {
+        "type": "container",
+        "name": "kaida-auth-source-client-b",
+        "id": "cbf211f3c57ff337c87dc4c7d9f312e76b5ffd0f86a137aeb01d08e4d91f9289"
+      },
+      {
+        "type": "container",
+        "name": "kaida-auth-source-postgres",
+        "id": "16e40d684bf692cfed708b73631bc9319a56a360ebc72e4506c22c2150d5bc32"
+      },
+      {
+        "type": "volume",
+        "name": "kaida-auth-source-pg"
+      },
+      {
+        "type": "volume",
+        "name": "kaida-auth-source_photos"
+      },
+      {
+        "type": "network",
+        "name": "kaida-auth-source-backend",
+        "id": "337a99d10529c009e666d9bf827eeeb010a26c961e9fd9fd4900b448b8bb84f2"
+      },
+      {
+        "type": "network",
+        "name": "kaida-auth-source_ingress",
+        "id": "b519fa2a536d63b49d0023ad5f6b25eb9eb01428c583dff26e2bd80c9aa9f3a1"
+      },
+      {
+        "type": "imageTag",
+        "tag": "kaida-auth-source-app:local",
+        "id": "sha256:96ee82233b7b8924896ec41da2e4aa3e3164bd9412cdd3d492166cb75c60626f",
+        "removed": true
+      },
+      {
+        "type": "imageTag",
+        "tag": "kaida-auth-source-worker:local",
+        "id": "sha256:1b114dce63ba22d150e5f1a9c2ff0c9535211f2664a6c1b41cc536c75e473418",
+        "removed": true
+      },
+      {
+        "type": "imageTag",
+        "tag": "kaida-auth-source-tools:local",
+        "id": "sha256:655d4787d1ebe5c35f69bb9e242d64e5083c6aa7416c0322ba7108f8fd9b97f9",
+        "removed": true
+      },
+      {
+        "type": "imageTag",
+        "tag": "kaida-auth-source-prod-deps:local",
+        "id": "sha256:20749815584db13d688a71f37293f91590abd0f30dd4db66c0ef91ec1e862408",
+        "removed": true
+      },
+      {
+        "type": "imageTag",
+        "tag": "kaida-auth-source-os:local",
+        "id": "sha256:0515debea510c643b36ff6628cb161ca08c35c789ef449d2307bad307089d86c",
+        "removed": true
+      },
+      {
+        "type": "imageTag",
+        "tag": "kaida-auth-source-edge:local",
+        "id": "sha256:31c2ddffb75ed112791ad4fb7a9189df0ac18609a7040d3c4fbdb22520ce2dd5",
+        "removed": true
+      }
+    ],
+    "allRecordedAcceptanceContainersRemoved": true,
+    "fixturesRemovedWithOwnedDatabases": true
+  },
+  "servedPid": 35480,
+  "servedBuild": "13wD7vmnIA9tamRJbSuMl",
+  "database": "kaida_checkpoint",
+  "snapshotContainer": "kaida-checkpoint-3000-postgres",
+  "photos": "tmp/auth-otp-closure-private/photos",
+  "sourceProtection": "off",
+  "sourceProxyCleanupArrangement": "none/direct loopback Next; kept OFF",
+  "snapshotUpgradeOldPublicTablesUnchanged": 32,
+  "newSourceTablesEmpty": true,
+  "port3000Checks": {
+    "port": 3000,
+    "merge": "f99dfe982e1098ffb0b6aa16454a882499f27663",
+    "buildId": "13wD7vmnIA9tamRJbSuMl",
+    "database": "kaida_checkpoint",
+    "sourceProtection": "off",
+    "proxy": "none:direct loopback Next server",
+    "cleanup": "none:source protection disabled",
+    "responses": {
+      "/api/health": 200,
+      "/welcome": 200,
+      "/login": 200
+    },
+    "reportingEnabled": false,
+    "photoBytesMatchPrivateSnapshot": {
+      "thumb": {
+        "status": 200,
+        "sha256": "30e0ca8d75052abd1e79096d8892ad8fa53c649bb46f5a9067f47e2a6bd8b801"
+      },
+      "display": {
+        "status": 200,
+        "sha256": "350af2c6e7166d74d3b42878470552281ab2b3152e9704eddb5f59063a135570"
+      }
+    },
+    "sourceTablesRemainEmpty": true,
+    "welcomeLoginCancelAndDirectLogin": true,
+    "noPrivateSnapshotOtpIssued": true
+  },
+  "retiredPorts": [
+    3200,
+    3203,
+    3204
+  ],
+  "rootIndexUnchanged": true,
+  "originalPhotoHashesMatched": 1648,
+  "dockerMemoryBytes": 3962191872,
+  "createdAt": "2026-10-11T04:17:51.294Z"
+}
