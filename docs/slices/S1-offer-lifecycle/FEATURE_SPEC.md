@@ -295,3 +295,8 @@ S1 готов только после того, как:
 - mobile и desktop E2E зелёные;
 - manual acceptance фактически выполнена;
 - нет реализации S2+.
+
+
+## Approved Offer-favourites exception (PO 2026-10-12)
+
+Only the authenticated owner of a previously saved, formerly public exact Offer+point may see current confirmed title, public seller display name and point name in private Favourites after confirmation expiry or seller switch-off. Show «Сейчас недоступно»; no price, contacts, route or detail navigation. Removal remains usable; normal presentation returns only when the same identity passes ordinary eligibility. Deleted/operator-removed excluded from visible list/count. Retain only owner/saved-entry/Offer/point IDs and savedAt until user removal. Expired-active cover requires existing ordinary media authorization; switched-off uses neutral placeholder, no photo URL/ID. Public Search/Nearby/detail/media access and S13 unchanged. [Owning approved policy](../offer-favourites/UNAVAILABLE_PROPOSAL.md).

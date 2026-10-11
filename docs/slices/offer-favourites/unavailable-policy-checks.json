@@ -1,0 +1,89 @@
+{
+  "scope": "Static preview only; no runtime authorization proof",
+  "checks": [
+    {
+      "width": 320,
+      "large": false,
+      "state": "temporary",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 320,
+      "large": false,
+      "state": "switched-off",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 320,
+      "large": false,
+      "state": "removed",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nПока нет избранных предложений\n\nСохраняйте предложения сердечком на странице товара.\n\nНайти товар\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 320,
+      "large": true,
+      "state": "temporary",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 320,
+      "large": true,
+      "state": "switched-off",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 320,
+      "large": true,
+      "state": "removed",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nПока нет избранных предложений\n\nСохраняйте предложения сердечком на странице товара.\n\nНайти товар\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 390,
+      "large": false,
+      "state": "temporary",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 390,
+      "large": false,
+      "state": "switched-off",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 390,
+      "large": false,
+      "state": "removed",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nПока нет избранных предложений\n\nСохраняйте предложения сердечком на странице товара.\n\nНайти товар\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 390,
+      "large": true,
+      "state": "temporary",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 390,
+      "large": true,
+      "state": "switched-off",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nМёд цветочный\n\nСейчас недоступно\n\nПавильон «Мёд»\n\nТестовый продавец\n\nУбрать из избранного\nПоиск\nРядом\nЕщё"
+    },
+    {
+      "width": 390,
+      "large": true,
+      "state": "removed",
+      "noHorizontalOverflow": true,
+      "text": "Избранное\nПока нет избранных предложений\n\nСохраняйте предложения сердечком на странице товара.\n\nНайти товар\nПоиск\nРядом\nЕщё"
+    }
+  ]
+}

@@ -757,3 +757,8 @@ S5 принимается только если одновременно вып�
 Тот же пакет должен быть пройден на mobile и desktop.
 
 Concurrency, stale protection, atomic rollback, ownership spoofing и migration correctness проверяются автоматическими тестами.
+
+
+## Approved Offer-favourites exception (PO 2026-10-12)
+
+Only the authenticated owner of a previously saved, formerly public exact Offer+point may see current confirmed title, public seller display name and point name in private Favourites after confirmation expiry or seller switch-off. Show «Сейчас недоступно»; no price, contacts, route or detail navigation. Removal remains usable; normal presentation returns only when the same identity passes ordinary eligibility. Deleted/operator-removed excluded from visible list/count. Retain only owner/saved-entry/Offer/point IDs and savedAt until user removal. Expired-active cover requires existing ordinary media authorization; switched-off uses neutral placeholder, no photo URL/ID. Public Search/Nearby/detail/media access and S13 unchanged. [Owning approved policy](../offer-favourites/UNAVAILABLE_PROPOSAL.md).

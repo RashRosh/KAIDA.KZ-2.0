@@ -176,3 +176,8 @@ cover — the card page opens; swipe through three photos, go back — the same 
 
 [Buyer reporting contract](../buyer-offer-reports/SLICE_CONTRACT.md) adds the bounded local report flow. Existing promises above remain unchanged except for the explicit extensions in that contract. Real-user reporting and production evidence retention remain unauthorized.
 An allowlisted operator may read an immutable report-referenced historical photo through a report-scoped private/no-store route, including after detachment. Every read rechecks report and operator access; outsiders receive404. Ordinary/public/owner photo URLs and physical retention are unchanged.
+
+
+## Approved Offer-favourites exception (PO 2026-10-12)
+
+Only the authenticated owner of a previously saved, formerly public exact Offer+point may see current confirmed title, public seller display name and point name in private Favourites after confirmation expiry or seller switch-off. Show «Сейчас недоступно»; no price, contacts, route or detail navigation. Removal remains usable; normal presentation returns only when the same identity passes ordinary eligibility. Deleted/operator-removed excluded from visible list/count. Retain only owner/saved-entry/Offer/point IDs and savedAt until user removal. Expired-active cover requires existing ordinary media authorization; switched-off uses neutral placeholder, no photo URL/ID. Public Search/Nearby/detail/media access and S13 unchanged. [Owning approved policy](../offer-favourites/UNAVAILABLE_PROPOSAL.md).

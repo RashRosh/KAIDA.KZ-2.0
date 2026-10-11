@@ -1,0 +1,3 @@
+# Offer favourites — approved composition
+
+PO approved 2026-10-12: More entry, detail heart, private list/current price, empty/signed-out/loading/error and safe return. [Gallery](preview.html) is static synthetic documentation. New heart glyph approved. Current legacy Product-interest star, labels and behaviour remain unchanged; earlier relabelling and universal tombstones are superseded and excluded from implementation. [Unavailable policy](UNAVAILABLE_PROPOSAL.md) and [approved two-cause preview](unavailable-policy.png) own unavailable states. Static preview is not authorization/runtime proof.

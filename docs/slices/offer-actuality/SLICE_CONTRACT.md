@@ -121,3 +121,8 @@ badges and order, the task block, `Всё актуально`, the hidden card, 
 - 2026-09-25 (`EXECUTION_PLAN.md` item 5): actuality and reminders are in stage 1; public launch needs them.
 - Issue #31: thresholds 2 / 7 / 14 days, fresh before ageing, no buyer offer ≥ 7 days, archive is not deletion.
 - 2026-09-28: the archive (14 days) is built in this item — list and restore, without automatic deletion.
+
+
+## Approved Offer-favourites exception (PO 2026-10-12)
+
+Only the authenticated owner of a previously saved, formerly public exact Offer+point may see current confirmed title, public seller display name and point name in private Favourites after confirmation expiry or seller switch-off. Show «Сейчас недоступно»; no price, contacts, route or detail navigation. Removal remains usable; normal presentation returns only when the same identity passes ordinary eligibility. Deleted/operator-removed excluded from visible list/count. Retain only owner/saved-entry/Offer/point IDs and savedAt until user removal. Expired-active cover requires existing ordinary media authorization; switched-off uses neutral placeholder, no photo URL/ID. Public Search/Nearby/detail/media access and S13 unchanged. [Owning approved policy](../offer-favourites/UNAVAILABLE_PROPOSAL.md).

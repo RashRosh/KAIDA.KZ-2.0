@@ -68,6 +68,8 @@
 
 ## 2. Утверждённая очередь и кандидаты
 
+**PO 2026-10-12: B-FAV-OFFER SCHEDULED / IMPLEMENTATION AUTHORIZED.** [Approved contract](../slices/offer-favourites/SLICE_CONTRACT.md) and previews; publish docs PR, then separate implementation branch. Approved owner-only unavailable metadata for expiry/seller switch-off, safe media rules, removal/restoration and minimal reference retention. Deleted/operator-removed excluded; public visibility/media and legacy S13 unchanged. Final-SHA regression/branch CI and isolated manual acceptance; STOP before implementation merge/tag. Tracking notifications, voice/translation, paid services and public launch unauthorized.
+
 **Утверждено PO (очередь):**
 
 1. Закрытая работа — в истории и тегах; здесь статусы закрытого не ведутся.
