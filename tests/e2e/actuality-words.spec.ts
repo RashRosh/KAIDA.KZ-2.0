@@ -6,7 +6,8 @@ import { testDatabaseUrl } from '../integration/database';
 // actuality-words §10: the one-tap «Всё актуально · N» on «Моя витрина», partial success, the review list, and the
 // wording at 320 / 390 px (no horizontal scroll, no short preposition or conjunction at the end of a line).
 
-const phoneFor = (project: string) => `+7700006${project === 'mobile' ? '1' : '2'}001`;
+// One phone per test: the tests of a file run in parallel and each cleans up its own Seller.
+const phoneFor = (project: string, test: 1 | 2) => `+7700006${project === 'mobile' ? '1' : '2'}00${test}`;
 const SHORT = new Set(['в', 'во', 'на', 'с', 'со', 'к', 'ко', 'по', 'за', 'от', 'до', 'из', 'у', 'о', 'об', 'и', 'а', 'но', 'не', 'ни', 'да', 'же', 'ли', 'бы']);
 
 async function withPool<T>(run: (pool: Pool) => Promise<T>) {
@@ -88,7 +89,7 @@ async function lineEnds(page: Page, selector: string): Promise<string[]> {
 
 test('one tap confirms the due cards buyers see; a card that cannot be confirmed is reported and the list opens', async ({ page }, testInfo) => {
   test.setTimeout(90_000);
-  const phone = phoneFor(testInfo.project.name);
+  const phone = phoneFor(testInfo.project.name, 1);
   try {
     await cleanup(phone);
     await login(page.request, phone);
@@ -131,7 +132,7 @@ test('one tap confirms the due cards buyers see; a card that cannot be confirmed
 
 test('texts fit at 320 and 390 px without short words at line ends or horizontal scroll', async ({ page }, testInfo) => {
   test.setTimeout(90_000);
-  const phone = phoneFor(testInfo.project.name);
+  const phone = phoneFor(testInfo.project.name, 2);
   try {
     await cleanup(phone);
     await login(page.request, phone);
