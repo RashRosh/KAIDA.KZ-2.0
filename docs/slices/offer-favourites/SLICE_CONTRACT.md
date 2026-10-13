@@ -1,6 +1,6 @@
 # B-FAV-OFFER — Offer favourites
 
-Status: APPROVED — PO 2026-10-12. Contract, previews, narrow unavailable metadata exceptions and minimal-reference retention approved; implementation authorized in a separate branch after docs PR publication. STOP for exact-SHA manual acceptance before implementation merge/tag.
+Status: CLOSED (PO 2026-10-13). Manual acceptance PASS at d743563c1b9cac37a16d10a40b8237de86c5cfe0; PR #175 merged at 96aa8c4d586be65eeb1800c086e2e872efe5e961, accepted/result trees identical. Main verify38373523918 attempt2 and CodeQL38373523950 PASS before annotated checkpoint v0.0.77-offer-favourites. Tracking notifications remain unimplemented; voice/translation paused; no paid services/public launch.
 
 Verified base 2026-10-11: main `f1fda1880546ff9dc27955df14cc6b6f6a2227ca`, checkpoint `v0.0.76-auth-otp-source-protection` (`f99dfe982e1098ffb0b6aa16454a882499f27663`), main verify38111727140/CodeQL38111727129 green.
 
@@ -68,3 +68,5 @@ On isolated synthetic fixtures: open Offer A at point1 signed out, heart→cance
 ## 8. Approval / STOP gate
 
 PO 2026-10-12 approves this contract, entry/heart/private-list previews and both unavailable variants; explicit S1/S5, actuality and offer-photos metadata revisions are recorded in UNAVAILABLE_PROPOSAL.md and their owning contracts. Minimal internal references retained until user removal; public access and S13 unchanged. Publish docs PR, implement separately, use isolated recorded fixtures, run final-SHA regression/CI, then STOP for manual acceptance. Do not merge implementation/tag yet. Voice/translation paused; tracking, paid services and public launch unauthorized.
+
+Closure evidence: [sanitized receipt](evidence/closure.json).
