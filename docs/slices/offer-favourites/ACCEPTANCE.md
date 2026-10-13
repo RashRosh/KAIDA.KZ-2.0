@@ -1,6 +1,10 @@
+> CLOSED (PO 2026-10-13). Manual acceptance PASS at d743563c1b9cac37a16d10a40b8237de86c5cfe0; PR #175 merged at 96aa8c4d586be65eeb1800c086e2e872efe5e961, accepted/result trees identical. Main verify38373523918 attempt2 and CodeQL38373523950 PASS before annotated checkpoint v0.0.77-offer-favourites. Tracking notifications remain unimplemented; voice/translation paused; no paid services/public launch.
+
+Recorded acceptance ports3300/3304, PostgreSQL container/volume and synthetic photo files retired after private evidence preservation. Port3000 serves the accepted checkpoint against the existing kaida_checkpoint snapshot and retained photos, with legacy S13 unchanged. The resources/checklist below are historical.
+
 # Offer favourites — implementation acceptance
 
-PO approval is recorded in the owning contract and the explicit S1/S5, actuality and offer-photos revisions. Docs PR [174](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/174) is merged at `09768f80bec3fc4fc2e35c0e8d4ac8f4819fb80a`. Implementation remains on `slice/offer-favourites`; manual acceptance, implementation merge and checkpoint are separate gates.
+PO approval is recorded in the owning contract and the explicit S1/S5, actuality and offer-photos revisions. Docs PR [174](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/174) is merged at `09768f80bec3fc4fc2e35c0e8d4ac8f4819fb80a`. Implementation and checkpoint gates are complete.
 
 The new heart and private list use current Offer data. An owner-only unavailable projection retains only title, public seller name and point name. Expired-active uses the current cover only through existing public media authorization; switched-off never returns a photo locator. Deleted/operator-removed entries are absent from both list and count. The additive `0028` table retains only the approved internal reference and cascades on account erasure. PO wording revision supersedes previous disable/notice/temporary-label instructions: Product button «Отслеживать товар» in both selected/unselected states, heart «Добавить в избранное»/«В избранном». Authentication/error/accessibility wording follows these labels. Existing S13 selection behavior/API/data remain intact; no tracking notifications are activated. Public Search, Nearby, detail and media predicates are unchanged.
 
@@ -16,7 +20,7 @@ Local lint, route types/TypeScript and production build pass. Full unit regressi
 
 Both new mobile browser flows pass against the production build: guest cancellation and automatic post-login save, independent points, safe return, current prices, unavailable transitions/media fallback, restoration, removal failure/retry, late old-account response rejection, existing Product selection preservation, preview suppression, direct-list login without auto-add, eligibility expiry during login and retryable list errors. Their runtime UUIDs are attached to the browser report before mutation. Required full final-SHA branch/PR verification and security checks must be green before the acceptance handoff; use the implementation PR checks for the authoritative SHA and full regression evidence.
 
-## Isolated local acceptance
+## Historical isolated local acceptance (retired)
 
 - App: <http://127.0.0.2:3300/favourites>. Controls: <http://127.0.0.2:3304/>. The controls are local test tooling, separate from product UI. Dedicated loopback host `127.0.0.2` isolates acceptance login cookies from the private snapshot on `127.0.0.1`/`localhost:3000`.
 - Buyer: `+7 700 028 03 01`; use the test OTP shown by the existing login dialog. Seller fixture: `+7 700 028 03 02`. No real SMS.
@@ -35,7 +39,7 @@ Both new mobile browser flows pass against the production build: guest cancellat
 6. Remove an available or unavailable card. Use **Operator-remove the two-point card**, refresh: both entries disappear; deleted/operator-removed fixtures never show or count. Reset can restore the synthetic test setup.
 7. Log out: private content disappears. A signed-out direct Favourites login loads the account's list without adding anything.
 
-Acceptance scope: mobile Russian UI; Kazakh text remains provisional under the existing localization gate. STOP for PO acceptance of the exact final SHA. Do not merge the implementation or tag. Voice/translation remain paused; tracking, paid services and public launch are unauthorized.
+Acceptance scope: mobile Russian UI; Kazakh text remains provisional under the existing localization gate. PO accepted the exact final SHA; implementation merge and checkpoint tagging are complete. Voice/translation remain paused; tracking, paid services and public launch are unauthorized.
 
 ## Implemented screenshots
 

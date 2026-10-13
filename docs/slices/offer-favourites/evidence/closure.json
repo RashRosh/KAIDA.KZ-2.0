@@ -1,0 +1,53 @@
+{
+  "accepted": "d743563c1b9cac37a16d10a40b8237de86c5cfe0",
+  "merge": "96aa8c4d586be65eeb1800c086e2e872efe5e961",
+  "tree": "f1efa99f3ae5fab3127be97643ebafe8cc8c4fcf",
+  "tag": "v0.0.77-offer-favourites",
+  "poAcceptance": "PASS 2026-10-13",
+  "mainVerify": 38373523918,
+  "mainVerifyAttempt": 2,
+  "mainCodeql": 38373523950,
+  "mainCiGreen": true,
+  "tagPushed": true,
+  "cleanup": {
+    "ownedAcceptanceContainerVolumeRemoved": true,
+    "syntheticPhotoVariantsRemoved": 2,
+    "retiredPorts": [
+      3300,
+      3304
+    ],
+    "privateEvidencePreserved": true
+  },
+  "served": {
+    "sha": "96aa8c4d586be65eeb1800c086e2e872efe5e961",
+    "buildId": "yoSAT8Sa3YpSYaTTfE746",
+    "database": "kaida_checkpoint",
+    "container": "kaida-checkpoint-3000-postgres",
+    "photos": "retained private snapshot photos",
+    "sourceProtection": "off",
+    "reporting": false,
+    "translation": "off"
+  },
+  "preservation": {
+    "existingSnapshotTables": 34,
+    "legacyS13Unchanged": true,
+    "originalPhotoHashesMatched": 3296,
+    "rootIndexUnchanged": true
+  },
+  "checks": {
+    "welcome": true,
+    "login": true,
+    "favourites": true,
+    "logout": true,
+    "health": true,
+    "photos": true
+  },
+  "firstMainAttempt": "Known unchanged Search shared-fixture race; same-SHA full rerun PASS, no source change",
+  "remainingGates": [
+    "Tracking notifications unimplemented",
+    "Voice/translation paused",
+    "No paid services/public launch",
+    "Production source protection/retention and real SMS separate",
+    "Kazakh proofreading provisional"
+  ]
+}
