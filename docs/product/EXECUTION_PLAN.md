@@ -6,11 +6,12 @@
 
 ## Общая дорожная карта
 
-**Approved queue complete: auth-otp-source-protection CLOSED at v0.0.76-auth-otp-source-protection.** PO acceptance/implementation merge/main CI complete. Future candidates keep their dependencies/order; no new implementation authorized. Production trust/retention gates and real SMS/voice/translation deferrals unchanged.
+**Approved queue is empty: the last closed item is B-FAV-OFFER (offer-favourites), checkpoint v0.0.77-offer-favourites.** The order after it is not approved; future candidates keep their dependencies, and no new implementation is authorized. Production trust/retention gates and real SMS/voice/translation deferrals unchanged.
 
 **Утверждено**
 1. **Фундамент — завершён.** Поиск и карточка предложения для покупателя, кабинет продавца и редактор карточки, актуальность, Production KB, справочник адресов, события D0, локальный bootstrap (R1), backup/restore (R2), блок UX/search 1–6 (последний checkpoint `v0.0.72`).
 2. **R3 - CLOSED:** reproducible isolated deployment preparation without hosting; contract accepted by PO on 2026-10-09, PR #163 merged, merged-main CI green and annotated checkpoint v0.0.73-r3-deployment-preparation. Closure does not authorize public deployment or extend local-only security exceptions.
+3. **Closed after R3 (local scope only):** `v0.0.74-auth-otp-protection`, `v0.0.75-buyer-offer-reports`, `v0.0.76-auth-otp-source-protection`, `v0.0.77-offer-favourites` (details in section 2).
 
 **Не утверждено как последовательность: направления и их зависимости**
 
@@ -46,7 +47,7 @@
 
 Колонки «Зависимости и условия готовности» даны формулировками источников; строки с пометкой ВНИМАНИЕ смешивают документированное требование с рекомендацией агента. Колонка «Следующее действие» — процедурная запись самого плана, не требование источника.
 
-**3. Permission to start.** Status and requirement basis do not authorize implementation. R3 and auth protection are closed; PO authorized the bounded buyer-offer-reports contract. A direct PO instruction and approved Slice Contract remain required (PROJECT_RULES sections 3 and 19).
+**3. Permission to start.** Status and requirement basis do not authorize implementation. R3, auth protection, buyer-offer-reports and offer-favourites are closed; the approved queue is empty and nothing is currently authorized. A direct PO instruction and approved Slice Contract remain required for any new work (PROJECT_RULES sections 3 and 19).
 
 Вид работы: **Dev** — изменение продукта (всегда workflow slice: контракт → реализация → CI → приёмка PO → checkpoint); **Research** — письменная находка и решение PO, из неё может последовать Dev; **Ops** — среда, процесс, данные, юридические и организационные шаги (изменения кода внутри идут как Dev). Метки: **HOLD** — явная остановка PO; **STRATEGY** — запись strategy backlog, не mandate; **FOLLOW-UP** — записанное последующее дело; **LIMIT** — известное ограничение, принятое PO; **NON-GOAL** — ограниченное исключение или принцип (не вечный запрет).
 
@@ -58,13 +59,13 @@
 
 **Что уже работает (поставлено, проверено PO):**
 
-- **Покупатель:** поиск по каталогу и названиям продавцов с понятной выдачей (известный товар / неизвестный запрос / пустые состояния с пояснением), сортировки «Расстояние / Цена / Актуальность», «Рядом», словоформы, автоисправление опечаток, интересы по Product, карточка предложения с ценой, единицей и упаковкой, контактами и часами работы, русский и казахский интерфейс (казахский текст предварительный), стартовая страница First Entry (мобильная).
+- **Покупатель:** поиск по каталогу и названиям продавцов с понятной выдачей (известный товар / неизвестный запрос / пустые состояния с пояснением), сортировки «Расстояние / Цена / Актуальность», «Рядом», словоформы, автоисправление опечаток, интересы по Product, карточка предложения с ценой, единицей и упаковкой, контактами и часами работы, жалоба на карточку (`v0.0.75`), избранное конкретного Offer — сердечко и приватный список (`v0.0.77`), русский и казахский интерфейс (казахский текст предварительный), стартовая страница First Entry (мобильная).
 - **Продавец:** вход и контекстный вход, «Моя витрина» с карточками на несколько торговых точек, редактор карточки (фото до 5, цена обязательна, единица и упаковка, часы работы, контакты точки), актуальность 2/7/14 с напоминаниями, подсказки адреса из собственного справочника (OSM), перевод комментария (выключен до переезда на сервер), приватный просмотр «как увидят покупатели» до и после публикации.
 - **Каталог и данные:** Production KB v1 (682 / 210 / 35), поисковые события D0 (запись `organic` выключена), снятие карточки оператором и пост-проверка.
-- **Операции:** воспроизводимый локальный bootstrap (R1), backup и restore (R2), baseline security automation (CodeQL, Dependency Review, Scorecard).
-- **Основные теги:** S0–S15B закрыты (Production KB `v0.0.52`, S15B `v0.0.54`–`v0.0.60`), D0 `v0.0.61`, R1 `v0.0.62`, R2 `v0.0.64`, блок UX/search 1–6 закрыт (последний — `v0.0.72-pre-publication-buyer-preview`). Полный перечень — `CURRENT_STATE.md` и `EXECUTION_HISTORY.md`.
+- **Операции:** воспроизводимый локальный bootstrap (R1), backup и restore (R2), baseline security automation (CodeQL, Dependency Review, Scorecard), подготовка изолированного развёртывания (R3, `v0.0.73`), локальная защита входа по OTP: лимиты по телефону и источнику (`v0.0.74`, `v0.0.76`) — только локально, не production.
+- **Основные теги:** S0–S15B закрыты (Production KB `v0.0.52`, S15B `v0.0.54`–`v0.0.60`), D0 `v0.0.61`, R1 `v0.0.62`, R2 `v0.0.64`, блок UX/search 1–6 закрыт (`v0.0.72-pre-publication-buyer-preview`), затем R3 `v0.0.73`, auth-otp-protection `v0.0.74`, buyer-offer-reports `v0.0.75`, auth-otp-source-protection `v0.0.76`, offer-favourites `v0.0.77` (последний). Полный перечень — `CURRENT_STATE.md` и `EXECUTION_HISTORY.md`.
 
-**Чего ещё нет:** настоящая аутентификация и доставка OTP, AI-ввод, AI-модерация, отзывы и рейтинг, архив карточек, навигация по рынкам, ленты и уведомления для покупателя, аналитика для продавца, платные тарифы и Backoffice, развёртывание на реальной среде.
+**Чего ещё нет:** реальная доставка OTP и production-защита от злоупотреблений, AI-ввод, AI-модерация, отзывы и рейтинг (жалоба на карточку есть), архив карточек, навигация по рынкам, ленты и уведомления для покупателя (отслеживание товара не реализовано), аналитика для продавца, платные тарифы и Backoffice, развёртывание на реальной среде.
 
 ## 2. Утверждённая очередь и кандидаты
 
@@ -77,14 +78,15 @@
 3. **auth-otp-protection — CLOSED:** PO manual acceptance PASS at `2df2f5dd82e6b1805f863548f71ab0c2ea0df067`; PR #166 merged at `11eb7f12943c25749b9dfb125b72686400b93e1d`; merged-main CI green, checkpoint `v0.0.74-auth-otp-protection`.
 4. **buyer-offer-reports — CLOSED:** approved contract/previews and queue insertion (PO, 2026-10-10); docs PR168 and implementation PR169 merged, exact-head manual acceptance PASS, branch/main CI green, annotated checkpoint `v0.0.75-buyer-offer-reports`. Evidence: [ACCEPTANCE.md](../slices/buyer-offer-reports/ACCEPTANCE.md). No further implementation authorized.
 5. **auth-otp-source-protection — CLOSED:** PO manual acceptance PASS at 0c771f7b8b364d733bdfc6581ce75f8aaf56e80f; PR172 merged f99dfe982e1098ffb0b6aa16454a882499f27663, main CI GREEN and checkpoint v0.0.76-auth-otp-source-protection. Local20/exact IP/rolling15min, atomic phone/source admission, protected reference ingress and supervised cleanup delivered. Existing phone policy/login design preserved. Source protection OFF on port3000 private snapshot; production trust/retention gates open. No new task.
+6. **offer-favourites (B-FAV-OFFER) — CLOSED:** PO acceptance PASS at d743563c1b9cac37a16d10a40b8237de86c5cfe0; PR #175 merged 96aa8c4d586be65eeb1800c086e2e872efe5e961, main CI green, checkpoint `v0.0.77-offer-favourites`. The approved queue is now empty; the next order is not approved.
 
-**Approved bounded scope:** [buyer-offer-reports](../slices/buyer-offer-reports/SLICE_CONTRACT.md): buyer report → operator reviews saved/current evidence → disposition via existing whole-card moderation. Existing auth before explicit Send; four reasons, optional300-character text; immediate reason navigation/Back draft preservation; one User/card/version report including closed reports, five new reports/rolling24h, atomic admission; open/closed dispositions and acknowledgement only. Approved report-scoped operator historical-photo access, private buyer text separate from seller comments, closure independent of return. Local installation evidence retention only; no real users/production retention, broader reviews/ratings/appeals, new Issues or paid services. At authorized closure, port3000 serves the accepted checkpoint against the same isolated private snapshot with additive migration; reporting is disabled there. Original dev data/photos remain unchanged; voice remains paused.
-
-**Approved bounded scope (2026-10-09):** [auth-otp-protection Slice Contract](../slices/auth-otp-protection/SLICE_CONTRACT.md) covers login OTP request throttling, failed-code attempts and same-modal resend/recovery. Approved initial policy: 60 seconds between requests; five accepted requests per canonical phone per rolling 15 minutes; five incorrect attempts per issued code; fresh-code recovery subject to the same limits, no permanent account lock. This covers O-OTP-RESEND and only the phone-based login portion of O-ABUSE. O-AUTH real delivery and broader anti-abuse remain open, including distributed many-phone abuse and deliberate exhaustion of another person's allowance. Approved final contract/docs PR #165, separate implementation PR #166, isolated verification, full branch/main CI and PO manual acceptance are complete; the slice is CLOSED. Real SMS/purchases excluded.
+**Closed bounded scopes (delivered; the contracts own the exact behaviour):**
+- [buyer-offer-reports](../slices/buyer-offer-reports/SLICE_CONTRACT.md) — CLOSED at `v0.0.75`: buyer report → operator reviews saved/current evidence → disposition via existing whole-card moderation. Local installation evidence retention only; no real users/production retention, broader reviews/ratings/appeals, new Issues or paid services. Reporting is disabled on the port-3000 private snapshot.
+- [auth-otp-protection](../slices/auth-otp-protection/SLICE_CONTRACT.md) — CLOSED at `v0.0.74`: login OTP request throttling, failed-code attempts and same-modal resend/recovery (covers O-OTP-RESEND and only the phone-based login portion of O-ABUSE). O-AUTH real delivery and broader anti-abuse remain open, including distributed many-phone abuse and deliberate exhaustion of another person's allowance. Real SMS/purchases excluded.
 
 **PO research pause:** voice feasibility is PAUSED; evidence and memory blocker are retained in `docs/research/voice-input/local-feasibility-2026-10-09/`. Resume requires explicit PO instruction and sufficient memory preflight; do not resume automatically when memory frees. AI input remains required for launch; its implementation order is deferred. Existing manual/voice/photos/video channels, AI moderation deferral and public-launch gate are unchanged. The auth proposal is independently feasible locally and does not satisfy or remove the AI launch requirement.
 
-**Не утверждено:** порядок после buyer-offer-reports. Раздел 5 перечисляет остальные workstreams как зависимости и кандидатов с состоянием каждой задачи; их взаимный порядок PO не задавал (исключение — зафиксированные ниже цепочки зависимостей внутри Demand и commercial/Backoffice, описанные в разделе 7 как зависимости, а не как расписание).
+**Очередь пуста; порядок после offer-favourites (B-FAV-OFFER) не утверждён.** Раздел 5 перечисляет остальные workstreams как зависимости и кандидатов с состоянием каждой задачи; их взаимный порядок PO не задавал (исключение — зафиксированные ниже цепочки зависимостей внутри Demand и commercial/Backoffice, описанные в разделе 7 как зависимости, а не как расписание).
 
 **Постоянные решения PO (действуют, порядок не меняют):**
 
@@ -125,9 +127,9 @@ Issues владеют подробным обсуждением; здесь — 
 | Оповещение оператору о карточке вне каталога | B-FREETITLE-ALERT | Feature Map говорит «входит в stage 10», план — «pilot-функция, не добавлять». Кто получает и каким каналом — решает контракт. |
 | Постановка в порядок кандидатов | раздел 5 | Любой UNSCHEDULED получает место в порядке только решением PO. |
 
-### 4.2 O-ABUSE: approved local source-wide OTP slice
+### 4.2 O-ABUSE: local source-wide OTP slice (CLOSED)
 
-PO2026-10-11 approves [auth-otp-source-protection](../slices/auth-otp-source-protection/SLICE_CONTRACT.md), final actual-component previews and separate implementation after docs publication. This contract owns the exact atomic admission, source trust, cleanup/key/retention and UI boundary. Local reference only; production proxy/backup/WAL/log verification remains gated. No future queue change beyond this authorized insertion; voice and translation experiments remain paused. STOP for manual acceptance before implementation merge/tag.
+[auth-otp-source-protection](../slices/auth-otp-source-protection/SLICE_CONTRACT.md) was approved by PO on 2026-10-11 and is CLOSED at `v0.0.76-auth-otp-source-protection`. The contract owns the exact atomic admission, source trust, cleanup/key/retention and UI boundary. Local reference only; production proxy/backup/WAL/log verification remains gated. No further implementation is authorized; voice and translation experiments remain paused.
 
 ## 5. Workstreams и задачи
 
