@@ -24,7 +24,7 @@ test('buyer draft survives Back/login; operator disposition keeps buyer text pri
     const set=await createCardChangeSet(sellerId,cardCreateBodySchema.parse({title:'Абрикосы отчётэ2е',productId:null,price:'1200',unit:{code:'package'},pack:{amount:'500',unit:'g'},sellerComment:'Синтетический товар',photoIds:[],points:[{locationId:seller.locations[0]!.id}]}),{database:db});
     const confirmed=await confirmSellerChangeSet(sellerId,set.id,{database:db});const offerId=confirmed.items[0]!.resultOffer!.id;
     cardId=(await pool.query('SELECT card_id FROM offers WHERE id=$1',[offerId])).rows[0].card_id;
-    await page.goto(`/offers/${offerId}`);await page.getByRole('button',{name:'Пожаловаться на карточку'}).click();
+    await page.goto(`/offers/${offerId}`);await page.getByRole('button',{name:'Пожаловаться',exact:true}).click();
     await page.getByRole('button',{name:'Цена не совпадает',exact:true}).click();
     await expect(page.getByLabel('Комментарий · необязательно')).toBeVisible();await expect(page.getByRole('button',{name:'Далее',exact:true})).toHaveCount(0);
     const privateText='PRIVATE покупатель: персональные сведения';await page.getByLabel('Комментарий · необязательно').fill(privateText);
@@ -57,7 +57,7 @@ test('buyer draft survives Back/login; operator disposition keeps buyer text pri
     await op.goto('/operator/reports');await op.getByRole('button',{name:'Закрытые',exact:true}).click();await op.getByRole('article').filter({hasText:'Абрикосы отчётэ2е'}).getByRole('button',{name:'Рассмотреть'}).click();
     await expect(op.getByRole('region',{name:'Исторический итог'})).toContainText('Карточка снята');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('На витрине');await expect(op.getByRole('region',{name:'Сейчас'})).toContainText('Позднее возвращена оператором');
     await info.attach('operator-returned-card-closed-report',{body:await op.screenshot(),contentType:'image/png'});
-    await page.goto(`/offers/${offerId}`);await page.getByRole('button',{name:'Пожаловаться на карточку'}).click();await page.getByRole('button',{name:'Другое',exact:true}).click();await page.getByLabel('Комментарий · необязательно').fill('Повторное сообщение');await page.getByRole('button',{name:'Отправить жалобу',exact:true}).click();
+    await page.goto(`/offers/${offerId}`);await page.getByRole('button',{name:'Пожаловаться',exact:true}).click();await page.getByRole('button',{name:'Другое',exact:true}).click();await page.getByLabel('Комментарий · необязательно').fill('Повторное сообщение');await page.getByRole('button',{name:'Отправить жалобу',exact:true}).click();
     await expect(page.getByText('Вы уже сообщили об этом предложении. Первое сообщение сохранено.',{exact:true})).toBeVisible();
     const saved=await pool.query('SELECT buyer_text FROM offer_reports WHERE card_id=$1',[cardId]);expect(saved.rows).toHaveLength(1);expect(saved.rows[0].buyer_text).toBe(privateText);
   }finally{

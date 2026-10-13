@@ -99,3 +99,39 @@ test('list login never adds; Offer expiring during heart login is not saved; lis
     await pool.query('DELETE FROM buyer_offer_favourites WHERE offer_id=$1 OR user_id=$2',[offer,user]);await pool.query('DELETE FROM offers WHERE id=$1',[offer]);await pool.query('DELETE FROM locations WHERE id=$1',[point]);await pool.query('DELETE FROM sellers WHERE id=$1',[seller]);await pool.query("DELETE FROM auth_sessions WHERE user_id IN (SELECT id FROM users WHERE phone_e164=ANY($1::text[]))",[['+77000280401','+77000280402','+77000280411']]);await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=ANY($1::text[])',[['+77000280401','+77000280411']]);await pool.query('DELETE FROM users WHERE phone_e164=ANY($1::text[])',[['+77000280401','+77000280402','+77000280411']]);await pool.end();
   }
 });
+
+test('detail actions retain touch targets and wrap at narrow widths and enlarged text', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'Approved mobile RU boundary');
+  await page.goto('/offers/' + seedIds.lambOffer);
+  const heart = page.getByTestId('favourite-heart');
+  const report = page.getByRole('button', { name: 'Пожаловаться', exact: true });
+  const tracking = page.getByRole('button', { name: 'Отслеживать товар', exact: true });
+  await expect(heart).toHaveAccessibleName('Добавить в избранное');
+  await expect(tracking).toBeEnabled();
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const action of [heart, report, tracking]) {
+      const box = await action.boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+    }
+    const layout = await page.locator('.offer-text-actions').evaluate(el => {
+      const boxes = [...el.querySelectorAll('button')].map(button => button.getBoundingClientRect());
+      return { overflow: el.scrollWidth > el.clientWidth, wraps: boxes[1]!.top > boxes[0]!.top };
+    });
+    expect(layout.overflow).toBe(false);
+    if (width === 320) expect(layout.wraps).toBe(true);
+  }
+  await page.addStyleTag({ content: '.kaida .offer-text-action{font-size:28px;line-height:40px}' });
+  const enlarged = await page.locator('.offer-text-actions').evaluate(el => ({ overflow: el.scrollWidth > el.clientWidth, buttons: [...el.querySelectorAll('button')].map(button => ({height:button.getBoundingClientRect().height, font:parseFloat(getComputedStyle(button).fontSize)})) }));
+  expect(enlarged.overflow).toBe(false);
+  for (const action of enlarged.buttons) { expect(action.height).toBeGreaterThanOrEqual(44); expect(action.font).toBe(28); }
+  await report.click();
+  await expect(page.getByRole('heading', { name: 'Пожаловаться на карточку', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Назад', exact: true }).click();
+  await expect(report).toBeFocused();
+  await heart.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Закрыть', exact: true }).click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'false');
+});

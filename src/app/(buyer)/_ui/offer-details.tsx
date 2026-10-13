@@ -119,13 +119,20 @@ function SellerComment({ offer }: { offer: BuyerOfferPage }) {
   );
 }
 
-export function OfferDetails({ offer, back, inert = false, footer }: { offer: BuyerOfferPage; back: ReactNode; inert?: boolean; footer?: ReactNode }) {
+export function OfferDetails({ offer, back, inert = false, titleAction, footer }: { offer: BuyerOfferPage; back: ReactNode; inert?: boolean; titleAction?: ReactNode; footer?: ReactNode }) {
   return (
     <>
       <Gallery offer={offer} back={back} />
       <article style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: 16 }} aria-labelledby="offer-title">
-        <h1 className="h1" id="offer-title" lang={offer.product.nameLocale}>{offer.product.name}</h1>
-        <PriceLine offer={offer} large />
+        {titleAction ? (
+          <div className="offer-heading">
+            <div className="offer-heading-copy">
+              <h1 className="h1" id="offer-title" lang={offer.product.nameLocale}>{offer.product.name}</h1>
+              <PriceLine offer={offer} large />
+            </div>
+            {titleAction}
+          </div>
+        ) : <><h1 className="h1" id="offer-title" lang={offer.product.nameLocale}>{offer.product.name}</h1><PriceLine offer={offer} large /></>}
         <SellerComment
           key={`${offer.sellerCommentTranslation?.status ?? 'original'}:${offer.sellerCommentTranslation?.status === 'translated' ? offer.sellerCommentTranslation.locale : ''}`}
           offer={offer}

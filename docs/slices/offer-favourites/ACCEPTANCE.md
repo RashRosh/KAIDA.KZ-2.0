@@ -4,6 +4,12 @@ PO approval is recorded in the owning contract and the explicit S1/S5, actuality
 
 The new heart and private list use current Offer data. An owner-only unavailable projection retains only title, public seller name and point name. Expired-active uses the current cover only through existing public media authorization; switched-off never returns a photo locator. Deleted/operator-removed entries are absent from both list and count. The additive `0028` table retains only the approved internal reference and cascades on account erasure. PO wording revision supersedes previous disable/notice/temporary-label instructions: Product button «Отслеживать товар» in both selected/unselected states, heart «Добавить в избранное»/«В избранном». Authentication/error/accessibility wording follows these labels. Existing S13 selection behavior/API/data remain intact; no tracking notifications are activated. Public Search, Nearby, detail and media predicates are unchanged.
 
+## PO presentation amendment — 2026-10-13
+
+Approved icon-only heart below the gallery beside title/price; borderless flag «Пожаловаться» and star «Отслеживать товар» row. Existing handlers, accessibility state/login, report focus return and privacy remain unchanged. At390px the two text actions share one row; at320px they wrap onto separate rows. Doubled text keeps targets at least44px, readable wrapping and no action-row horizontal overflow.
+
+Local amended-head lint/types/production build PASS. Affected production-browser regressions:23 PASS/5 existing mobile-boundary skips, including new narrow/large-text targets, report return focus and guest-heart cancellation. Final amended-SHA full CI evidence belongs to PR175; earlier verification below describes the preceding implementation revision.
+
 ## Automated proof
 
 Local lint, route types/TypeScript and production build pass. Full unit regression: 523 passing tests. Seven real PostgreSQL checks cover owner isolation, anonymous/override rejection, exact point identity, current prices, expiry boundary, inactive photo stripping, restoration, moderation/deletion/changed-point exclusion, retained-reference removal, concurrent idempotency, save-versus-moderation locking, and additive upgrade preservation of every pre-existing table including nonempty S13/photos.
@@ -32,6 +38,10 @@ Both new mobile browser flows pass against the production build: guest cancellat
 Acceptance scope: mobile Russian UI; Kazakh text remains provisional under the existing localization gate. STOP for PO acceptance of the exact final SHA. Do not merge the implementation or tag. Voice/translation remain paused; tracking, paid services and public launch are unauthorized.
 
 ## Implemented screenshots
+
+![Narrow detail with wrapped actions](evidence/detail-narrow.png)
+
+![Doubled text at320px](evidence/detail-large-text.png)
 
 ![Approved Product action and Offer heart labels](evidence/product-action.png)
 

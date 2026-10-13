@@ -115,3 +115,14 @@
 .kaida .act .ic{flex:none;text-decoration:none}
 .kaida .act:disabled{color:var(--ink3);cursor:default}
 .kaida .act:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+
+/* Offer favourites: PO-approved detail presentation; text and targets wrap without shrinking. */
+.kaida .offer-heading{display:flex;align-items:flex-start;gap:12px}
+.kaida .offer-heading-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;overflow-wrap:anywhere}
+.kaida .offer-favourite{width:44px;height:44px;color:var(--ink)}
+.kaida .offer-favourite[aria-pressed="true"]{color:var(--primary-text)}
+.kaida .offer-favourite:disabled{color:var(--ink3);cursor:default}
+.kaida .offer-favourite:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.kaida .offer-text-actions{display:flex;flex-wrap:wrap;align-items:center;column-gap:20px;row-gap:4px}
+.kaida .offer-text-action{min-width:44px;max-width:100%;flex:0 1 auto;text-decoration:none;color:var(--ink2)}
+.kaida .offer-text-action>span{min-width:0;overflow-wrap:anywhere}

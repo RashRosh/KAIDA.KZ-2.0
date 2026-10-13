@@ -88,19 +88,21 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
         <OfferDetails
           offer={offer}
           back={<BackButton returnTo={returnTo} />}
+          titleAction={!preview && <button data-testid="favourite-heart" type="button" className="ib offer-favourite" aria-label={fav.active ? t('fav.saved') : t('fav.save')} aria-pressed={fav.active} aria-busy={fav.pendingId !== null} disabled={!fav.available || fav.pendingId !== null} onClick={fav.toggle}><FavouriteHeart active={fav.active} /></button>}
           footer={(
             <>
-              {reporting && previewReturn === null && <button id="report-entry" type="button" className="btn btn-o w" onClick={() => setReportOpen(true)}>{t('report.title')}</button>}
-              {!preview && <button data-testid="favourite-heart" type="button" className="btn btn-o w" aria-pressed={fav.active} aria-busy={fav.pendingId !== null} disabled={!fav.available || fav.pendingId !== null} onClick={fav.toggle}><FavouriteHeart active={fav.active} />{fav.active ? t('fav.saved') : t('fav.save')}</button>}
+              {(reporting && previewReturn === null || interest.available) && <div className="offer-text-actions">
+                {reporting && previewReturn === null && <button id="report-entry" type="button" className="act offer-text-action" onClick={() => setReportOpen(true)}><Ic name="flag" className="sm" /><span>{t('report.entry')}</span></button>}
+                {interest.available && (
+                  <button type="button" className="act offer-text-action" aria-pressed={interest.active} aria-busy={interest.pending} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
+                    <Ic name={interest.active ? 'starf' : 'star'} className="sm" />
+                    <span>{t('offer.trackProduct')}</span>
+                  </button>
+                )}
+              </div>}
               {fav.error && <p className="emsg" role="alert">{t('fav.writeError')}</p>}
               {!preview && fav.state.kind === 'error' && <div role="alert"><p className="emsg">{t('fav.loadError')}</p><button type="button" className="btn btn-o w" onClick={() => void fav.reload()}>{t('cabinet.retry')}</button></div>}
               {fav.unavailable && <p className="b" role="status">{t('fav.unavailable')}</p>}
-              {interest.available && (
-                <button type="button" className="btn btn-o w" aria-pressed={interest.active} aria-busy={interest.pending} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
-                  <Ic name={interest.active ? 'starf' : 'star'} className="sm" />
-                  {t('offer.trackProduct')}
-                </button>
-              )}
               {interest.error && <div className="fld"><p className="emsg" role="alert"><Ic name="alert" />{t('search.interestError')}</p></div>}
             </>
           )}
