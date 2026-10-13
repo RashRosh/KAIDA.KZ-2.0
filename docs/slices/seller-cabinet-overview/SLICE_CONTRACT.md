@@ -156,3 +156,7 @@ Manual scenario: log in as a Seller with two points and several offers. Overview
 `Предложения`, filter `Активные`, switch one off, confirm — the list shows it as `Выключено`, Back does not reopen the
 review. Switch it on again. Change the same offer from a second browser while the review is open — confirm shows the
 conflict and applies nothing. Repeat in `ҚАЗ` on a phone width.
+
+## Actuality-words revision (PO 2026-10-13)
+
+Owning approved contract: [actuality-words](../actuality-words/SLICE_CONTRACT.md) §4. On «Моя витрина» the task block «Пора подтвердить актуальность» gains a primary full-width counted button `Всё актуально · N` (≥ 44 px) above a secondary `Проверить`; with no card to confirm in one tap the block shows `Проверить` only, and with nothing due it is absent, as before.

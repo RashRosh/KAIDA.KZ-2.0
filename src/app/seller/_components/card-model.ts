@@ -72,7 +72,14 @@ export function findCard(cards: SellerCard[], id: string | null): SellerCard | u
   return cards.find((card) => card.cardId === id || card.offers.some((offer) => offer.id === id));
 }
 
-export function pluralKey<K extends 'showcase.points' | 'points.cards' | 'card.willCreate' | 'card.willChange' | 'card.summary' | 'confirm.willPublish' | 'actuality.days' | 'actuality.taskCount' | 'actuality.taskHidden'>(
+// actuality-words Q1: what the one tap «Всё актуально» confirms — live cards that are due (≥ 24 h) and not yet hidden
+// from buyers (< 168 h); hidden and archived cards are confirmed only from the review list, row by row.
+export function isOneTapCard(card: Pick<SellerCard, 'actuality'>): boolean {
+  const actuality = card.actuality;
+  return Boolean(actuality && actuality.due && !actuality.archived && (actuality.stage === 'fresh' || actuality.stage === 'ageing'));
+}
+
+export function pluralKey<K extends 'showcase.points' | 'points.cards' | 'card.willCreate' | 'card.willChange' | 'card.summary' | 'confirm.willPublish' | 'actuality.days' | 'actuality.taskCount' | 'actuality.taskHidden' | 'actuality.bulkDone'>(
   base: K,
   count: number,
 ): MessageKey {

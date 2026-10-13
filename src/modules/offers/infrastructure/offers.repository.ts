@@ -214,6 +214,22 @@ export async function applyOfferReconfirmation(database: OfferWriteDb, values: {
     .returning(managementUpdateReturning);
 }
 
+// actuality-words: undo of a reconfirmation — restores the previous confirmation time, only for an Offer that still has the
+// revision the reconfirmation produced and is still on. Revision moves forward like for every other change.
+export async function applyOfferUndoReconfirmation(database: OfferWriteDb, values: {
+  offerId: string;
+  expectedRevision: number;
+  restoredConfirmedAt: Date;
+  changeTime: Date;
+}) {
+  return database.update(offers).set({
+    lastConfirmedAt: values.restoredConfirmedAt,
+    updatedAt: values.changeTime,
+    revision: sql`${offers.revision} + 1`,
+  }).where(and(eq(offers.id, values.offerId), eq(offers.revision, values.expectedRevision), eq(offers.status, 'active')))
+    .returning(managementUpdateReturning);
+}
+
 // All Offers of one card of this Seller, locked for a card-wide change.
 export async function lockCardOffers(database: OfferWriteDb, cardId: string, sellerId: string) {
   const rows = await database.select(managementOfferSelection).from(offers)

@@ -175,6 +175,15 @@ export class OfferAlreadyInactiveError extends Error {
   }
 }
 
+// actuality-words: an undo would put the card back at ≥ the hidden threshold, so the confirmation stays.
+export class UndoWouldHideError extends Error {
+  readonly code = 'UNDO_WOULD_HIDE' as const;
+  constructor() {
+    super('Подтверждение нельзя отменить: карточка снова стала бы скрытой.');
+    this.name = 'UndoWouldHideError';
+  }
+}
+
 export class OfferPriceRequiredError extends Error {
   readonly code = 'OFFER_PRICE_REQUIRED' as const;
   constructor() {

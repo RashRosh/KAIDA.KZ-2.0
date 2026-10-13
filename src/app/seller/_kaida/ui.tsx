@@ -92,13 +92,22 @@ export function Nav({ active }: { active: NavSection }) {
 
 // Motion page · «авто через 4 с»: callers hide a toast after TOAST_MS.
 export const TOAST_MS = 4000;
+// actuality-words (R4): only a toast with «Отменить» stays longer — 8 s.
+export const UNDO_TOAST_MS = 8000;
 
-export function Toast({ children, bottom }: { children: React.ReactNode; bottom?: number }) {
+// actuality-words: a toast may carry one action (44 px, R3); `warn` swaps the check for an alert icon.
+export function Toast({ children, bottom, action, tone = 'ok' }: {
+  children: React.ReactNode;
+  bottom?: number;
+  action?: { label: string; onClick: () => void };
+  tone?: 'ok' | 'warn';
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useLeaveAnimation(ref);
   return (
     <div ref={ref} className="toast" role="status" style={bottom ? { bottom } : undefined}>
-      <Ic name="check" style={{ color: '#7ee29a' }} /><span style={{ flex: 1 }}>{children}</span>
+      <Ic name={tone === 'warn' ? 'alert' : 'check'} style={{ color: tone === 'warn' ? '#ffc56b' : '#7ee29a' }} /><span style={{ flex: 1 }}>{children}</span>
+      {action && <button type="button" className="btn btn-g" style={{ height: 44, minHeight: 44, padding: '0 10px' }} onClick={action.onClick}>{action.label}</button>}
     </div>
   );
 }

@@ -23,6 +23,7 @@ const kindKey: Record<Action, MessageKey> = {
   deactivate_offer: 'confirm.kindDisable',
   activate_offer: 'confirm.kindEnable',
   reconfirm_offer: 'confirm.kindReconfirm',
+  undo_reconfirm_offer: 'confirm.kindReconfirm',
 };
 
 const noticeFor: Record<Action, string> = {
@@ -31,6 +32,7 @@ const noticeFor: Record<Action, string> = {
   deactivate_offer: 'disabled',
   activate_offer: 'enabled',
   reconfirm_offer: 'updated',
+  undo_reconfirm_offer: 'updated',
 };
 
 // Only cabinet paths are accepted as a return target.
