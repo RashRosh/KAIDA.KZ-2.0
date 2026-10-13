@@ -1,12 +1,12 @@
 # Actuality words and one-tap «Всё актуально» — Slice Contract
 
-**Status:** DRAFT — not approved. PO decisions of 2026-10-13 are recorded in §6 and §11; the contract becomes binding only after the Product Owner approves it in writing, including the previews of §9. Nothing here authorizes implementation.
+**Status:** APPROVED — Product Owner, 2026-10-13, with the decisions of §6 and §6.1 and the previews of §9. Implementation has not started and needs a separate PO instruction.
 
 **Queue:** S-ACTUALITY-WORDS, first of three independent slices ordered by PO on 2026-10-13 (then S-CONTACT-DEFAULT, then B-READABILITY; one at a time, each with its own contract, PO acceptance and checkpoint). Order and state are owned by `docs/product/EXECUTION_PLAN.md`.
 
 **Base:** `main` at `5cb570b331965c2ad0e1c1427fcd00b1bcf5aecc` (checkpoint `v0.0.77-offer-favourites`).
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `S01` (task block), `S15` (card screen), `S16` («Актуальность», «Всё актуально»). The mockup has no frame for the one-tap button, the undo toast, the partial-success state or the per-row confirm; the previews in §9 stand in for them until the PO approves or replaces them. Mobile, Russian (`PROJECT_RULES.md` §18.5); every new key also gets a provisional Kazakh string.
+**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `S01` (task block), `S15` (card screen), `S16` («Актуальность», «Всё актуально»). The mockup has no frame for the one-tap button, the undo toast, the partial-success state or the per-row confirm; the previews in §9, approved by the PO on 2026-10-13, stand in for them. Mobile, Russian (`PROJECT_RULES.md` §18.5); every new key also gets a provisional Kazakh string.
 
 ## 1. User task
 
@@ -62,7 +62,7 @@ Confirming actuality is a Seller's statement, not proof that the goods are fresh
 
 ## 6. PO decisions (2026-10-13)
 
-Basis: ideal-UX basis, decided by the controller on the PO's delegation; approval of this contract remains the PO's. Question numbers are kept from the draft.
+Basis: ideal-UX basis, decided by the controller on the PO's delegation; the PO approved the contract with these decisions. Question numbers are kept from the draft.
 
 | # | Question | Decision |
 |---|---|---|
@@ -77,15 +77,15 @@ Basis: ideal-UX basis, decided by the controller on the PO's delegation; approva
 | Q9 | Measurement | Manual stopwatch and tap count in PO acceptance on a seeded showcase; target: all due cards confirmed in 1 tap; no new events or tracking. |
 | Q10 | Per-row confirm | Yes, one tap per row in the review list; no inline edit, switch-off or delete there. |
 
-### 6.1 Details the decisions leave open (proposals, for the PO to confirm with the contract)
+### 6.1 Decisions on the details (PO, 2026-10-13)
 
-- **R1 — undo after partial success:** the partial toast has `Посмотреть` only, as decided; confirmed cards of a partial batch are not undoable from it. Proposal: keep it so (fewer states).
-- **R2 — per-row confirm control:** icon-only check button (≥ 44 px, `aria-label` «Товар есть, цена та же: <name>») as drawn in preview 4, or a text button. Proposal: icon-only.
-- **R3 — toast action size:** the accepted mockup defines the toast action at 32 px height; `PROJECT_RULES.md` §18.4 requires ≥ 44 px. Preview 2 and 3 draw 44 px. Needs PO permission (design gap).
-- **R4 — toast duration:** the Motion page's plain toast is 4 s; a toast with `Отменить` stays 8 s (decision Q3). Proposal: the 8 s applies only to this toast.
-- **R5 — server grace:** the server accepts an undo for a short grace beyond the 8 s toast to absorb latency; the exact constant (proposal: 8 s + a few seconds) is fixed at approval.
-- **R6 — feedback after undo:** a plain toast «Подтверждение отменено» (proposal; KK provisional).
-- **R7 — string line-end pass:** short-preposition line ends exist today in strings of the touched surfaces (`actuality.taskHidden.*`, `hiddenFor`, `hiddenShort`, `listHint`, `confirmError`; e.g. «уже скрыты с / витрины» wraps at 320 px). Proposal: fix them in this slice with non-breaking spaces (listed in §7.1); strings on untouched screens stay.
+- **R1 — undo after partial success:** the partial toast has `Посмотреть` only; confirmed cards of a partial batch are not undoable from it. Decided: keep.
+- **R2 — per-row confirm control:** icon-only check button (≥ 44 px, `aria-label` «Товар есть, цена та же: <name>») as drawn in preview 4. Decided.
+- **R3 — toast action size:** the accepted mockup defines the toast action at 32 px height; `PROJECT_RULES.md` §18.4 requires ≥ 44 px. Toast actions are 44 px, as drawn in previews 2 and 3. Permitted by the PO.
+- **R4 — toast duration:** the Motion page's plain toast is 4 s; only the toast with `Отменить` stays 8 s (decision Q3). Decided.
+- **R5 — server grace:** the server accepts an undo for 12 s in total from the confirmation (the 8 s toast plus 4 s for latency). Decided.
+- **R6 — feedback after undo:** a plain toast «Подтверждение отменено» (KK provisional). Decided.
+- **R7 — string line-end pass:** short-preposition line ends exist today in strings of the touched surfaces (`actuality.taskHidden.*`, `hiddenFor`, `hiddenShort`, `listHint`, `confirmError`; e.g. «уже скрыты с / витрины» wraps at 320 px). They are fixed in this slice with non-breaking spaces (listed in §7.1); strings on untouched screens stay. Decided.
 
 ## 7. Technical consequences
 
@@ -114,17 +114,17 @@ Read from `offers.repository.ts`, `confirm-seller-change-set.ts`, `seller-change
 - New: the bulk request is processed per card (each card its own ChangeSet, as if confirmed one by one). The response is 200 with `confirmed` and `failed` card lists (a failure carries the same reason code as today); if nothing could be confirmed it stays 409 with the first reason, so the single-card path keeps today's errors.
 - Tests that change: `tests/integration/offer-actuality.test.ts` (mass reconfirm gets subset and mixed-batch cases; the refusal cases — switched-off, removed, stale — are asserted per card in bulk and unchanged for one card); `tests/e2e/offer-actuality.spec.ts` (labels, one-tap, toast with undo, partial state, per-row confirm); `tests/e2e/actuality-reminders.spec.ts` and `tests/e2e/post-publication-buyer-preview.spec.ts` (action name). `tests/integration/actuality-reminders.test.ts` and `buyer-offer-reports.test.ts` call the single-card path and keep working. New: migration/constraint tests, undo tests, catalog-completeness and non-breaking-space tests.
 
-## 8. Acceptance criteria (draft — final with the PO's approval)
+## 8. Acceptance criteria
 
 1. On the card screen the action reads «Товар есть, цена та же» (RU; KK string present) in the list row and the primary button; no duplicate hint; the old keys are gone.
 2. With at least one live due card not hidden and not archived, «Моя витрина» shows `Всё актуально · N` as a primary full-width button inside the task block; one tap confirms exactly those N cards; `Проверить` stays secondary and opens the review list; with none, only `Проверить` (hidden cards left) or no block (nothing due).
 3. Boundary tests: cards at 23 h 59 min, 24 h, 167 h 59 min, 168 h and 336 h; only ≥ 24 h and < 168 h are in the set; a hidden card is confirmed only from its own row.
 4. Each confirmed card gets the same `reconfirm_offer` change as the single-card action; thresholds, reminder moments, badges and ordering are unchanged (existing tests stay green).
-5. After the tap the toast «Подтверждено: N карточек» with `Отменить` stays 8 s; undo restores exactly those cards' previous times, refuses cards changed since or that would become hidden, and leaves reminders without duplicates.
+5. After the tap the toast «Подтверждено: N карточек» with `Отменить` stays 8 s; undo within 12 s of the confirmation (R5) restores exactly those cards' previous times, refuses cards changed since or that would become hidden, and leaves reminders without duplicates.
 6. Partial success: confirmable cards are confirmed, the rest unchanged, «Подтверждено N, не удалось M» + `Посмотреть` opens the review list; a request where nothing can be confirmed returns the reason as today.
 7. The review list has a one-tap confirm per row (1 tap), the pencil, and the counted footer button; no inline edit, switch-off or delete.
 8. No new RU string, nor a changed string of §7.1, has a short preposition or conjunction before a regular space (unit test); 320 px check shows none at a line end; KK keys exist for every key.
-9. Tap targets ≥ 44 × 44 px (the toast action per R3 after PO permission); focus order, `role=status` / `aria-live` and keyboard use of the toast are not weakened.
+9. Tap targets ≥ 44 × 44 px (the toast actions at 44 px per R3); focus order, `role=status` / `aria-live` and keyboard use of the toast are not weakened.
 10. In PO acceptance on a seeded showcase all due cards are confirmed in 1 tap; the tap count and the stopwatch time for the old and the new path are recorded.
 
 ## 9. Previews and design gaps (`PROJECT_RULES.md` §18.1)
@@ -138,7 +138,7 @@ How previews were done before: for `offer-favourites` the contract carries a sta
 3. `3-partial-320.png`, `-390.png` — «Подтверждено 2, не удалось 1» with `Посмотреть`.
 4. `4-review-list-320.png`, `-390.png` — review list with per-row confirm, pencil and counted footer button.
 
-Limits: static HTML, synthetic data, system font fallback (Roboto / Geologica are not embedded), the toast actions drawn at 44 px (R3), the per-row control drawn icon-only (R2). The PO approves these previews, or replaces them with a designer frame, before implementation. Remaining design gaps: R2, R3, R4.
+Limits: static HTML, synthetic data, system font fallback (Roboto / Geologica are not embedded), the toast actions drawn at 44 px (R3), the per-row control drawn icon-only (R2). The PO approved these previews on 2026-10-13, including R2, R3 and R4; no design gap remains open.
 
 ## 10. Verification plan (after approval)
 
@@ -150,4 +150,5 @@ Limits: static HTML, synthetic data, system font fallback (Roboto / Geologica ar
 ## 11. Product Owner decisions
 
 - 2026-10-13: slice scheduled first of three; intent as in §2.
-- 2026-10-13: decisions Q1–Q10 as in §6 (ideal-UX basis, decided by the controller on the PO's delegation). Contract approval, the previews of §9 and the proposals of §6.1 await the PO.
+- 2026-10-13: decisions Q1–Q10 as in §6 (ideal-UX basis, decided by the controller on the PO's delegation).
+- 2026-10-13: the PO approved this contract with the decisions of §6 and R1–R7 of §6.1 (R5 = 12 s), and approved the previews of §9. Implementation has not started and needs a separate PO instruction.
