@@ -420,3 +420,7 @@ Current gate:
 `IMPLEMENTATION AUTHORIZED`
 
 All implementation must remain within this contract. If a closed S0-S12 contract must change, STOP before that change and return with the blocker.
+
+## PO-approved internal-build wording revision
+
+PO supersedes earlier label/disable/notice directions: the existing Product-selection control is labelled «Отслеживать товар» (Kazakh «Тауарды бақылау») in both states, with aligned auth/error text and aria-pressed/aria-busy. No «Скоро», disclaimer, forced disabled button or temporary wording. The existing selection toggle, guest intent, API and stored data remain unchanged until tracking implementation replaces them; no tracking notifications or public release are authorized. Offer heart is independently labelled «Добавить в избранное»/«В избранном». This narrow wording revision supersedes earlier UI text promises without changing domain/privacy boundaries.

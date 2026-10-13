@@ -116,3 +116,5 @@ Clarification acceptance extension: after return, the seller replaces the report
 ## 7. Approved queue insertion
 
 PO approved `buyer-offer-reports` as the next local development slice after the closed auth checkpoint, a bounded subset of S-REVIEWS/S-OPERATOR. The rest of those workstreams and other candidate order remain unchanged. Docs publication precedes a separate implementation branch. Full branch CI and PO manual acceptance are required before implementation merge/tag. No real-user reporting, production retention approval, new Issues or voice research resume.
+
+PO presentation amendment, 2026-10-13: the current Offer-favourites acceptance build uses the icon-only heart beside title/price and compact «Пожаловаться» / «Отслеживать товар» text row defined in [Offer favourites §2.1](../offer-favourites/SLICE_CONTRACT.md#21-po-presentation-amendment--2026-10-13). Existing action, login, focus-return and privacy semantics remain unchanged.

@@ -154,7 +154,7 @@ export function formatDistance(meters: number, t: ReturnType<typeof useI18n>['t'
 
 // B01 · Result: photo or neutral fallback with the actuality plaque, name, pack, price, point, address · distance,
 // opening hours, route and the existing contacts. The whole card opens the offer page; the buttons stay separate.
-export function ResultCard({ offer, distanceMeters }: { offer: SearchOffer; distanceMeters?: number }) {
+export function ResultCard({ offer, distanceMeters, detailHref, onOpen }: { offer: SearchOffer; distanceMeters?: number; detailHref?: string; onOpen?: () => void }) {
   const { t } = useI18n();
   const place = [offer.location.addressText, distanceMeters !== undefined ? formatDistance(distanceMeters, t) : null]
     .filter(Boolean).join(' · ');
@@ -170,7 +170,7 @@ export function ResultCard({ offer, distanceMeters }: { offer: SearchOffer; dist
         </div>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
           <h3 className="h3 clamp2" style={{ fontSize: 16, lineHeight: '21px', margin: 0 }} id={`offer-${offer.id}`} lang={offer.product.nameLocale}>
-            <Link href={`/offers/${offer.id}`} className="stretch" onClick={() => { openedFromList = true; }}>{offer.product.name}</Link>
+            <Link href={detailHref ?? `/offers/${offer.id}`} className="stretch" onClick={() => { openedFromList = true; onOpen?.(); }}>{offer.product.name}</Link>
           </h3>
           <PriceLine offer={offer} />
           <p className="c c2" style={{ marginTop: 2 }}>{offer.location.name}</p>

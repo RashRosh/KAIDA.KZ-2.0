@@ -4,7 +4,7 @@ Status: APPROVED — PO 2026-10-12. Contract, previews, narrow unavailable metad
 
 Verified base 2026-10-11: main `f1fda1880546ff9dc27955df14cc6b6f6a2227ca`, checkpoint `v0.0.76-auth-otp-source-protection` (`f99dfe982e1098ffb0b6aa16454a882499f27663`), main verify38111727140/CodeQL38111727129 green.
 
-> Latest PO preview direction: [Unavailable proposal](UNAVAILABLE_PROPOSAL.md) owns the replacement temporary/removed UX and required closed-contract exceptions. Prior all-state neutral tombstones and legacy-star relabelling are superseded proposals, not approved scope. Current S13 action stays unchanged. Approval recorded 2026-10-12; legacy S13 unchanged.
+> Latest PO preview direction: [Unavailable proposal](UNAVAILABLE_PROPOSAL.md) owns the replacement temporary/removed UX and required closed-contract exceptions. Prior all-state neutral tombstones and legacy-star relabelling are superseded proposals, not approved scope. PO wording revision supersedes prior label/disabled-notice instructions: Product action «Отслеживать товар» in this internal build, heart «Добавить в избранное» / «В избранном». Existing S13 selection behavior/API/data remain intact. No tracking implementation or notifications are activated.
 
 ## 1. One user task and authority
 
@@ -13,12 +13,18 @@ Buyer saves a specific Offer at its trading point with a heart, revisits its cur
 ## 2. Approved behaviour and focused UI
 
 - Add «Избранное» entry to existing buyer «Ещё» without moving existing rows/navigation. New list reuses accepted BuyerScreen/Bar/ResultCard, existing loading/error/button patterns. Order: savedAt descending, stable saved-entry ID tie-break; all saved entries reachable through incremental loading if needed, no new arbitrary quota.
-- Heart action on actual buyer Offer detail: «В избранное» / active «В избранном», aria-pressed, independent of the existing Product-interest star. Do not add result-card hearts in this slice; preserve current cards. This narrow addition to buyer-screens composition and the new heart glyph are approved. No heart/mutations in seller preview (`preview=1`) or private pre-publication preview.
+- Heart action on actual buyer Offer detail: «Добавить в избранное» / active «В избранном», aria-pressed, independent of the existing Product-interest star. Do not add result-card hearts in this slice; preserve current cards. This narrow addition to buyer-screens composition and the new heart glyph are approved. No heart/mutations in seller preview (`preview=1`) or private pre-publication preview.
 - Saving requires authenticated current user and an Offer currently buyer-visible at the captured point; adding twice/concurrently is idempotent and leaves one entry. Re-read visibility when committing, not only in UI. Never accept client userId/point substitution. If the Offer disappeared meanwhile, fail truthfully without creating an entry or exposing hidden fields.
 - Available list entries hydrate current public Offer data and exact price basis/point/hours/actions from the common buyer read model. No frozen price/title/photo snapshot; current price is not a price-change notification. Favourites do not guarantee physical stock beyond existing buyer visibility/confirmation semantics.
 - Remove via active heart on detail or a separately labelled list action «Убрать из избранного». Removing affects only this user's saved entry, never the Offer/Product/S13 data. Idempotent DELETE works even if Offer no longer exists; pending disabled/announced, error preserves entry and permits retry. No confirmation dialog for this reversible operation; user can save an available Offer again.
 - Existing guest modal preserves intent for the exact Offer+point after explicit heart click; no save before login. Successful login revalidates and performs that one save automatically, then returns to same Offer/list context; cancel leaves original screen, no write. If unavailable after login, show unavailable, no save. Direct favourites visit signed out shows sign-in action; successful login loads only that account's list, never auto-adds an Offer.
 - Empty list: «Пока нет избранных предложений» / «Сохраняйте предложения сердечком на странице товара.» / existing Search action. Loading uses card-shaped skeletons; service failure is a retryable error, never converted into unavailable/deleted/empty. Logout/account switch immediately clears private list and pending intent; late responses cannot restore old-account data.
+
+## 2.1 PO presentation amendment — 2026-10-13
+
+Approved for the current Offer-detail acceptance build: move the existing Offer heart below the gallery, right-aligned beside the title/price block. Icon only, no visible label, border or background; outline unsaved and filled saved, using existing app icon/colours (the PO annotation marks placement, not red). Preserve at least44px by44px touch target, keyboard focus, accessible «Добавить в избранное» / «В избранном», aria-pressed/busy and unchanged pending/save/login/error behaviour.
+
+Replace the full-width report and Product tracking controls with a compact horizontal row of borderless, panel-free text actions: existing flag + «Пожаловаться» and existing star + «Отслеживать товар». Preserve report entry/return focus, its existing flow/auth/privacy and Product selection semantics. Both actions keep at least44px touch targets and existing readable text size. Wrap whole actions onto another row at narrow widths or large text; if one action itself cannot fit, its text wraps by words rather than shrinking text/targets or overflowing. Seller previews suppress these mutations as before. This presentation-only amendment supersedes the prior detail-control placement, visible heart label and report-entry label; list/unavailable/media/API/data boundaries remain unchanged.
 
 ## 3. Approved unavailable exception
 
@@ -32,7 +38,7 @@ Minimal internal saved reference retention until buyer removes it is approved in
 
 Detail opened from list returns to that list, preserving position when practical; unavailable after opening offers a safe «Назад в избранное». Internal return routes validated, no arbitrary external redirect/history navigation. Direct Offer visits preserve existing safe Search fallback; existing seller preview returns unchanged.
 
-Legacy S13 selections/API/auth intent, current labels, star and behaviour remain unchanged and accessible through the existing control. No migration/conversion/deletion or notification activation. Prior proposed Product-star relabelling withdrawn for this transition despite current overlapping wording. Future independent Product tracking requires its own explicit consent and contract; no fake tracking action is added. Free-title Offers may be favourited without a fabricated Product link.
+Legacy S13 selections/API/auth intent, star and behavior remain unchanged. PO approves the constant visible/accessible label «Отслеживать товар» and aligned authentication/error wording, without «Скоро», notices or forced disablement. aria-pressed retains selection state; ordinary pending protection remains. This internal build will not expose the unfinished tracking flow to released users. No migration/conversion/deletion or notification activation; tracking implementation remains separate. Free-title Offers may be favourited without a fabricated Product link.
 
 ## 5. Closed contracts, modules and actual risks
 
@@ -49,7 +55,7 @@ Expected: one private favourites module/table with additive migration and unique
 5. Temporary entry follows explicitly approved disclosure boundary with safe authorized cover/no price or sales actions; deleted/operator-removed entries excluded without leaks; minimal internal retention approved. Same identity returns only through normal eligibility.
 6. Guest login intent completes once for exact target after revalidation; cancel/session change/unavailable never writes incorrectly.
 7. Safe favourites return for available/unavailable detail, direct Search fallback and both seller preview modes preserved.
-8. S13 selections/interest API/guest intent unchanged; no subscriptions/events from any favourite action, no fake tracking control.
+8. S13 selections/interest API/guest intent unchanged; no subscriptions/events from any favourite action; approved Product label with preserved selection behavior.
 9. Additive clean/upgrade migration preserves all existing data including S13 and photos; recorded isolated fixtures only, dev/private port3000 untouched.
 10. Approved composition, keyboard/44px targets/status/focus, narrow widths/large text; mobile/RU acceptance and provisional KK per PROJECT_RULES.
 

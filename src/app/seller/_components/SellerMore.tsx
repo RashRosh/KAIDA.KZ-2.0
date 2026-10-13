@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { announceSessionChange } from '../../_components/session-change';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
@@ -34,6 +35,7 @@ export function SellerMore() {
 
   async function logout() {
     setLoggingOut(true);
+    announceSessionChange(false);
     try {
       await forgetPushOnThisDevice();
       const response = await fetch('/api/auth/logout', { method: 'POST' });
@@ -42,6 +44,7 @@ export function SellerMore() {
         router.refresh();
       }
     } finally {
+      announceSessionChange();
       setLoggingOut(false);
     }
   }

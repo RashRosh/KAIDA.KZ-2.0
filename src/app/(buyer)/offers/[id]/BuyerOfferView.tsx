@@ -10,6 +10,9 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { Ic } from '../../../seller/_kaida/ui';
 import { BuyerScreen, cameFromList } from '../../_ui/buyer-ui';
 import { OfferDetails } from '../../_ui/offer-details';
+import { useFavourites } from '../../_ui/use-favourites';
+import { FavouriteHeart } from '../../_ui/FavouriteHeart';
+import { favouritesReturn } from '@/modules/favourites/safe-return';
 import { useInterest } from '../../_ui/use-interest';
 
 // buyer-screens-mockup · B02 offer detail: gallery (or neutral fallback, or a photo error that keeps the data), the
@@ -55,7 +58,7 @@ function BackButton({ returnTo }: { returnTo: string | null }) {
       style={{ background: '#ffffffe6', position: 'absolute', top: 8, left: 8, zIndex: 2 }}
       onClick={(event) => {
         // Back to the same results (the query is kept in the search address); a direct visit goes to search.
-        if (window.history.length > 1 && ((returnTo === null && cameFromList()) || document.referrer.startsWith(window.location.origin))) {
+        if (window.history.length > 1 && ((returnTo === null && cameFromList()) || (returnTo !== '/favourites' && document.referrer.startsWith(window.location.origin)))) {
           event.preventDefault();
           router.back();
         }
@@ -69,26 +72,37 @@ function BackButton({ returnTo }: { returnTo: string | null }) {
 export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOfferPage; reporting?: boolean }) {
   const [reportOpen, setReportOpen] = useState(false);
   const { t } = useI18n();
-  const returnTo = usePreviewReturn();
+  const previewReturn = usePreviewReturn();
+  const params = useSearchParams();
+  const returnTo = previewReturn ?? (params.get('preview') === '1' ? null : favouritesReturn(params.get('return')));
   // in the Seller's preview there is no interest action and no request for it
-  const interest = useInterest(returnTo === null ? offer.product.id : null);
+  const preview = params.get('preview') === '1';
+  const interest = useInterest(previewReturn === null ? offer.product.id : null);
+  const fav = useFavourites({ offerId: offer.id, locationId: offer.location.id }, !preview);
+  if (fav.unavailable) return <OfferUnavailable failed={false} />;
   if (reportOpen) return <BuyerReportFlow offerId={offer.id} onClose={() => { setReportOpen(false); requestAnimationFrame(() => document.getElementById('report-entry')?.focus()); }} />;
   return (
-    <BuyerScreen section="search" overlay={interest.modal}>
+    <BuyerScreen section="search" overlay={<>{interest.modal}{fav.modal}</>}>
       <main className="body np" style={{ gap: 0 }}>
-        {returnTo !== null && <PreviewNote returnTo={returnTo} />}
+        {previewReturn !== null && <PreviewNote returnTo={previewReturn} />}
         <OfferDetails
           offer={offer}
           back={<BackButton returnTo={returnTo} />}
+          titleAction={!preview && <button data-testid="favourite-heart" type="button" className="ib offer-favourite" aria-label={fav.active ? t('fav.saved') : t('fav.save')} aria-pressed={fav.active} aria-busy={fav.pendingId !== null} disabled={!fav.available || fav.pendingId !== null} onClick={fav.toggle}><FavouriteHeart active={fav.active} /></button>}
           footer={(
             <>
-              {reporting && returnTo === null && <button id="report-entry" type="button" className="btn btn-o w" onClick={() => setReportOpen(true)}>{t('report.title')}</button>}
-              {interest.available && (
-                <button type="button" className="btn btn-o w" aria-pressed={interest.active} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
-                  <Ic name={interest.active ? 'starf' : 'star'} className="sm" />
-                  {interest.pending ? t('offer.saving') : interest.active ? t('offer.inInterests') : t('offer.addInterest')}
-                </button>
-              )}
+              {(reporting && previewReturn === null || interest.available) && <div className="offer-text-actions">
+                {reporting && previewReturn === null && <button id="report-entry" type="button" className="act offer-text-action" onClick={() => setReportOpen(true)}><Ic name="flag" className="sm" /><span>{t('report.entry')}</span></button>}
+                {interest.available && (
+                  <button type="button" className="act offer-text-action" aria-pressed={interest.active} aria-busy={interest.pending} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
+                    <Ic name={interest.active ? 'starf' : 'star'} className="sm" />
+                    <span>{t('offer.trackProduct')}</span>
+                  </button>
+                )}
+              </div>}
+              {fav.error && <p className="emsg" role="alert">{t('fav.writeError')}</p>}
+              {!preview && fav.state.kind === 'error' && <div role="alert"><p className="emsg">{t('fav.loadError')}</p><button type="button" className="btn btn-o w" onClick={() => void fav.reload()}>{t('cabinet.retry')}</button></div>}
+              {fav.unavailable && <p className="b" role="status">{t('fav.unavailable')}</p>}
               {interest.error && <div className="fld"><p className="emsg" role="alert"><Ic name="alert" />{t('search.interestError')}</p></div>}
             </>
           )}
@@ -101,14 +115,16 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
 export function OfferUnavailable({ failed }: { failed: boolean }) {
   const { t } = useI18n();
   // in the Seller's preview the way back is the card, not the search
-  const returnTo = usePreviewReturn();
+  const previewReturn = usePreviewReturn();
+  const params = useSearchParams();
+  const returnTo = previewReturn ?? (params.get('preview') === '1' ? null : favouritesReturn(params.get('return')));
   return (
     <BuyerScreen section="search">
       <main className="body" style={{ justifyContent: 'center', gap: 16, padding: '24px 20px', textAlign: 'center' }} aria-labelledby="offer-unavailable">
         <h1 className="h2" id="offer-unavailable">{failed ? t('offer.loadFailedTitle') : t('offer.unavailableTitle')}</h1>
         <p className="t c2">{failed ? t('offer.loadFailedText') : t('offer.unavailableText')}</p>
         {returnTo !== null
-          ? <Link href={returnTo} className="btn btn-p lg w">{t('preview.back')}</Link>
+          ? <Link href={returnTo} className="btn btn-p lg w">{returnTo === '/favourites' ? t('fav.back') : t('preview.back')}</Link>
           : <Link href="/" className="btn btn-p lg w">{t('offer.toSearch')}</Link>}
       </main>
     </BuyerScreen>

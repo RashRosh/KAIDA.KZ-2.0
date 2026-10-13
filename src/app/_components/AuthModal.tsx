@@ -3,6 +3,7 @@
 import { FormEvent, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
+import { announceSessionChange } from './session-change';
 import { useI18n } from '@/i18n/I18nProvider';
 
 type User = { id: string; phone: string };
@@ -205,6 +206,7 @@ export function AuthModal({ open, onClose, onAuthenticated, description }: AuthM
         setError(t(key));
         return;
       }
+      announceSessionChange();
       onAuthenticated(data.user);
     } catch {
       if (current === operation.current) setError(t('error.signIn'));

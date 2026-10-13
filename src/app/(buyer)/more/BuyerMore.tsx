@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { FavouriteHeart } from '../_ui/FavouriteHeart';
+import { announceSessionChange } from '../../_components/session-change';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
@@ -46,6 +49,7 @@ export function BuyerMore() {
 
   async function logout() {
     setLoggingOut(true);
+    announceSessionChange(false);
     try {
       await forgetPushOnThisDevice();
       const response = await fetch('/api/auth/logout', { method: 'POST' });
@@ -54,6 +58,7 @@ export function BuyerMore() {
         router.refresh();
       }
     } finally {
+      announceSessionChange();
       setLoggingOut(false);
     }
   }
@@ -95,6 +100,7 @@ export function BuyerMore() {
           )}
         </div>
         <div className="card" style={{ gap: 0, padding: '0 12px' }}>
+          <Link className="li" href="/favourites" style={{ textDecoration: 'none', color: 'inherit' }}><FavouriteHeart /><div className="mid"><div className="ts">{t('fav.title')}</div></div><Ic name="right" className="c2" /></Link>
           <InlineLanguage />
           <a className="li" href="/seller" onClick={(event) => void seller.enter(event)} style={{ textDecoration: 'none', color: 'inherit', borderTop: '1px solid var(--line)' }}>
             <Ic name="store" className="c2" /><div className="mid"><div className="ts">{t('buyer.sellerEntry')}</div></div><Ic name="right" className="c2" />

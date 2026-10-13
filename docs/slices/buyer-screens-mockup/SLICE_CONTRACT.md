@@ -143,3 +143,5 @@ c. The result card follows B01; seller name, seller comment and `В избран
 d. This stage goes first after stage 1, before the Seller Location geo fallback.
 e. No permanent language switch and no `Войти` in the top bars, for the buyer and the seller: the language is chosen
    once at the first visit and later in «Ещё»; sign-in / sign-out live in «Ещё» and appear where an action needs them.
+
+PO presentation amendment, 2026-10-13: the current Offer-favourites acceptance build uses the icon-only heart beside title/price and compact «Пожаловаться» / «Отслеживать товар» text row defined in [Offer favourites §2.1](../offer-favourites/SLICE_CONTRACT.md#21-po-presentation-amendment--2026-10-13). Existing action, login, focus-return and privacy semantics remain unchanged.
