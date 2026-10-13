@@ -133,7 +133,7 @@ Issues владеют подробным обсуждением; здесь — 
 
 ## 5. Workstreams и задачи
 
-102 remaining tasks plus the retained Q-R3 CLOSED marker: 103 indexed rows (102 previous register records plus B-MARKET-TEXT), with 33 previously archived IDs, 136 total IDs. Q-R3 remains here as a closure marker until the next register/archive maintenance; it is outside the active queue.
+103 remaining tasks plus the retained Q-R3 CLOSED marker: 104 indexed rows (102 previous register records plus B-MARKET-TEXT and B-TRACK-PRICE), with 33 previously archived IDs, 137 total IDs. Q-R3 remains here as a closure marker until the next register/archive maintenance; it is outside the active queue.
 
 Исторические номера stages: 7 = S-AI-INPUT, 8 = S-AI-MOD, 9 = B-INTEREST-FEED (S14), 10C = M-D1/M-D2, 11 = S-OPERATOR + M-READINESS, 11A–11C = K-PLANNING, 12 = K-COMMERCIAL / K-BOOST / K-BUSINESS / K-BACKOFFICE; они не задают очерёдность. Колонки: **Задача** (что и зачем, с главными ограничениями) · **Вид · Состояние** · **Основание требования** · **Зависимости и условия готовности** (формулировки источников) · **Следующее действие**. Полные формулировки ограничений и коды источников — `REQUIREMENTS_REGISTER.md`.
 
@@ -245,6 +245,7 @@ Issues владеют подробным обсуждением; здесь — 
 |---|---|---|---|---|---|
 | B-INTEREST-FEED | S14: лента «Для вас» по явным интересам покупателя. Без скрытого профилирования; интерес к Product ≠ избранное Offer ≠ уведомления. | Dev · UNSCHEDULED | DOCUMENTED · FM:S14; BJ; SS | Зависимости S7, S13 закрыты; место в порядке не назначено (committed stage в Feature Map) | Решение PO о месте. |
 | B-NOTIFY | S23: уведомление покупателю о новом Offer по интересу. Не обещать внешние уведомления до отдельного канал-slice. | Dev · GATED | DOCUMENTED · FM:S23; BJ; GS:G6 | Ждёт B-INTEREST-FEED и политики уведомлений; внешний канал доставки (push в браузере есть только для напоминаний продавцу) | Нет. |
+| B-TRACK-PRICE | Notify a buyer who tracks a Product when its price drops (PO intent 2026-10-13). Interest in a Product, not a specific Offer; not implemented, tracking notifications do not exist. Product interest ≠ favourite Offer ≠ notifications. | Dev · GATED | DECIDED as intent (PO 2026-10-13), not scheduled · IO:#79; BJ | History of prices and comparable units (Price Intelligence #79, which excludes price alerts at MVP stage); B-INTEREST-FEED / a visible tracked-Products list; B-NOTIFY policy and a delivery channel (only seller-reminder browser push exists); D2 availability watch (M-D2) comes first | Нет; placement only by PO decision after those gates. |
 | B-RECS | S24/S30/S31: рекомендации (детерминированный feed без ML), behavioral ranking, влияние редкости. | Dev · GATED | DOCUMENTED · FM:S24,S30,S31; SS:§26 | B-INTEREST-FEED + накопленные данные | Нет. |
 
 ### 5.9 Каталог и знания о товарах
