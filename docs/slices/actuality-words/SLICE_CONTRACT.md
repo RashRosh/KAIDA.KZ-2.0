@@ -1,6 +1,6 @@
 # Actuality words and one-tap «Всё актуально» — Slice Contract
 
-**Status:** APPROVED — Product Owner, 2026-10-13, with the decisions of §6 and §6.1 and the previews of §9. Implementation has not started and needs a separate PO instruction.
+**Status:** CLOSED (PO 2026-10-14). Approved by the Product Owner on 2026-10-13 with the decisions of §6 and §6.1 and the previews of §9; manual acceptance PASS at `dbee3e7d7af83491badf53be59571fa92078b89d`; merged as `ca1429037b6b983e6d4fd62033d2a731820cf4db`; annotated checkpoint `v0.0.78-actuality-words`. See §12.
 
 **Queue:** S-ACTUALITY-WORDS, first of three independent slices ordered by PO on 2026-10-13 (then S-CONTACT-DEFAULT, then B-READABILITY; one at a time, each with its own contract, PO acceptance and checkpoint). Order and state are owned by `docs/product/EXECUTION_PLAN.md`.
 
@@ -152,3 +152,13 @@ Limits: static HTML, synthetic data, system font fallback (Roboto / Geologica ar
 - 2026-10-13: slice scheduled first of three; intent as in §2.
 - 2026-10-13: decisions Q1–Q10 as in §6 (ideal-UX basis, decided by the controller on the PO's delegation).
 - 2026-10-13: the PO approved this contract with the decisions of §6 and R1–R7 of §6.1 (R5 = 12 s), and approved the previews of §9. Implementation has not started and needs a separate PO instruction.
+
+## 12. Closure (PO 2026-10-14)
+
+- **Acceptance:** manual acceptance PASS at `dbee3e7d7af83491badf53be59571fa92078b89d` (PR #180). The accepted tree `8a85885faf542bfc796c509d2fe51771ec850304` is identical to the merged tree.
+- **Merge:** PR #180 merged with a merge commit `ca1429037b6b983e6d4fd62033d2a731820cf4db`. Scope audited against this contract: thresholds 24 / 48 / 168 / 336 h, reminders, buyer badges, ordering and search / Nearby code are untouched; migration 0029 is additive (one nullable column and wider or new check constraints; no data rewritten).
+- **Checkpoint:** annotated tag `v0.0.78-actuality-words` on the merge commit.
+- **CI:** accepted head — verify 38431477931 and 38431482829, CodeQL check 115414865731, Analyze 38431482720, dependency review 38431482749. Merged main — KAIDA verify 38518803753, CodeQL 38518803740. An earlier head failed only in a new e2e (two new tests shared one seller phone and ran in parallel); fixed by one phone per test, no existing test changed to get green.
+- **Existing-test change:** `tests/integration/s6-migration-upgrade.test.ts` now expects the new nullable column on a migrated item (the same pattern as `photos_specified`).
+- **Known, unscheduled limitation (no code change):** when an undo refuses a card (changed since, past the window, or it would become hidden), the UI is silent: the toast is dismissed and the list reloads. The contract defines no string for it; a change needs its own PO decision.
+- **Port 3000:** serves this checkpoint against the isolated snapshot (migration 0029 applied to the snapshot database only).
