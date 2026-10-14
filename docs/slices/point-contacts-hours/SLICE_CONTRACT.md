@@ -159,3 +159,7 @@ buyer, find a card of each point: the hours line and the colored icon match the 
    mandatory; buyer line format, green / orange (≤ 1 h) / red, icon without a word (2026-09-25).
 
 Open for approval: the migration rule for existing seller contacts (§2) and the first-point hours template.
+
+## Contact-default revision (PO 2026-10-14)
+
+Owning approved contract: [contact-default](../contact-default/SLICE_CONTRACT.md). Extends §2 (contacts): on any point form a chip offers the owner's login number under an empty «Телефон», and a chip under an empty «WhatsApp» copies the phone number while «Телефон» holds one; nothing is ever prefilled and nothing is stored before «Сохранить». While a field holds the login number a notice says what buyers can do. Saving a point whose phone or WhatsApp equals the login number records that number in `seller_verified_phones` (no migration). The help line no longer says every number needs a code. Copy-from-latest, verification rules and what buyers see are unchanged.

@@ -215,3 +215,7 @@ Mobile + desktop:
 11. Убедиться, что onboarding показывает состояние «готово».
 12. Перезагрузить страницу и убедиться, что настройка не начинается заново, а П2 видит существующий Seller Input / управление предложениями.
 13. Проверить mobile и desktop визуально, в том числе Bolt-like composition/rhythm.
+
+## Contact-default revision (PO 2026-10-14)
+
+Owning approved contract: [contact-default](../contact-default/SLICE_CONTRACT.md). The prefill of the login number into phone and WhatsApp (this contract) is not reinstated: a one-tap chip under an empty «Телефон», and a chip «Тот же номер, что в «Телефоне»» under an empty «WhatsApp», replace it. Nothing is prefilled; the rule that the login number is not published without an explicit save stands.

@@ -198,3 +198,7 @@ Manual acceptance does not require API, SQL, DevTools, internal IDs, or manual h
 ## Gate
 
 Implementation is authorized by the Product Owner, but manual acceptance and merge remain blocked until implementation diff and automated proof are reviewed by the Controller.
+
+## Contact-default revision (PO 2026-10-14)
+
+Owning approved contract: [contact-default](../contact-default/SLICE_CONTRACT.md). The rule "Identity login phone is never copied or published automatically as a Seller contact" stays and is now verifiable: the login number enters a point form only by the Seller's tap on a chip (or typing) and becomes a contact only when the Seller saves the point. Public shape, contact building and buyer actions are unchanged.

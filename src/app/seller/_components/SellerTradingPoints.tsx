@@ -6,7 +6,8 @@ import { parseManualLocationInput } from '@/modules/locations/contracts/manual-l
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
 import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
-import { OpeningHoursFields, PointContactStatus, PointContactsFields, type ContactsDraft } from './PointDetailsFields';
+import { OpeningHoursFields, PointContactStatus, PointContactsFields } from './PointDetailsFields';
+import type { ContactsDraft } from './contact-chips';
 import { Bar, Ic, Nav, Phone, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -68,6 +69,23 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [formReady, setFormReady] = useState(!embedded);
   const [baseline, setBaseline] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  // contact-default: the owner's login number for the chips; stays null (no chip, no error) when it cannot be read.
+  const [loginPhone, setLoginPhone] = useState<string | null>(null);
+  const loginPhoneRequested = useRef(false);
+  useEffect(() => {
+    if (mode === 'closed' || loginPhoneRequested.current) return;
+    loginPhoneRequested.current = true;
+    void (async () => {
+      try {
+        const response = await fetch('/api/auth/me', { cache: 'no-store' });
+        if (!response.ok) return;
+        const data = await response.json() as { user: { phone?: string } | null };
+        if (data.user?.phone) setLoginPhone(data.user.phone);
+      } catch {
+        // The chips are a convenience: without the number there is no chip and no message.
+      }
+    })();
+  }, [mode]);
 
   // Whether contacts and hours have arrived: a form opened before that loads them itself instead of the template.
   const [detailsLoaded, setDetailsLoaded] = useState(false);
@@ -446,7 +464,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
               </div>
             )}
           </div>
-          <PointContactsFields value={contacts} onChange={setContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} saved={saved} />
+          <PointContactsFields value={contacts} onChange={setContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} saved={saved} loginPhone={loginPhone} />
           {editing && (['phone', 'whatsapp'] as const).map((channel) => {
             const contact = details.get(editing.id)?.contacts[channel];
             return contact && !contact.verified ? (
