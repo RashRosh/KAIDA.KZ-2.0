@@ -1,6 +1,6 @@
 # Contact default — login number offered as the point's contact — Slice Contract
 
-**Status:** DRAFT — not approved. Revised 2026-10-14 after the PO review of the first draft (§13). Contract preparation only; implementation has not started and needs the PO's approval of this contract and a separate PO instruction. Questions marked PO DECIDED in §6 are decided; the others carry a recommendation only.
+**Status:** APPROVED (PO, 2026-10-14) — the contract with the ten decisions of §6 and the previews of §9. Implementation has not started and needs a separate PO instruction.
 
 **Queue:** S-CONTACT-DEFAULT, item 8 of the PO-approved order of 2026-10-13 (after S-ACTUALITY-WORDS, before B-READABILITY; one at a time). Order and state are owned by `docs/product/EXECUTION_PLAN.md`.
 
@@ -10,7 +10,7 @@
 
 ## 1. User task
 
-A Seller who has just logged in with a phone number can put that number on a point with one tap instead of retyping it, and always sees what buyers will be able to do with it. Nothing is filled, stored or published until the Seller taps the offer and presses «Сохранить».
+A Seller who has just logged in with a phone number can put that number on a point with one tap instead of retyping it, and always sees what buyers will be able to do with it. Nothing is filled, stored or published until the Seller taps a chip and presses «Сохранить».
 
 ## 2. PO intent (2026-10-13/14, source of the questions in §6)
 
@@ -61,15 +61,15 @@ There is no way to change it: no endpoint, UI or repository function updates `us
 - **Tests asserting today's behavior:** `tests/integration/point-contacts-hours.test.ts` (new number unverified until code; login phone needs no code; changed number drops verification; a new point copies contacts; buyers see only verified numbers; migration copies seller phones and marks only the login phone verified), `tests/integration/s10-search-contact-projection.test.ts`, `tests/integration/s10-migration-upgrade.test.ts`, `tests/e2e/s10-contact-actions.spec.ts` (verify by code, reach the buyer card), `tests/e2e/seller-trading-points-workspace.spec.ts`, `tests/e2e/seller-card-point-link.spec.ts`, `tests/e2e/seller-setup.spec.ts`, `tests/e2e/pre-publication-buyer-preview.spec.ts`. None changes unless the answers in §6 require it (§7).
 - Not verified: whether any e2e asserts the exact text of `pointDetails.contactsHelp` (a grep for the key found only the component); to be checked when the change is implemented.
 
-## 4. Scope (assumes the recommended answers of §6 that the PO has not changed; changes with the PO's decisions)
+## 4. Scope (per the PO decisions of §6)
 
-1. **No prefill (Q3, PO 2026-10-14).** In the first point's form «Телефон» and «WhatsApp» start empty, as today.
+1. **No prefill (Q2, Q3).** No field is ever prefilled; «Телефон» and «WhatsApp» show what the point holds, and an empty field stays empty.
 2. **Chip for the login number (Q3).** When the login number is known (read from the existing `GET /api/auth/me`; no new API) and «Телефон» is empty, a chip «Указать мой номер +7 701 000 00 01» sits under the field; one tap fills the field. Target ≥ 44 px. The existing clear control of the field is the way back; no separate «Не показывать покупателям» button.
 3. **Chip for WhatsApp (Q1, PO 2026-10-14).** WhatsApp is never prefilled. Under «WhatsApp», only while «Телефон» holds a number and «WhatsApp» is empty, a chip «Тот же номер, что в «Телефоне»» fills it with that number on one tap. Not shown while «Телефон» is empty. Target ≥ 44 px.
 4. **Nothing before «Сохранить».** Neither chip stores or publishes anything; the values are a form draft until the Seller presses «Сохранить» on that screen; leaving the form discards them.
 5. **Notice (Q5).** While a field holds the login number (typed or chipped) a notice sits under it: for «Телефон» «Это номер, с которого вы вошли. Покупатели смогут позвонить на этот номер.»; for «WhatsApp» «Покупатели смогут написать на этот номер.» Buyers see the call and WhatsApp icons, not the number as text; the wording says only what buyers can do. The notice is not shown for any other number.
 6. **Verification unchanged (Q4).** The login number stays verified as today («Подтверждён»); a number copied by the WhatsApp chip is verified exactly when the same number is (it is the same number).
-7. **Existing and later points (Q2, Q7, Q10).** Existing points are never changed. Chips appear on the first point only; a later point keeps copy-from-latest and its label.
+7. **Any point form (Q2, Q10).** The chips show on any point form — first point, later points, editing an existing point — by the same rules: the login-number chip whenever «Телефон» is empty and the login number is known; the WhatsApp chip whenever «Телефон» holds a number and «WhatsApp» is empty. A Seller who skipped contacts at onboarding can add them later with one tap. Existing points are never changed unless the Seller taps a chip and presses «Сохранить». Copy-from-latest on a later point is unchanged; a copied non-empty field simply shows no chip.
 8. **Persist the proof (Q6).** Saving a point whose phone or WhatsApp equals the login number records that number in `seller_verified_phones`, so a future change of the login number cannot silently remove a public contact. No new column; existing rows unchanged.
 9. **Honest help text.** `pointDetails.contactsHelp` stops saying that every number needs a code.
 10. **Strings (§8).** RU and provisional KK. In every new or changed RU string no short preposition or conjunction may stay at the end of a line: non-breaking spaces (U+00A0) after such words, verified by a unit test over the new and changed RU keys and by a 320 px check, as in `actuality-words` §4.7.
@@ -77,26 +77,26 @@ There is no way to change it: no endpoint, UI or repository function updates `us
 ## 5. Explicit out of scope
 
 - Any prefill of a field; any change of what buyers see or how contacts are built (`tel:`, `wa.me`, icons); Telegram, Instagram.
-- Chips on later points (Q10 recommends none); retroactive change of existing points; background or "set for all points" actions; any automatic publishing of a number.
+- Retroactive change of existing points; background or "set for all points" actions; any automatic publishing of a number.
 - Changing the login number (no such feature exists); real SMS; new OTP flows; changes to OTP limits.
 - Contacts inside ChangeSet / publication confirmation (contacts stay on the point, not on the card).
 - New analytics, events or tracking; seller statistics; notifications; voice or translation; paid services; public launch.
 - B-READABILITY.
 
-## 6. Questions for PO (recommendations are not decisions, except where marked PO DECIDED)
+## 6. PO decisions (2026-10-14)
 
-Each open question has the recommended answer from the point of view of the best Seller UX and the safest privacy default.
+All ten are decided by the Product Owner; numbering is kept from the draft.
 
-1. **Which fields are prefilled — phone only, or also WhatsApp?** **PO DECIDED 2026-10-14:** nothing is prefilled. WhatsApp is never prefilled; under «WhatsApp», only when «Телефон» holds a number, a chip «Тот же номер, что в «Телефоне»» fills it on one tap; not shown when the phone is empty.
-2. **For which points and when?** Recommend (unchanged, not yet decided): **the first point (onboarding) only**; every later point keeps copy-from-latest; existing points are **never** changed retroactively. If the latest point deliberately has no phone, a new point stays empty. Reason: one clear moment of offer, no re-asking, no silent change of live data.
-3. **Opt-in mechanics.** **PO DECIDED 2026-10-14 (replaces the prefill):** NO prefill. The first-point form starts with «Телефон» empty. When the login number is known, a chip «Указать мой номер +7 701 000 00 01» sits under the field; one tap fills it. Nothing is stored or published before «Сохранить». The button «Не показывать покупателям» is removed (the existing clear control is enough). The publication confirmation (ChangeSet) carries no contacts today and does not start to (§3.2); the private «Как видят покупатели» preview already shows what buyers get.
-4. **Does the login number count as verified automatically?** Recommend (unchanged): **automatically verified, as today.** Reason: the Seller proved the number with the login code; a second code costs a step and an SMS later and contradicts the success criterion.
-5. **What does the buyer see, and what tells the Seller the number will be public?** **PO DECIDED 2026-10-14 (exact wording):** when a field holds the login number, the notice reads «Это номер, с которого вы вошли. Покупатели смогут позвонить на этот номер.» for «Телефон» and «Покупатели смогут написать на этот номер.» for «WhatsApp» (non-breaking spaces after short words). The buyer sees the call and WhatsApp icons, not the number as text; the wording must be accurate.
-6. **What happens when the login number changes later?** Recommend (unchanged): **no silent change of public contacts.** A point's number is its own stored value, never a live reference to the login number; saving a point with the login number records the proof (§4.8). A change-number feature, if ever built, needs its own contract and must ask the Seller what to do with each point.
-7. **Interplay with «copy contacts from the latest point».** Recommend (unchanged): **unchanged.** A copied login number is already visible in the form with the label «Контакты как у точки «…»»; no second chip. Noted for the PO, out of scope: the server-side copy in `createOwnedLocation` publishes the copied contacts even if the form is abandoned after the point is created; it matches the closed contract and is not changed here.
-8. **Empty, error and KK states.** **PO DECIDED 2026-10-14 (part):** if `GET /api/auth/me` fails or has no number, no chip and no error. Recommend for the rest (unchanged): the chip disappears once the field holds a number and returns when the field is cleared; a different typed number is unaffected and gets no notice; an invalid number keeps the existing error; KK strings are provisional (`PROJECT_RULES.md` §18.5) and listed in §8.
-9. **How is the success criterion measured?** Recommend (unchanged): **PO acceptance with a stopwatch and a tap count, no tracking events.** Baseline today: typing 10 digits and «+7» handling into «Телефон» (and again into «WhatsApp»); new design: one tap each. Record fields typed and taps for onboarding and for adding a second point, old build (port 3000 checkpoint) versus new.
-10. **OPEN (one line): do the chips show again on a later point's form?** Recommend: **no — only on the first point; a later point keeps copy-from-latest.**
+1. **Which fields are prefilled?** Nothing is prefilled. WhatsApp is never prefilled; under «WhatsApp», only when «Телефон» holds a number, a chip «Тот же номер, что в «Телефоне»» fills it on one tap; not shown when the phone is empty.
+2. **For which points and when?** No field is ever prefilled; the chips are the only way a number enters the form without typing. Existing points are never changed unless the Seller taps a chip and presses «Сохранить».
+3. **Opt-in mechanics.** NO prefill. «Телефон» starts empty. When the login number is known, a chip «Указать мой номер +7 701 000 00 01» sits under the field; one tap fills it. Nothing is stored or published before «Сохранить». The button «Не показывать покупателям» is removed (the existing clear control is enough). The publication confirmation (ChangeSet) carries no contacts today and does not start to (§3.2); the private «Как видят покупатели» preview already shows what buyers get.
+4. **Verification.** The login number counts as verified automatically, as today (the Seller proved it with the login code; no second code).
+5. **What the buyer sees, and the notice (exact wording).** When a field holds the login number, the notice reads «Это номер, с которого вы вошли. Покупатели смогут позвонить на этот номер.» for «Телефон» and «Покупатели смогут написать на этот номер.» for «WhatsApp» (non-breaking spaces after short words). The buyer sees the call and WhatsApp icons, not the number as text; the wording must be accurate.
+6. **Login number changes later.** No silent change of public contacts. A point's number is its own stored value, never a live reference to the login number; saving a point with the login number records the proof in `seller_verified_phones` (§4.8). A change-number feature, if ever built, needs its own contract.
+7. **Copy from the latest point.** Unchanged. A copied login number is already visible in the form with the label «Контакты как у точки «…»». The server-side copy in `createOwnedLocation`, which publishes copied contacts even if the form is abandoned after the point is created, stays as a known limitation (it matches the closed contract; not changed here).
+8. **Empty, error and KK states.** If `GET /api/auth/me` fails or has no number, no chip and no error. The chip disappears once the field holds a number and returns when the field is cleared; a different typed number is unaffected and gets no notice; an invalid number keeps the existing error; KK strings are provisional (`PROJECT_RULES.md` §18.5) and listed in §8.
+9. **Measurement.** PO acceptance with a stopwatch and a tap count, no tracking events. Baseline today: typing 10 digits and «+7» handling into «Телефон» (and again into «WhatsApp»); new design: one tap each. Record fields typed and taps for onboarding and for adding a second point, old build (port 3000 checkpoint) versus new.
+10. **Where the chips show.** On ANY point form (first point, later points, editing an existing point) whenever «Телефон» is empty and the login number is known; the WhatsApp chip whenever «Телефон» holds a number and «WhatsApp» is empty. Reason: a Seller who skipped contacts at onboarding must be able to add them later with one tap. A chip stores and publishes nothing before «Сохранить». Copy-from-latest on a later point is unchanged; a copied non-empty field simply shows no chip.
 
 ## 7. Risk flags
 
@@ -104,6 +104,7 @@ Each open question has the recommended answer from the point of view of the best
 |---|---|
 | Privacy: login number becomes public without the Seller acting | No prefill; a number enters the form only by the Seller's tap or typing; test that opening the form and leaving stores nothing; integration test that `users.phone_e164` is absent from buyer payloads unless saved as a point number; existing points untouched. |
 | Notice inaccurate | Wording is fixed by the PO (Q5) and says only «позвонить» / «написать»; buyers see icons, never the number as text (unchanged, asserted by the existing contact tests). |
+| Chip on an existing point | A chip on an existing point with an empty field is an explicit tap; nothing is stored before «Сохранить»; leaving the form discards it; a point with a non-empty field shows no chip, so a saved number is never replaced by a chip. |
 | Chip taps the wrong field | Each chip sits directly under its own field, is labelled with the number or the source field, ≥ 44 px; the WhatsApp chip is hidden while «Телефон» is empty. |
 | Verification meaning | «Подтверждён» for the login number is correct (login OTP); the help text is corrected so no screen says a code is always needed. |
 | Closed contracts | S10, point-contacts-hours, UX2 are extended, not weakened; their tests stay green. |
@@ -117,22 +118,22 @@ Each has non-breaking spaces after short words (the previews use them). Existing
 
 ## 9. Previews and design gaps (`PROJECT_RULES.md` §18.1)
 
-The mockup has no frame for the chips or the notices: a design gap, to be approved by the PO with this contract. Redrawn after the PO review of 2026-10-14 (the first previews, with a prefilled field and a clear button, were removed). Documentation only: static `preview.html` with the shipped seller CSS inlined, synthetic data, system font fallback, no production code, no new tokens or palette; the chips reuse the existing secondary button at 44 px, the notices the existing info banner:
+The mockup has no frame for the chips or the notices; the PO approved the previews below with the contract on 2026-10-14, so no design gap remains open. They were redrawn after the PO review of 2026-10-14 (the first previews, with a prefilled field and a clear button, were removed). Documentation only: static `preview.html` with the shipped seller CSS inlined, synthetic data, system font fallback, no production code, no new tokens or palette; the chips reuse the existing secondary button at 44 px, the notices the existing info banner:
 
 1. `1-first-point-empty-320.png`, `-390.png` — first-point form scrolled to «Контакты»: «Телефон» empty, chip «Указать мой номер +7 701 000 00 01»; no WhatsApp chip (phone empty).
 2. `2-after-phone-chip-320.png`, `-390.png` — after the tap: the number in «Телефон» with «Подтверждён» and the notice «…позвонить на этот номер.»; the WhatsApp chip «Тот же номер, что в «Телефоне»» is visible.
 3. `3-after-whatsapp-chip-320.png`, `-390.png` — after the second tap: both fields filled, each with its notice.
 
-A static preview is not authorization and not runtime proof.
+The chip on later points and in the edit form of an existing point is the same element as drawn here, under the same rules (§4.7). A static preview is not authorization and not runtime proof.
 
 ## 10. Acceptance criteria (draft)
 
-1. In the first point's form «Телефон» and «WhatsApp» start empty; with the login number known, a chip «Указать мой номер +7 701 000 00 01» (≥ 44 px) sits under «Телефон»; without it (request failed or no number) there is no chip and no error.
+1. In a point form «Телефон» and «WhatsApp» show what the point holds and are never prefilled; with the login number known, a chip «Указать мой номер +7 701 000 00 01» (≥ 44 px) sits under «Телефон»; without it (request failed or no number) there is no chip and no error.
 2. One tap on the chip fills «Телефон», shows «Подтверждён» and the notice «Это номер, с которого вы вошли. Покупатели смогут позвонить на этот номер.»; clearing the field with its existing control removes the notice and brings the chip back.
 3. «Тот же номер, что в «Телефоне»» (≥ 44 px) shows under «WhatsApp» only while «Телефон» holds a number and «WhatsApp» is empty; one tap fills it; when that number is the login number the notice «Покупатели смогут написать на этот номер.» shows.
 4. Before «Сохранить» nothing is stored; leaving the form discards it; after save the buyer card shows `Позвонить` (and `WhatsApp` when filled) and no number as text.
 5. `users.phone_e164` appears in no buyer payload except as a point's saved number; existing points are unchanged by this slice.
-6. A second point still starts with the latest point's contacts and the existing label; no chip appears there (Q10, if approved).
+6. A second point still starts with the latest point's contacts and the existing label: with an empty phone it shows the login-number chip; a copied non-empty phone shows none. Editing an existing point with an empty phone shows the chip too (one tap, nothing stored before «Сохранить»); with a non-empty phone it shows none.
 7. Saving a point with the login number records it as verified for the Seller; nothing else changes.
 8. The help text no longer claims every number needs a code; new and changed RU strings have no short preposition or conjunction before a regular space (unit test); the 320 px check shows none at a line end; KK keys exist.
 9. Tap targets ≥ 44 px; focus order, labels and keyboard use of the form are not weakened.
@@ -140,17 +141,18 @@ A static preview is not authorization and not runtime proof.
 
 ## 11. Verification plan (after approval)
 
-- Unit: string rule over the new and changed RU keys; chip visibility rules (login number known or not, phone empty or not, WhatsApp empty or not, first point only).
+- Unit: string rule over the new and changed RU keys; chip visibility rules (login number known or not, phone empty or not, WhatsApp empty or not; any point form).
 - Integration: buyer payloads never contain the login number unless it is a saved point number; verified set after saving the login number; existing points untouched; point-contacts-hours and S10 tests stay green.
-- E2E (mobile RU, 320 and 390): chip → field → notice → WhatsApp chip → save → buyer `Позвонить` / `WhatsApp`; `/api/auth/me` failure gives no chip and no error; clearing brings the chip back; second point shows only the copy label.
+- E2E (mobile RU, 320 and 390): chip → field → notice → WhatsApp chip → save → buyer `Позвонить` / `WhatsApp`; `/api/auth/me` failure gives no chip and no error; clearing brings the chip back; a second point with an empty phone shows the chip, one with a copied phone shows only the copy label; an existing point with an empty phone shows the chip and saves the number after one tap and «Сохранить».
 - Manual acceptance (PO, phone): onboarding a new Seller on a disposable database; count taps and seconds against the checkpoint build; check wording at 320 px.
 
 ## 12. Closed contracts affected
 
-point-contacts-hours (extended: first-point chips, honest help text, stored proof); S10 buyer contact actions (the rule "never copied or published automatically" is kept and made verifiable: the number enters the form only by the Seller's tap); UX2 seller onboarding (its prefill of the login number is **not** reinstated: a one-tap chip replaces it); seller-card-point-link (the embedded editor shows the same chips on a first point); S2 auth and auth-otp-* (unchanged). When this slice closes, revision notes go into these contracts per `PROJECT_RULES.md` §19.1.
+point-contacts-hours (extended: chips on point forms, honest help text, stored proof); S10 buyer contact actions (the rule "never copied or published automatically" is kept and made verifiable: the number enters the form only by the Seller's tap); UX2 seller onboarding (its prefill of the login number is **not** reinstated: a one-tap chip replaces it); seller-card-point-link (the embedded editor shows the same chips); S2 auth and auth-otp-* (unchanged). When this slice closes, revision notes go into these contracts per `PROJECT_RULES.md` §19.1.
 
 ## 13. Product Owner decisions
 
 - 2026-10-13: slice scheduled as item 8; intent as in §2.
 - 2026-10-14: contract preparation authorized (docs only).
-- 2026-10-14 (review of the first draft): Q1 — WhatsApp never prefilled, own chip; Q3 — no prefill, chip «Указать мой номер …», no clear button of our own; Q5 — notice wording fixed; Q8 — no chip and no error when the number is unknown. Q2, Q4, Q6, Q7, Q9 stay as drafted (recommendations, not yet decided); Q10 is new and open. The contract stays DRAFT; the PO re-reviews after the new previews.
+- 2026-10-14 (review of the first draft): Q1 — WhatsApp never prefilled, own chip; Q3 — no prefill, chip «Указать мой номер …», no clear button of our own; Q5 — notice wording fixed; Q8 — no chip and no error when the number is unknown.
+- 2026-10-14 (re-review): the PO APPROVED this contract and the previews of §9. Added decisions: Q2 — no field is ever prefilled, existing points change only by a chip tap and «Сохранить»; Q10 — chips on any point form (replaces the draft recommendation of first point only); Q4, Q6, Q7, Q9 accepted as drafted. Implementation has not started and needs a separate PO instruction.
