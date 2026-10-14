@@ -79,6 +79,14 @@ export async function isNumberOnSellerPoint(database: PointDetailsDb, sellerId: 
   return Boolean(row);
 }
 
+// The owner's login number (proved by the login code); contact-default records it as verified when a point holds it.
+export async function findOwnerLoginPhone(database: PointDetailsDb, sellerId: string): Promise<string | null> {
+  const [row] = await database.select({ phone: users.phoneE164 }).from(sellers)
+    .innerJoin(users, eq(users.id, sellers.ownerUserId))
+    .where(eq(sellers.id, sellerId)).limit(1);
+  return row?.phone ?? null;
+}
+
 export async function recordVerifiedPhone(database: PointDetailsDb, sellerId: string, phoneE164: string, at: Date) {
   await database.insert(sellerVerifiedPhones).values({ sellerId, phoneE164, verifiedAt: at }).onConflictDoNothing();
 }

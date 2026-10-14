@@ -75,3 +75,7 @@ same point edit from «Точки». `pnpm verify` green; manual acceptance on a
 2. **Which modes:** everywhere a point is shown and may be edited (§2). **Answer: yes.**
 3. **Wording of the warning** that the point changes for all its cards (proposal above) — stands unless the PO
    changes it.
+
+## Contact-default revision (PO 2026-10-14)
+
+Owning approved contract: [contact-default](../contact-default/SLICE_CONTRACT.md). The point editor embedded in a card shows the same chips and notices as the editor on «Точки» (same component, same rules); no new point fields, no change to verification or hours rules.

@@ -12,8 +12,9 @@ import type { PointContactView } from '@/modules/locations/details/point-details
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
 import { ErrorLine, Ic } from '../_kaida/ui';
+import { contactChips, formatLoginPhone, holdsLoginNumber, type ContactsDraft } from './contact-chips';
 
-export type ContactsDraft = { phone: string; whatsapp: string };
+export type { ContactsDraft };
 
 const dayKey = (day: Weekday) => `hours.day.${day}` as MessageKey;
 
@@ -30,16 +31,35 @@ function ChannelLabel({ channel, htmlFor, label, badge }: { channel: 'phone' | '
   );
 }
 
+function LoginNotice({ id, text }: { id: string; text: string }) {
+  return (
+    <div id={id} className="banner info" style={{ padding: '10px 12px', borderRadius: 12, flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+      <Ic name="info" className="sm" style={{ color: 'var(--info)' }} /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{text}</p>
+    </div>
+  );
+}
+
+function Chip({ testId, label, onClick, disabled }: { testId: string; label: string; onClick: () => void; disabled: boolean }) {
+  return (
+    <button type="button" className="btn btn-o" data-testid={testId} style={{ minHeight: 44, height: 'auto', alignSelf: 'flex-start', textAlign: 'left', whiteSpace: 'normal', padding: '8px 14px' }} onClick={onClick} disabled={disabled}>{label}</button>
+  );
+}
+
 // AI-S12A · Point · Contacts: both optional; a number is public only after it is confirmed (AI-S13).
-export function PointContactsFields({ value, onChange, disabled, sourceName, saved }: {
+export function PointContactsFields({ value, onChange, disabled, sourceName, saved, loginPhone = null }: {
   value: ContactsDraft;
   onChange: (value: ContactsDraft) => void;
   disabled: boolean;
   sourceName?: string | null;
   saved?: { phone?: PointContactView | null; whatsapp?: PointContactView | null };
+  // The owner's login number when known (contact-default): offered by a chip, never filled in.
+  loginPhone?: string | null;
 }) {
   const { t } = useI18n();
-  const badge = (contact: PointContactView | null | undefined, draft: string) => contact && contact.e164 === draft.trim()
+  const chips = contactChips(value, loginPhone);
+  const badge = (contact: PointContactView | null | undefined, draft: string) => holdsLoginNumber(draft, loginPhone)
+    ? <span className="bd bd-ok"><Ic name="check" />{t('pointDetails.verified')}</span>
+    : contact && contact.e164 === draft.trim()
     ? contact.verified
       ? <span className="bd bd-ok"><Ic name="check" />{t('pointDetails.verified')}</span>
       : <span className="bd bd-info"><Ic name="clock" />{t('pointDetails.waiting')}</span>
@@ -58,11 +78,15 @@ export function PointContactsFields({ value, onChange, disabled, sourceName, sav
       )}
       <div className="fld">
         <ChannelLabel channel="phone" htmlFor="point-phone" label={t('pointDetails.phone')} badge={badge(saved?.phone, value.phone)} />
-        <input id="point-phone" className="inp" type="tel" inputMode="tel" autoComplete="tel" placeholder="+7 7XX XXX XX XX" value={value.phone} onChange={(event) => onChange({ ...value, phone: event.target.value })} disabled={disabled} />
+        <input id="point-phone" className="inp" type="tel" inputMode="tel" autoComplete="tel" placeholder="+7 7XX XXX XX XX" value={value.phone} onChange={(event) => onChange({ ...value, phone: event.target.value })} disabled={disabled} aria-describedby={chips.phoneNotice ? 'point-phone-notice' : undefined} />
+        {chips.phoneNotice && <LoginNotice id="point-phone-notice" text={t('pointDetails.loginNoticePhone')} />}
+        {chips.loginNumber && loginPhone && <Chip testId="chip-login-number" label={t('pointDetails.useLoginNumber', { phone: formatLoginPhone(loginPhone) })} onClick={() => onChange({ ...value, phone: loginPhone })} disabled={disabled} />}
       </div>
       <div className="fld">
         <ChannelLabel channel="whatsapp" htmlFor="point-whatsapp" label="WhatsApp" badge={badge(saved?.whatsapp, value.whatsapp)} />
-        <input id="point-whatsapp" className="inp" type="tel" inputMode="tel" placeholder="+7 7XX XXX XX XX" value={value.whatsapp} onChange={(event) => onChange({ ...value, whatsapp: event.target.value })} disabled={disabled} />
+        <input id="point-whatsapp" className="inp" type="tel" inputMode="tel" placeholder="+7 7XX XXX XX XX" value={value.whatsapp} onChange={(event) => onChange({ ...value, whatsapp: event.target.value })} disabled={disabled} aria-describedby={chips.whatsappNotice ? 'point-whatsapp-notice' : undefined} />
+        {chips.whatsappNotice && <LoginNotice id="point-whatsapp-notice" text={t('pointDetails.loginNoticeWhatsapp')} />}
+        {chips.samePhone && <Chip testId="chip-same-phone" label={t('pointDetails.sameAsPhone')} onClick={() => onChange({ ...value, whatsapp: value.phone.trim() })} disabled={disabled} />}
       </div>
       <p className="c">{t('pointDetails.withoutContacts')}</p>
     </>

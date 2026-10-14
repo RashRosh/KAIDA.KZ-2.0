@@ -14,6 +14,7 @@ import {
   type PointDetailsView,
 } from './point-details.contract';
 import {
+  findOwnerLoginPhone,
   isNumberOnSellerPoint,
   listPointDetails,
   recordVerifiedPhone,
@@ -48,16 +49,23 @@ export async function replaceOwnedPointDetails(
   ownerUserId: string,
   locationId: string,
   input: PointDetailsInput,
-  dependencies: { database?: Database } = {},
+  dependencies: { database?: Database; clock?: IdentityClock } = {},
 ): Promise<PointDetailsView> {
   const database = dependencies.database ?? getDatabase();
   const phoneE164 = normalize(input.phone, 'phone');
   const whatsappPhoneE164 = normalize(input.whatsapp, 'whatsapp');
   const seller = await findSellerByOwner(database, ownerUserId);
   if (!seller) throw new LocationNotFoundError();
-  const view = await updatePointDetails(database, seller.id, locationId, { phoneE164, whatsappPhoneE164, openingHours: input.openingHours });
-  if (!view) throw new LocationNotFoundError();
-  return view;
+  const clock = dependencies.clock ?? systemIdentityClock;
+  return database.transaction(async (tx) => {
+    const view = await updatePointDetails(tx, seller.id, locationId, { phoneE164, whatsappPhoneE164, openingHours: input.openingHours });
+    if (!view) throw new LocationNotFoundError();
+    // contact-default §4.8: a point that holds the login number records the proof, so the contact does not vanish if the
+    // login number is ever changed (idempotent; the number is verified by the login code already).
+    const login = await findOwnerLoginPhone(tx, seller.id);
+    if (login && (phoneE164 === login || whatsappPhoneE164 === login)) await recordVerifiedPhone(tx, seller.id, login, clock());
+    return view;
+  });
 }
 
 export async function requestPointContactCode(
