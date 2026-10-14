@@ -1,6 +1,7 @@
 # Current verified state
 
-- Current task: none. S-ACTUALITY-WORDS CLOSED: PO manual acceptance PASS at dbee3e7d7af83491badf53be59571fa92078b89d (PR180); merged ca1429037b6b983e6d4fd62033d2a731820cf4db; accepted/merged tree 8a85885faf542bfc796c509d2fe51771ec850304 identical.
+- Current task: none. S-CONTACT-DEFAULT contract APPROVED by PO 2026-10-14 (PR183, docs only); implementation not started.
+- Last completed: S-ACTUALITY-WORDS CLOSED: PO manual acceptance PASS at dbee3e7d7af83491badf53be59571fa92078b89d (PR180); merged ca1429037b6b983e6d4fd62033d2a731820cf4db; accepted/merged tree 8a85885faf542bfc796c509d2fe51771ec850304 identical; later test-only tolerance fix PR182 merged 14785751a1e4b60308d93531b8e1a77875f953f5 (main verify38526493563/CodeQL38526493655 GREEN, no tag).
 - Verified checkpoint: annotated v0.0.78-actuality-words at ca1429037b6b983e6d4fd62033d2a731820cf4db; main verify38518803753/CodeQL38518803740 GREEN. Branch head CI verify38431477931/38431482829, CodeQL115414865731, analyze38431482720, dependency38431482749 GREEN (unit529/integration330/e2e280 pass,58 expected skips). Earlier head failed one new e2e (shared seller phone race), fixed in test only.
 - Served: http://127.0.0.1:3000, checkout tmp/actwords-checkpoint-3000 at ca1429037b6b983e6d4fd62033d2a731820cf4db, build ANVp_3ejstSvb607PO62E, PID8856. kaida_checkpoint DB in kaida-checkpoint-3000-postgres (ID be1a29cd…3578, volume kaida-checkpoint-3000-pg, 55435), photos tmp/auth-otp-closure-private/photos. Source protection/reporting/translation OFF.
 - Snapshot upgrade: pre-upgrade dump taken; additive0029 applied to the SNAPSHOT database only (30 migrations); all50 seller_change_items rows, all tables and2 S13 selections unchanged. Port3000 checks PASS: health, Welcome, fake-OTP login, favourites, seller block «Пора подтвердить актуальность» + «Всё актуально · 5» rendered (no card confirmed), photo thumb.
@@ -8,4 +9,4 @@
 - Preservation: original dev container/volume untouched; port3000 snapshot data unchanged except ordinary smoke-login auth rows. Evidence, dumps and receipts retained in tmp/actuality-words-closure-evidence; never upload private evidence.
 - Known limitation (unscheduled, no code change): a refused undo is silent in the UI.
 - Root dirty docs/r3-closure personal/staged research/drafts preserved; never use root index for publication.
-- Next action: S-CONTACT-DEFAULT and B-READABILITY each need their own contract and a separate PO instruction; STOP. Tracking notifications unimplemented; voice/translation paused, no paid services/real SMS/public launch. Production source-protection/retention gates separate; KK provisional/mobile RU.
+- Next action: implementation of S-CONTACT-DEFAULT requires a separate PO instruction; STOP. B-READABILITY not started. Tracking notifications unimplemented; voice/translation paused, no paid services/real SMS/public launch. Production source-protection/retention gates separate; KK provisional/mobile RU.
