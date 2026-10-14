@@ -1,6 +1,6 @@
 # Contact default — login number offered as the point's contact — Slice Contract
 
-**Status:** APPROVED (PO, 2026-10-14) — the contract with the ten decisions of §6 and the previews of §9. Implementation has not started and needs a separate PO instruction.
+**Status:** CLOSED (PO 2026-10-14). Approved by the Product Owner on 2026-10-14 with the ten decisions of §6 and the previews of §9; manual acceptance PASS at `14a3a124bfd7394a4fd1a313277f39ac758b2f8b`; merged as `9dff3f42ca52ec024d27191c0ce43309607a22f4`; annotated checkpoint `v0.0.79-contact-default`.
 
 **Queue:** S-CONTACT-DEFAULT, item 8 of the PO-approved order of 2026-10-13 (after S-ACTUALITY-WORDS, before B-READABILITY; one at a time). Order and state are owned by `docs/product/EXECUTION_PLAN.md`.
 
@@ -156,3 +156,13 @@ point-contacts-hours (extended: chips on point forms, honest help text, stored p
 - 2026-10-14: contract preparation authorized (docs only).
 - 2026-10-14 (review of the first draft): Q1 — WhatsApp never prefilled, own chip; Q3 — no prefill, chip «Указать мой номер …», no clear button of our own; Q5 — notice wording fixed; Q8 — no chip and no error when the number is unknown.
 - 2026-10-14 (re-review): the PO APPROVED this contract and the previews of §9. Added decisions: Q2 — no field is ever prefilled, existing points change only by a chip tap and «Сохранить»; Q10 — chips on any point form (replaces the draft recommendation of first point only); Q4, Q6, Q7, Q9 accepted as drafted. Implementation has not started and needs a separate PO instruction.
+
+## 14. Closure (PO 2026-10-14)
+
+- **Acceptance:** manual acceptance PASS at `14a3a124bfd7394a4fd1a313277f39ac758b2f8b` (PR #184), as given by the PO; no timing figures were provided and none are recorded. The accepted tree `e049afe5d9ed21ab86585519a5d7dc54d4dc5be2` is identical to the merged tree.
+- **Merge:** PR #184 merged with a merge commit `9dff3f42ca52ec024d27191c0ce43309607a22f4`. Scope audited against this contract: no migration; nothing buyers see, contact building, verification rules, OTP flows or limits changed; the only existing-test edits are two cleanup lines that also delete `seller_verified_phones` rows (`s7-real-seller-search` integration, `seller-card-point-link` e2e).
+- **Decisions Q1–Q10:** as approved in §6 and §13; implemented as written (chips on any point form, no prefill, fixed notices, proof recorded when a point holds the login number).
+- **Checkpoint:** annotated tag `v0.0.79-contact-default` on the merge commit.
+- **CI:** contract PR #183 merged `57a35870f89fedb6372ffdf875cb808a2d4aecd4`, main KAIDA verify 38536333848 and CodeQL 38536333832. Accepted head — verify 38542587718 and 38542612684, Analyze 38542612440, dependency review 38542612639, CodeQL check 115781221678 (unit 538, integration 336, e2e 290 passed with 58 expected skips). Merged main — KAIDA verify 38547306819, CodeQL 38547306967.
+- **Known, unscheduled limitations (no code change):** the KK strings are provisional and have not been reviewed by a human; the WhatsApp chip copies the «Телефон» text as typed, and an invalid value is rejected by the server on save.
+- **Port 3000:** serves this checkpoint against the isolated snapshot; there is no migration in this slice, the snapshot schema is untouched.
