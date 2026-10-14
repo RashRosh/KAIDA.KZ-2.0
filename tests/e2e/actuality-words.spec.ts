@@ -6,6 +6,7 @@ import { testDatabaseUrl } from '../integration/database';
 // actuality-words §10: the one-tap «Всё актуально · N» on «Моя витрина», partial success, the review list, and the
 // wording at 320 / 390 px (no horizontal scroll, no short preposition or conjunction at the end of a line).
 
+// Sizes are checked with a 0.1 px rounding allowance (sub-pixel layout can report 43.99998 for a 44 px box).
 // One phone per test: the tests of a file run in parallel and each cleans up its own Seller.
 const phoneFor = (project: string, test: 1 | 2) => `+7700006${project === 'mobile' ? '1' : '2'}00${test}`;
 const SHORT = new Set(['в', 'во', 'на', 'с', 'со', 'к', 'ко', 'по', 'за', 'от', 'до', 'из', 'у', 'о', 'об', 'и', 'а', 'но', 'не', 'ни', 'да', 'же', 'ли', 'бы']);
@@ -113,7 +114,7 @@ test('one tap confirms the due cards buyers see; a card that cannot be confirmed
     await expect(partial).toBeVisible();
     const view = partial.getByRole('button', { name: 'Посмотреть' });
     // The toast settles after its entry animation; the action is at least 44 px tall (R3).
-    await expect.poll(async () => (await view.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect.poll(async () => (await view.boundingBox())!.height).toBeGreaterThanOrEqual(43.9);
     // The confirmed card changed, the failing one did not.
     await withPool(async (pool) => {
       const rows = (await pool.query('SELECT title, last_confirmed_at > now() - interval \'1 hour\' AS fresh FROM offers WHERE id = ANY($1::uuid[]) ORDER BY title', [[ids['Слова курага'], ids['Слова изюм']]])).rows;
@@ -123,8 +124,8 @@ test('one tap confirms the due cards buyers see; a card that cannot be confirmed
     await expect(page.getByRole('heading', { name: /^Актуальность · \d$/, level: 1 })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Товар есть, цена та же: Слова чай/ })).toBeVisible();
     const row = page.getByRole('button', { name: /^Товар есть, цена та же: Слова чай/ });
-    await expect.poll(async () => (await row.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await expect.poll(async () => (await row.boundingBox())!.width).toBeGreaterThanOrEqual(44);
+    await expect.poll(async () => (await row.boundingBox())!.height).toBeGreaterThanOrEqual(43.9);
+    await expect.poll(async () => (await row.boundingBox())!.width).toBeGreaterThanOrEqual(43.9);
   } finally {
     await cleanup(phone);
   }

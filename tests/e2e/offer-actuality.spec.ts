@@ -100,7 +100,8 @@ test('buyers see how fresh offers are; the Seller confirms due cards and restore
     await expect(all).toBeVisible();
     await expect(task.getByRole('button', { name: 'Проверить' })).toBeVisible();
     const box = await all.boundingBox();
-    expect(box!.height).toBeGreaterThanOrEqual(44);
+    // 44 px as laid out; the browser may report 43.99998 for the same box (sub-pixel layout), so allow a rounding error.
+    expect(box!.height).toBeGreaterThanOrEqual(43.9);
     await all.click();
     const done = page.getByRole('status').filter({ hasText: 'Подтверждено: 1 карточка' });
     await expect(done).toBeVisible();
