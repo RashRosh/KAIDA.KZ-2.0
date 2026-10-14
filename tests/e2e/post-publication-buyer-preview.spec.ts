@@ -127,9 +127,9 @@ test('the Seller cabinet: the action only for what buyers can see, in the agreed
     // one point, on the showcase: «Редактировать» is followed by the new action, then «Выключить»
     await page.goto(`/seller?card=${ids.oneCard}`);
     const list = page.locator('.card').filter({ has: page.getByTestId('preview-action') });
-    await expect(list.locator('.li .ts, .li').filter({ hasText: /Подтвердить актуальность|Редактировать|Как видят покупатели|Выключить/ }).first()).toBeVisible();
+    await expect(list.locator('.li .ts, .li').filter({ hasText: /Товар есть, цена та же|Редактировать|Как видят покупатели|Выключить/ }).first()).toBeVisible();
     const order = await list.locator('.ts').allTextContents();
-    expect(order.filter((text) => /Подтвердить актуальность|Редактировать|Как видят покупатели|Выключить/.test(text))).toEqual(['Подтвердить актуальность', 'Редактировать', 'Как видят покупатели', 'Выключить']);
+    expect(order.filter((text) => /Товар есть, цена та же|Редактировать|Как видят покупатели|Выключить/.test(text))).toEqual(['Товар есть, цена та же', 'Редактировать', 'Как видят покупатели', 'Выключить']);
     const action = page.getByTestId('preview-action');
     await expect(action).toHaveAttribute('href', href(ids.oneOffer, ids.oneCard));
     await action.click();

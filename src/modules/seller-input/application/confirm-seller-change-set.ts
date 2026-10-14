@@ -4,6 +4,7 @@ import { getDatabase } from '../../../db/client';
 import {
   applyOfferActivation,
   applyOfferReconfirmation,
+  applyOfferUndoReconfirmation,
   applyOfferDeactivation,
   applyOfferUpdateSnapshot,
   createOffer,
@@ -21,6 +22,7 @@ import {
   type PublishedSellerComment,
   type ScheduleSellerCommentTranslations,
 } from '../../offers/translation/seller-comment-translator';
+import { readActualityPolicy } from '../../offers/actuality/actuality';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   ChangeSetNotFoundError,
@@ -29,6 +31,7 @@ import {
   OfferPriceRequiredError,
   SellerInputInvariantError,
   SellerRequiredError,
+  UndoWouldHideError,
   type SellerChangeSetView,
 } from '../contracts/seller-change-set.contract';
 import {
@@ -39,6 +42,7 @@ import {
   lockChangeItems,
   lockChangeSetByIdAndSeller,
   markChangeSetConfirmed,
+  recordPreviousConfirmedAt,
 } from '../infrastructure/seller-change-sets.repository';
 
 type LockedOffer = NonNullable<Awaited<ReturnType<typeof lockOfferById>>>;
@@ -177,8 +181,11 @@ export async function confirmSellerChangeSet(
         throw new SellerInputInvariantError('Deactivate proposal ожидает active target Offer на своей revision.');
       }
       // offer-actuality: a switched-off offer is confirmed by switching it on, not by «Подтвердить актуальность».
-      if (item.action === 'reconfirm_offer' && targetOffer.status !== 'active') {
+      if ((item.action === 'reconfirm_offer' || item.action === 'undo_reconfirm_offer') && targetOffer.status !== 'active') {
         throw new OfferAlreadyInactiveError();
+      }
+      if (item.action === 'undo_reconfirm_offer' && !item.previousConfirmedAt) {
+        throw new SellerInputInvariantError('Undo Item не содержит время для восстановления.');
       }
       assertPricedItem(item);
       if (item.action === 'activate_offer' && (targetOffer.priceAmount === null || targetOffer.priceCurrency !== 'KZT')) {
@@ -199,7 +206,7 @@ export async function confirmSellerChangeSet(
     // one proposed after it republishes the card (clears the removal); switching a removed card on is refused.
     const removals = await lockActiveRemovals(tx, items.map((item) => item.cardId));
     const removedCards = new Set(removals.map((removal) => removal.cardId));
-    if (items.some((item) => (item.action === 'activate_offer' || item.action === 'reconfirm_offer') && removedCards.has(item.cardId))) {
+    if (items.some((item) => (item.action === 'activate_offer' || item.action === 'reconfirm_offer' || item.action === 'undo_reconfirm_offer') && removedCards.has(item.cardId))) {
       throw new CardRemovedByOperatorError();
     }
     const republishedCards = new Set(items
@@ -266,6 +273,18 @@ export async function confirmSellerChangeSet(
           offerId: targetOffer.id,
           expectedRevision: item.expectedOfferRevision!,
           confirmationTime,
+        });
+        // actuality-words: remember the time this confirmation replaced, so it can be undone.
+        if (applied.length === 1) await recordPreviousConfirmedAt(tx, item.id, targetOffer.lastConfirmedAt);
+      } else if (item.action === 'undo_reconfirm_offer') {
+        const restored = item.previousConfirmedAt!;
+        // An undo never hides a card from buyers: past the hidden threshold the confirmation stays.
+        if (confirmationTime.getTime() - restored.getTime() >= readActualityPolicy().hiddenHours * 3_600_000) throw new UndoWouldHideError();
+        applied = await applyOfferUndoReconfirmation(tx, {
+          offerId: targetOffer.id,
+          expectedRevision: item.expectedOfferRevision!,
+          restoredConfirmedAt: restored,
+          changeTime: confirmationTime,
         });
       } else {
         applied = await applyOfferActivation(tx, {

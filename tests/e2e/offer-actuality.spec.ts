@@ -4,7 +4,8 @@ import { testDatabaseUrl } from '../integration/database';
 import { fillOfferFields, offerEditor, openNewCard, publishButton, showcaseCard } from './offer-editor-helpers';
 
 // offer-actuality §7: cards of different ages → buyer badges and order, the task block, «Нужно подтвердить», the
-// archive, «Всё актуально», and a restore from the archive through the card screen.
+// archive, the one-tap «Всё актуально · N» with its undo (actuality-words), the review list with a per-row confirm, and a
+// restore from the archive through the card screen.
 
 function phoneFor(projectName: string) {
   return `+7700004${projectName === 'mobile' ? '4' : '5'}001`;
@@ -94,19 +95,41 @@ test('buyers see how fresh offers are; the Seller confirms due cards and restore
     await expect(showcaseCard(page, new RegExp(names.ageing))).toContainText('Подтвердите актуальность');
     await expect(showcaseCard(page, new RegExp(names.archived))).toHaveCount(0);
 
-    // «Проверить» → «Всё актуально».
+    // actuality-words: one tap confirms the due card buyers still see (the hidden one is left for the list); undo restores it.
+    const all = task.getByRole('button', { name: 'Всё актуально · 1' });
+    await expect(all).toBeVisible();
+    await expect(task.getByRole('button', { name: 'Проверить' })).toBeVisible();
+    const box = await all.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    await all.click();
+    const done = page.getByRole('status').filter({ hasText: 'Подтверждено: 1 карточка' });
+    await expect(done).toBeVisible();
+    await expect(done.getByRole('button', { name: 'Отменить' })).toBeVisible();
+    await expect(task).toContainText('1 карточка · 1 уже скрыта с витрины');
+    await expect(task.getByTestId('actuality-all')).toHaveCount(0);
+    await done.getByRole('button', { name: 'Отменить' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Подтверждение отменено' })).toBeVisible();
+    await expect(task).toContainText('2 карточки · 1 уже скрыта с витрины');
+    await expect(showcaseCard(page, new RegExp(names.ageing))).toContainText('Подтвердите актуальность');
+    await expect(task.getByRole('button', { name: 'Всё актуально · 1' })).toBeVisible();
+
+    // The review list: a counted footer button and a one-tap confirm per row (also for the hidden card).
     await task.getByRole('button', { name: 'Проверить' }).click();
     await expect(page.getByRole('heading', { name: 'Актуальность · 2', level: 1 })).toBeVisible();
-    await page.getByRole('button', { name: 'Всё актуально' }).click();
+    await expect(page.getByTestId('actuality-all')).toHaveText('Всё актуально · 1');
+    await page.getByRole('button', { name: new RegExp('^Товар есть, цена та же: ' + names.hidden) }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Актуальность подтверждена' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Актуальность · 1', level: 1 })).toBeVisible();
+    await page.getByTestId('actuality-all').click();
+    await expect(page.getByRole('status').filter({ hasText: 'Подтверждено: 1 карточка' })).toBeVisible();
     await expect(page.getByTestId('actuality-task')).toHaveCount(0);
 
-    // Archive → card screen → «Подтвердить актуальность» brings it back.
+    // Archive → card screen → «Товар есть, цена та же» brings it back.
     await page.getByRole('link', { name: 'Архив · 1' }).click();
     await expect(page.getByRole('heading', { name: 'Архив · 1', level: 1 })).toBeVisible();
     await page.getByRole('button', { name: new RegExp(names.archived) }).click();
     await expect(page.getByText('В архиве', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: /^Подтвердить актуальность/ }).click();
+    await page.getByRole('button', { name: 'Товар есть, цена та же', exact: true }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Актуальность подтверждена' })).toBeVisible();
     await page.getByRole('button', { name: 'Назад' }).click();
     await expect(showcaseCard(page, new RegExp(names.archived))).toBeVisible();

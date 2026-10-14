@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { actualityText } from '../../_components/actuality-text';
 import { formatAmount } from '../../_components/format-amount';
-import { Bar, Ic, Phone, Thumb } from '../_kaida/ui';
+import { Bar, Ic, Phone, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
 import { pluralKey, type SellerCard } from './card-model';
 import { PushToggle } from './PushToggle';
 
@@ -49,23 +49,43 @@ export function daysLabel(days: number, t: ReturnType<typeof useI18n>['t']) {
   return t(pluralKey('actuality.days', days), { count: days });
 }
 
-// S01: the task, not a status — shown while some card has waited a day or more.
-export function ActualityTask({ due, onCheck }: { due: SellerCard[]; onCheck: () => void }) {
+// S01: the task, not a status — shown while some card has waited a day or more. actuality-words: a primary counted button
+// «Всё актуально · N» confirms every due card that buyers still see (one tap); «Проверить» opens the review list.
+export function ActualityTask({ due, oneTap, busy, error, onCheck, onConfirmAll }: {
+  due: SellerCard[];
+  oneTap: SellerCard[];
+  busy: boolean;
+  error: boolean;
+  onCheck: () => void;
+  onConfirmAll: () => void;
+}) {
   const { t } = useI18n();
   if (due.length === 0) return null;
   const hidden = due.filter((card) => card.actuality?.stage === 'hidden').length;
   return (
-    <div className="banner warn" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14 }} data-testid="actuality-task">
-      <Ic name="clock" style={{ color: 'var(--warning)' }} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div className="ts">{t('actuality.taskTitle')}</div>
-        <p className="c c2">
-          {t(pluralKey('actuality.taskCount', due.length), { count: due.length })}
-          {hidden > 0 ? ` · ${t(pluralKey('actuality.taskHidden', hidden), { count: hidden })}` : ''}
-        </p>
-        <PushToggle variant="task" />
+    <div className="banner warn" style={{ gap: 10, padding: '12px 14px', borderRadius: 14 }} data-testid="actuality-task">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Ic name="clock" style={{ color: 'var(--warning)' }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="ts">{t('actuality.taskTitle')}</div>
+          <p className="c c2" data-testid="actuality-count">
+            {t(pluralKey('actuality.taskCount', due.length), { count: due.length })}
+            {hidden > 0 ? ` · ${t(pluralKey('actuality.taskHidden', hidden), { count: hidden })}` : ''}
+          </p>
+          <PushToggle variant="task" />
+        </div>
       </div>
-      <button type="button" className="btn btn-o sm" onClick={onCheck}>{t('actuality.check')}</button>
+      {oneTap.length > 0 && (
+        <button type="button" className="btn btn-p lg w" disabled={busy} onClick={onConfirmAll} data-testid="actuality-all">
+          <Ic name="check" className="sm" />{t('actuality.allGoodCount', { count: oneTap.length })}
+        </button>
+      )}
+      {error && (
+        <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12 }}>
+          <p className="c" style={{ color: 'var(--ink)' }}>{t('actuality.confirmError')}</p>
+        </div>
+      )}
+      <button type="button" className="btn btn-o w" onClick={onCheck} data-testid="actuality-check">{t('actuality.check')}</button>
     </div>
   );
 }
@@ -78,14 +98,26 @@ function priceText(card: SellerCard) {
 }
 
 // S16 · Actuality · Default: every due card with its age; «Всё актуально» confirms them all.
-export function ActualityScreen({ due, onClose, onDone, go }: {
+export function ActualityScreen({ due, oneTap, bulk, onClose, onConfirmAll, onRefresh, go }: {
   due: SellerCard[];
+  oneTap: SellerCard[];
+  bulk: { busy: boolean; error: boolean };
   onClose: () => void;
-  onDone: () => void;
+  onConfirmAll: () => Promise<void>;
+  onRefresh: () => void;
   go: (query: string) => void;
 }) {
   const { t } = useI18n();
-  const { confirm, busy, error } = useReconfirm();
+  // Row by row (Q10): one tap confirms one card — also a card already hidden from buyers.
+  const { confirm, busy: rowBusy, error: rowError } = useReconfirm();
+  const [rowDone, setRowDone] = useState(false);
+  useEffect(() => {
+    if (!rowDone) return;
+    const timer = window.setTimeout(() => setRowDone(false), TOAST_MS);
+    return () => window.clearTimeout(timer);
+  }, [rowDone]);
+  const busy = bulk.busy || rowBusy;
+  const error = bulk.error || rowError;
   const steps: [string, string, string, string][] = [
     ['0', 'var(--success-soft)', 'var(--success)', 'actuality.how0'],
     ['2', 'var(--warning-soft)', 'var(--warning)', 'actuality.how2'],
@@ -109,6 +141,10 @@ export function ActualityScreen({ due, onClose, onDone, go }: {
                 <div className="ts">{name}</div>
                 <p className="c num" style={hidden ? { color: 'var(--warning)' } : undefined}>{priceText(card)} · {age}</p>
               </div>
+              <button type="button" className="ib" disabled={busy} aria-label={t('actuality.confirmItem', { name })} data-testid={`actuality-confirm-${card.cardId}`}
+                onClick={async () => { if (await confirm([card.cardId])) { setRowDone(true); onRefresh(); } }}>
+                <Ic name="check" className="sm" style={{ color: 'var(--primary-text)' }} />
+              </button>
               <button type="button" className="ib" aria-label={t('actuality.editItem', { name })} onClick={() => go(`edit=${card.cardId}`)}>
                 <Ic name="pencil" className="sm" />
               </button>
@@ -131,15 +167,14 @@ export function ActualityScreen({ due, onClose, onDone, go }: {
           </div>
         )}
       </main>
-      {due.length > 0 && (
+      {oneTap.length > 0 && (
         <div className="foot">
-          <button type="button" className="btn btn-p lg w" disabled={busy} onClick={async () => {
-            if (await confirm(due.map((card) => card.cardId))) onDone();
-          }}>
-            <Ic name="check" className="sm" />{t('actuality.allGood')}
+          <button type="button" className="btn btn-p lg w" disabled={busy} onClick={() => void onConfirmAll()} data-testid="actuality-all">
+            <Ic name="check" className="sm" />{t('actuality.allGoodCount', { count: oneTap.length })}
           </button>
         </div>
       )}
+      {rowDone && <Toast>{t('actuality.confirmed')}</Toast>}
     </Phone>
   );
 }

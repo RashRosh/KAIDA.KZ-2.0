@@ -113,6 +113,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
   targetOfferId: string;
   expectedOfferRevision: number;
   photosSpecified?: boolean;
+  previousConfirmedAt?: Date;
 }) {
   const rows = await database.insert(sellerChangeItems).values({
     changeSetId: values.changeSetId,
@@ -126,6 +127,7 @@ export async function createOfferManagementChangeItem(database: SellerInputDb, v
     targetOfferId: values.targetOfferId,
     expectedOfferRevision: values.expectedOfferRevision,
     photosSpecified: values.photosSpecified ?? false,
+    previousConfirmedAt: values.previousConfirmedAt ?? null,
   }).returning({ id: sellerChangeItems.id });
   const item = rows[0];
   if (!item) throw new Error('Seller offer management item insert did not return a row');
@@ -260,6 +262,7 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     expectedOfferRevision: sellerChangeItems.expectedOfferRevision,
     resultOfferId: sellerChangeItems.resultOfferId,
     photosSpecified: sellerChangeItems.photosSpecified,
+    previousConfirmedAt: sellerChangeItems.previousConfirmedAt,
   }).from(sellerChangeItems)
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id))
@@ -275,6 +278,14 @@ export async function linkResultOffer(database: SellerInputDb, itemId: string, o
   return database.update(sellerChangeItems)
     .set({ resultOfferId: offerId })
     .where(and(eq(sellerChangeItems.id, itemId), isNull(sellerChangeItems.resultOfferId)))
+    .returning({ id: sellerChangeItems.id });
+}
+
+// actuality-words: the confirmation moment remembers the Offer's previous last_confirmed_at, so a reconfirmation can be undone.
+export async function recordPreviousConfirmedAt(database: SellerInputDb, itemId: string, previousConfirmedAt: Date) {
+  return database.update(sellerChangeItems)
+    .set({ previousConfirmedAt })
+    .where(and(eq(sellerChangeItems.id, itemId), isNull(sellerChangeItems.previousConfirmedAt)))
     .returning({ id: sellerChangeItems.id });
 }
 

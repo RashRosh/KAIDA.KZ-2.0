@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { boolean, char, check, index, integer, numeric, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { boolean, char, check, index, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { products } from '../../catalog/db/products.table';
 import { locations } from '../../locations/db/locations.table';
 import { offers } from '../../offers/db/offers.table';
@@ -7,7 +7,7 @@ import type { PriceUnitCode } from '../../offers/price-unit/price-unit';
 import type { PackUnit } from '../../offers/pack/pack';
 import { sellerChangeSets } from './seller-change-sets.table';
 
-export type SellerChangeAction = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer' | 'reconfirm_offer';
+export type SellerChangeAction = 'create_offer' | 'update_offer' | 'deactivate_offer' | 'activate_offer' | 'reconfirm_offer' | 'undo_reconfirm_offer';
 export type SellerOfferManagementAction = Exclude<SellerChangeAction, 'create_offer'>;
 
 export const sellerChangeItems = pgTable('seller_change_items', {
@@ -32,11 +32,14 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   resultOfferId: uuid('result_offer_id').references(() => offers.id),
   // update_offer only: true replaces the Offer photo list with the item photos (possibly none); false keeps it.
   photosSpecified: boolean('photos_specified').notNull().default(false),
+  // actuality-words: the Offer's last_confirmed_at before a reconfirm_offer confirmation; on an undo_reconfirm_offer
+  // item, the time that undo restores (the same value). Null on every other action and on items confirmed before 0029.
+  previousConfirmedAt: timestamp('previous_confirmed_at', { withTimezone: true }),
 }, (table) => [
   index('seller_change_items_change_set_id_idx').on(table.changeSetId),
   check('seller_change_items_pack_valid', sql`(${table.packAmount} IS NULL AND ${table.packUnit} IS NULL)
   OR (${table.packAmount} > 0 AND ${table.packUnit} IN ('g', 'kg', 'ml', 'l') AND ${table.priceUnitCode} IN ('package', 'piece'))`),
-  check('seller_change_items_action_allowed', sql`${table.action} IN ('create_offer', 'update_offer', 'deactivate_offer', 'activate_offer', 'reconfirm_offer')`),
+  check('seller_change_items_action_allowed', sql`${table.action} IN ('create_offer', 'update_offer', 'deactivate_offer', 'activate_offer', 'reconfirm_offer', 'undo_reconfirm_offer')`),
   check('seller_change_items_price_valid', sql`${table.priceAmount} IS NULL OR (
     ${table.priceAmount} >= 0
     AND ${table.priceAmount} NOT IN ('NaN'::numeric, 'Infinity'::numeric)
@@ -64,10 +67,12 @@ export const sellerChangeItems = pgTable('seller_change_items', {
     AND ${table.targetOfferId} IS NULL
     AND ${table.expectedOfferRevision} IS NULL
   ) OR (
-    ${table.action} IN ('update_offer', 'deactivate_offer', 'activate_offer', 'reconfirm_offer')
+    ${table.action} IN ('update_offer', 'deactivate_offer', 'activate_offer', 'reconfirm_offer', 'undo_reconfirm_offer')
     AND ${table.targetOfferId} IS NOT NULL
     AND ${table.expectedOfferRevision} IS NOT NULL
   )`),
   check('seller_change_items_photos_specified_scope', sql`${table.photosSpecified} = false OR ${table.action} = 'update_offer'`),
+  check('seller_change_items_previous_confirmed_scope', sql`${table.previousConfirmedAt} IS NULL OR ${table.action} IN ('reconfirm_offer', 'undo_reconfirm_offer')`),
+  check('seller_change_items_undo_restore_time_required', sql`${table.action} <> 'undo_reconfirm_offer' OR ${table.previousConfirmedAt} IS NOT NULL`),
   check('seller_change_items_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
 ]);

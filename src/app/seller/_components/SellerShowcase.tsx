@@ -17,7 +17,8 @@ import { ActualityScreen, ActualityTask, ArchiveScreen, daysLabel, FreshPlaque, 
 import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardEditor';
 import { SellerTradingPoints } from './SellerTradingPoints';
 import { valuesFromChangeSet, type CardValues } from './card-editor-state';
-import { findCard, groupCards, missingDraftFields, pluralKey, showcaseEntries, type SellerCard } from './card-model';
+import { findCard, groupCards, isOneTapCard, missingDraftFields, pluralKey, showcaseEntries, type SellerCard } from './card-model';
+import { BulkToast, useBulkConfirm } from './useBulkConfirm';
 
 type Data =
   | { kind: 'loading' }
@@ -73,6 +74,7 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   const router = useRouter();
   const params = useSearchParams();
   const { data, reload } = useShowcaseData(locale);
+  const bulk = useBulkConfirm({ onChanged: reload });
   const [sourceOpen, setSourceOpen] = useState(false);
   const [notice, setNotice] = useState<{ text: MessageKey; offerId: string | null } | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
@@ -140,10 +142,14 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   const liveCards = cards.filter((card) => !card.actuality?.archived);
   const dueCards = liveCards.filter((card) => card.actuality?.due)
     .sort((a, b) => a.actuality!.lastConfirmedAt.localeCompare(b.actuality!.lastConfirmedAt));
+  // actuality-words Q1: the one tap confirms live due cards that buyers still see; hidden ones are confirmed row by row.
+  const oneTapCards = dueCards.filter(isOneTapCard);
   const overlay = (
     <Overlays
       cards={cards}
       dueCards={dueCards}
+      oneTapCards={oneTapCards}
+      bulk={bulk}
       archivedCards={archivedCards}
       drafts={data.drafts}
       seller={data.seller}
@@ -156,10 +162,8 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
         closeOverlay();
       }}
       onRefresh={reload}
-      onReconfirmed={() => {
-        setNotice({ text: 'actuality.confirmed', offerId: null });
-        reload();
-        closeOverlay();
+      onConfirmAll={async () => {
+        if (await bulk.confirmAll(oneTapCards.map((card) => card.cardId))) closeOverlay();
       }}
       onReload={(values, photoIds) => {
         setOverride({ key: String(Date.now()), initial: { values, photoIds } });
@@ -172,7 +176,9 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
 
   const entries = showcaseEntries(liveCards, data.drafts).filter((entry) => tab === 'all' || entry.kind === 'draft');
   const empty = cards.length === 0 && data.drafts.length === 0;
-  const toast = notice && <Toast>{t(notice.text)}</Toast>;
+  const toast = bulk.toast
+    ? <BulkToast toast={bulk.toast} onUndo={() => void bulk.undo()} onView={() => { bulk.dismiss(); go('actuality=1'); }} />
+    : notice && <Toast>{t(notice.text)}</Toast>;
 
   if (empty) {
     return screen(
@@ -188,7 +194,7 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
   return screen(
     <main className="body" style={{ gap: 12 }}>
       {cta}
-      <ActualityTask due={dueCards} onCheck={() => go('actuality=1')} />
+      <ActualityTask due={dueCards} oneTap={oneTapCards} busy={bulk.busy} error={bulk.error} onCheck={() => go('actuality=1')} onConfirmAll={() => void bulk.confirmAll(oneTapCards.map((card) => card.cardId))} />
       {data.drafts.length > 0 || archivedCards.length > 0 ? (
         <nav className="chips" aria-label={t('showcase.tabs')}>
           <Link href="/seller" scroll={false} className={`chip${tab === 'all' ? ' on' : ''}`} aria-current={tab === 'all' ? 'page' : undefined}>{t('showcase.tabAll', { count: liveCards.length + data.drafts.length })}</Link>
@@ -335,9 +341,11 @@ function SourceSheet({ onClose, onManual }: { onClose: () => void; onManual: () 
 
 // The editor and the card screen, opened from the address: `new=1`, `draft=`, `edit=`, `point=`, `card=`; `from=` a
 // proposed ChangeSet when the Seller returns from the review page.
-function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTranslationEnabled, override, onClose, onSaved, onReconfirmed, onRefresh, onReload, go }: {
+function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, seller, commentTranslationEnabled, override, onClose, onSaved, onConfirmAll, onRefresh, onReload, go }: {
   cards: SellerCard[];
   dueCards: SellerCard[];
+  oneTapCards: SellerCard[];
+  bulk: { busy: boolean; error: boolean };
   archivedCards: SellerCard[];
   drafts: OfferDraftView[];
   seller: SellerView | null;
@@ -345,7 +353,7 @@ function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTrans
   override: { key: string; initial: CardEditorInitial } | null;
   onClose: () => void;
   onSaved: (kind: 'draftSaved' | 'draftDeleted') => void;
-  onReconfirmed: () => void;
+  onConfirmAll: () => Promise<void>;
   onRefresh: () => void;
   onReload: (values: CardValues, photoIds: string[]) => void;
   go: (query: string) => void;
@@ -410,7 +418,7 @@ function Overlays({ cards, dueCards, archivedCards, drafts, seller, commentTrans
     );
   }
   if (screenCard) return <CardScreen card={screenCard} seller={seller} onClose={onClose} go={go} onRefresh={onRefresh} />;
-  if (params.get('actuality') === '1') return <ActualityScreen due={dueCards} onClose={onClose} onDone={onReconfirmed} go={go} />;
+  if (params.get('actuality') === '1') return <ActualityScreen due={dueCards} oneTap={oneTapCards} bulk={bulk} onClose={onClose} onConfirmAll={onConfirmAll} onRefresh={onRefresh} go={go} />;
   if (params.get('tab') === 'archive') return <ArchiveScreen cards={archivedCards} onClose={onClose} go={go} />;
   return null;
 }
@@ -563,7 +571,7 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
           ) : (
             <div className="card" style={{ gap: 0, padding: '0 12px' }}>
               <button type="button" className="li" onClick={() => void confirmActuality()} disabled={reconfirm.busy} style={{ background: 'transparent', border: 0 }}>
-                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t('actuality.confirm')}</div><p className="c">{t('actuality.confirmHint')}</p></div>
+                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t('actuality.confirm')}</div></div>
               </button>
               <button type="button" className="li" onClick={() => go(`edit=${card.cardId}`)} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
                 <Ic name="pencil" className="c2" /><div className="mid"><div className="ts">{t('cardScreen.edit')}</div></div>

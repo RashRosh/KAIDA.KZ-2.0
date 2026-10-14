@@ -1347,3 +1347,7 @@ Until that happens:
 S5 NOT APPROVED
 IMPLEMENTATION BLOCKED
 ```
+
+## Actuality-words revision (PO 2026-10-13)
+
+Owning approved contract: [actuality-words](../actuality-words/SLICE_CONTRACT.md) §7.2. A new ChangeSet item action `undo_reconfirm_offer` sits next to `reconfirm_offer`: it restores the Offer's previous `last_confirmed_at` (and bumps the revision) only for an Offer that is still on and still has the revision the reconfirmation produced. `reconfirm_offer` items remember the replaced time in `previous_confirmed_at` (additive migration 0029; existing rows keep it empty). Original ChangeSets are never edited or deleted.
