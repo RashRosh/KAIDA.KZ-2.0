@@ -1,0 +1,904 @@
+{
+  "report": {
+    "model": "embedding-A",
+    "model_revision": null,
+    "repository_ref": "a736c4d793db8280b2ba9d6ccfb4c41622007de3",
+    "catalog_hashes": {
+      "products.csv": "a32f3cf087e25db57740829afd7bb9c79152e8ff8a70374dc3a88ad31f43dd14",
+      "aliases.csv": "b96c4181f6b3efb8609aa9b7b0ba5b33471062200bb05335ad0c5f6e1ec49350"
+    },
+    "device": "cuda:1",
+    "dtype": "float32",
+    "catalog_seconds": 2.7012442200002624,
+    "query_batch_seconds": 0.10261444400020991,
+    "query_prompt": "task: search result | query: ",
+    "document_prompt": "title: none | text: ",
+    "versions": {
+      "torch": "2.11.0+cu128",
+      "transformers": "5.21.0.dev0",
+      "sentence-transformers": "6.1.0"
+    },
+    "notes": [
+      "Копия каталога, не подключение к рабочей базе.",
+      "Кандидаты не назначаются автоматически и не создают Product.",
+      "Cosine similarity не является вероятностью правильного совпадения.",
+      "Даже отсутствующий или неоднозначный товар получит пять кандидатов.",
+      "Нет эталонной разметки: точность и Recall@K здесь не подсчитываются.",
+      "Это отдельный этап подбора, не сквозной тест извлечения сообщения.",
+      "Точное сопоставление в Python приближает resolver, но не заменяет PostgreSQL тест."
+    ],
+    "results": [
+      {
+        "query": "Говядина",
+        "exact_product_ids": [
+          "KAIDA-P0001"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0001",
+            "name_ru": "Говядина",
+            "name_kk": "Сиыр еті",
+            "cosine_similarity": 0.8319761157035828
+          },
+          {
+            "product_id": "KAIDA-P0015",
+            "name_ru": "Говяжья пашина",
+            "name_kk": "Сиыр шап еті",
+            "cosine_similarity": 0.8193761706352234
+          },
+          {
+            "product_id": "KAIDA-P0006",
+            "name_ru": "Говяжья шея",
+            "name_kk": "Сиыр мойын еті",
+            "cosine_similarity": 0.8149498701095581
+          },
+          {
+            "product_id": "KAIDA-P0119",
+            "name_ru": "Говяжье лёгкое",
+            "name_kk": "Сиыр өкпесі",
+            "cosine_similarity": 0.8129611015319824
+          },
+          {
+            "product_id": "KAIDA-P0010",
+            "name_ru": "Говяжья корейка",
+            "name_kk": "Сиыр жон еті",
+            "cosine_similarity": 0.8124247193336487
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "мясо говядины",
+        "exact_product_ids": [
+          "KAIDA-P0001"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0001",
+            "name_ru": "Говядина",
+            "name_kk": "Сиыр еті",
+            "cosine_similarity": 0.8187953233718872
+          },
+          {
+            "product_id": "KAIDA-P0005",
+            "name_ru": "Говяжья мякоть",
+            "name_kk": "Сиыр етінің жұмсағы",
+            "cosine_similarity": 0.7976855039596558
+          },
+          {
+            "product_id": "KAIDA-P0006",
+            "name_ru": "Говяжья шея",
+            "name_kk": "Сиыр мойын еті",
+            "cosine_similarity": 0.7843165993690491
+          },
+          {
+            "product_id": "KAIDA-P0021",
+            "name_ru": "Говядина на кости",
+            "name_kk": "Сүйекті сиыр еті",
+            "cosine_similarity": 0.7835420370101929
+          },
+          {
+            "product_id": "KAIDA-P0777",
+            "name_ru": "Говядина для шашлыка",
+            "name_kk": "Кәуапқа арналған сиыр еті",
+            "cosine_similarity": 0.7828786373138428
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Сиыр еті",
+        "exact_product_ids": [
+          "KAIDA-P0001"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0001",
+            "name_ru": "Говядина",
+            "name_kk": "Сиыр еті",
+            "cosine_similarity": 0.8244786262512207
+          },
+          {
+            "product_id": "KAIDA-P0119",
+            "name_ru": "Говяжье лёгкое",
+            "name_kk": "Сиыр өкпесі",
+            "cosine_similarity": 0.8241808414459229
+          },
+          {
+            "product_id": "KAIDA-P0015",
+            "name_ru": "Говяжья пашина",
+            "name_kk": "Сиыр шап еті",
+            "cosine_similarity": 0.8144287467002869
+          },
+          {
+            "product_id": "KAIDA-P0116",
+            "name_ru": "Говяжье сердце",
+            "name_kk": "Сиыр жүрегі",
+            "cosine_similarity": 0.8081008195877075
+          },
+          {
+            "product_id": "KAIDA-P0010",
+            "name_ru": "Говяжья корейка",
+            "name_kk": "Сиыр жон еті",
+            "cosine_similarity": 0.8077191114425659
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Куриное филе",
+        "exact_product_ids": [
+          "KAIDA-P0089"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0089",
+            "name_ru": "Куриное филе",
+            "name_kk": "Тауық сүбесі",
+            "cosine_similarity": 0.8197499513626099
+          },
+          {
+            "product_id": "KAIDA-P0081",
+            "name_ru": "Кроличье филе",
+            "name_kk": "Қоян сүбесі",
+            "cosine_similarity": 0.7935588955879211
+          },
+          {
+            "product_id": "KAIDA-P0101",
+            "name_ru": "Филе индейки",
+            "name_kk": "Күркетауық сүбесі",
+            "cosine_similarity": 0.7904666066169739
+          },
+          {
+            "product_id": "KAIDA-P0248",
+            "name_ru": "Филе минтая",
+            "name_kk": "Минтай сүбесі",
+            "cosine_similarity": 0.7690311670303345
+          },
+          {
+            "product_id": "KAIDA-P0206",
+            "name_ru": "Корюшка",
+            "name_kk": "Корюшка",
+            "cosine_similarity": 0.7680458426475525
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Тауық сүбесі",
+        "exact_product_ids": [
+          "KAIDA-P0089"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0091",
+            "name_ru": "Куриное бедро",
+            "name_kk": "Тауық саны",
+            "cosine_similarity": 0.8154220581054688
+          },
+          {
+            "product_id": "KAIDA-P0094",
+            "name_ru": "Куриная четверть",
+            "name_kk": "Тауықтың ширек бөлігі",
+            "cosine_similarity": 0.8097188472747803
+          },
+          {
+            "product_id": "KAIDA-P0141",
+            "name_ru": "Куриные шеи",
+            "name_kk": "Тауық мойны",
+            "cosine_similarity": 0.8074471354484558
+          },
+          {
+            "product_id": "KAIDA-P0095",
+            "name_ru": "Куриный окорочок",
+            "name_kk": "Тауықтың сан еті",
+            "cosine_similarity": 0.805558979511261
+          },
+          {
+            "product_id": "KAIDA-P0092",
+            "name_ru": "Куриная голень",
+            "name_kk": "Тауық сирағы",
+            "cosine_similarity": 0.8045072555541992
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "филе",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0004",
+            "name_ru": "Говяжье филе",
+            "name_kk": "Сиыр еті филесі",
+            "cosine_similarity": 0.8273675441741943
+          },
+          {
+            "product_id": "KAIDA-P0246",
+            "name_ru": "Филе сома",
+            "name_kk": "Жайын сүбесі",
+            "cosine_similarity": 0.8033030033111572
+          },
+          {
+            "product_id": "KAIDA-P0081",
+            "name_ru": "Кроличье филе",
+            "name_kk": "Қоян сүбесі",
+            "cosine_similarity": 0.7976121306419373
+          },
+          {
+            "product_id": "KAIDA-P0249",
+            "name_ru": "Филе трески",
+            "name_kk": "Нәлім сүбесі",
+            "cosine_similarity": 0.793917715549469
+          },
+          {
+            "product_id": "KAIDA-P0089",
+            "name_ru": "Куриное филе",
+            "name_kk": "Тауық сүбесі",
+            "cosine_similarity": 0.7932244539260864
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "бедро",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0326",
+            "name_ru": "Фета",
+            "name_kk": "Фета",
+            "cosine_similarity": 0.7875081300735474
+          },
+          {
+            "product_id": "KAIDA-P0177",
+            "name_ru": "Нерка",
+            "name_kk": "Нерка",
+            "cosine_similarity": 0.7756447196006775
+          },
+          {
+            "product_id": "KAIDA-P0720",
+            "name_ru": "Квас",
+            "name_kk": "Квас",
+            "cosine_similarity": 0.7700586915016174
+          },
+          {
+            "product_id": "KAIDA-P0322",
+            "name_ru": "Бри",
+            "name_kk": "Бри",
+            "cosine_similarity": 0.7684420943260193
+          },
+          {
+            "product_id": "KAIDA-P0103",
+            "name_ru": "Бедро индейки",
+            "name_kk": "Күркетауық саны",
+            "cosine_similarity": 0.7614606022834778
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "крылья",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0206",
+            "name_ru": "Корюшка",
+            "name_kk": "Корюшка",
+            "cosine_similarity": 0.7940801978111267
+          },
+          {
+            "product_id": "KAIDA-P0105",
+            "name_ru": "Крыло индейки",
+            "name_kk": "Күркетауық қанаты",
+            "cosine_similarity": 0.7902885675430298
+          },
+          {
+            "product_id": "KAIDA-P0093",
+            "name_ru": "Куриное крыло",
+            "name_kk": "Тауық қанаты",
+            "cosine_similarity": 0.7882623672485352
+          },
+          {
+            "product_id": "KAIDA-P0720",
+            "name_ru": "Квас",
+            "name_kk": "Квас",
+            "cosine_similarity": 0.7764590978622437
+          },
+          {
+            "product_id": "KAIDA-P0205",
+            "name_ru": "Мойва",
+            "name_kk": "Мойва",
+            "cosine_similarity": 0.7633586525917053
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "куриное феле",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0089",
+            "name_ru": "Куриное филе",
+            "name_kk": "Тауық сүбесі",
+            "cosine_similarity": 0.7594358921051025
+          },
+          {
+            "product_id": "KAIDA-P0326",
+            "name_ru": "Фета",
+            "name_kk": "Фета",
+            "cosine_similarity": 0.7592760920524597
+          },
+          {
+            "product_id": "KAIDA-P0547",
+            "name_ru": "Пенне",
+            "name_kk": "Пенне",
+            "cosine_similarity": 0.7456017732620239
+          },
+          {
+            "product_id": "KAIDA-P0688",
+            "name_ru": "Шелпек",
+            "name_kk": "Шелпек",
+            "cosine_similarity": 0.7438422441482544
+          },
+          {
+            "product_id": "KAIDA-P0640",
+            "name_ru": "Хмели-сунели",
+            "name_kk": "Хмели-сунели",
+            "cosine_similarity": 0.7436909079551697
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "пелмени домашние",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0557",
+            "name_ru": "Тесто для пельменей",
+            "name_kk": "Тұшпара қамыры",
+            "cosine_similarity": 0.7536927461624146
+          },
+          {
+            "product_id": "KAIDA-P0547",
+            "name_ru": "Пенне",
+            "name_kk": "Пенне",
+            "cosine_similarity": 0.7498593330383301
+          },
+          {
+            "product_id": "KAIDA-P0457",
+            "name_ru": "Помело",
+            "name_kk": "Помело",
+            "cosine_similarity": 0.7225304841995239
+          },
+          {
+            "product_id": "KAIDA-P0544",
+            "name_ru": "Спагетти",
+            "name_kk": "Спагетти",
+            "cosine_similarity": 0.7112278938293457
+          },
+          {
+            "product_id": "KAIDA-P0744",
+            "name_ru": "Балкаймак домашний",
+            "name_kk": "Үй балқаймағы",
+            "cosine_similarity": 0.697507917881012
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "пельмени",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0547",
+            "name_ru": "Пенне",
+            "name_kk": "Пенне",
+            "cosine_similarity": 0.820554792881012
+          },
+          {
+            "product_id": "KAIDA-P0557",
+            "name_ru": "Тесто для пельменей",
+            "name_kk": "Тұшпара қамыры",
+            "cosine_similarity": 0.7884406447410583
+          },
+          {
+            "product_id": "KAIDA-P0457",
+            "name_ru": "Помело",
+            "name_kk": "Помело",
+            "cosine_similarity": 0.7840281128883362
+          },
+          {
+            "product_id": "KAIDA-P0544",
+            "name_ru": "Спагетти",
+            "name_kk": "Спагетти",
+            "cosine_similarity": 0.7741742134094238
+          },
+          {
+            "product_id": "KAIDA-P0688",
+            "name_ru": "Шелпек",
+            "name_kk": "Шелпек",
+            "cosine_similarity": 0.7719314098358154
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Картофель",
+        "exact_product_ids": [
+          "KAIDA-P0342"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0342",
+            "name_ru": "Картофель",
+            "name_kk": "Картоп",
+            "cosine_similarity": 0.8868064880371094
+          },
+          {
+            "product_id": "KAIDA-P0343",
+            "name_ru": "Картофель молодой",
+            "name_kk": "Жас картоп",
+            "cosine_similarity": 0.8343217968940735
+          },
+          {
+            "product_id": "KAIDA-P0628",
+            "name_ru": "Кардамон",
+            "name_kk": "Кардамон",
+            "cosine_similarity": 0.8142214417457581
+          },
+          {
+            "product_id": "KAIDA-P0344",
+            "name_ru": "Картофель красный",
+            "name_kk": "Қызыл картоп",
+            "cosine_similarity": 0.8129613399505615
+          },
+          {
+            "product_id": "KAIDA-P0233",
+            "name_ru": "Кальмар",
+            "name_kk": "Кальмар",
+            "cosine_similarity": 0.809174656867981
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "картошка",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0342",
+            "name_ru": "Картофель",
+            "name_kk": "Картоп",
+            "cosine_similarity": 0.8645806908607483
+          },
+          {
+            "product_id": "KAIDA-P0343",
+            "name_ru": "Картофель молодой",
+            "name_kk": "Жас картоп",
+            "cosine_similarity": 0.8244228959083557
+          },
+          {
+            "product_id": "KAIDA-P0344",
+            "name_ru": "Картофель красный",
+            "name_kk": "Қызыл картоп",
+            "cosine_similarity": 0.8041049838066101
+          },
+          {
+            "product_id": "KAIDA-P0628",
+            "name_ru": "Кардамон",
+            "name_kk": "Кардамон",
+            "cosine_similarity": 0.7958619594573975
+          },
+          {
+            "product_id": "KAIDA-P0541",
+            "name_ru": "Крахмал картофельный",
+            "name_kk": "Картоп крахмалы",
+            "cosine_similarity": 0.7941164374351501
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Картоп",
+        "exact_product_ids": [
+          "KAIDA-P0342"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0342",
+            "name_ru": "Картофель",
+            "name_kk": "Картоп",
+            "cosine_similarity": 0.8756073713302612
+          },
+          {
+            "product_id": "KAIDA-P0628",
+            "name_ru": "Кардамон",
+            "name_kk": "Кардамон",
+            "cosine_similarity": 0.834445595741272
+          },
+          {
+            "product_id": "KAIDA-P0343",
+            "name_ru": "Картофель молодой",
+            "name_kk": "Жас картоп",
+            "cosine_similarity": 0.8213425874710083
+          },
+          {
+            "product_id": "KAIDA-P0465",
+            "name_ru": "Папайя",
+            "name_kk": "Папайя",
+            "cosine_similarity": 0.8087913990020752
+          },
+          {
+            "product_id": "KAIDA-P0233",
+            "name_ru": "Кальмар",
+            "name_kk": "Кальмар",
+            "cosine_similarity": 0.8046507835388184
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Мёд",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0699",
+            "name_ru": "Мёд липовый",
+            "name_kk": "Жөке балы",
+            "cosine_similarity": 0.841205894947052
+          },
+          {
+            "product_id": "KAIDA-P0697",
+            "name_ru": "Мёд горный",
+            "name_kk": "Тау балы",
+            "cosine_similarity": 0.8334240317344666
+          },
+          {
+            "product_id": "KAIDA-P0696",
+            "name_ru": "Мёд цветочный",
+            "name_kk": "Гүл балы",
+            "cosine_similarity": 0.8323507905006409
+          },
+          {
+            "product_id": "KAIDA-P0698",
+            "name_ru": "Мёд гречишный",
+            "name_kk": "Қарақұмық балы",
+            "cosine_similarity": 0.8305157423019409
+          },
+          {
+            "product_id": "KAIDA-P0702",
+            "name_ru": "Мёд хлопковый",
+            "name_kk": "Мақта балы",
+            "cosine_similarity": 0.8232519626617432
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "мед",
+        "exact_product_ids": [
+          "KAIDA-P0696"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0698",
+            "name_ru": "Мёд гречишный",
+            "name_kk": "Қарақұмық балы",
+            "cosine_similarity": 0.8222726583480835
+          },
+          {
+            "product_id": "KAIDA-P0699",
+            "name_ru": "Мёд липовый",
+            "name_kk": "Жөке балы",
+            "cosine_similarity": 0.8219442963600159
+          },
+          {
+            "product_id": "KAIDA-P0696",
+            "name_ru": "Мёд цветочный",
+            "name_kk": "Гүл балы",
+            "cosine_similarity": 0.8208417296409607
+          },
+          {
+            "product_id": "KAIDA-P0702",
+            "name_ru": "Мёд хлопковый",
+            "name_kk": "Мақта балы",
+            "cosine_similarity": 0.8032701015472412
+          },
+          {
+            "product_id": "KAIDA-P0703",
+            "name_ru": "Соты медовые",
+            "name_kk": "Бал ұясы",
+            "cosine_similarity": 0.8004435300827026
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Сметана",
+        "exact_product_ids": [
+          "KAIDA-P0275"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0275",
+            "name_ru": "Сметана",
+            "name_kk": "Қаймақ",
+            "cosine_similarity": 0.8453195691108704
+          },
+          {
+            "product_id": "KAIDA-P0755",
+            "name_ru": "Сметана домашняя",
+            "name_kk": "Үй қаймағы",
+            "cosine_similarity": 0.8228177428245544
+          },
+          {
+            "product_id": "KAIDA-P0279",
+            "name_ru": "Йогурт",
+            "name_kk": "Йогурт",
+            "cosine_similarity": 0.8202611804008484
+          },
+          {
+            "product_id": "KAIDA-P0326",
+            "name_ru": "Фета",
+            "name_kk": "Фета",
+            "cosine_similarity": 0.8051808476448059
+          },
+          {
+            "product_id": "KAIDA-P0287",
+            "name_ru": "Ряженка",
+            "name_kk": "Ряженка",
+            "cosine_similarity": 0.7974520325660706
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "сметана, баночка 400г",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0275",
+            "name_ru": "Сметана",
+            "name_kk": "Қаймақ",
+            "cosine_similarity": 0.7328300476074219
+          },
+          {
+            "product_id": "KAIDA-P0755",
+            "name_ru": "Сметана домашняя",
+            "name_kk": "Үй қаймағы",
+            "cosine_similarity": 0.7327575087547302
+          },
+          {
+            "product_id": "KAIDA-P0279",
+            "name_ru": "Йогурт",
+            "name_kk": "Йогурт",
+            "cosine_similarity": 0.7140257954597473
+          },
+          {
+            "product_id": "KAIDA-P0287",
+            "name_ru": "Ряженка",
+            "name_kk": "Ряженка",
+            "cosine_similarity": 0.7030152082443237
+          },
+          {
+            "product_id": "KAIDA-P0272",
+            "name_ru": "Сливки",
+            "name_kk": "Кілегей",
+            "cosine_similarity": 0.7029043436050415
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "Бутылка сливок 0.5 л",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0272",
+            "name_ru": "Сливки",
+            "name_kk": "Кілегей",
+            "cosine_similarity": 0.7015087008476257
+          },
+          {
+            "product_id": "KAIDA-P0287",
+            "name_ru": "Ряженка",
+            "name_kk": "Ряженка",
+            "cosine_similarity": 0.7000942230224609
+          },
+          {
+            "product_id": "KAIDA-P0273",
+            "name_ru": "Сливки питьевые",
+            "name_kk": "Ішетін кілегей",
+            "cosine_similarity": 0.6878514289855957
+          },
+          {
+            "product_id": "KAIDA-P0279",
+            "name_ru": "Йогурт",
+            "name_kk": "Йогурт",
+            "cosine_similarity": 0.6806821823120117
+          },
+          {
+            "product_id": "KAIDA-P0296",
+            "name_ru": "Сухие сливки",
+            "name_kk": "Құрғақ кілегей",
+            "cosine_similarity": 0.6798072457313538
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "бауырсақ",
+        "exact_product_ids": [
+          "KAIDA-P0689"
+        ],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0689",
+            "name_ru": "Баурсак",
+            "name_kk": "Бауырсақ",
+            "cosine_similarity": 0.8453312516212463
+          },
+          {
+            "product_id": "KAIDA-P0335",
+            "name_ru": "Балкаймак",
+            "name_kk": "Балқаймақ",
+            "cosine_similarity": 0.7780983448028564
+          },
+          {
+            "product_id": "KAIDA-P0691",
+            "name_ru": "Пирожок",
+            "name_kk": "Бәліш",
+            "cosine_similarity": 0.774633526802063
+          },
+          {
+            "product_id": "KAIDA-P0744",
+            "name_ru": "Балкаймак домашний",
+            "name_kk": "Үй балқаймағы",
+            "cosine_similarity": 0.7743377685546875
+          },
+          {
+            "product_id": "KAIDA-P0683",
+            "name_ru": "Батон",
+            "name_kk": "Батон",
+            "cosine_similarity": 0.7721174359321594
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "сыр",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0330",
+            "name_ru": "Чечил",
+            "name_kk": "Чечил",
+            "cosine_similarity": 0.8305926322937012
+          },
+          {
+            "product_id": "KAIDA-P0307",
+            "name_ru": "Моцарелла",
+            "name_kk": "Моцарелла",
+            "cosine_similarity": 0.8300496935844421
+          },
+          {
+            "product_id": "KAIDA-P0312",
+            "name_ru": "Пармезан",
+            "name_kk": "Пармезан",
+            "cosine_similarity": 0.8185701370239258
+          },
+          {
+            "product_id": "KAIDA-P0321",
+            "name_ru": "Камамбер",
+            "name_kk": "Камамбер",
+            "cosine_similarity": 0.8115642666816711
+          },
+          {
+            "product_id": "KAIDA-P0300",
+            "name_ru": "Сыр полутвёрдый",
+            "name_kk": "Жартылай қатты ірімшік",
+            "cosine_similarity": 0.8069878220558167
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "копченый сыр",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0304",
+            "name_ru": "Сыр копчёный",
+            "name_kk": "Ысталған ірімшік",
+            "cosine_similarity": 0.7882438898086548
+          },
+          {
+            "product_id": "KAIDA-P0321",
+            "name_ru": "Камамбер",
+            "name_kk": "Камамбер",
+            "cosine_similarity": 0.7647961378097534
+          },
+          {
+            "product_id": "KAIDA-P0312",
+            "name_ru": "Пармезан",
+            "name_kk": "Пармезан",
+            "cosine_similarity": 0.7466331720352173
+          },
+          {
+            "product_id": "KAIDA-P0307",
+            "name_ru": "Моцарелла",
+            "name_kk": "Моцарелла",
+            "cosine_similarity": 0.7457582354545593
+          },
+          {
+            "product_id": "KAIDA-P0330",
+            "name_ru": "Чечил",
+            "name_kk": "Чечил",
+            "cosine_similarity": 0.7426384687423706
+          }
+        ],
+        "review": "pending"
+      },
+      {
+        "query": "марсианская ягода",
+        "exact_product_ids": [],
+        "semantic_candidates": [
+          {
+            "product_id": "KAIDA-P0718",
+            "name_ru": "Морс ягодный",
+            "name_kk": "Жидек морсы",
+            "cosine_similarity": 0.7297798991203308
+          },
+          {
+            "product_id": "KAIDA-P0463",
+            "name_ru": "Киви",
+            "name_kk": "Киви",
+            "cosine_similarity": 0.7205564975738525
+          },
+          {
+            "product_id": "KAIDA-P0452",
+            "name_ru": "Мандарин",
+            "name_kk": "Мандарин",
+            "cosine_similarity": 0.7153373956680298
+          },
+          {
+            "product_id": "KAIDA-P0489",
+            "name_ru": "Малина",
+            "name_kk": "Таңқурай",
+            "cosine_similarity": 0.7103937268257141
+          },
+          {
+            "product_id": "KAIDA-P0582",
+            "name_ru": "Макадамия",
+            "name_kk": "Макадамия",
+            "cosine_similarity": 0.709600031375885
+          }
+        ],
+        "review": "pending"
+      }
+    ]
+  }
+}
