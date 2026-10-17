@@ -1,6 +1,6 @@
 # Current verified state
 
-- Current task: none. S-CONTACT-DEFAULT CLOSED: PO manual acceptance PASS at 14a3a124bfd7394a4fd1a313277f39ac758b2f8b (PR184, no timing figures given); merged 9dff3f42ca52ec024d27191c0ce43309607a22f4; accepted/merged tree e049afe5d9ed21ab86585519a5d7dc54d4dc5be2 identical.
+- Current task: document the 2026-10-17 text AI research in a separate documentation PR, authorized by PO; see docs/research/ai-text-2026-10-17/README.md. No app implementation in scope. S-CONTACT-DEFAULT CLOSED: PO manual acceptance PASS at 14a3a124bfd7394a4fd1a313277f39ac758b2f8b (PR184, no timing figures given); merged 9dff3f42ca52ec024d27191c0ce43309607a22f4; accepted/merged tree e049afe5d9ed21ab86585519a5d7dc54d4dc5be2 identical.
 - Verified checkpoint: annotated v0.0.79-contact-default at 9dff3f42ca52ec024d27191c0ce43309607a22f4; main verify38547306819/CodeQL38547306967 GREEN. Branch head CI verify38542587718/38542612684, CodeQL115781221678, analyze38542612440, dependency38542612639 GREEN (unit538/integration336/e2e290 pass,58 expected skips). Contract PR183 merged 57a35870f89fedb6372ffdf875cb808a2d4aecd4 (main verify38536333848/CodeQL38536333832).
 - Served: http://127.0.0.1:3000, checkout tmp/contactdef-checkpoint-3000 at 9dff3f42ca52ec024d27191c0ce43309607a22f4, build VVSimhPXuR6rlckm-8fJD, PID29540. kaida_checkpoint DB in kaida-checkpoint-3000-postgres (volume kaida-checkpoint-3000-pg, 55435), photos tmp/auth-otp-closure-private/photos. No migration in this slice (30 migrations, schema untouched). Source protection/reporting/translation OFF.
 - Checks on port3000 PASS: health, Welcome, fake-OTP login, favourites, seller block, photo thumb, point forms render the chips (nothing saved, no chip tapped, no number published).
@@ -8,4 +8,5 @@
 - Preservation: original dev container/volume untouched; evidence, dumps and receipts retained in tmp/contactdef-acceptance; never upload private evidence.
 - Known limitations (unscheduled, no code change): KK strings provisional and not human-reviewed; the WhatsApp chip copies the «Телефон» text as typed, an invalid value is rejected by the server on save.
 - Root dirty docs/r3-closure personal/staged research/drafts preserved; never use root index for publication.
+- Research handoff: text checkpoint and transformed evidence recorded; known KK omission, package errors and correlated guard failure remain open. Further research/implementation requires its own scope; no AI production readiness claimed.
 - Next action: B-READABILITY requires its own contract and a separate PO instruction; STOP. Tracking notifications unimplemented; voice/translation paused, no paid services/real SMS/public launch. Production source-protection/retention gates separate; KK provisional/mobile RU.

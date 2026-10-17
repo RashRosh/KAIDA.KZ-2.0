@@ -315,3 +315,7 @@ Revisit this note when one of these begins:
 - a production-server AI benchmark near MVP.
 
 At that point, update the candidate list because this market changes quickly. The names in this document are candidates, not permanent vendor choices.
+
+## Text research checkpoint — 2026-10-17
+
+The [text experiment report](../research/ai-text-2026-10-17/README.md) preserves synthetic RU/KK/mixed extraction, catalog matching, decision checks, failures and source hashes. It supports testing editable seller drafts; it does not establish production readiness or the necessity of a separate decision model. It does not change execution order or authorize voice/translation implementation. Exact model identifiers remain outside git under AGENTS.md.
