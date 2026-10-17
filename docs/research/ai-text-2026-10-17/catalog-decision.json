@@ -1,0 +1,623 @@
+{
+  "report": {
+    "model": "decision-A",
+    "model_revision": "[revision retained in original]",
+    "dtype": "float32",
+    "source_report": "kaida_semantic_1792228671718683913.json",
+    "instructions": "\nВыбери товар каталога, соответствующий названию продавца.\nСовпадения по звучанию или написанию недостаточно.\nНе добавляй сорт, вид животного, часть туши или другие\nхарактеристики, которых продавец не указал.\n\nЕсли название слишком общее и требует уточнения,\nвыбери need_details.\nЕсли название достаточно конкретное, но подходящего товара\nсреди кандидатов нет, выбери none.\nВыдуманному товару не назначай ближайший похожий.\nОшибку написания можно учитывать, если смысл однозначен.\nНазвания могут быть русскими или казахскими.\n",
+    "notes": [
+      "Малый диагностический набор, не оценка production-качества.",
+      "Проверяются списки из семантического поиска, не весь каталог.",
+      "Для Тауық сүбесі правильного товара в списке нет.",
+      "Ожидаемые решения заданы вручную, KK требует вычитки.",
+      "Confidence модели не считается проверенной вероятностью."
+    ],
+    "results": [
+      {
+        "query": "Тауық сүбесі",
+        "candidates": [
+          {
+            "id": "KAIDA-P0091",
+            "name_ru": "Куриное бедро",
+            "name_kk": "Тауық саны"
+          },
+          {
+            "id": "KAIDA-P0094",
+            "name_ru": "Куриная четверть",
+            "name_kk": "Тауықтың ширек бөлігі"
+          },
+          {
+            "id": "KAIDA-P0141",
+            "name_ru": "Куриные шеи",
+            "name_kk": "Тауық мойны"
+          },
+          {
+            "id": "KAIDA-P0095",
+            "name_ru": "Куриный окорочок",
+            "name_kk": "Тауықтың сан еті"
+          },
+          {
+            "id": "KAIDA-P0092",
+            "name_ru": "Куриная голень",
+            "name_kk": "Тауық сирағы"
+          }
+        ],
+        "expected": "none",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "none",
+              "confidence": 0.41368888086958483,
+              "probabilities": {
+                "KAIDA-P0091": 0.2635984143852177,
+                "KAIDA-P0094": 0.03652931554079594,
+                "KAIDA-P0141": 0.01378041300758811,
+                "KAIDA-P0095": 0.02593344257114952,
+                "KAIDA-P0092": 0.03195452005089731,
+                "none": 0.41368888086958483,
+                "need_details": 0.21451501357476666
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 544,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 3.830355103999864
+      },
+      {
+        "query": "филе",
+        "candidates": [
+          {
+            "id": "KAIDA-P0004",
+            "name_ru": "Говяжье филе",
+            "name_kk": "Сиыр еті филесі"
+          },
+          {
+            "id": "KAIDA-P0246",
+            "name_ru": "Филе сома",
+            "name_kk": "Жайын сүбесі"
+          },
+          {
+            "id": "KAIDA-P0081",
+            "name_ru": "Кроличье филе",
+            "name_kk": "Қоян сүбесі"
+          },
+          {
+            "id": "KAIDA-P0249",
+            "name_ru": "Филе трески",
+            "name_kk": "Нәлім сүбесі"
+          },
+          {
+            "id": "KAIDA-P0089",
+            "name_ru": "Куриное филе",
+            "name_kk": "Тауық сүбесі"
+          }
+        ],
+        "expected": "need_details",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "need_details",
+              "confidence": 0.495668385585913,
+              "probabilities": {
+                "KAIDA-P0004": 0.04158270263252295,
+                "KAIDA-P0246": 0.036352359607650146,
+                "KAIDA-P0081": 0.003051924896059488,
+                "KAIDA-P0249": 0.004762452006821175,
+                "KAIDA-P0089": 0.00443099795392064,
+                "none": 0.4141511773171127,
+                "need_details": 0.495668385585913
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 537,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.7849678639995545
+      },
+      {
+        "query": "бедро",
+        "candidates": [
+          {
+            "id": "KAIDA-P0326",
+            "name_ru": "Фета",
+            "name_kk": "Фета"
+          },
+          {
+            "id": "KAIDA-P0177",
+            "name_ru": "Нерка",
+            "name_kk": "Нерка"
+          },
+          {
+            "id": "KAIDA-P0720",
+            "name_ru": "Квас",
+            "name_kk": "Квас"
+          },
+          {
+            "id": "KAIDA-P0322",
+            "name_ru": "Бри",
+            "name_kk": "Бри"
+          },
+          {
+            "id": "KAIDA-P0103",
+            "name_ru": "Бедро индейки",
+            "name_kk": "Күркетауық саны"
+          }
+        ],
+        "expected": "need_details",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "KAIDA-P0103",
+              "confidence": 0.6868708457348515,
+              "probabilities": {
+                "KAIDA-P0326": 0.0023912140305784356,
+                "KAIDA-P0177": 0.0025175165253112156,
+                "KAIDA-P0720": 0.0017476552737914694,
+                "KAIDA-P0322": 0.00342231729298266,
+                "KAIDA-P0103": 0.6868708457348515,
+                "none": 0.21831468125497236,
+                "need_details": 0.08473576988751227
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 474,
+            "output_tokens": 0
+          }
+        },
+        "passed": false,
+        "seconds": 0.6561946459996761
+      },
+      {
+        "query": "куриное феле",
+        "candidates": [
+          {
+            "id": "KAIDA-P0089",
+            "name_ru": "Куриное филе",
+            "name_kk": "Тауық сүбесі"
+          },
+          {
+            "id": "KAIDA-P0326",
+            "name_ru": "Фета",
+            "name_kk": "Фета"
+          },
+          {
+            "id": "KAIDA-P0547",
+            "name_ru": "Пенне",
+            "name_kk": "Пенне"
+          },
+          {
+            "id": "KAIDA-P0688",
+            "name_ru": "Шелпек",
+            "name_kk": "Шелпек"
+          },
+          {
+            "id": "KAIDA-P0640",
+            "name_ru": "Хмели-сунели",
+            "name_kk": "Хмели-сунели"
+          }
+        ],
+        "expected": "KAIDA-P0089",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "KAIDA-P0089",
+              "confidence": 0.9408821599517171,
+              "probabilities": {
+                "KAIDA-P0089": 0.9408821599517171,
+                "KAIDA-P0326": 0.004418223682535784,
+                "KAIDA-P0547": 0.0024427711116703143,
+                "KAIDA-P0688": 0.001799128068018423,
+                "KAIDA-P0640": 0.002150296757695316,
+                "none": 0.03067255825426094,
+                "need_details": 0.017634862174102095
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 495,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.6635269739999785
+      },
+      {
+        "query": "пельмени",
+        "candidates": [
+          {
+            "id": "KAIDA-P0547",
+            "name_ru": "Пенне",
+            "name_kk": "Пенне"
+          },
+          {
+            "id": "KAIDA-P0557",
+            "name_ru": "Тесто для пельменей",
+            "name_kk": "Тұшпара қамыры"
+          },
+          {
+            "id": "KAIDA-P0457",
+            "name_ru": "Помело",
+            "name_kk": "Помело"
+          },
+          {
+            "id": "KAIDA-P0544",
+            "name_ru": "Спагетти",
+            "name_kk": "Спагетти"
+          },
+          {
+            "id": "KAIDA-P0688",
+            "name_ru": "Шелпек",
+            "name_kk": "Шелпек"
+          }
+        ],
+        "expected": "none",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "none",
+              "confidence": 0.4937940571932169,
+              "probabilities": {
+                "KAIDA-P0547": 0.011626908138852374,
+                "KAIDA-P0557": 0.35707081529109536,
+                "KAIDA-P0457": 0.001737373531496122,
+                "KAIDA-P0544": 0.001685666698242117,
+                "KAIDA-P0688": 0.012171306799939668,
+                "none": 0.4937940571932169,
+                "need_details": 0.12191387234715743
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 492,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.6668284159995892
+      },
+      {
+        "query": "картошка",
+        "candidates": [
+          {
+            "id": "KAIDA-P0342",
+            "name_ru": "Картофель",
+            "name_kk": "Картоп"
+          },
+          {
+            "id": "KAIDA-P0343",
+            "name_ru": "Картофель молодой",
+            "name_kk": "Жас картоп"
+          },
+          {
+            "id": "KAIDA-P0344",
+            "name_ru": "Картофель красный",
+            "name_kk": "Қызыл картоп"
+          },
+          {
+            "id": "KAIDA-P0628",
+            "name_ru": "Кардамон",
+            "name_kk": "Кардамон"
+          },
+          {
+            "id": "KAIDA-P0541",
+            "name_ru": "Крахмал картофельный",
+            "name_kk": "Картоп крахмалы"
+          }
+        ],
+        "expected": "KAIDA-P0342",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "KAIDA-P0342",
+              "confidence": 0.8607889812926847,
+              "probabilities": {
+                "KAIDA-P0342": 0.8607889812926847,
+                "KAIDA-P0343": 0.009355527373677478,
+                "KAIDA-P0344": 0.004668522803303113,
+                "KAIDA-P0628": 0.0017833332592569625,
+                "KAIDA-P0541": 0.003906355297870211,
+                "none": 0.041398330247848183,
+                "need_details": 0.0780989497253594
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 510,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.6756216809999387
+      },
+      {
+        "query": "Мёд",
+        "candidates": [
+          {
+            "id": "KAIDA-P0699",
+            "name_ru": "Мёд липовый",
+            "name_kk": "Жөке балы"
+          },
+          {
+            "id": "KAIDA-P0697",
+            "name_ru": "Мёд горный",
+            "name_kk": "Тау балы"
+          },
+          {
+            "id": "KAIDA-P0696",
+            "name_ru": "Мёд цветочный",
+            "name_kk": "Гүл балы"
+          },
+          {
+            "id": "KAIDA-P0698",
+            "name_ru": "Мёд гречишный",
+            "name_kk": "Қарақұмық балы"
+          },
+          {
+            "id": "KAIDA-P0702",
+            "name_ru": "Мёд хлопковый",
+            "name_kk": "Мақта балы"
+          }
+        ],
+        "expected": "need_details",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "need_details",
+              "confidence": 0.5953973787575437,
+              "probabilities": {
+                "KAIDA-P0699": 0.027094840828021664,
+                "KAIDA-P0697": 0.010854139252800404,
+                "KAIDA-P0696": 0.01325258332406367,
+                "KAIDA-P0698": 0.003947006544979646,
+                "KAIDA-P0702": 0.0026834203838132426,
+                "none": 0.34677063090877763,
+                "need_details": 0.5953973787575437
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 519,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.7976393059998372
+      },
+      {
+        "query": "Бутылка сливок 0.5 л",
+        "candidates": [
+          {
+            "id": "KAIDA-P0272",
+            "name_ru": "Сливки",
+            "name_kk": "Кілегей"
+          },
+          {
+            "id": "KAIDA-P0287",
+            "name_ru": "Ряженка",
+            "name_kk": "Ряженка"
+          },
+          {
+            "id": "KAIDA-P0273",
+            "name_ru": "Сливки питьевые",
+            "name_kk": "Ішетін кілегей"
+          },
+          {
+            "id": "KAIDA-P0279",
+            "name_ru": "Йогурт",
+            "name_kk": "Йогурт"
+          },
+          {
+            "id": "KAIDA-P0296",
+            "name_ru": "Сухие сливки",
+            "name_kk": "Құрғақ кілегей"
+          }
+        ],
+        "expected": "KAIDA-P0272",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "none",
+              "confidence": 0.3771669079926107,
+              "probabilities": {
+                "KAIDA-P0272": 0.369101207135532,
+                "KAIDA-P0287": 0.009062659812437021,
+                "KAIDA-P0273": 0.03514276395296229,
+                "KAIDA-P0279": 0.0012191030770998406,
+                "KAIDA-P0296": 0.006327208730604186,
+                "none": 0.3771669079926107,
+                "need_details": 0.20198014929875402
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 522,
+            "output_tokens": 0
+          }
+        },
+        "passed": false,
+        "seconds": 0.802905460999682
+      },
+      {
+        "query": "сыр",
+        "candidates": [
+          {
+            "id": "KAIDA-P0330",
+            "name_ru": "Чечил",
+            "name_kk": "Чечил"
+          },
+          {
+            "id": "KAIDA-P0307",
+            "name_ru": "Моцарелла",
+            "name_kk": "Моцарелла"
+          },
+          {
+            "id": "KAIDA-P0312",
+            "name_ru": "Пармезан",
+            "name_kk": "Пармезан"
+          },
+          {
+            "id": "KAIDA-P0321",
+            "name_ru": "Камамбер",
+            "name_kk": "Камамбер"
+          },
+          {
+            "id": "KAIDA-P0300",
+            "name_ru": "Сыр полутвёрдый",
+            "name_kk": "Жартылай қатты ірімшік"
+          }
+        ],
+        "expected": "need_details",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "need_details",
+              "confidence": 0.41418685168977626,
+              "probabilities": {
+                "KAIDA-P0330": 0.0056296698192476015,
+                "KAIDA-P0307": 0.019325553784232407,
+                "KAIDA-P0312": 0.023356218267359237,
+                "KAIDA-P0321": 0.005290709144407141,
+                "KAIDA-P0300": 0.13786761800647013,
+                "none": 0.3943433792885073,
+                "need_details": 0.41418685168977626
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 505,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.6824798239995289
+      },
+      {
+        "query": "копченый сыр",
+        "candidates": [
+          {
+            "id": "KAIDA-P0304",
+            "name_ru": "Сыр копчёный",
+            "name_kk": "Ысталған ірімшік"
+          },
+          {
+            "id": "KAIDA-P0321",
+            "name_ru": "Камамбер",
+            "name_kk": "Камамбер"
+          },
+          {
+            "id": "KAIDA-P0312",
+            "name_ru": "Пармезан",
+            "name_kk": "Пармезан"
+          },
+          {
+            "id": "KAIDA-P0307",
+            "name_ru": "Моцарелла",
+            "name_kk": "Моцарелла"
+          },
+          {
+            "id": "KAIDA-P0330",
+            "name_ru": "Чечил",
+            "name_kk": "Чечил"
+          }
+        ],
+        "expected": "KAIDA-P0304",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "KAIDA-P0304",
+              "confidence": 0.9279917052531176,
+              "probabilities": {
+                "KAIDA-P0304": 0.9279917052531176,
+                "KAIDA-P0321": 0.005853858467939948,
+                "KAIDA-P0312": 0.004151046818008332,
+                "KAIDA-P0307": 0.0020181409601048804,
+                "KAIDA-P0330": 0.0029972410417449433,
+                "none": 0.03493314187230679,
+                "need_details": 0.022054865586777442
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 505,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.679985441000099
+      },
+      {
+        "query": "марсианская ягода",
+        "candidates": [
+          {
+            "id": "KAIDA-P0718",
+            "name_ru": "Морс ягодный",
+            "name_kk": "Жидек морсы"
+          },
+          {
+            "id": "KAIDA-P0463",
+            "name_ru": "Киви",
+            "name_kk": "Киви"
+          },
+          {
+            "id": "KAIDA-P0452",
+            "name_ru": "Мандарин",
+            "name_kk": "Мандарин"
+          },
+          {
+            "id": "KAIDA-P0489",
+            "name_ru": "Малина",
+            "name_kk": "Таңқурай"
+          },
+          {
+            "id": "KAIDA-P0582",
+            "name_ru": "Макадамия",
+            "name_kk": "Макадамия"
+          }
+        ],
+        "expected": "none",
+        "result": {
+          "answers": {
+            "product": {
+              "type": "choice",
+              "choice": "none",
+              "confidence": 0.7014045383158085,
+              "probabilities": {
+                "KAIDA-P0718": 0.00983252246968267,
+                "KAIDA-P0463": 0.0266313145106143,
+                "KAIDA-P0452": 0.0077271799139306,
+                "KAIDA-P0489": 0.01117320371892841,
+                "KAIDA-P0582": 0.002855348256248615,
+                "none": 0.7014045383158085,
+                "need_details": 0.24037589281478686
+              }
+            }
+          },
+          "usage": {
+            "input_tokens": 486,
+            "output_tokens": 0
+          }
+        },
+        "passed": true,
+        "seconds": 0.6733070390000648
+      }
+    ]
+  }
+}

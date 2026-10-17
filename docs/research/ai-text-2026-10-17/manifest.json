@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-17",
+  "base_commit": "a736c4d793db8280b2ba9d6ccfb4c41622007de3",
+  "transformations": [
+    "JSON reports only; original executable helpers and notebook remain in PO-held source materials.",
+    "Model identifiers and model revisions replaced with research roles; raw answers and test outcomes otherwise preserved.",
+    "Original filenames and notebook outputs are not republished."
+  ],
+  "sources": [
+    {
+      "evidence": "checkpoint.json",
+      "original_archive_sha256": "11944f975d4f50c0abd7c3ae7957456aab3aad313d01fccb61ce7ec30b0a1eef",
+      "published_sha256": "2d8068aeca7123766d5607f2cb55dc39e718f49c23e3f77427cb8358d5d88822"
+    },
+    {
+      "evidence": "fixed.json",
+      "original_archive_sha256": "a82894cc6b43c32fda7f77b249d772daa5f58ab8715dd4005a66d41e4181db43",
+      "published_sha256": "446a12d6de92c35da65b1e30b04fa2f26c65dbc608d2fa5cd3038f576f5566ec"
+    },
+    {
+      "evidence": "messy.json",
+      "original_archive_sha256": "e3fccfe5a1e0e3935cd6e40ee0e184d54b6345ef815919e8865a90f4338496c4",
+      "published_sha256": "e07c0851799e67ff34643b4ef4c2e727ead729e65bfd205019a08ba990f28d36"
+    },
+    {
+      "evidence": "pack-v2.json",
+      "original_archive_sha256": "122d4388295c7aa52547bc9bec66ead6def81199b11c94825c0a55a94a1f9278",
+      "published_sha256": "9d682866d9fc265b7ca55f04e65e8e02e8fe2ce003abb16ccfe330da630acbac"
+    },
+    {
+      "evidence": "comparison.json",
+      "original_archive_sha256": "1080db74097df5e4cafcd469fd37df684bb0e98cc8e7af63029b58061a9f4bbb",
+      "published_sha256": "f2d0f2f2488ea6e3afb7ebcf9008781d993f053e98a3e5997650d681a91afb19"
+    },
+    {
+      "evidence": "semantic.json",
+      "original_archive_sha256": "ec2627ff1d65d71ee8820c5de79445523cb14b32d62b6bba95c2f00d9733352f",
+      "published_sha256": "684772c11308b3d79140f9d0c1998e6a50c6a74ee5b4bf5369d83456036fc1df"
+    },
+    {
+      "evidence": "catalog-decision.json",
+      "original_archive_sha256": "cabee541f93b9d91e0a7185a13bfcca80d5de3d724fd2c0829b3586914d27296",
+      "published_sha256": "aa6966475a63ad268068f85f3478805bc194b58563686ac70ab48a8a1e9e1186"
+    },
+    {
+      "evidence": "full-text.json",
+      "original_archive_sha256": "ff589c0ddcfe360802769a8a39eecbab9eadf904b9bf2758c6eb3b72c549c41c",
+      "published_sha256": "7c9809837db7d20e61f8e6c006b4ee8368e28540cc479ce5f93bae27ff3d65d2"
+    },
+    {
+      "evidence": "guards.json",
+      "original_archive_sha256": "c92955feaeec512be9811e9dbae3bdbc5a519781fa2493af5407c99cb8e1d06b",
+      "published_sha256": "0c897cef245aec99c3b054ae79912e90422116d7d26c6898b0c6fb77d99314ea"
+    }
+  ],
+  "session_notebook": {
+    "original_sha256": "1e4397b7c7053b458fcde3d7396288fedefe55896778ad37cceb18e862293ec3",
+    "cells": 25,
+    "location": "PO-held original attachment; contains model identifiers and historical failed cells; not a clean Run All notebook."
+  },
+  "follow_up_control28": {
+    "source_folder": "https://drive.google.com/drive/folders/1UOUCRD3_g6R8OA-hBRHJHxtPqYW9koJV",
+    "source_script_sha256": "695d930faf7fa6b6f83594aa9674d8c9edb272065582ab017f4204183ba8a593",
+    "source_bench_sha256": "17e0f144ebf3f12e57a547dc43ee42a2bc58d7b6b3f77fbb673e264db6fc0835",
+    "original_raw_bytes_sha256": null,
+    "original_bytes_note": "Connector decoded JSON available; original raw-byte digests not verified.",
+    "publications": [
+      {
+        "evidence": "control28.json",
+        "published_sha256": "d5e04ceb3ea1563e26e20fcc5e5e28eacf0a9869cdde9c55e6dcec2a3529c260"
+      },
+      {
+        "evidence": "CONTROL28_REVIEW.md",
+        "published_sha256": "16da7000cb5d21d2ac4e9e6b2fd87073ee35959268799f3fe2d44c84e349029d"
+      },
+      {
+        "evidence": "DRAFT_PILOT_PROPOSAL.md",
+        "published_sha256": "bde9818fcf6c8ca097dd68995132ce4e56b434f6b6f986b55d9c2fb1abc2e1c4"
+      }
+    ],
+    "transformations": [
+      "Results parsed from connector-provided JSON and serialized with two-space indentation; semantic raw answers and assembled cards unchanged.",
+      "Model role replaces model identity; original full manifests and executable script not republished.",
+      "Review and pilot proposal are newly authored documentation, not run outputs."
+    ]
+  }
+}
