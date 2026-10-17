@@ -57,5 +57,31 @@
     "original_sha256": "1e4397b7c7053b458fcde3d7396288fedefe55896778ad37cceb18e862293ec3",
     "cells": 25,
     "location": "PO-held original attachment; contains model identifiers and historical failed cells; not a clean Run All notebook."
+  },
+  "follow_up_control28": {
+    "source_folder": "https://drive.google.com/drive/folders/1UOUCRD3_g6R8OA-hBRHJHxtPqYW9koJV",
+    "source_script_sha256": "695d930faf7fa6b6f83594aa9674d8c9edb272065582ab017f4204183ba8a593",
+    "source_bench_sha256": "17e0f144ebf3f12e57a547dc43ee42a2bc58d7b6b3f77fbb673e264db6fc0835",
+    "original_raw_bytes_sha256": null,
+    "original_bytes_note": "Connector decoded JSON available; original raw-byte digests not verified.",
+    "publications": [
+      {
+        "evidence": "control28.json",
+        "published_sha256": "d5e04ceb3ea1563e26e20fcc5e5e28eacf0a9869cdde9c55e6dcec2a3529c260"
+      },
+      {
+        "evidence": "CONTROL28_REVIEW.md",
+        "published_sha256": "16da7000cb5d21d2ac4e9e6b2fd87073ee35959268799f3fe2d44c84e349029d"
+      },
+      {
+        "evidence": "DRAFT_PILOT_PROPOSAL.md",
+        "published_sha256": "bde9818fcf6c8ca097dd68995132ce4e56b434f6b6f986b55d9c2fb1abc2e1c4"
+      }
+    ],
+    "transformations": [
+      "Results parsed from connector-provided JSON and serialized with two-space indentation; semantic raw answers and assembled cards unchanged.",
+      "Model role replaces model identity; original full manifests and executable script not republished.",
+      "Review and pilot proposal are newly authored documentation, not run outputs."
+    ]
   }
 }
