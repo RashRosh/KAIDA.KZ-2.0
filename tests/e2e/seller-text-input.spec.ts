@@ -5,7 +5,7 @@ import { offerEditor, publishButton } from './offer-editor-helpers';
 
 function phoneFor(projectName: string, slot: number) {
   const band = projectName === 'mobile' ? '493' : '494';
-  return `+770000${band}${String(slot).padStart(2, '0')}0`;
+  return `+770000${band}0${slot}`;
 }
 
 async function cleanup(phone: string) {
