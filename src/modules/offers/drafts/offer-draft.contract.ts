@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+export const offerDraftAiHintsSchema = z.object({
+  source: z.literal('text'),
+  inputId: z.string().uuid(),
+  uncertainFields: z.array(z.enum(['price', 'unit', 'pack', 'catalog', 'title'])),
+  catalogStatus: z.enum(['resolved', 'ambiguous', 'not_found']).optional(),
+  sourceQuote: z.string().max(500).nullable().optional(),
+}).strict();
+
+export type OfferDraftAiHints = z.infer<typeof offerDraftAiHintsSchema>;
+
 // seller-showcase-editor §2 «Drafts»: the editor of a new card as it is; any field may be empty. Validated only for
 // shape and size — the full rules apply when the draft is published.
 export const offerDraftPayloadSchema = z.object({
@@ -14,6 +24,7 @@ export const offerDraftPayloadSchema = z.object({
   sellerComment: z.string().max(500),
   photoIds: z.array(z.uuid()).max(5),
   points: z.array(z.object({ locationId: z.uuid(), ownPrice: z.string().max(40).nullable() }).strict()).max(50),
+  aiHints: offerDraftAiHintsSchema.optional(),
 }).strict();
 
 export type OfferDraftPayload = z.infer<typeof offerDraftPayloadSchema>;

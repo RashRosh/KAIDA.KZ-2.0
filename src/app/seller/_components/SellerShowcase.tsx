@@ -69,7 +69,7 @@ const noticeText: Record<string, MessageKey> = {
 
 // AI-S01 «Моя витрина» · AI off (seller-showcase-editor §2): one primary action, cards grouped by product across
 // points, drafts, the incomplete-card reminder; the editor and the card screen replace it while open.
-export function SellerShowcase({ commentTranslationEnabled = false }: { commentTranslationEnabled?: boolean }) {
+export function SellerShowcase({ commentTranslationEnabled = false, textInputEnabled = false }: { commentTranslationEnabled?: boolean; textInputEnabled?: boolean }) {
   const { locale, t } = useI18n();
   const router = useRouter();
   const params = useSearchParams();
@@ -128,7 +128,14 @@ export function SellerShowcase({ commentTranslationEnabled = false }: { commentT
       {content}
       {extra}
       <Nav active="showcase" />
-      {sourceOpen && <SourceSheet onClose={() => setSourceOpen(false)} onManual={() => { setSourceOpen(false); go('new=1'); }} />}
+      {sourceOpen && (
+        <SourceSheet
+          textInputEnabled={textInputEnabled}
+          onClose={() => setSourceOpen(false)}
+          onManual={() => { setSourceOpen(false); go('new=1'); }}
+          onText={() => { setSourceOpen(false); router.push('/seller/text-input'); }}
+        />
+      )}
     </Phone>
   );
 
@@ -308,7 +315,12 @@ function DraftRow({ draft, onOpen }: { draft: OfferDraftView; onOpen: () => void
 }
 
 // AI-S02 · Source · AI outage: the AI ways are visible but off with the reason; the manual way is active.
-function SourceSheet({ onClose, onManual }: { onClose: () => void; onManual: () => void }) {
+function SourceSheet({ onClose, onManual, onText, textInputEnabled }: {
+  onClose: () => void;
+  onManual: () => void;
+  onText: () => void;
+  textInputEnabled: boolean;
+}) {
   const { t } = useI18n();
   const ai: { key: MessageKey; icon: string }[] = [
     { key: 'source.video', icon: 'video' },
@@ -318,10 +330,17 @@ function SourceSheet({ onClose, onManual }: { onClose: () => void; onManual: () 
   return (
     <Sheet title={t('source.title')} onClose={onClose}>
       <div className="banner gray" role="status" style={{ flexDirection: 'row', gap: 10, padding: 12, borderRadius: 14 }}>
-        <Ic name="info" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t('source.outage')}</p>
+        <Ic name="info" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t(textInputEnabled ? 'source.partialOutage' : 'source.outage')}</p>
       </div>
       <div className="ov">{t('source.ai')}</div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {textInputEnabled && (
+          <button type="button" className="li card hl" onClick={onText} data-testid="source-text-input" style={{ padding: '8px 12px', flexDirection: 'row' }}>
+            <div className="lic ai"><Ic name="pencil" /></div>
+            <div className="mid"><div className="ts">{t('source.text')}</div><p className="c c2">{t('source.textHint')}</p></div>
+            <Ic name="right" className="pt" />
+          </button>
+        )}
         {ai.map((item) => (
           <button key={item.key} type="button" className="li" disabled style={{ color: 'var(--ink3)', background: 'transparent', border: 0, cursor: 'default' }}>
             <div className="lic ai" title={t('source.ai')}><Ic name={item.icon} /></div>

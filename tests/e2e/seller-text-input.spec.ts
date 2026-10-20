@@ -1,0 +1,122 @@
+import { expect, test } from '@playwright/test';
+import { Pool } from 'pg';
+import { testDatabaseUrl } from '../integration/database';
+import { PLAIN_SEARCH_URL } from './browser-state';
+
+function phoneFor(projectName: string) {
+  return projectName === 'mobile' ? '+77000009201' : '+77000009202';
+}
+
+async function cleanup(phone: string) {
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    const users = await pool.query('SELECT id FROM users WHERE phone_e164=$1', [phone]);
+    for (const row of users.rows) {
+      await pool.query('DELETE FROM offer_drafts WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      await pool.query('DELETE FROM offers WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      await pool.query('DELETE FROM locations WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [row.id]);
+      await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [row.id]);
+    }
+    await pool.query('DELETE FROM users WHERE phone_e164=$1', [phone]);
+  } finally {
+    await pool.end();
+  }
+}
+
+function formattedPhone(phone: string) {
+  return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
+}
+
+async function loginAsSeller(page: import('@playwright/test').Page, phoneDisplay: string) {
+  await page.goto('/seller');
+  await page.getByRole('link', { name: 'Войти' }).click();
+  await page.getByRole('textbox', { name: 'Телефон', exact: true }).fill(phoneDisplay);
+  const requestResponse = page.waitForResponse((response) => response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Получить код' }).click();
+  const requested = await (await requestResponse).json();
+  await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
+  await page.getByRole('button', { name: 'Войти', exact: true }).click();
+  await expect(page).toHaveURL(PLAIN_SEARCH_URL);
+}
+
+async function offerCount(phone: string) {
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  try {
+    return Number((await pool.query(`
+      SELECT count(*) FROM offers o
+      JOIN sellers s ON s.id = o.seller_id
+      JOIN users u ON u.id = s.owner_user_id
+      WHERE u.phone_e164 = $1
+    `, [phone])).rows[0].count);
+  } finally {
+    await pool.end();
+  }
+}
+
+test.describe('seller text input', () => {
+  test.skip(({ baseURL }) => !baseURL?.includes('3100'), 'text input E2E runs on the default server with SELLER_TEXT_INPUT=fake');
+
+  test('text to drafts, edit, no auto publish', async ({ page }, testInfo) => {
+    const phone = phoneFor(testInfo.project.name);
+    await cleanup(phone);
+    await loginAsSeller(page, formattedPhone(phone));
+    await page.goto('/seller/points');
+    await page.getByLabel('Имя', { exact: true }).fill('Продавец текста');
+    await page.getByLabel('Название для покупателей').fill('Точка текста');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
+    await page.getByLabel('Адрес').fill('Алматы');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+
+    await page.goto('/seller');
+    await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
+    await page.getByTestId('source-text-input').click();
+    await page.getByLabel('Список товаров').fill('[fixture:e2e-catalog]');
+    await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
+    await expect(page.getByTestId('text-input-review')).toBeVisible();
+    expect(await offerCount(phone)).toBe(0);
+
+    await page.getByRole('button', { name: /Баранина/ }).click();
+    await page.getByLabel('Название товара').fill('Баранина, лопатка');
+    await page.getByRole('button', { name: 'Сохранить черновик' }).click();
+    expect(await offerCount(phone)).toBe(0);
+  });
+
+  test('shows skipped and uncertain notices', async ({ page }, testInfo) => {
+    const phone = phoneFor(testInfo.project.name);
+    await cleanup(phone);
+    await loginAsSeller(page, formattedPhone(phone));
+    await page.goto('/seller/points');
+    await page.getByLabel('Имя', { exact: true }).fill('Продавец');
+    await page.getByLabel('Название для покупателей').fill('Точка');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
+    await page.getByLabel('Адрес').fill('Алматы');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+
+    await page.goto('/seller');
+    await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
+    await page.getByTestId('source-text-input').click();
+    await page.getByLabel('Список товаров').fill('[fixture:e2e-skipped]');
+    await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
+    await expect(page.getByTestId('text-skipped-block')).toContainText('Виноград');
+
+    await page.goto('/seller/text-input');
+    await page.getByLabel('Список товаров').fill('[fixture:e2e-uncertain]');
+    await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
+    await expect(page.getByTestId('text-uncertain-notice')).toBeVisible();
+  });
+
+  test('network error can retry', async ({ page }, testInfo) => {
+    const phone = phoneFor(testInfo.project.name);
+    await cleanup(phone);
+    await loginAsSeller(page, formattedPhone(phone));
+    await page.goto('/seller/text-input');
+    await page.route('**/api/seller/text-input', (route) => route.abort());
+    await page.getByLabel('Список товаров').fill('[fixture:e2e-catalog]');
+    await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
+    await expect(page.getByRole('alert')).toBeVisible();
+    await page.unroute('**/api/seller/text-input');
+    await page.getByRole('button', { name: 'Повторить' }).click();
+    await expect(page).toHaveURL(/text-input\/review/);
+  });
+});
