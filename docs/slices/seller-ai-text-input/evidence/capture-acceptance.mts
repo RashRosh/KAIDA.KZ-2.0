@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 /**
  * PO acceptance screenshots (no secrets in output files). From repo root:
  *   pnpm exec tsx docs/slices/seller-ai-text-input/evidence/capture-acceptance.mts
@@ -107,6 +109,9 @@ async function runViewport(label: 'mobile' | 'desktop', width: number, height: n
     await page.getByLabel('Список товаров').fill('[fixture:e2e-multi]');
     await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
     await page.waitForURL(/text-input\/review/);
+    await page.getByTestId('text-input-review').waitFor();
+    await page.getByRole('button', { name: /Баранина/ }).waitFor();
+    await page.getByRole('button', { name: /Укроп/ }).waitFor();
     await capture(`${label}-03-review-multi.png`, page);
 
     await page.goto(`${BASE}/seller/text-input`);
