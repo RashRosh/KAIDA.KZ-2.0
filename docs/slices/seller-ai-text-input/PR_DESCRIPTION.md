@@ -24,7 +24,7 @@
 | Layer | Status |
 | --- | --- |
 | Unit (`seller-text-input.test.ts`) | 7 passed locally |
-| Integration | Requires `DATABASE_URL` + `TEST_DATABASE_URL` (CI) |
+| Integration (`seller-text-input.test.ts`) | API auth/validation/201, rollback, multi-draft, retry — CI |
 | E2E (`seller-text-input.spec.ts`) | Runs on server 3100 with `SELLER_TEXT_INPUT=fake` |
 | Full `pnpm verify` | Run on CI / machine with test Postgres |
 

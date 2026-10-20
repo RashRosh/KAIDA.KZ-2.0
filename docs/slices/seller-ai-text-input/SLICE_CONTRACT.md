@@ -74,7 +74,7 @@ Session notices for skipped lines: returned in API and held in `sessionStorage` 
 - Auth: same as other seller routes (S2).
 - Body: `{ "text": string }` — trim, max 4000 chars; empty → 400.
 - When `SELLER_TEXT_INPUT=off` → 503 `TEXT_INPUT_UNAVAILABLE`.
-- Success 200:
+- Success **201** (draft resources created; same semantics as `POST /api/seller/drafts`):
 
 ```json
 {

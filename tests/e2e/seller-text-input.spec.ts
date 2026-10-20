@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 import { PLAIN_SEARCH_URL } from './browser-state';
+import { offerEditor, publishButton } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
   return projectName === 'mobile' ? '+77000009201' : '+77000009202';
@@ -104,6 +105,34 @@ test.describe('seller text input', () => {
     await page.getByLabel('Список товаров').fill('[fixture:e2e-uncertain]');
     await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
     await expect(page.getByTestId('text-uncertain-notice')).toBeVisible();
+  });
+
+  test('publish after confirm creates exactly one offer', async ({ page }, testInfo) => {
+    const phone = phoneFor(testInfo.project.name);
+    await cleanup(phone);
+    await loginAsSeller(page, formattedPhone(phone));
+    await page.goto('/seller/points');
+    await page.getByLabel('Имя', { exact: true }).fill('Продавец публикации');
+    await page.getByLabel('Название для покупателей').fill('Точка публикации');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
+    await page.getByLabel('Адрес').fill('Алматы');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+
+    await page.goto('/seller');
+    await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
+    await page.getByTestId('source-text-input').click();
+    await page.getByLabel('Список товаров').fill('[fixture:e2e-catalog]');
+    await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
+    await page.getByRole('button', { name: /Баранина/ }).click();
+
+    const editor = offerEditor(page);
+    await expect(editor).toBeVisible();
+    expect(await offerCount(phone)).toBe(0);
+    await editor.getByRole('button', { name: 'Проверить и опубликовать' }).click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+/);
+    await page.getByRole('button', { name: publishButton }).click();
+    await expect(page).toHaveURL(/\/seller(\?.*)?$/);
+    expect(await offerCount(phone)).toBe(1);
   });
 
   test('network error can retry', async ({ page }, testInfo) => {
