@@ -34,6 +34,7 @@ export default defineConfig({
     timeout: 120000,
     env: {
       SELLER_COMMENT_TRANSLATOR: translatorOn ? 'fake' : 'off',
+      SELLER_TEXT_INPUT: translatorOn ? 'off' : 'fake',
       DATABASE_URL: testDatabaseUrl(),
       NEARBY_RADIUS_METERS: String(NEARBY_RADIUS_METERS_DEFAULT),
       IDENTITY_OTP_TTL_SECONDS: '300',
