@@ -148,11 +148,18 @@ test.describe('seller text input', () => {
     const phone = phoneFor(testInfo.project.name, 4);
     await cleanup(phone);
     await loginAsSeller(page, phone);
+    await page.goto('/seller/points');
+    await page.getByLabel('Имя', { exact: true }).fill('Продавец retry');
+    await page.getByLabel('Название для покупателей').fill('Точка retry');
+    await page.getByLabel('Тип торговой точки').selectOption('shop');
+    await page.getByLabel('Адрес').fill('Алматы');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+
+    await page.route('**/api/seller/text-input', (route) => route.abort('failed'));
     await page.goto('/seller/text-input');
-    await page.route('**/api/seller/text-input', (route) => route.abort());
     await page.getByLabel('Список товаров').fill('[fixture:e2e-catalog]');
     await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Повторить' })).toBeVisible();
     await page.unroute('**/api/seller/text-input');
     await page.getByRole('button', { name: 'Повторить' }).click();
     await expect(page).toHaveURL(/text-input\/review/);
