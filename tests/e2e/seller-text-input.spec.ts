@@ -3,8 +3,9 @@ import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
 import { offerEditor, publishButton } from './offer-editor-helpers';
 
-function phoneFor(projectName: string) {
-  return projectName === 'mobile' ? '+77000049301' : '+77000049302';
+function phoneFor(projectName: string, slot: number) {
+  const band = projectName === 'mobile' ? '493' : '494';
+  return `+770000${band}${String(slot).padStart(2, '0')}0`;
 }
 
 async function cleanup(phone: string) {
@@ -12,9 +13,23 @@ async function cleanup(phone: string) {
   try {
     const users = await pool.query('SELECT id FROM users WHERE phone_e164=$1', [phone]);
     for (const row of users.rows) {
-      await pool.query('DELETE FROM offer_drafts WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
-      await pool.query('DELETE FROM offers WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
-      await pool.query('DELETE FROM locations WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      const bySeller = 'SELECT id FROM sellers WHERE owner_user_id=$1';
+      await pool.query(
+        `DELETE FROM seller_change_item_photos WHERE item_id IN (SELECT i.id FROM seller_change_items i JOIN seller_change_sets cs ON cs.id=i.change_set_id WHERE cs.seller_id IN (${bySeller}))`,
+        [row.id],
+      );
+      await pool.query(
+        `DELETE FROM seller_change_items WHERE change_set_id IN (SELECT id FROM seller_change_sets WHERE seller_id IN (${bySeller}))`,
+        [row.id],
+      );
+      await pool.query(`DELETE FROM seller_change_sets WHERE seller_id IN (${bySeller})`, [row.id]);
+      await pool.query(`DELETE FROM offer_drafts WHERE seller_id IN (${bySeller})`, [row.id]);
+      await pool.query(
+        `DELETE FROM offer_photos WHERE offer_id IN (SELECT id FROM offers WHERE seller_id IN (${bySeller}))`,
+        [row.id],
+      );
+      await pool.query(`DELETE FROM offers WHERE seller_id IN (${bySeller})`, [row.id]);
+      await pool.query(`DELETE FROM locations WHERE seller_id IN (${bySeller})`, [row.id]);
       await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [row.id]);
       await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [row.id]);
     }
@@ -52,7 +67,7 @@ test.describe('seller text input', () => {
   test.skip(({ baseURL }) => !baseURL?.includes('3100'), 'text input E2E runs on the default server with SELLER_TEXT_INPUT=fake');
 
   test('text to drafts, edit, no auto publish', async ({ page }, testInfo) => {
-    const phone = phoneFor(testInfo.project.name);
+    const phone = phoneFor(testInfo.project.name, 1);
     await cleanup(phone);
     await loginAsSeller(page, phone);
     await page.goto('/seller/points');
@@ -67,6 +82,7 @@ test.describe('seller text input', () => {
     await page.getByTestId('source-text-input').click();
     await page.getByLabel('Список товаров').fill('[fixture:e2e-catalog]');
     await page.getByRole('button', { name: 'Разобрать в черновики' }).click();
+    await expect(page).toHaveURL(/text-input\/review/);
     await expect(page.getByTestId('text-input-review')).toBeVisible();
     expect(await offerCount(phone)).toBe(0);
 
@@ -77,7 +93,7 @@ test.describe('seller text input', () => {
   });
 
   test('shows skipped and uncertain notices', async ({ page }, testInfo) => {
-    const phone = phoneFor(testInfo.project.name);
+    const phone = phoneFor(testInfo.project.name, 2);
     await cleanup(phone);
     await loginAsSeller(page, phone);
     await page.goto('/seller/points');
@@ -101,7 +117,7 @@ test.describe('seller text input', () => {
   });
 
   test('publish after confirm creates exactly one offer', async ({ page }, testInfo) => {
-    const phone = phoneFor(testInfo.project.name);
+    const phone = phoneFor(testInfo.project.name, 3);
     await cleanup(phone);
     await loginAsSeller(page, phone);
     await page.goto('/seller/points');
@@ -129,7 +145,7 @@ test.describe('seller text input', () => {
   });
 
   test('network error can retry', async ({ page }, testInfo) => {
-    const phone = phoneFor(testInfo.project.name);
+    const phone = phoneFor(testInfo.project.name, 4);
     await cleanup(phone);
     await loginAsSeller(page, phone);
     await page.goto('/seller/text-input');
