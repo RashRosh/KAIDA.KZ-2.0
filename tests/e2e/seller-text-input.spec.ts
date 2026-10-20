@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { Pool } from 'pg';
 import { testDatabaseUrl } from '../integration/database';
-import { PLAIN_SEARCH_URL } from './browser-state';
 import { offerEditor, publishButton } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
@@ -26,19 +25,13 @@ async function cleanup(phone: string) {
   }
 }
 
-function formattedPhone(phone: string) {
-  return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
-}
-
-async function loginAsSeller(page: import('@playwright/test').Page, phone: string) {
-  const phoneDisplay = formattedPhone(phone);
-  await page.goto('/seller');
-  await page.getByRole('link', { name: 'Войти' }).click();
-  await page.getByRole('textbox', { name: 'Телефон', exact: true }).fill(phoneDisplay);
+async function loginAsSeller(page: Page, phone: string) {
   const requested = await (await page.request.post('/api/auth/otp/request', { data: { phone } })).json();
-  await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
-  await page.getByRole('button', { name: 'Войти', exact: true }).click();
-  await expect(page).toHaveURL(PLAIN_SEARCH_URL);
+  expect(
+    (await page.request.post('/api/auth/otp/verify', {
+      data: { challengeId: requested.challenge.id, code: requested.delivery.code },
+    })).ok(),
+  ).toBe(true);
 }
 
 async function offerCount(phone: string) {
