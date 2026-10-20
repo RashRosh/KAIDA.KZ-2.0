@@ -5,7 +5,7 @@ import { PLAIN_SEARCH_URL } from './browser-state';
 import { offerEditor, publishButton } from './offer-editor-helpers';
 
 function phoneFor(projectName: string) {
-  return projectName === 'mobile' ? '+77000009201' : '+77000009202';
+  return projectName === 'mobile' ? '+77000049301' : '+77000049302';
 }
 
 async function cleanup(phone: string) {
@@ -19,6 +19,7 @@ async function cleanup(phone: string) {
       await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [row.id]);
       await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [row.id]);
     }
+    await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=$1', [phone]);
     await pool.query('DELETE FROM users WHERE phone_e164=$1', [phone]);
   } finally {
     await pool.end();
@@ -29,13 +30,12 @@ function formattedPhone(phone: string) {
   return `8 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8, 10)}-${phone.slice(10, 12)}`;
 }
 
-async function loginAsSeller(page: import('@playwright/test').Page, phoneDisplay: string) {
+async function loginAsSeller(page: import('@playwright/test').Page, phone: string) {
+  const phoneDisplay = formattedPhone(phone);
   await page.goto('/seller');
   await page.getByRole('link', { name: 'Войти' }).click();
   await page.getByRole('textbox', { name: 'Телефон', exact: true }).fill(phoneDisplay);
-  const requestResponse = page.waitForResponse((response) => response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST');
-  await page.getByRole('button', { name: 'Получить код' }).click();
-  const requested = await (await requestResponse).json();
+  const requested = await (await page.request.post('/api/auth/otp/request', { data: { phone } })).json();
   await page.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page).toHaveURL(PLAIN_SEARCH_URL);
@@ -61,7 +61,7 @@ test.describe('seller text input', () => {
   test('text to drafts, edit, no auto publish', async ({ page }, testInfo) => {
     const phone = phoneFor(testInfo.project.name);
     await cleanup(phone);
-    await loginAsSeller(page, formattedPhone(phone));
+    await loginAsSeller(page, phone);
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('Продавец текста');
     await page.getByLabel('Название для покупателей').fill('Точка текста');
@@ -86,7 +86,7 @@ test.describe('seller text input', () => {
   test('shows skipped and uncertain notices', async ({ page }, testInfo) => {
     const phone = phoneFor(testInfo.project.name);
     await cleanup(phone);
-    await loginAsSeller(page, formattedPhone(phone));
+    await loginAsSeller(page, phone);
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('Продавец');
     await page.getByLabel('Название для покупателей').fill('Точка');
@@ -110,7 +110,7 @@ test.describe('seller text input', () => {
   test('publish after confirm creates exactly one offer', async ({ page }, testInfo) => {
     const phone = phoneFor(testInfo.project.name);
     await cleanup(phone);
-    await loginAsSeller(page, formattedPhone(phone));
+    await loginAsSeller(page, phone);
     await page.goto('/seller/points');
     await page.getByLabel('Имя', { exact: true }).fill('Продавец публикации');
     await page.getByLabel('Название для покупателей').fill('Точка публикации');
@@ -138,7 +138,7 @@ test.describe('seller text input', () => {
   test('network error can retry', async ({ page }, testInfo) => {
     const phone = phoneFor(testInfo.project.name);
     await cleanup(phone);
-    await loginAsSeller(page, formattedPhone(phone));
+    await loginAsSeller(page, phone);
     await page.goto('/seller/text-input');
     await page.route('**/api/seller/text-input', (route) => route.abort());
     await page.getByLabel('Список товаров').fill('[fixture:e2e-catalog]');
