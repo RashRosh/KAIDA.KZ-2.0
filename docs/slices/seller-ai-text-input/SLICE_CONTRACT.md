@@ -1,6 +1,6 @@
 # Seller AI text input (integration slice 1) — Slice Contract
 
-**Status:** APPROVED FOR IMPLEMENTATION — Product Owner instruction in chat 2026-10-20 (first integration slice of free-text seller input; does not change `EXECUTION_PLAN.md` queue order).
+**Status:** CLOSED (PO 2026-10-20). Product Owner instruction 2026-10-20; manual acceptance PASS by Rashit on 2026-10-20; merged as `ceeb0a849323a2e02053367d6126b6ef438f7ffa` (PR #188); annotated checkpoint `v0.0.80-seller-ai-text-input`.
 
 **Capability:** Feature Map `S17` (text channel only). Voice, photo, video, Telegram, new publication UI, AI moderation and live paid LLM providers are **out of scope**.
 
@@ -159,3 +159,12 @@ Session notices for skipped lines: returned in API and held in `sessionStorage` 
 | Live model | Deferred; `fake` only |
 | Skip list persistence | sessionStorage + API; reload may drop skips |
 | Queue | This slice does not reorder `EXECUTION_PLAN` |
+
+## 13. Closure (PO 2026-10-20)
+
+- **Acceptance:** manual acceptance PASS by Rashit on 2026-10-20 (evidence: `PO_ACCEPTANCE_HANDOFF.md`, `evidence/*.png`). PO reviewed slice at `01ae87f`; merge commit `ceeb0a8` adds docs-only screenshot fix (`4e6aa8d`).
+- **Merge:** PR #188 merged `ceeb0a849323a2e02053367d6126b6ef438f7ffa`. Scope: text → editable offer drafts → existing `CardEditor` → existing confirm/publish; `SELLER_TEXT_INPUT=off|fake` only; no live LLM, voice, photo, video, migrations, or `EXECUTION_PLAN` queue change.
+- **Checkpoint:** annotated tag `v0.0.80-seller-ai-text-input` on the merge commit.
+- **CI (merged main):** KAIDA verify https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/39421951381 ; CodeQL https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/39421951410 .
+- **Known, unscheduled limitations (no code change):** no dedicated integration/E2E for ambiguous catalog; `aiHints` strip on publish not proven by a separate test; skipped lines may disappear after review reload (`sessionStorage`).
+- **Not delivered:** voice input, speech-to-text, live LLM providers, production enablement (`default off`).
