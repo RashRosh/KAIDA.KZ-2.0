@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { locations } from '../db/locations.table';
 import { unsetOpeningHours, type OpeningHours } from '../hours/opening-hours';
@@ -75,7 +75,9 @@ export async function listLocationsBySeller(database: LocationDb, sellerId: stri
   const rows = await database
     .select(locationSelection)
     .from(locations)
-    .where(eq(locations.sellerId, sellerId));
+    .where(eq(locations.sellerId, sellerId))
+    // Oldest first, so the last entry is the latest point — the same order the contact default uses (§18).
+    .orderBy(asc(locations.createdAt), asc(locations.id));
   return rows.map(toLocationView);
 }
 
