@@ -500,7 +500,7 @@ explicitly before implementation. These are revisions recorded here; the closed 
 
 | Closed decision | Revised to (PO 2026-10-21) |
 |---|---|
-| contact-default Q2/Q3 «no prefill» | A **new** point prefills «Телефон» from the previous point, else from the login number. The Seller may clear it; a cleared field is never refilled. Existing points are never changed. |
+| contact-default Q2/Q3 «no prefill» | A **new** point prefills «Телефон» with the verified login number (PO 2026-10-22; replaces «previous point, else login» of 2026-10-21). The Seller may clear it; a cleared field is never refilled. Existing points are never changed. |
 | point-contacts-hours D2 «Telegram later, via a KAIDA bot» | Telegram per point now, **public when saved**, without bot verification. |
 | point-contacts-hours first-point template Mon–Fri 09:00–18:00 | A new point starts with every day «Не указано». KAIDA never invents hours. |
 | seller-showcase-editor post-publication highlight; post-publication-buyer-preview decision B (action on the highlighted row) | No lasting highlight. A short success message carries «Как видят покупатели». |
@@ -511,11 +511,14 @@ strings were added together.
 
 ## 18. Point contacts: phone default, WhatsApp, Telegram (findings 1, 2)
 
-- **Phone default.** «Добавить точку» prefills «Телефон» once, from the most recent point; if that point has no phone,
-  it uses the login number. After the Seller edits or clears the field, it is never refilled. Editing an existing
-  point shows what the point holds and never writes a default into it. All numbers display in one format
-  (`8 (7xx) xxx-xx-xx`); comparisons use the canonical E.164 form.
-- **WhatsApp.** It is filled only by the explicit action «Использовать этот же номер». It is never filled silently.
+- **Phone default.** «Добавить точку» prefills «Телефон» once with the verified login number, never with another
+  point's number (PO 2026-10-22; replaces «previous point, else login» of 2026-10-21). Without a known login number the
+  field starts empty. After the Seller edits or clears the field, it is never refilled. Editing an existing point
+  shows what the point holds and never writes a default into it. All numbers display in one format
+  (`+7 7xx xxx xx xx`); comparisons use the canonical E.164 form.
+- **WhatsApp.** Besides the previous point's saved WhatsApp, which a new point copies together with the hours
+  (point-contacts-hours §2, unchanged), it is filled only by the explicit action «Использовать этот же номер». It is
+  never derived from «Телефон» silently.
 - **Telegram.** The field is optional, one per point. It accepts `name`, `@name`, `t.me/name`, `telegram.me/name` and
   `telegram.dog/name`, and stores only the lowercase username (5–32 characters, `[a-z0-9_]`, starting with a letter).
   It rejects invite links (`+…`, `joinchat/`), `c/` and `s/` paths, extra path segments and any other URL, with a

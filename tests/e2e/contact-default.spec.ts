@@ -184,27 +184,28 @@ test('leaving the form after a chip tap stores nothing', async ({ page }, testIn
   }
 });
 
-test('a new point copies the previous point\'s phone, else starts with the login number; an existing point is never prefilled', async ({ page }, testInfo) => {
+test('a new point starts with the login number, never the previous point\'s phone; an existing point is never prefilled', async ({ page }, testInfo) => {
   test.setTimeout(120_000);
   const copyPhone = phoneFor(testInfo.project.name, 3);
   const emptyPhone = phoneFor(testInfo.project.name, 4);
   await cleanup(copyPhone);
   await cleanup(emptyPhone);
   try {
-    // (C) two points, the latest has a phone: «Добавить» copies it, no chip.
+    // (C) two points, the latest has another phone: «Добавить» still starts with the login number (§18, PO 2026-10-22).
     await login(page, copyPhone);
     await seedSeller(copyPhone, [['Первая', null, null], ['Вторая', '+77010008399', null]]);
     await page.goto('/seller/points');
     await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt('+77010008399'));
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt(copyPhone));
     await expect(page.getByText(/^Контакты и режим работы как у точки «Вторая»/)).toBeVisible();
     await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
-    // WhatsApp is empty and the phone holds a number: the WhatsApp chip is offered (copy of «Телефон», not of the login number).
+    // The field holds the login number, so its notice shows; WhatsApp is empty, so «same number» is offered.
+    await expect(page.getByText(NOTICE_PHONE, { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: SAME_CHIP, exact: true })).toBeVisible();
-    await expect(page.getByText(NOTICE_PHONE, { exact: true })).toHaveCount(0);
-    // Editing the point that holds a number shows no login chip either.
+    // Editing the point that holds a number shows its own number and no login chip.
     await page.getByRole('button', { name: 'Отмена' }).click();
     await page.getByRole('button', { name: 'Изменить торговую точку Вторая' }).click();
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt('+77010008399'));
     await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
     await page.getByRole('button', { name: 'Отмена' }).click();
 

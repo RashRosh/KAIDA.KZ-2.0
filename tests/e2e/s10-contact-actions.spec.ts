@@ -162,11 +162,11 @@ test('point contacts are verified by code and reach the buyer card with the hour
     offer = await search();
     await expect(offer.getByRole('link', { name: 'Позвонить продавцу', exact: true })).toHaveAttribute('href', `tel:${pointPhone}`);
 
-    // A second point starts with the first point's contacts and hours.
+    // A second point starts with the first point's hours; its «Телефон» is the login number (§18, PO 2026-10-22).
     await page.goto('/seller/points');
     await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
     await expect(page.getByText(`Контакты и режим работы как у точки «${pointName}» — можно изменить до сохранения.`)).toBeVisible();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(formatted(pointPhone));
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(formatted(phone));
     await expect(page.getByTestId('hours-summary').getByRole('listitem').filter({ hasText: 'ВС' })).toContainText('Круглосуточно');
   } finally {
     await cleanup(phone);

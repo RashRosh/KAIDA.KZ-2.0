@@ -1,8 +1,9 @@
 import { InvalidPhoneError, normalizeKzPhone } from '@/modules/identity/phone/normalize-phone';
 
-// contact-default §4 as revised by seller-ai-text-real-parser §17 (PO 2026-10-21): a NEW point's «Телефон» starts with
-// the previous point's number, else the login number; the Seller may change or clear it, and a cleared field is never
-// refilled. Existing points are never prefilled. WhatsApp and Telegram are only ever filled by an explicit tap.
+// contact-default §4 as revised by seller-ai-text-real-parser §17–§18 (PO 2026-10-21, 2026-10-22): a NEW point's
+// «Телефон» starts with the login number; the Seller may change or clear it, and a cleared field is never refilled.
+// Existing points are never prefilled. Beyond the previous point's saved WhatsApp (point-contacts-hours §2), WhatsApp
+// and Telegram are only filled by an explicit tap.
 
 export type ContactsDraft = { phone: string; whatsapp: string; telegram: string };
 

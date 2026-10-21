@@ -29,7 +29,8 @@ const typeLabelKeys: Record<LocationType, MessageKey> = {
 
 // How saved contacts appear in the form: formatted numbers, "@username"; a copy for a new point leaves Telegram empty.
 function contactsOf(source: PointDetailsView | undefined, copy = false): ContactsDraft {
-  const phone = source?.contacts.phone?.e164;
+  // A new point never copies «Телефон»: it starts with the login number instead (§18, PO 2026-10-22).
+  const phone = copy ? undefined : source?.contacts.phone?.e164;
   const whatsapp = source?.contacts.whatsapp?.e164;
   const telegram = copy ? null : source?.contacts.telegram;
   return { phone: phone ? formatPhone(phone) : '', whatsapp: whatsapp ? formatPhone(whatsapp) : '', telegram: telegram ? '@' + telegram : '' };
@@ -169,7 +170,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     return () => window.clearTimeout(timer);
   }, [status]);
 
-  // A new point copies phone and WhatsApp of the previous point (point-contacts-hours §2); its Telegram is only offered.
+  // A new point copies WhatsApp and hours of the previous point (point-contacts-hours §2); its Telegram is only offered.
   function fillDetails(source: PointDetailsView | undefined, copy = false) {
     setContacts(contactsOf(source, copy));
     setPhoneTouched(false);
@@ -217,7 +218,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     onClose?.(result);
   }
 
-  // §17: a NEW point's «Телефон» starts with the login number when it did not copy one; a cleared field stays cleared.
+  // §18: a NEW point's «Телефон» starts with the login number; a cleared field stays cleared.
   useEffect(() => {
     if (mode !== 'add' || phoneTouched || !loginPhone || contacts.phone.trim() !== '') return;
     const timer = window.setTimeout(() => setContacts((current) => (current.phone.trim() === '' ? { ...current, phone: formatPhone(loginPhone) } : current)), 0);
