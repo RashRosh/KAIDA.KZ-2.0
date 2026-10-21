@@ -491,3 +491,88 @@ PO instruction (2026-10-21) adds, without changing the model, prompt, parsing ru
 Verification: integration `seller-text-review-recovery.test.ts`; E2E `seller-text-journey.spec.ts` (field height and
 scrolling, missing point → create → return with text, cancel, add products from new and existing points, recovery
 after reload / new tab / from the showcase, other seller, published, expired) on mobile and desktop.
+
+## 17. Acceptance session 2 findings: scope and revised closed decisions (PO 2026-10-21)
+
+The PO approved seven findings from manual acceptance run 2 for this slice (no model, prompt, parsing-rule or
+publication-semantics change). Four of them conflict with decisions of closed contracts; the PO resolved each
+explicitly before implementation. These are revisions recorded here; the closed contracts stay as historical records.
+
+| Closed decision | Revised to (PO 2026-10-21) |
+|---|---|
+| contact-default Q2/Q3 «no prefill» | A **new** point prefills «Телефон» from the previous point, else from the login number. The Seller may clear it; a cleared field is never refilled. Existing points are never changed. |
+| point-contacts-hours D2 «Telegram later, via a KAIDA bot» | Telegram per point now, **public when saved**, without bot verification. |
+| point-contacts-hours first-point template Mon–Fri 09:00–18:00 | A new point starts with every day «Не указано». KAIDA never invents hours. |
+| seller-showcase-editor post-publication highlight; post-publication-buyer-preview decision B (action on the highlighted row) | No lasting highlight. A short success message carries «Как видят покупатели». |
+| pre-publication-buyer-preview §3.4/§3.5 (layout and wording of the preview) | Revised as in §20. The draft/unpublished label and inert contacts stay. |
+
+Findings 1–7 are specified in §18–§21. Verification is listed per section. Mobile and desktop are covered; RU and KK
+strings were added together.
+
+## 18. Point contacts: phone default, WhatsApp, Telegram (findings 1, 2)
+
+- **Phone default.** «Добавить точку» prefills «Телефон» once, from the most recent point; if that point has no phone,
+  it uses the login number. After the Seller edits or clears the field, it is never refilled. Editing an existing
+  point shows what the point holds and never writes a default into it. All numbers display in one format
+  (`8 (7xx) xxx-xx-xx`); comparisons use the canonical E.164 form.
+- **WhatsApp.** It is filled only by the explicit action «Использовать этот же номер». It is never filled silently.
+- **Telegram.** The field is optional, one per point. It accepts `name`, `@name`, `t.me/name`, `telegram.me/name` and
+  `telegram.dog/name`, and stores only the lowercase username (5–32 characters, `[a-z0-9_]`, starting with a letter).
+  It rejects invite links (`+…`, `joinchat/`), `c/` and `s/` paths, extra path segments and any other URL, with a
+  field error; nothing is saved. Clearing the field removes the username.
+  The buyer contact action is a link built by KAIDA as `https://t.me/<username>`, never a stored URL. When the point
+  has no Telegram, a chip offers a username the Seller has already saved (another point, else the valid legacy
+  seller username). One tap fills the field.
+- Data: migration `0031` adds `locations.telegram_username` with a database CHECK on the format (additive, nullable).
+  API: optional `contacts.telegram`; omitted keeps the current value, `null` removes it, an invalid value returns 400
+  `INVALID_TELEGRAM`. `GET /api/seller/points/details` also returns `telegramSuggestion`.
+
+Verification: unit `point-telegram`, `contact-default`; integration `point-telegram` (with migration 0031),
+`point-contacts-hours`; E2E `contact-default.spec.ts`, `point-telegram.spec.ts`, `s10-contact-actions.spec.ts`.
+
+## 19. Opening hours editor (finding 3)
+
+- A new day kind, «Не указано» (`unset`), is distinct from «Выходной». Unset days never produce «Открыто» or a
+  promised opening time. A fully unset week shows «Режим работы не указан».
+- The editor is a grouped summary: days with the same hours form one line. «Изменить режим: {days}» edits a group;
+  «Задать часы для дней» starts a new selection. The shortcuts are «Ежедневно», «По будням» and «Выбрать дни».
+  Choosing days can split a day off its group. Breaks appear only after «+ перерыв».
+- Before «Применить» the editor shows a summary, the days whose hours it will replace («Заменит часы: …») and the
+  days that stay unchanged («Без изменений останутся: …»). Nothing is overwritten silently. «Отмена» keeps the form
+  values. Existing schedules are shown and kept without loss.
+
+Verification: unit `opening-hours-unset`; E2E `point-hours-editor.spec.ts`, `s10-contact-actions.spec.ts`.
+
+## 20. Showcase rows, publication state and the draft preview (findings 4, 5, 6)
+
+- **Row controls (4).** Every card and draft row, on the review screen and on «Моя витрина», has the same «›» and
+  opens the editor. After editing a draft from the review, saving or going back returns to that review, via the
+  `back` parameter (`/seller…` paths only). The controls stay the same after a reload. Other drafts are unchanged.
+- **Publication state (5).** A card that buyers can see has a violet background and border and the status
+  «✓ Опубликовано · На витрине». Drafts stay neutral with «Черновик». A switched-off or archived card shows its own
+  state, never «На витрине». The style comes only from the current state; the publication moment adds nothing that
+  persists. After publishing, a short success message appears with «Как видят покупатели»: the buyer page for one
+  point, the card screen for several, and no action for a card nobody can see. The keyboard focus outline is kept.
+- **Draft preview (6).** The heading is «Предпросмотр карточки», followed by the status «Черновик · Покупатели пока не
+  видят» (for a change: «Изменения · Покупатели пока видят прежнюю версию»). The buyer card is directly below. There
+  is no «Без фото · Без комментария» line. The hours show today's state, and the week opens on request. Contacts and
+  the route are inert, with a note outside the card.
+  Actions: «Перейти к публикации» opens the existing explicit confirmation; «Редактировать» returns to the editor.
+  When required fields are missing, the preview lists them and offers «Дополнить карточку» instead of publishing.
+  The preview never saves or publishes; going back keeps the editor state.
+
+Verification: E2E `seller-journey-corrections.spec.ts` (row controls, publication style, focus, switched-off card),
+`pre-publication-buyer-preview.spec.ts`, `post-publication-buyer-preview.spec.ts`, `seller-offer-management.spec.ts`.
+
+## 21. Products of one point (finding 7)
+
+- Each point card in «Точки» shows «Товары точки · N» and «Добавить товары». N counts the point's non-archived cards
+  (distinct cards) plus the drafts that include the point. It is computed by the same function as the list, so the
+  number and the list match.
+- `/seller/points/{id}/products` lists only that point's cards and drafts, in the showcase row style. It has
+  «Добавить товары» (with the point selected), an empty state «В этой точке пока нет товаров» and «Назад к точкам».
+- API: `GET /api/seller/points/{id}/products` (owner only; a foreign, unknown or malformed id gets the same 404),
+  returning `{point, offers, drafts, total}`. It only reads; nothing changes.
+
+Verification: integration `point-products.test.ts` (scoping, archived excluded, drafts, ownership);
+E2E `seller-journey-corrections.spec.ts` (count, list, empty state, add with the point, back).
