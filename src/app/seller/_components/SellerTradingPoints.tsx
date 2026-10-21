@@ -1,6 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
+import type { OfferDraftView } from '@/modules/offers/drafts/offer-draft.contract';
+import { pointProducts } from '@/modules/offers/point-products';
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { LocationGeo, LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import { parseManualLocationInput } from '@/modules/locations/contracts/manual-location-input';
@@ -11,7 +15,6 @@ import { OpeningHoursFields, PointContactStatus, PointContactsFields } from './P
 import { formatPhone, type ContactsDraft } from './contact-chips';
 import { InvalidTelegramUsernameError, normalizeTelegramUsername } from '@/modules/locations/details/telegram-username';
 import { Bar, Ic, Nav, Phone, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
-import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
 import { AddressSuggestionInput } from './AddressSuggestionInput';
@@ -137,20 +140,22 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     if (details.has(locationId) || detailsLoaded) return details.get(locationId);
     return (await loadDetails())?.get(locationId);
   }
-  // AI-S12 · Points · List: how many cards each point shows («· 8 карточек»).
+  // seller-ai-text-real-parser §21: «Товары точки · N» — N counted by the same rule as the point's own list.
   const [cardCounts, setCardCounts] = useState<Map<string, number>>(new Map());
   const loadCardCounts = useCallback(async () => {
     try {
-      const response = await fetch('/api/seller/offers', { cache: 'no-store' });
-      if (!response.ok) return;
-      const data = await response.json() as { offers: { location: { id: string } }[] };
-      const counts = new Map<string, number>();
-      for (const offer of data.offers) counts.set(offer.location.id, (counts.get(offer.location.id) ?? 0) + 1);
-      setCardCounts(counts);
+      const [offersResponse, draftsResponse] = await Promise.all([
+        fetch('/api/seller/offers', { cache: 'no-store' }),
+        fetch('/api/seller/drafts', { cache: 'no-store' }),
+      ]);
+      if (!offersResponse.ok || !draftsResponse.ok) return;
+      const { offers } = await offersResponse.json() as { offers: SellerOfferView[] };
+      const { drafts } = await draftsResponse.json() as { drafts: OfferDraftView[] };
+      setCardCounts(new Map((seller?.locations ?? []).map((location) => [location.id, pointProducts(offers, drafts, location.id).total])));
     } catch {
       // The list works without the counts.
     }
-  }, []);
+  }, [seller]);
   const locationCount = locations.length;
   useEffect(() => {
     if (!seller || embedded) return;
@@ -625,7 +630,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
                 <div className="lic p"><Ic name="pin" /></div>
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <div className="ts">{location.name}</div>
-                  <p className="c">{t(typeLabelKeys[location.type])} · {location.addressText}{cardCounts.has(location.id) ? ` · ${t(pluralKey('points.cards', cardCounts.get(location.id)!), { count: cardCounts.get(location.id)! })}` : ''}</p>
+                  <p className="c">{t(typeLabelKeys[location.type])} · {location.addressText}</p>
                   {channels.length > 0 ? (
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                       {channels.includes('phone') && <Ic name="phone" className="xs c2" />}
@@ -642,10 +647,15 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
                 </div>
                 <Ic name="right" className="c2" />
               </button>
-              <button type="button" className="act" style={{ alignSelf: 'flex-start', paddingLeft: 4 }} onClick={() => setAddTarget({ location, created: false })}
-                data-testid={`add-products-${location.id}`}>
-                <Ic name="plus" className="sm" /><span>{t('points.addProducts')}</span>
-              </button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Link className="btn btn-o sm" href={`/seller/points/${location.id}/products`} data-testid={`point-products-${location.id}`}>
+                  <Ic name="box" className="sm" />{t('points.products', { count: cardCounts.get(location.id) ?? 0 })}
+                </Link>
+                <button type="button" className="btn btn-g sm" onClick={() => setAddTarget({ location, created: false })}
+                  data-testid={`add-products-${location.id}`}>
+                  <Ic name="plus" className="sm" />{t('points.addProducts')}
+                </button>
+              </div>
               </div>
             );
           })}
@@ -661,8 +671,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
 
 // seller-ai-text-real-parser §16: products go to one named point; the existing manual editor and text list open with it
 // selected. «Готово» ends here without adding anything.
-function AddProductsSheet({ location, textInputEnabled, onManual, onText, onClose }: {
-  location: LocationView;
+export function AddProductsSheet({ location, textInputEnabled, onManual, onText, onClose }: {
+  location: Pick<LocationView, 'id' | 'name' | 'addressText'>;
   textInputEnabled: boolean;
   onManual: () => void;
   onText: () => void;

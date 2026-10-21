@@ -8,23 +8,32 @@ import type { MessageKey } from '../../../i18n/messages';
 import type { CardPreviewPage } from '../../../modules/seller-input/application/card-preview';
 import { Bar, Ic, Phone } from '../_kaida/ui';
 
-// pre-publication-buyer-preview (docs/slices/pre-publication-buyer-preview, contract rev 1): the Seller's PRIVATE preview of a card
-// that is not published. A screen of the editor (the form stays mounted underneath, so nothing typed is lost). The page is the
-// buyer's own presentation (`OfferDetails`); a permanent note says buyers do not see it yet; route and contacts are inactive and
-// there is no interest action. One point opens at once; several points open a list with the price in each.
+// pre-publication-buyer-preview (contract rev 1) as revised by seller-ai-text-real-parser §20 (PO 2026-10-21): the
+// Seller's PRIVATE preview of a card that is not published, a screen of the editor (the form stays mounted, nothing typed
+// is lost). «Предпросмотр карточки» with a compact status, then the buyer's own presentation (`OfferDetails`, contacts and
+// route inert, the week behind a disclosure). Actions: «Редактировать» and «Перейти к публикации» — the editor's existing
+// «Проверить и опубликовать» into the explicit confirmation; with required fields missing, «Дополнить карточку» and
+// what is missing. Nothing is published or saved from here.
 
 export type PreviewState =
   | { status: 'loading' }
   | { status: 'error' }
-  | { status: 'ready'; pages: CardPreviewPage[]; change: boolean; missing: MessageKey[] };
+  | { status: 'ready'; pages: CardPreviewPage[]; change: boolean; problems: MessageKey[] };
 
-export function CardPreviewScreen({ state, onClose, onRetry }: { state: PreviewState; onClose: () => void; onRetry: () => void }) {
+export function CardPreviewScreen({ state, onClose, onRetry, onPublish, onComplete }: {
+  state: PreviewState;
+  onClose: () => void;
+  onRetry: () => void;
+  onPublish: () => void;
+  onComplete: () => void;
+}) {
   const { t } = useI18n();
   const [index, setIndex] = useState<number | null>(null);
+  const title = t('preview.cardTitle');
   if (state.status !== 'ready') {
     return (
       <Phone>
-        <Bar title={t('preview.future')} onBack={onClose} backLabel={t('preview.backEdit')} />
+        <Bar title={title} onBack={onClose} backLabel={t('preview.backEdit')} />
         <main className="body" style={{ gap: 12 }} aria-busy={state.status === 'loading' || undefined}>
           {state.status === 'loading'
             ? <div className="sk" style={{ height: 160, borderRadius: 16 }} aria-hidden="true" />
@@ -38,20 +47,34 @@ export function CardPreviewScreen({ state, onClose, onRetry }: { state: PreviewS
       </Phone>
     );
   }
-  const { pages, change, missing } = state;
+  const { pages, change, problems } = state;
   const current = pages.length === 1 ? 0 : index;
-  const note = (
-    <div role="note" style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 16px', background: 'var(--warning-soft)', borderBottom: '1px solid var(--line)' }}>
-      <p className="c" style={{ margin: 0, color: 'var(--ink)', fontWeight: 600 }}>{change ? t('preview.noteChange') : t('preview.noteNew')}</p>
-      {missing.length > 0 && <p className="c c2" style={{ margin: 0 }}>{missing.map((key) => t(key)).join(' · ')}</p>}
-      <button type="button" className="act" style={{ margin: '0 0 -8px', minHeight: 44 }} onClick={onClose}><span>{t('preview.backEdit')}</span></button>
+  const status = (
+    <p role="note" className="c" data-testid="preview-status" style={{ margin: 0, padding: '8px 16px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <Ic name="eyeoff" className="sm c2" /><span>{change ? t('preview.statusChange') : t('preview.statusDraft')}</span>
+    </p>
+  );
+  const foot = (
+    <div className="foot" data-testid="preview-actions">
+      <p className="c c2" style={{ margin: 0 }}>{t('preview.inertNote')}</p>
+      {problems.length > 0 ? (
+        <>
+          <p className="c" role="status" data-testid="preview-problems" style={{ margin: 0 }}>{t('preview.problems', { fields: problems.map((key) => t(key)).join(', ') })}</p>
+          <button type="button" className="btn btn-p lg w" onClick={onComplete}>{t('preview.complete')}</button>
+        </>
+      ) : (
+        <>
+          <button type="button" className="btn btn-p lg w" onClick={onPublish} data-testid="preview-publish">{t('preview.toPublish')}</button>
+          <button type="button" className="btn btn-g w" onClick={onClose}>{t('preview.edit')}</button>
+        </>
+      )}
     </div>
   );
   if (current === null) {
     return (
       <Phone>
-        <Bar title={t('preview.future')} onBack={onClose} backLabel={t('preview.backEdit')} />
-        {note}
+        <Bar title={title} onBack={onClose} backLabel={t('preview.backEdit')} />
+        {status}
         <main className="body" style={{ gap: 12 }}>
           <h2 className="ov">{t('cardScreen.inPoints', { count: pages.length })}</h2>
           <p className="c c2" style={{ margin: 0 }}>{t('preview.choosePoint')}</p>
@@ -65,6 +88,7 @@ export function CardPreviewScreen({ state, onClose, onRetry }: { state: PreviewS
             </button>
           ))}
         </main>
+        {foot}
       </Phone>
     );
   }
@@ -72,14 +96,15 @@ export function CardPreviewScreen({ state, onClose, onRetry }: { state: PreviewS
   return (
     <Phone>
       <Bar
-        title={t('preview.future')}
+        title={title}
         onBack={pages.length === 1 ? onClose : () => setIndex(null)}
         backLabel={pages.length === 1 ? t('preview.backEdit') : t('preview.backList')}
       />
-      {note}
+      {status}
       <main className="body np" style={{ gap: 0 }} data-testid="card-preview">
-        <OfferDetails offer={page.offer} back={null} inert />
+        <OfferDetails offer={page.offer} back={null} inert scheduleLabel={t('preview.showSchedule')} />
       </main>
+      {foot}
     </Phone>
   );
 }

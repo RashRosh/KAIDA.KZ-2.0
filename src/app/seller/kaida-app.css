@@ -7,6 +7,8 @@
 .kaida button.card,.kaida button.li,.kaida button.inp{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
 .kaida button.card{background:var(--surface)}
 .kaida button.card.hl{background:#fdf8ff}
+/* seller-ai-text-real-parser §19: every card on the showcase — subtle violet, thin border; status also in words. */
+.kaida .card.pub{background:#fcf6ff;border:1px solid #dcb0f0}
 .kaida input.inp,.kaida textarea.inp{outline:none}
 .kaida textarea.inp{resize:none;display:block;font:400 16px/22px var(--sans)}
 .kaida .inp:focus-visible,.kaida .inp:focus-within,.kaida input.inp:focus,.kaida textarea.inp:focus{border:2px solid var(--primary);outline:2px solid var(--primary-soft)}

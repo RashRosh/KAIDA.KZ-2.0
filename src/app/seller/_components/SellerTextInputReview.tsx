@@ -148,7 +148,7 @@ export function SellerTextInputReviewScreen() {
           const price = draft.payload.price.trim();
           return (
             <article key={draft.id} className="card p16" style={{ gap: 8 }} data-testid={`text-draft-${draft.id}`}>
-              <button type="button" className="rowbtn" onClick={() => router.push(`/seller?draft=${draft.id}`)}>
+              <button type="button" className="rowbtn" onClick={() => router.push(`/seller?draft=${draft.id}&back=${encodeURIComponent(`/seller/text-input/review?input=${submission.inputId}`)}`)}>
                 <Thumb photoUrl={null} />
                 <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                   <div className="ts">{draft.payload.title.trim() || t('showcase.draftUntitled')}</div>

@@ -175,9 +175,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   async function openPreview() {
     if (!previewCheck.ok || busyRef.current) return;
     const body = previewBody(values, mode.kind === 'create' ? { kind: 'create' } : { kind: 'edit', offerIds: cardOffers.map((offer) => offer.id) }, currentPhotoIds);
-    const missing: MessageKey[] = [];
-    if (currentPhotoIds.length === 0) missing.push('showcase.noPhoto');
-    if (values.comment.trim() === '') missing.push('showcase.noComment');
+    // §20: what still blocks publication (the editor's own rules; the server validates again on the confirmation).
+    const problems = [...new Set(Object.values(validateCard(values, mode.kind, locations.length).errors))] as MessageKey[];
     // one history entry: the device Back closes the preview first (contract §3.9)
     if (preview === null) window.history.pushState({ ...(window.history.state as object | null), kaidaPreview: true }, '');
     setPreview({ status: 'loading' });
@@ -185,7 +184,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       const response = await fetch(`/api/seller/card-preview?locale=${locale}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
       if (!response.ok) throw new Error('preview');
       const result = await response.json() as { previews: Extract<PreviewState, { status: 'ready' }>['pages'] };
-      setPreview({ status: 'ready', pages: result.previews, change: mode.kind === 'edit', missing });
+      setPreview({ status: 'ready', pages: result.previews, change: mode.kind === 'edit', problems });
     } catch {
       setPreview({ status: 'error' });
     }
@@ -618,7 +617,18 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
     );
   }
 
-  if (preview !== null) return <CardPreviewScreen state={preview} onClose={closePreview} onRetry={() => void openPreview()} />;
+  if (preview !== null) {
+    return (
+      <CardPreviewScreen
+        state={preview}
+        onClose={closePreview}
+        onRetry={() => void openPreview()}
+        // The existing «Проверить и опубликовать»: a ChangeSet and its explicit confirmation screen; never publishes here.
+        onPublish={() => { setPreview(null); void send(); }}
+        onComplete={() => { closePreview(); window.setTimeout(() => void send(), 0); }}
+      />
+    );
+  }
 
   // ---- The form ----
   const unitText = unitLabel(values.unit.code, values.unit.custom);

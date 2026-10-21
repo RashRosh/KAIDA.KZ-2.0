@@ -26,6 +26,7 @@ async function cleanup(phone: string) {
       await pool.query('DELETE FROM seller_change_sets WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM offers WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM locations WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
+      await pool.query('DELETE FROM seller_verified_phones WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [row.id]);
       await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [row.id]);
     }
@@ -173,7 +174,7 @@ test('Seller manages an existing Offer only after explicit confirmation and buye
     await page.goto('/seller');
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Моя витрина', level: 1 })).toBeVisible();
-    await expect(page.getByText('На витрине', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Опубликовано · На\u00a0витрине', { exact: true }).first()).toBeVisible();
 
     await proposeNewOffer(page, { product: 'Баранина', price: '4700.00', comment: 'S5 второй Offer' });
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать|Опубликовать без фото)$/ }).click();
