@@ -443,7 +443,7 @@ All reproducibility artifacts identified in §2 have been located; none is missi
 
 ## 15. Implementation record (branch `slice/seller-ai-text-real-parser`)
 
-State: §10 step 1 (local implementation, replay-verified) done; step 2 (live model) blocked by B-1; step 3 open.
+State: §10 step 1 done; step 2 done 2026-10-21 on Modal (smoke 5/5; control-28 byte-identical to the saved C2 answers, same scores; see [LIVE_TEST_2026-10-21.md](LIVE_TEST_2026-10-21.md)); step 3 (PO manual acceptance, [PO_ACCEPTANCE_HANDOFF.md](PO_ACCEPTANCE_HANDOFF.md)) open.
 
 - Code: `src/modules/seller-text-input/real-parser/` (C2 assets generated from script 2.2, message builder, reducer port,
   safeguards), `parsers/real-seller-text-parser.ts` (adapter), `db/` + migration `0030` + `infrastructure/` (submissions),
@@ -459,4 +459,4 @@ State: §10 step 1 (local implementation, replay-verified) done; step 2 (live mo
   answers; the C2 prompt probe hash matches the manifest; on the 28 saved C2 answers the safeguards change exactly one
   value (`REAL_04` cucumbers: unit «кг» → empty with a notice) and add no omission hints; script 2.2's scorer reproduces
   the recorded 25/28 from the saved answers in the live-check row format.
-- Not verified: generation through the wrapper on a GPU (no environment, B-1); live latency, memory and quality.
+- Live (Modal, T4, billed $0): see LIVE_TEST_2026-10-21.md. Latency 9–29 s per message warm, about a minute after a cold start.

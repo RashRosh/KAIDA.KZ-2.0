@@ -1,0 +1,6 @@
+{"case":"single item","ok":true,"ms":8962,"drafts":1,"skipped":0,"notices":0}
+{"case":"multi item","ok":true,"ms":16964,"drafts":3,"skipped":0,"notices":0}
+{"case":"package","ok":true,"ms":9691,"drafts":1,"skipped":0,"notices":0}
+{"case":"out of stock","ok":true,"ms":11248,"drafts":1,"skipped":1,"notices":0}
+{"case":"unpriced","ok":true,"ms":12428,"drafts":2,"skipped":0,"notices":0}
+SMOKE PASS (integration only; not a quality result)
