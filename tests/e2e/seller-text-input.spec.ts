@@ -76,6 +76,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
@@ -102,6 +103,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
@@ -126,6 +128,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
@@ -154,6 +157,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.route('**/api/seller/text-input', (route) => route.abort('failed'));
     await page.goto('/seller/text-input');

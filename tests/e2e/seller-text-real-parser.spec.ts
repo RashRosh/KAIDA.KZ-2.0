@@ -56,6 +56,7 @@ async function sellerWithPoint(page: Page, phone: string) {
   await page.getByLabel('Тип торговой точки').selectOption('shop');
   await page.getByLabel('Адрес').fill('Алматы');
   await page.getByRole('button', { name: 'Сохранить точку' }).click();
+  await expect(page.getByTestId('point-created-panel')).toBeVisible();
 }
 
 test.describe('seller text input with the real parser (replay stub)', () => {
@@ -92,15 +93,17 @@ test.describe('seller text input with the real parser (replay stub)', () => {
     await expect(page).toHaveURL(/\/seller(\?.*)?$/);
     expect(await counts(phone)).toEqual({ drafts: 2, offers: 1 });
 
-    // A late retry of the same submission (same requestId) after publishing: replay, nothing recreated.
-    const replay = await page.request.post('/api/seller/text-input', { data: { text, requestId: inputId } });
+    // A late retry of the same submission (same requestId and point) after publishing: replay, nothing recreated.
+    const locationId = await withPool(async (pool) => (await pool.query(
+      'SELECT l.id FROM locations l JOIN sellers s ON s.id = l.seller_id JOIN users u ON u.id = s.owner_user_id WHERE u.phone_e164=$1', [phone],
+    )).rows[0].id as string);
+    const replay = await page.request.post('/api/seller/text-input', { data: { text, requestId: inputId, locationId } });
     expect(replay.status()).toBe(200);
     const body = await replay.json();
     expect([body.unavailableDrafts, body.drafts.length]).toEqual([1, 2]);
     expect(await counts(phone)).toEqual({ drafts: 2, offers: 1 });
-    await page.evaluate((result) => sessionStorage.setItem(`kaida:text-input-review:${result.inputId}`, JSON.stringify(result)), body);
     await page.goto(`/seller/text-input/review?input=${inputId}`);
-    await expect(page.getByTestId('text-input-unavailable')).toHaveText('Часть карточек из этого списка уже опубликована или удалена.');
+    await expect(page.getByTestId('text-review-published')).toHaveText('Опубликовано из этого списка: 1');
   });
 
   test('pack written in grams stays in grams; omission hint for a line the parser did not cover', async ({ page }, testInfo) => {

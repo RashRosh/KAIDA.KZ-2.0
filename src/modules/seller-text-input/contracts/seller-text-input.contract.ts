@@ -9,6 +9,8 @@ export const sellerTextInputBodySchema = z.object({
   text: z.string().trim().min(1).max(SELLER_TEXT_INPUT_MAX_LENGTH),
   // seller-ai-text-real-parser §6.4: client-chosen id of one submitted text; retries of that text reuse it.
   requestId: z.uuid().optional(),
+  // The Seller's trading point the drafts are prepared for (connected journey, contract §16); must be the Seller's own.
+  locationId: z.uuid().optional(),
 }).strict();
 
 export const uncertainLineFieldSchema = z.enum(['price', 'unit', 'pack', 'title']);
@@ -59,7 +61,42 @@ export type SellerTextInputResponse = {
   notices: string[];
   // Replay (§6.4 rule 3): drafts of this submission already published or deleted; never recreated. 0 on a first answer.
   unavailableDrafts: number;
+  publishedDrafts: number;
+  deletedDrafts: number;
 };
+
+// A stored submission as the review screen recovers it (§16): never the raw text, which is not kept on the server.
+export type SellerTextSubmissionView = Omit<SellerTextInputResponse, 'rawText'> & {
+  status: 'processing' | 'succeeded' | 'failed';
+  locationId: string | null;
+  createdAt: string;
+  expiresAt: string;
+};
+
+export type SellerTextSubmissionSummary = {
+  inputId: string;
+  createdAt: string;
+  expiresAt: string;
+  drafts: number;
+  skipped: number;
+  notices: number;
+};
+
+export class TextInputPointRequiredError extends Error {
+  readonly code = 'TEXT_INPUT_POINT_REQUIRED' as const;
+  constructor() {
+    super('Сначала создайте торговую точку.');
+    this.name = 'TextInputPointRequiredError';
+  }
+}
+
+export class TextInputPointNotFoundError extends Error {
+  readonly code = 'TEXT_INPUT_POINT_NOT_FOUND' as const;
+  constructor() {
+    super('Эта торговая точка не найдена. Выберите свою точку.');
+    this.name = 'TextInputPointNotFoundError';
+  }
+}
 
 export class TextInputUnavailableError extends Error {
   readonly code = 'TEXT_INPUT_UNAVAILABLE' as const;

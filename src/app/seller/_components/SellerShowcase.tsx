@@ -9,6 +9,7 @@ import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { previewHref } from '../../../modules/offers/preview/preview-link';
 import type { SellerChangeSetView } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
+import type { SellerTextSubmissionSummary } from '../../../modules/seller-text-input/contracts/seller-text-input.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/format-amount';
@@ -75,6 +76,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
   const params = useSearchParams();
   const { data, reload } = useShowcaseData(locale);
   const bulk = useBulkConfirm({ onChanged: reload });
+  const textReviews = useTextReviews(textInputEnabled && data.kind === 'ready' && data.seller !== null, data);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [notice, setNotice] = useState<{ text: MessageKey; offerId: string | null } | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
@@ -193,6 +195,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
         <h2 className="h1" style={{ textAlign: 'center' }}>{t('showcase.emptyTitle')}</h2>
         <p className="t c2" style={{ textAlign: 'center' }}>{t('showcase.emptyText')}</p>
         {cta}
+        <TextReviews reviews={textReviews} />
       </main>,
       toast,
     );
@@ -202,6 +205,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
     <main className="body" style={{ gap: 12 }}>
       {cta}
       <ActualityTask due={dueCards} oneTap={oneTapCards} busy={bulk.busy} error={bulk.error} onCheck={() => go('actuality=1')} onConfirmAll={() => void bulk.confirmAll(oneTapCards.map((card) => card.cardId))} />
+      <TextReviews reviews={textReviews} />
       {data.drafts.length > 0 || archivedCards.length > 0 ? (
         <nav className="chips" aria-label={t('showcase.tabs')}>
           <Link href="/seller" scroll={false} className={`chip${tab === 'all' ? ' on' : ''}`} aria-current={tab === 'all' ? 'page' : undefined}>{t('showcase.tabAll', { count: liveCards.length + data.drafts.length })}</Link>
@@ -381,6 +385,7 @@ function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, s
   const from = params.get('from');
   const initialFocus = params.get('focus') === 'photos' ? 'photos' : undefined;
   const creating = params.get('new') === '1';
+  const atPoint = creating ? params.get('at') : null;
   const draft = drafts.find((item) => item.id === params.get('draft')) ?? null;
   const editCard = findCard(cards, params.get('edit'));
   const pointId = params.get('point');
@@ -420,7 +425,7 @@ function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, s
   if (mode) {
     if (from && restored?.from !== from) return null;
     const initial = override?.initial ?? (from ? restored?.initial ?? undefined : undefined);
-    const reopen = creating ? 'new=1' : draft ? `draft=${draft.id}` : editCard ? `edit=${editCard.cardId}` : `point=${pointId}`;
+    const reopen = creating ? (atPoint ? `new=1&at=${atPoint}` : 'new=1') : draft ? `draft=${draft.id}` : editCard ? `edit=${editCard.cardId}` : `point=${pointId}`;
     return (
       <CardEditor
         key={`${reopen}:${from ?? ''}:${override?.key ?? ''}`}
@@ -428,6 +433,7 @@ function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, s
         seller={seller}
         initial={initial}
         initialFocus={initialFocus}
+        initialPointId={atPoint}
         reopen={reopen}
         commentTranslationEnabled={commentTranslationEnabled}
         onClose={onClose}
@@ -674,5 +680,44 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
       </main>
       {pointSaved && <Toast>{t('points.saved')}</Toast>}
     </Phone>
+  );
+}
+
+// seller-ai-text-real-parser §16: the Seller's list reviews of the last 24 hours, each linked to its own submission, so
+// skipped items and notices stay reachable after leaving the review screen. Re-read whenever the showcase re-reads.
+function useTextReviews(enabled: boolean, data: unknown) {
+  const [reviews, setReviews] = useState<SellerTextSubmissionSummary[]>([]);
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    void (async () => {
+      try {
+        const response = await fetch('/api/seller/text-input', { cache: 'no-store' });
+        if (!response.ok) return;
+        const { submissions } = await response.json() as { submissions: SellerTextSubmissionSummary[] };
+        if (alive) setReviews(submissions);
+      } catch {
+        // The showcase works without the list; the drafts themselves are shown as usual.
+      }
+    })();
+    return () => { alive = false; };
+  }, [enabled, data]);
+  return enabled ? reviews : [];
+}
+
+function TextReviews({ reviews }: { reviews: SellerTextSubmissionSummary[] }) {
+  const { locale, t } = useI18n();
+  if (reviews.length === 0) return null;
+  const time = new Intl.DateTimeFormat(locale === 'kk' ? 'kk-KZ' : 'ru-KZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return (
+    <section className="card p16" style={{ gap: 6 }} data-testid="text-reviews">
+      <div className="ov">{t('textInput.recentTitle')}</div>
+      {reviews.map((review) => (
+        <Link key={review.inputId} href={`/seller/text-input/review?input=${review.inputId}`} className="act" data-testid={`text-review-link-${review.inputId}`}>
+          <Ic name="right" className="sm" />
+          <span>{t('textInput.recentItem', { time: time.format(new Date(review.createdAt)), drafts: review.drafts, skipped: review.skipped })}</span>
+        </Link>
+      ))}
+    </section>
   );
 }

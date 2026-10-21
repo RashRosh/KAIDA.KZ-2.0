@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { applySellerTextInput } from '@/modules/seller-text-input/application/apply-seller-text-input';
+import {
+  applySellerTextInput,
+  listSellerTextSubmissions,
+} from '@/modules/seller-text-input/application/apply-seller-text-input';
 import {
   sellerTextInputBodySchema,
   TextInputParserError,
+  TextInputPointNotFoundError,
+  TextInputPointRequiredError,
   TextInputRequestConflictError,
   TextInputUnavailableError,
 } from '@/modules/seller-text-input/contracts/seller-text-input.contract';
@@ -24,17 +29,31 @@ export async function POST(request: NextRequest): Promise<Response> {
     const { replayed, ...result } = await applySellerTextInput(
       user,
       parsed.data.text,
-      { requestId: parsed.data.requestId },
+      { requestId: parsed.data.requestId, locationId: parsed.data.locationId },
     );
     return NextResponse.json(result, { status: replayed ? 200 : 201, headers: noStore });
   } catch (error) {
     if (error instanceof TextInputUnavailableError) return jsonError(error.code, error.message, 503);
-    if (error instanceof DraftSellerRequiredError) return jsonError(error.code, error.message, 400);
+    if (error instanceof TextInputPointRequiredError) return jsonError(error.code, error.message, 409);
+    if (error instanceof DraftSellerRequiredError) return jsonError('TEXT_INPUT_POINT_REQUIRED', 'Сначала создайте торговую точку.', 409);
+    if (error instanceof TextInputPointNotFoundError) return jsonError(error.code, error.message, 404);
     if (error instanceof TextInputRequestConflictError) return jsonError(error.code, error.message, 409);
     if (error instanceof TextInputParserError) {
       return jsonError(error.code, error.message, error.code === 'TEXT_INPUT_BUSY' ? 429 : 503);
     }
     console.error('Seller text input failed');
     return jsonError('TEXT_INPUT_FAILED', 'Не удалось разобрать текст. Попробуйте ещё раз.', 503);
+  }
+}
+
+// Connected journey (contract §16): the Seller's own list reviews still inside the 24-hour retention, newest first.
+export async function GET(request: NextRequest): Promise<Response> {
+  const user = await sellerUser(request);
+  if (user instanceof Response) return user;
+  try {
+    return NextResponse.json({ submissions: await listSellerTextSubmissions(user.id) }, { headers: noStore });
+  } catch {
+    console.error('Seller text input list failed');
+    return jsonError('TEXT_INPUT_FAILED', 'Не удалось загрузить разборы списков.', 503);
   }
 }

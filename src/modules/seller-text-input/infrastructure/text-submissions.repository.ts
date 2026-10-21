@@ -1,4 +1,4 @@
-import { and, eq, inArray, lt } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, lt, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { offerDrafts } from '../../offers/db/offer-drafts.table';
 import {
@@ -70,4 +70,21 @@ export async function markSubmissionSucceeded(db: Db, key: SubmissionKey, result
 export async function findSellerDraftsByIds(db: Db, sellerId: string, ids: string[]) {
   if (ids.length === 0) return [];
   return db.select().from(offerDrafts).where(and(eq(offerDrafts.sellerId, sellerId), inArray(offerDrafts.id, ids)));
+}
+
+// Connected journey (contract §16): the Seller's submissions still inside the retry period, newest first.
+export async function listLiveSubmissions(db: Db, sellerId: string, now: Date, limit = 10): Promise<SubmissionRow[]> {
+  return db.select().from(sellerTextSubmissions)
+    .where(and(eq(sellerTextSubmissions.sellerId, sellerId), eq(sellerTextSubmissions.status, 'succeeded'), gt(sellerTextSubmissions.expiresAt, now)))
+    .orderBy(desc(sellerTextSubmissions.createdAt))
+    .limit(limit);
+}
+
+// Called by the confirm step before it removes a published draft: bookkeeping only, publication is unchanged.
+export async function recordPublishedTextDraft(db: Pick<Database, 'execute'>, sellerId: string, draftId: string): Promise<void> {
+  await db.execute(sql`
+    UPDATE seller_text_submissions
+    SET result = jsonb_set(result, '{publishedDraftIds}', COALESCE(result->'publishedDraftIds', '[]'::jsonb) || to_jsonb(${draftId}::text))
+    WHERE seller_id = ${sellerId} AND status = 'succeeded' AND result->'draftIds' ? ${draftId}
+      AND NOT COALESCE(result->'publishedDraftIds', '[]'::jsonb) ? ${draftId}`);
 }

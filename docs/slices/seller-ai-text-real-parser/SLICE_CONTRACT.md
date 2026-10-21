@@ -460,3 +460,34 @@ State: §10 step 1 done; step 2 done 2026-10-21 on Modal (smoke 5/5; control-28 
   value (`REAL_04` cucumbers: unit «кг» → empty with a notice) and add no omission hints; script 2.2's scorer reproduces
   the recorded 25/28 from the saved answers in the live-check row format.
 - Live (Modal, T4, billed $0): see LIVE_TEST_2026-10-21.md. Latency 9–29 s per message warm, about a minute after a cold start.
+
+## 16. Connected seller journey (scope adjustment after manual-acceptance findings, PO 2026-10-21)
+
+Findings of the paused acceptance run (live stand, 2026-10-21):
+- F-1: with no trading point the text list failed with the generic «Не удалось разобрать текст»; the reason (no point)
+  was not shown and the way to create one was hidden.
+- F-2: after leaving the review screen the «Не распознано» list could not be reopened (it lived only in the tab).
+- F-3: the list field was small and grew with the text; the path «create point → add products» went through «Ещё».
+
+PO instruction (2026-10-21) adds, without changing the model, prompt, parsing rules or publication semantics:
+1. **Text field:** about six visible lines from the start, fixed height, inner scrolling, persistent label; the text is
+   kept in the browser tab through recoverable errors and point creation (never sent anywhere else).
+2. **Target point:** product entry always names its trading point. After creating a point an inline panel offers
+   «Добавить товары в эту точку» (manual entry with the point selected, or the text list with the point as target) and
+   «Готово»; existing points offer the same action. The text list shows the target; with several points the Seller
+   chooses, nothing is switched silently. API: optional `locationId` (must be the Seller's own → else 404
+   `TEXT_INPUT_POINT_NOT_FOUND`, nothing created); no point at all → 409 `TEXT_INPUT_POINT_REQUIRED`. The point is part
+   of the request identity (same `requestId` with another point → 409 conflict).
+3. **Missing point:** the text list explains that a point is needed and links to the existing point form
+   (`/seller/points?return=text-input`); after saving it returns with that point selected and the text restored, without
+   submitting; cancelling returns with the text. Manual entry keeps its existing inline point creation.
+4. **Review recovery:** `GET /api/seller/text-input/{inputId}` (owner only; unknown, foreign and expired ids answer the
+   same 404) rebuilds the review from the submission record: current drafts, skipped items, notices, the point, and
+   how many drafts were published or deleted. The confirm step records a published draft in the record before it
+   removes the draft (bookkeeping only). `GET /api/seller/text-input` lists the Seller's reviews of the last 24 hours;
+   «Моя витрина» links each one. Expired or unavailable reviews show an explicit state, never an empty list. The raw
+   text is still not stored on the server: without it in the tab the review says so and shows the stored result.
+
+Verification: integration `seller-text-review-recovery.test.ts`; E2E `seller-text-journey.spec.ts` (field height and
+scrolling, missing point → create → return with text, cancel, add products from new and existing points, recovery
+after reload / new tab / from the showcase, other seller, published, expired) on mobile and desktop.

@@ -11,6 +11,10 @@ export type SellerTextSubmissionResult = {
   skipped: SkippedTextLine[];
   uncertain: UncertainDraftNotice[];
   notices: string[];
+  // Connected journey (contract §16): the trading point the drafts were prepared for, and drafts of this submission
+  // that were later published (recorded by the confirm step) — so a missing draft is told apart as published or deleted.
+  locationId?: string | null;
+  publishedDraftIds?: string[];
 };
 
 // seller-ai-text-real-parser §6.4: durable retry protection for 24 hours. Holds a salted digest of the text, never the

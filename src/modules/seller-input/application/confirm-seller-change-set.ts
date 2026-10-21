@@ -16,6 +16,7 @@ import { assertPhotosOwnedBy } from './assert-photos-owned';
 import { CardRemovedByOperatorError } from '../../moderation/contracts/moderation.contract';
 import { clearRemovals, lockActiveRemovals } from '../../moderation/infrastructure/moderation.repository';
 import { removeDraftById } from '../../offers/drafts/offer-drafts';
+import { recordPublishedTextDraft } from '../../seller-text-input/infrastructure/text-submissions.repository';
 import { systemClock, type Clock } from '../../offers/lifecycle/offer-lifecycle';
 import {
   disabledSellerCommentTranslationScheduler,
@@ -317,7 +318,11 @@ export async function confirmSellerChangeSet(
 
     const confirmed = await markChangeSetConfirmed(tx, changeSet.id, confirmationTime);
     if (confirmed.length !== 1) throw new SellerInputInvariantError('Change Set не удалось перевести в confirmed.');
-    if (changeSet.draftId) await removeDraftById(tx, changeSet.draftId, seller.id);
+    if (changeSet.draftId) {
+      // seller-ai-text-real-parser §16: a text-input review can tell a published draft from a deleted one.
+      await recordPublishedTextDraft(tx, seller.id, changeSet.draftId);
+      await removeDraftById(tx, changeSet.draftId, seller.id);
+    }
 
     return { view: await loadFinalView(tx, changeSet.id, seller.id), comments };
   });

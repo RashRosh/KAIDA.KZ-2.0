@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { LocationGeo, LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import { parseManualLocationInput } from '@/modules/locations/contracts/manual-location-input';
@@ -33,14 +34,23 @@ type Props = {
   seller: SellerView | null;
   onSellerChange: (seller: SellerView) => void;
   autoOpenAdd?: boolean;
-  onLocationCreated?: () => void;
+  // A caller that continues elsewhere after a new point (the text list it came from) gets the point; without one the
+  // screen offers «Добавить товары в эту точку» itself (seller-ai-text-real-parser §16).
+  onLocationCreated?: (location: LocationView) => void;
+  textInputEnabled?: boolean;
   // seller-card-point-link: the editor of one existing point opens at once (from a card) and hands back to the caller.
   editLocationId?: string;
   onClose?: (result: 'saved' | 'cancelled') => void;
 };
 
-export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = false, onLocationCreated, editLocationId, onClose }: Props) {
+export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = false, onLocationCreated, textInputEnabled = false, editLocationId, onClose }: Props) {
   const { t } = useI18n();
+  const router = useRouter();
+  // The point products are about to be added to, and whether it was created just now.
+  // A point created just now gets an inline «Добавить товары в эту точку» panel (nothing is covered); the choice of
+  // manual entry or a text list opens as a sheet only when asked for.
+  const [createdPoint, setCreatedPoint] = useState<LocationView | null>(null);
+  const [addTarget, setAddTarget] = useState<{ location: LocationView; created: boolean } | null>(null);
   const ids = useId();
   const locations = seller?.locations ?? [];
   const embeddedLocation = editLocationId ? locations.find((location) => location.id === editLocationId) : undefined;
@@ -299,7 +309,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         : mode === 'edit' ? t('points.saved') : t('points.added'));
       const created = mode === 'add';
       closeForm('saved');
-      if (created) onLocationCreated?.();
+      if (created && onLocationCreated) onLocationCreated(savedLocation);
+      else if (created && !embedded) setCreatedPoint(savedLocation);
     } catch {
       setError(t('points.saveError'));
     } finally {
@@ -390,6 +401,15 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   }
 
   const statusToast = status && <Toast>{status}</Toast>;
+  const addProductsSheet = addTarget && (
+    <AddProductsSheet
+      location={addTarget.location}
+      textInputEnabled={textInputEnabled}
+      onManual={() => router.push(`/seller?new=1&at=${addTarget.location.id}`)}
+      onText={() => router.push(`/seller/text-input?point=${addTarget.location.id}`)}
+      onClose={() => setAddTarget(null)}
+    />
+  );
   const errorBanner = error && (
     <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12, flexDirection: 'row', gap: 10 }}>
       <Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{error}</p>
@@ -542,12 +562,23 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       ) : (
         <main className="body" style={{ gap: 10 }}>
           {errorBanner}
+          {createdPoint && locations.some((location) => location.id === createdPoint.id) && (
+            <div className="card p16 hl" style={{ gap: 8 }} role="status" data-testid="point-created-panel">
+              <div className="ts">{t('points.createdTitle', { name: createdPoint.name })}</div>
+              <p className="c c2">{t('points.addProductsHint', { name: createdPoint.name })}</p>
+              <button type="button" className="btn btn-p w" onClick={() => setAddTarget({ location: createdPoint, created: true })} data-testid="point-created-add">
+                <Ic name="plus" className="sm" />{t('points.addProducts')}
+              </button>
+              <button type="button" className="btn btn-g w" onClick={() => setCreatedPoint(null)}>{t('points.addLater')}</button>
+            </div>
+          )}
           {locations.map((location) => {
             const point = details.get(location.id);
             const channels = (['phone', 'whatsapp'] as const).filter((channel) => point?.contacts[channel]);
             const waiting = channels.some((channel) => point?.contacts[channel]?.verified === false);
             return (
-              <button key={location.id} type="button" className="card" style={{ flexDirection: 'row', gap: 12 }} onClick={() => beginEdit(location)}
+              <div key={location.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <button type="button" className="card" style={{ flexDirection: 'row', gap: 12 }} onClick={() => beginEdit(location)}
                 aria-label={t('points.editNamed', { name: location.name })} data-testid={`trading-point-${location.id}`}>
                 <div className="lic p"><Ic name="pin" /></div>
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -569,13 +600,52 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
                 </div>
                 <Ic name="right" className="c2" />
               </button>
+              <button type="button" className="act" style={{ alignSelf: 'flex-start', paddingLeft: 4 }} onClick={() => setAddTarget({ location, created: false })}
+                data-testid={`add-products-${location.id}`}>
+                <Ic name="plus" className="sm" /><span>{t('points.addProducts')}</span>
+              </button>
+              </div>
             );
           })}
           <button type="button" className="btn btn-o w" onClick={beginAdd}><Ic name="plus" className="sm" />{t('points.add')}</button>
         </main>
       )}
       {statusToast}
+      {addProductsSheet}
       <Nav active="points" />
     </Phone>
+  );
+}
+
+// seller-ai-text-real-parser §16: products go to one named point; the existing manual editor and text list open with it
+// selected. «Готово» ends here without adding anything.
+function AddProductsSheet({ location, textInputEnabled, onManual, onText, onClose }: {
+  location: LocationView;
+  textInputEnabled: boolean;
+  onManual: () => void;
+  onText: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <Sheet title={t('points.addProductsTitle', { name: location.name })} onClose={onClose}>
+      <div data-testid="add-products-sheet" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <p className="t c2">{t('points.addProductsHint', { name: location.name })}</p>
+        <p className="c">{location.addressText}</p>
+        {textInputEnabled && (
+          <button type="button" className="li card hl" onClick={onText} data-testid="add-products-text" style={{ padding: '8px 12px', flexDirection: 'row' }}>
+            <div className="lic ai"><Ic name="pencil" /></div>
+            <div className="mid"><div className="ts">{t('source.text')}</div><p className="c c2">{t('source.textHint')}</p></div>
+            <Ic name="right" className="pt" />
+          </button>
+        )}
+        <button type="button" className="li card hl" onClick={onManual} data-testid="add-products-manual" data-autofocus style={{ padding: '8px 12px', flexDirection: 'row' }}>
+          <div className="lic p"><Ic name="pencil" /></div>
+          <div className="mid"><div className="ts">{t('source.manual')}</div></div>
+          <Ic name="right" className="pt" />
+        </button>
+        <button type="button" className="btn btn-g w" onClick={onClose}>{t('points.addLater')}</button>
+      </div>
+    </Sheet>
   );
 }

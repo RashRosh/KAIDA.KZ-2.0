@@ -66,14 +66,17 @@ function formatInput(amount: string | null | undefined) {
   return amount ? formatAmount(amount).replace(/\u00a0/g, ' ') : '';
 }
 
-function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: CardEditorInitial): CardValues {
+function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: CardEditorInitial, initialPointId?: string | null): CardValues {
   const base = emptyCardValues();
   const locations = seller?.locations ?? [];
   let values: CardValues;
   if (mode.kind === 'create') {
     values = mode.draft
       ? valuesFromDraft(mode.draft.payload, new Set(locations.map((location) => location.id)))
-      : { ...base, points: locations.length === 1 ? { [locations[0]!.id]: { selected: true, ownPrice: null } } : {} };
+      // seller-ai-text-real-parser §16: «Добавить товары в эту точку» opens a new card for exactly that point.
+      : initialPointId && locations.some((location) => location.id === initialPointId)
+        ? { ...base, points: { [initialPointId]: { selected: true, ownPrice: null } } }
+        : { ...base, points: locations.length === 1 ? { [locations[0]!.id]: { selected: true, ownPrice: null } } : {} };
   } else {
     const lead = mode.card.lead;
     values = {
@@ -95,11 +98,13 @@ function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: 
 
 // AI-S09 in the «ИИ выключен» mode (seller-showcase-editor §2): one editor for a new card, a draft, a change in all
 // points and the price of one point. Full screen on phones, a dialog on desktop; overlay rules PROJECT_RULES §18.4.
-export function CardEditor({ mode, seller: initialSeller, initial, initialFocus, reopen, commentTranslationEnabled, onClose, onSaved, onReload }: {
+export function CardEditor({ mode, seller: initialSeller, initial, initialFocus, initialPointId, reopen, commentTranslationEnabled, onClose, onSaved, onReload }: {
   mode: CardEditorMode;
   seller: SellerView | null;
   initial?: CardEditorInitial;
   initialFocus?: 'photos';
+  // A new card started from a trading point (`at=`): that point is the selected target.
+  initialPointId?: string | null;
   // Query that reopens this editor from the review page («Вернуться к правке»).
   reopen: string;
   commentTranslationEnabled: boolean;
@@ -114,7 +119,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const ids = useId();
   const [seller, setSeller] = useState<SellerView | null>(initialSeller);
   const locations = seller?.locations ?? [];
-  const [start] = useState(() => startValues(mode, initialSeller, initial));
+  const [start] = useState(() => startValues(mode, initialSeller, initial, initialPointId));
   const [values, setValues] = useState<CardValues>(start);
   const [startPhotoIds] = useState<string[]>(() => initial?.photoIds
     ?? (mode.kind === 'create' ? mode.draft?.payload.photoIds ?? [] : mode.card.lead.photos?.map((photo) => photo.id) ?? []));

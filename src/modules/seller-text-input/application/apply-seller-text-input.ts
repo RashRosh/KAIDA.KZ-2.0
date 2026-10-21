@@ -2,12 +2,16 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
-import { DraftSellerRequiredError, saveOfferDraft } from '../../offers/drafts/offer-drafts';
+import { saveOfferDraft } from '../../offers/drafts/offer-drafts';
 import type { OfferDraftView } from '../../offers/drafts/offer-draft.contract';
 import { listLocationsBySeller } from '../../locations/infrastructure/locations.repository';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   type SellerTextInputResponse,
+  type SellerTextSubmissionSummary,
+  type SellerTextSubmissionView,
+  TextInputPointNotFoundError,
+  TextInputPointRequiredError,
   type SellerTextParseResult,
   type SellerTextParser,
   type UncertainDraftNotice,
@@ -22,6 +26,7 @@ import {
   findSellerDraftsByIds,
   findSubmission,
   insertProcessingSubmission,
+  listLiveSubmissions,
   markSubmissionFailed,
   markSubmissionSucceeded,
   purgeExpiredSubmissions,
@@ -51,6 +56,7 @@ export type ApplySellerTextInputDependencies = {
   database?: Database;
   env?: Record<string, string | undefined>;
   requestId?: string;
+  locationId?: string;
   fetch?: typeof fetch;
   clock?: () => Date;
   sleep?: (ms: number) => Promise<void>;
@@ -60,8 +66,9 @@ export type SellerTextInputOutcome = SellerTextInputResponse & { replayed: boole
 
 // Salted with the requestId so equal texts of different submissions have different digests (§6.4); the text itself is
 // never stored.
-export function submissionTextDigest(requestId: string, text: string): string {
-  return createHash('sha256').update(`${requestId}\n${text}`, 'utf8').digest('hex');
+export function submissionTextDigest(requestId: string, text: string, locationId?: string): string {
+  const salt = locationId ? `${requestId}\n${locationId}` : requestId;
+  return createHash('sha256').update(`${salt}\n${text}`, 'utf8').digest('hex');
 }
 
 function asUser(owner: string | TextInputUser): TextInputUser {
@@ -77,21 +84,67 @@ function logOutcome(fields: Record<string, string | number | boolean | null>) {
   console.info(JSON.stringify({ event: 'seller_text_input', ...fields }));
 }
 
-async function replay(database: Database, row: SubmissionRow, rawText: string): Promise<SellerTextInputOutcome> {
+// The stored result with the drafts as they are now; a missing draft is published (recorded at confirm) or deleted.
+async function storedResult(database: Database, row: SubmissionRow) {
   const result = row.result!;
   const found = new Map((await findSellerDraftsByIds(database, row.sellerId, result.draftIds)).map((d) => [d.id, d]));
   const drafts = result.draftIds.flatMap((id) => (found.has(id) ? [view(found.get(id)!)] : []));
+  const published = new Set(result.publishedDraftIds ?? []);
+  const missing = result.draftIds.filter((id) => !found.has(id));
+  const publishedDrafts = missing.filter((id) => published.has(id)).length;
   return {
     inputId: row.requestId,
-    rawText,
     parser: row.parser,
     drafts,
     skipped: result.skipped,
     uncertain: result.uncertain.filter((u) => found.has(u.draftId)),
     notices: result.notices,
-    unavailableDrafts: result.draftIds.length - drafts.length,
-    replayed: true,
+    unavailableDrafts: missing.length,
+    publishedDrafts,
+    deletedDrafts: missing.length - publishedDrafts,
   };
+}
+
+async function replay(database: Database, row: SubmissionRow, rawText: string): Promise<SellerTextInputOutcome> {
+  return { ...await storedResult(database, row), rawText, replayed: true };
+}
+
+// Review recovery (contract §16): the Seller's own submission while it is retained; anything else is unavailable.
+export async function getSellerTextSubmission(
+  ownerUserId: string,
+  inputId: string,
+  dependencies: { database?: Database; clock?: () => Date } = {},
+): Promise<SellerTextSubmissionView | null> {
+  const database = dependencies.database ?? getDatabase();
+  const seller = await findSellerByOwner(database, ownerUserId);
+  if (!seller) return null;
+  const row = await findSubmission(database, { sellerId: seller.id, requestId: inputId });
+  const now = (dependencies.clock ?? (() => new Date()))();
+  if (!row || row.expiresAt.getTime() <= now.getTime()) return null;
+  const base = { status: row.status, createdAt: row.createdAt.toISOString(), expiresAt: row.expiresAt.toISOString() };
+  if (row.status !== 'succeeded') {
+    return { ...base, inputId: row.requestId, parser: row.parser, locationId: null, drafts: [], skipped: [], uncertain: [],
+      notices: [], unavailableDrafts: 0, publishedDrafts: 0, deletedDrafts: 0 };
+  }
+  return { ...base, ...await storedResult(database, row), locationId: row.result!.locationId ?? null };
+}
+
+export async function listSellerTextSubmissions(
+  ownerUserId: string,
+  dependencies: { database?: Database; clock?: () => Date } = {},
+): Promise<SellerTextSubmissionSummary[]> {
+  const database = dependencies.database ?? getDatabase();
+  const seller = await findSellerByOwner(database, ownerUserId);
+  if (!seller) return [];
+  const rows = await listLiveSubmissions(database, seller.id, (dependencies.clock ?? (() => new Date()))());
+  const out: SellerTextSubmissionSummary[] = [];
+  for (const row of rows) {
+    const result = row.result!;
+    const present = await findSellerDraftsByIds(database, seller.id, result.draftIds);
+    out.push({ inputId: row.requestId, createdAt: row.createdAt.toISOString(), expiresAt: row.expiresAt.toISOString(),
+      drafts: present.length, skipped: result.skipped.length, notices: result.notices.length });
+  }
+  return out;
 }
 
 async function parse(text: string, parser: SellerTextParser, config: RealParserConfig | null,
@@ -120,9 +173,15 @@ export async function applySellerTextInput(
   const leaseMs = realConfig ? realConfig.timeoutMs + LEASE_MARGIN_MS : FAKE_PARSER_LEASE_MS;
 
   const seller = await findSellerByOwner(database, user.id);
-  if (!seller) throw new DraftSellerRequiredError();
+  if (!seller) throw new TextInputPointRequiredError();
+  // Connected journey (§16): drafts go to a point of this Seller; without any point the Seller creates one first.
+  const locations = await listLocationsBySeller(database, seller.id);
+  if (locations.length === 0) throw new TextInputPointRequiredError();
+  const locationId = dependencies.locationId;
+  if (locationId && !locations.some((location) => location.id === locationId)) throw new TextInputPointNotFoundError();
+  const targetLocationId = locationId ?? (locations.length === 1 ? locations[0]!.id : null);
   const key: SubmissionKey = { sellerId: seller.id, requestId: dependencies.requestId ?? randomUUID() };
-  const textDigest = submissionTextDigest(key.requestId, text);
+  const textDigest = submissionTextDigest(key.requestId, text, locationId);
   await purgeExpiredSubmissions(database, clock());
 
   for (let round = 0; round < MAX_ROUNDS; round += 1) {
@@ -168,7 +227,7 @@ export async function applySellerTextInput(
     }
 
     const committed = await database.transaction(async (tx) => commitDrafts(tx as unknown as Database, {
-      key, attemptId, sellerId: seller.id, userId: user.id, parsed, parser, now: clock,
+      key, attemptId, userId: user.id, parsed, parser, now: clock, locationId: targetLocationId,
     })).catch(async (error: unknown) => {
       await markSubmissionFailed(database, key, attemptId, 'TEXT_INPUT_FAILED').catch(() => undefined);
       logOutcome({ inputId: key.requestId, outcome: 'TEXT_INPUT_FAILED', reason: 'db_error', ms: Date.now() - started, parser });
@@ -188,6 +247,8 @@ export async function applySellerTextInput(
       uncertain: committed.result.uncertain,
       notices: committed.result.notices,
       unavailableDrafts: 0,
+      publishedDrafts: 0,
+      deletedDrafts: 0,
       replayed: false,
     };
   }
@@ -197,15 +258,14 @@ export async function applySellerTextInput(
 // Rule 7: drafts are written only by the attempt that, under the row lock, still owns the submission; the drafts and
 // the `succeeded` outcome commit together or not at all.
 async function commitDrafts(tx: Database, input: {
-  key: SubmissionKey; attemptId: string; sellerId: string; userId: string; parsed: SellerTextParseResult;
-  parser: SellerTextParser; now: () => Date;
+  key: SubmissionKey; attemptId: string; userId: string; parsed: SellerTextParseResult;
+  parser: SellerTextParser; now: () => Date; locationId: string | null;
 }) {
   const { key, attemptId, parsed, parser } = input;
   const row = await findSubmission(tx, key, true);
   if (!row || row.status !== 'processing' || row.attemptId !== attemptId) return null;
 
-  const locations = await listLocationsBySeller(tx, input.sellerId);
-  const defaultLocationId = locations.length === 1 ? locations[0]!.id : null;
+  const defaultLocationId = input.locationId;
   const drafts: OfferDraftView[] = [];
   const uncertain: UncertainDraftNotice[] = [];
   for (const line of parsed.lines) {
@@ -223,6 +283,7 @@ async function commitDrafts(tx: Database, input: {
   }
   const result: SellerTextSubmissionResult = {
     draftIds: drafts.map((d) => d.id), skipped: parsed.skipped, uncertain, notices: parsed.notices ?? [],
+    locationId: input.locationId,
   };
   await markSubmissionSucceeded(tx, key, result, input.now());
   return { drafts, result };
