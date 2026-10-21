@@ -31,3 +31,4 @@ export { offerReports, offerReportPhotos, offerReportReceipts } from '../modules
 export { otpSourceEvents, otpSourceMaintenance } from '../modules/identity/db/otp-source.table';
 
 export { buyerOfferFavourites } from '../modules/favourites/db/favourites.table';
+export { sellerTextSubmissions } from '../modules/seller-text-input/db/seller-text-submissions.table';

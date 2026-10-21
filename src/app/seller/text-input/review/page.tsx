@@ -1,11 +1,13 @@
+import { cookies } from 'next/headers';
 import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { SellerTextInputReviewScreen } from '../../_components/SellerTextInputReview';
-import { isSellerTextInputEnabled } from '@/modules/seller-text-input/seller-text-input.config';
+import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
+import { isTextInputEnabledForSession } from '@/modules/seller-text-input/application/text-input-access';
 
 export default async function Page() {
   await connection();
-  if (!isSellerTextInputEnabled()) notFound();
+  if (!await isTextInputEnabledForSession((await cookies()).get(SESSION_COOKIE_NAME)?.value)) notFound();
   return <Suspense><SellerTextInputReviewScreen /></Suspense>;
 }

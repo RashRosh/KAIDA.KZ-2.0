@@ -1,70 +1,229 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
 import { resolveProduct } from '../../catalog/application/resolve-product';
 import { DraftSellerRequiredError, saveOfferDraft } from '../../offers/drafts/offer-drafts';
+import type { OfferDraftView } from '../../offers/drafts/offer-draft.contract';
 import { listLocationsBySeller } from '../../locations/infrastructure/locations.repository';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
 import {
   type SellerTextInputResponse,
   type SellerTextParseResult,
+  type SellerTextParser,
+  type UncertainDraftNotice,
+  TextInputParserError,
+  TextInputRequestConflictError,
   TextInputUnavailableError,
 } from '../contracts/seller-text-input.contract';
-import { readSellerTextInputMode } from '../seller-text-input.config';
+import type { SellerTextSubmissionResult } from '../db/seller-text-submissions.table';
+import {
+  type SubmissionKey,
+  type SubmissionRow,
+  findSellerDraftsByIds,
+  findSubmission,
+  insertProcessingSubmission,
+  markSubmissionFailed,
+  markSubmissionSucceeded,
+  purgeExpiredSubmissions,
+  takeOverSubmission,
+} from '../infrastructure/text-submissions.repository';
 import { parseFakeSellerText } from '../parsers/fake-seller-text-parser';
+import { parseWithRealModel } from '../parsers/real-seller-text-parser';
+import { PARSER_CONFIG_ID } from '../real-parser/c2-pipeline';
+import {
+  type RealParserConfig,
+  type TextInputUser,
+  isSellerTextInputEnabledFor,
+  readRealParserConfig,
+  readSellerTextInputMode,
+} from '../seller-text-input.config';
 import { mapParseLineToDraftPayload, uncertainMessage } from './map-parse-line-to-draft';
 
-function parseText(text: string, mode: ReturnType<typeof readSellerTextInputMode>): SellerTextParseResult {
-  if (mode === 'fake') return parseFakeSellerText(text);
-  throw new TextInputUnavailableError();
+// seller-ai-text-real-parser §6.4: retry protection lasts 24 hours; a processing attempt is live for the parser timeout
+// plus 30 seconds, after which another request may take it over.
+export const SUBMISSION_RETENTION_MS = 24 * 60 * 60 * 1000;
+const LEASE_MARGIN_MS = 30_000;
+const FAKE_PARSER_LEASE_MS = 30_000;
+const POLL_INTERVAL_MS = 250;
+const MAX_ROUNDS = 8;
+
+export type ApplySellerTextInputDependencies = {
+  database?: Database;
+  env?: Record<string, string | undefined>;
+  requestId?: string;
+  fetch?: typeof fetch;
+  clock?: () => Date;
+  sleep?: (ms: number) => Promise<void>;
+};
+
+export type SellerTextInputOutcome = SellerTextInputResponse & { replayed: boolean };
+
+// Salted with the requestId so equal texts of different submissions have different digests (§6.4); the text itself is
+// never stored.
+export function submissionTextDigest(requestId: string, text: string): string {
+  return createHash('sha256').update(`${requestId}\n${text}`, 'utf8').digest('hex');
+}
+
+function asUser(owner: string | TextInputUser): TextInputUser {
+  return typeof owner === 'string' ? { id: owner, phoneE164: '' } : owner;
+}
+
+function view(row: { id: string; payload: OfferDraftView['payload']; createdAt: Date; updatedAt: Date }): OfferDraftView {
+  return { id: row.id, payload: row.payload, createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString() };
+}
+
+function logOutcome(fields: Record<string, string | number | boolean | null>) {
+  // §6.5: identifiers, outcome, duration, counts and configuration only — never seller text, quotes, titles or output.
+  console.info(JSON.stringify({ event: 'seller_text_input', ...fields }));
+}
+
+async function replay(database: Database, row: SubmissionRow, rawText: string): Promise<SellerTextInputOutcome> {
+  const result = row.result!;
+  const found = new Map((await findSellerDraftsByIds(database, row.sellerId, result.draftIds)).map((d) => [d.id, d]));
+  const drafts = result.draftIds.flatMap((id) => (found.has(id) ? [view(found.get(id)!)] : []));
+  return {
+    inputId: row.requestId,
+    rawText,
+    parser: row.parser,
+    drafts,
+    skipped: result.skipped,
+    uncertain: result.uncertain.filter((u) => found.has(u.draftId)),
+    notices: result.notices,
+    unavailableDrafts: result.draftIds.length - drafts.length,
+    replayed: true,
+  };
+}
+
+async function parse(text: string, parser: SellerTextParser, config: RealParserConfig | null,
+  dependencies: ApplySellerTextInputDependencies): Promise<SellerTextParseResult> {
+  if (parser === 'fake') return parseFakeSellerText(text);
+  return parseWithRealModel(text, config!, { fetch: dependencies.fetch });
 }
 
 export async function applySellerTextInput(
-  ownerUserId: string,
+  owner: string | TextInputUser,
   text: string,
-  dependencies: { database?: Database; env?: Record<string, string | undefined> } = {},
-): Promise<SellerTextInputResponse> {
-  const mode = readSellerTextInputMode(dependencies.env);
+  dependencies: ApplySellerTextInputDependencies = {},
+): Promise<SellerTextInputOutcome> {
+  const started = Date.now();
+  const env = dependencies.env ?? process.env;
+  const mode = readSellerTextInputMode(env);
   if (mode === 'off') throw new TextInputUnavailableError();
+  const user = asUser(owner);
+  if (!isSellerTextInputEnabledFor(user, env)) throw new TextInputUnavailableError();
+  const parser: SellerTextParser = mode;
+  const realConfig = parser === 'real' ? readRealParserConfig(env) as RealParserConfig : null;
 
   const database = dependencies.database ?? getDatabase();
-  const inputId = randomUUID();
-  const parsed = parseText(text, mode);
+  const clock = dependencies.clock ?? (() => new Date());
+  const sleep = dependencies.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+  const leaseMs = realConfig ? realConfig.timeoutMs + LEASE_MARGIN_MS : FAKE_PARSER_LEASE_MS;
 
-  return database.transaction(async (tx) => {
-    const seller = await findSellerByOwner(tx, ownerUserId);
-    if (!seller) throw new DraftSellerRequiredError();
+  const seller = await findSellerByOwner(database, user.id);
+  if (!seller) throw new DraftSellerRequiredError();
+  const key: SubmissionKey = { sellerId: seller.id, requestId: dependencies.requestId ?? randomUUID() };
+  const textDigest = submissionTextDigest(key.requestId, text);
+  await purgeExpiredSubmissions(database, clock());
 
-    const locations = await listLocationsBySeller(tx, seller.id);
-    const defaultLocationId = locations.length === 1 ? locations[0]!.id : null;
+  for (let round = 0; round < MAX_ROUNDS; round += 1) {
+    const now = clock();
+    const attemptId = randomUUID();
+    let owned = await insertProcessingSubmission(database, {
+      ...key, textDigest, parser, attemptId, now, expiresAt: new Date(now.getTime() + SUBMISSION_RETENTION_MS),
+    });
 
-    const drafts = [];
-    const uncertain = [];
-
-    for (const line of parsed.lines) {
-      const resolution = await resolveProduct(tx, line.title);
-      const catalog = resolution.status === 'resolved'
-        ? { productId: resolution.product.id, status: 'resolved' as const }
-        : { productId: null, status: resolution.status };
-
-      const { payload, uncertainFields } = mapParseLineToDraftPayload(line, inputId, defaultLocationId, catalog);
-      const draft = await saveOfferDraft(ownerUserId, null, payload, { database: tx as unknown as Database });
-      drafts.push(draft);
-      if (uncertainFields.length > 0) {
-        uncertain.push({
-          draftId: draft.id,
-          fields: uncertainFields,
-          message: uncertainMessage(uncertainFields, resolution.status),
-        });
+    if (!owned) {
+      const row = await findSubmission(database, key);
+      if (!row) continue; // expired and purged meanwhile: try to insert again
+      if (row.textDigest !== textDigest) throw new TextInputRequestConflictError(); // rule 2
+      if (row.status === 'succeeded') { // rule 3
+        const outcome = await replay(database, row, text);
+        logOutcome({ inputId: key.requestId, outcome: 'replay', ms: Date.now() - started, drafts: outcome.drafts.length,
+          unavailable: outcome.unavailableDrafts, parser: row.parser });
+        return outcome;
       }
+      const stale = row.status === 'processing' && clock().getTime() - row.attemptStartedAt.getTime() >= leaseMs;
+      if (row.status === 'processing' && !stale) { // rule 4: wait for the live attempt, never run a second inference
+        const deadline = row.attemptStartedAt.getTime() + leaseMs;
+        let current: SubmissionRow | null = row;
+        while (current && current.status === 'processing' && current.attemptId === row.attemptId && clock().getTime() < deadline) {
+          await sleep(POLL_INTERVAL_MS);
+          current = await findSubmission(database, key);
+        }
+        continue; // new state: replay, failure to retry, or an attempt that became stale and is taken over (rule 5)
+      }
+      owned = await takeOverSubmission(database, key, row, attemptId, clock()); // rule 5
+      if (!owned) continue;
     }
 
+    let parsed: SellerTextParseResult;
+    try {
+      parsed = await parse(text, parser, realConfig, dependencies);
+    } catch (error) {
+      const code = error instanceof TextInputParserError ? error.code : 'TEXT_INPUT_FAILED';
+      await markSubmissionFailed(database, key, attemptId, code).catch(() => undefined);
+      logOutcome({ inputId: key.requestId, outcome: code, reason: error instanceof TextInputParserError ? error.reason : 'parser_error',
+        ms: Date.now() - started, parser, config: parser === 'real' ? PARSER_CONFIG_ID : null });
+      throw error;
+    }
+
+    const committed = await database.transaction(async (tx) => commitDrafts(tx as unknown as Database, {
+      key, attemptId, sellerId: seller.id, userId: user.id, parsed, parser, now: clock,
+    })).catch(async (error: unknown) => {
+      await markSubmissionFailed(database, key, attemptId, 'TEXT_INPUT_FAILED').catch(() => undefined);
+      logOutcome({ inputId: key.requestId, outcome: 'TEXT_INPUT_FAILED', reason: 'db_error', ms: Date.now() - started, parser });
+      throw error;
+    });
+    if (!committed) continue; // another attempt owns the row now; its result is replayed or awaited next round
+
+    logOutcome({ inputId: key.requestId, outcome: 'created', ms: Date.now() - started, items: parsed.lines.length,
+      drafts: committed.drafts.length, skipped: parsed.skipped.length, notices: committed.result.notices.length,
+      uncertain: committed.result.uncertain.length, parser, config: parser === 'real' ? PARSER_CONFIG_ID : null });
     return {
-      inputId,
+      inputId: key.requestId,
       rawText: text,
-      drafts,
+      parser,
+      drafts: committed.drafts,
       skipped: parsed.skipped,
-      uncertain,
+      uncertain: committed.result.uncertain,
+      notices: committed.result.notices,
+      unavailableDrafts: 0,
+      replayed: false,
     };
-  });
+  }
+  throw new TextInputParserError('TEXT_INPUT_FAILED', 'submission_contention');
+}
+
+// Rule 7: drafts are written only by the attempt that, under the row lock, still owns the submission; the drafts and
+// the `succeeded` outcome commit together or not at all.
+async function commitDrafts(tx: Database, input: {
+  key: SubmissionKey; attemptId: string; sellerId: string; userId: string; parsed: SellerTextParseResult;
+  parser: SellerTextParser; now: () => Date;
+}) {
+  const { key, attemptId, parsed, parser } = input;
+  const row = await findSubmission(tx, key, true);
+  if (!row || row.status !== 'processing' || row.attemptId !== attemptId) return null;
+
+  const locations = await listLocationsBySeller(tx, input.sellerId);
+  const defaultLocationId = locations.length === 1 ? locations[0]!.id : null;
+  const drafts: OfferDraftView[] = [];
+  const uncertain: UncertainDraftNotice[] = [];
+  for (const line of parsed.lines) {
+    const resolution = await resolveProduct(tx, line.title);
+    const catalog = resolution.status === 'resolved'
+      ? { productId: resolution.product.id, status: 'resolved' as const }
+      : { productId: null, status: resolution.status };
+    const { payload, uncertainFields } = mapParseLineToDraftPayload(line, key.requestId, defaultLocationId, catalog,
+      { parser, parserConfig: parser === 'real' ? PARSER_CONFIG_ID : undefined });
+    const draft = await saveOfferDraft(input.userId, null, payload, { database: tx });
+    drafts.push(draft);
+    if (uncertainFields.length > 0) {
+      uncertain.push({ draftId: draft.id, fields: uncertainFields, message: uncertainMessage(uncertainFields, resolution.status, line.notice) });
+    }
+  }
+  const result: SellerTextSubmissionResult = {
+    draftIds: drafts.map((d) => d.id), skipped: parsed.skipped, uncertain, notices: parsed.notices ?? [],
+  };
+  await markSubmissionSucceeded(tx, key, result, input.now());
+  return { drafts, result };
 }

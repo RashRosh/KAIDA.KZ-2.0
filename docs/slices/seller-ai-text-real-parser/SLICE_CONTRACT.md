@@ -240,8 +240,8 @@ retries of that text, so expiry does not affect normal use.
    shows «Часть карточек из этого списка уже опубликована или удалена». The stored `skipped` list and notices are
    returned (notices only for drafts that still exist).
 4. `processing` with a live attempt (started less than parser timeout + 30 s ago) → the request waits, polling the row,
-   for at most that time, then applies rules 2–5 to the new state; still processing → 503 `TEXT_INPUT_FAILED` with
-   nothing created. No second inference runs.
+   until the attempt finishes or becomes stale, then applies rules 2–5 to the new state (an attempt still processing
+   at that point is stale and is taken over under rule 5). No second inference runs while the attempt is live.
 5. `failed`, or `processing` whose attempt is older than parser timeout + 30 s (owner crashed or restarted) → this
    request takes over: new `attempt_id`, inference runs again.
 6. New key → row inserted as `processing` (`INSERT … ON CONFLICT DO NOTHING`; the database decides the single
@@ -286,7 +286,7 @@ absent, slice-1 mapping applies, so `fake` behaviour is unchanged. Skipped entri
 | `SELLER_TEXT_PARSER_API_KEY` | bearer secret, at least 32 characters; **required for any non-loopback URL** (public tunnel, LAN or hosted endpoint); may be omitted only for a loopback URL; sent only in the `Authorization` header; never logged, returned to the browser or committed |
 | `SELLER_TEXT_PARSER_TIMEOUT_MS` | 1 000–180 000, default 60 000 |
 | `SELLER_TEXT_PARSER_CONCURRENCY` | 1–8, default 1 |
-| `SELLER_TEXT_INPUT_ALLOWLIST` | user IDs allowed in `real` mode; empty → nobody |
+| `SELLER_TEXT_INPUT_ALLOWLIST` | user IDs or login phone numbers (E.164) allowed in `real` mode, comma-separated; empty → nobody |
 
 A `real` configuration that breaks these rules (missing or short key for a non-loopback URL, `http` to a
 non-loopback host) is invalid and degrades to `off` with one server log line that names the rule, not the value.
@@ -335,9 +335,9 @@ Three separate kinds of evidence; none substitutes for another. Fixtures and tes
   inference again, drafts once; stale `processing` attempt taken over and the old owner's late commit creates nothing;
   expired rows purged; migration applies on a database with existing data.
 - E2E (production build): slice-1 fake E2E unchanged; one replay E2E text → review (skipped, notices, reminder) → edit
-  → publish one card → stub failure → retry without duplicates; resubmitting the same text after publishing shows the
-  «уже опубликована или удалена» notice and no duplicate; non-allowlisted seller sees the slice-1 unavailable state;
-  manual entry works.
+  → publish one card → stub failure → retry without duplicates; a late retry of the same submission (same
+  `requestId`) after publishing returns the replay without duplicates and the review shows the «уже опубликована или
+  удалена» notice; non-allowlisted seller sees the slice-1 unavailable state; manual entry works.
 - `pnpm verify` and branch CI green.
 
 ### 9.2 Smoke test with the real model (Part B, manual)
@@ -440,3 +440,23 @@ All reproducibility artifacts identified in §2 have been located; none is missi
 - Retry protection lasts 24 hours; a retry of the same `requestId` after that creates new drafts.
 - A replay cannot tell whether a missing draft was published or deleted; it reports both together.
 - One request slot: concurrent sellers get “busy”; acceptable for a controlled test, not for launch.
+
+## 15. Implementation record (branch `slice/seller-ai-text-real-parser`)
+
+State: §10 step 1 (local implementation, replay-verified) done; step 2 (live model) blocked by B-1; step 3 open.
+
+- Code: `src/modules/seller-text-input/real-parser/` (C2 assets generated from script 2.2, message builder, reducer port,
+  safeguards), `parsers/real-seller-text-parser.ts` (adapter), `db/` + migration `0030` + `infrastructure/` (submissions),
+  `application/apply-seller-text-input.ts` (§6.4 rules), route codes, compose and review screens.
+- Service: `ops/seller-text-parser/` (reference wrapper with its HTTP/access tests using a fake generator, requirements,
+  `live-check.ts` for §9.2–§9.3); ops note `docs/ops/SELLER_TEXT_PARSER.md`.
+- Fixtures: `tests/fixtures/seller-text-real-parser/` (script 2.2 and `control28.json`, byte-exact, D-3).
+- Clarifications made during implementation: allowlist accepts login phones as well as user IDs (§8); rule 4 wording
+  (§6.4); claims with status `cmd` stay ignored as in script 2.2 (not listed as skipped); the «unused number» hint
+  counts only numbers ≥ 10 outside every recognised quote; a parser «busy» answer is recorded as a failed attempt, so
+  the retry runs again; one existing test that pinned 0029 as the newest migration now checks the 0029 entry itself.
+- Replay evidence (deterministic, no model): the reducer port reproduces the Python reducer on all 56 saved C1/C2
+  answers; the C2 prompt probe hash matches the manifest; on the 28 saved C2 answers the safeguards change exactly one
+  value (`REAL_04` cucumbers: unit «кг» → empty with a notice) and add no omission hints; script 2.2's scorer reproduces
+  the recorded 25/28 from the saved answers in the live-check row format.
+- Not verified: generation through the wrapper on a GPU (no environment, B-1); live latency, memory and quality.

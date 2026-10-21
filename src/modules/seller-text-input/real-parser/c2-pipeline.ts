@@ -1,0 +1,241 @@
+import { packInputSchema } from '../../offers/pack/pack';
+import type {
+  ParsedTextLine, SellerTextParseResult, SkippedTextLine,
+} from '../contracts/seller-text-input.contract';
+import {
+  STATUSES, findSpan, numberOccurrences, reduceClaims, sameProduct, tokEq, type ReducedItem,
+} from './c2-reducer';
+import {
+  KG, LITER, PACKAGE, PIECE, W, halfRe, normText, packsEquivalent, sizeReading, sizeRe, tokens, type Pack,
+} from './c2-text';
+
+// seller-ai-text-real-parser §6.2–§6.3: claim-level validation, KAIDA safeguards on top of the C2 reducer, mapping to
+// draft lines and omission hints. Deterministic; the model's answer is untrusted data throughout.
+
+export const MAX_DRAFTS_PER_SUBMISSION = 30;
+export const PARSER_CONFIG_ID = 'c2/script-2.2/Qwen3-4B@1cfa9a7';
+
+const REASON_UNUSABLE_CLAIM = 'Ответ модели по этой позиции не распознан';
+const REASON_OUT_OF_STOCK = 'Отметка «нет в наличии» — измените карточку вручную';
+const REASON_OVERFLOW = 'Не больше 30 позиций за раз';
+
+const NOTE = {
+  title: 'Проверьте название',
+  priceUnbound: 'Цена не привязана к товару — укажите цену',
+  priceCheck: 'Проверьте цену',
+  priceCorrection: 'Проверьте цену: в тексте была поправка',
+  priceCurrency: 'Цена указана не в тенге — укажите цену в тенге',
+  unit: 'Единица не указана рядом с товаром — проверьте',
+  packDropped: 'Фасовка из текста не перенесена',
+  packMismatch: 'Фасовка не совпадает с текстом — проверьте',
+  packCheck: 'Проверьте фасовку',
+} as const;
+
+const LIMITS = { product: 200, text: 500, price: 100, per: 100, size: 100 } as const;
+
+export type ValidClaim = {
+  product: string | null; status: string; price: string | number | null; per: string | number | null;
+  size: string | number | null; only: boolean; text: string | null;
+};
+
+const clip = (s: string, max: number) => (s.length <= max ? s : `${s.slice(0, max - 1)}…`);
+
+// Claim level (§6.2): a usable claim goes on; an unusable one becomes a visible skipped entry and never a draft.
+export function validateClaim(raw: unknown, index: number, message: string): { claim: ValidClaim } | { skipped: SkippedTextLine } {
+  const record = raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : null;
+  const productLabel = record && typeof record.product === 'string' && record.product.trim().length >= 1
+    && record.product.trim().length <= 200 ? record.product.trim() : `Позиция ${index + 1}`;
+  const quote = record && typeof record.text === 'string' && record.text && message.includes(record.text)
+    ? clip(record.text, 500) : null;
+  const skip = { skipped: { label: productLabel, reason: REASON_UNUSABLE_CLAIM, sourceQuote: quote } };
+  if (!record) return skip;
+
+  const str = (k: 'product' | 'text') => {
+    const v = record[k];
+    if (v === undefined || v === null) return { ok: true as const, v: null };
+    if (typeof v !== 'string' || v.length > LIMITS[k]) return { ok: false as const };
+    return { ok: true as const, v };
+  };
+  const scalar = (k: 'price' | 'per' | 'size') => {
+    const v = record[k];
+    if (v === undefined || v === null) return { ok: true as const, v: null };
+    if (typeof v === 'number' && Number.isFinite(v)) return { ok: true as const, v };
+    if (typeof v !== 'string' || v.length > LIMITS[k]) return { ok: false as const };
+    return { ok: true as const, v };
+  };
+  const product = str('product');
+  const text = str('text');
+  const price = scalar('price');
+  const per = scalar('per');
+  const size = scalar('size');
+  const only = record.only;
+  const onlyOk = only === undefined || only === null || typeof only === 'boolean'
+    || (typeof only === 'string' && ['true', 'false'].includes(only.trim().toLowerCase()));
+  const status = record.status;
+  if (!product.ok || !text.ok || !price.ok || !per.ok || !size.ok || !onlyOk) return skip;
+  if (typeof status !== 'string' || !(STATUSES as readonly string[]).includes(status.trim())) return skip;
+  if (status.trim() !== 'cmd' && (!product.v || !product.v.trim())) return skip;
+  return {
+    claim: {
+      product: product.v, status: status.trim(), price: price.v, per: per.v, size: size.v, text: text.v,
+      only: only === true || (typeof only === 'string' && only.trim().toLowerCase() === 'true'),
+    },
+  };
+}
+
+const UNIT_WORDS = (t: string) => KG.has(t) || LITER.has(t) || PIECE.has(t) || PACKAGE.has(t);
+
+// §6.3 «unit assigned to the wrong product»: the model's unit words count only if they occur in the claim's own quote,
+// and no other product of the answer is named in that quote before them. Otherwise the unit is dropped (a size
+// written in `per` is kept as size) and the product gets a `unit` notice.
+export function guardUnits(claims: ValidClaim[], message: string): { claims: ValidClaim[]; unitDropped: string[] } {
+  const unitDropped: string[] = [];
+  const out = claims.map((cl, i) => {
+    if (cl.per === null || cl.status === 'cmd' || !cl.product) return cl;
+    const per = String(cl.per);
+    const unitToks = tokens(per).filter(UNIT_WORDS);
+    if (unitToks.length === 0) return cl;
+    const ownToks = tokens(cl.product);
+    const otherToks = claims.flatMap((o, j) => (j === i || !o.product ? [] : tokens(o.product)))
+      .filter((t) => t.length >= 3 && !ownToks.some((x) => tokEq(t, x)));
+    const quoteToks = cl.text && findSpan(message, cl.text) ? tokens(cl.text) : [];
+    const at = quoteToks.findIndex((t) => unitToks.includes(t));
+    const ok = at >= 0 && !quoteToks.slice(0, at).some((t) => otherToks.some((o) => tokEq(t, o)));
+    if (ok) return cl;
+    if (cl.status !== 'none') unitDropped.push(cl.product);
+    const keepsSize = cl.size === null && sizeReading(per)[0] !== null;
+    return { ...cl, per: null, size: keepsSize ? per : cl.size };
+  });
+  return { claims: out, unitDropped };
+}
+
+// All pack sizes the seller wrote in a quote, in the seller's own units.
+export function sellerPacks(quote: string): Pack[] {
+  const found: Pack[] = [];
+  const add = (p: Pack | null) => { if (p && !found.some((f) => f.amount === p.amount && f.unit === p.unit)) found.push(p); };
+  add(sizeReading(quote, quote)[0]);
+  const low = normText(quote);
+  for (const m of low.matchAll(sizeRe('gu'))) add(sizeReading(m[0])[0]);
+  for (const m of low.matchAll(halfRe('gu'))) add(sizeReading(m[0])[0]);
+  for (const part of low.split(new RegExp(`[,;.—–]|\\s-\\s|(?<=${W})\\s+(?=\\d)`, 'u'))) add(sizeReading(part, quote)[0]);
+  return found;
+}
+
+// §6.3 «Packaging»: keep the seller's unit; an equivalent normalization is accepted and shown as the seller wrote it.
+export function guardPack(pack: Pack | null, source: string | null): { pack: Pack | null; mismatch: boolean } {
+  if (pack === null) return { pack: null, mismatch: false };
+  const written = source ? sellerPacks(source) : [];
+  const exact = written.find((p) => p.amount === pack.amount && p.unit === pack.unit);
+  if (exact) return { pack: exact, mismatch: false };
+  const equivalent = written.find((p) => packsEquivalent(p, pack));
+  if (equivalent) return { pack: equivalent, mismatch: false };
+  return { pack: null, mismatch: true };
+}
+
+function mapItem(item: ReducedItem, unitDropped: string[]): ParsedTextLine {
+  const flags = new Set(item.flags);
+  const fields = new Set<'price' | 'unit' | 'pack' | 'title'>();
+  const notes: string[] = [];
+  const note = (field: 'price' | 'unit' | 'pack' | 'title', text: string) => {
+    fields.add(field);
+    if (!notes.includes(text)) notes.push(text);
+  };
+
+  if (flags.has('product_not_in_message') || flags.has('quote_not_found') || flags.has('no_source')) note('title', NOTE.title);
+
+  let price = item.price;
+  if (price !== null && item.currency === 'non_kzt') {
+    price = null;
+    note('price', NOTE.priceCurrency);
+  }
+  if (['price_not_bound', 'price_unparsed', 'price_not_in_message'].some((f) => flags.has(f))) note('price', NOTE.priceUnbound);
+  if (['price_binding_weak', 'price_bound_cross_clause', 'price_bound_by_quote_only', 'price_in_command_clause']
+    .some((f) => flags.has(f))) note('price', NOTE.priceCheck);
+  if (['later_correction_in_text', 'fix_ambiguous_target', 'fix_variant_unmatched', 'fix_changed_variant', 'fix_without_target',
+    'none_variant_unmatched', 'none_all_variants'].some((f) => flags.has(f))) note('price', NOTE.priceCorrection);
+  if (price === null) fields.add('price');
+
+  const unitWasDropped = unitDropped.some((p) => sameProduct(p, item.title, true));
+  if (item.unit === null && (unitWasDropped || flags.has('unit_unrecognized') || price !== null)) note('unit', NOTE.unit);
+
+  if (flags.has('pack_dropped_for_weight_unit')) note('pack', NOTE.packDropped);
+  if (flags.has('size_count_or_volume_ambiguous')) note('pack', NOTE.packCheck);
+  const guarded = guardPack(item.pack, item.source);
+  let pack = guarded.pack;
+  if (guarded.mismatch) note('pack', NOTE.packMismatch);
+  if (pack !== null && !packInputSchema.safeParse(pack).success) {
+    pack = null;
+    note('pack', NOTE.packCheck);
+  }
+
+  const line: ParsedTextLine = {
+    title: clip(item.title.trim(), 200),
+    price,
+    unit: item.unit,
+    pack,
+    confidence: fields.size > 0 ? 'low' : 'high',
+    sourceQuote: item.source === null ? null : clip(item.source, 500),
+    uncertainFields: [...fields],
+  };
+  if (notes.length > 0) line.notice = clip(notes.join('; '), 300);
+  return line;
+}
+
+function overlaps(a: [number, number], spans: [number, number][]): boolean {
+  return spans.some(([s, e]) => a[0] < e && s < a[1]);
+}
+
+// §6.3 «Omitted products — no completeness guarantee»: two deterministic hints; neither detects every omission.
+export function omissionHints(message: string, covered: [number, number][], prices: Set<string>): string[] {
+  const hints: string[] = [];
+  let offset = 0;
+  for (const line of message.split('\n')) {
+    const span: [number, number] = [offset, offset + line.length];
+    offset += line.length + 1;
+    if (!/\p{L}/u.test(line) || overlaps(span, covered)) continue;
+    hints.push(`Строка не разобрана: «${clip(line.trim(), 120)}»`);
+  }
+  for (const o of numberOccurrences(message)) {
+    // price-like: at least 10; a number inside a recognised quote or equal to a recognised price is used
+    if (![...o.values].some((v) => Number(v) >= 10)) continue;
+    if (overlaps([o.start, o.end], covered) || [...o.values].some((v) => prices.has(v))) continue;
+    hints.push(`Число не использовано: ${message.slice(o.start, o.end).trim()}`);
+  }
+  return [...new Set(hints)].slice(0, 20);
+}
+
+export function claimsToParseResult(rawClaims: unknown[], message: string): SellerTextParseResult {
+  const skipped: SkippedTextLine[] = [];
+  const valid: ValidClaim[] = [];
+  rawClaims.forEach((raw, i) => {
+    const checked = validateClaim(raw, i, message);
+    if ('claim' in checked) valid.push(checked.claim);
+    else skipped.push(checked.skipped);
+  });
+
+  const { claims, unitDropped } = guardUnits(valid, message);
+  const reduced = reduceClaims(claims, message);
+
+  const lines: ParsedTextLine[] = [];
+  const covered: [number, number][] = [];
+  const cover = (text: string | null) => {
+    const span = findSpan(message, text);
+    if (span) covered.push(span);
+  };
+  for (const cl of claims) cover(cl.text);
+  for (const item of reduced.items) {
+    cover(item.source);
+    if (item.available === false) {
+      skipped.push({ label: clip(item.title.trim(), 200), reason: REASON_OUT_OF_STOCK, sourceQuote: item.source && clip(item.source, 500) });
+      continue;
+    }
+    const line = mapItem(item, unitDropped);
+    if (lines.length >= MAX_DRAFTS_PER_SUBMISSION) {
+      skipped.push({ label: line.title, reason: REASON_OVERFLOW, sourceQuote: line.sourceQuote });
+      continue;
+    }
+    lines.push(line);
+  }
+  const prices = new Set(lines.flatMap((l) => (l.price ? [l.price] : [])));
+  return { lines, skipped, notices: omissionHints(message, covered, prices) };
+}

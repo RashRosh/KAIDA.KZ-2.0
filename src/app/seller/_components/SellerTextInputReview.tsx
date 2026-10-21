@@ -14,6 +14,10 @@ type ReviewMeta = {
   skipped: SkippedTextLine[];
   uncertain: UncertainDraftNotice[];
   rawText: string;
+  // seller-ai-text-real-parser: absent in reviews stored by slice 1.
+  parser?: 'fake' | 'real';
+  notices?: string[];
+  unavailableDrafts?: number;
 };
 
 const REVIEW_STORAGE_PREFIX = 'kaida:text-input-review:';
@@ -71,8 +75,14 @@ export function SellerTextInputReviewScreen() {
       <Bar title={t('textInput.reviewTitle')} onBack={() => router.push('/seller/text-input')} />
       <main className="body" style={{ gap: 12 }} data-testid="text-input-review">
         {meta?.rawText && <p className="c c2" style={{ whiteSpace: 'pre-wrap' }}>{meta.rawText}</p>}
+        {meta?.parser === 'real' && (
+          <p className="c" role="note" data-testid="text-input-reminder">{t('textInput.reminder')}</p>
+        )}
+        {(meta?.unavailableDrafts ?? 0) > 0 && (
+          <p className="c" role="status" data-testid="text-input-unavailable">{t('textInput.unavailableDrafts')}</p>
+        )}
         {loading && <p className="c c2">{t('textInput.loading')}</p>}
-        {!loading && drafts.length === 0 && meta?.skipped.length === 0 && (
+        {!loading && drafts.length === 0 && meta?.skipped.length === 0 && (meta.notices ?? []).length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', textAlign: 'center' }}>
             <Ic name="box" className="lg c2" />
             <h2 className="h3">{t('textInput.emptyTitle')}</h2>
@@ -114,6 +124,14 @@ export function SellerTextInputReviewScreen() {
                 <p className="c c2">{item.reason}</p>
                 {item.sourceQuote && <p className="c c2" style={{ fontStyle: 'italic' }}>{item.sourceQuote}</p>}
               </div>
+            ))}
+          </section>
+        )}
+        {(meta?.notices ?? []).length > 0 && (
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="text-notices-block">
+            <div className="ov">{t('textInput.noticesTitle')}</div>
+            {meta!.notices!.map((notice, index) => (
+              <p key={`${notice}-${index}`} className="c c2">{notice}</p>
             ))}
           </section>
         )}

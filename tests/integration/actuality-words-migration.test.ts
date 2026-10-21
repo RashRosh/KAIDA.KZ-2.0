@@ -15,7 +15,7 @@ it('0029 upgrades data that has reconfirm items and S13 selections without chang
         if (statement.trim()) await pool.query(statement);
       }
     }
-    expect(journal.entries.at(-1)!.tag).toBe('0029_actuality_words_undo');
+    expect(journal.entries.find((entry) => entry.idx === 29)!.tag).toBe('0029_actuality_words_undo');
     for (const entry of journal.entries.filter((item) => item.idx < 29)) await apply(entry.tag);
 
     // Existing data: a Seller with a confirmed ChangeSet whose item is a pre-0029 reconfirm_offer, and an S13 selection.
