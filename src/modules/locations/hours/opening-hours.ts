@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // Point opening hours (point-contacts-hours contract §2): a weekly schedule in the point's local time. Every day is
 // closed, open around the clock, or 1–3 intervals; an interval whose close is not after its open ends on the next day.
+// seller-ai-text-real-parser §18 (PO 2026-10-21): a day may also be «не указано» (`unset`) — unknown, never closed.
 
 export const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 export type Weekday = typeof WEEKDAYS[number];
@@ -20,6 +21,7 @@ const intervalSchema = z.object({ open: timeSchema, close: timeSchema }).strict(
 export const dayScheduleSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('closed') }).strict(),
   z.object({ kind: z.literal('24h') }).strict(),
+  z.object({ kind: z.literal('unset') }).strict(),
   z.object({ kind: z.literal('intervals'), intervals: z.array(intervalSchema).min(1).max(MAX_INTERVALS_PER_DAY) }).strict()
     .refine((day) => !intervalsOverlap(day.intervals), 'Intervals of one day must not overlap'),
 ]);
@@ -50,7 +52,16 @@ function intervalsOverlap(intervals: Interval[]): boolean {
   return spans.some((current, index) => index > 0 && current[0] < spans[index - 1]![1]);
 }
 
-// First-point template: visibly a template, to be adjusted by the Seller.
+// §18: a new point's hours before the Seller chooses any — every day «не указано»; nothing is invented.
+export function unsetOpeningHours(): OpeningHours {
+  return { timeZone: DEFAULT_TIME_ZONE, days: Object.fromEntries(WEEKDAYS.map((day) => [day, { kind: 'unset' }])) as OpeningHours['days'] };
+}
+
+export function hasAnyKnownDay(hours: OpeningHours): boolean {
+  return WEEKDAYS.some((day) => hours.days[day].kind !== 'unset');
+}
+
+// Legacy template of points created before §18 (the migration rule of point-contacts-hours); new points do not use it.
 export function templateOpeningHours(): OpeningHours {
   const weekday: DaySchedule = { kind: 'intervals', intervals: [{ open: '09:00', close: '18:00' }] };
   return {

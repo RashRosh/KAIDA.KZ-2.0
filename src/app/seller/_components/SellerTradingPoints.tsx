@@ -6,7 +6,7 @@ import type { LocationGeo, LocationType, LocationView } from '@/modules/location
 import { parseManualLocationInput } from '@/modules/locations/contracts/manual-location-input';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
-import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
+import { openingHoursSchema, unsetOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
 import { OpeningHoursFields, PointContactStatus, PointContactsFields } from './PointDetailsFields';
 import { formatPhone, type ContactsDraft } from './contact-chips';
 import { InvalidTelegramUsernameError, normalizeTelegramUsername } from '@/modules/locations/details/telegram-username';
@@ -85,8 +85,9 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [telegramSuggestion, setTelegramSuggestion] = useState<string | null>(null);
   const [telegramError, setTelegramError] = useState<string | null>(null);
-  const [hours, setHours] = useState<OpeningHours>(templateOpeningHours);
-  const [hoursNeedsReview, setHoursNeedsReview] = useState(true);
+  // §18: a point without earlier hours starts with every day «не указано»; nothing is invented.
+  const [hours, setHours] = useState<OpeningHours>(unsetOpeningHours);
+  const [hoursNeedsReview, setHoursNeedsReview] = useState(false);
   const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
   // Embedded in a card: contacts and hours must arrive before the point can be saved, and going back asks when changed.
   const [formReady, setFormReady] = useState(!embedded);
@@ -168,8 +169,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     setContacts(contactsOf(source, copy));
     setPhoneTouched(false);
     setTelegramError(null);
-    setHours(source?.openingHours ?? templateOpeningHours());
-    setHoursNeedsReview(source ? source.openingHoursNeedsReview : true);
+    setHours(source?.openingHours ?? unsetOpeningHours());
+    setHoursNeedsReview(source ? source.openingHoursNeedsReview : false);
   }
 
   function resetForm() {
@@ -264,7 +265,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         addressText: embeddedLocation.addressText.trim(),
         addressDirectoryEntryId: null,
         contacts: contactsOf(source),
-        hours: source?.openingHours ?? templateOpeningHours(),
+        hours: source?.openingHours ?? unsetOpeningHours(),
       }));
       setFormReady(true);
     });

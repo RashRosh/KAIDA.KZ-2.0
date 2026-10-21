@@ -78,7 +78,22 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await page.getByLabel('Адрес').fill(`Алматы, S10 ${project} address`);
     await page.getByLabel('Телефон', { exact: true }).fill(pointPhone);
     await page.getByLabel('WhatsApp', { exact: true }).fill(phone);
-    await page.getByLabel('ВС: режим').selectOption('24h');
+    // seller-ai-text-real-parser §18: a new point starts «не указано»; the Seller sets the week in the compact editor.
+    const hoursEditor = page.getByTestId('hours-editor');
+    const applyHours = async (days: string[] | 'weekdays', kind: string, times?: [string, string]) => {
+      await page.getByTestId('hours-other-days').click();
+      if (days === 'weekdays') await hoursEditor.getByRole('button', { name: 'По будням' }).click();
+      else for (const day of days) await hoursEditor.getByRole('button', { name: day, exact: true }).click();
+      await hoursEditor.getByLabel('В эти дни').selectOption(kind);
+      if (times) {
+        await hoursEditor.getByLabel('Промежуток 1: с').fill(times[0]);
+        await hoursEditor.getByLabel('Промежуток 1: до').fill(times[1]);
+      }
+      await hoursEditor.getByRole('button', { name: 'Применить' }).click();
+    };
+    await applyHours('weekdays', 'intervals', ['09:00', '18:00']);
+    await applyHours(['СБ'], 'closed');
+    await applyHours(['ВС'], '24h');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
 
     const card = page.locator('[data-testid^="trading-point-"]').filter({ hasText: pointName });
@@ -86,7 +101,8 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await expect(card.getByText('ждёт подтверждения')).toBeVisible();
     // AI-S12A: the login number is confirmed at once; the new call number waits for its code (AI-S13).
     await card.click();
-    const callNumber = page.locator('div.card').filter({ hasText: `Телефон: ${pointPhone}` });
+    const formatted = (e164: string) => `+7\u00a0${e164.slice(2, 5)}\u00a0${e164.slice(5, 8)}\u00a0${e164.slice(8, 10)}\u00a0${e164.slice(10, 12)}`;
+    const callNumber = page.locator('div.card').filter({ hasText: `Телефон: ${formatted(pointPhone)}` });
     await expect(callNumber.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
     await expect(page.getByText('Подтверждён', { exact: true })).toHaveCount(1);
     await page.getByRole('button', { name: 'Отмена' }).click();
@@ -150,8 +166,8 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await page.goto('/seller/points');
     await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
     await expect(page.getByText(`Контакты и режим работы как у точки «${pointName}» — можно изменить до сохранения.`)).toBeVisible();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(pointPhone);
-    await expect(page.getByLabel('ВС: режим')).toHaveValue('24h');
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(formatted(pointPhone));
+    await expect(page.getByTestId('hours-summary').getByRole('listitem').filter({ hasText: 'ВС' })).toContainText('Круглосуточно');
   } finally {
     await cleanup(phone);
   }

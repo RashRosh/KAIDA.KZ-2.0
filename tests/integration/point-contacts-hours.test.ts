@@ -14,7 +14,7 @@ import {
   requestPointContactCode,
 } from '../../src/modules/locations/details/point-details.application';
 import { InvalidPointPhoneError, PointContactNotOnPointError } from '../../src/modules/locations/details/point-details.contract';
-import { templateOpeningHours, type OpeningHours } from '../../src/modules/locations/hours/opening-hours';
+import { templateOpeningHours, unsetOpeningHours, type OpeningHours } from '../../src/modules/locations/hours/opening-hours';
 import { searchOffers } from '../../src/modules/search/application/search-offers';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
 import { connectTestDatabase } from './database';
@@ -72,9 +72,9 @@ describe('point contacts and verification', () => {
     const seller = await createSeller(OWNER, 'verify');
     const pointId = seller.locations[0]!.id;
 
-    // The first point starts with no contacts and the template hours marked for review.
+    // The first point starts with no contacts and every day «не указано» (seller-ai-text-real-parser §18: no invented hours).
     expect(await listOwnedPointDetails(OWNER.id, { database: db })).toEqual([{
-      locationId: pointId, contacts: { phone: null, whatsapp: null, telegram: null }, openingHours: templateOpeningHours(), openingHoursNeedsReview: true,
+      locationId: pointId, contacts: { phone: null, whatsapp: null, telegram: null }, openingHours: unsetOpeningHours(), openingHoursNeedsReview: false,
     }]);
 
     const saved = await replaceOwnedPointDetails(OWNER.id, pointId, { phone: '8 701 000 72 99', whatsapp: '+7 701 000 72 01', openingHours: lunchBreak }, { database: db });

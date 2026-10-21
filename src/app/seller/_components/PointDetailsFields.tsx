@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import {
+  dayScheduleSchema,
   MAX_INTERVALS_PER_DAY,
   WEEKDAYS,
   type DaySchedule,
   type OpeningHours,
   type Weekday,
 } from '@/modules/locations/hours/opening-hours';
+import { formatInterval, scheduleKey } from '@/modules/locations/hours/opening-hours-view';
 import type { PointContactView } from '@/modules/locations/details/point-details.contract';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
@@ -110,10 +112,53 @@ export function PointContactsFields({ value, onChange, disabled, sourceName, sav
   );
 }
 
-function kindOf(day: DaySchedule): DaySchedule['kind'] { return day.kind; }
+type EditorKind = 'intervals' | '24h' | 'closed' | 'unset';
+type GroupEdit = { days: Weekday[]; original: Weekday[]; kind: EditorKind; intervals: { open: string; close: string }[] };
 
-// Opening hours editor (point-contacts-hours §2): any weekly schedule — closed, around the clock, or up to three
-// intervals per day, an interval may end after midnight.
+const WEEKDAYS_ONLY: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri'];
+
+// Days that share one identical schedule, in week order; a group need not be consecutive (Пн, Ср, Пт).
+function scheduleGroups(hours: OpeningHours): { days: Weekday[]; schedule: DaySchedule }[] {
+  const groups: { days: Weekday[]; schedule: DaySchedule }[] = [];
+  for (const day of WEEKDAYS) {
+    const key = scheduleKey(hours.days[day]);
+    const group = groups.find((item) => scheduleKey(item.schedule) === key);
+    if (group) group.days.push(day);
+    else groups.push({ days: [day], schedule: hours.days[day] });
+  }
+  return groups;
+}
+
+// «ПН–ПТ», «ПН, СР, ПТ», «СБ»: consecutive runs as a range, the rest one by one.
+function daysLabel(days: Weekday[], dayName: (day: Weekday) => string): string {
+  const indexes = days.map((day) => WEEKDAYS.indexOf(day)).sort((a, b) => a - b);
+  const runs: number[][] = [];
+  for (const index of indexes) {
+    const last = runs.at(-1);
+    if (last && index === last[last.length - 1]! + 1) last.push(index);
+    else runs.push([index]);
+  }
+  return runs.map((run) => (run.length >= 3
+    ? `${dayName(WEEKDAYS[run[0]!]!)}–${dayName(WEEKDAYS[run.at(-1)!]!)}`
+    : run.map((index) => dayName(WEEKDAYS[index]!)).join(', '))).join(', ');
+}
+
+function scheduleText(schedule: DaySchedule, t: ReturnType<typeof useI18n>['t']): string {
+  if (schedule.kind === 'closed') return t('hoursEditor.closed');
+  if (schedule.kind === '24h') return t('hours.aroundTheClock');
+  if (schedule.kind === 'unset') return t('hours.notSpecified');
+  return schedule.intervals.map(formatInterval).join(', ');
+}
+
+function editedSchedule(edit: GroupEdit): DaySchedule | null {
+  const candidate: DaySchedule = edit.kind === 'intervals' ? { kind: 'intervals', intervals: edit.intervals } : { kind: edit.kind } as DaySchedule;
+  return dayScheduleSchema.safeParse(candidate).success ? candidate : null;
+}
+
+// Opening hours (point-contacts-hours §2, compact editor of seller-ai-text-real-parser §18): the week as a few grouped
+// lines; a group opens one editor where the Seller picks days and enters shared hours once. Applying changes only the
+// chosen days and says beforehand which other days it takes over; «Отмена» leaves the form as it was. Every supported
+// schedule (24 h, overnight, up to three intervals, «выходной», «не указано») loads and saves unchanged.
 export function OpeningHoursFields({ value, onChange, disabled, needsReview }: {
   value: OpeningHours;
   onChange: (value: OpeningHours) => void;
@@ -121,19 +166,42 @@ export function OpeningHoursFields({ value, onChange, disabled, needsReview }: {
   needsReview: boolean;
 }) {
   const { t } = useI18n();
-  const setDay = (day: Weekday, schedule: DaySchedule) => onChange({ ...value, days: { ...value.days, [day]: schedule } });
+  const dayName = (day: Weekday) => t(dayKey(day));
+  const [edit, setEdit] = useState<GroupEdit | null>(null);
   const [announce, setAnnounce] = useState('');
+  const groups = scheduleGroups(value);
 
-  function setKind(day: Weekday, kind: DaySchedule['kind']) {
-    if (kind === 'intervals') setDay(day, { kind, intervals: [{ open: '09:00', close: '18:00' }] });
-    else setDay(day, { kind } as DaySchedule);
+  function open(days: Weekday[], schedule: DaySchedule | null) {
+    setEdit({
+      days: [...days],
+      original: [...days],
+      kind: schedule ? schedule.kind : 'intervals',
+      intervals: schedule?.kind === 'intervals' ? schedule.intervals.map((interval) => ({ ...interval })) : [{ open: '', close: '' }],
+    });
+    setAnnounce('');
   }
 
-  function copyMondayToWeekdays() {
-    const monday = value.days.mon;
-    onChange({ ...value, days: { ...value.days, tue: monday, wed: monday, thu: monday, fri: monday } });
-    setAnnounce(t('hoursEditor.copied'));
+  function toggleDay(day: Weekday) {
+    if (!edit) return;
+    setEdit({ ...edit, days: edit.days.includes(day) ? edit.days.filter((item) => item !== day) : [...edit.days, day] });
   }
+
+  function apply() {
+    if (!edit) return;
+    const schedule = editedSchedule(edit);
+    if (!schedule || edit.days.length === 0) return;
+    const days = { ...value.days };
+    for (const day of edit.days) days[day] = schedule;
+    onChange({ ...value, days });
+    setAnnounce(t('hoursEditor.applied', { days: daysLabel(edit.days, dayName) }));
+    setEdit(null);
+  }
+
+  const candidate = edit ? editedSchedule(edit) : null;
+  // Days the Seller is about to take over from another group, and days left out of the group being edited.
+  const takenOver = edit ? edit.days.filter((day) => !edit.original.includes(day) && (!candidate || scheduleKey(value.days[day]) !== scheduleKey(candidate))) : [];
+  const leftOut = edit ? edit.original.filter((day) => !edit.days.includes(day)) : [];
+  const timesMissing = edit?.kind === 'intervals' && edit.intervals.some((interval) => !interval.open || !interval.close);
 
   return (
     <fieldset aria-describedby="hours-help" style={{ border: 0, margin: 0, padding: 0, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -145,43 +213,75 @@ export function OpeningHoursFields({ value, onChange, disabled, needsReview }: {
       ) : (
         <p id="hours-help" className="c c2">{t('hoursEditor.help')}</p>
       )}
-      <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }} onClick={copyMondayToWeekdays} disabled={disabled}><Ic name="copy" className="sm" />{t('hoursEditor.sameWeekdays')}</button>
-      <div className="card" style={{ gap: 0, padding: '0 12px' }}>
-        {WEEKDAYS.map((day) => {
-          const schedule = value.days[day];
-          return (
-            <div key={day} className="li" role="group" aria-label={t(dayKey(day))} style={{ flexWrap: 'wrap', alignItems: 'flex-start', padding: '10px 0' }}>
-              <span className="ts" style={{ width: 32, lineHeight: '44px' }}>{t(dayKey(day))}</span>
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <select className="inp" style={{ height: 44 }} aria-label={t('hoursEditor.kindFor', { day: t(dayKey(day)) })} value={kindOf(schedule)} onChange={(event) => setKind(day, event.target.value as DaySchedule['kind'])} disabled={disabled}>
-                  <option value="intervals">{t('hoursEditor.open')}</option>
-                  <option value="24h">{t('hours.aroundTheClock')}</option>
-                  <option value="closed">{t('hoursEditor.closed')}</option>
-                </select>
-                {schedule.kind === 'intervals' && schedule.intervals.map((interval, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input type="time" className="inp num" style={{ height: 44, flex: 1, minWidth: 0 }} aria-label={t('hoursEditor.from', { day: t(dayKey(day)), n: index + 1 })} value={interval.open} disabled={disabled}
-                      onChange={(event) => setDay(day, { kind: 'intervals', intervals: schedule.intervals.map((item, i) => (i === index ? { ...item, open: event.target.value } : item)) })} />
-                    <span className="c2" aria-hidden="true">–</span>
-                    <input type="time" className="inp num" style={{ height: 44, flex: 1, minWidth: 0 }} aria-label={t('hoursEditor.to', { day: t(dayKey(day)), n: index + 1 })} value={interval.close} disabled={disabled}
-                      onChange={(event) => setDay(day, { kind: 'intervals', intervals: schedule.intervals.map((item, i) => (i === index ? { ...item, close: event.target.value } : item)) })} />
-                    {schedule.intervals.length > 1 && (
-                      <button type="button" className="ib" style={{ width: 36, height: 36 }} disabled={disabled} aria-label={t('hoursEditor.removeInterval', { day: t(dayKey(day)), n: index + 1 })}
-                        onClick={() => setDay(day, { kind: 'intervals', intervals: schedule.intervals.filter((_, i) => i !== index) })}><Ic name="close" className="c2" /></button>
-                    )}
-                  </div>
-                ))}
-                {schedule.kind === 'intervals' && schedule.intervals.length < MAX_INTERVALS_PER_DAY && (
-                  <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} disabled={disabled}
-                    onClick={() => setDay(day, { kind: 'intervals', intervals: [...schedule.intervals, { open: '14:00', close: '18:00' }] })}>
-                    {t('hoursEditor.addBreak')}
-                  </button>
-                )}
-              </div>
+      <ul className="card" style={{ gap: 0, padding: '0 12px', listStyle: 'none', margin: 0 }} aria-label={t('hoursEditor.summary')} data-testid="hours-summary">
+        {groups.map((group) => (
+          <li key={group.days.join(',')} className="li" style={{ padding: '8px 0', gap: 8 }}>
+            <span className="ts" style={{ minWidth: 72 }}>{daysLabel(group.days, dayName)}</span>
+            <span className="t" style={{ flex: 1, minWidth: 0, color: group.schedule.kind === 'unset' ? 'var(--ink3)' : undefined }}>{scheduleText(group.schedule, t)}</span>
+            <button type="button" className="btn btn-g sm" disabled={disabled || edit !== null} onClick={() => open(group.days, group.schedule)}
+              aria-label={t('hoursEditor.editGroup', { days: daysLabel(group.days, dayName) })}>{t('hoursEditor.change')}</button>
+          </li>
+        ))}
+      </ul>
+      {edit === null ? (
+        <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }} onClick={() => open([], null)} disabled={disabled} data-testid="hours-other-days">
+          <Ic name="plus" className="sm" />{t('hoursEditor.setDays')}
+        </button>
+      ) : (
+        <div className="card p16" role="group" aria-label={t('hoursEditor.editorLabel')} style={{ gap: 12 }} data-testid="hours-editor">
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-o sm" onClick={() => setEdit({ ...edit, days: [...WEEKDAYS] })} disabled={disabled}>{t('hoursEditor.everyDay')}</button>
+            <button type="button" className="btn btn-o sm" onClick={() => setEdit({ ...edit, days: [...WEEKDAYS_ONLY] })} disabled={disabled}>{t('hoursEditor.weekdays')}</button>
+            <button type="button" className="btn btn-o sm" onClick={() => setEdit({ ...edit, days: [] })} disabled={disabled}>{t('hoursEditor.chooseDays')}</button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} role="group" aria-label={t('hoursEditor.days')}>
+            {WEEKDAYS.map((day) => (
+              <button key={day} type="button" className={`chip${edit.days.includes(day) ? ' on' : ''}`} aria-pressed={edit.days.includes(day)}
+                onClick={() => toggleDay(day)} disabled={disabled} style={{ minWidth: 44, minHeight: 44 }}>{dayName(day)}</button>
+            ))}
+          </div>
+          <div className="fld">
+            <label htmlFor="hours-kind">{t('hoursEditor.kind')}</label>
+            <select id="hours-kind" className="inp" style={{ height: 44 }} value={edit.kind} disabled={disabled}
+              onChange={(event) => setEdit({ ...edit, kind: event.target.value as EditorKind, intervals: edit.intervals.length > 0 ? edit.intervals : [{ open: '', close: '' }] })}>
+              <option value="intervals">{t('hoursEditor.open')}</option>
+              <option value="24h">{t('hours.aroundTheClock')}</option>
+              <option value="closed">{t('hoursEditor.closed')}</option>
+              <option value="unset">{t('hours.notSpecified')}</option>
+            </select>
+          </div>
+          {edit.kind === 'intervals' && edit.intervals.map((interval, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input type="time" className="inp num" style={{ height: 44, flex: 1, minWidth: 0 }} aria-label={t('hoursEditor.fromN', { n: index + 1 })} value={interval.open} disabled={disabled}
+                onChange={(event) => setEdit({ ...edit, intervals: edit.intervals.map((item, i) => (i === index ? { ...item, open: event.target.value } : item)) })} />
+              <span className="c2" aria-hidden="true">–</span>
+              <input type="time" className="inp num" style={{ height: 44, flex: 1, minWidth: 0 }} aria-label={t('hoursEditor.toN', { n: index + 1 })} value={interval.close} disabled={disabled}
+                onChange={(event) => setEdit({ ...edit, intervals: edit.intervals.map((item, i) => (i === index ? { ...item, close: event.target.value } : item)) })} />
+              {edit.intervals.length > 1 && (
+                <button type="button" className="ib" style={{ width: 44, height: 44 }} disabled={disabled} aria-label={t('hoursEditor.removeIntervalN', { n: index + 1 })}
+                  onClick={() => setEdit({ ...edit, intervals: edit.intervals.filter((_, i) => i !== index) })}><Ic name="close" className="c2" /></button>
+              )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+          {edit.kind === 'intervals' && edit.intervals.length < MAX_INTERVALS_PER_DAY && (
+            <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} disabled={disabled}
+              onClick={() => setEdit({ ...edit, intervals: [...edit.intervals, { open: '', close: '' }] })}>{t('hoursEditor.addBreak')}</button>
+          )}
+          <div role="status" className="c" style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-testid="hours-edit-summary">
+            {edit.days.length === 0
+              ? <span>{t('hoursEditor.pickDays')}</span>
+              : candidate
+                ? <span><b>{daysLabel(edit.days, dayName)}</b>: {scheduleText(candidate, t)}</span>
+                : <span>{t(timesMissing ? 'hoursEditor.enterTimes' : 'hoursEditor.invalidTimes')}</span>}
+            {takenOver.length > 0 && <span data-testid="hours-taken-over">{t('hoursEditor.replaces', { days: takenOver.map((day) => `${dayName(day)} (${scheduleText(value.days[day], t)})`).join(', ') })}</span>}
+            {leftOut.length > 0 && <span data-testid="hours-left-out">{t('hoursEditor.keeps', { days: daysLabel(leftOut, dayName) })}</span>}
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-p sm" onClick={apply} disabled={disabled || edit.days.length === 0 || !candidate}>{t('hoursEditor.apply')}</button>
+            <button type="button" className="btn btn-g sm" onClick={() => setEdit(null)} disabled={disabled}>{t('offerManage.cancel')}</button>
+          </div>
+        </div>
+      )}
       <p className="vh" aria-live="polite">{announce}</p>
     </fieldset>
   );
