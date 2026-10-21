@@ -22,6 +22,7 @@ async function cleanup(pool: Pool, userId: string, phone: string) {
   await pool.query('DELETE FROM seller_change_sets WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [userId]);
   await pool.query('DELETE FROM offers WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [userId]);
   await pool.query('DELETE FROM locations WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [userId]);
+  await pool.query('DELETE FROM seller_verified_phones WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [userId]);
   await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [userId]);
   await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [userId]);
   await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=$1', [phone]);
@@ -84,7 +85,9 @@ test('UX2 first setup remains resumable inside the permanent Trading Points work
     await expect(tradingPointCard.getByText('ждёт подтверждения')).toBeVisible();
     // AI-S12A / AI-S13: the point screen shows the saved number waiting for its code.
     await page.getByRole('button', { name: `Изменить торговую точку ${pointName}` }).click();
-    await expect(page.getByText(`Телефон: ${auth.publicPhone}`)).toBeVisible();
+    // seller-ai-text-real-parser §18: one display format for every number.
+    const shown = (e164: string) => `+7\u00a0${e164.slice(2, 5)}\u00a0${e164.slice(5, 8)}\u00a0${e164.slice(8, 10)}\u00a0${e164.slice(10, 12)}`;
+    await expect(page.getByText(`Телефон: ${shown(auth.publicPhone)}`)).toBeVisible();
     await expect(page.getByText('Не подтверждён — покупатели его не видят')).toBeVisible();
     await page.getByRole('button', { name: 'Отмена' }).click();
 

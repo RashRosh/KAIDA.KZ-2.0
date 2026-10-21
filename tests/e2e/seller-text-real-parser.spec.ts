@@ -29,6 +29,7 @@ async function cleanup(phone: string) {
     await pool.query(`DELETE FROM offer_photos WHERE offer_id IN (SELECT id FROM offers WHERE seller_id IN (${bySeller}))`, [phone]);
     await pool.query(`DELETE FROM offers WHERE seller_id IN (${bySeller})`, [phone]);
     await pool.query(`DELETE FROM locations WHERE seller_id IN (${bySeller})`, [phone]);
+    await pool.query('DELETE FROM seller_verified_phones WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id IN (SELECT id FROM users WHERE phone_e164=$1))', [phone]);
     await pool.query('DELETE FROM sellers WHERE owner_user_id IN (SELECT id FROM users WHERE phone_e164=$1)', [phone]);
     await pool.query('DELETE FROM auth_sessions WHERE user_id IN (SELECT id FROM users WHERE phone_e164=$1)', [phone]);
     await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=$1', [phone]);
