@@ -77,6 +77,7 @@ export async function buildCardPreview(
     openingHours: locations.openingHours,
     phoneE164: locations.phoneE164,
     whatsappPhoneE164: locations.whatsappPhoneE164,
+    telegramUsername: locations.telegramUsername,
     latitude: locations.latitude,
     longitude: locations.longitude,
   }).from(locations).where(and(inArray(locations.id, locationIds), eq(locations.sellerId, seller.id)));
@@ -98,6 +99,7 @@ export async function buildCardPreview(
       location: { id: where.id, name: where.name, addressText: where.addressText, openingHours: where.openingHours },
       locationPhoneE164: where.phoneE164,
       locationWhatsappPhoneE164: where.whatsappPhoneE164,
+      locationTelegramUsername: where.telegramUsername,
       verifiedPhones,
       priceAmount: row.priceAmount,
       priceUnitCode: unit === null ? null : unit.code,

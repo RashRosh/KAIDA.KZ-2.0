@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TELEGRAM_USERNAME_PATTERN } from './telegram-username';
 
 const e164 = z.string().regex(/^\+[1-9][0-9]{1,14}$/);
 
@@ -6,16 +7,19 @@ const e164 = z.string().regex(/^\+[1-9][0-9]{1,14}$/);
 export const pointPublicContactsSchema = z.object({
   phoneE164: e164.optional(),
   whatsappPhoneE164: e164.optional(),
+  // §17: a saved username is public (PO 2026-10-21); KAIDA builds the link.
+  telegramUsername: z.string().regex(TELEGRAM_USERNAME_PATTERN).optional(),
 }).strict().refine((contacts) => Object.keys(contacts).length > 0, { message: 'At least one point contact is required' });
 
 export type PointPublicContacts = z.infer<typeof pointPublicContactsSchema>;
 
 export function projectPointPublicContacts(
-  point: { phoneE164: string | null; whatsappPhoneE164: string | null },
+  point: { phoneE164: string | null; whatsappPhoneE164: string | null; telegramUsername?: string | null },
   verified: Set<string> | undefined,
 ): { contacts?: PointPublicContacts } {
   const contacts: PointPublicContacts = {};
   if (point.phoneE164 && verified?.has(point.phoneE164)) contacts.phoneE164 = point.phoneE164;
   if (point.whatsappPhoneE164 && verified?.has(point.whatsappPhoneE164)) contacts.whatsappPhoneE164 = point.whatsappPhoneE164;
+  if (point.telegramUsername) contacts.telegramUsername = point.telegramUsername;
   return Object.keys(contacts).length > 0 ? { contacts } : {};
 }

@@ -12,13 +12,14 @@ import type { PointContactView } from '@/modules/locations/details/point-details
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
 import { ErrorLine, Ic } from '../_kaida/ui';
-import { contactChips, formatLoginPhone, holdsLoginNumber, type ContactsDraft } from './contact-chips';
+import { canonicalPhone, contactChips, formatLoginPhone, formatPhone, holdsLoginNumber, type ContactsDraft } from './contact-chips';
 
 export type { ContactsDraft };
 
 const dayKey = (day: Weekday) => `hours.day.${day}` as MessageKey;
 
 const WHATSAPP_ICON = '/kaida/icons/127a626f246aa48c4b8bc196e32e93a2.svg';
+const TELEGRAM_ICON = '/kaida/icons/24ad95a4b3664ef668a9dad80a7f425a.svg';
 
 function ChannelLabel({ channel, htmlFor, label, badge }: { channel: 'phone' | 'whatsapp'; htmlFor: string; label: string; badge?: React.ReactNode }) {
   return (
@@ -46,20 +47,23 @@ function Chip({ testId, label, onClick, disabled }: { testId: string; label: str
 }
 
 // AI-S12A · Point · Contacts: both optional; a number is public only after it is confirmed (AI-S13).
-export function PointContactsFields({ value, onChange, disabled, sourceName, saved, loginPhone = null }: {
+export function PointContactsFields({ value, onChange, disabled, sourceName, saved, loginPhone = null, telegramSuggestion = null, telegramError = null }: {
   value: ContactsDraft;
   onChange: (value: ContactsDraft) => void;
   disabled: boolean;
   sourceName?: string | null;
   saved?: { phone?: PointContactView | null; whatsapp?: PointContactView | null };
-  // The owner's login number when known (contact-default): offered by a chip, never filled in.
+  // The owner's login number when known (contact-default): a new point starts with it unless it copied another number.
   loginPhone?: string | null;
+  // §17: a username the Seller saved before (another point or the legacy seller contact), offered by a chip.
+  telegramSuggestion?: string | null;
+  telegramError?: string | null;
 }) {
   const { t } = useI18n();
-  const chips = contactChips(value, loginPhone);
+  const chips = contactChips(value, loginPhone, telegramSuggestion);
   const badge = (contact: PointContactView | null | undefined, draft: string) => holdsLoginNumber(draft, loginPhone)
     ? <span className="bd bd-ok"><Ic name="check" />{t('pointDetails.verified')}</span>
-    : contact && contact.e164 === draft.trim()
+    : contact && contact.e164 === canonicalPhone(draft)
     ? contact.verified
       ? <span className="bd bd-ok"><Ic name="check" />{t('pointDetails.verified')}</span>
       : <span className="bd bd-info"><Ic name="clock" />{t('pointDetails.waiting')}</span>
@@ -80,13 +84,26 @@ export function PointContactsFields({ value, onChange, disabled, sourceName, sav
         <ChannelLabel channel="phone" htmlFor="point-phone" label={t('pointDetails.phone')} badge={badge(saved?.phone, value.phone)} />
         <input id="point-phone" className="inp" type="tel" inputMode="tel" autoComplete="tel" placeholder="+7 7XX XXX XX XX" value={value.phone} onChange={(event) => onChange({ ...value, phone: event.target.value })} disabled={disabled} aria-describedby={chips.phoneNotice ? 'point-phone-notice' : undefined} />
         {chips.phoneNotice && <LoginNotice id="point-phone-notice" text={t('pointDetails.loginNoticePhone')} />}
-        {chips.loginNumber && loginPhone && <Chip testId="chip-login-number" label={t('pointDetails.useLoginNumber', { phone: formatLoginPhone(loginPhone) })} onClick={() => onChange({ ...value, phone: loginPhone })} disabled={disabled} />}
+        {chips.loginNumber && loginPhone && <Chip testId="chip-login-number" label={t('pointDetails.useLoginNumber', { phone: formatLoginPhone(loginPhone) })} onClick={() => onChange({ ...value, phone: formatPhone(loginPhone) })} disabled={disabled} />}
       </div>
       <div className="fld">
         <ChannelLabel channel="whatsapp" htmlFor="point-whatsapp" label="WhatsApp" badge={badge(saved?.whatsapp, value.whatsapp)} />
         <input id="point-whatsapp" className="inp" type="tel" inputMode="tel" placeholder="+7 7XX XXX XX XX" value={value.whatsapp} onChange={(event) => onChange({ ...value, whatsapp: event.target.value })} disabled={disabled} aria-describedby={chips.whatsappNotice ? 'point-whatsapp-notice' : undefined} />
         {chips.whatsappNotice && <LoginNotice id="point-whatsapp-notice" text={t('pointDetails.loginNoticeWhatsapp')} />}
         {chips.samePhone && <Chip testId="chip-same-phone" label={t('pointDetails.sameAsPhone')} onClick={() => onChange({ ...value, whatsapp: value.phone.trim() })} disabled={disabled} />}
+      </div>
+      <div className="fld">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- mockup brand mark */}
+          <img src={TELEGRAM_ICON} alt="" style={{ width: 20, height: 20 }} />
+          <label htmlFor="point-telegram">Telegram</label>
+        </div>
+        <input id="point-telegram" className={`inp${telegramError ? ' er' : ''}`} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="@username"
+          value={value.telegram} onChange={(event) => onChange({ ...value, telegram: event.target.value })} disabled={disabled}
+          aria-invalid={telegramError ? true : undefined} aria-describedby={telegramError ? 'point-telegram-help point-telegram-error' : 'point-telegram-help'} />
+        <span className="hint" id="point-telegram-help">{t('pointDetails.telegramHelp')}</span>
+        {telegramError && <ErrorLine id="point-telegram-error">{telegramError}</ErrorLine>}
+        {chips.telegram && telegramSuggestion && <Chip testId="chip-telegram" label={t('pointDetails.useTelegram', { username: telegramSuggestion })} onClick={() => onChange({ ...value, telegram: `@${telegramSuggestion}` })} disabled={disabled} />}
       </div>
       <p className="c">{t('pointDetails.withoutContacts')}</p>
     </>
@@ -229,7 +246,7 @@ export function PointContactStatus({ label, contact, onVerified }: {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {channelIcon}
         <div style={{ flex: 1 }}>
-          <div className="ts">{label}: {contact.e164}</div>
+          <div className="ts">{label}: {formatPhone(contact.e164)}</div>
           <p className="c">{contact.verified ? t('pointDetails.visible') : t('pointDetails.notVerified')}</p>
         </div>
         {contact.verified

@@ -15,11 +15,13 @@ import {
 } from './point-details.contract';
 import {
   findOwnerLoginPhone,
+  findSavedTelegramUsernames,
   isNumberOnSellerPoint,
   listPointDetails,
   recordVerifiedPhone,
   updatePointDetails,
 } from './point-details.repository';
+import { InvalidTelegramUsernameError, normalizeTelegramUsername } from './telegram-username';
 
 function normalize(value: string | null, field: 'phone' | 'whatsapp'): string | null {
   if (value === null || value === '') return null;
@@ -43,6 +45,21 @@ export async function listOwnedPointDetails(ownerUserId: string, dependencies: {
   return listPointDetails(database, seller.id);
 }
 
+// §17: the username a new or empty Telegram field may offer for reuse (a legacy value only if it is still valid).
+export async function findTelegramSuggestion(ownerUserId: string, dependencies: { database?: Database } = {}): Promise<string | null> {
+  const database = dependencies.database ?? getDatabase();
+  const seller = await findSellerByOwner(database, ownerUserId);
+  if (!seller) return null;
+  const saved = await findSavedTelegramUsernames(database, seller.id);
+  if (saved.point) return saved.point;
+  try {
+    return normalizeTelegramUsername(saved.legacy);
+  } catch (error) {
+    if (error instanceof InvalidTelegramUsernameError) return null;
+    throw error;
+  }
+}
+
 // Replaces contacts and hours of one point; never touches another point. A changed number is verified only if the
 // Seller has already proved it (it then needs no new code).
 export async function replaceOwnedPointDetails(
@@ -54,11 +71,13 @@ export async function replaceOwnedPointDetails(
   const database = dependencies.database ?? getDatabase();
   const phoneE164 = normalize(input.phone, 'phone');
   const whatsappPhoneE164 = normalize(input.whatsapp, 'whatsapp');
+  // §17: undefined (an older client) leaves the saved username as it is.
+  const telegram = input.telegram === undefined ? {} : { telegramUsername: normalizeTelegramUsername(input.telegram) };
   const seller = await findSellerByOwner(database, ownerUserId);
   if (!seller) throw new LocationNotFoundError();
   const clock = dependencies.clock ?? systemIdentityClock;
   return database.transaction(async (tx) => {
-    const view = await updatePointDetails(tx, seller.id, locationId, { phoneE164, whatsappPhoneE164, openingHours: input.openingHours });
+    const view = await updatePointDetails(tx, seller.id, locationId, { phoneE164, whatsappPhoneE164, ...telegram, openingHours: input.openingHours });
     if (!view) throw new LocationNotFoundError();
     // contact-default §4.8: a point that holds the login number records the proof, so the contact does not vanish if the
     // login number is ever changed (idempotent; the number is verified by the login code already).

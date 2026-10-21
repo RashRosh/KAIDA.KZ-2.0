@@ -74,13 +74,13 @@ describe('point contacts and verification', () => {
 
     // The first point starts with no contacts and the template hours marked for review.
     expect(await listOwnedPointDetails(OWNER.id, { database: db })).toEqual([{
-      locationId: pointId, contacts: { phone: null, whatsapp: null }, openingHours: templateOpeningHours(), openingHoursNeedsReview: true,
+      locationId: pointId, contacts: { phone: null, whatsapp: null, telegram: null }, openingHours: templateOpeningHours(), openingHoursNeedsReview: true,
     }]);
 
     const saved = await replaceOwnedPointDetails(OWNER.id, pointId, { phone: '8 701 000 72 99', whatsapp: '+7 701 000 72 01', openingHours: lunchBreak }, { database: db });
     expect(saved).toEqual({
       locationId: pointId,
-      contacts: { phone: { e164: POINT_PHONE, verified: false }, whatsapp: { e164: OWNER.phone, verified: true } },
+      contacts: { phone: { e164: POINT_PHONE, verified: false }, whatsapp: { e164: OWNER.phone, verified: true }, telegram: null },
       openingHours: lunchBreak,
       openingHoursNeedsReview: false,
     });
@@ -124,7 +124,7 @@ describe('point contacts and verification', () => {
     const points = await listOwnedPointDetails(OWNER.id, { database: db });
     expect(points.find((point) => point.locationId === second.id)).toEqual({
       locationId: second.id,
-      contacts: { phone: { e164: OWNER.phone, verified: true }, whatsapp: null },
+      contacts: { phone: { e164: OWNER.phone, verified: true }, whatsapp: null, telegram: null },
       openingHours: lunchBreak,
       openingHoursNeedsReview: false,
     });

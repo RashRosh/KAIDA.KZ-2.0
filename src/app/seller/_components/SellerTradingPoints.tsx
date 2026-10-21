@@ -8,7 +8,8 @@ import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
 import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
 import { OpeningHoursFields, PointContactStatus, PointContactsFields } from './PointDetailsFields';
-import type { ContactsDraft } from './contact-chips';
+import { formatPhone, type ContactsDraft } from './contact-chips';
+import { InvalidTelegramUsernameError, normalizeTelegramUsername } from '@/modules/locations/details/telegram-username';
 import { Bar, Ic, Nav, Phone, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
 import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -22,6 +23,14 @@ type SellerResponse = { seller?: SellerView } & ApiError;
 const typeLabelKeys: Record<LocationType, MessageKey> = {
   market: 'points.type.market', shop: 'points.type.shop', pavilion: 'points.type.pavilion', home: 'points.type.home', other: 'points.type.other',
 };
+
+// How saved contacts appear in the form: formatted numbers, "@username"; a copy for a new point leaves Telegram empty.
+function contactsOf(source: PointDetailsView | undefined, copy = false): ContactsDraft {
+  const phone = source?.contacts.phone?.e164;
+  const whatsapp = source?.contacts.whatsapp?.e164;
+  const telegram = copy ? null : source?.contacts.telegram;
+  return { phone: phone ? formatPhone(phone) : '', whatsapp: whatsapp ? formatPhone(whatsapp) : '', telegram: telegram ? '@' + telegram : '' };
+}
 
 function browserGeoErrorKey(error: GeolocationPositionError): MessageKey {
   if (error.code === 1) return 'points.geoDenied';
@@ -71,7 +80,11 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [details, setDetails] = useState<Map<string, PointDetailsView>>(new Map());
-  const [contacts, setContacts] = useState<ContactsDraft>({ phone: '', whatsapp: '' });
+  const [contacts, setContacts] = useState<ContactsDraft>({ phone: '', whatsapp: '', telegram: '' });
+  // §17: once the Seller edits «Телефон» (including clearing it), nothing refills it on this form.
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [telegramSuggestion, setTelegramSuggestion] = useState<string | null>(null);
+  const [telegramError, setTelegramError] = useState<string | null>(null);
   const [hours, setHours] = useState<OpeningHours>(templateOpeningHours);
   const [hoursNeedsReview, setHoursNeedsReview] = useState(true);
   const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
@@ -104,8 +117,9 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       try {
         const response = await fetch('/api/seller/points/details', { cache: 'no-store' });
         if (!response.ok) return null;
-        const data = await response.json() as { points: PointDetailsView[] };
+        const data = await response.json() as { points: PointDetailsView[]; telegramSuggestion?: string | null };
         const loaded = new Map(data.points.map((point) => [point.locationId, point]));
+        setTelegramSuggestion(data.telegramSuggestion ?? null);
         setDetails(loaded);
         setDetailsLoaded(true);
         return loaded;
@@ -149,8 +163,11 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     return () => window.clearTimeout(timer);
   }, [status]);
 
-  function fillDetails(source: PointDetailsView | undefined) {
-    setContacts({ phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' });
+  // A new point copies phone and WhatsApp of the previous point (point-contacts-hours §2); its Telegram is only offered.
+  function fillDetails(source: PointDetailsView | undefined, copy = false) {
+    setContacts(contactsOf(source, copy));
+    setPhoneTouched(false);
+    setTelegramError(null);
     setHours(source?.openingHours ?? templateOpeningHours());
     setHoursNeedsReview(source ? source.openingHoursNeedsReview : true);
   }
@@ -169,7 +186,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     // point-contacts-hours §2: a new point starts with the latest point's contacts and hours.
     const latest = locations.at(-1);
     const source = await detailsOf(latest?.id);
-    fillDetails(source);
+    fillDetails(source, true);
     setCopiedFrom(latest && source ? latest.name : null);
     setStatus('');
     setMode('add');
@@ -192,6 +209,19 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     resetForm();
     setMode('closed');
     onClose?.(result);
+  }
+
+  // §17: a NEW point's «Телефон» starts with the login number when it did not copy one; a cleared field stays cleared.
+  useEffect(() => {
+    if (mode !== 'add' || phoneTouched || !loginPhone || contacts.phone.trim() !== '') return;
+    const timer = window.setTimeout(() => setContacts((current) => (current.phone.trim() === '' ? { ...current, phone: formatPhone(loginPhone) } : current)), 0);
+    return () => window.clearTimeout(timer);
+  }, [mode, phoneTouched, loginPhone, contacts.phone]);
+
+  function changeContacts(next: ContactsDraft) {
+    if (next.phone !== contacts.phone) setPhoneTouched(true);
+    if (next.telegram !== contacts.telegram) setTelegramError(null);
+    setContacts(next);
   }
 
   const snapshot = () => JSON.stringify({ name: name.trim(), type, addressText: addressText.trim(), addressDirectoryEntryId, contacts, hours });
@@ -233,7 +263,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         type: embeddedLocation.type,
         addressText: embeddedLocation.addressText.trim(),
         addressDirectoryEntryId: null,
-        contacts: { phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' },
+        contacts: contactsOf(source),
         hours: source?.openingHours ?? templateOpeningHours(),
       }));
       setFormReady(true);
@@ -260,6 +290,15 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     }
     if (!openingHoursSchema.safeParse(hours).success) {
       setError(t('pointDetails.hoursInvalid'));
+      return;
+    }
+    let telegram: string | null;
+    try {
+      telegram = normalizeTelegramUsername(contacts.telegram);
+    } catch (problem) {
+      if (!(problem instanceof InvalidTelegramUsernameError)) throw problem;
+      setTelegramError(t(problem.reason === 'invite' ? 'pointDetails.telegramInvite' : 'pointDetails.telegramInvalid'));
+      setError(t('pointDetails.telegramFix'));
       return;
     }
 
@@ -291,13 +330,14 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       const detailsResponse = await fetch(`/api/seller/locations/${savedLocation.id}/details`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: contacts.phone.trim() || null, whatsapp: contacts.whatsapp.trim() || null, openingHours: hours }),
+        body: JSON.stringify({ phone: contacts.phone.trim() || null, whatsapp: contacts.whatsapp.trim() || null, telegram, openingHours: hours }),
       });
       if (!detailsResponse.ok) {
         const detailsError = await detailsResponse.json().catch(() => ({})) as { error?: { code?: string } };
         onSellerChange(nextSeller);
         if (mode === 'add') { setMode('edit'); setEditingId(savedLocation.id); }
-        setError(detailsError.error?.code === 'INVALID_PHONE' ? t('error.INVALID_PHONE') : t('points.saveError'));
+        if (detailsError.error?.code === 'INVALID_TELEGRAM') setTelegramError(t('pointDetails.telegramInvalid'));
+        setError(detailsError.error?.code === 'INVALID_PHONE' ? t('error.INVALID_PHONE') : detailsError.error?.code === 'INVALID_TELEGRAM' ? t('pointDetails.telegramFix') : t('points.saveError'));
         return;
       }
       const savedDetails = (await detailsResponse.json() as { point: PointDetailsView }).point;
@@ -484,7 +524,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
               </div>
             )}
           </div>
-          <PointContactsFields value={contacts} onChange={setContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} saved={saved} loginPhone={loginPhone} />
+          <PointContactsFields value={contacts} onChange={changeContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} saved={saved} loginPhone={loginPhone}
+            telegramSuggestion={telegramSuggestion} telegramError={telegramError} />
           {editing && (['phone', 'whatsapp'] as const).map((channel) => {
             const contact = details.get(editing.id)?.contacts[channel];
             return contact && !contact.verified ? (

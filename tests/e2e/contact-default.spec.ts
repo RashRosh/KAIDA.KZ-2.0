@@ -8,7 +8,9 @@ import { testDatabaseUrl } from '../integration/database';
 // One phone per test: the tests of a file run in parallel and each cleans up its own Seller.
 const phoneFor = (project: string, test: 1 | 2 | 3 | 4 | 5 | 6) => `+7700008${project === 'mobile' ? '1' : '2'}00${test}`;
 const LOGIN_CHIP = /^Указать\sмой\sномер\s\+7\s700\s008\s[12]0\s0[1-6]$/;
-const SAME_CHIP = 'Тот же номер, что в «Телефоне»';
+const SAME_CHIP = 'Использовать этот же\u00a0номер';
+// seller-ai-text-real-parser §17 (PO 2026-10-21): numbers show as «+7 701 000 00 01» with non-breaking spaces.
+const fmt = (e164: string) => `+7\u00a0${e164.slice(2, 5)}\u00a0${e164.slice(5, 8)}\u00a0${e164.slice(8, 10)}\u00a0${e164.slice(10, 12)}`;
 const NOTICE_PHONE = 'Это номер, с которого вы вошли. Покупатели смогут позвонить на этот номер.';
 const NOTICE_WHATSAPP = 'Покупатели смогут написать на этот номер.';
 const SHORT = new Set(['в', 'во', 'на', 'с', 'со', 'к', 'ко', 'по', 'за', 'от', 'до', 'из', 'у', 'о', 'об', 'и', 'а', 'но', 'не', 'ни', 'да', 'же', 'ли', 'бы']);
@@ -65,7 +67,7 @@ const target = async (locator: ReturnType<Page['locator']>) => {
   await expect.poll(async () => (await locator.boundingBox())!.height).toBeGreaterThanOrEqual(43.9);
 };
 
-test('first point: no prefill, a chip fills the login number, the notice and the WhatsApp chip follow; nothing is stored before saving; buyers get the icons', async ({ page }, testInfo) => {
+test('first point: the login number is prefilled with its public-number notice; clearing persists; WhatsApp only on a tap; nothing is stored before saving; buyers get the icons', async ({ page }, testInfo) => {
   test.setTimeout(120_000);
   const phone = phoneFor(testInfo.project.name, 1);
   const pointName = `Контакты точка ${testInfo.project.name}`;
@@ -77,20 +79,13 @@ test('first point: no prefill, a chip fills the login number, the notice and the
     await page.goto('/seller/points');
     await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
 
-    // Nothing is prefilled; the chip waits under «Телефон»; the WhatsApp chip is not shown while the phone is empty.
+    // A new point starts with the login number, confirmed, with the notice that buyers will call it; WhatsApp stays
+    // empty (a phone is not assumed to have WhatsApp) and is offered by a chip.
     const phoneField = page.getByLabel('Телефон', { exact: true });
     const whatsappField = page.getByLabel('WhatsApp', { exact: true });
-    await expect(phoneField).toHaveValue('');
-    await expect(whatsappField).toHaveValue('');
     const chip = page.getByTestId('chip-login-number');
-    await expect(chip).toHaveText(LOGIN_CHIP);
-    await target(chip);
-    await expect(page.getByTestId('chip-same-phone')).toHaveCount(0);
-    await expect(page.getByText(NOTICE_PHONE, { exact: true })).toHaveCount(0);
-
-    // One tap: the number is in the field, confirmed, with its notice; the WhatsApp chip appears.
-    await chip.click();
-    await expect(phoneField).toHaveValue(phone);
+    await expect(phoneField).toHaveValue(fmt(phone));
+    await expect(whatsappField).toHaveValue('');
     await expect(page.getByText(NOTICE_PHONE, { exact: true })).toBeVisible();
     await expect(page.getByText('Подтверждён', { exact: true })).toHaveCount(1);
     await expect(chip).toHaveCount(0);
@@ -99,16 +94,22 @@ test('first point: no prefill, a chip fills the login number, the notice and the
     await target(same);
     await expect(page.getByText(NOTICE_WHATSAPP, { exact: true })).toHaveCount(0);
 
-    // Clearing the field with its own control brings the login chip back, the notice and the WhatsApp chip go away.
+    // Clearing is deliberate: the field stays empty through re-renders and a failed save; the chip offers it back.
     await phoneField.fill('');
+    await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.locator('.banner.err')).toBeVisible();
+    await page.getByLabel('Имя', { exact: true }).fill('Пусто');
+    await expect(phoneField).toHaveValue('');
     await expect(chip).toBeVisible();
+    await target(chip);
     await expect(page.getByText(NOTICE_PHONE, { exact: true })).toHaveCount(0);
     await expect(same).toHaveCount(0);
     await chip.click();
+    await expect(phoneField).toHaveValue(fmt(phone));
 
     // The second chip copies the number of «Телефон».
     await same.click();
-    await expect(whatsappField).toHaveValue(phone);
+    await expect(whatsappField).toHaveValue(fmt(phone));
     await expect(page.getByText(NOTICE_WHATSAPP, { exact: true })).toBeVisible();
     await expect(same).toHaveCount(0);
 
@@ -165,7 +166,7 @@ test('leaving the form after a chip tap stores nothing', async ({ page }, testIn
     const chip = page.getByTestId('chip-login-number');
     await expect(chip).toHaveText(LOGIN_CHIP);
     await chip.click();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(phone);
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt(phone));
     await page.getByRole('button', { name: 'Отмена' }).click();
     expect(await withPool(async (pool) => (await pool.query('SELECT phone_e164, whatsapp_phone_e164 FROM locations WHERE id=$1', [ids[0]])).rows[0]))
       .toEqual({ phone_e164: null, whatsapp_phone_e164: null });
@@ -183,7 +184,7 @@ test('leaving the form after a chip tap stores nothing', async ({ page }, testIn
   }
 });
 
-test('a copied non-empty phone shows no chip; a later point with an empty latest phone shows it; a point with a number shows none', async ({ page }, testInfo) => {
+test('a new point copies the previous point\'s phone, else starts with the login number; an existing point is never prefilled', async ({ page }, testInfo) => {
   test.setTimeout(120_000);
   const copyPhone = phoneFor(testInfo.project.name, 3);
   const emptyPhone = phoneFor(testInfo.project.name, 4);
@@ -195,7 +196,7 @@ test('a copied non-empty phone shows no chip; a later point with an empty latest
     await seedSeller(copyPhone, [['Первая', null, null], ['Вторая', '+77010008399', null]]);
     await page.goto('/seller/points');
     await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
-    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue('+77010008399');
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt('+77010008399'));
     await expect(page.getByText(/^Контакты и режим работы как у точки «Вторая»/)).toBeVisible();
     await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
     // WhatsApp is empty and the phone holds a number: the WhatsApp chip is offered (copy of «Телефон», not of the login number).
@@ -207,12 +208,16 @@ test('a copied non-empty phone shows no chip; a later point with an empty latest
     await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
     await page.getByRole('button', { name: 'Отмена' }).click();
 
-    // A second point whose latest point has no phone shows the login chip.
+    // A second point whose latest point has no phone starts with the login number; the existing point stays empty.
     await page.context().clearCookies();
     await login(page, emptyPhone);
     await seedSeller(emptyPhone, [['Без телефона', null, null]]);
     await page.goto('/seller/points');
     await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
+    await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt(emptyPhone));
+    await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Отмена' }).click();
+    await page.getByRole('button', { name: 'Изменить торговую точку Без телефона' }).click();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue('');
     await expect(page.getByTestId('chip-login-number')).toHaveText(LOGIN_CHIP);
   } finally {
@@ -275,7 +280,6 @@ test('texts fit at 320 and 390 px without short words at line ends or horizontal
       await page.setViewportSize({ width, height: 760 });
       await page.goto('/seller/points');
       await expect(page.getByRole('heading', { name: 'Новая торговая точка', level: 1 })).toBeVisible();
-      await page.getByTestId('chip-login-number').click();
       await expect(page.getByTestId('chip-same-phone')).toBeVisible();
       await page.getByTestId('chip-same-phone').click();
       await expect(page.getByText(NOTICE_WHATSAPP, { exact: true })).toBeVisible();

@@ -14,6 +14,8 @@ export const locations = pgTable('locations', {
   // Point contacts: public only while the number is verified for the Seller (seller_verified_phones or login phone).
   phoneE164: text('phone_e164'),
   whatsappPhoneE164: text('whatsapp_phone_e164'),
+  // seller-ai-text-real-parser §17: normalized Telegram username; public when saved (PO 2026-10-21).
+  telegramUsername: text('telegram_username'),
   openingHours: jsonb('opening_hours').$type<OpeningHours>().notNull().default(templateOpeningHours()),
   // True while the hours are the template nobody has saved yet (migration or a point created without hours).
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -28,6 +30,7 @@ export const locations = pgTable('locations', {
   check('locations_geo_complete_pair', sql`(${table.latitude} IS NULL AND ${table.longitude} IS NULL) OR (${table.latitude} IS NOT NULL AND ${table.longitude} IS NOT NULL)`),
   check('locations_latitude_range', sql`${table.latitude} IS NULL OR ${table.latitude} BETWEEN -90 AND 90`),
   check('locations_phone_e164_format', sql`${table.phoneE164} IS NULL OR ${table.phoneE164} ~ '^\\+[1-9][0-9]{1,14}$'`),
+  check('locations_telegram_username_format', sql`${table.telegramUsername} IS NULL OR ${table.telegramUsername} ~ '^[a-z][a-z0-9_]{3,30}[a-z0-9]$'`),
   check('locations_whatsapp_phone_e164_format', sql`${table.whatsappPhoneE164} IS NULL OR ${table.whatsappPhoneE164} ~ '^\\+[1-9][0-9]{1,14}$'`),
   check('locations_opening_hours_object', sql`jsonb_typeof(${table.openingHours}) = 'object'`),
   check('locations_longitude_range', sql`${table.longitude} IS NULL OR ${table.longitude} BETWEEN -180 AND 180`),

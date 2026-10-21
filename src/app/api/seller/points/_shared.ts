@@ -4,6 +4,7 @@ import { AuthError } from '@/modules/identity/contracts/auth.contract';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { LocationNotFoundError, SellerRequiredError } from '@/modules/locations/application/location-errors';
 import { InvalidPointPhoneError, PointContactNotOnPointError } from '@/modules/locations/details/point-details.contract';
+import { InvalidTelegramUsernameError } from '@/modules/locations/details/telegram-username';
 
 export const noStore = { 'Cache-Control': 'no-store' };
 
@@ -24,6 +25,7 @@ export async function currentUserOr401(request: NextRequest) {
 // Known domain errors of point details, codes and verification; anything else is a 503 without details.
 export function pointErrorResponse(error: unknown, context: string) {
   if (error instanceof InvalidPointPhoneError) return fail(error.code, error.message, 400, { field: error.field });
+  if (error instanceof InvalidTelegramUsernameError) return fail(error.code, error.message, 400, { field: 'telegram', reason: error.reason });
   if (error instanceof PointContactNotOnPointError) return fail(error.code, error.message, 409);
   if (error instanceof SellerRequiredError) return fail(error.code, error.message, 409);
   if (error instanceof LocationNotFoundError) return fail(error.code, error.message, 404);
