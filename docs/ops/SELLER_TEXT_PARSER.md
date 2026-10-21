@@ -47,6 +47,43 @@ service host's environment and the app's environment only. Never paste it into c
 The service logs one line per request (method, path, status, milliseconds, token count) — never text or headers.
 `GET /healthz` answers `{"ok": true}` without the key.
 
+## Temporary test on Modal (candidate for D-1)
+
+Facts checked 2026-10-21 on Modal's official pages:
+- **Payment method:** "you must have a payment method on file in order to use Modal" ([billing](https://modal.com/docs/guide/billing)), and
+  "Using a GPU requires having a valid payment method on file" ([GPU](https://modal.com/docs/guide/gpu)). A card is
+  therefore required even when all usage stays inside the free credits.
+- **Credits:** Starter is $0/month with $30/month free credits, 10 GPU concurrency ([pricing](https://modal.com/pricing)). Own containers,
+  including a GPU web server, count as normal compute. T4 ≈ $0.59/hour (third-party listings; Modal's own GPU price
+  table is not rendered as text). This test is expected to use well under $5.
+- **Overage protection:** the Workspace *usage limit* and *spend limit* ([budgets](https://modal.com/docs/guide/budgets)). "When the spend limit is
+  reached, Modal stops workloads that would incur additional out-of-pocket charges." Set the spend limit to the lowest
+  allowed value (target $0) and the usage limit to $30 before deploying. Whether $0 is accepted is visible only in the
+  account; if it is not, the lowest accepted value is the maximum possible charge.
+- **Region:** by default, inputs are routed through `us-east` (Virginia) and containers run in any region ([region
+  selection](https://modal.com/docs/guide/region-selection)). Pinning a region costs 1.15–1.75×. This is acceptable for synthetic test text only, not
+  for seller data.
+- **Terms** ([terms](https://modal.com/legal/terms), effective May 2026): commercial use; Customer Data is expunged after processing; Modal does not
+  train models on it; crypto-mining and similar uses are prohibited. Nothing excludes our own inference service.
+- **Model and runtime:** `ops/seller-text-parser/modal_app.py` builds Python 3.13, torch 2.11.0 (cu128 wheels) and
+  transformers 5.16.1. It bakes the pinned revision into the image (the repository is public, not gated, licence
+  `apache-2.0`) and runs the unchanged wrapper on one T4, the GPU type of the evidenced run.
+  Settings: `max_containers=1`, one input per container, `scaledown_window=120` (scale to zero), bearer key from the
+  Modal Secret.
+
+Steps (account owner):
+1. Create a Modal account. Add a payment method only if PO accepts that. Set the spend limit and usage limit as above.
+2. On the operator machine: `pip install modal`, then `modal token new` (browser login; the token stays in
+   `~/.modal.toml`, never in Git).
+3. Generate a key (see above). Run `modal secret create kaida-c2-parser-key KAIDA_PARSER_API_KEY=<key>`.
+4. Run `modal deploy ops/seller-text-parser/modal_app.py` from the repository root. The first build downloads about
+   8 GB of weights into the image. Note the printed `https://…modal.run` URL.
+5. Warm up: request `<url>/healthz` until it answers `{"ok": true}`. The first start loads the model.
+6. For the app or `live-check.ts`, set `SELLER_TEXT_PARSER_URL=<url>`, `SELLER_TEXT_PARSER_API_KEY=<key>` and
+   `SELLER_TEXT_PARSER_TIMEOUT_MS=180000` (cold starts).
+7. After testing: `modal app stop kaida-c2-parser`, then `modal secret delete kaida-c2-parser-key`. Check usage on the
+   Usage & Billing page.
+
 ## Checks
 
 Run from a KAIDA checkout with the app variables above exported in the shell (synthetic text only):
