@@ -1,6 +1,6 @@
 # Ручная приёмка — ввод товаров списком с реальной моделью (§11, §16–§21)
 
-Для: Рашит (PO). Ветка `slice/seller-ai-text-real-parser`, PR #191. Не слито, production не включён, тега нет.
+Для: Рашит (PO). **Slice закрыт (PO 2026-10-22):** PR #191 слит `c70c2b77`, main CI: KAIDA verify 39724557776, CodeQL 39724557980 and Dependency Graph 39724566621 GREEN; checkpoint `v0.0.81-seller-ai-text-real-parser`. Production выключен.
 
 ## Решение PO (2026-10-22)
 
@@ -82,6 +82,6 @@
 - Резервные копии БД стенда (локально, вне Git): `kaida-before-0031.dump`, `kaida-after-run3-2026-10-22.dump`,
   `kaida-final-2026-10-22.dump`.
 - Доказательства: `evidence/`, `LIVE_TEST_2026-10-21.md`.
-- Для закрытия slice (PROJECT_RULES §19.1) остаются действия только по поручению PO: merge PR #191, CI на main,
-  тег checkpoint, обновление плана и состояния при закрытии. Production выключен; отдельные решения — D-2
-  (лицензия перед production), D-4 (размещение в Казахстане).
+- Закрытие выполнено по поручению PO 2026-10-22 (см. шапку и §22 контракта). Резервные копии также перенесены в
+  `C:\dev\KAIDA-backups\seller-ai-text-real-parser-2026-10-22\` (вне Git, SHA256SUMS). Production выключен;
+  отдельные решения — D-2 (лицензия перед production), D-4 (размещение в Казахстане).

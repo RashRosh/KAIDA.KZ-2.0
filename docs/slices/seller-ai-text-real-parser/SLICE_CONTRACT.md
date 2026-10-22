@@ -1,10 +1,8 @@
 # Seller AI text input — real parser (integration slice 2) — Slice Contract
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (PO review of PR #190 at `d6c7f14a`, 2026-10-21; revision 3 applies
-the three corrections required by that review: durable retry protection §6.4, mandatory endpoint authentication §8,
-consistent handling of invalid model output §6.2). Authorized: §10 steps 1–2 on a dedicated implementation branch.
-Not authorized: production enablement, purchases, merge, checkpoint tag. The slice stays open until the real-model
-verification (§9.2–§9.3) and PO manual acceptance (§11.2).
+**Status:** CLOSED (PO 2026-10-22). Approved as revision 3 (PO review of PR #190 at `d6c7f14a`, 2026-10-21), scope
+adjusted by §16–§21; PO acceptance 2026-10-22 in the agreed scope (§22); merged as `c70c2b77ff76670f9bdedb9f61c5e466555822c9` (PR #191);
+annotated checkpoint `v0.0.81-seller-ai-text-real-parser`. Production text input stays `off`.
 
 **Capability:** Feature Map `S17` (text channel only), Execution Plan `S-AI-INPUT`. Continues the closed
 [integration slice 1](../seller-ai-text-input/SLICE_CONTRACT.md) (`v0.0.80-seller-ai-text-input`).
@@ -581,3 +579,27 @@ Verification: E2E `seller-journey-corrections.spec.ts` (row controls, publicatio
 
 Verification: integration `point-products.test.ts` (scoping, archived excluded, drafts, ownership);
 E2E `seller-journey-corrections.spec.ts` (count, list, empty state, add with the point, back).
+
+## 22. Closure (PO 2026-10-22)
+
+- **Acceptance (PO, 2026-10-22):** the slice is accepted in its agreed scope — seller text → editable private drafts →
+  review → explicit publication — together with the documented model limitations (§14 and the control-28 report).
+  Run 3 UX fixes (§16–§21) accepted by PO; minor observations deferred.
+- **Attribution** (detail: `PO_ACCEPTANCE_HANDOFF.md`):
+  - PO, manual: run 3 UX checklist; final-session step 1 (unpriced item and out-of-stock mention, real model).
+  - Agent-run: smoke 5/5 and control-28 byte-identical to saved C2 (25/28) — `LIVE_TEST_2026-10-21.md`; §11.2 steps
+    1–3 with the check user; investigation of the out-of-stock finding.
+  - Automated (CI, replay stub, no live model): failure → retry without duplicates → manual entry; review recovery;
+    `off` hides text input; new-point contact defaults; out-of-stock mention changes nothing.
+  - Not performed manually: review recovery on the stand, live service failure and retry, restart in `off`, new-point
+    defaults on the stand. Not marked as passed.
+- **Out-of-stock finding (2026-10-22):** «пельменей сегодня нет» next to a published card produced only a «Не
+  распознано» entry with its reason; no draft for that product; the published offer unchanged. Behaviour met §6.3; a
+  regression test was added (`abdc3763`). The card-like look of «Не распознано» entries is a deferred UX observation.
+- **Merge:** PR #191 merged `c70c2b77ff76670f9bdedb9f61c5e466555822c9`; it contains the approved contract of PR #190. Main CI: KAIDA verify 39724557776, CodeQL 39724557980 and Dependency Graph 39724566621 GREEN.
+- **Checkpoint:** annotated tag `v0.0.81-seller-ai-text-real-parser` on the merge commit.
+- **Deferred:** `S-TEXT-AVAILABILITY` (EXECUTION_PLAN §5.3; out-of-stock text as a confirmed change to existing
+  offers) — planning only. Minor run 3 observations. D-2 (licence confirmation before production) and D-4 (Kazakhstan
+  deployment) remain separate PO decisions.
+- **Limitations kept:** §14; production `SELLER_TEXT_INPUT=off`; the live model ran only on a temporary Modal
+  deployment (spend limit $0), now stopped with its secret deleted.
