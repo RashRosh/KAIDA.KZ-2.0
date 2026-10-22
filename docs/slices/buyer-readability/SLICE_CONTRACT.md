@@ -35,8 +35,9 @@ the phone closer.
 
 - The accepted frames `B01` / `B02` draw these exact lines with `.c` (13 px, `--ink3`): today's screens match the mockup.
 - None of these lines is 12 px; UXA's «12 px» is inaccurate (as UXD already noted). They already pass WCAG AA 4.5:1.
-  The real gaps are a small size (13 px), the lightest grey of the palette, and a size fixed in px, so the lines do
-  not grow when the buyer raises text size in the browser (the opening-hours line next to them, in `rem`, does).
+  The real gaps are a small size (13 px), the lightest grey of the palette, and a size fixed in px, so the lines
+  ignore the browser's default font-size setting (the opening-hours line next to them, in `rem`, follows it). How a
+  phone's own system text-size setting reaches a web page depends on the OS and browser and is not verified here.
 - What is 12 px on buyer screens: bottom-navigation labels, the freshness plaque on the photo, badges and the
   photo-fallback text. They are not the lines UXA names and are out of scope (§4).
 - The result card is one shared component used by Search, «Рядом» and Favourites; the offer page body is shared with
@@ -58,8 +59,15 @@ For these lines (values per decision D1, recommended):
 
 1. size 14 px with a 20 px line, instead of 13 / 18;
 2. colour `--ink2` (`#615b64`) for all of them, instead of `--ink3` where it is used;
-3. the size follows the buyer's text-size setting (relative unit), as the opening-hours line already does (D3);
-4. long addresses and names wrap by words; nothing is truncated or pushed off screen.
+3. the lines respect the browser's default font-size setting (D3), as the opening-hours line already does, and stay
+   usable with text enlarged to 200 %: no clipping, no overlap, no lost or unreachable action;
+4. long addresses and names wrap by words; nothing is truncated or pushed off screen;
+5. with enlarged text the affected card content may grow vertically and its rows may rearrange (for example, the
+   action row wrapping); readability and usable actions take priority over keeping today's row arrangement.
+
+Support for every phone's system text-size setting is **not** promised: using relative units does not guarantee that a
+given OS/browser passes its system setting to the page. Behavior found unsupported during acceptance is recorded as a
+limitation (§11), not fixed in this slice.
 
 Content, order, wording, data and actions stay exactly as they are. The style is scoped to the buyer lines; seller
 screens and the shared mockup stylesheet are untouched.
@@ -74,7 +82,9 @@ screens and the shared mockup stylesheet are untouched.
   and route buttons, bottom-navigation labels, the photo fallback.
 - Other `.c` texts on buyer screens: results caption («Сначала актуальные»), «Ещё» hints and disclaimer, photo error,
   translation status, empty-state and error lines, preview strip.
-- Any change to layout, card composition, photo size, information shown, strings, i18n keys, search, data or API.
+- Any change to layout, card composition, photo size, information shown, strings, i18n keys, search, data or API —
+  except the vertical growth and row rearrangement with enlarged text allowed by §3 item 5.
+- Making phone system text-size settings reach the page where the OS/browser does not pass them.
 - A general type-scale or palette revision, desktop layouts, Kazakh proofreading.
 - The other UX audit items (B-HOME-APPETITE, B-RESULTS-META, B-NEARBY-DEADENDS, O-PRELAUNCH-COPY, …).
 
@@ -102,9 +112,9 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
 
 - DB migration — no. Public API — no. Auth/security/privacy — no. Concurrency/atomicity — no. Data loss — no.
   External service — no.
-- Actual risk: visual regression on shared components — longer text wrapping at 320 px or with large text, an
+- Actual risk: visual regression on shared components — longer text wrapping at 320 px or with enlarged text, an
   accidental change to seller screens through the shared stylesheet, or crowding the card's action row. Covered by
-  AC 6–9.
+  AC 6–9. Automated root-font-size checks do not prove real browser/device settings; that part is manual (§11).
 
 ## 8. Product Owner decisions needed
 
@@ -114,8 +124,10 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
 - **D2 — mockup deviation.** Recommended: approve the deviation from B01 / B02 for these lines, recorded in the mockup
   README; the PO checks it on a real phone during acceptance. Alternative: request updated frames from the designer
   first (blocks the slice until they arrive).
-- **D3 — follow the text-size setting.** Recommended: yes — the lines grow with the buyer's browser/system text size
-  (as the opening-hours line does). Alternative: fixed 14 px.
+- **D3 — browser font-size setting and 200 % text.** Recommended: yes — the lines respect the browser's default
+  font-size setting and stay usable at 200 % text (§3 items 3 and 5); the card may grow vertically. No promise for
+  every phone's system text-size setting; unsupported behavior is recorded as a limitation. Alternative: fixed 14 px
+  (lines do not follow the browser setting).
 
 ## 9. Acceptance criteria
 
@@ -127,9 +139,13 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
 4. Text, order and data of all these lines are unchanged in RU and KK; no new or changed strings.
 5. Every changed line keeps contrast ≥ 4.5:1 on its actual background; the opening-hours line and schedule are
    unchanged (size, weight, state colours, icons).
-6. At 320 px and 360 px width, in RU and KK, with a long address and a long point name: lines wrap by words, nothing is
-   cut or overlapping, no horizontal scroll; route and contact buttons stay 44 × 44 and in their row.
-7. With text size raised to 200 % (D3): the changed lines grow, and AC 6 still holds.
+6. At 320 px and 360 px width, at default text size, in RU and KK, with a long address and a long point name: lines
+   wrap by words, nothing is cut or overlapping, no horizontal scroll; route and contact buttons stay 44 × 44 and in
+   their row.
+7. With text enlarged to 200 % (D3), at 320 px and 360 px, in RU and KK: the changed lines are larger than at default
+   size; nothing is clipped or overlapping, no horizontal scroll; every action (open card, route, contacts, favourite)
+   stays visible, reachable and at least 44 × 44. The card may grow vertically and its rows may rearrange.
+   Automated evidence: root font size raised to 200 %. Manual evidence: a named browser setting on a real phone (§11).
 8. Seller screens are visually unchanged (same size and colour of `.c` texts as before); the seller previews
    «Как видят покупатели» show the new buyer lines.
 9. Other buyer secondary texts listed in §4 are unchanged; on a desktop-width window the centred phone column renders
@@ -140,8 +156,11 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
 ## 10. Verification plan (after approval)
 
 - E2E (mobile RU, new spec): computed size and colour of the lines of AC 1–3; no horizontal overflow at 320 px in RU
-  and KK with long data; growth and no overflow at 200 % root text size; one seller screen keeps its `.c` size and
-  colour. No unit or integration tests: no logic, data or API changes.
+  and KK with long data; at root font size 200 % (emulating a larger browser default): the lines grow, no clipping,
+  overlap or horizontal overflow, actions visible and ≥ 44 × 44; one seller screen keeps its `.c` size and colour.
+  No unit or integration tests: no logic, data or API changes.
+- Scope of automated evidence: root-font-size emulation only. It does not prove how a real browser or phone setting
+  behaves; that is checked manually (§11) and reported separately from the automated results.
 - Existing buyer and preview E2E pass unchanged (they assert content and behavior, not these styles).
 - Full `pnpm verify` and branch CI on the final head; diff audit that `kaida.css`, seller components, server code and
   i18n catalogs are untouched.
@@ -153,8 +172,13 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
    are larger and darker than before; name and price still lead.
 2. Open a card: the address under the point and the seller line read easily; the opening hours look as before.
 3. Open «Рядом» and Favourites (sign in if needed): the same lines look the same way.
-4. Raise the phone's text size and repeat step 1: lines grow, nothing is cut off.
-5. As a seller, open «Как видят покупатели» on a card: its offer page shows the same buyer lines; seller screens look as
+4. Enlarged text, on a named browser and setting (recorded in the acceptance note: phone, OS version, browser and
+   version, setting path and value). Default case: Chrome for Android → Settings → Accessibility → «Text scaling» set
+   to 200 %; on iPhone: Safari → «аА» → 200 %. Repeat steps 1–2: the lines are larger, nothing is cut off or
+   overlapping, route, contacts and favourite still work; the card may be taller and rows may rearrange.
+5. Optional: the phone's own system text-size setting (Android «Размер шрифта», iOS «Размер текста»). If the page does
+   not follow it, or behaves badly, record it as a known limitation; it does not fail this slice unless AC 7 breaks.
+6. As a seller, open «Как видят покупатели» on a card: its offer page shows the same buyer lines; seller screens look as
    before.
 
 Mobile + RU is the gate (`PROJECT_RULES.md` §18.5); KK and desktop are checked automatically for no breakage only.
