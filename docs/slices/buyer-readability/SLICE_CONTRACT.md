@@ -1,8 +1,8 @@
 # Buyer readability — point, address and seller lines — Slice Contract
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Product Owner, 2026-10-22, contract at `e7796ee9` in PR #193, with
-the decisions D1–D3 recorded in §8.1). No merge, checkpoint tag or production enablement without a further PO
-instruction.
+**Status:** CLOSED (PO 2026-10-22). Approved at `e7796ee9` in PR #193 with decisions D1–D3 (§8.1); acceptance and
+limitations in §12; merged as `7175479f0c6255ce64466b6d0cf0722a754078ab` (PR #194, after PR #193); annotated checkpoint
+`v0.0.82-buyer-readability`.
 
 **Queue:** B-READABILITY, item 9 of the PO-approved order of 2026-10-13. Order and state are owned by
 `docs/product/EXECUTION_PLAN.md`.
@@ -194,3 +194,29 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
    before.
 
 Mobile + RU is the gate (`PROJECT_RULES.md` §18.5); KK and desktop are checked automatically for no breakage only.
+
+## 12. Closure (PO 2026-10-22)
+
+- **Attribution** (detail and evidence: `ACCEPTANCE.md`):
+  - PO, manual: ordinary-size appearance accepted (the inspected result cards and offer page look acceptable). PO did
+    not check 200 %, Favourites, «Рядом», the seller preview, or name the phone/browser.
+  - Agent, real browser (procedure changed by PO, §8.1): Google Chrome 155.0.8059.80 on Windows 11, «Размер шрифта» 32
+    (200 % of 16): result card, offer page, Favourites (unavailable + available), «Рядом» and «Как видят покупатели» at
+    360 / 320 px and a desktop window, RU and KK, plus 100 % — all pass; seller `.c` unchanged.
+  - Automated: `tests/e2e/buyer-readability.spec.ts` (root font size raised to 200 %, mobile and desktop projects) and
+    the affected E2E; branch and main CI green. Root-font-size emulation is separate evidence, not a device setting.
+  - Not verified (documented limitation, accepted by PO): phone browsers (Chrome Android «Text scaling», Safari iOS
+    «аА»), page zoom, the phone's system text-size setting.
+- **Fix during acceptance:** the first real-Chrome run found the unavailable Favourites seller line overflowing its box
+  at 200 %, KK, 320 px (flex row, long word). Fixed in scope with `overflow-wrap: anywhere` in the slice stylesheet; the
+  E2E now covers Favourites at 200 % (red on the old build, green after).
+- **Limitations kept (accepted by PO):** at 200 % long words in the narrow column next to the photo break mid-word
+  (§3 item 4 holds at the default size; AC 6–7 met, nothing clipped); the browser font-size setting enlarges only `rem`
+  text, so at 200 % the «where» lines are larger than the px-sized product name and price; the existing two-line title
+  clamp is unchanged.
+- **Merge:** PR #193 (this contract) merged `c4459abb0d7ff250060f8803ac9b3669a6bf2340`; PR #194 merged
+  `7175479f0c6255ce64466b6d0cf0722a754078ab`, carrying the §8.1 procedure amendment. Main CI on `7175479f`: KAIDA
+  verify 39769092446 and CodeQL 39769092477 GREEN.
+- **Checkpoint:** annotated tag `v0.0.82-buyer-readability` on `7175479f`.
+- **Maintenance recorded:** O-CI-FLAKE-TYPO (EXECUTION_PLAN §5.12) — intermittent `search-typo-correction` E2E failure
+  on PR #193 (run 39739883719: attempt 1 failed, attempt 2 passed); cause unconfirmed.
