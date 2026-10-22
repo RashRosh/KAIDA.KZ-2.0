@@ -13,6 +13,7 @@ const detailsSelection = {
   locationId: locations.id,
   phoneE164: locations.phoneE164,
   whatsappPhoneE164: locations.whatsappPhoneE164,
+  telegramUsername: locations.telegramUsername,
   openingHours: locations.openingHours,
   openingHoursNeedsReview: locations.openingHoursNeedsReview,
 };
@@ -31,13 +32,14 @@ function toView(row: {
   locationId: string;
   phoneE164: string | null;
   whatsappPhoneE164: string | null;
+  telegramUsername: string | null;
   openingHours: OpeningHours;
   openingHoursNeedsReview: boolean;
 }, verified: Set<string>): PointDetailsView {
   const contact = (e164: string | null) => (e164 ? { e164, verified: verified.has(e164) } : null);
   return {
     locationId: row.locationId,
-    contacts: { phone: contact(row.phoneE164), whatsapp: contact(row.whatsappPhoneE164) },
+    contacts: { phone: contact(row.phoneE164), whatsapp: contact(row.whatsappPhoneE164), telegram: row.telegramUsername },
     openingHours: row.openingHours,
     openingHoursNeedsReview: row.openingHoursNeedsReview,
   };
@@ -54,6 +56,7 @@ export async function listPointDetails(database: PointDetailsDb, sellerId: strin
 export async function updatePointDetails(database: PointDetailsDb, sellerId: string, locationId: string, values: {
   phoneE164: string | null;
   whatsappPhoneE164: string | null;
+  telegramUsername?: string | null;
   openingHours: OpeningHours;
 }): Promise<PointDetailsView | null> {
   const [row] = await database.update(locations).set({ ...values, openingHoursNeedsReview: false })
@@ -101,4 +104,14 @@ export async function findVerifiedPhonesBySellers(database: PointDetailsDb, sell
   for (const row of await database.select({ sellerId: sellers.id, phone: users.phoneE164 }).from(sellers)
     .innerJoin(users, eq(users.id, sellers.ownerUserId)).where(inArray(sellers.id, sellerIds))) add(row.sellerId, row.phone);
   return result;
+}
+
+// §17: a Telegram username the Seller has already saved — on the most recent point that has one, else the legacy
+// seller-level value (S10). Only offered for reuse; never copied anywhere by itself.
+export async function findSavedTelegramUsernames(database: PointDetailsDb, sellerId: string): Promise<{ point: string | null; legacy: string | null }> {
+  const [point] = await database.select({ username: locations.telegramUsername }).from(locations)
+    .where(and(eq(locations.sellerId, sellerId), sql`${locations.telegramUsername} IS NOT NULL`))
+    .orderBy(desc(locations.createdAt), desc(locations.id)).limit(1);
+  const [seller] = await database.select({ username: sellers.telegramUsername }).from(sellers).where(eq(sellers.id, sellerId)).limit(1);
+  return { point: point?.username ?? null, legacy: seller?.username ?? null };
 }

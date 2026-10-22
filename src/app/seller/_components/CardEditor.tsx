@@ -66,14 +66,17 @@ function formatInput(amount: string | null | undefined) {
   return amount ? formatAmount(amount).replace(/\u00a0/g, ' ') : '';
 }
 
-function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: CardEditorInitial): CardValues {
+function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: CardEditorInitial, initialPointId?: string | null): CardValues {
   const base = emptyCardValues();
   const locations = seller?.locations ?? [];
   let values: CardValues;
   if (mode.kind === 'create') {
     values = mode.draft
       ? valuesFromDraft(mode.draft.payload, new Set(locations.map((location) => location.id)))
-      : { ...base, points: locations.length === 1 ? { [locations[0]!.id]: { selected: true, ownPrice: null } } : {} };
+      // seller-ai-text-real-parser §16: «Добавить товары в эту точку» opens a new card for exactly that point.
+      : initialPointId && locations.some((location) => location.id === initialPointId)
+        ? { ...base, points: { [initialPointId]: { selected: true, ownPrice: null } } }
+        : { ...base, points: locations.length === 1 ? { [locations[0]!.id]: { selected: true, ownPrice: null } } : {} };
   } else {
     const lead = mode.card.lead;
     values = {
@@ -95,11 +98,13 @@ function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: 
 
 // AI-S09 in the «ИИ выключен» mode (seller-showcase-editor §2): one editor for a new card, a draft, a change in all
 // points and the price of one point. Full screen on phones, a dialog on desktop; overlay rules PROJECT_RULES §18.4.
-export function CardEditor({ mode, seller: initialSeller, initial, initialFocus, reopen, commentTranslationEnabled, onClose, onSaved, onReload }: {
+export function CardEditor({ mode, seller: initialSeller, initial, initialFocus, initialPointId, reopen, commentTranslationEnabled, onClose, onSaved, onReload }: {
   mode: CardEditorMode;
   seller: SellerView | null;
   initial?: CardEditorInitial;
   initialFocus?: 'photos';
+  // A new card started from a trading point (`at=`): that point is the selected target.
+  initialPointId?: string | null;
   // Query that reopens this editor from the review page («Вернуться к правке»).
   reopen: string;
   commentTranslationEnabled: boolean;
@@ -114,7 +119,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const ids = useId();
   const [seller, setSeller] = useState<SellerView | null>(initialSeller);
   const locations = seller?.locations ?? [];
-  const [start] = useState(() => startValues(mode, initialSeller, initial));
+  const [start] = useState(() => startValues(mode, initialSeller, initial, initialPointId));
   const [values, setValues] = useState<CardValues>(start);
   const [startPhotoIds] = useState<string[]>(() => initial?.photoIds
     ?? (mode.kind === 'create' ? mode.draft?.payload.photoIds ?? [] : mode.card.lead.photos?.map((photo) => photo.id) ?? []));
@@ -170,9 +175,8 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   async function openPreview() {
     if (!previewCheck.ok || busyRef.current) return;
     const body = previewBody(values, mode.kind === 'create' ? { kind: 'create' } : { kind: 'edit', offerIds: cardOffers.map((offer) => offer.id) }, currentPhotoIds);
-    const missing: MessageKey[] = [];
-    if (currentPhotoIds.length === 0) missing.push('showcase.noPhoto');
-    if (values.comment.trim() === '') missing.push('showcase.noComment');
+    // §20: what still blocks publication (the editor's own rules; the server validates again on the confirmation).
+    const problems = [...new Set(Object.values(validateCard(values, mode.kind, locations.length).errors))] as MessageKey[];
     // one history entry: the device Back closes the preview first (contract §3.9)
     if (preview === null) window.history.pushState({ ...(window.history.state as object | null), kaidaPreview: true }, '');
     setPreview({ status: 'loading' });
@@ -180,7 +184,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       const response = await fetch(`/api/seller/card-preview?locale=${locale}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
       if (!response.ok) throw new Error('preview');
       const result = await response.json() as { previews: Extract<PreviewState, { status: 'ready' }>['pages'] };
-      setPreview({ status: 'ready', pages: result.previews, change: mode.kind === 'edit', missing });
+      setPreview({ status: 'ready', pages: result.previews, change: mode.kind === 'edit', problems });
     } catch {
       setPreview({ status: 'error' });
     }
@@ -613,7 +617,18 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
     );
   }
 
-  if (preview !== null) return <CardPreviewScreen state={preview} onClose={closePreview} onRetry={() => void openPreview()} />;
+  if (preview !== null) {
+    return (
+      <CardPreviewScreen
+        state={preview}
+        onClose={closePreview}
+        onRetry={() => void openPreview()}
+        // The existing «Проверить и опубликовать»: a ChangeSet and its explicit confirmation screen; never publishes here.
+        onPublish={() => { setPreview(null); void send(); }}
+        onComplete={() => { closePreview(); window.setTimeout(() => void send(), 0); }}
+      />
+    );
+  }
 
   // ---- The form ----
   const unitText = unitLabel(values.unit.code, values.unit.custom);

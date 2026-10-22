@@ -169,18 +169,19 @@ test('the Seller cabinet: the action only for what buyers can see, in the agreed
     await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Вернуться к карточке' })).toBeVisible();
 
-    // right after publishing: the highlighted row gets the action — the buyer page for one point, the card screen for several
+    // right after publishing (seller-ai-text-real-parser §19, PO 2026-10-21): no lasting highlight; the brief message
+    // carries the action — the buyer page for one point, the card screen for several, nothing for a card nobody sees
     await page.goto(`/seller?notice=created&offer=${ids.oneOffer}`);
-    const row = page.getByTestId(`seller-card-${ids.oneCard}`);
-    await expect(row.getByTestId('preview-action')).toHaveAttribute('href', `/offers/${ids.oneOffer}?preview=1&return=%2Fseller`);
+    await expect(page.getByTestId(`seller-card-${ids.oneCard}`)).not.toHaveClass(/\bhl\b/);
+    await page.getByRole('button', { name: 'Как видят покупатели' }).click();
+    await expect(page).toHaveURL(new RegExp(`/offers/${ids.oneOffer}\\?preview=1&return=%2Fseller`));
     await page.goto(`/seller?notice=updated&offer=${ids.many[0]}`);
-    const manyRow = page.getByTestId(`seller-card-${ids.manyCard}`);
-    await manyRow.getByTestId('preview-action').click();
+    await page.getByRole('button', { name: 'Как видят покупатели' }).click();
     await expect(page).toHaveURL(new RegExp(`/seller\\?card=${ids.manyCard}`));
     await expect(pointCards.first()).toBeVisible();
-    // a card nobody can see gets no action even when highlighted
     await page.goto(`/seller?notice=updated&offer=${ids.staleOffer}`);
-    await expect(page.getByTestId(`seller-card-${ids.staleCard}`).getByTestId('preview-action')).toHaveCount(0);
+    await expect(page.getByTestId(`seller-card-${ids.staleCard}`)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Как видят покупатели' })).toHaveCount(0);
 
     // Kazakh, a narrow screen and large text: the point card wraps, nothing is clipped, no sideways scroll
     await setLocaleCookie(page.context(), 'kk');

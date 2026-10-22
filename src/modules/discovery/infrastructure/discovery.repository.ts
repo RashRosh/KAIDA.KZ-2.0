@@ -36,6 +36,7 @@ export async function findVisibleDiscoveryCandidates(
     location: { id: locations.id, name: locations.name, addressText: locations.addressText, openingHours: locations.openingHours },
     locationPhoneE164: locations.phoneE164,
     locationWhatsappPhoneE164: locations.whatsappPhoneE164,
+    locationTelegramUsername: locations.telegramUsername,
     priceAmount: offers.priceAmount,
     priceCurrency: offers.priceCurrency,
     priceUnitCode: offers.priceUnitCode,
@@ -62,6 +63,7 @@ export async function findVisibleDiscoveryCandidates(
     priceUnitValue,
     locationPhoneE164,
     locationWhatsappPhoneE164,
+    locationTelegramUsername,
     lastConfirmedAt,
     locationLatitude,
     locationLongitude,
@@ -87,7 +89,7 @@ export async function findVisibleDiscoveryCandidates(
       ...(pack === null ? {} : { pack }),
       location: {
         ...rest.location,
-        ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164 }, verifiedBySeller.get(rest.seller.id)),
+        ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164, telegramUsername: locationTelegramUsername }, verifiedBySeller.get(rest.seller.id)),
       },
       price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
       // Nearby requires complete Location coordinates (geo overlay), so the route capability is always available here.

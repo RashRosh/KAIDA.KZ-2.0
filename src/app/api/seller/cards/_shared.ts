@@ -21,7 +21,7 @@ export function jsonError(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status, headers: noStore });
 }
 
-export async function sellerUser(request: NextRequest): Promise<{ id: string } | Response> {
+export async function sellerUser(request: NextRequest): Promise<{ id: string; phoneE164: string } | Response> {
   try {
     const user = await resolveCurrentUser(request.cookies.get(SESSION_COOKIE_NAME)?.value);
     return user ?? jsonError('AUTH_REQUIRED', 'Войдите, чтобы продолжить.', 401);

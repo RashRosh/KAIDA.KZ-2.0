@@ -1,0 +1,7 @@
+# Reference wrapper for the C2 configuration (seller-ai-text-real-parser §5). Versions recorded in the evidenced run
+# (control_C2.manifest.json): Python 3.13.15, torch 2.11.0+cu128, transformers 5.16.1. Install torch from the CUDA 12.8
+# wheel index of the PyTorch project for a GPU host. `accelerate` is needed for device placement; its version was not
+# recorded in the C2 manifest — record the installed version in the smoke-test evidence.
+torch==2.11.0
+transformers==5.16.1
+accelerate

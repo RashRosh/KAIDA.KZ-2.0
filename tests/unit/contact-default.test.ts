@@ -8,33 +8,33 @@ const LOGIN = '+77010000001';
 
 describe('chips', () => {
   it('login-number chip: only when the number is known and «Телефон» is empty', () => {
-    expect(contactChips({ phone: '', whatsapp: '' }, LOGIN).loginNumber).toBe(true);
-    expect(contactChips({ phone: '   ', whatsapp: '' }, LOGIN).loginNumber).toBe(true);
-    expect(contactChips({ phone: '', whatsapp: '' }, null).loginNumber).toBe(false); // /api/auth/me failed or has no number
-    expect(contactChips({ phone: '+77010007299', whatsapp: '' }, LOGIN).loginNumber).toBe(false); // a copied or typed number
-    expect(contactChips({ phone: '+77010007299', whatsapp: '+77010007299' }, LOGIN).loginNumber).toBe(false);
+    expect(contactChips({ phone: '', whatsapp: '', telegram: '' }, LOGIN).loginNumber).toBe(true);
+    expect(contactChips({ phone: '   ', whatsapp: '', telegram: '' }, LOGIN).loginNumber).toBe(true);
+    expect(contactChips({ phone: '', whatsapp: '', telegram: '' }, null).loginNumber).toBe(false); // /api/auth/me failed or has no number
+    expect(contactChips({ phone: '+77010007299', whatsapp: '', telegram: '' }, LOGIN).loginNumber).toBe(false); // a copied or typed number
+    expect(contactChips({ phone: '+77010007299', whatsapp: '+77010007299', telegram: '' }, LOGIN).loginNumber).toBe(false);
   });
 
   it('WhatsApp chip: only when «Телефон» holds a number and «WhatsApp» is empty, with or without a known login number', () => {
-    expect(contactChips({ phone: '+77010007299', whatsapp: '' }, LOGIN).samePhone).toBe(true);
-    expect(contactChips({ phone: '+77010007299', whatsapp: '' }, null).samePhone).toBe(true);
-    expect(contactChips({ phone: '', whatsapp: '' }, LOGIN).samePhone).toBe(false);
-    expect(contactChips({ phone: '+77010007299', whatsapp: '+77010007288' }, LOGIN).samePhone).toBe(false); // a copied field shows no chip
-    expect(contactChips({ phone: '', whatsapp: '+77010007288' }, LOGIN).samePhone).toBe(false);
+    expect(contactChips({ phone: '+77010007299', whatsapp: '', telegram: '' }, LOGIN).samePhone).toBe(true);
+    expect(contactChips({ phone: '+77010007299', whatsapp: '', telegram: '' }, null).samePhone).toBe(true);
+    expect(contactChips({ phone: '', whatsapp: '', telegram: '' }, LOGIN).samePhone).toBe(false);
+    expect(contactChips({ phone: '+77010007299', whatsapp: '+77010007288', telegram: '' }, LOGIN).samePhone).toBe(false); // a copied field shows no chip
+    expect(contactChips({ phone: '', whatsapp: '+77010007288', telegram: '' }, LOGIN).samePhone).toBe(false);
   });
 
   it('chips come back when a field is cleared', () => {
-    expect(contactChips({ phone: LOGIN, whatsapp: '' }, LOGIN).loginNumber).toBe(false);
-    expect(contactChips({ phone: '', whatsapp: '' }, LOGIN).loginNumber).toBe(true);
-    expect(contactChips({ phone: LOGIN, whatsapp: LOGIN }, LOGIN).samePhone).toBe(false);
-    expect(contactChips({ phone: LOGIN, whatsapp: '' }, LOGIN).samePhone).toBe(true);
+    expect(contactChips({ phone: LOGIN, whatsapp: '', telegram: '' }, LOGIN).loginNumber).toBe(false);
+    expect(contactChips({ phone: '', whatsapp: '', telegram: '' }, LOGIN).loginNumber).toBe(true);
+    expect(contactChips({ phone: LOGIN, whatsapp: LOGIN, telegram: '' }, LOGIN).samePhone).toBe(false);
+    expect(contactChips({ phone: LOGIN, whatsapp: '', telegram: '' }, LOGIN).samePhone).toBe(true);
   });
 
   it('notices only while the field holds the login number, in any spelling of it', () => {
-    expect(contactChips({ phone: LOGIN, whatsapp: '' }, LOGIN)).toMatchObject({ phoneNotice: true, whatsappNotice: false });
-    expect(contactChips({ phone: '8 701 000 00 01', whatsapp: '+7 701 000 00 01' }, LOGIN)).toMatchObject({ phoneNotice: true, whatsappNotice: true });
-    expect(contactChips({ phone: '+77010007299', whatsapp: '+77010007299' }, LOGIN)).toMatchObject({ phoneNotice: false, whatsappNotice: false });
-    expect(contactChips({ phone: LOGIN, whatsapp: LOGIN }, null)).toMatchObject({ phoneNotice: false, whatsappNotice: false });
+    expect(contactChips({ phone: LOGIN, whatsapp: '', telegram: '' }, LOGIN)).toMatchObject({ phoneNotice: true, whatsappNotice: false });
+    expect(contactChips({ phone: '8 701 000 00 01', whatsapp: '+7 701 000 00 01', telegram: '' }, LOGIN)).toMatchObject({ phoneNotice: true, whatsappNotice: true });
+    expect(contactChips({ phone: '+77010007299', whatsapp: '+77010007299', telegram: '' }, LOGIN)).toMatchObject({ phoneNotice: false, whatsappNotice: false });
+    expect(contactChips({ phone: LOGIN, whatsapp: LOGIN, telegram: '' }, null)).toMatchObject({ phoneNotice: false, whatsappNotice: false });
     expect(holdsLoginNumber('not a number', LOGIN)).toBe(false);
   });
 
@@ -52,6 +52,9 @@ const NEW_OR_CHANGED_RU = [
   'pointDetails.sameAsPhone',
   'pointDetails.loginNoticePhone',
   'pointDetails.loginNoticeWhatsapp',
+  'pointDetails.telegramHelp',
+  'pointDetails.telegramInvalid',
+  'pointDetails.telegramInvite',
 ] as const;
 
 describe('wording of the contact-default strings', () => {
@@ -63,7 +66,7 @@ describe('wording of the contact-default strings', () => {
     const nb = ' ';
     expect(ru['pointDetails.loginNoticePhone']).toBe(`Это${nb}номер, с${nb}которого вы${nb}вошли. Покупатели смогут позвонить на${nb}этот${nb}номер.`);
     expect(ru['pointDetails.loginNoticeWhatsapp']).toBe(`Покупатели смогут написать на${nb}этот${nb}номер.`);
-    expect(ru['pointDetails.sameAsPhone']).toBe(`Тот${nb}же номер, что в${nb}«Телефоне»`);
+    expect(ru['pointDetails.sameAsPhone']).toBe(`Использовать этот же${nb}номер`); // seller-ai-text-real-parser §17 (PO 2026-10-21)
     expect(ru['pointDetails.useLoginNumber']).toBe(`Указать мой${nb}номер {phone}`);
   });
 

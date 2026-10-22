@@ -21,6 +21,8 @@ export type BuyerOfferFields = {
   location: { id: string; name: string; addressText: string; openingHours: OpeningHours };
   locationPhoneE164: string | null;
   locationWhatsappPhoneE164: string | null;
+  // §17: the point's saved Telegram username (public when saved)
+  locationTelegramUsername?: string | null;
   // the verified phone numbers of the Seller: only a verified number becomes a public contact
   verifiedPhones: Set<string> | undefined;
   priceAmount: string;
@@ -45,7 +47,7 @@ export function projectBuyerOffer(fields: BuyerOfferFields, locale: Locale): { o
     seller: fields.seller,
     location: {
       ...fields.location,
-      ...projectPointPublicContacts({ phoneE164: fields.locationPhoneE164, whatsappPhoneE164: fields.locationWhatsappPhoneE164 }, fields.verifiedPhones),
+      ...projectPointPublicContacts({ phoneE164: fields.locationPhoneE164, whatsappPhoneE164: fields.locationWhatsappPhoneE164, telegramUsername: fields.locationTelegramUsername }, fields.verifiedPhones),
     },
     price: { amount: fields.priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(fields.priceUnitCode, fields.priceUnitValue), locale) },
     sellerComment: fields.sellerComment,

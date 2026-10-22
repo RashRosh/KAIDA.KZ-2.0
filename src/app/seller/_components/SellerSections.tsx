@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import { SellerTradingPoints } from './SellerTradingPoints';
@@ -39,10 +40,25 @@ function useOwnedSeller() {
 }
 
 // AI-S12 «Мои точки»: loading, sign-in and error states around the list and the point screen.
-export function SellerPointsSection() {
+export function SellerPointsSection({ textInputEnabled = false }: { textInputEnabled?: boolean }) {
   const { t } = useI18n();
+  const router = useRouter();
+  // seller-ai-text-real-parser §16: opened from the text list without a point — create one, then go back to the list
+  // with that point selected (its text is kept in the tab); cancelling also goes back, the text stays.
+  const fromTextInput = useSearchParams().get('return') === 'text-input';
   const { state, setSeller, retry } = useOwnedSeller();
-  if (state.kind === 'ready') return <SellerTradingPoints seller={state.seller} onSellerChange={setSeller} autoOpenAdd={state.seller === null} />;
+  if (state.kind === 'ready') {
+    return (
+      <SellerTradingPoints
+        seller={state.seller}
+        onSellerChange={setSeller}
+        autoOpenAdd={state.seller === null || fromTextInput}
+        textInputEnabled={textInputEnabled}
+        onLocationCreated={fromTextInput ? (location) => router.push(`/seller/text-input?point=${location.id}`) : undefined}
+        onClose={fromTextInput ? (result) => { if (result === 'cancelled') router.push('/seller/text-input'); } : undefined}
+      />
+    );
+  }
   return (
     <Phone>
       <Bar title={t('points.title')} />

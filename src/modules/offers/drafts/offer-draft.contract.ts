@@ -6,6 +6,9 @@ export const offerDraftAiHintsSchema = z.object({
   uncertainFields: z.array(z.enum(['price', 'unit', 'pack', 'catalog', 'title'])),
   catalogStatus: z.enum(['resolved', 'ambiguous', 'not_found']).optional(),
   sourceQuote: z.string().max(500).nullable().optional(),
+  // seller-ai-text-real-parser §7: provenance of the draft (which parser and configuration produced it).
+  parser: z.enum(['fake', 'real']).optional(),
+  parserConfig: z.string().max(80).optional(),
 }).strict();
 
 export type OfferDraftAiHints = z.infer<typeof offerDraftAiHintsSchema>;

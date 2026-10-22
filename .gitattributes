@@ -1,2 +1,4 @@
 # Immutable vendored Production KB package: bytes must match the pinned manifest SHA-256, so no EOL conversion.
 src/modules/catalog/kb-package/v1/** -text
+# seller-ai-text-real-parser: byte-exact C2 reference fixtures (SHA-256 checked by tests), so no EOL conversion.
+tests/fixtures/seller-text-real-parser/** -text

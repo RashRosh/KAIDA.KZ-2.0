@@ -119,7 +119,9 @@ function SellerComment({ offer }: { offer: BuyerOfferPage }) {
   );
 }
 
-export function OfferDetails({ offer, back, inert = false, titleAction, footer }: { offer: BuyerOfferPage; back: ReactNode; inert?: boolean; titleAction?: ReactNode; footer?: ReactNode }) {
+// `scheduleLabel` (seller preview only, seller-ai-text-real-parser §20): the week sits behind an explicit disclosure under
+// the status line; the buyer page itself keeps the whole week visible.
+export function OfferDetails({ offer, back, inert = false, titleAction, footer, scheduleLabel }: { offer: BuyerOfferPage; back: ReactNode; inert?: boolean; titleAction?: ReactNode; footer?: ReactNode; scheduleLabel?: string }) {
   return (
     <>
       <Gallery offer={offer} back={back} />
@@ -147,7 +149,12 @@ export function OfferDetails({ offer, back, inert = false, titleAction, footer }
           </div>
           <div>
             <OpeningStatusLine hours={offer.location.openingHours} />
-            <OpeningSchedule hours={offer.location.openingHours} />
+            {scheduleLabel ? (
+              <details data-testid="preview-schedule">
+                <summary className="act" style={{ minHeight: 44 }}>{scheduleLabel}</summary>
+                <OpeningSchedule hours={offer.location.openingHours} />
+              </details>
+            ) : <OpeningSchedule hours={offer.location.openingHours} />}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, ...(inert ? { opacity: 0.55 } : {}) }} inert={inert || undefined} aria-disabled={inert || undefined} data-testid={inert ? 'offer-actions-inert' : undefined}>
             {/* stage 5A: the route action is honest — shown only when the route capability is available. */}

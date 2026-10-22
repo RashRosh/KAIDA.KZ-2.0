@@ -9,6 +9,7 @@ import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { previewHref } from '../../../modules/offers/preview/preview-link';
 import type { SellerChangeSetView } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
+import type { SellerTextSubmissionSummary } from '../../../modules/seller-text-input/contracts/seller-text-input.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatAmount } from '../../_components/format-amount';
@@ -75,9 +76,9 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
   const params = useSearchParams();
   const { data, reload } = useShowcaseData(locale);
   const bulk = useBulkConfirm({ onChanged: reload });
+  const textReviews = useTextReviews(textInputEnabled && data.kind === 'ready' && data.seller !== null, data);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [notice, setNotice] = useState<{ text: MessageKey; offerId: string | null } | null>(null);
-  const [highlight, setHighlight] = useState<string | null>(null);
   const [override, setOverride] = useState<{ key: string; initial: CardEditorInitial } | null>(null);
   const tab = params.get('tab') === 'drafts' ? 'drafts' : 'all';
 
@@ -90,10 +91,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
     const text: MessageKey = noticeKind === 'created'
       ? (offer?.buyerVisible ? 'showcase.published' : 'notice.created')
       : noticeText[noticeKind] ?? 'notice.updated';
-    const timer = window.setTimeout(() => {
-      setNotice({ text, offerId: noticeOffer });
-      setHighlight(offer?.cardId ?? null);
-    }, 0);
+    const timer = window.setTimeout(() => setNotice({ text, offerId: noticeOffer }), 0);
     const rest = new URLSearchParams(params);
     rest.delete('notice');
     rest.delete('offer');
@@ -112,10 +110,17 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
     setNotice(null);
     router.push(query ? `/seller?${query}` : '/seller', { scroll: false });
   }, [router]);
+  // seller-ai-text-real-parser §19: an editor or card opened from another seller screen (a list review, a point's
+  // products) returns there; only seller paths are accepted.
+  const back = params.get('back');
   const closeOverlay = useCallback(() => {
     setOverride(null);
+    if (back && /^\/seller(?:\/|\?|$)/.test(back) && !back.startsWith('//')) {
+      router.push(back, { scroll: false });
+      return;
+    }
     router.replace(tab === 'drafts' ? '/seller?tab=drafts' : '/seller', { scroll: false });
-  }, [router, tab]);
+  }, [router, tab, back]);
 
   const cta = (
     <button type="button" className="btn btn-p lg w" onClick={() => setSourceOpen(true)} aria-haspopup="dialog">
@@ -183,9 +188,17 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
 
   const entries = showcaseEntries(liveCards, data.drafts).filter((entry) => tab === 'all' || entry.kind === 'draft');
   const empty = cards.length === 0 && data.drafts.length === 0;
+  // §19 (PO 2026-10-21): no lasting highlight after publishing; «Как видят покупатели» rides on the brief message —
+  // the buyer page for one point, the card screen for several; nothing for a card buyers cannot see.
+  const previewAction = (offerId: string | null) => {
+    const offer = offerId ? data.offers.find((item) => item.id === offerId) : undefined;
+    if (!offer?.buyerVisible) return undefined;
+    const several = data.offers.filter((item) => item.cardId === offer.cardId).length > 1;
+    return { label: t('preview.action'), onClick: () => (several ? go(`card=${offer.cardId}`) : router.push(previewHref(offer.id, '/seller'))) };
+  };
   const toast = bulk.toast
     ? <BulkToast toast={bulk.toast} onUndo={() => void bulk.undo()} onView={() => { bulk.dismiss(); go('actuality=1'); }} />
-    : notice && <Toast>{t(notice.text)}</Toast>;
+    : notice && <Toast action={previewAction(notice.offerId)}>{t(notice.text)}</Toast>;
 
   if (empty) {
     return screen(
@@ -193,6 +206,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
         <h2 className="h1" style={{ textAlign: 'center' }}>{t('showcase.emptyTitle')}</h2>
         <p className="t c2" style={{ textAlign: 'center' }}>{t('showcase.emptyText')}</p>
         {cta}
+        <TextReviews reviews={textReviews} />
       </main>,
       toast,
     );
@@ -202,6 +216,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
     <main className="body" style={{ gap: 12 }}>
       {cta}
       <ActualityTask due={dueCards} oneTap={oneTapCards} busy={bulk.busy} error={bulk.error} onCheck={() => go('actuality=1')} onConfirmAll={() => void bulk.confirmAll(oneTapCards.map((card) => card.cardId))} />
+      <TextReviews reviews={textReviews} />
       {data.drafts.length > 0 || archivedCards.length > 0 ? (
         <nav className="chips" aria-label={t('showcase.tabs')}>
           <Link href="/seller" scroll={false} className={`chip${tab === 'all' ? ' on' : ''}`} aria-current={tab === 'all' ? 'page' : undefined}>{t('showcase.tabAll', { count: liveCards.length + data.drafts.length })}</Link>
@@ -213,7 +228,7 @@ export function SellerShowcase({ commentTranslationEnabled = false, textInputEna
       )}
       {entries.length === 0 && <p className="t c2">{t('showcase.draftsEmpty')}</p>}
       {entries.map((entry) => entry.kind === 'card'
-        ? <CardRow key={entry.card.cardId} card={entry.card} highlighted={highlight === entry.card.cardId} onOpen={() => go(`card=${entry.card.cardId}`)} onAddPhoto={() => go(`edit=${entry.card.cardId}&focus=photos`)} />
+        ? <CardRow key={entry.card.cardId} card={entry.card} onOpen={() => go(`card=${entry.card.cardId}`)} onAddPhoto={() => go(`edit=${entry.card.cardId}&focus=photos`)} />
         : <DraftRow key={entry.draft.id} draft={entry.draft} onOpen={() => go(`draft=${entry.draft.id}`)} />)}
     </main>,
     toast,
@@ -241,17 +256,22 @@ function priceLine(card: SellerCard, t: ReturnType<typeof useI18n>['t']) {
   );
 }
 
-function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; highlighted: boolean; onOpen: () => void; onAddPhoto: () => void }) {
+// seller-ai-text-real-parser §19: a card's look follows its current state only — every card on the showcase now has the
+// same subtle violet style and «✓ Опубликовано · На витрине»; switched off, hidden or removed cards never claim it.
+export function isOnShowcase(card: SellerCard): boolean {
+  return Boolean(card.live && !card.removal && card.actuality?.stage !== 'hidden' && !card.actuality?.archived);
+}
+
+export function CardRow({ card, onOpen, onAddPhoto }: { card: SellerCard; onOpen: () => void; onAddPhoto: () => void }) {
   const { t } = useI18n();
   const lead = card.lead;
   const cover = lead.photos?.[0];
   const missing: MessageKey[] = [];
-  // the Offers buyers can open right now (the same visibility as Search); only these can be previewed
-  const previewable = card.offers.filter((offer) => offer.buyerVisible);
   if (!cover) missing.push('showcase.noPhoto');
   if (!lead.sellerComment) missing.push('showcase.noComment');
   return (
-    <article className={`card${highlighted ? ' hl is-new' : ''}`} aria-labelledby={`card-${card.cardId}`} data-testid={`seller-card-${card.cardId}`}
+    <article className={`card${isOnShowcase(card) ? ' pub' : ''}`} aria-labelledby={`card-${card.cardId}`} data-testid={`seller-card-${card.cardId}`}
+      data-state={isOnShowcase(card) ? 'published' : 'other'}
       style={{ position: 'relative', ...(card.removal ? { border: '1.5px solid var(--danger)' } : {}) }}>
       <button type="button" className="rowbtn" onClick={onOpen} aria-labelledby={`card-${card.cardId}`}>
         <Thumb photoUrl={cover ? photoUrl(cover.id, 'thumb') : null} />
@@ -270,11 +290,12 @@ function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; 
             </>
           ) : card.live ? (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <span className="bd bd-ok"><Ic name="check" />{t('showcase.statusLive')}{highlighted ? ` · ${t('showcase.statusNow')}` : ''}</span>
+              <span className="bd bd-p" data-testid="status-published"><Ic name="check" />{t('showcase.statusPublished')}</span>
               {card.actuality?.due && <span className="bd bd-warn"><Ic name="clock" />{t('actuality.confirmDue')}</span>}
             </div>
           ) : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>}
         </div>
+        <Ic name="right" className="c2" />
       </button>
       {!cover && (
         <button type="button" className="photo-shortcut" onClick={onAddPhoto} aria-label={`${t('source.photos')}: ${lead.product.name}`}>
@@ -284,19 +305,11 @@ function CardRow({ card, highlighted, onOpen, onAddPhoto }: { card: SellerCard; 
       {missing.length > 0 && (
         <p className="c" style={{ paddingLeft: 68 }}>{missing.map((key) => t(key)).join(' · ')}. {t('showcase.incomplete')}</p>
       )}
-      {/* post-publication-buyer-preview §3.2 (3): right after publishing — one point opens the buyer page, several points open the card screen with its points. */}
-      {highlighted && !card.removal && previewable.length > 0 && (
-        <div style={{ paddingLeft: 68 }}>
-          {previewable.length === 1 && card.offers.length === 1
-            ? <Link href={previewHref(previewable[0]!.id, '/seller')} className="act" data-testid="preview-action"><Ic name="eye" className="sm" /><span>{t('preview.action')}</span></Link>
-            : <button type="button" className="act" data-testid="preview-action" onClick={onOpen}><Ic name="eye" className="sm" /><span>{t('preview.action')}</span></button>}
-        </div>
-      )}
     </article>
   );
 }
 
-function DraftRow({ draft, onOpen }: { draft: OfferDraftView; onOpen: () => void }) {
+export function DraftRow({ draft, onOpen }: { draft: OfferDraftView; onOpen: () => void }) {
   const { t } = useI18n();
   const missing = missingDraftFields(draft.payload);
   const cover = draft.payload.photoIds[0];
@@ -309,6 +322,7 @@ function DraftRow({ draft, onOpen }: { draft: OfferDraftView; onOpen: () => void
           <span className="bd bd-n"><Ic name="pencil" />{t('showcase.statusDraft')}</span>
           <p className="c">{missing.length > 0 ? t('showcase.missing', { fields: missing.map((key) => t(key)).join(', ') }) : t('showcase.draftReady')}</p>
         </div>
+        <Ic name="right" className="c2" />
       </button>
     </article>
   );
@@ -381,6 +395,7 @@ function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, s
   const from = params.get('from');
   const initialFocus = params.get('focus') === 'photos' ? 'photos' : undefined;
   const creating = params.get('new') === '1';
+  const atPoint = creating ? params.get('at') : null;
   const draft = drafts.find((item) => item.id === params.get('draft')) ?? null;
   const editCard = findCard(cards, params.get('edit'));
   const pointId = params.get('point');
@@ -420,7 +435,7 @@ function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, s
   if (mode) {
     if (from && restored?.from !== from) return null;
     const initial = override?.initial ?? (from ? restored?.initial ?? undefined : undefined);
-    const reopen = creating ? 'new=1' : draft ? `draft=${draft.id}` : editCard ? `edit=${editCard.cardId}` : `point=${pointId}`;
+    const reopen = creating ? (atPoint ? `new=1&at=${atPoint}` : 'new=1') : draft ? `draft=${draft.id}` : editCard ? `edit=${editCard.cardId}` : `point=${pointId}`;
     return (
       <CardEditor
         key={`${reopen}:${from ?? ''}:${override?.key ?? ''}`}
@@ -428,6 +443,7 @@ function Overlays({ cards, dueCards, oneTapCards, bulk, archivedCards, drafts, s
         seller={seller}
         initial={initial}
         initialFocus={initialFocus}
+        initialPointId={atPoint}
         reopen={reopen}
         commentTranslationEnabled={commentTranslationEnabled}
         onClose={onClose}
@@ -674,5 +690,44 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
       </main>
       {pointSaved && <Toast>{t('points.saved')}</Toast>}
     </Phone>
+  );
+}
+
+// seller-ai-text-real-parser §16: the Seller's list reviews of the last 24 hours, each linked to its own submission, so
+// skipped items and notices stay reachable after leaving the review screen. Re-read whenever the showcase re-reads.
+function useTextReviews(enabled: boolean, data: unknown) {
+  const [reviews, setReviews] = useState<SellerTextSubmissionSummary[]>([]);
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    void (async () => {
+      try {
+        const response = await fetch('/api/seller/text-input', { cache: 'no-store' });
+        if (!response.ok) return;
+        const { submissions } = await response.json() as { submissions: SellerTextSubmissionSummary[] };
+        if (alive) setReviews(submissions);
+      } catch {
+        // The showcase works without the list; the drafts themselves are shown as usual.
+      }
+    })();
+    return () => { alive = false; };
+  }, [enabled, data]);
+  return enabled ? reviews : [];
+}
+
+function TextReviews({ reviews }: { reviews: SellerTextSubmissionSummary[] }) {
+  const { locale, t } = useI18n();
+  if (reviews.length === 0) return null;
+  const time = new Intl.DateTimeFormat(locale === 'kk' ? 'kk-KZ' : 'ru-KZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return (
+    <section className="card p16" style={{ gap: 6 }} data-testid="text-reviews">
+      <div className="ov">{t('textInput.recentTitle')}</div>
+      {reviews.map((review) => (
+        <Link key={review.inputId} href={`/seller/text-input/review?input=${review.inputId}`} className="act" data-testid={`text-review-link-${review.inputId}`}>
+          <Ic name="right" className="sm" />
+          <span>{t('textInput.recentItem', { time: time.format(new Date(review.createdAt)), drafts: review.drafts, skipped: review.skipped })}</span>
+        </Link>
+      ))}
+    </section>
   );
 }

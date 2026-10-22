@@ -36,7 +36,10 @@ export type OpeningStatus =
   | { state: 'closing'; kind: 'closingAtOn'; time: string; day: Weekday }
   | { state: 'closed'; kind: 'opensToday'; time: string }
   | { state: 'closed'; kind: 'opensOn'; time: string; day: Weekday }
-  | { state: 'closed'; kind: 'noWorkingDays' };
+  | { state: 'closed'; kind: 'noWorkingDays' }
+  // §18: an unknown day is never reported as closed, and an opening after an unknown day is not promised.
+  | { state: 'closed'; kind: 'closedNow' }
+  | { state: 'unknown'; kind: 'unknownToday' };
 
 // A closing or opening that falls on another day of the point names that day: Sunday 22:00 with a close at 03:00 on
 // Monday reads «до 3:00 ПН». A closed point always says when it opens, except when no day ever opens.
@@ -44,7 +47,18 @@ export function openingStatus(hours: OpeningHours, now: Date): OpeningStatus {
   const current = openingState(hours, now);
   const today = localWeekday(hours, now);
   if (current.state === 'closed') {
-    if (current.opensAt === null) return { state: 'closed', kind: 'noWorkingDays' };
+    if (hours.days[today].kind === 'unset') return { state: 'unknown', kind: 'unknownToday' };
+    const unknownBefore = (target: Weekday | null) => {
+      const from = WEEKDAYS.indexOf(today);
+      for (let step = 1; step <= 7; step += 1) {
+        const day = WEEKDAYS[(from + step) % 7]!;
+        if (day === target) return false;
+        if (hours.days[day].kind === 'unset') return true;
+      }
+      return false;
+    };
+    if (current.opensAt === null) return unknownBefore(null) ? { state: 'closed', kind: 'closedNow' } : { state: 'closed', kind: 'noWorkingDays' };
+    if (!current.opensAt.sameDay && unknownBefore(current.opensAt.weekday)) return { state: 'closed', kind: 'closedNow' };
     const time = clockText(current.opensAt.time);
     return current.opensAt.sameDay
       ? { state: 'closed', kind: 'opensToday', time }
@@ -70,6 +84,8 @@ export function statusMessage(status: OpeningStatus): { key: string; time?: stri
     case 'opensToday': return { key: 'hours.opensToday', time: status.time };
     case 'opensOn': return { key: 'hours.opensOn', time: status.time, day: status.day };
     case 'noWorkingDays': return { key: 'hours.noWorkingDays' };
+    case 'closedNow': return { key: 'hours.closedNow' };
+    case 'unknownToday': return { key: 'hours.unknownToday' };
   }
 }
 

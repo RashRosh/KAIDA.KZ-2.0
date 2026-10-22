@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WEEKDAYS, type OpeningHours, type Weekday } from '../../modules/locations/hours/opening-hours';
+import { hasAnyKnownDay, WEEKDAYS, type OpeningHours, type Weekday } from '../../modules/locations/hours/opening-hours';
 import {
   formatInterval,
   groupContains,
@@ -42,6 +42,9 @@ function StateIcon({ state }: { state: OpeningStatus['state'] }) {
   if (state === 'open') {
     return <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor" /></svg>;
   }
+  if (state === 'unknown') {
+    return <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeDasharray="2.5 2" /></svg>;
+  }
   if (state === 'closing') {
     return <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>;
   }
@@ -59,7 +62,7 @@ export function OpeningStatusLine({ hours }: { hours: OpeningHours | null | unde
   const { t } = useI18n();
   const dayName = useDayName();
   const now = useNow();
-  if (!hours?.days) {
+  if (!hours?.days || !hasAnyKnownDay(hours)) {
     return <p className={styles.line} data-testid="opening-hours"><span className={styles.text} data-muted="true">{t('hours.notSet')}</span></p>;
   }
   const status = now ? openingStatus(hours, now) : null;
@@ -91,7 +94,7 @@ export function OpeningSchedule({ hours }: { hours: OpeningHours | null | undefi
   const { t } = useI18n();
   const dayName = useDayName();
   const now = useNow();
-  if (!hours?.days) return null;
+  if (!hours?.days || !hasAnyKnownDay(hours)) return null;
   const today = now ? localWeekday(hours, now) : null;
   return (
     <ul className={styles.schedule} aria-label={t('hours.label')} data-testid="opening-schedule">
@@ -106,6 +109,7 @@ export function OpeningSchedule({ hours }: { hours: OpeningHours | null | undefi
             </span>
             <span className={styles.times}>
               {schedule.kind === 'closed' && <span className={styles.off}>{t('hours.dayOff')}</span>}
+              {schedule.kind === 'unset' && <span className={styles.off}>{t('hours.notSpecified')}</span>}
               {schedule.kind === '24h' && t('hours.aroundTheClock')}
               {schedule.kind === 'intervals' && schedule.intervals.map((interval, index) => (
                 <span key={index}>{index > 0 && ', '}<span className={styles.interval}>{formatInterval(interval)}</span></span>

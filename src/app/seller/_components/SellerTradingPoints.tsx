@@ -1,15 +1,20 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import type { SellerOfferView } from '@/modules/offers/contracts/seller-offer.contract';
+import type { OfferDraftView } from '@/modules/offers/drafts/offer-draft.contract';
+import { pointProducts } from '@/modules/offers/point-products';
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { LocationGeo, LocationType, LocationView } from '@/modules/locations/contracts/location.contract';
 import { parseManualLocationInput } from '@/modules/locations/contracts/manual-location-input';
 import type { SellerView } from '@/modules/sellers/contracts/seller.contract';
 import type { PointDetailsView } from '@/modules/locations/details/point-details.contract';
-import { openingHoursSchema, templateOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
+import { openingHoursSchema, unsetOpeningHours, type OpeningHours } from '@/modules/locations/hours/opening-hours';
 import { OpeningHoursFields, PointContactStatus, PointContactsFields } from './PointDetailsFields';
-import type { ContactsDraft } from './contact-chips';
+import { formatPhone, type ContactsDraft } from './contact-chips';
+import { InvalidTelegramUsernameError, normalizeTelegramUsername } from '@/modules/locations/details/telegram-username';
 import { Bar, Ic, Nav, Phone, shakeErrors, Sheet, Toast, TOAST_MS } from '../_kaida/ui';
-import { pluralKey } from './card-model';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { MessageKey } from '@/i18n/messages';
 import { AddressSuggestionInput } from './AddressSuggestionInput';
@@ -22,6 +27,15 @@ const typeLabelKeys: Record<LocationType, MessageKey> = {
   market: 'points.type.market', shop: 'points.type.shop', pavilion: 'points.type.pavilion', home: 'points.type.home', other: 'points.type.other',
 };
 
+// How saved contacts appear in the form: formatted numbers, "@username"; a copy for a new point leaves Telegram empty.
+function contactsOf(source: PointDetailsView | undefined, copy = false): ContactsDraft {
+  // A new point copies no contact (§18, PO 2026-10-22): «Телефон» starts with the login number, WhatsApp empty.
+  const phone = copy ? undefined : source?.contacts.phone?.e164;
+  const whatsapp = copy ? undefined : source?.contacts.whatsapp?.e164;
+  const telegram = copy ? null : source?.contacts.telegram;
+  return { phone: phone ? formatPhone(phone) : '', whatsapp: whatsapp ? formatPhone(whatsapp) : '', telegram: telegram ? '@' + telegram : '' };
+}
+
 function browserGeoErrorKey(error: GeolocationPositionError): MessageKey {
   if (error.code === 1) return 'points.geoDenied';
   if (error.code === 2) return 'points.geoUnavailable';
@@ -33,14 +47,23 @@ type Props = {
   seller: SellerView | null;
   onSellerChange: (seller: SellerView) => void;
   autoOpenAdd?: boolean;
-  onLocationCreated?: () => void;
+  // A caller that continues elsewhere after a new point (the text list it came from) gets the point; without one the
+  // screen offers «Добавить товары в эту точку» itself (seller-ai-text-real-parser §16).
+  onLocationCreated?: (location: LocationView) => void;
+  textInputEnabled?: boolean;
   // seller-card-point-link: the editor of one existing point opens at once (from a card) and hands back to the caller.
   editLocationId?: string;
   onClose?: (result: 'saved' | 'cancelled') => void;
 };
 
-export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = false, onLocationCreated, editLocationId, onClose }: Props) {
+export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = false, onLocationCreated, textInputEnabled = false, editLocationId, onClose }: Props) {
   const { t } = useI18n();
+  const router = useRouter();
+  // The point products are about to be added to, and whether it was created just now.
+  // A point created just now gets an inline «Добавить товары в эту точку» panel (nothing is covered); the choice of
+  // manual entry or a text list opens as a sheet only when asked for.
+  const [createdPoint, setCreatedPoint] = useState<LocationView | null>(null);
+  const [addTarget, setAddTarget] = useState<{ location: LocationView; created: boolean } | null>(null);
   const ids = useId();
   const locations = seller?.locations ?? [];
   const embeddedLocation = editLocationId ? locations.find((location) => location.id === editLocationId) : undefined;
@@ -61,9 +84,14 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [details, setDetails] = useState<Map<string, PointDetailsView>>(new Map());
-  const [contacts, setContacts] = useState<ContactsDraft>({ phone: '', whatsapp: '' });
-  const [hours, setHours] = useState<OpeningHours>(templateOpeningHours);
-  const [hoursNeedsReview, setHoursNeedsReview] = useState(true);
+  const [contacts, setContacts] = useState<ContactsDraft>({ phone: '', whatsapp: '', telegram: '' });
+  // §17: once the Seller edits «Телефон» (including clearing it), nothing refills it on this form.
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [telegramSuggestion, setTelegramSuggestion] = useState<string | null>(null);
+  const [telegramError, setTelegramError] = useState<string | null>(null);
+  // §18: a point without earlier hours starts with every day «не указано»; nothing is invented.
+  const [hours, setHours] = useState<OpeningHours>(unsetOpeningHours);
+  const [hoursNeedsReview, setHoursNeedsReview] = useState(false);
   const [copiedFrom, setCopiedFrom] = useState<string | null>(null);
   // Embedded in a card: contacts and hours must arrive before the point can be saved, and going back asks when changed.
   const [formReady, setFormReady] = useState(!embedded);
@@ -94,8 +122,9 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       try {
         const response = await fetch('/api/seller/points/details', { cache: 'no-store' });
         if (!response.ok) return null;
-        const data = await response.json() as { points: PointDetailsView[] };
+        const data = await response.json() as { points: PointDetailsView[]; telegramSuggestion?: string | null };
         const loaded = new Map(data.points.map((point) => [point.locationId, point]));
+        setTelegramSuggestion(data.telegramSuggestion ?? null);
         setDetails(loaded);
         setDetailsLoaded(true);
         return loaded;
@@ -112,20 +141,22 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     if (details.has(locationId) || detailsLoaded) return details.get(locationId);
     return (await loadDetails())?.get(locationId);
   }
-  // AI-S12 · Points · List: how many cards each point shows («· 8 карточек»).
+  // seller-ai-text-real-parser §21: «Товары точки · N» — N counted by the same rule as the point's own list.
   const [cardCounts, setCardCounts] = useState<Map<string, number>>(new Map());
   const loadCardCounts = useCallback(async () => {
     try {
-      const response = await fetch('/api/seller/offers', { cache: 'no-store' });
-      if (!response.ok) return;
-      const data = await response.json() as { offers: { location: { id: string } }[] };
-      const counts = new Map<string, number>();
-      for (const offer of data.offers) counts.set(offer.location.id, (counts.get(offer.location.id) ?? 0) + 1);
-      setCardCounts(counts);
+      const [offersResponse, draftsResponse] = await Promise.all([
+        fetch('/api/seller/offers', { cache: 'no-store' }),
+        fetch('/api/seller/drafts', { cache: 'no-store' }),
+      ]);
+      if (!offersResponse.ok || !draftsResponse.ok) return;
+      const { offers } = await offersResponse.json() as { offers: SellerOfferView[] };
+      const { drafts } = await draftsResponse.json() as { drafts: OfferDraftView[] };
+      setCardCounts(new Map((seller?.locations ?? []).map((location) => [location.id, pointProducts(offers, drafts, location.id).total])));
     } catch {
       // The list works without the counts.
     }
-  }, []);
+  }, [seller]);
   const locationCount = locations.length;
   useEffect(() => {
     if (!seller || embedded) return;
@@ -139,10 +170,13 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     return () => window.clearTimeout(timer);
   }, [status]);
 
-  function fillDetails(source: PointDetailsView | undefined) {
-    setContacts({ phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' });
-    setHours(source?.openingHours ?? templateOpeningHours());
-    setHoursNeedsReview(source ? source.openingHoursNeedsReview : true);
+  // A new point copies only the hours of the previous point (point-contacts-hours §2 as revised by §18); Telegram is only offered.
+  function fillDetails(source: PointDetailsView | undefined, copy = false) {
+    setContacts(contactsOf(source, copy));
+    setPhoneTouched(false);
+    setTelegramError(null);
+    setHours(source?.openingHours ?? unsetOpeningHours());
+    setHoursNeedsReview(source ? source.openingHoursNeedsReview : false);
   }
 
   function resetForm() {
@@ -159,7 +193,7 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     // point-contacts-hours §2: a new point starts with the latest point's contacts and hours.
     const latest = locations.at(-1);
     const source = await detailsOf(latest?.id);
-    fillDetails(source);
+    fillDetails(source, true);
     setCopiedFrom(latest && source ? latest.name : null);
     setStatus('');
     setMode('add');
@@ -182,6 +216,19 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     resetForm();
     setMode('closed');
     onClose?.(result);
+  }
+
+  // §18: a NEW point's «Телефон» starts with the login number; a cleared field stays cleared.
+  useEffect(() => {
+    if (mode !== 'add' || phoneTouched || !loginPhone || contacts.phone.trim() !== '') return;
+    const timer = window.setTimeout(() => setContacts((current) => (current.phone.trim() === '' ? { ...current, phone: formatPhone(loginPhone) } : current)), 0);
+    return () => window.clearTimeout(timer);
+  }, [mode, phoneTouched, loginPhone, contacts.phone]);
+
+  function changeContacts(next: ContactsDraft) {
+    if (next.phone !== contacts.phone) setPhoneTouched(true);
+    if (next.telegram !== contacts.telegram) setTelegramError(null);
+    setContacts(next);
   }
 
   const snapshot = () => JSON.stringify({ name: name.trim(), type, addressText: addressText.trim(), addressDirectoryEntryId, contacts, hours });
@@ -223,8 +270,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         type: embeddedLocation.type,
         addressText: embeddedLocation.addressText.trim(),
         addressDirectoryEntryId: null,
-        contacts: { phone: source?.contacts.phone?.e164 ?? '', whatsapp: source?.contacts.whatsapp?.e164 ?? '' },
-        hours: source?.openingHours ?? templateOpeningHours(),
+        contacts: contactsOf(source),
+        hours: source?.openingHours ?? unsetOpeningHours(),
       }));
       setFormReady(true);
     });
@@ -250,6 +297,15 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
     }
     if (!openingHoursSchema.safeParse(hours).success) {
       setError(t('pointDetails.hoursInvalid'));
+      return;
+    }
+    let telegram: string | null;
+    try {
+      telegram = normalizeTelegramUsername(contacts.telegram);
+    } catch (problem) {
+      if (!(problem instanceof InvalidTelegramUsernameError)) throw problem;
+      setTelegramError(t(problem.reason === 'invite' ? 'pointDetails.telegramInvite' : 'pointDetails.telegramInvalid'));
+      setError(t('pointDetails.telegramFix'));
       return;
     }
 
@@ -281,13 +337,14 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       const detailsResponse = await fetch(`/api/seller/locations/${savedLocation.id}/details`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: contacts.phone.trim() || null, whatsapp: contacts.whatsapp.trim() || null, openingHours: hours }),
+        body: JSON.stringify({ phone: contacts.phone.trim() || null, whatsapp: contacts.whatsapp.trim() || null, telegram, openingHours: hours }),
       });
       if (!detailsResponse.ok) {
         const detailsError = await detailsResponse.json().catch(() => ({})) as { error?: { code?: string } };
         onSellerChange(nextSeller);
         if (mode === 'add') { setMode('edit'); setEditingId(savedLocation.id); }
-        setError(detailsError.error?.code === 'INVALID_PHONE' ? t('error.INVALID_PHONE') : t('points.saveError'));
+        if (detailsError.error?.code === 'INVALID_TELEGRAM') setTelegramError(t('pointDetails.telegramInvalid'));
+        setError(detailsError.error?.code === 'INVALID_PHONE' ? t('error.INVALID_PHONE') : detailsError.error?.code === 'INVALID_TELEGRAM' ? t('pointDetails.telegramFix') : t('points.saveError'));
         return;
       }
       const savedDetails = (await detailsResponse.json() as { point: PointDetailsView }).point;
@@ -299,7 +356,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
         : mode === 'edit' ? t('points.saved') : t('points.added'));
       const created = mode === 'add';
       closeForm('saved');
-      if (created) onLocationCreated?.();
+      if (created && onLocationCreated) onLocationCreated(savedLocation);
+      else if (created && !embedded) setCreatedPoint(savedLocation);
     } catch {
       setError(t('points.saveError'));
     } finally {
@@ -390,6 +448,15 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
   }
 
   const statusToast = status && <Toast>{status}</Toast>;
+  const addProductsSheet = addTarget && (
+    <AddProductsSheet
+      location={addTarget.location}
+      textInputEnabled={textInputEnabled}
+      onManual={() => router.push(`/seller?new=1&at=${addTarget.location.id}`)}
+      onText={() => router.push(`/seller/text-input?point=${addTarget.location.id}`)}
+      onClose={() => setAddTarget(null)}
+    />
+  );
   const errorBanner = error && (
     <div className="banner err" role="alert" style={{ padding: '10px 12px', borderRadius: 12, flexDirection: 'row', gap: 10 }}>
       <Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{error}</p>
@@ -464,7 +531,8 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
               </div>
             )}
           </div>
-          <PointContactsFields value={contacts} onChange={setContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} saved={saved} loginPhone={loginPhone} />
+          <PointContactsFields value={contacts} onChange={changeContacts} disabled={submitting} sourceName={mode === 'add' ? copiedFrom : null} saved={saved} loginPhone={loginPhone}
+            telegramSuggestion={telegramSuggestion} telegramError={telegramError} />
           {editing && (['phone', 'whatsapp'] as const).map((channel) => {
             const contact = details.get(editing.id)?.contacts[channel];
             return contact && !contact.verified ? (
@@ -542,17 +610,28 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
       ) : (
         <main className="body" style={{ gap: 10 }}>
           {errorBanner}
+          {createdPoint && locations.some((location) => location.id === createdPoint.id) && (
+            <div className="card p16 hl" style={{ gap: 8 }} role="status" data-testid="point-created-panel">
+              <div className="ts">{t('points.createdTitle', { name: createdPoint.name })}</div>
+              <p className="c c2">{t('points.addProductsHint', { name: createdPoint.name })}</p>
+              <button type="button" className="btn btn-p w" onClick={() => setAddTarget({ location: createdPoint, created: true })} data-testid="point-created-add">
+                <Ic name="plus" className="sm" />{t('points.addProducts')}
+              </button>
+              <button type="button" className="btn btn-g w" onClick={() => setCreatedPoint(null)}>{t('points.addLater')}</button>
+            </div>
+          )}
           {locations.map((location) => {
             const point = details.get(location.id);
             const channels = (['phone', 'whatsapp'] as const).filter((channel) => point?.contacts[channel]);
             const waiting = channels.some((channel) => point?.contacts[channel]?.verified === false);
             return (
-              <button key={location.id} type="button" className="card" style={{ flexDirection: 'row', gap: 12 }} onClick={() => beginEdit(location)}
+              <div key={location.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <button type="button" className="card" style={{ flexDirection: 'row', gap: 12 }} onClick={() => beginEdit(location)}
                 aria-label={t('points.editNamed', { name: location.name })} data-testid={`trading-point-${location.id}`}>
                 <div className="lic p"><Ic name="pin" /></div>
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <div className="ts">{location.name}</div>
-                  <p className="c">{t(typeLabelKeys[location.type])} · {location.addressText}{cardCounts.has(location.id) ? ` · ${t(pluralKey('points.cards', cardCounts.get(location.id)!), { count: cardCounts.get(location.id)! })}` : ''}</p>
+                  <p className="c">{t(typeLabelKeys[location.type])} · {location.addressText}</p>
                   {channels.length > 0 ? (
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                       {channels.includes('phone') && <Ic name="phone" className="xs c2" />}
@@ -569,13 +648,57 @@ export function SellerTradingPoints({ seller, onSellerChange, autoOpenAdd = fals
                 </div>
                 <Ic name="right" className="c2" />
               </button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Link className="btn btn-o sm" href={`/seller/points/${location.id}/products`} data-testid={`point-products-${location.id}`}>
+                  <Ic name="box" className="sm" />{t('points.products', { count: cardCounts.get(location.id) ?? 0 })}
+                </Link>
+                <button type="button" className="btn btn-g sm" onClick={() => setAddTarget({ location, created: false })}
+                  data-testid={`add-products-${location.id}`}>
+                  <Ic name="plus" className="sm" />{t('points.addProducts')}
+                </button>
+              </div>
+              </div>
             );
           })}
           <button type="button" className="btn btn-o w" onClick={beginAdd}><Ic name="plus" className="sm" />{t('points.add')}</button>
         </main>
       )}
       {statusToast}
+      {addProductsSheet}
       <Nav active="points" />
     </Phone>
+  );
+}
+
+// seller-ai-text-real-parser §16: products go to one named point; the existing manual editor and text list open with it
+// selected. «Готово» ends here without adding anything.
+export function AddProductsSheet({ location, textInputEnabled, onManual, onText, onClose }: {
+  location: Pick<LocationView, 'id' | 'name' | 'addressText'>;
+  textInputEnabled: boolean;
+  onManual: () => void;
+  onText: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <Sheet title={t('points.addProductsTitle', { name: location.name })} onClose={onClose}>
+      <div data-testid="add-products-sheet" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <p className="t c2">{t('points.addProductsHint', { name: location.name })}</p>
+        <p className="c">{location.addressText}</p>
+        {textInputEnabled && (
+          <button type="button" className="li card hl" onClick={onText} data-testid="add-products-text" style={{ padding: '8px 12px', flexDirection: 'row' }}>
+            <div className="lic ai"><Ic name="pencil" /></div>
+            <div className="mid"><div className="ts">{t('source.text')}</div><p className="c c2">{t('source.textHint')}</p></div>
+            <Ic name="right" className="pt" />
+          </button>
+        )}
+        <button type="button" className="li card hl" onClick={onManual} data-testid="add-products-manual" data-autofocus style={{ padding: '8px 12px', flexDirection: 'row' }}>
+          <div className="lic p"><Ic name="pencil" /></div>
+          <div className="mid"><div className="ts">{t('source.manual')}</div></div>
+          <Ic name="right" className="pt" />
+        </button>
+        <button type="button" className="btn btn-g w" onClick={onClose}>{t('points.addLater')}</button>
+      </div>
+    </Sheet>
   );
 }

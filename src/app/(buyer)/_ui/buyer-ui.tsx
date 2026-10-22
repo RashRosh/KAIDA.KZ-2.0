@@ -91,7 +91,8 @@ export function FreshPlaque({ offer, style }: { offer: SearchOffer; style?: Reac
   return <span className={`fresh fr${days}`} style={style}>{actualityText(offer.actuality.days, t)}</span>;
 }
 
-function contactName(label: 'Позвонить' | 'WhatsApp', t: ReturnType<typeof useI18n>['t']) {
+function contactName(label: 'Позвонить' | 'WhatsApp' | 'Telegram', t: ReturnType<typeof useI18n>['t']) {
+  if (label === 'Telegram') return t('offer.writeTelegram');
   return label === 'Позвонить' ? t('offer.callSeller') : t('offer.writeWhatsApp');
 }
 
@@ -108,12 +109,15 @@ export function ContactIcons({ offer }: { offer: SearchOffer }) {
           className="ct"
           href={action.href}
           aria-label={contactName(action.label, t)}
-          {...(action.label === 'WhatsApp' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          {...(action.label !== 'Позвонить' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
           {action.label === 'WhatsApp'
             // eslint-disable-next-line @next/next/no-img-element -- the mockup's official WhatsApp mark
             ? <img src="/kaida/icons/127a626f246aa48c4b8bc196e32e93a2.svg" alt="" />
-            : <Ic name="phone" />}
+            : action.label === 'Telegram'
+              // eslint-disable-next-line @next/next/no-img-element -- the mockup's official Telegram mark
+              ? <img src="/kaida/icons/24ad95a4b3664ef668a9dad80a7f425a.svg" alt="" />
+              : <Ic name="phone" />}
         </a>
       ))}
     </div>

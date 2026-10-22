@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import { locations } from '../db/locations.table';
-import type { OpeningHours } from '../hours/opening-hours';
+import { unsetOpeningHours, type OpeningHours } from '../hours/opening-hours';
 import type { LocationGeo, LocationIdentityInput, LocationType, LocationView } from '../contracts/location.contract';
 
 export type LocationDb = Pick<Database, 'insert' | 'select' | 'update'>;
@@ -50,7 +50,7 @@ export async function createLocation(
     addressText: string;
     type: LocationType;
     geo?: LocationGeo;
-    // Omitted: the database template hours, marked for review; no contacts.
+    // Omitted: no contacts and hours «не указано» for every day (seller-ai-text-real-parser §18: nothing invented).
     details?: { phoneE164: string | null; whatsappPhoneE164: string | null; openingHours: OpeningHours; openingHoursNeedsReview: boolean };
   },
 ): Promise<LocationView> {
@@ -63,7 +63,7 @@ export async function createLocation(
       type: values.type,
       latitude: values.geo?.latitude,
       longitude: values.geo?.longitude,
-      ...values.details,
+      ...(values.details ?? { openingHours: unsetOpeningHours(), openingHoursNeedsReview: false }),
     })
     .returning(locationSelection);
   const location = rows[0];
@@ -75,7 +75,9 @@ export async function listLocationsBySeller(database: LocationDb, sellerId: stri
   const rows = await database
     .select(locationSelection)
     .from(locations)
-    .where(eq(locations.sellerId, sellerId));
+    .where(eq(locations.sellerId, sellerId))
+    // Oldest first, so the last entry is the latest point — the same order the contact default uses (§18).
+    .orderBy(asc(locations.createdAt), asc(locations.id));
   return rows.map(toLocationView);
 }
 

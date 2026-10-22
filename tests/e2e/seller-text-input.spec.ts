@@ -30,6 +30,7 @@ async function cleanup(phone: string) {
       );
       await pool.query(`DELETE FROM offers WHERE seller_id IN (${bySeller})`, [row.id]);
       await pool.query(`DELETE FROM locations WHERE seller_id IN (${bySeller})`, [row.id]);
+      await pool.query('DELETE FROM seller_verified_phones WHERE seller_id IN (SELECT id FROM sellers WHERE owner_user_id=$1)', [row.id]);
       await pool.query('DELETE FROM sellers WHERE owner_user_id=$1', [row.id]);
       await pool.query('DELETE FROM auth_sessions WHERE user_id=$1', [row.id]);
     }
@@ -76,6 +77,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
@@ -102,6 +104,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
@@ -126,6 +129,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.goto('/seller');
     await page.getByRole('button', { name: 'Сформировать карточки товаров' }).click();
@@ -154,6 +158,7 @@ test.describe('seller text input', () => {
     await page.getByLabel('Тип торговой точки').selectOption('shop');
     await page.getByLabel('Адрес').fill('Алматы');
     await page.getByRole('button', { name: 'Сохранить точку' }).click();
+    await expect(page.getByTestId('point-created-panel')).toBeVisible();
 
     await page.route('**/api/seller/text-input', (route) => route.abort('failed'));
     await page.goto('/seller/text-input');

@@ -2,8 +2,11 @@ import { defineConfig } from '@playwright/test';
 import { NEARBY_RADIUS_METERS_DEFAULT } from './src/modules/discovery/config/discovery.config';
 import { testDatabaseUrl } from './tests/integration/database';
 import { returningVisitorState } from './tests/e2e/browser-state';
+import { REAL_PARSER_E2E_PHONES, REPLAY_STUB_PORT } from './tests/e2e/real-parser-e2e';
 
 const identityTestSecret = '1111111111111111111111111111111111111111111111111111111111111111';
+// seller-ai-text-real-parser: test-only key of the loopback replay stub (never used outside E2E).
+const replayStubKey = 'e2e-replay-stub-key-0000000000000000000000';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -26,15 +29,24 @@ export default defineConfig({
     { name: 'desktop', use: { browserName: 'chromium', viewport: { width: 1440, height: 900 } } },
   ],
   // Two instances of one build: the default with the comment translator off (every existing flow must pass that
-  // way) and one with the deterministic fake translator for seller-comment-translation.spec.ts.
-  webServer: [false, true].map((translatorOn) => ({
+  // way) and one with the deterministic fake translator for seller-comment-translation.spec.ts. The second one also
+  // runs seller text input in `real` mode against the loopback REPLAY stub (saved C2 answers, not a model) for
+  // seller-text-real-parser.spec.ts; only the allowlisted test phones see it, everyone else sees it off.
+  webServer: [...[false, true].map((translatorOn) => ({
     command: `pnpm start --hostname 127.0.0.1 --port ${translatorOn ? 3101 : 3100}`,
     url: `http://127.0.0.1:${translatorOn ? 3101 : 3100}`,
     reuseExistingServer: false,
     timeout: 120000,
     env: {
       SELLER_COMMENT_TRANSLATOR: translatorOn ? 'fake' : 'off',
-      SELLER_TEXT_INPUT: translatorOn ? 'off' : 'fake',
+      SELLER_TEXT_INPUT: translatorOn ? 'real' : 'fake',
+      ...(translatorOn ? {
+        SELLER_TEXT_PARSER_URL: `http://127.0.0.1:${REPLAY_STUB_PORT}`,
+        SELLER_TEXT_PARSER_API_KEY: replayStubKey,
+        SELLER_TEXT_PARSER_TIMEOUT_MS: '10000',
+        SELLER_TEXT_PARSER_CONCURRENCY: '4',
+        SELLER_TEXT_INPUT_ALLOWLIST: REAL_PARSER_E2E_PHONES.join(','),
+      } : {}),
       DATABASE_URL: testDatabaseUrl(),
       NEARBY_RADIUS_METERS: String(NEARBY_RADIUS_METERS_DEFAULT),
       IDENTITY_OTP_TTL_SECONDS: '300',
@@ -51,5 +63,11 @@ export default defineConfig({
       WEB_PUSH_VAPID_PRIVATE_KEY: 'YSEabg270nHHi3ihJu2Pytv1hlIGROYZwnynExHsg7U',
       WEB_PUSH_SUBJECT: 'mailto:e2e@kaida.invalid',
     },
-  })),
+  })), {
+    command: `pnpm exec tsx tests/support/c2-replay-stub-server.ts ${REPLAY_STUB_PORT}`,
+    url: `http://127.0.0.1:${REPLAY_STUB_PORT}/__stats`,
+    reuseExistingServer: false,
+    timeout: 60000,
+    env: { STUB_PARSER_API_KEY: replayStubKey },
+  }],
 });

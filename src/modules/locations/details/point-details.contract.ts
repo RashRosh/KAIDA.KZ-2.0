@@ -6,6 +6,8 @@ import { openingHoursSchema, type OpeningHours } from '../hours/opening-hours';
 export const pointDetailsInputSchema = z.object({
   phone: z.string().trim().max(32).nullable(),
   whatsapp: z.string().trim().max(32).nullable(),
+  // §17: username, @username or a t.me link; normalized server-side; null clears it. Omitted (older clients) keeps it.
+  telegram: z.string().trim().max(200).nullable().optional(),
   openingHours: openingHoursSchema,
 }).strict();
 
@@ -20,7 +22,7 @@ export type PointContactView = { e164: string; verified: boolean };
 
 export type PointDetailsView = {
   locationId: string;
-  contacts: { phone: PointContactView | null; whatsapp: PointContactView | null };
+  contacts: { phone: PointContactView | null; whatsapp: PointContactView | null; telegram: string | null };
   openingHours: OpeningHours;
   openingHoursNeedsReview: boolean;
 };

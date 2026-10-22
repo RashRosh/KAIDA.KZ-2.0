@@ -91,8 +91,17 @@ test('the preview from the editor: new card, several points, edit; private, iner
     const interest: string[] = [];
     page.on('request', (item) => { if (item.url().includes('/api/interests')) interest.push(item.url()); });
     await open.click();
+    // seller-ai-text-real-parser §20: «Предпросмотр карточки», a compact status, the buyer card right below, no
+    // «Без фото · Без комментария» line, the week behind an explicit disclosure, contacts inert with a note outside the card.
     const note = page.getByRole('note');
-    await expect(note).toContainText('Покупатели этого пока не видят');
+    await expect(note).toHaveText(/^Черновик · Покупатели пока не\sвидят$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Предпросмотр карточки' })).toBeVisible();
+    await expect(page.getByText(/Без фото · Без комментария/)).toHaveCount(0);
+    const schedule = page.getByTestId('preview-schedule');
+    await expect(schedule).not.toHaveAttribute('open', /.*/);
+    await schedule.locator('summary').click();
+    await expect(schedule).toHaveAttribute('open', '');
+    await expect(page.getByTestId('preview-actions')).toContainText('кнопки связи');
     await expect(page.getByTestId('card-preview').getByRole('heading', { level: 1 })).toHaveText(`Предпросмотр новая ${tag}`);
     await expect(page.getByTestId('card-preview')).toContainText('Свежая партия');
     await expect(page.getByTestId('card-preview').getByText(/1\s?200\s?₸/).first()).toBeVisible();
@@ -102,7 +111,7 @@ test('the preview from the editor: new card, several points, edit; private, iner
     expect(page.url()).not.toContain('preview:');
 
     // back to the editor by the button: what was typed is still there; nothing was saved
-    await note.getByRole('button', { name: 'Вернуться к редактированию' }).click();
+    await page.getByTestId('preview-actions').getByRole('button', { name: 'Редактировать' }).click();
     await expect(editor.getByRole('combobox', { name: 'Название товара' })).toHaveValue(`Предпросмотр новая ${tag}`);
     await expect(editor.getByRole('textbox', { name: 'Цена', exact: true })).toHaveValue('1200');
     expect(await offerCount(phone)).toBe(before);
@@ -133,6 +142,25 @@ test('the preview from the editor: new card, several points, edit; private, iner
     await expect(editor.getByTestId('preview-open')).toBeVisible();
     expect(await offerCount(phone)).toBe(before);
 
+    // «Перейти к публикации» is the editor's own path into the explicit confirmation; nothing is published yet
+    await open.click();
+    await page.getByTestId('preview-publish').click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+/);
+    expect(await offerCount(phone)).toBe(before);
+
+    // incomplete: no unit — the preview says what is missing and offers «Дополнить карточку» back to the editor
+    await page.goto('/seller?new=1');
+    const incomplete = offerEditor(page);
+    await fillOfferFields(page, { product: `Предпросмотр без единицы ${tag}`, price: '700' });
+    await choosePoints(page, [points[0]!]);
+    await incomplete.getByTestId('preview-open').click();
+    await expect(page.getByTestId('preview-problems')).toContainText('Чтобы опубликовать, заполните:');
+    await expect(page.getByTestId('preview-publish')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Дополнить карточку' }).click();
+    await expect(incomplete.getByRole('combobox', { name: 'Название товара' })).toHaveValue(`Предпросмотр без единицы ${tag}`);
+    await expect(incomplete.locator('.emsg').first()).toBeVisible();
+    expect(await offerCount(phone)).toBe(before);
+
     // the synthetic id has no address of its own
     await page.goto('/offers/preview:0');
     await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
@@ -143,7 +171,7 @@ test('the preview from the editor: new card, several points, edit; private, iner
     const edit = offerEditor(page);
     await edit.getByRole('textbox', { name: 'Цена', exact: true }).fill('9900');
     await edit.getByTestId('preview-open').click();
-    await expect(page.getByRole('note')).toContainText('Покупатели видят прежнюю версию');
+    await expect(page.getByRole('note')).toContainText('видят прежнюю версию');
     await expect(page.getByTestId('card-preview').getByText(/9\s?900\s?₸/).first()).toBeVisible();
     const real = await (await page.request.get(`/api/search?q=${encodeURIComponent(existing.title)}`)).json();
     expect(Number(real.offers.find((item: { id: string }) => item.id === existing.offer).price.amount)).toBe(4500);
@@ -155,7 +183,7 @@ test('the preview from the editor: new card, several points, edit; private, iner
     const kk = offerEditor(page);
     await kk.getByRole('textbox', { name: /^Баға/ }).fill('9900');
     await kk.getByTestId('preview-open').click();
-    await expect(page.getByRole('note')).toContainText('Өзгерістерді алдын ала қарау');
+    await expect(page.getByRole('note')).toContainText('Өзгерістер');
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally {
