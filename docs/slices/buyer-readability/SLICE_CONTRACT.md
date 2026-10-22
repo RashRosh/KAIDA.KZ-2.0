@@ -1,7 +1,8 @@
 # Buyer readability — point, address and seller lines — Slice Contract
 
-**Status:** DRAFT — for Product Owner review. Not approved; implementation not authorized (`PROJECT_RULES.md` §2, §3).
-Needs the PO decisions of §8 and a separate PO instruction to implement.
+**Status:** APPROVED — IMPLEMENTATION AUTHORIZED (Product Owner, 2026-10-22, contract at `e7796ee9` in PR #193, with
+the decisions D1–D3 recorded in §8.1). No merge, checkpoint tag or production enablement without a further PO
+instruction.
 
 **Queue:** B-READABILITY, item 9 of the PO-approved order of 2026-10-13. Order and state are owned by
 `docs/product/EXECUTION_PLAN.md`.
@@ -128,6 +129,13 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
   font-size setting and stay usable at 200 % text (§3 items 3 and 5); the card may grow vertically. No promise for
   every phone's system text-size setting; unsupported behavior is recorded as a limitation. Alternative: fixed 14 px
   (lines do not follow the browser setting).
+
+### 8.1 PO decisions (2026-10-22)
+
+- **D1:** 14 px font size and 20 px line height at the default browser font size; colour `--ink2` (`#615b64`).
+- **D2:** the documented deviation from B01 / B02 for the lines of §3 is approved; it is recorded in the mockup README.
+- **D3:** browser font-size support and enlargement to 200 % approved with the revised AC 7 and §11; device /
+  system-setting checks stay separately attributed from automated evidence.
 
 ## 9. Acceptance criteria
 
