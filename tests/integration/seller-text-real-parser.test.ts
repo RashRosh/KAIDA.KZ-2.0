@@ -113,6 +113,25 @@ describe('real parser, replay mode: drafts', () => {
     expect(stub.calls).toBe(1);
   });
 
+  it('an out-of-stock mention of an already published offer: listed with its reason, no draft, the offer unchanged', async () => {
+    // §6.3 / acceptance 2026-10-22 («пельменей сегодня нет» next to a published card): the mention is only listed under
+    // «Не распознано»; it creates no available-product draft and never touches existing offers.
+    const sellerId = await sellerFor(A);
+    const locationId = (await pool.query('SELECT id FROM locations WHERE seller_id=$1', [sellerId])).rows[0].id as string;
+    await pool.query(`INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,title,title_search,card_id)
+      VALUES ($1,$2,$3,'570','KZT','active',now(),'Морковь','морковь',$4)`, [null, sellerId, locationId, randomUUID()]);
+    const offerBefore = (await pool.query('SELECT * FROM offers WHERE seller_id=$1', [sellerId])).rows;
+
+    const result = await applySellerTextInput(A, 'Есть редис, виноград и яблоки. Моркови нет в наличии.', deps());
+
+    const outOfStock = result.skipped.filter((item) => /морков/i.test(item.label));
+    expect(outOfStock).toHaveLength(1);
+    expect(outOfStock[0]!.reason).toBe('Отметка «нет в наличии» — измените карточку вручную');
+    expect(result.drafts.map((d) => d.payload.title).filter((title) => /морков/i.test(title))).toEqual([]);
+    expect((await pool.query('SELECT * FROM offers WHERE seller_id=$1', [sellerId])).rows).toEqual(offerBefore);
+    expect(await count('offers', A.id)).toBe(1);
+  });
+
   it('ambiguous catalog title: no automatic choice, productId null and a notice', async () => {
     await sellerFor(A);
     const first = randomUUID();
