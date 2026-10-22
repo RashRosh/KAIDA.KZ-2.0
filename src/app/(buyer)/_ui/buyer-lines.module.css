@@ -1,5 +1,7 @@
 /* buyer-readability (D1–D3): where the offer is — point, address · distance, seller — on the result card, the offer
    page and the unavailable Favourites card. 14/20 px at the default browser font size, in rem so the browser's
    font-size setting and 200 % text enlarge it; --ink2. Replaces the mockup's 13 px `.c` on these lines only
-   (approved deviation from B01/B02); `kaida.css` stays the verbatim mockup port. */
-.line { margin: 0; font-family: var(--sans); font-weight: 400; font-size: 0.875rem; line-height: 1.25rem; color: var(--ink2); overflow-wrap: break-word; }
+   (approved deviation from B01/B02); `kaida.css` stays the verbatim mockup port. `anywhere` (not `break-word`) also
+   lowers the min-content width, so a long word inside a flex row (icon + seller name) wraps instead of overflowing
+   at 200 %; where words fit, wrapping is by words as before. */
+.line { margin: 0; font-family: var(--sans); font-weight: 400; font-size: 0.875rem; line-height: 1.25rem; color: var(--ink2); overflow-wrap: anywhere; }

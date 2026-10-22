@@ -166,6 +166,13 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     for (let index = 0; index < 3; index++) await expectReadable(unavailable.nth(index));
     await expectUsable(page);
     await shot('favourites-unavailable-360-ru');
+    // the seller line is a flex row (icon + name): at 200 % a long word must still wrap inside the narrow card
+    await page.addStyleTag({ content: 'html{font-size:200% !important}' });
+    await expectReadable(unavailable.nth(2), '28px', '40px');
+    for (const width of [360, 320]) {
+      await page.setViewportSize({ width, height: 800 });
+      await expectUsable(page);
+    }
     await page.unroute('**/api/favourites?locale=*');
 
     // ---- seller screens keep the mockup's `.c` (13/18 px, --ink3) ----
