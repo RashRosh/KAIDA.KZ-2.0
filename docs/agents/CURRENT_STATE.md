@@ -6,5 +6,5 @@
 - Known limitations: omissions inside one sentence (especially unpriced items) are not detected by code; positional binding can attach a price/unit to the wrong item; evidence is 28 synthetic messages; one request slot; retry protection 24 h. Deferred: «Не распознано» entries look card-like; minor run 3 observations; KK strings provisional.
 - Infrastructure: acceptance stand stopped; temporary Modal app stopped and its secret deleted (spend limit $0); acceptance DB dumps in `C:\dev\KAIDA-backups\seller-ai-text-real-parser-2026-10-22\` (outside Git).
 - Open decisions: D-2 model licence confirmation before production; D-4 Kazakhstan deployment. Follow-up `S-TEXT-AVAILABILITY` (EXECUTION_PLAN §5.3) — planning only.
-- Current task: none.
-- Next action: **B-READABILITY** (EXECUTION_PLAN item 9) needs its own contract approved by PO and a separate PO instruction.
+- Current task: **B-READABILITY** contract DRAFT `docs/slices/buyer-readability/SLICE_CONTRACT.md` on branch `docs/b-readability-contract` (docs-only PR); no application changes.
+- Next action: PO reviews the contract and decides D1 (values), D2 (deviation from mockup B01/B02), D3 (follow text size). Implementation only after approval and a separate PO instruction.
