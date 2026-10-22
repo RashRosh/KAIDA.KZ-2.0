@@ -136,6 +136,10 @@ No business, data, privacy or API contract is touched (`PROJECT_RULES.md` §18.2
 - **D2:** the documented deviation from B01 / B02 for the lines of §3 is approved; it is recorded in the mockup README.
 - **D3:** browser font-size support and enlargement to 200 % approved with the revised AC 7 and §11; device /
   system-setting checks stay separately attributed from automated evidence.
+- **Acceptance procedure (later the same day):** PO accepted the ordinary-size appearance and allowed the agent to perform
+  the 200 % check in a real browser (named browser and setting), the unavailable Favourites entry and the seller's buyer
+  preview, attributed to the agent (`ACCEPTANCE.md`). Phone-specific and system-font-setting behaviour may stay
+  unverified and is documented as a limitation.
 
 ## 9. Acceptance criteria
 

@@ -9,6 +9,7 @@ import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { Bar, Ic } from '../../seller/_kaida/ui';
 import { BuyerScreen, ResultCard, ResultSkeletons } from '../_ui/buyer-ui';
 import { FavouriteHeart } from '../_ui/FavouriteHeart';
+import lines from '../_ui/buyer-lines.module.css';
 import { useFavourites } from '../_ui/use-favourites';
 
 function UnavailableCard({ entry }: { entry: Extract<Favourite, { state: 'unavailable' }> }) {
@@ -23,11 +24,11 @@ function UnavailableCard({ entry }: { entry: Extract<Favourite, { state: 'unavai
       </div>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <h3 className="h3 clamp2" style={{ fontSize: 16, lineHeight: '21px', margin: 0 }} id={`saved-${entry.id}`}>{entry.title}</h3>
-        <p className="c c2" style={{ marginTop: 4 }}>{t('fav.unavailable')}</p>
-        <p className="c c2" style={{ marginTop: 2 }}>{entry.pointName}</p>
+        <p className={lines.line} style={{ marginTop: 4 }} data-testid="unavailable-line">{t('fav.unavailable')}</p>
+        <p className={lines.line} style={{ marginTop: 2 }} data-testid="unavailable-line">{entry.pointName}</p>
       </div>
     </div>
-    <p className="c c2" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Ic name="store" className="sm" />{entry.sellerName}</p>
+    <p className={lines.line} style={{ display: 'flex', alignItems: 'center', gap: 6 }} data-testid="unavailable-line"><Ic name="store" className="sm" />{entry.sellerName}</p>
   </article>;
 }
 

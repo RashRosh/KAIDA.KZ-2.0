@@ -13,6 +13,7 @@ import { formatAmount } from '../../_components/format-amount';
 import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
 import { OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { Ic, Phone } from '../../seller/_kaida/ui';
+import lines from './buyer-lines.module.css';
 
 // buyer-screens-mockup: the buyer app frame and the result card of the accepted mockup (B01), from its own classes.
 
@@ -177,8 +178,8 @@ export function ResultCard({ offer, distanceMeters, detailHref, onOpen }: { offe
             <Link href={detailHref ?? `/offers/${offer.id}`} className="stretch" onClick={() => { openedFromList = true; onOpen?.(); }}>{offer.product.name}</Link>
           </h3>
           <PriceLine offer={offer} />
-          <p className="c c2" style={{ marginTop: 2 }}>{offer.location.name}</p>
-          {place && <p className="c">{place}</p>}
+          <p className={lines.line} style={{ marginTop: 2 }} data-testid="card-point">{offer.location.name}</p>
+          {place && <p className={lines.line} data-testid="card-place">{place}</p>}
         </div>
       </div>
       {/* card-opening-hours: only the status, on its own full-width line; the schedule is on the Offer page. */}

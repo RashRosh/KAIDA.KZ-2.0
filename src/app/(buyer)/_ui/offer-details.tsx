@@ -7,6 +7,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { OpeningSchedule, OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { Ic } from '../../seller/_kaida/ui';
 import { ContactIcons, FreshPlaque, PriceLine, RouteButton } from './buyer-ui';
+import lines from './buyer-lines.module.css';
 
 // buyer-screens-mockup · B02 offer detail, as ONE component: gallery (or neutral fallback, or a photo error that keeps the data),
 // the actuality plaque, name, pack, price, the seller comment, the point block with route and contacts, the seller. The buyer's
@@ -144,7 +145,7 @@ export function OfferDetails({ offer, back, inert = false, titleAction, footer, 
             <Ic name="pin" className="pt" />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <div className="ts">{offer.location.name}</div>
-              <p className="c">{offer.location.addressText}</p>
+              <p className={lines.line} data-testid="offer-address">{offer.location.addressText}</p>
             </div>
           </div>
           <div>
@@ -163,7 +164,7 @@ export function OfferDetails({ offer, back, inert = false, titleAction, footer, 
             <ContactIcons offer={offer} />
           </div>
         </div>
-        <p className="c" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Ic name="store" className="sm c2" />{offer.seller.displayName}</p>
+        <p className={lines.line} style={{ display: 'flex', alignItems: 'center', gap: 6 }} data-testid="offer-seller"><Ic name="store" className="sm c2" />{offer.seller.displayName}</p>
         {footer}
       </article>
     </>
