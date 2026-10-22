@@ -1,0 +1,484 @@
+{
+  "chrome": "155.0.8059.80 (официальная сборка) (64 бит) (cohort: Stable)",
+  "setting": "chrome://settings/fonts «Размер шрифта» = 32 (default 16 → 200 %)",
+  "results": [
+    {
+      "label": "chrome-200-ru-360 card",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 4,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-ru-360 offer",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 4,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "BUTTON",
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-ru-360 favourites",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 5,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 6,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-kk-360 card",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 4,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-kk-360 offer",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 4,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "BUTTON",
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-kk-360 favourites",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 5,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 6,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-ru-320 card",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 4,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "320×720"
+    },
+    {
+      "label": "chrome-200-ru-320 offer",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 4,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "BUTTON",
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "320×720"
+    },
+    {
+      "label": "chrome-200-ru-320 favourites",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 5,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 6,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "320×720"
+    },
+    {
+      "label": "chrome-200-kk-320 card",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 4,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "320×720"
+    },
+    {
+      "label": "chrome-200-kk-320 offer",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 4,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "BUTTON",
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "320×720"
+    },
+    {
+      "label": "chrome-200-kk-320 favourites",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 5,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 6,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "320×720"
+    },
+    {
+      "label": "chrome-200-ru-window card",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 4,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "1267×751"
+    },
+    {
+      "label": "chrome-200-ru-window offer",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 4,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "BUTTON",
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "1267×751"
+    },
+    {
+      "label": "chrome-100-ru-360 card",
+      "ok": true,
+      "root": "16px",
+      "lineStyles": [
+        "14px/20px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 4,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-100-ru-360 offer",
+      "ok": true,
+      "root": "16px",
+      "lineStyles": [
+        "14px/20px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 4,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "BUTTON",
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-100-ru-360 favourites",
+      "ok": true,
+      "root": "16px",
+      "lineStyles": [
+        "14px/20px"
+      ],
+      "lines": 5,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 6,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-100-seller seller .c",
+      "ok": true,
+      "sellerC": "13px/18px/rgb(110, 104, 113)"
+    },
+    {
+      "label": "chrome-100-seller buyer preview",
+      "ok": true,
+      "root": "16px",
+      "lineStyles": [
+        "14px/20px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    },
+    {
+      "label": "chrome-200-seller seller .c",
+      "ok": true,
+      "sellerC": "13px/18px/rgb(110, 104, 113)"
+    },
+    {
+      "label": "chrome-200-seller buyer preview",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "lines": 2,
+      "pageNoHScroll": true,
+      "clippedLines": 0,
+      "overlaps": [],
+      "actions": 3,
+      "badActions": 0,
+      "clickable": 5,
+      "coveredActions": 0,
+      "coveredList": [],
+      "actionHrefs": [
+        "/api/offers/37aa180d-c56b-4e1a-b708-d1a3b81d2eca/route",
+        "tel:+77001234567",
+        "https://wa.me/77001234567"
+      ],
+      "viewport": "360×800"
+    }
+  ],
+  "nearby": [
+    {
+      "label": "chrome-200-ru-360-nearby",
+      "ok": true,
+      "root": "32px",
+      "lineStyles": [
+        "28px/40px"
+      ],
+      "clipped": 0,
+      "noHScroll": true,
+      "smallActions": 0
+    },
+    {
+      "label": "chrome-100-ru-360-nearby",
+      "ok": true,
+      "root": "16px",
+      "lineStyles": [
+        "14px/20px"
+      ],
+      "clipped": 0,
+      "noHScroll": true,
+      "smallActions": 0
+    }
+  ],
+  "note": "Agent check in installed Google Chrome on Windows 11; not a phone; not PO acceptance. Width 360/320 via viewport emulation in the same Chrome."
+}
