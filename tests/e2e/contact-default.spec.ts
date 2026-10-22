@@ -193,11 +193,13 @@ test('a new point starts with the login number, never the previous point\'s phon
   try {
     // (C) two points, the latest has another phone: «Добавить» still starts with the login number (§18, PO 2026-10-22).
     await login(page, copyPhone);
-    await seedSeller(copyPhone, [['Первая', null, null], ['Вторая', '+77010008399', null]]);
+    await seedSeller(copyPhone, [['Первая', null, null], ['Вторая', '+77010008399', '+77010008398']]);
     await page.goto('/seller/points');
     await page.getByRole('button', { name: 'Добавить торговую точку' }).click();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt(copyPhone));
-    await expect(page.getByText(/^Контакты и режим работы как у точки «Вторая»/)).toBeVisible();
+    // WhatsApp is never copied from another point (§18, PO 2026-10-22); only the hours are.
+    await expect(page.getByLabel('WhatsApp', { exact: true })).toHaveValue('');
+    await expect(page.getByText(/^Режим работы как у точки «Вторая»/)).toBeVisible();
     await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
     // The field holds the login number, so its notice shows; WhatsApp is empty, so «same number» is offered.
     await expect(page.getByText(NOTICE_PHONE, { exact: true })).toBeVisible();
@@ -206,6 +208,7 @@ test('a new point starts with the login number, never the previous point\'s phon
     await page.getByRole('button', { name: 'Отмена' }).click();
     await page.getByRole('button', { name: 'Изменить торговую точку Вторая' }).click();
     await expect(page.getByLabel('Телефон', { exact: true })).toHaveValue(fmt('+77010008399'));
+    await expect(page.getByLabel('WhatsApp', { exact: true })).toHaveValue(fmt('+77010008398'));
     await expect(page.getByTestId('chip-login-number')).toHaveCount(0);
     await page.getByRole('button', { name: 'Отмена' }).click();
 

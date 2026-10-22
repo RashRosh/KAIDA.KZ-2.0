@@ -501,6 +501,7 @@ explicitly before implementation. These are revisions recorded here; the closed 
 | Closed decision | Revised to (PO 2026-10-21) |
 |---|---|
 | contact-default Q2/Q3 «no prefill» | A **new** point prefills «Телефон» with the verified login number (PO 2026-10-22; replaces «previous point, else login» of 2026-10-21). The Seller may clear it; a cleared field is never refilled. Existing points are never changed. |
+| point-contacts-hours §2 «a new point copies the previous point's contacts» | A new point copies no contact: «Телефон» starts with the login number, WhatsApp starts empty (PO 2026-10-22). Only the hours are copied. |
 | point-contacts-hours D2 «Telegram later, via a KAIDA bot» | Telegram per point now, **public when saved**, without bot verification. |
 | point-contacts-hours first-point template Mon–Fri 09:00–18:00 | A new point starts with every day «Не указано». KAIDA never invents hours. |
 | seller-showcase-editor post-publication highlight; post-publication-buyer-preview decision B (action on the highlighted row) | No lasting highlight. A short success message carries «Как видят покупатели». |
@@ -516,9 +517,10 @@ strings were added together.
   field starts empty. After the Seller edits or clears the field, it is never refilled. Editing an existing point
   shows what the point holds and never writes a default into it. All numbers display in one format
   (`+7 7xx xxx xx xx`); comparisons use the canonical E.164 form.
-- **WhatsApp.** Besides the previous point's saved WhatsApp, which a new point copies together with the hours
-  (point-contacts-hours §2, unchanged), it is filled only by the explicit action «Использовать этот же номер». It is
-  never derived from «Телефон» silently.
+- **WhatsApp.** A new point's WhatsApp starts empty. It is filled only by the explicit action «Использовать этот же
+  номер» or by manual entry, and is never copied from another point (PO 2026-10-22; this revises point-contacts-hours
+  §2, which copied it). A new point copies only the previous point's hours, and its note says so: «Режим работы как у
+  точки «…»». Existing points keep their saved WhatsApp.
 - **Telegram.** The field is optional, one per point. It accepts `name`, `@name`, `t.me/name`, `telegram.me/name` and
   `telegram.dog/name`, and stores only the lowercase username (5–32 characters, `[a-z0-9_]`, starting with a letter).
   It rejects invite links (`+…`, `joinchat/`), `c/` and `s/` paths, extra path segments and any other URL, with a

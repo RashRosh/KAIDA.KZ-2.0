@@ -2,8 +2,8 @@ import { InvalidPhoneError, normalizeKzPhone } from '@/modules/identity/phone/no
 
 // contact-default §4 as revised by seller-ai-text-real-parser §17–§18 (PO 2026-10-21, 2026-10-22): a NEW point's
 // «Телефон» starts with the login number; the Seller may change or clear it, and a cleared field is never refilled.
-// Existing points are never prefilled. Beyond the previous point's saved WhatsApp (point-contacts-hours §2), WhatsApp
-// and Telegram are only filled by an explicit tap.
+// Existing points are never prefilled. WhatsApp starts empty and is filled only by «Использовать этот же номер» or by
+// hand; Telegram only by hand or the offered username. Nothing is copied from another point.
 
 export type ContactsDraft = { phone: string; whatsapp: string; telegram: string };
 
