@@ -80,6 +80,14 @@ export async function listLiveSubmissions(db: Db, sellerId: string, now: Date, l
     .limit(limit);
 }
 
+// text-availability §4.1 item 5: remember a switch-off proposal made from this review (bookkeeping only).
+export async function recordAvailabilityChangeSet(db: Pick<Database, 'execute'>, key: SubmissionKey, changeSetId: string): Promise<void> {
+  await db.execute(sql`
+    UPDATE seller_text_submissions
+    SET result = jsonb_set(result, '{availabilityChangeSetIds}', COALESCE(result->'availabilityChangeSetIds', '[]'::jsonb) || to_jsonb(${changeSetId}::text))
+    WHERE seller_id = ${key.sellerId} AND request_id = ${key.requestId} AND status = 'succeeded'`);
+}
+
 // Called by the confirm step before it removes a published draft: bookkeeping only, publication is unchanged.
 export async function recordPublishedTextDraft(db: Pick<Database, 'execute'>, sellerId: string, draftId: string): Promise<void> {
   await db.execute(sql`

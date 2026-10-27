@@ -116,8 +116,8 @@ paths and can be verified separately inside one review.
      «Открыть подтверждение».
 5. **Proposal endpoint:** `POST /api/seller/text-input/{inputId}/availability`. Body: for each statement the Seller
    acted on, its index, the candidates **as shown** (offer ID + `revision`) and the ticked offer IDs. Owner only
-   (unknown or foreign `inputId` → the existing 404). In **one transaction**, with the candidate offers locked, the
-   server recomputes each statement's candidates from current data and compares them with what was shown:
+   (unknown or foreign `inputId` → the existing 404). In **one transaction** the server recomputes each statement's
+   candidates from current data and compares them with what was shown:
    - same offers, same revisions, ticked offers still selectable → creates **one** change set of `deactivate_offer`
      items through the existing batch creation service, with `expectedOfferRevision` = the revision the Seller saw;
      records the change-set id in the submission record (bookkeeping only, as slice 2 §16 does for published drafts);
@@ -131,6 +131,13 @@ paths and can be verified separately inside one review.
    increments it. Changes that do not write the offer (time moving a card to the archived stage, a new card at the
    point) are caught by comparing the candidate set. Statuses «Ждёт подтверждения» / «Выключено по этому списку» are
    derived from the recorded change sets and current offers; nothing else is stored.
+
+   **Exact guarantee (implementation clarification, PO instruction 2026-10-27: no stronger guarantee than needed).**
+   No row is locked. The comparison is a consistency check at proposal time; when the proposal is created each chosen
+   offer is re-read and must still have the revision the Seller saw, otherwise nothing is created (409). A card
+   committed by another request after the comparison is not seen by it — locking existing rows would not prevent that
+   either — and it cannot affect the chosen offers. Correct confirmation of the chosen offers rests on the existing
+   confirm guard (`expectedOfferRevision`), which refuses any change made after the proposal.
 6. **Mixed input:** new-product drafts and availability proposals come from one submission and appear on one review.
    They are independent: publishing a draft does not switch anything off; confirming availability does not publish
    drafts.

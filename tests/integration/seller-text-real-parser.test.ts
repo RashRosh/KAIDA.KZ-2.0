@@ -113,9 +113,9 @@ describe('real parser, replay mode: drafts', () => {
     expect(stub.calls).toBe(1);
   });
 
-  it('an out-of-stock mention of an already published offer: listed with its reason, no draft, the offer unchanged', async () => {
-    // §6.3 / acceptance 2026-10-22 («пельменей сегодня нет» next to a published card): the mention is only listed under
-    // «Не распознано»; it creates no available-product draft and never touches existing offers.
+  it('an out-of-stock mention of an already published offer: a statement with that card, no draft, the offer unchanged', async () => {
+    // Revised by text-availability (D-A): the mention is a «Нет в наличии» statement whose candidate is the published
+    // card; it creates no available-product draft and changes no offer before an explicit confirmation.
     const sellerId = await sellerFor(A);
     const locationId = (await pool.query('SELECT id FROM locations WHERE seller_id=$1', [sellerId])).rows[0].id as string;
     await pool.query(`INSERT INTO offers (product_id,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at,title,title_search,card_id)
@@ -124,9 +124,9 @@ describe('real parser, replay mode: drafts', () => {
 
     const result = await applySellerTextInput(A, 'Есть редис, виноград и яблоки. Моркови нет в наличии.', deps());
 
-    const outOfStock = result.skipped.filter((item) => /морков/i.test(item.label));
-    expect(outOfStock).toHaveLength(1);
-    expect(outOfStock[0]!.reason).toBe('Отметка «нет в наличии» — измените карточку вручную');
+    expect(result.skipped.filter((item) => /морков/i.test(item.label))).toEqual([]);
+    expect(result.availability.map((view) => [view.sourceQuote, view.variant.state, view.candidates.map((c) => [c.title, c.status])]))
+      .toEqual([['Моркови нет в наличии', 'none', [['Морковь', 'live']]]]);
     expect(result.drafts.map((d) => d.payload.title).filter((title) => /морков/i.test(title))).toEqual([]);
     expect((await pool.query('SELECT * FROM offers WHERE seller_id=$1', [sellerId])).rows).toEqual(offerBefore);
     expect(await count('offers', A.id)).toBe(1);

@@ -10,6 +10,7 @@ import {
   BatchOfferConflictError,
   LocationNotFoundError,
   OfferAlreadyInactiveError,
+  OfferChangedError,
   OfferNotFoundError,
   OfferPriceRequiredError,
   OfferUpdateNoChangesError,
@@ -158,6 +159,46 @@ async function prepareItem(
     targetOfferId: offer.id,
     expectedOfferRevision: offer.revision,
   };
+}
+
+// text-availability §4.1 item 5: one proposal switching off the offers the Seller ticked, inside the caller's
+// transaction. Each item expects the revision the Seller saw; an offer that changed since then is refused here, and the
+// existing confirm guard refuses any later change. No row is locked: nothing stronger is needed for a correct confirm.
+export async function createDeactivationChangeSet(
+  tx: Parameters<typeof findOwnedLocation>[0],
+  sellerId: string,
+  targets: { offerId: string; expectedRevision: number }[],
+): Promise<string> {
+  const items = targets.map((target) => ({ action: 'deactivate_offer' as const, offerId: target.offerId }));
+  assertNoBatchOfferConflicts(items);
+  const prepared: PreparedManagementItem[] = [];
+  for (const [index, item] of items.entries()) {
+    let next: PreparedItem;
+    try {
+      next = await prepareItem(tx, sellerId, item);
+    } catch (error) {
+      if (error instanceof OfferAlreadyInactiveError) throw new OfferChangedError();
+      throw error;
+    }
+    if (next.action === 'create_offer' || next.expectedOfferRevision !== targets[index]!.expectedRevision) throw new OfferChangedError();
+    prepared.push(next);
+  }
+  const changeSet = await createChangeSet(tx, sellerId);
+  for (const item of prepared) {
+    await createOfferManagementChangeItem(tx, {
+      changeSetId: changeSet.id,
+      action: item.action,
+      card: item.card,
+      locationId: item.locationId,
+      priceAmount: item.priceAmount,
+      priceCurrency: item.priceCurrency,
+      priceUnit: item.priceUnit,
+      sellerComment: item.sellerComment,
+      targetOfferId: item.targetOfferId,
+      expectedOfferRevision: item.expectedOfferRevision,
+    });
+  }
+  return changeSet.id;
 }
 
 export async function createBatchSellerChangeSet(

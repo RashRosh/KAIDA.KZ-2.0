@@ -122,12 +122,16 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const isCreate = !isBatch && first.action === 'create_offer';
   const publishes = !isBatch && (first.action === 'create_offer' || first.action === 'update_offer' || first.action === 'activate_offer');
   const back = safeBack(params.get('back'), '/seller');
+  // text-availability §4.1 items 5 and 7: a switch-off proposal opened from a text review returns to that review.
+  const fromTextReview = back.startsWith('/seller/text-input/review');
   // seller-showcase-editor: the card editor passes the query that reopens it with this proposal's values.
   const reopen = params.get('reopen');
   const cardMode = items.every((item) => (item.action === 'create_offer' || item.action === 'update_offer') && item.cardId === first.cardId)
     && (reopen !== null || !isBatch);
   const editHref = reopen && /^[a-z]+=[0-9a-f-]+$|^new=1$/.test(reopen)
     ? `/seller?${reopen}&from=${changeSetId}`
+    : fromTextReview
+    ? back
     : isCreate
     ? `${back}${back.includes('?') ? '&' : '?'}new=1&from=${changeSetId}`
     : isBatch
@@ -180,6 +184,10 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
 
   // Re-propose the Seller's own values on top of the current Offer, then review again.
   async function refresh() {
+    if (fromTextReview) {
+      router.replace(back);
+      return;
+    }
     if (isBatch || !targetOfferId || first.action === 'create_offer') {
       router.replace(isBatch ? '/seller/batch' : back);
       return;
@@ -257,6 +265,7 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
           <span className="bd bd-p">{t(kindKey[item.action])}</span>
         </div>
         <div className="hr" />
+        {item.action === 'deactivate_offer' && item.packLabel && <Kv label={t('confirm.pack')} value={item.packLabel} />}
         <Kv label={t('confirm.point')} value={item.location.name} />
         <Kv label={t('confirm.price')} value={priceText(item.price) ?? t('review.noPrice')} old={old ? priceText(old.price) : null} />
         {editsCard && <Kv label={t('confirm.comment')} value={item.sellerComment ?? t('confirm.noComment')} old={old ? old.sellerComment ?? t('confirm.noComment') : null} />}
@@ -270,7 +279,11 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
       <Phone>
         <Bar title={t('confirm.doneTitle')} onBack={() => router.push('/seller')} />
         <main className="body" style={{ gap: 14 }}>{items.map((item) => describe(item, false))}</main>
-        <div className="foot"><Link className="btn btn-p lg w" href="/seller">{t('confirm.toOffers')}</Link></div>
+        <div className="foot">
+          {fromTextReview
+            ? <Link className="btn btn-p lg w" href={back}>{t('confirm.toTextReview')}</Link>
+            : <Link className="btn btn-p lg w" href="/seller">{t('confirm.toOffers')}</Link>}
+        </div>
       </Phone>
     );
   }

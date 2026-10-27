@@ -10,6 +10,7 @@ import { useI18n } from '../../../i18n/I18nProvider';
 import { formatAmount } from '../../_components/format-amount';
 import { Bar, Ic, LoadError, LoginRequired, Phone, Thumb } from '../_kaida/ui';
 import { missingDraftFields } from './card-model';
+import { availabilitySummary, SellerTextAvailability } from './SellerTextAvailability';
 
 const REVIEW_STORAGE_PREFIX = 'kaida:text-input-review:';
 
@@ -52,7 +53,7 @@ export function SellerTextInputReviewScreen() {
     void (async () => {
       try {
         if (!inputId) { setReview({ kind: 'unavailable' }); return; }
-        const response = await fetch(`/api/seller/text-input/${encodeURIComponent(inputId)}`, { cache: 'no-store' });
+        const response = await fetch(`/api/seller/text-input/${encodeURIComponent(inputId)}?locale=${locale}`, { cache: 'no-store' });
         if (!alive) return;
         if (response.status === 401) { setReview({ kind: 'anonymous' }); return; }
         if (response.status === 404) { setReview({ kind: 'unavailable' }); return; }
@@ -111,7 +112,13 @@ export function SellerTextInputReviewScreen() {
     );
   }
   const nothingAtAll = submission.drafts.length === 0 && submission.skipped.length === 0 && submission.notices.length === 0
-    && submission.unavailableDrafts === 0;
+    && submission.unavailableDrafts === 0 && submission.availability.length === 0;
+  // text-availability §4.1 item 4: one summary line — counts only — when the list also holds «нет в наличии».
+  const availability = availabilitySummary(submission.availability);
+  const acted = submission.publishedDrafts > 0 || availability.off > 0 || availability.pending > 0;
+  const summary = submission.availability.length === 0 ? null : acted
+    ? t('availability.summaryAfter', { published: submission.publishedDrafts, off: availability.off, waiting: submission.drafts.length + availability.open })
+    : t('availability.summaryBefore', { drafts: submission.drafts.length, choose: availability.open });
 
   return (
     <Phone>
@@ -133,6 +140,14 @@ export function SellerTextInputReviewScreen() {
         )}
         {submission.deletedDrafts > 0 && (
           <p className="c" role="status" data-testid="text-review-deleted">{t('textInput.deletedDrafts', { count: submission.deletedDrafts })}</p>
+        )}
+        {summary && (
+          <div className={`banner ${acted ? 'ok' : 'gray'}`} role="status" style={{ padding: '10px 14px', borderRadius: 14 }} data-testid="text-review-summary">
+            <p className="c" style={{ color: 'var(--ink)' }}>{summary}</p>
+          </div>
+        )}
+        {submission.availability.length > 0 && submission.drafts.length > 0 && (
+          <div className="ov">{t('availability.newTitle', { count: submission.drafts.length })}</div>
         )}
         {nothingAtAll && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', textAlign: 'center' }}>
@@ -161,6 +176,10 @@ export function SellerTextInputReviewScreen() {
             </article>
           );
         })}
+        {submission.availability.length > 0 && (
+          <SellerTextAvailability inputId={submission.inputId} locationId={submission.locationId}
+            availability={submission.availability} pendingChangeSetIds={submission.pendingChangeSetIds} />
+        )}
         {submission.skipped.length > 0 && (
           <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="text-skipped-block">
             <div className="ov">{t('textInput.skippedTitle')}</div>

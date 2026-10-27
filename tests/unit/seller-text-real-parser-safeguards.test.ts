@@ -49,7 +49,7 @@ describe('claim-level validation (§6.2)', () => {
   });
 
   it('an empty answer or all-unusable claims give zero drafts, not an error', () => {
-    expect(run(message, [])).toEqual({ lines: [], skipped: [], notices: ['Строка не разобрана: «Морковь 570 за кг»', 'Число не использовано: 570'] });
+    expect(run(message, [])).toEqual({ lines: [], skipped: [], notices: ['Строка не разобрана: «Морковь 570 за кг»', 'Число не использовано: 570'], unavailable: [] });
     expect(run(message, [1, 2]).lines).toEqual([]);
   });
 });
@@ -171,10 +171,11 @@ describe('packaging (§6.3)', () => {
 });
 
 describe('out of stock, overflow and omission hints (§6.3)', () => {
-  it('an out-of-stock mention is listed, no offer or draft is changed', () => {
+  // Revised by text-availability (D-A): out-of-stock mentions are statements for «Нет в наличии», not skipped entries.
+  it('an out-of-stock mention becomes a statement, no draft is created', () => {
     const result = run('Изюм закончился', [{ product: 'Изюм', status: 'none', price: null, per: null, size: null, only: false, text: 'Изюм закончился' }]);
-    expect(result.lines).toEqual([]);
-    expect(result.skipped).toEqual([{ label: 'Изюм', reason: 'Отметка «нет в наличии» — измените карточку вручную', sourceQuote: 'Изюм закончился' }]);
+    expect([result.lines, result.skipped]).toEqual([[], []]);
+    expect(result.unavailable).toEqual([{ label: 'Изюм', sourceQuote: 'Изюм закончился', variant: { state: 'none' } }]);
   });
 
   it('more than 30 items: the first 30 become drafts, the rest are listed', () => {

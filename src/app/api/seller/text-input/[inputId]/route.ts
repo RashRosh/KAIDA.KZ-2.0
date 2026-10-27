@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSellerTextSubmission } from '@/modules/seller-text-input/application/apply-seller-text-input';
+import { apiLocale } from '@/i18n/config';
 import { jsonError, noStore, sellerUser } from '../../cards/_shared';
 
 export const runtime = 'nodejs';
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ inp
   const inputId = z.uuid().safeParse((await context.params).inputId);
   if (!inputId.success) return jsonError('TEXT_INPUT_REVIEW_UNAVAILABLE', 'Разбор этого списка недоступен.', 404);
   try {
-    const submission = await getSellerTextSubmission(user.id, inputId.data);
+    const submission = await getSellerTextSubmission(user.id, inputId.data, { locale: apiLocale(request.nextUrl.searchParams.get('locale')) });
     if (!submission) return jsonError('TEXT_INPUT_REVIEW_UNAVAILABLE', 'Разбор этого списка недоступен.', 404);
     return NextResponse.json({ submission }, { headers: noStore });
   } catch {
