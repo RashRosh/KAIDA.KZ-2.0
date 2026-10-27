@@ -5,7 +5,8 @@ import { testDatabaseUrl } from '../integration/database';
 // text-availability (docs/slices/text-availability/SLICE_CONTRACT.md §10) on the default server (fake parser), mobile RU:
 // «нет в наличии» → candidates at the selected point → «Выключить отмеченные» → existing confirm → statuses on return.
 function phoneFor(slot: number) {
-  return `+77000049${slot}01`;
+  // Band 499: free among the E2E phone bands (493–498 are taken by other text-input specs).
+  return `+7700004990${slot}`;
 }
 
 async function withPool<T>(run: (pool: Pool) => Promise<T>) {
