@@ -2,6 +2,13 @@ import { z } from 'zod';
 import type { OfferDraftView } from '../../offers/drafts/offer-draft.contract';
 import { packInputSchema } from '../../offers/pack/pack';
 import { priceUnitInputSchema } from '../../offers/price-unit/price-unit';
+import type {
+  AvailabilityStatement,
+  AvailabilityStatementView,
+} from '../../seller-input/contracts/availability.contract';
+
+// A «нет в наличии» statement as a parser produced it; the matching against the point's cards lives in seller-input.
+export type UnavailableStatement = AvailabilityStatement;
 
 export const SELLER_TEXT_INPUT_MAX_LENGTH = 4000;
 
@@ -43,6 +50,8 @@ export type SellerTextParseResult = {
   skipped: SkippedTextLine[];
   // Omission hints of the real parser («Строка не разобрана», «Число не использовано»); never a completeness claim.
   notices?: string[];
+  // text-availability §4.1 item 1: «нет в наличии» statements; never drafts.
+  unavailable?: UnavailableStatement[];
 };
 
 export type UncertainDraftNotice = {
@@ -63,7 +72,39 @@ export type SellerTextInputResponse = {
   unavailableDrafts: number;
   publishedDrafts: number;
   deletedDrafts: number;
+  // text-availability §4.1 items 3–4: «нет в наличии» statements with candidates from current data, and the
+  // switch-off proposals of this list that still wait for confirmation.
+  availability: AvailabilityStatementView[];
+  pendingChangeSetIds: string[];
 };
+
+// text-availability §4.1 item 5: what the Seller saw for each statement acted on, and what they ticked.
+export const availabilityProposalBodySchema = z.object({
+  statements: z.array(z.object({
+    index: z.number().int().min(0).max(59),
+    shown: z.array(z.object({ offerId: z.uuid(), revision: z.number().int().min(1) }).strict()).max(60),
+    selected: z.array(z.uuid()).max(30),
+  }).strict()).min(1).max(60),
+}).strict();
+
+export type AvailabilityProposalBody = z.infer<typeof availabilityProposalBodySchema>;
+
+// Another Seller's, an expired or an unknown review: the same answer as review recovery (seller-ai-text-real-parser §16).
+export class TextInputReviewUnavailableError extends Error {
+  readonly code = 'TEXT_INPUT_REVIEW_UNAVAILABLE' as const;
+  constructor() {
+    super('Разбор этого списка недоступен.');
+    this.name = 'TextInputReviewUnavailableError';
+  }
+}
+
+export class TextAvailabilityChangedError extends Error {
+  readonly code = 'TEXT_AVAILABILITY_CHANGED' as const;
+  constructor(readonly availability: AvailabilityStatementView[], readonly changed: number[]) {
+    super('Карточки изменились — отметьте заново.');
+    this.name = 'TextAvailabilityChangedError';
+  }
+}
 
 // A stored submission as the review screen recovers it (§16): never the raw text, which is not kept on the server.
 export type SellerTextSubmissionView = Omit<SellerTextInputResponse, 'rawText'> & {

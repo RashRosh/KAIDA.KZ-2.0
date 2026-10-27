@@ -80,8 +80,9 @@ test.describe('seller text input with the real parser (replay stub)', () => {
     const inputId = new URL(page.url()).searchParams.get('input')!;
     await expect(page.getByTestId('text-input-reminder')).toHaveText('Список составлен автоматически. Сверьте с исходным текстом выше.');
     await expect(page.locator('[data-testid^="text-draft-"]')).toHaveCount(3);
-    await expect(page.getByTestId('text-skipped-block')).toContainText('сметана');
-    await expect(page.getByTestId('text-skipped-block')).toContainText('нет в наличии');
+    // Revised by text-availability (D-A): «сметана закончилась» is a «Нет в наличии» statement; the point has no such card.
+    await expect(page.getByTestId('availability-block')).toContainText('сметана');
+    await expect(page.getByTestId('availability-block')).toContainText('Нет такой карточки в этой точке.');
     await expect(page.getByTestId('text-uncertain-notice').first()).toContainText('Единица не указана');
     expect(await counts(phone)).toEqual({ drafts: 3, offers: 0 });
 

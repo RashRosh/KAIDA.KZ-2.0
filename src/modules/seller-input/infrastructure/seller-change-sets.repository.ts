@@ -8,6 +8,7 @@ import { formatPriceUnit, priceUnitFromColumns, priceUnitToColumns, type PriceUn
 import { formatPack, packFromColumns, type Pack } from '../../offers/pack/pack';
 import type { Locale } from '../../../i18n/config';
 import { sellers } from '../../sellers/db/sellers.table';
+import type { TrackedAvailabilityItem } from '../contracts/availability.contract';
 import type { SellerChangeSetView } from '../contracts/seller-change-set.contract';
 import { sellerChangeItemPhotos } from '../db/seller-change-item-photos.table';
 import { sellerChangeItems, type SellerOfferManagementAction } from '../db/seller-change-items.table';
@@ -294,4 +295,28 @@ export async function markChangeSetConfirmed(database: SellerInputDb, changeSetI
     .set({ status: 'confirmed', confirmedAt })
     .where(and(eq(sellerChangeSets.id, changeSetId), eq(sellerChangeSets.status, 'proposed')))
     .returning({ id: sellerChangeSets.id });
+}
+
+// text-availability: the switch-off items of the given proposals of this Seller, with each proposal's current status.
+export async function findDeactivationItems(
+  database: Pick<Database, 'select'>,
+  sellerId: string,
+  changeSetIds: string[],
+): Promise<TrackedAvailabilityItem[]> {
+  if (changeSetIds.length === 0) return [];
+  const rows = await database.select({
+    changeSetId: sellerChangeItems.changeSetId,
+    changeSetStatus: sellerChangeSets.status,
+    offerId: sellerChangeItems.targetOfferId,
+    expectedRevision: sellerChangeItems.expectedOfferRevision,
+  }).from(sellerChangeItems)
+    .innerJoin(sellerChangeSets, eq(sellerChangeSets.id, sellerChangeItems.changeSetId))
+    .where(and(
+      eq(sellerChangeSets.sellerId, sellerId),
+      inArray(sellerChangeSets.id, changeSetIds),
+      eq(sellerChangeItems.action, 'deactivate_offer'),
+    ));
+  return rows.flatMap((row) => (row.offerId !== null && row.expectedRevision !== null
+    ? [{ changeSetId: row.changeSetId, changeSetStatus: row.changeSetStatus, offerId: row.offerId, expectedRevision: row.expectedRevision }]
+    : []));
 }

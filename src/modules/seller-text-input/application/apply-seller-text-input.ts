@@ -6,8 +6,17 @@ import { saveOfferDraft } from '../../offers/drafts/offer-drafts';
 import type { OfferDraftView } from '../../offers/drafts/offer-draft.contract';
 import { listLocationsBySeller } from '../../locations/infrastructure/locations.repository';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
+import type { Locale } from '../../../i18n/config';
+import { createDeactivationChangeSet } from '../../seller-input/application/create-batch-seller-change-set';
+import { matchAvailability } from '../../seller-input/application/match-availability';
+import type { AvailabilityStatementView } from '../../seller-input/contracts/availability.contract';
+import { OfferChangedError } from '../../seller-input/contracts/seller-change-set.contract';
+import { findDeactivationItems } from '../../seller-input/infrastructure/seller-change-sets.repository';
 import {
+  type AvailabilityProposalBody,
   type SellerTextInputResponse,
+  TextAvailabilityChangedError,
+  TextInputReviewUnavailableError,
   type SellerTextSubmissionSummary,
   type SellerTextSubmissionView,
   TextInputPointNotFoundError,
@@ -30,6 +39,7 @@ import {
   markSubmissionFailed,
   markSubmissionSucceeded,
   purgeExpiredSubmissions,
+  recordAvailabilityChangeSet,
   takeOverSubmission,
 } from '../infrastructure/text-submissions.repository';
 import { parseFakeSellerText } from '../parsers/fake-seller-text-parser';
@@ -84,8 +94,22 @@ function logOutcome(fields: Record<string, string | number | boolean | null>) {
   console.info(JSON.stringify({ event: 'seller_text_input', ...fields }));
 }
 
+// text-availability §4.1 items 3–5: the statements of a submission with candidates from current data, and the
+// proposals of this review that still wait for confirmation.
+async function availabilityOf(database: Database, ownerUserId: string, row: SubmissionRow, locale?: Locale) {
+  const result = row.result!;
+  const tracked = await findDeactivationItems(database, row.sellerId, result.availabilityChangeSetIds ?? []);
+  const availability = await matchAvailability(ownerUserId, result.locationId ?? null, result.unavailable ?? [], tracked,
+    { database, locale });
+  const pendingRevision = new Map(availability.flatMap((view) => view.candidates)
+    .filter((candidate) => candidate.status === 'pending').map((candidate) => [candidate.offerId, candidate.revision]));
+  const pendingChangeSetIds = [...new Set(tracked.filter((item) => item.changeSetStatus === 'proposed'
+    && pendingRevision.get(item.offerId) === item.expectedRevision).map((item) => item.changeSetId))];
+  return { availability, pendingChangeSetIds };
+}
+
 // The stored result with the drafts as they are now; a missing draft is published (recorded at confirm) or deleted.
-async function storedResult(database: Database, row: SubmissionRow) {
+async function storedResult(database: Database, row: SubmissionRow, ownerUserId: string, locale?: Locale) {
   const result = row.result!;
   const found = new Map((await findSellerDraftsByIds(database, row.sellerId, result.draftIds)).map((d) => [d.id, d]));
   const drafts = result.draftIds.flatMap((id) => (found.has(id) ? [view(found.get(id)!)] : []));
@@ -102,18 +126,19 @@ async function storedResult(database: Database, row: SubmissionRow) {
     unavailableDrafts: missing.length,
     publishedDrafts,
     deletedDrafts: missing.length - publishedDrafts,
+    ...await availabilityOf(database, ownerUserId, row, locale),
   };
 }
 
-async function replay(database: Database, row: SubmissionRow, rawText: string): Promise<SellerTextInputOutcome> {
-  return { ...await storedResult(database, row), rawText, replayed: true };
+async function replay(database: Database, row: SubmissionRow, rawText: string, ownerUserId: string): Promise<SellerTextInputOutcome> {
+  return { ...await storedResult(database, row, ownerUserId), rawText, replayed: true };
 }
 
 // Review recovery (contract §16): the Seller's own submission while it is retained; anything else is unavailable.
 export async function getSellerTextSubmission(
   ownerUserId: string,
   inputId: string,
-  dependencies: { database?: Database; clock?: () => Date } = {},
+  dependencies: { database?: Database; clock?: () => Date; locale?: Locale } = {},
 ): Promise<SellerTextSubmissionView | null> {
   const database = dependencies.database ?? getDatabase();
   const seller = await findSellerByOwner(database, ownerUserId);
@@ -124,9 +149,9 @@ export async function getSellerTextSubmission(
   const base = { status: row.status, createdAt: row.createdAt.toISOString(), expiresAt: row.expiresAt.toISOString() };
   if (row.status !== 'succeeded') {
     return { ...base, inputId: row.requestId, parser: row.parser, locationId: null, drafts: [], skipped: [], uncertain: [],
-      notices: [], unavailableDrafts: 0, publishedDrafts: 0, deletedDrafts: 0 };
+      notices: [], unavailableDrafts: 0, publishedDrafts: 0, deletedDrafts: 0, availability: [], pendingChangeSetIds: [] };
   }
-  return { ...base, ...await storedResult(database, row), locationId: row.result!.locationId ?? null };
+  return { ...base, ...await storedResult(database, row, ownerUserId, dependencies.locale), locationId: row.result!.locationId ?? null };
 }
 
 export async function listSellerTextSubmissions(
@@ -196,7 +221,7 @@ export async function applySellerTextInput(
       if (!row) continue; // expired and purged meanwhile: try to insert again
       if (row.textDigest !== textDigest) throw new TextInputRequestConflictError(); // rule 2
       if (row.status === 'succeeded') { // rule 3
-        const outcome = await replay(database, row, text);
+        const outcome = await replay(database, row, text, user.id);
         logOutcome({ inputId: key.requestId, outcome: 'replay', ms: Date.now() - started, drafts: outcome.drafts.length,
           unavailable: outcome.unavailableDrafts, parser: row.parser });
         return outcome;
@@ -237,7 +262,9 @@ export async function applySellerTextInput(
 
     logOutcome({ inputId: key.requestId, outcome: 'created', ms: Date.now() - started, items: parsed.lines.length,
       drafts: committed.drafts.length, skipped: parsed.skipped.length, notices: committed.result.notices.length,
-      uncertain: committed.result.uncertain.length, parser, config: parser === 'real' ? PARSER_CONFIG_ID : null });
+      uncertain: committed.result.uncertain.length, unavailable: committed.result.unavailable?.length ?? 0, parser,
+      config: parser === 'real' ? PARSER_CONFIG_ID : null });
+    const availability = await matchAvailability(user.id, targetLocationId, committed.result.unavailable ?? [], [], { database });
     return {
       inputId: key.requestId,
       rawText: text,
@@ -249,6 +276,8 @@ export async function applySellerTextInput(
       unavailableDrafts: 0,
       publishedDrafts: 0,
       deletedDrafts: 0,
+      availability,
+      pendingChangeSetIds: [],
       replayed: false,
     };
   }
@@ -283,8 +312,63 @@ async function commitDrafts(tx: Database, input: {
   }
   const result: SellerTextSubmissionResult = {
     draftIds: drafts.map((d) => d.id), skipped: parsed.skipped, uncertain, notices: parsed.notices ?? [],
-    locationId: input.locationId,
+    locationId: input.locationId, unavailable: parsed.unavailable ?? [],
   };
   await markSubmissionSucceeded(tx, key, result, input.now());
   return { drafts, result };
+}
+
+// text-availability §4.1 item 5: compare what the Seller saw with the current candidates and, only when nothing that
+// decides the match or the choice changed, create one switch-off proposal expecting the revisions the Seller saw.
+// No row is locked: a card added after this comparison does not affect the chosen offers, and the existing confirm guard
+// refuses any later change of them.
+export async function proposeTextAvailability(
+  ownerUserId: string,
+  inputId: string,
+  body: AvailabilityProposalBody,
+  dependencies: { database?: Database; clock?: () => Date; locale?: Locale } = {},
+): Promise<{ changeSetId: string }> {
+  const database = dependencies.database ?? getDatabase();
+  const now = (dependencies.clock ?? (() => new Date()))();
+  return database.transaction(async (transaction) => {
+    const tx = transaction as unknown as Database;
+    const seller = await findSellerByOwner(tx, ownerUserId);
+    if (!seller) throw new TextInputReviewUnavailableError();
+    const key: SubmissionKey = { sellerId: seller.id, requestId: inputId };
+    const row = await findSubmission(tx, key);
+    if (!row || row.status !== 'succeeded' || row.expiresAt.getTime() <= now.getTime()) throw new TextInputReviewUnavailableError();
+    const current = async () => (await availabilityOf(tx, ownerUserId, row, dependencies.locale)).availability;
+    const fresh = await current();
+
+    const changed: number[] = [];
+    const targets = new Map<string, number>();
+    for (const statement of body.statements) {
+      const view: AvailabilityStatementView | undefined = fresh[statement.index];
+      if (!view) { changed.push(statement.index); continue; }
+      const shown = new Set(statement.shown.map((c) => `${c.offerId}:${c.revision}`));
+      const present = new Set(view.candidates.map((c) => `${c.offerId}:${c.revision}`));
+      const selectable = new Map(view.candidates.filter((c) => c.selectable).map((c) => [c.offerId, c.revision]));
+      if (shown.size !== present.size || [...shown].some((k) => !present.has(k)) || statement.selected.some((id) => !selectable.has(id))) {
+        changed.push(statement.index);
+        continue;
+      }
+      for (const id of statement.selected) targets.set(id, selectable.get(id)!);
+    }
+    if (changed.length > 0) throw new TextAvailabilityChangedError(fresh, changed);
+
+    let changeSetId: string;
+    try {
+      changeSetId = await createDeactivationChangeSet(tx, seller.id,
+        [...targets].map(([offerId, expectedRevision]) => ({ offerId, expectedRevision })));
+    } catch (error) {
+      // Changed between the comparison and the proposal: nothing is created; the Seller chooses again.
+      if (error instanceof OfferChangedError) {
+        throw new TextAvailabilityChangedError(await current(), body.statements.map((statement) => statement.index));
+      }
+      throw error;
+    }
+    await recordAvailabilityChangeSet(tx, key, changeSetId);
+    logOutcome({ inputId, outcome: 'availability_proposed', offers: targets.size });
+    return { changeSetId };
+  });
 }

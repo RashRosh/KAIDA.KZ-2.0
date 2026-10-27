@@ -8,6 +8,7 @@ import type { MessageKey } from '../../../i18n/messages';
 import type { SellerTextInputResponse } from '../../../modules/seller-text-input/contracts/seller-text-input.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { Bar, Ic, LoginRequired, Phone } from '../_kaida/ui';
+import { clientRequestId } from '../../_components/client-request-id';
 
 const REVIEW_STORAGE_PREFIX = 'kaida:text-input-review:';
 // The text being written survives errors, point creation and a reload of this tab; it never leaves the browser.
@@ -127,7 +128,7 @@ export function SellerTextInputScreen() {
   async function submit() {
     if (busy || text.trim() === '' || !target) return;
     if (error === 'conflict') requestId.current = null;
-    requestId.current ??= crypto.randomUUID();
+    requestId.current ??= clientRequestId();
     setBusy(true);
     setError(null);
     try {

@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { char, check, index, jsonb, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { sellers } from '../../sellers/db/sellers.table';
-import type { SkippedTextLine, UncertainDraftNotice } from '../contracts/seller-text-input.contract';
+import type { SkippedTextLine, UncertainDraftNotice, UnavailableStatement } from '../contracts/seller-text-input.contract';
 
 export type SellerTextSubmissionStatus = 'processing' | 'succeeded' | 'failed';
 
@@ -15,6 +15,10 @@ export type SellerTextSubmissionResult = {
   // that were later published (recorded by the confirm step) — so a missing draft is told apart as published or deleted.
   locationId?: string | null;
   publishedDraftIds?: string[];
+  // text-availability §4.1 items 3 and 5: the «нет в наличии» statements (candidates are recomputed from current data on
+  // every read) and the switch-off proposals created from this review (bookkeeping only).
+  unavailable?: UnavailableStatement[];
+  availabilityChangeSetIds?: string[];
 };
 
 // seller-ai-text-real-parser §6.4: durable retry protection for 24 hours. Holds a salted digest of the text, never the

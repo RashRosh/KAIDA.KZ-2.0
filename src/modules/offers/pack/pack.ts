@@ -40,6 +40,18 @@ export function samePack(left: Pack | null, right: Pack | null): boolean {
   return left.unit === right.unit && canonicalAmount(left.amount) === canonicalAmount(right.amount);
 }
 
+// text-availability: the same quantity in base units — «1 кг» equals «1000 г», «0,5 л» equals «500 мл», mass never
+// equals volume. Amounts have at most three decimals, so thousandths are exact integers.
+export function samePackQuantity(left: Pack, right: Pack): boolean {
+  const base = (pack: Pack) => ({
+    volume: pack.unit === 'ml' || pack.unit === 'l',
+    thousandths: Math.round(Number(pack.amount) * (pack.unit === 'kg' || pack.unit === 'l' ? 1000 : 1) * 1000),
+  });
+  const a = base(left);
+  const b = base(right);
+  return a.volume === b.volume && a.thousandths === b.thousandths;
+}
+
 export function formatPack(pack: Pack | null, locale: Locale = 'ru'): string | null {
   if (pack === null) return null;
   return `${canonicalAmount(pack.amount).replace('.', ',')} ${PACK_UNIT_LABELS[locale][pack.unit]}`;

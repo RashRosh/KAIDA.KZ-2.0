@@ -1,6 +1,6 @@
 import { packInputSchema } from '../../offers/pack/pack';
 import type {
-  ParsedTextLine, SellerTextParseResult, SkippedTextLine,
+  ParsedTextLine, SellerTextParseResult, SkippedTextLine, UnavailableStatement,
 } from '../contracts/seller-text-input.contract';
 import {
   STATUSES, findSpan, numberOccurrences, reduceClaims, sameProduct, tokEq, type ReducedItem,
@@ -16,7 +16,6 @@ export const MAX_DRAFTS_PER_SUBMISSION = 30;
 export const PARSER_CONFIG_ID = 'c2/script-2.2/Qwen3-4B@1cfa9a7';
 
 const REASON_UNUSABLE_CLAIM = 'Ответ модели по этой позиции не распознан';
-const REASON_OUT_OF_STOCK = 'Отметка «нет в наличии» — измените карточку вручную';
 const REASON_OVERFLOW = 'Не больше 30 позиций за раз';
 
 const NOTE = {
@@ -88,8 +87,12 @@ const UNIT_WORDS = (t: string) => KG.has(t) || LITER.has(t) || PIECE.has(t) || P
 // §6.3 «unit assigned to the wrong product»: the model's unit words count only if they occur in the claim's own quote,
 // and no other product of the answer is named in that quote before them. Otherwise the unit is dropped (a size
 // written in `per` is kept as size) and the product gets a `unit` notice.
-export function guardUnits(claims: ValidClaim[], message: string): { claims: ValidClaim[]; unitDropped: string[] } {
+export function guardUnits(claims: ValidClaim[], message: string): {
+  claims: ValidClaim[]; unitDropped: string[]; outOfStockUnitDropped: string[];
+} {
   const unitDropped: string[] = [];
+  // text-availability §4.1 item 1: a dropped unit of a «нет в наличии» claim makes its variant uncertain.
+  const outOfStockUnitDropped: string[] = [];
   const out = claims.map((cl, i) => {
     if (cl.per === null || cl.status === 'cmd' || !cl.product) return cl;
     const per = String(cl.per);
@@ -102,11 +105,11 @@ export function guardUnits(claims: ValidClaim[], message: string): { claims: Val
     const at = quoteToks.findIndex((t) => unitToks.includes(t));
     const ok = at >= 0 && !quoteToks.slice(0, at).some((t) => otherToks.some((o) => tokEq(t, o)));
     if (ok) return cl;
-    if (cl.status !== 'none') unitDropped.push(cl.product);
+    (cl.status === 'none' ? outOfStockUnitDropped : unitDropped).push(cl.product);
     const keepsSize = cl.size === null && sizeReading(per)[0] !== null;
     return { ...cl, per: null, size: keepsSize ? per : cl.size };
   });
-  return { claims: out, unitDropped };
+  return { claims: out, unitDropped, outOfStockUnitDropped };
 }
 
 // All pack sizes the seller wrote in a quote, in the seller's own units.
@@ -181,6 +184,50 @@ function mapItem(item: ReducedItem, unitDropped: string[]): ParsedTextLine {
   return line;
 }
 
+const UNIT_OF: [Set<string>, 'kg' | 'liter' | 'piece' | 'package'][] = [[KG, 'kg'], [LITER, 'liter'], [PIECE, 'piece'], [PACKAGE, 'package']];
+const VARIANT_UNCERTAIN_FLAGS = ['unit_unrecognized', 'size_count_or_volume_ambiguous', 'pack_dropped_for_weight_unit'];
+
+// The Seller's sentence around a quote: up to «. ! ? ;» or a line break; a point between digits («0.5») is no boundary.
+function sentenceAround(message: string, span: [number, number]): [number, number] {
+  const boundary = (i: number) => /[!?;\n]/u.test(message[i]!)
+    || (message[i] === '.' && !(/\d/u.test(message[i - 1] ?? '') && /\d/u.test(message[i + 1] ?? '')));
+  let start = span[0];
+  while (start > 0 && !boundary(start - 1)) start -= 1;
+  let end = span[1];
+  while (end < message.length && !boundary(end)) end += 1;
+  return [start, end];
+}
+
+// text-availability §4.1 item 1: the pack/unit state of a «нет в наличии» statement, from the existing guards and the
+// pack/unit words of the Seller's own sentence (words inside other items' quotes are not this statement's).
+// Wording the size and unit patterns do not know counts as `none` — the contract's accepted limitation.
+export function statementVariant(item: ReducedItem, message: string, otherSpans: [number, number][], unitDropped: boolean): UnavailableStatement['variant'] {
+  const span = findSpan(message, item.source);
+  if (!span) return { state: 'uncertain', words: null };
+  const [start, end] = sentenceAround(message, span);
+  const chars = [...message.slice(start, end)];
+  for (const [a, b] of otherSpans) {
+    if (a < span[1] && span[0] < b) continue;
+    for (let i = Math.max(a, start); i < Math.min(b, end); i += 1) chars[i - start] = ' ';
+  }
+  const sentence = normText(chars.join(''));
+  const sizeWords = [...sentence.matchAll(sizeRe('gu')), ...sentence.matchAll(halfRe('gu'))].map((m) => m[0].trim());
+  const unitWords = tokens(sentence.replace(halfRe('gu'), ' ').replace(sizeRe('gu'), ' ')).filter(UNIT_WORDS);
+  const words = [...new Set([...sizeWords, ...unitWords])].join(', ') || null;
+
+  const guarded = guardPack(item.pack, item.source);
+  const pack = guarded.pack !== null && packInputSchema.safeParse(guarded.pack).success ? guarded.pack : null;
+  const unit = item.unit;
+  const unitCode = (t: string) => UNIT_OF.find(([set]) => set.has(t))?.[1];
+  const uncertain = unitDropped || guarded.mismatch || (item.pack !== null && pack === null)
+    || VARIANT_UNCERTAIN_FLAGS.some((f) => item.flags.includes(f))
+    || sellerPacks(sentence).some((p) => pack === null || !packsEquivalent(p, pack))
+    || unitWords.some((t) => unitCode(t) !== unit?.code);
+  if (uncertain) return { state: 'uncertain', words };
+  if (pack !== null || unit !== null) return { state: 'bound', unit, pack };
+  return { state: 'none' };
+}
+
 function overlaps(a: [number, number], spans: [number, number][]): boolean {
   return spans.some(([s, e]) => a[0] < e && s < a[1]);
 }
@@ -213,10 +260,12 @@ export function claimsToParseResult(rawClaims: unknown[], message: string): Sell
     else skipped.push(checked.skipped);
   });
 
-  const { claims, unitDropped } = guardUnits(valid, message);
+  const { claims, unitDropped, outOfStockUnitDropped } = guardUnits(valid, message);
   const reduced = reduceClaims(claims, message);
 
   const lines: ParsedTextLine[] = [];
+  const unavailable: UnavailableStatement[] = [];
+  const itemSpans = reduced.items.flatMap((item) => { const span = findSpan(message, item.source); return span ? [span] : []; });
   const covered: [number, number][] = [];
   const cover = (text: string | null) => {
     const span = findSpan(message, text);
@@ -225,8 +274,13 @@ export function claimsToParseResult(rawClaims: unknown[], message: string): Sell
   for (const cl of claims) cover(cl.text);
   for (const item of reduced.items) {
     cover(item.source);
+    // text-availability §4.1 item 1: a «нет в наличии» statement is matched against the point's cards, never a draft.
     if (item.available === false) {
-      skipped.push({ label: clip(item.title.trim(), 200), reason: REASON_OUT_OF_STOCK, sourceQuote: item.source && clip(item.source, 500) });
+      unavailable.push({
+        label: clip(item.title.trim(), 200),
+        sourceQuote: item.source && clip(item.source, 500),
+        variant: statementVariant(item, message, itemSpans, outOfStockUnitDropped.some((p) => sameProduct(p, item.title, true))),
+      });
       continue;
     }
     const line = mapItem(item, unitDropped);
@@ -237,5 +291,5 @@ export function claimsToParseResult(rawClaims: unknown[], message: string): Sell
     lines.push(line);
   }
   const prices = new Set(lines.flatMap((l) => (l.price ? [l.price] : [])));
-  return { lines, skipped, notices: omissionHints(message, covered, prices) };
+  return { lines, skipped, notices: omissionHints(message, covered, prices), unavailable };
 }

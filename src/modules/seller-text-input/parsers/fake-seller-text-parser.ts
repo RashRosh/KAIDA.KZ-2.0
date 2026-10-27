@@ -1,4 +1,6 @@
-import type { ParsedTextLine, SellerTextParseResult, SkippedTextLine } from '../contracts/seller-text-input.contract';
+import type {
+  ParsedTextLine, SellerTextParseResult, SkippedTextLine, UnavailableStatement,
+} from '../contracts/seller-text-input.contract';
 
 const FIXTURES: Record<string, SellerTextParseResult> = {
   'e2e-catalog': {
@@ -88,8 +90,35 @@ function parseSegment(segment: string): ParsedTextLine | null {
   };
 }
 
+// text-availability: the test parser's «нет в наличии» — «Сметаны нет», «Пельменей по 1 кг нет», «Сметаны 0,4 кг и 1 кг
+// нет». A small genitive → title map keeps CI and the acceptance stand deterministic; the real parser does not use it.
+const FAKE_TITLES: Record<string, string> = {
+  сметаны: 'Сметана', пельменей: 'Пельмени', сыра: 'Сыр', чеснока: 'Чеснок', моркови: 'Морковь', лука: 'Лук',
+  перца: 'Перец', молока: 'Молоко', картошки: 'Картошка', баранины: 'Баранина',
+};
+const OUT_OF_STOCK_RE = /^(.+?)\s+(?:нет(?:\s+в\s+наличии)?|закончил(?:ся|ась|ось|ись))[.!]?$/iu;
+const FAKE_PACK_RE = /(\d+(?:[.,]\d+)?)\s*(кг|г|мл|л)(?![\p{L}])/giu;
+
+function parseOutOfStock(segment: string): UnavailableStatement | null {
+  const match = segment.trim().match(OUT_OF_STOCK_RE);
+  if (!match) return null;
+  const head = match[1]!;
+  const packs = [...head.matchAll(FAKE_PACK_RE)];
+  const name = head.replace(FAKE_PACK_RE, ' ').replace(/(^|\s)(?:по|и|в)(?=\s|$)/giu, ' ').replace(/\s+/gu, ' ').trim();
+  if (name.length < 2) return null;
+  const label = FAKE_TITLES[name.toLowerCase()] ?? name;
+  const units: Record<string, 'g' | 'kg' | 'ml' | 'l'> = { г: 'g', кг: 'kg', мл: 'ml', л: 'l' };
+  const variant: UnavailableStatement['variant'] = packs.length === 0
+    ? { state: 'none' }
+    : packs.length === 1
+      ? { state: 'bound', unit: null, pack: { amount: packs[0]![1]!.replace(',', '.'), unit: units[packs[0]![2]!.toLowerCase()]! } }
+      : { state: 'uncertain', words: packs.map((p) => p[0]).join(', ') };
+  return { label, sourceQuote: segment.trim().replace(/[.!]$/u, ''), variant };
+}
+
 function heuristicParse(text: string): SellerTextParseResult {
   const skipped: SkippedTextLine[] = [];
+  const unavailable: UnavailableStatement[] = [];
   const grape = text.match(/виноград[^.;\n]*/iu);
   if (grape && !/виноград\s+\d+/iu.test(text)) {
     skipped.push({ label: 'Виноград', reason: 'Товар упомянут, но не распознан', sourceQuote: grape[0].trim() });
@@ -99,10 +128,15 @@ function heuristicParse(text: string): SellerTextParseResult {
   const lines: ParsedTextLine[] = [];
   for (const segment of segments) {
     if (/виноград/iu.test(segment) && !/\d/.test(segment)) continue;
+    const outOfStock = parseOutOfStock(segment);
+    if (outOfStock) {
+      unavailable.push(outOfStock);
+      continue;
+    }
     const parsed = parseSegment(segment);
     if (parsed) lines.push(parsed);
   }
-  return { lines, skipped };
+  return { lines, skipped, unavailable };
 }
 
 export function parseFakeSellerText(text: string): SellerTextParseResult {
