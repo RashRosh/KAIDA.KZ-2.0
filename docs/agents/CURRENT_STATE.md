@@ -8,5 +8,5 @@
 - Open decisions: D-2 model licence; D-4 Kazakhstan deployment.
 - PO direction 2026-10-27: features first, then release; no redesign phase; pilot prep not moved ahead; priority = seller offer creation/maintenance via text, voice, photo, video (voice/photo/video order not approved).
 - Preserved, not to be changed: voice research branch `research/voice-input-local-feasibility-2026-10-09` @ `63623363`; local-only `wip/local-leftovers-2026-10-09` @ `335205de`; stashes and old worktrees kept.
-- Current task: prepare the Slice Contract of `S-TEXT-DUPLICATES` (PO 2026-10-27) — contract only, no implementation, no model runs.
-- Next action: contract on a docs branch from `main`; PO review. Implementation only after approval and a direct PO instruction.
+- Current task: implementing `S-TEXT-DUPLICATES` (contract `docs/slices/text-duplicates/SLICE_CONTRACT.md`, APPROVED rev. 3, PO 2026-10-27) on branch `slice/text-duplicates` from `main` 71441bdb; the first commit holds contract, preview and plan. Commit, push, PR allowed; merge and tag NOT. No model runs; production text input `off`.
+- Next action: implement per contract §4–§5; targeted tests, full regression, branch CI; PR; local acceptance stand + short PO scenario. PO manual acceptance pending — never mark it done without PO confirmation.
