@@ -212,7 +212,10 @@ export function SellerTextInputReviewScreen() {
             </article>
           );
         })}
-        {heldCount > 0 && <SellerTextHeld inputId={submission.inputId} held={submission.held} onChanged={reload} />}
+        {heldCount > 0 && (
+          <SellerTextHeld inputId={submission.inputId} held={submission.held} pendingChangeSetIds={submission.pricePendingChangeSetIds}
+            stickyAction={submission.availability.length === 0} onChanged={reload} onRefresh={() => setAttempt((value) => value + 1)} />
+        )}
         {submission.availability.length > 0 && (
           <SellerTextAvailability inputId={submission.inputId} locationId={submission.locationId}
             availability={submission.availability} pendingChangeSetIds={submission.pendingChangeSetIds} />

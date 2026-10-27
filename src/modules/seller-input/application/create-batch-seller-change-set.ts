@@ -201,6 +201,54 @@ export async function createDeactivationChangeSet(
   return changeSet.id;
 }
 
+// text-price-update §3.5: one proposal of `update_offer` items setting a new price on the chosen offers, inside the
+// caller's transaction. The comment and the card's shared fields stay as they are (existing preparation, which locks the
+// card's offers); each item expects the revision the Seller saw, and an offer that changed, was switched off or already
+// has that price is refused here. Confirmation stays the existing guarded step.
+export async function createPriceUpdateChangeSet(
+  tx: Parameters<typeof findOwnedLocation>[0],
+  sellerId: string,
+  targets: { offerId: string; expectedRevision: number; price: string }[],
+): Promise<string> {
+  assertNoBatchOfferConflicts(targets.map((target) => ({ action: 'update_offer' as const, offerId: target.offerId,
+    price: { amount: target.price, unit: null }, sellerComment: null })));
+  const prepared: PreparedManagementItem[] = [];
+  for (const target of targets) {
+    const offer = await findOwnedOfferForManagement(tx, target.offerId, sellerId);
+    if (!offer || offer.status !== 'active' || offer.revision !== target.expectedRevision) throw new OfferChangedError();
+    let next: PreparedItem;
+    try {
+      next = await prepareItem(tx, sellerId, {
+        action: 'update_offer',
+        offerId: offer.id,
+        price: { amount: target.price, unit: offer.priceUnit },
+        sellerComment: normalizeNullableText(offer.sellerComment),
+      });
+    } catch (error) {
+      if (error instanceof OfferUpdateNoChangesError) throw new OfferChangedError();
+      throw error;
+    }
+    if (next.action !== 'update_offer' || next.expectedOfferRevision !== target.expectedRevision) throw new OfferChangedError();
+    prepared.push(next);
+  }
+  const changeSet = await createChangeSet(tx, sellerId);
+  for (const item of prepared) {
+    await createOfferManagementChangeItem(tx, {
+      changeSetId: changeSet.id,
+      action: item.action,
+      card: item.card,
+      locationId: item.locationId,
+      priceAmount: item.priceAmount,
+      priceCurrency: item.priceCurrency,
+      priceUnit: item.priceUnit,
+      sellerComment: item.sellerComment,
+      targetOfferId: item.targetOfferId,
+      expectedOfferRevision: item.expectedOfferRevision,
+    });
+  }
+  return changeSet.id;
+}
+
 export async function createBatchSellerChangeSet(
   ownerUserId: string,
   input: SellerBatchChangeSetCreateInput,

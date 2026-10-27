@@ -88,9 +88,10 @@ test.describe('a repeated text list', () => {
 
     await expect(page.getByTestId('held-block')).toBeVisible();
     await expect(page.getByTestId('held-0').getByTestId('held-headline')).toHaveText('Без изменений');
-    await expect(page.getByTestId('held-1').getByTestId('held-headline')).toHaveText('Карточка уже есть');
-    await expect(page.getByTestId('held-1')).toContainText('Цена: в карточке 1 400 ₸, в тексте 1 500 ₸');
-    await expect(page.getByTestId('held-1').getByRole('link', { name: 'Изменить цену в карточке' })).toBeVisible();
+    // Revised by text-price-update (§3.1, approved 2026-10-27): an eligible price difference is offered as a proposal
+    // (the existing editor link stays for rows that are not eligible).
+    await expect(page.getByTestId('held-1').getByTestId('held-headline')).toHaveText('Новая цена для карточки');
+    await expect(page.getByTestId(`held-candidate-${ids.pelm05}`).getByTestId('price-change')).toHaveText('1 400 ₸ → 1 500 ₸ / упак.');
     await expect(page.getByTestId('held-2').getByTestId('held-headline')).toHaveText('Есть выключенная карточка');
     await expect(page.locator('[data-testid^="text-draft-"]')).toHaveCount(3);
     await expect(page.getByTestId('text-other-pack')).toHaveText('В точке уже есть: Пельмени · 500 г — другая фасовка');

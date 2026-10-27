@@ -54,6 +54,8 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const router = useRouter();
   const params = useSearchParams();
   const targetOfferId = params.get('offer');
+  // text-availability / text-price-update: a proposal opened from a text review returns there and shows its items row by row.
+  const textReview = (params.get('back') ?? '').startsWith('/seller/text-input/review');
   const [changeSet, setChangeSet] = useState<SellerChangeSetView | null>(null);
   const [owned, setOwned] = useState<SellerOfferView[] | null>(null);
   const [load, setLoad] = useState<'loading' | 'anonymous' | 'error' | 'ready'>('loading');
@@ -79,7 +81,7 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
         }
         const data = await response.json() as ApiResponse;
         if (!response.ok || !data.changeSet) throw new Error('load');
-        const offers = data.changeSet.status === 'proposed' && targetOfferId ? await readOwnedOffers() : null;
+        const offers = data.changeSet.status === 'proposed' && (targetOfferId || textReview) ? await readOwnedOffers() : null;
         if (!alive) return;
         setChangeSet(data.changeSet);
         setOwned(offers);
@@ -89,7 +91,7 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
       }
     })();
     return () => { alive = false; };
-  }, [changeSetId, locale, targetOfferId, readOwnedOffers, attempt]);
+  }, [changeSetId, locale, targetOfferId, textReview, readOwnedOffers, attempt]);
 
   if (load === 'loading') {
     return (
@@ -123,11 +125,11 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const publishes = !isBatch && (first.action === 'create_offer' || first.action === 'update_offer' || first.action === 'activate_offer');
   const back = safeBack(params.get('back'), '/seller');
   // text-availability §4.1 items 5 and 7: a switch-off proposal opened from a text review returns to that review.
-  const fromTextReview = back.startsWith('/seller/text-input/review');
+  const fromTextReview = textReview && back.startsWith('/seller/text-input/review');
   // seller-showcase-editor: the card editor passes the query that reopens it with this proposal's values.
   const reopen = params.get('reopen');
   const cardMode = items.every((item) => (item.action === 'create_offer' || item.action === 'update_offer') && item.cardId === first.cardId)
-    && (reopen !== null || !isBatch);
+    && (reopen !== null || !isBatch) && !textReview;
   const editHref = reopen && /^[a-z]+=[0-9a-f-]+$|^new=1$/.test(reopen)
     ? `/seller?${reopen}&from=${changeSetId}`
     : fromTextReview
@@ -257,7 +259,8 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   function describe(item: SellerChangeSetItemView, withOld: boolean) {
     const old = withOld && current && item.action === 'update_offer' ? current : undefined;
     const photoIds = resultingPhotoIds(item);
-    const editsCard = item.action === 'create_offer' || item.action === 'update_offer';
+    // A price change from a text review keeps the comment and photos; only the price rows are shown (text-price-update §3.6).
+    const editsCard = (item.action === 'create_offer' || item.action === 'update_offer') && !fromTextReview;
     return (
       <div key={item.id} className="card p16" style={{ gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -267,7 +270,21 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
         <div className="hr" />
         {item.action === 'deactivate_offer' && item.packLabel && <Kv label={t('confirm.pack')} value={item.packLabel} />}
         <Kv label={t('confirm.point')} value={item.location.name} />
-        <Kv label={t('confirm.price')} value={priceText(item.price) ?? t('review.noPrice')} old={old ? priceText(old.price) : null} />
+        {/* text-price-update §3.6: point, product, pack, unit and old → new price for a price change from a text review. */}
+        {fromTextReview && item.action === 'update_offer' ? (
+          <>
+            <Kv label={t('confirm.product')} value={item.product.name} />
+            <Kv label={t('confirm.pack')} value={item.packLabel ?? t('confirm.notStated')} />
+            <Kv label={t('confirm.unit')} value={item.price?.unit ?? t('confirm.notStated')} />
+            <Kv label={t('confirm.price')} value={item.price ? `${formatAmount(item.price.amount)} ₸` : t('review.noPrice')}
+              old={item.previousPriceAmount ? `${formatAmount(item.previousPriceAmount)} ₸` : null} />
+            {(owned ?? []).some((offer) => offer.cardId === item.cardId && offer.location.id !== item.location.id) && (
+              <p className="c c2" data-testid="confirm-other-points">{t('confirm.otherPointsKeep')}</p>
+            )}
+          </>
+        ) : (
+          <Kv label={t('confirm.price')} value={priceText(item.price) ?? t('review.noPrice')} old={old ? priceText(old.price) : null} />
+        )}
         {editsCard && <Kv label={t('confirm.comment')} value={item.sellerComment ?? t('confirm.noComment')} old={old ? old.sellerComment ?? t('confirm.noComment') : null} />}
         {editsCard && <Kv label={t('confirm.photos')} value={photoIds.length > 0 ? String(photoIds.length) : t('confirm.noPhotos')} />}
       </div>

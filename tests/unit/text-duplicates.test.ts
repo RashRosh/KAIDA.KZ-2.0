@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { compareNames, duplicateOutcome, lineDifferences } from '../../src/modules/seller-input/application/match-duplicates';
+import {
+  compareNames, duplicateOutcome, lineDifferences, preselectedForPrice, priceDiffers, priceEligible,
+} from '../../src/modules/seller-input/application/match-duplicates';
 import type { DuplicateCandidate, DuplicateLineInput } from '../../src/modules/seller-input/contracts/duplicates.contract';
 import { mergeRepeatedLines } from '../../src/modules/seller-text-input/application/merge-repeated-lines';
 import type { ParsedTextLine } from '../../src/modules/seller-text-input/contracts/seller-text-input.contract';
@@ -32,7 +34,7 @@ describe('names: candidates are not proof (§3)', () => {
 
 describe('differences and outcomes (§4.1, D-3)', () => {
   const live = (differences: DuplicateCandidate['differences'], status: 'live' | 'off' = 'live'): DuplicateCandidate =>
-    ({ offerId: 'o', cardId: 'c', title: 't', packLabel: null, price: null, status, differences });
+    ({ offerId: 'o', revision: 1, cardId: 'c', title: 't', packLabel: null, price: null, status, differences, priceEligible: false, packKnown: false });
 
   it('same name, pack, unit and price → «Без изменений»', () => {
     const differences = lineDifferences(input(line('Сметана', '1200')), card('Сметана', '1200'));
@@ -104,5 +106,34 @@ describe('real parser: possibly merged items (§4.3)', () => {
       { product: 'сметана', status: 'fix', price: '1300', per: null, size: null, only: false, text: 'нет, 1300' },
     ], message);
     expect([result.lines[0]!.price, result.lines[0]!.priceChoices]).toEqual(['1300', undefined]);
+  });
+});
+
+describe('text-price-update: eligibility and pre-selection (§3.1–§3.2)', () => {
+  const offer = (status: 'active' | 'inactive', code: 'package' | 'kg' = 'package') =>
+    ({ status, price: { amount: '1400', currency: 'KZT' as const, unit: 'упак.', unitChoice: { code } } });
+  const candidate = (differences: DuplicateCandidate['differences'], extra: Partial<DuplicateCandidate> = {}): DuplicateCandidate =>
+    ({ offerId: 'o', revision: 1, cardId: 'c', title: 't', packLabel: '500 г', price: null, status: 'live', differences, priceEligible: true, packKnown: true, ...extra });
+
+  it('eligible only on sale, with the same known unit and one bound price or a conflict', () => {
+    expect(priceEligible(input(line('Пельмени', '1500')), offer('active'))).toBe(true);
+    expect(priceEligible(input(line('Пельмени', '1500')), offer('inactive'))).toBe(false);
+    expect(priceEligible(input(line('Пельмени', '1500')), offer('active', 'kg'))).toBe(false);
+    expect(priceEligible(input(line('Пельмени', '1500', { uncertainFields: ['unit'] })), offer('active'))).toBe(false);
+    expect(priceEligible(input(line('Пельмени', '1500', { uncertainFields: ['price'] })), offer('active'))).toBe(false);
+    expect(priceEligible(input(line('Пельмени', null)), offer('active'))).toBe(false);
+    expect(priceEligible(input(line('Пельмени', null, { priceChoices: ['1500', '1600'] })), offer('active'))).toBe(true);
+    expect([priceDiffers('1400', { price: { amount: '1400.00' } }), priceDiffers('1500', { price: { amount: '1400' } })]).toEqual([false, true]);
+  });
+
+  it('pre-selected only for one candidate with name, pack and unit known and equal, only the price different', () => {
+    const l = input(line('Пельмени', '1500'));
+    expect(preselectedForPrice(l, [candidate([{ kind: 'price', card: '1400', text: '1500' }])])).toBe('o');
+    expect(preselectedForPrice(l, [candidate([{ kind: 'price', card: '1400', text: '1500' }]), candidate([], { offerId: 'p' })])).toBeNull();
+    expect(preselectedForPrice(l, [candidate([{ kind: 'price', card: '1400', text: '1500' }, { kind: 'nameLonger', cardTitle: 'x' }])])).toBeNull();
+    expect(preselectedForPrice(input(line('Пельмени', '1500', { pack: null })), [candidate([{ kind: 'price', card: '1400', text: '1500' }])])).toBeNull();
+    expect(preselectedForPrice(l, [candidate([{ kind: 'price', card: '1400', text: '1500' }], { packKnown: false })])).toBeNull();
+    expect(preselectedForPrice({ ...l, possiblyMerged: true }, [candidate([{ kind: 'price', card: '1400', text: '1500' }])])).toBeNull();
+    expect(preselectedForPrice(input(line('Пельмени', null, { priceChoices: ['1500', '1600'] })), [candidate([{ kind: 'priceConflict', prices: ['1500', '1600'] }])])).toBeNull();
   });
 });

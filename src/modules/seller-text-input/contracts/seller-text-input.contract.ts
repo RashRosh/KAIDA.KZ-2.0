@@ -6,7 +6,7 @@ import type {
   AvailabilityStatement,
   AvailabilityStatementView,
 } from '../../seller-input/contracts/availability.contract';
-import type { DuplicateCandidate, DuplicateOutcome } from '../../seller-input/contracts/duplicates.contract';
+import type { DuplicateCandidate, DuplicateOutcome, PriceProposalState } from '../../seller-input/contracts/duplicates.contract';
 
 // A «нет в наличии» statement as a parser produced it; the matching against the point's cards lives in seller-input.
 export type UnavailableStatement = AvailabilityStatement;
@@ -85,12 +85,16 @@ export type SellerTextInputResponse = {
   held: HeldLineView[];
   draftNotes: DraftNoteView[];
   priceChoices: { draftId: string; choices: string[] }[];
+  // text-price-update §3.5: price proposals of this review still waiting for confirmation.
+  pricePendingChangeSetIds: string[];
 };
 
 export type HeldLineView = {
   index: number;
   quote: string;
   title: string;
+  // The line's one bound price (null when absent, uncertain or in conflict — then `priceChoices`).
+  linePrice: string | null;
   priceChoices: string[] | null;
   mergedFragments: string[] | null;
   possiblyMerged: boolean;
@@ -98,6 +102,9 @@ export type HeldLineView = {
   candidates: DuplicateCandidate[];
   // The draft made from this line on the Seller's request, while it exists.
   draftId: string | null;
+  // text-price-update §3.2, §3.5: the card pre-selected for a new price, and this line's latest price proposal.
+  pricePreselect: string | null;
+  priceProposal: { changeSetId: string; state: PriceProposalState; offerId: string; price: string } | null;
 };
 
 export type DraftNoteView = { draftId: string; otherPacks: { title: string; packLabel: string | null }[] };
@@ -193,5 +200,36 @@ export class TextInputRequestConflictError extends Error {
   constructor() {
     super('Этот запрос уже отправлен с другим текстом. Отправьте текст заново.');
     this.name = 'TextInputRequestConflictError';
+  }
+}
+
+// text-price-update §3.5: per held line acted on — what the Seller saw, the one chosen card and the price.
+export const priceProposalBodySchema = z.object({
+  lines: z.array(z.object({
+    index: z.number().int().min(0).max(59),
+    shown: z.array(z.object({ offerId: z.uuid(), revision: z.number().int().min(1) }).strict()).max(60),
+    offerId: z.uuid(),
+    price: z.string().trim().min(1).max(40),
+  }).strict()).min(1).max(60),
+}).strict();
+
+export type PriceProposalBody = z.infer<typeof priceProposalBodySchema>;
+
+// The cards changed since they were shown (or no longer pass §3.1): nothing created, the review is reloaded.
+export class TextPriceChangedError extends Error {
+  readonly code = 'TEXT_PRICE_CHANGED' as const;
+  constructor(readonly changed: number[]) {
+    super('Карточки изменились — выберите заново.');
+    this.name = 'TextPriceChangedError';
+  }
+}
+
+// A request the server refuses whatever the cards are: a price that is not the line's, or two prices for one card.
+export class TextPriceRejectedError extends Error {
+  constructor(readonly code: 'TEXT_PRICE_NOT_ALLOWED' | 'TEXT_PRICE_SAME_CARD_CONFLICT', readonly indexes: number[]) {
+    super(code === 'TEXT_PRICE_SAME_CARD_CONFLICT'
+      ? 'Две строки предлагают разные цены для одной карточки — оставьте одну.'
+      : 'Эта цена не из вашего текста.');
+    this.name = 'TextPriceRejectedError';
   }
 }
