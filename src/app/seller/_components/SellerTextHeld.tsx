@@ -156,7 +156,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
           {offerable
             ? (
               <button type="button" role="radio" aria-checked={selected} aria-label={name} onClick={select}
-                style={{ appearance: 'none', background: 'none', border: 0, padding: 10, margin: -10, cursor: 'pointer' }} data-testid="price-choice">
+                style={{ appearance: 'none', background: 'none', border: 0, padding: 10, margin: -10, cursor: 'pointer', flex: 'none', display: 'inline-flex' }} data-testid="price-choice">
                 <Radio on={selected} />
               </button>
             )
