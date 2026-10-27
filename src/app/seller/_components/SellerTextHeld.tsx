@@ -228,7 +228,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
                   </div>
                 </div>
               )}
-              {changed.has(line.index) && warn(t('price.changed'), 'price-changed')}
+              {(changed.has(line.index) || line.priceProposal?.state === 'stale') && warn(t('price.changed'), 'price-changed')}
               {rejected?.code === 'TEXT_PRICE_SAME_CARD_CONFLICT' && rejected.indexes.has(line.index) && warn(t('price.sameCard'))}
               {clashes.has(line.index) && warn(t('price.sameCard'), 'price-same-card')}
               {line.priceProposal?.state === 'applied' && <p className="c" role="status" style={{ color: 'var(--success)' }} data-testid="price-applied">{t('price.applied', { price: price(line.priceProposal.price) })}</p>}

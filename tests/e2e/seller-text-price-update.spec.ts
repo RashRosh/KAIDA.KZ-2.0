@@ -126,4 +126,28 @@ test.describe('a new price from the text list', () => {
     await expect(page).toHaveURL(new RegExp(first.split('?')[0]!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     expect([await changeSets(phone), await priceOf(ids.prosto)]).toEqual([1, '1200']);
   });
+
+  // Regression (PO stand, 2026-10-28): after a refused confirm and «Отмена» the card was pre-selected again.
+  test('a confirm refused by a price changed in another tab → «Отмена» → the Seller chooses again, nothing pre-selected', async ({ page }) => {
+    const phone = phoneFor(3);
+    const ids = await seed(page, phone);
+    await submitList(page, ids.pointA, 'Пельмени 1600 за упаковку 500 г.');
+    await page.getByTestId('price-submit').click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+/);
+    await withPool((pool) => pool.query("UPDATE offers SET price_amount='1570', revision=revision+1 WHERE id=$1", [ids.pelmA]));
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
+    await page.getByRole('button', { name: 'Отмена' }).click();
+
+    await expect(page).toHaveURL(/text-input\/review\?input=/);
+    await expect(page.getByTestId('price-changed')).toBeVisible();
+    await expect(page.getByTestId(`held-candidate-${ids.pelmA}`).getByRole('radio')).toHaveAttribute('aria-checked', 'false');
+    await expect(page.getByTestId('price-submit')).toBeDisabled();
+    expect([await priceOf(ids.pelmA), await changeSets(phone)]).toEqual(['1570', 1]);
+
+    await page.getByTestId(`held-candidate-${ids.pelmA}`).getByRole('radio').click();
+    await page.getByTestId('price-submit').click();
+    await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+/);
+    await expect(page.getByText('1 570 ₸ → 1 600 ₸')).toBeVisible();
+    expect(await changeSets(phone)).toBe(2);
+  });
 });

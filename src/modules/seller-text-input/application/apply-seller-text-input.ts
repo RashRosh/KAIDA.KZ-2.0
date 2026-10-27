@@ -147,22 +147,25 @@ async function duplicatesOf(database: Database, ownerUserId: string, result: Sel
   for (const proposal of result.priceProposals ?? []) {
     for (const item of proposal.items) latestByLine.set(item.index, { changeSetId: proposal.changeSetId, offerId: item.offerId, price: item.price });
   }
-  const held: HeldLineView[] = heldLines.map((entry, index) => ({
-    index,
-    quote: entry.line.sourceQuote ?? entry.line.title,
-    title: entry.line.title,
-    linePrice: entry.line.price && !duplicateInput(entry.line).uncertain.includes('price') ? entry.line.price : null,
-    priceChoices: entry.line.priceChoices ?? null,
-    mergedFragments: entry.line.mergedFragments ?? null,
-    possiblyMerged: duplicateInput(entry.line).possiblyMerged === true,
-    outcome: duplicateOutcome(heldChecks[index]!.candidates),
-    candidates: heldChecks[index]!.candidates,
-    draftId: entry.draftId && present.has(entry.draftId) ? entry.draftId : null,
-    pricePreselect: preselectedForPrice(duplicateInput(entry.line), heldChecks[index]!.candidates),
-    priceProposal: latestByLine.has(index)
-      ? { ...latestByLine.get(index)!, state: states.get(latestByLine.get(index)!.changeSetId) ?? 'stale' }
-      : null,
-  }));
+  const held: HeldLineView[] = heldLines.map((entry, index) => {
+    const latest = latestByLine.get(index);
+    const priceProposal = latest ? { ...latest, state: states.get(latest.changeSetId) ?? 'stale' as const } : null;
+    return {
+      index,
+      quote: entry.line.sourceQuote ?? entry.line.title,
+      title: entry.line.title,
+      linePrice: entry.line.price && !duplicateInput(entry.line).uncertain.includes('price') ? entry.line.price : null,
+      priceChoices: entry.line.priceChoices ?? null,
+      mergedFragments: entry.line.mergedFragments ?? null,
+      possiblyMerged: duplicateInput(entry.line).possiblyMerged === true,
+      outcome: duplicateOutcome(heldChecks[index]!.candidates),
+      candidates: heldChecks[index]!.candidates,
+      draftId: entry.draftId && present.has(entry.draftId) ? entry.draftId : null,
+      // §3.5: after a refused or stale proposal the Seller chooses again — the card is never re-selected for them.
+      pricePreselect: priceProposal?.state === 'stale' ? null : preselectedForPrice(duplicateInput(entry.line), heldChecks[index]!.candidates),
+      priceProposal,
+    };
+  });
   const pricePendingChangeSetIds = [...new Set(held.flatMap((line) => (line.priceProposal?.state === 'pending' ? [line.priceProposal.changeSetId] : [])))];
   const draftChecks = await checkDuplicates(ownerUserId, locationId, drafts.map((draft) => ({
     title: draft.payload.title, price: draft.payload.price || null, unit: draft.payload.unit, pack: draft.payload.pack, uncertain: [],

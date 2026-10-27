@@ -146,7 +146,8 @@ describe('proposal, confirmation and repetition (AC 5–7)', () => {
     expect((await row(seed.pelmA)).price_amount).toBe('1450');
     await expect(propose(result.inputId, [pick(result.held[0]!, seed.pelmA, '1500')])).rejects.toBeInstanceOf(TextPriceChangedError);
     const fresh = (await getSellerTextSubmission(A.id, result.inputId, { database: db }))!.held[0]!;
-    expect(fresh.priceProposal?.state).toBe('stale');
+    // Regression (PO stand, 2026-10-28): after the refused confirm and «Отмена» the card was pre-selected again.
+    expect([fresh.priceProposal?.state, fresh.pricePreselect]).toEqual(['stale', null]);
     const second = await propose(result.inputId, [pick(fresh, seed.pelmA, '1500')]);
     expect([second.created, second.changeSetId !== first.changeSetId]).toEqual([true, true]);
   });
