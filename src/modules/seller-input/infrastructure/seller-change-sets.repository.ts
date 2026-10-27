@@ -320,3 +320,28 @@ export async function findDeactivationItems(
     ? [{ changeSetId: row.changeSetId, changeSetStatus: row.changeSetStatus, offerId: row.offerId, expectedRevision: row.expectedRevision }]
     : []));
 }
+
+// text-price-update §3.5: the price items of the given proposals of this Seller, with each proposal's current status.
+export async function findPriceUpdateItems(
+  database: Pick<Database, 'select'>,
+  sellerId: string,
+  changeSetIds: string[],
+): Promise<(TrackedAvailabilityItem & { priceAmount: string | null })[]> {
+  if (changeSetIds.length === 0) return [];
+  const rows = await database.select({
+    changeSetId: sellerChangeItems.changeSetId,
+    changeSetStatus: sellerChangeSets.status,
+    offerId: sellerChangeItems.targetOfferId,
+    expectedRevision: sellerChangeItems.expectedOfferRevision,
+    priceAmount: sellerChangeItems.priceAmount,
+  }).from(sellerChangeItems)
+    .innerJoin(sellerChangeSets, eq(sellerChangeSets.id, sellerChangeItems.changeSetId))
+    .where(and(
+      eq(sellerChangeSets.sellerId, sellerId),
+      inArray(sellerChangeSets.id, changeSetIds),
+      eq(sellerChangeItems.action, 'update_offer'),
+    ));
+  return rows.flatMap((row) => (row.offerId !== null && row.expectedRevision !== null
+    ? [{ changeSetId: row.changeSetId, changeSetStatus: row.changeSetStatus, offerId: row.offerId, expectedRevision: row.expectedRevision, priceAmount: row.priceAmount }]
+    : []));
+}
