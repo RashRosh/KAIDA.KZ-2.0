@@ -1,8 +1,9 @@
 # Text price update — a new price from the text list updates one existing card after confirmation — Slice Contract
 
-**Status:** APPROVED, revision 2 (PO 2026-10-27, D-1–D-5). Implementation authorized by the PO on 2026-10-27 on a
-separate branch, with the three implementation conditions of §3.5 (recorded there without a new approval round, as the
-PO asked); merge and checkpoint tag need a separate PO instruction. PO manual acceptance is pending.
+**Status:** CLOSED (PO 2026-10-28). Approved as revision 2 (PO 2026-10-27, D-1–D-5) with the three implementation
+conditions of §3.5 (recorded without a new approval round, as the PO asked); PO acceptance 2026-10-28 (§12); merged
+through PR #199 (head `a40805a4`); annotated checkpoint `v0.0.85-text-price-update` on the merge commit (merge SHA and
+merged-main CI: `docs/agents/CURRENT_STATE.md`). Production text input stays `off`.
 
 **Preview:** [preview.html](preview.html), screenshots `1-clear-match.png` … `6-confirm.png` (static, synthetic, shipped
 seller CSS, mobile RU; not runtime proof).
@@ -215,3 +216,35 @@ gets a price proposal.
 
 Switching on from text; unit or pack changes from text; common price for all points; voice, photo and video reuse of the
 same proposals (order not approved).
+
+## 12. Closure
+
+- **PO acceptance (2026-10-28):** the PO accepted the slice on the basis of the ChatGPT browser check, in the PO's
+  words: «я тебе верю». No check of their own is attributed to the PO.
+- **ChatGPT browser check (reported by the PO; not PO acceptance, not an agent check):** ChatGPT used the acceptance
+  stand in a browser. Its remark — after a confirm refused by a price changed in another tab (review
+  `248bd91a-6736-4dcc-a23e-e7258671f8ee`, proposal 1 550 → 1 600, price changed to 1 570) and «Отмена», the card was
+  pre-selected again — was fixed in `a40805a4` and, per the PO, re-checked by ChatGPT on the fixed stand. ChatGPT left one
+  unconfirmed proposal `7fb93927-b729-46bf-8870-2a0b0d9bf8e0` in the stand database; it was not applied and was dropped
+  with the database.
+- **Agent checks (not PO acceptance):** browser walk of the 6-step scenario on the stand over plain http
+  ([ACCEPTANCE.md](ACCEPTANCE.md); the «other tab» of step 6 simulated by a DB write); it found the radio drawn as a thin
+  bar, fixed in `5ec01e62`. After `a40805a4` the agent opened the PO's review `248bd91a…` on the fixed stand: nothing
+  selected, «Карточки изменились — выберите заново» shown, «Обновить цены · 0» disabled.
+- **Stand = final code:** the stand ran a production build made at 01:36 on 2026-10-28 from the working tree whose
+  source equals `a40805a4` (committed 01:43 with the same source edits plus `ACCEPTANCE.md` and `CURRENT_STATE.md`; no
+  source change after the build).
+- **Automated:** PR #199 at `a40805a4` — KAIDA verify 40580574325 (PR) green; KAIDA verify 40580564699 (push) green on
+  attempt 2 (attempt 1 failed only `search-typo-correction.spec.ts:100`, the known O-CI-FLAKE-TYPO; the same test passed in
+  the PR run on the same SHA; search code untouched); CodeQL and Dependency review green. Locally: unit 725/725,
+  integration 422/422 on a fresh test DB (incl. price update 10/10), price/duplicates/availability mobile E2E 8/8 with one
+  worker. The stale regression assertion fails without the fix.
+- **Diff audit:** price eligibility and pre-selection in `seller-input` matching; `createPriceUpdateChangeSet` (existing
+  `update_offer` items through `prepareItem`); the held-price route and `proposeTextPrices` in `seller-text-input`; review
+  UI, confirm-screen price rows, i18n. Confirm semantics, the revision guard, the offers repository, the DB schema
+  (additive JSON in the submission result only, no migration) and the reducer, prompt, parser and model files are
+  unchanged.
+- **Known limitations:** the fake test parser takes the first number as the price (write the price before the pack;
+  test parser only). A refused or stale proposal is never pre-selected again; the Seller chooses by hand.
+- **Not verified:** a live model (fake parser and replay only); Kazakh strings (provisional); phone browsers other than
+  the stand runs; a real second-tab edit in the agent walk (simulated by a DB write; the PO's remark came from a real one).
