@@ -1,0 +1,33 @@
+{
+  "ggerganov/whisper.cpp": {
+    "revision": "5359861c739e955e79d9a303bcbc70fb988958b1",
+    "license": "mit",
+    "files": {
+      "ggml-base.bin": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe"
+    }
+  },
+  "Systran/faster-whisper-base": {
+    "revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66",
+    "license": "mit",
+    "files": {
+      "config.json": "56a6d8110d311f19c8f0471e562832c7527f146b567275bfca59fcf7c184da9a",
+      "model.bin": "d01c3014881c9c6f3133c182f3d2887eb6ca1c789a7538c5c007196857a0a6a9",
+      "tokenizer.json": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab",
+      "vocabulary.txt": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913"
+    }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct-GGUF": {
+    "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+    "license": "apache-2.0",
+    "files": {
+      "qwen2.5-0.5b-instruct-q4_k_m.gguf": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
+    }
+  },
+  "Qwen/Qwen2.5-1.5B-Instruct-GGUF": {
+    "revision": "91cad51170dc346986eccefdc2dd33a9da36ead9",
+    "license": "apache-2.0",
+    "files": {
+      "qwen2.5-1.5b-instruct-q4_k_m.gguf": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
+    }
+  }
+}

@@ -1,0 +1,187 @@
+﻿{
+    "Decision":  "STOP if available physical memory below planned 2048 MiB; no benchmark/download started",
+    "Samples":  [
+                    {
+                        "TimestampUtc":  "2026-10-09T15:00:02.2204195Z",
+                        "FreePhysicalKiB":  532500,
+                        "FreeVirtualKiB":  19626680,
+                        "Memory":  {
+                                       "AvailableMBytes":  520,
+                                       "CommittedBytes":  30150737920,
+                                       "CommitLimit":  50244902912,
+                                       "PercentCommittedBytesInUse":  60,
+                                       "CacheBytes":  77598720,
+                                       "PoolPagedBytes":  945537024,
+                                       "PoolNonpagedBytes":  903311360,
+                                       "SystemCacheResidentBytes":  77598720,
+                                       "ModifiedPageListBytes":  376832,
+                                       "StandbyCacheCoreBytes":  22155264,
+                                       "StandbyCacheNormalPriorityBytes":  520077312,
+                                       "StandbyCacheReserveBytes":  1294336
+                                   }
+                    },
+                    {
+                        "TimestampUtc":  "2026-10-09T15:00:03.6313956Z",
+                        "FreePhysicalKiB":  462076,
+                        "FreeVirtualKiB":  19568900,
+                        "Memory":  {
+                                       "AvailableMBytes":  422,
+                                       "CommittedBytes":  30153560064,
+                                       "CommitLimit":  50244902912,
+                                       "PercentCommittedBytesInUse":  60,
+                                       "CacheBytes":  77156352,
+                                       "PoolPagedBytes":  945524736,
+                                       "PoolNonpagedBytes":  904626176,
+                                       "SystemCacheResidentBytes":  77156352,
+                                       "ModifiedPageListBytes":  11177984,
+                                       "StandbyCacheCoreBytes":  22118400,
+                                       "StandbyCacheNormalPriorityBytes":  418758656,
+                                       "StandbyCacheReserveBytes":  0
+                                   }
+                    },
+                    {
+                        "TimestampUtc":  "2026-10-09T15:00:05.0320545Z",
+                        "FreePhysicalKiB":  343628,
+                        "FreeVirtualKiB":  19774192,
+                        "Memory":  {
+                                       "AvailableMBytes":  339,
+                                       "CommittedBytes":  29999230976,
+                                       "CommitLimit":  50244902912,
+                                       "PercentCommittedBytesInUse":  59,
+                                       "CacheBytes":  78602240,
+                                       "PoolPagedBytes":  944852992,
+                                       "PoolNonpagedBytes":  908636160,
+                                       "SystemCacheResidentBytes":  78602240,
+                                       "ModifiedPageListBytes":  38010880,
+                                       "StandbyCacheCoreBytes":  21962752,
+                                       "StandbyCacheNormalPriorityBytes":  318664704,
+                                       "StandbyCacheReserveBytes":  12800000
+                                   }
+                    }
+                ],
+    "ProcessGroups":  [
+                          {
+                              "Name":  "chrome",
+                              "Count":  25,
+                              "WorkingSetMiB":  990.7,
+                              "PrivateCommitMiB":  4000
+                          },
+                          {
+                              "Name":  "Code",
+                              "Count":  28,
+                              "WorkingSetMiB":  888.8,
+                              "PrivateCommitMiB":  4783.1
+                          },
+                          {
+                              "Name":  "vmmemWSL",
+                              "Count":  1,
+                              "WorkingSetMiB":  493.1,
+                              "PrivateCommitMiB":  1976.8
+                          },
+                          {
+                              "Name":  "svchost",
+                              "Count":  87,
+                              "WorkingSetMiB":  318.4,
+                              "PrivateCommitMiB":  613.1
+                          },
+                          {
+                              "Name":  "ChatGPT",
+                              "Count":  12,
+                              "WorkingSetMiB":  241.5,
+                              "PrivateCommitMiB":  1954.1
+                          },
+                          {
+                              "Name":  "MsMpEng",
+                              "Count":  1,
+                              "WorkingSetMiB":  204.9,
+                              "PrivateCommitMiB":  511.3
+                          },
+                          {
+                              "Name":  "com.docker.backend",
+                              "Count":  2,
+                              "WorkingSetMiB":  150.8,
+                              "PrivateCommitMiB":  281
+                          },
+                          {
+                              "Name":  "codex",
+                              "Count":  3,
+                              "WorkingSetMiB":  134.6,
+                              "PrivateCommitMiB":  353
+                          },
+                          {
+                              "Name":  "claude",
+                              "Count":  1,
+                              "WorkingSetMiB":  130.7,
+                              "PrivateCommitMiB":  740.5
+                          },
+                          {
+                              "Name":  "Docker Desktop",
+                              "Count":  5,
+                              "WorkingSetMiB":  112.7,
+                              "PrivateCommitMiB":  391.9
+                          },
+                          {
+                              "Name":  "msedgewebview2",
+                              "Count":  12,
+                              "WorkingSetMiB":  108.1,
+                              "PrivateCommitMiB":  527.8
+                          },
+                          {
+                              "Name":  "WmiPrvSE",
+                              "Count":  3,
+                              "WorkingSetMiB":  91.9,
+                              "PrivateCommitMiB":  58.6
+                          },
+                          {
+                              "Name":  "dwm",
+                              "Count":  1,
+                              "WorkingSetMiB":  89.6,
+                              "PrivateCommitMiB":  1187.3
+                          },
+                          {
+                              "Name":  "powershell",
+                              "Count":  3,
+                              "WorkingSetMiB":  87.1,
+                              "PrivateCommitMiB":  176.1
+                          },
+                          {
+                              "Name":  "explorer",
+                              "Count":  1,
+                              "WorkingSetMiB":  81.1,
+                              "PrivateCommitMiB":  557.8
+                          },
+                          {
+                              "Name":  "Telegram",
+                              "Count":  1,
+                              "WorkingSetMiB":  47.2,
+                              "PrivateCommitMiB":  1757.2
+                          },
+                          {
+                              "Name":  "Memory Compression",
+                              "Count":  1,
+                              "WorkingSetMiB":  45.1,
+                              "PrivateCommitMiB":  15.8
+                          },
+                          {
+                              "Name":  "Secure System",
+                              "Count":  1,
+                              "WorkingSetMiB":  41.5,
+                              "PrivateCommitMiB":  0.2
+                          }
+                      ],
+    "ProcessTotals":  {
+                          "WorkingSetMiB":  4732.3,
+                          "PrivateCommitMiB":  23524
+                      },
+    "WslMeminfo":  "MemTotal:        3869328 kB\nMemFree:         2389388 kB\nMemAvailable:    2771352 kB\nBuffers:            2456 kB\nCached:           343888 kB\nSwapCached:        16000 kB\nActive:           452952 kB\nInactive:         468436 kB\nActive(anon):     350920 kB\nInactive(anon):   229820 kB\nActive(file):     102032 kB\nInactive(file):   238616 kB\nUnevictable:           0 kB\nMlocked:               0 kB\nSwapTotal:       1048576 kB\nSwapFree:         816172 kB\nDirty:                 0 kB\nWriteback:             0 kB\nAnonPages:        570968 kB\nMapped:            89528 kB\nShmem:              5320 kB\nKReclaimable:     131684 kB\nSlab:             225176 kB\nSReclaimable:     131684 kB\nSUnreclaim:        93492 kB\nKernelStack:        5984 kB\nPageTables:         8740 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     2983240 kB\nCommitted_AS:    2849968 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       33696 kB\nVmallocChunk:          0 kB\nPercpu:             7424 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:       52224 kB\nDirectMap2M:     2951168 kB\nDirectMap1G:     9437184 kB",
+    "DockerStats":  "kaidakz-20-postgres-1 30.48MiB / 3.69GiB 0.81%",
+    "DockerMemoryBytes":  "3962191872",
+    "Interpretation":  "Process working sets may include shared pages. Private commit is not resident RAM. WSL Linux cache/available is not an instruction to reclaim or restart WSL.",
+    "FinalPreflight":  {
+                           "TimestampUtc":  "2026-10-09T15:01:48.7743420Z",
+                           "AvailableMiB":  460,
+                           "CommitHeadroomMiB":  19382.9,
+                           "ThresholdMiB":  2048,
+                           "Sufficient":  false
+                       }
+}

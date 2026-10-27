@@ -1,0 +1,4047 @@
+[
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "ru-single",
+    "text": "Морковь триста тенге за килограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 46,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "ru-multi",
+    "text": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 50,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": 50,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 78,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "ru-ambiguous",
+    "text": "Сыр две пятьсот. Единицу уточню потом.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "piece",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 77,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "kk-single",
+    "text": "Сәбіз килограмы үш жүз теңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "kk-multi",
+    "text": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 77,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "kk-ambiguous",
+    "text": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 77,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "mixed-single",
+    "text": "Морковь. Килограмы үш жүз теңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 43,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "mixed-multi",
+    "text": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 54,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "mixed-missing",
+    "text": "Форель за килограмм. Бағасын кейін айтамын.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 73,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-single",
+    "text": "и стартинги на геограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-multi",
+    "text": "Каковидность и отеца, тень дилакия, бран. Я облакет, отецов, тень дилакия, бран.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 153,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 8,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 1
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-ambiguous",
+    "text": "сытнее отсот, единицу тачню потом.",
+    "items": [],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "length",
+    "completion_tokens": 256,
+    "error": "JSONDecodeError('Unterminated string starting at: line 49 column 7 (char 831)')",
+    "field_correct": 0,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-single",
+    "text": "Сәміз көйлғамың шустінге",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-multi",
+    "text": "Ақтол, көй лұбғамыне көзюзе лұтенге. Алмары көй лұбғамыбе сүзтенге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-ambiguous",
+    "text": "жәпінші кер көбеес жөпін керің айтамін",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-single",
+    "text": "Markov, Kellogg-Gamos, who's being here.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-multi",
+    "text": "Kato, kayu, gamma, keju, melu, denger, makostor, bosin, gisat, tiendi, naikler.",
+    "items": [],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "length",
+    "completion_tokens": 256,
+    "error": "JSONDecodeError('Expecting property name enclosed in double quotes: line 49 column 1 (char 805)')",
+    "field_correct": 0,
+    "field_total": 8,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-missing",
+    "text": "ฟะเที่ยนรัม บ้าราสนเที่ยนหายธามัน",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-single",
+    "text": "Кофта из-за 10 геограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-multi",
+    "text": "Катофин из тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-ambiguous",
+    "text": "сытнее отсот. Единец утащил потом.",
+    "items": [],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "length",
+    "completion_tokens": 256,
+    "error": "JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 756 (char 755)')",
+    "field_correct": 0,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-single",
+    "text": "Сэмін кей лобгамо шустінгер.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-multi",
+    "text": "қақто қаңғамың қаң жәл қың қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қа",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-ambiguous",
+    "text": "өпінші кер кербе сюп өпін керің айтамын",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-single",
+    "text": "Markof, Kellogg-Gamersz, Józdy Engier.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-multi",
+    "text": "Kātob, kei loggāma, yā kēju mēl dēngē, mā kostobosigisat tēngē līgēr.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 142,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 8,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-missing",
+    "text": "ฟัยศัคิดอรัม บาทราสนคิดเยอะหายตามัน",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "ru-single",
+    "text": "Морковь триста тенге за килограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 46,
+    "error": null,
+    "field_correct": 4,
+    "field_total": 4,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "ru-multi",
+    "text": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 79,
+    "error": null,
+    "field_correct": 7,
+    "field_total": 8,
+    "nonnull_fact_correct": 5,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "ru-ambiguous",
+    "text": "Сыр две пятьсот. Единицу уточню потом.",
+    "items": [
+      {
+        "product": "cheese",
+        "price": 250,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 46,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "kk-single",
+    "text": "Сәбіз килограмы үш жүз теңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 43,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "kk-multi",
+    "text": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 2,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 1,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 75,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "kk-ambiguous",
+    "text": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 41,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "mixed-single",
+    "text": "Морковь. Килограмы үш жүз теңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 2,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 44,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "mixed-multi",
+    "text": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 2,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 80,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 78,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "reference-diagnostic",
+    "id": "mixed-missing",
+    "text": "Форель за килограмм. Бағасын кейін айтамын.",
+    "items": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 43,
+    "error": null,
+    "field_correct": 4,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 2,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-single",
+    "text": "и стартинги на геограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 170,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 4,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-multi",
+    "text": "Каковидность и отеца, тень дилакия, бран. Я облакет, отецов, тень дилакия, бран.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 170,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-ambiguous",
+    "text": "сытнее отсот, единицу тачню потом.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 139,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-single",
+    "text": "Сәміз көйлғамың шустінге",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-multi",
+    "text": "Ақтол, көй лұбғамыне көзюзе лұтенге. Алмары көй лұбғамыбе сүзтенге.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 106,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 8,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 6,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-ambiguous",
+    "text": "жәпінші кер көбеес жөпін керің айтамін",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 42,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-single",
+    "text": "Markov, Kellogg-Gamos, who's being here.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 202,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 5,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-multi",
+    "text": "Kato, kayu, gamma, keju, melu, denger, makostor, bosin, gisat, tiendi, naikler.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 202,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 8,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 6,
+    "extra_items": 4,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-missing",
+    "text": "ฟะเที่ยนรัม บ้าราสนเที่ยนหายธามัน",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 42,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-single",
+    "text": "Кофта из-за 10 геограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 43,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-multi",
+    "text": "Катофин из тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя",
+    "items": [],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "length",
+    "completion_tokens": 256,
+    "error": "JSONDecodeError('Unterminated string starting at: line 49 column 7 (char 816)')",
+    "field_correct": 0,
+    "field_total": 8,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-ambiguous",
+    "text": "сытнее отсот. Единец утащил потом.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 42,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-single",
+    "text": "Сэмін кей лобгамо шустінгер.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 170,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 4,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-multi",
+    "text": "қақто қаңғамың қаң жәл қың қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қа",
+    "items": [],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "length",
+    "completion_tokens": 256,
+    "error": "JSONDecodeError('Unterminated string starting at: line 49 column 7 (char 816)')",
+    "field_correct": 0,
+    "field_total": 8,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-ambiguous",
+    "text": "өпінші кер кербе сюп өпін керің айтамын",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 41,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-single",
+    "text": "Markof, Kellogg-Gamersz, Józdy Engier.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 202,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 5,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-multi",
+    "text": "Kātob, kei loggāma, yā kēju mēl dēngē, mā kostobosigisat tēngē līgēr.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 106,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "robotic",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-missing",
+    "text": "ฟัยศัคิดอรัม บาทราสนคิดเยอะหายตามัน",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 42,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-single",
+    "text": "Марков 300 теньги за килограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-multi",
+    "text": "картофет 250 кг я блоки 500 кг",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-ambiguous",
+    "text": "и деницу точнюю потом.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 77,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-single",
+    "text": "Сәбіз кілғрағма ұшіздыңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 142,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-multi",
+    "text": "Артоп келайғраңа еқұрзейлыттенге, алма келайғраңа бейшістенге,",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 109,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-ambiguous",
+    "text": "енші ек кі біршість, бірші мін кейнайта мін.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 142,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-single",
+    "text": "Markov. Kilogramma, viš šiustingie.",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 77,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 3,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-multi",
+    "text": "Картуп кілавраме, Юкжділю Тинге. Молоко 180 тень кізаліта.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 180,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 50,
+    "error": null,
+    "field_correct": 0,
+    "field_total": 8,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-missing",
+    "text": "Karjevzikki logram. Ogas, minkinai tam.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 77,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-single",
+    "text": "Марков 305 кг.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-multi",
+    "text": "картофет 250 кг. Я блоки 500 кг.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-ambiguous",
+    "text": "42500, единицу уточню потом.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-single",
+    "text": "Себіз келіғра ма ұшіз түнге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-multi",
+    "text": "әртоп келғраңа и көзіл өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өті�",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 141,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-ambiguous",
+    "text": "өршемін кейнайта мін өршемін кейнайта мін",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-single",
+    "text": "Narkov! Kilogramma viššiustingie",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 142,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-multi",
+    "text": "картоп киловрамы и окружди лютинга. Молоко 180 теньги залита.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 85,
+    "error": null,
+    "field_correct": 5,
+    "field_total": 8,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 6,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-missing",
+    "text": "Karevzakilogram. Avasamkii naitamin.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 101,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-single",
+    "text": "Марков 300 теньги за килограмм.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 46,
+    "error": null,
+    "field_correct": 4,
+    "field_total": 4,
+    "nonnull_fact_correct": 3,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-multi",
+    "text": "картофет 250 кг я блоки 500 кг",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 8,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "ru-ambiguous",
+    "text": "и деницу точнюю потом.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 42,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-single",
+    "text": "Сәбіз кілғрағма ұшіздыңге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 43,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-multi",
+    "text": "Артоп келайғраңа еқұрзейлыттенге, алма келайғраңа бейшістенге,",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 73,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 8,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "kk-ambiguous",
+    "text": "енші ек кі біршість, бірші мін кейнайта мін.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 73,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-single",
+    "text": "Markov. Kilogramma, viš šiustingie.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 75,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-multi",
+    "text": "Картуп кілавраме, Юкжділю Тинге. Молоко 180 тень кізаліта.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 180,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 113,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 8,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 6,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "whisper.cpp",
+    "id": "mixed-missing",
+    "text": "Karjevzikki logram. Ogas, minkinai tam.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 3,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-single",
+    "text": "Марков 305 кг.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 43,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-multi",
+    "text": "картофет 250 кг. Я блоки 500 кг.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 138,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 8,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 6,
+    "extra_items": 2,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "ru-ambiguous",
+    "text": "42500, единицу уточню потом.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 42500,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 51,
+    "error": null,
+    "field_correct": 1,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-single",
+    "text": "Себіз келіғра ма ұшіз түнге.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 170,
+    "error": null,
+    "field_correct": 3,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 4,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-multi",
+    "text": "әртоп келғраңа и көзіл өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өті�",
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 202,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 8,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 6,
+    "extra_items": 4,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "kk-ambiguous",
+    "text": "өршемін кейнайта мін өршемін кейнайта мін",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 170,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 0,
+    "nonnull_fact_total": 1,
+    "extra_items": 4,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-single",
+    "text": "Narkov! Kilogramma viššiustingie",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "gold": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 42,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 3,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-multi",
+    "text": "картоп киловрамы и окружди лютинга. Молоко 180 теньги залита.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 79,
+    "error": null,
+    "field_correct": 4,
+    "field_total": 8,
+    "nonnull_fact_correct": 2,
+    "nonnull_fact_total": 6,
+    "extra_items": 0,
+    "duplicate_item_count": 0
+  },
+  {
+    "corpus": "neural",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "source": "faster-whisper",
+    "id": "mixed-missing",
+    "text": "Karevzakilogram. Avasamkii naitamin.",
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "gold": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "finish_reason": "stop",
+    "completion_tokens": 74,
+    "error": null,
+    "field_correct": 2,
+    "field_total": 4,
+    "nonnull_fact_correct": 1,
+    "nonnull_fact_total": 2,
+    "extra_items": 1,
+    "duplicate_item_count": 0
+  }
+]

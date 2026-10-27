@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "carrot",
+              "potato",
+              "apple",
+              "cheese",
+              "milk",
+              "trout",
+              null
+            ]
+          },
+          "price": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "kg",
+              "liter",
+              "piece",
+              "package",
+              null
+            ]
+          },
+          "clarify": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "product",
+          "price",
+          "unit",
+          "clarify"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "additionalProperties": false
+}

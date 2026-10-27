@@ -1,0 +1,29 @@
+﻿{
+    "decision":  "STOP: insufficient available memory; no download or inference started",
+    "requiredAvailableHeadroomMiB":  2048,
+    "thresholdBasis":  "Prior approved experiment planning estimate, not a validated minimum",
+    "audioGate":  "PO passed three representative synthetic clips; generally intelligible, incorrect word stress in places, no content mismatch reported",
+    "samples":  [
+                    {
+                        "timestampUtc":  "2026-10-09T14:27:10.9184416Z",
+                        "totalPhysicalKiB":  8107288,
+                        "freePhysicalKiB":  104140,
+                        "totalVirtualKiB":  49067288,
+                        "freeVirtualKiB":  916848
+                    },
+                    {
+                        "timestampUtc":  "2026-10-09T14:27:12.0972679Z",
+                        "totalPhysicalKiB":  8107288,
+                        "freePhysicalKiB":  175780,
+                        "totalVirtualKiB":  49067288,
+                        "freeVirtualKiB":  916728
+                    },
+                    {
+                        "timestampUtc":  "2026-10-09T14:27:13.3024060Z",
+                        "totalPhysicalKiB":  8107288,
+                        "freePhysicalKiB":  59520,
+                        "totalVirtualKiB":  49067288,
+                        "freeVirtualKiB":  979288
+                    }
+                ]
+}

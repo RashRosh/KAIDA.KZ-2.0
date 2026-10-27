@@ -1,0 +1,33 @@
+# Weights, binaries, caches and private recordings never belong in research Git evidence.
+**/models/
+**/tools/
+**/venv/
+**/.venv/
+**/__pycache__/
+**/.cache/
+**/confidential/
+*.gguf
+*.bin
+*.onnx
+*.zip
+*.pyc
+*.wav
+# Only these hash-verified synthetic test recordings are allowed.
+!/baseline/audio/ru-single.wav
+!/baseline/audio/ru-multi.wav
+!/baseline/audio/ru-ambiguous.wav
+!/baseline/audio/kk-single.wav
+!/baseline/audio/kk-multi.wav
+!/baseline/audio/kk-ambiguous.wav
+!/baseline/audio/mixed-single.wav
+!/baseline/audio/mixed-multi.wav
+!/baseline/audio/mixed-missing.wav
+!/baseline/neural/audio/ru-single.wav
+!/baseline/neural/audio/ru-multi.wav
+!/baseline/neural/audio/ru-ambiguous.wav
+!/baseline/neural/audio/kk-single.wav
+!/baseline/neural/audio/kk-multi.wav
+!/baseline/neural/audio/kk-ambiguous.wav
+!/baseline/neural/audio/mixed-single.wav
+!/baseline/neural/audio/mixed-multi.wav
+!/baseline/neural/audio/mixed-missing.wav

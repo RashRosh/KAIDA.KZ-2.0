@@ -1,0 +1,3783 @@
+[
+  {
+    "id": "ru-single",
+    "source": "reference-diagnostic",
+    "text": "Морковь триста тенге за килограмм.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 2.9450094000203535,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 300,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551325,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 191,
+        "total_tokens": 237,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-Kiaq2yvRMt3vw2t83A29rJTEJvX7SAzR",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 191,
+        "prompt_ms": 1204.89,
+        "prompt_per_token_ms": 6.308324607329843,
+        "prompt_per_second": 158.52069483521316,
+        "predicted_n": 46,
+        "predicted_ms": 1722.786,
+        "predicted_per_token_ms": 38.28413333333334,
+        "predicted_per_second": 26.12048159202594
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 226.35546875,
+    "min_host_available_mib": 175.703125
+  },
+  {
+    "id": "ru-multi",
+    "source": "reference-diagnostic",
+    "text": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 3.0766974999569356,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 50,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": 50,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 3,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 50,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": 50,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551328,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 78,
+        "prompt_tokens": 210,
+        "total_tokens": 288,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-skQICGX8qjrkqWPsxCLIaSTy5zzSqNSA",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 39,
+        "prompt_ms": 335.928,
+        "prompt_per_token_ms": 8.613538461538461,
+        "prompt_per_second": 116.096306351361,
+        "predicted_n": 78,
+        "predicted_ms": 2722.668,
+        "predicted_per_token_ms": 35.35932467532468,
+        "predicted_per_second": 28.281083114063115
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 226.35546875,
+    "min_host_available_mib": 175.703125
+  },
+  {
+    "id": "ru-ambiguous",
+    "source": "reference-diagnostic",
+    "text": "Сыр две пятьсот. Единицу уточню потом.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 3.0960748000070453,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "piece",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 1,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"piece\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551331,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 77,
+        "prompt_tokens": 194,
+        "total_tokens": 271,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-veYfLjlruMj5LjOlyr4Yh2G80OnH5ViU",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 23,
+        "prompt_ms": 173.462,
+        "prompt_per_token_ms": 7.5418260869565215,
+        "prompt_per_second": 132.59388223357277,
+        "predicted_n": 77,
+        "predicted_ms": 2908.39,
+        "predicted_per_token_ms": 38.268289473684206,
+        "predicted_per_second": 26.131296009132203
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 175.703125
+  },
+  {
+    "id": "kk-single",
+    "source": "reference-diagnostic",
+    "text": "Сәбіз килограмы үш жүз теңге.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 4.640866799978539,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551336,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 138,
+        "prompt_tokens": 195,
+        "total_tokens": 333,
+        "prompt_tokens_details": {
+          "cached_tokens": 172
+        }
+      },
+      "id": "chatcmpl-f9DVKfYYvjNJZkP7ZEAIrWmpc07RbIif",
+      "timings": {
+        "cache_n": 172,
+        "prompt_n": 23,
+        "prompt_ms": 176.435,
+        "prompt_per_token_ms": 7.671086956521739,
+        "prompt_per_second": 130.35962252387563,
+        "predicted_n": 138,
+        "predicted_ms": 4449.697,
+        "predicted_per_token_ms": 32.4795401459854,
+        "predicted_per_second": 30.788613247149186
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 175.703125
+  },
+  {
+    "id": "kk-multi",
+    "source": "reference-diagnostic",
+    "text": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 3.0021761000389233,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 1,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\": [{\"product\": \"carrot\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"apple\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}]}"
+          }
+        }
+      ],
+      "created": 1791551339,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 77,
+        "prompt_tokens": 209,
+        "total_tokens": 286,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-oEnsDhMmpu64j1GzhWQwKt4IPoM3gjmL",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 38,
+        "prompt_ms": 347.277,
+        "prompt_per_token_ms": 9.138868421052631,
+        "prompt_per_second": 109.4227374689369,
+        "predicted_n": 77,
+        "predicted_ms": 2641.957,
+        "predicted_per_token_ms": 34.76259210526316,
+        "predicted_per_second": 28.766554489721067
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 175.703125
+  },
+  {
+    "id": "kk-ambiguous",
+    "source": "reference-diagnostic",
+    "text": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 3.3227777000283822,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "field_correct": 1,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 2,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\": [{\"product\": \"apple\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"carrot\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}]}"
+          }
+        }
+      ],
+      "created": 1791551342,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 77,
+        "prompt_tokens": 208,
+        "total_tokens": 285,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-N6RhaFl517RDb7kwYwpzHRul7Rp4SwkG",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 37,
+        "prompt_ms": 315.365,
+        "prompt_per_token_ms": 8.523378378378379,
+        "prompt_per_second": 117.32437017424253,
+        "predicted_n": 77,
+        "predicted_ms": 2989.935,
+        "predicted_per_token_ms": 39.34125,
+        "predicted_per_second": 25.418612779207574
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 97.1484375
+  },
+  {
+    "id": "mixed-single",
+    "source": "reference-diagnostic",
+    "text": "Морковь. Килограмы үш жүз теңге.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 1.7928447000449523,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551344,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 195,
+        "total_tokens": 238,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-6I8agApcbDGiFIaL8EIbVRwkkDXXrsEP",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 24,
+        "prompt_ms": 166.653,
+        "prompt_per_token_ms": 6.943874999999999,
+        "prompt_per_second": 144.0118089683354,
+        "predicted_n": 43,
+        "predicted_ms": 1588.596,
+        "predicted_per_token_ms": 37.82371428571429,
+        "predicted_per_second": 26.438439980964326
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 97.1484375
+  },
+  {
+    "id": "mixed-multi",
+    "source": "reference-diagnostic",
+    "text": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 2.466618600068614,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\": [{\"product\": \"carrot\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}]}"
+          }
+        }
+      ],
+      "created": 1791551346,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 54,
+        "prompt_tokens": 210,
+        "total_tokens": 264,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-vtCVQDzkquXttNCDuyJJ7Olmpp2vEwdk",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 39,
+        "prompt_ms": 343.746,
+        "prompt_per_token_ms": 8.814,
+        "prompt_per_second": 113.45586566825506,
+        "predicted_n": 54,
+        "predicted_ms": 2099.897,
+        "predicted_per_token_ms": 39.620698113207546,
+        "predicted_per_second": 25.239333167293445
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 97.1484375
+  },
+  {
+    "id": "mixed-missing",
+    "source": "reference-diagnostic",
+    "text": "Форель за килограмм. Бағасын кейін айтамын.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 3.30899849999696,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 1,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551350,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 73,
+        "prompt_tokens": 200,
+        "total_tokens": 273,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-Yz31sCZ29MuX1AcCd6EohbvjYhd64H78",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 29,
+        "prompt_ms": 253.38,
+        "prompt_per_token_ms": 8.737241379310344,
+        "prompt_per_second": 114.45260083668798,
+        "predicted_n": 73,
+        "predicted_ms": 3041.589,
+        "predicted_per_token_ms": 42.24429166666667,
+        "predicted_per_second": 23.67183731924333
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 97.1484375
+  },
+  {
+    "id": "ru-single",
+    "source": "whisper.cpp",
+    "text": "и стартинги на геограмм.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 6.772153900004923,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551356,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 187,
+        "total_tokens": 328,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-9Ce01eQOc4nsErY4n3djcYrVOdRPBTYm",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 16,
+        "prompt_ms": 117.829,
+        "prompt_per_token_ms": 7.3643125,
+        "prompt_per_second": 135.79000076381877,
+        "predicted_n": 141,
+        "predicted_ms": 6616.511,
+        "predicted_per_token_ms": 47.26079285714286,
+        "predicted_per_second": 21.159187976865752
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 235.86328125,
+    "min_host_available_mib": 75.47265625
+  },
+  {
+    "id": "ru-multi",
+    "source": "whisper.cpp",
+    "text": "Каковидность и отеца, тень дилакия, бран. Я облакет, отецов, тень дилакия, бран.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 7.075076200067997,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "package",
+        "clarify": false
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 4,
+    "invented_missing_fields": 0,
+    "extra_items": 2,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"package\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"package\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"package\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"package\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551364,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 153,
+        "prompt_tokens": 215,
+        "total_tokens": 368,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-AKI5GKpKV2uFW3QxpUoNDKd9ROs3aAJ2",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 44,
+        "prompt_ms": 368.065,
+        "prompt_per_token_ms": 8.365113636363636,
+        "prompt_per_second": 119.54410226454566,
+        "predicted_n": 153,
+        "predicted_ms": 6272.276,
+        "predicted_per_token_ms": 41.264973684210524,
+        "predicted_per_second": 24.233627474301194
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 236.58984375,
+    "min_host_available_mib": 75.47265625
+  },
+  {
+    "id": "ru-ambiguous",
+    "source": "whisper.cpp",
+    "text": "сытнее отсот, единицу тачню потом.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 9.167369800037704,
+    "items": [],
+    "field_correct": 0,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": "JSONDecodeError('Unterminated string starting at: line 49 column 7 (char 831)')",
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \""
+          }
+        }
+      ],
+      "created": 1791551373,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 256,
+        "prompt_tokens": 190,
+        "total_tokens": 446,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-wRWp3QjxYyB1CD5tyenfQBEJoL3UJDjv",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 19,
+        "prompt_ms": 138.24,
+        "prompt_per_token_ms": 7.275789473684211,
+        "prompt_per_second": 137.44212962962962,
+        "predicted_n": 256,
+        "predicted_ms": 9006.067,
+        "predicted_per_token_ms": 35.317909803921566,
+        "predicted_per_second": 28.314246385242306
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 236.58984375,
+    "min_host_available_mib": 75.47265625
+  },
+  {
+    "id": "kk-single",
+    "source": "whisper.cpp",
+    "text": "Сәміз көйлғамың шустінге",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 4.804170500021428,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551377,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 194,
+        "total_tokens": 335,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-xgu9fW6NZO2QD26QxLTCnn3TCrgZYWMx",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 23,
+        "prompt_ms": 181.603,
+        "prompt_per_token_ms": 7.895782608695653,
+        "prompt_per_second": 126.64989014498657,
+        "predicted_n": 141,
+        "predicted_ms": 4601.8,
+        "predicted_per_token_ms": 32.870000000000005,
+        "predicted_per_second": 30.422878004259204
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 241.203125,
+    "min_host_available_mib": 75.47265625
+  },
+  {
+    "id": "kk-multi",
+    "source": "whisper.cpp",
+    "text": "Ақтол, көй лұбғамыне көзюзе лұтенге. Алмары көй лұбғамыбе сүзтенге.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 5.183727400028147,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 2,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551383,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 219,
+        "total_tokens": 360,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-D8rtYfRTZ8J20s4Xpnpby0KPogC48A4s",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 48,
+        "prompt_ms": 322.642,
+        "prompt_per_token_ms": 6.721708333333333,
+        "prompt_per_second": 148.77170362197108,
+        "predicted_n": 141,
+        "predicted_ms": 4842.783,
+        "predicted_per_token_ms": 34.59130714285715,
+        "predicted_per_second": 28.90899716134297
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 241.3984375,
+    "min_host_available_mib": 75.47265625
+  },
+  {
+    "id": "kk-ambiguous",
+    "source": "whisper.cpp",
+    "text": "жәпінші кер көбеес жөпін керің айтамін",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 6.0806493000127375,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551389,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 203,
+        "total_tokens": 344,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-aittjqni0i8hF8dsSYiXrmbhv2GT8BFh",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 32,
+        "prompt_ms": 262.604,
+        "prompt_per_token_ms": 8.206375,
+        "prompt_per_second": 121.85648352652665,
+        "predicted_n": 141,
+        "predicted_ms": 5795.742,
+        "predicted_per_token_ms": 41.398157142857144,
+        "predicted_per_second": 24.15566462413268
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 245.38671875,
+    "min_host_available_mib": 54.7109375
+  },
+  {
+    "id": "mixed-single",
+    "source": "whisper.cpp",
+    "text": "Markov, Kellogg-Gamos, who's being here.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 9.903237599995919,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551399,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 189,
+        "total_tokens": 330,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-WD8skl0V7lNi8ja6tNDLC5NLIBQbTaKn",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 18,
+        "prompt_ms": 154.602,
+        "prompt_per_token_ms": 8.589,
+        "prompt_per_second": 116.42798928862497,
+        "predicted_n": 141,
+        "predicted_ms": 9663.253,
+        "predicted_per_token_ms": 69.02323571428572,
+        "predicted_per_second": 14.487874838835328
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 254.71875,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "mixed-multi",
+    "source": "whisper.cpp",
+    "text": "Kato, kayu, gamma, keju, melu, denger, makostor, bosin, gisat, tiendi, naikler.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 11.573432799894363,
+    "items": [],
+    "field_correct": 0,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": "JSONDecodeError('Expecting property name enclosed in double quotes: line 49 column 1 (char 805)')",
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n"
+          }
+        }
+      ],
+      "created": 1791551410,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 256,
+        "prompt_tokens": 211,
+        "total_tokens": 467,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-7KoUlsmdqVNALlW5EUvU0H2sYhpulCXz",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 40,
+        "prompt_ms": 419.515,
+        "prompt_per_token_ms": 10.487874999999999,
+        "prompt_per_second": 95.3481997068043,
+        "predicted_n": 256,
+        "predicted_ms": 11058.289,
+        "predicted_per_token_ms": 43.36583921568628,
+        "predicted_per_second": 23.059625227736408
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 254.71875,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "mixed-missing",
+    "source": "whisper.cpp",
+    "text": "ฟะเที่ยนรัม บ้าราสนเที่ยนหายธามัน",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 5.47386180004105,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551416,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 198,
+        "total_tokens": 339,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-b3z7UZU2awAQFAPqGHFNJMEz80nJsESt",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 27,
+        "prompt_ms": 234.218,
+        "prompt_per_token_ms": 8.67474074074074,
+        "prompt_per_second": 115.27722036735008,
+        "predicted_n": 141,
+        "predicted_ms": 5196.985,
+        "predicted_per_token_ms": 37.12132142857143,
+        "predicted_per_second": 26.938696186346508
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 255.328125,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "ru-single",
+    "source": "faster-whisper",
+    "text": "Кофта из-за 10 геограмм.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 3.880785399931483,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\": [{\"product\": \"carrot\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"apple\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"trout\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}]}"
+          }
+        }
+      ],
+      "created": 1791551420,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 101,
+        "prompt_tokens": 190,
+        "total_tokens": 291,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-7s8HA6WuhShWNn9J62pPwiJjXD4DJ4nc",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 19,
+        "prompt_ms": 167.465,
+        "prompt_per_token_ms": 8.813947368421053,
+        "prompt_per_second": 113.45654315827188,
+        "predicted_n": 101,
+        "predicted_ms": 3665.598,
+        "predicted_per_token_ms": 36.65598,
+        "predicted_per_second": 27.28067835043559
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 255.328125,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "ru-multi",
+    "source": "faster-whisper",
+    "text": "Катофин из тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 6.777898700092919,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 2,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551426,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 399,
+        "total_tokens": 540,
+        "prompt_tokens_details": {
+          "cached_tokens": 172
+        }
+      },
+      "id": "chatcmpl-eddt9RZHrtuiPZB39fd1sHM49JlYM37E",
+      "timings": {
+        "cache_n": 172,
+        "prompt_n": 227,
+        "prompt_ms": 1406.963,
+        "prompt_per_token_ms": 6.198074889867841,
+        "prompt_per_second": 161.34041904442404,
+        "predicted_n": 141,
+        "predicted_ms": 5325.206,
+        "predicted_per_token_ms": 38.03718571428571,
+        "predicted_per_second": 26.290062769402724
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 255.515625,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "ru-ambiguous",
+    "source": "faster-whisper",
+    "text": "сытнее отсот. Единец утащил потом.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 10.153769999975339,
+    "items": [],
+    "field_correct": 0,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": "JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 756 (char 755)')",
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\": [{\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null,"
+          }
+        }
+      ],
+      "created": 1791551437,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 256,
+        "prompt_tokens": 191,
+        "total_tokens": 447,
+        "prompt_tokens_details": {
+          "cached_tokens": 176
+        }
+      },
+      "id": "chatcmpl-9QUVqtpQztFIgzq0641qGso867sTcjZa",
+      "timings": {
+        "cache_n": 176,
+        "prompt_n": 15,
+        "prompt_ms": 134.864,
+        "prompt_per_token_ms": 8.990933333333334,
+        "prompt_per_second": 111.22315814450113,
+        "predicted_n": 256,
+        "predicted_ms": 9968.586,
+        "predicted_per_token_ms": 39.09249411764706,
+        "predicted_per_second": 25.580358137051736
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 258.24609375,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "kk-single",
+    "source": "faster-whisper",
+    "text": "Сэмін кей лобгамо шустінгер.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 6.0130937999347225,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551443,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 193,
+        "total_tokens": 334,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-2HxLrOkqQqsU6thWMjnTjvkaODsPeBcv",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 22,
+        "prompt_ms": 168.721,
+        "prompt_per_token_ms": 7.669136363636364,
+        "prompt_per_second": 130.39277861084275,
+        "predicted_n": 141,
+        "predicted_ms": 5820.339,
+        "predicted_per_token_ms": 41.57385,
+        "predicted_per_second": 24.053581758725738
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 261.86328125,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "kk-multi",
+    "source": "faster-whisper",
+    "text": "қақто қаңғамың қаң жәл қың қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қа",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 6.587721500080079,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 2,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551449,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 354,
+        "total_tokens": 495,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-VbTEqKfBTJMM8twp4ijLNLnrddfHP4zb",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 183,
+        "prompt_ms": 1236.266,
+        "prompt_per_token_ms": 6.755551912568307,
+        "prompt_per_second": 148.02639561388892,
+        "predicted_n": 141,
+        "predicted_ms": 5333.851,
+        "predicted_per_token_ms": 38.09893571428571,
+        "predicted_per_second": 26.247452356655632
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 261.86328125,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "kk-ambiguous",
+    "source": "faster-whisper",
+    "text": "өпінші кер кербе сюп өпін керің айтамын",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 5.066614600014873,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 1,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\": [{\"product\": \"carrot\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"apple\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}, {\"product\": \"milk\", \"price\": null, \"unit\": \"liter\", \"clarify\": false}, {\"product\": \"trout\", \"price\": null, \"unit\": \"kg\", \"clarify\": false}]}"
+          }
+        }
+      ],
+      "created": 1791551454,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 101,
+        "prompt_tokens": 204,
+        "total_tokens": 305,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-34VfXmwxsTusOMLWTukpuFnDCPnwV7ag",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 33,
+        "prompt_ms": 279.971,
+        "prompt_per_token_ms": 8.483969696969696,
+        "prompt_per_second": 117.86935075418525,
+        "predicted_n": 101,
+        "predicted_ms": 4757.322,
+        "predicted_per_token_ms": 47.57322,
+        "predicted_per_second": 21.020229448416565
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 267.5234375,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "mixed-single",
+    "source": "faster-whisper",
+    "text": "Markof, Kellogg-Gamersz, Józdy Engier.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 5.989196399925277,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551460,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 193,
+        "total_tokens": 334,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-zW7UnDRsSLip6GydhUj0JbvQKZZnKgoG",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 22,
+        "prompt_ms": 183.118,
+        "prompt_per_token_ms": 8.323545454545455,
+        "prompt_per_second": 120.14111119605938,
+        "predicted_n": 141,
+        "predicted_ms": 5784.561,
+        "predicted_per_token_ms": 41.31829285714286,
+        "predicted_per_second": 24.202355200334132
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 267.8125,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "mixed-multi",
+    "source": "faster-whisper",
+    "text": "Kātob, kei loggāma, yā kēju mēl dēngē, mā kostobosigisat tēngē līgēr.",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 6.235918399994262,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 3,
+    "invented_missing_fields": 0,
+    "extra_items": 2,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551466,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 142,
+        "prompt_tokens": 219,
+        "total_tokens": 361,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-vT8IiBwzDVzkGsScYspTGb9bcys4L0ly",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 48,
+        "prompt_ms": 445.271,
+        "prompt_per_token_ms": 9.276479166666666,
+        "prompt_per_second": 107.79951984297205,
+        "predicted_n": 142,
+        "predicted_ms": 5759.034,
+        "predicted_per_token_ms": 40.844212765957444,
+        "predicted_per_second": 24.483272715528337
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 272.68359375,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "mixed-missing",
+    "source": "faster-whisper",
+    "text": "ฟัยศัคิดอรัม บาทราสนคิดเยอะหายตามัน",
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "wall_s": 5.44288270000834,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551472,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-0.5B-Instruct-GGUF\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 194,
+        "total_tokens": 335,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-FNF94t9hTCDrbjSVNlUxFph16fPdjO4P",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 23,
+        "prompt_ms": 174.16,
+        "prompt_per_token_ms": 7.572173913043478,
+        "prompt_per_second": 132.06247129076712,
+        "predicted_n": 141,
+        "predicted_ms": 5228.527,
+        "predicted_per_token_ms": 37.34662142857143,
+        "predicted_per_second": 26.776183808556407
+      }
+    },
+    "peak_rss_mib": 502.16015625,
+    "peak_private_mib": 272.68359375,
+    "min_host_available_mib": 0.6171875
+  },
+  {
+    "id": "ru-single",
+    "source": "reference-diagnostic",
+    "text": "Морковь триста тенге за килограмм.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 8.014236400020309,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 4,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 300,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551486,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 191,
+        "total_tokens": 237,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-cLM4dfkzFHPfHSHvzTea8GVi4xO1jjxl",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 191,
+        "prompt_ms": 2436.3,
+        "prompt_per_token_ms": 12.755497382198953,
+        "prompt_per_second": 78.39757008578582,
+        "predicted_n": 46,
+        "predicted_ms": 5471.971,
+        "predicted_per_token_ms": 121.59935555555555,
+        "predicted_per_second": 8.223727793879025
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.04296875,
+    "min_host_available_mib": 0.65234375
+  },
+  {
+    "id": "ru-multi",
+    "source": "reference-diagnostic",
+    "text": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 19.77309520007111,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 7,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 250,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": 500,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551505,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 79,
+        "prompt_tokens": 210,
+        "total_tokens": 289,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-akQCnOgDIo3GoGYPoOUtXlNzjQIMbd8t",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 39,
+        "prompt_ms": 794.636,
+        "prompt_per_token_ms": 20.37528205128205,
+        "prompt_per_second": 49.079075199210706,
+        "predicted_n": 79,
+        "predicted_ms": 18853.369,
+        "predicted_per_token_ms": 241.70985897435895,
+        "predicted_per_second": 4.137191607505269
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.1640625,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-ambiguous",
+    "source": "reference-diagnostic",
+    "text": "Сыр две пятьсот. Единицу уточню потом.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 6.2339598999824375,
+    "items": [
+      {
+        "product": "cheese",
+        "price": 250,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 2,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"cheese\",\n      \"price\": 250,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551512,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 194,
+        "total_tokens": 240,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-z1SrxCpGZpbmihE4alv38gKpdX3uZdnq",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 23,
+        "prompt_ms": 496.413,
+        "prompt_per_token_ms": 21.583173913043478,
+        "prompt_per_second": 46.33238855549714,
+        "predicted_n": 46,
+        "predicted_ms": 5409.174,
+        "predicted_per_token_ms": 120.20386666666667,
+        "predicted_per_second": 8.319199936995926
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.25,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "kk-single",
+    "source": "reference-diagnostic",
+    "text": "Сәбіз килограмы үш жүз теңге.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 5.928940000012517,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551518,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 195,
+        "total_tokens": 238,
+        "prompt_tokens_details": {
+          "cached_tokens": 172
+        }
+      },
+      "id": "chatcmpl-FHT562g42u4oEW7JxMYyrrO9ax7UJPit",
+      "timings": {
+        "cache_n": 172,
+        "prompt_n": 23,
+        "prompt_ms": 927.587,
+        "prompt_per_token_ms": 40.32986956521739,
+        "prompt_per_second": 24.79551783282862,
+        "predicted_n": 43,
+        "predicted_ms": 4883.943,
+        "predicted_per_token_ms": 116.28435714285715,
+        "predicted_per_second": 8.599608963495273
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.4375,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "kk-multi",
+    "source": "reference-diagnostic",
+    "text": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 7.847175500006415,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 2,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 1,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 3,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 2,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": 1,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551525,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 75,
+        "prompt_tokens": 209,
+        "total_tokens": 284,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-Pr35uaB6UtvzWEEOlsLdIYovluVCdSkd",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 38,
+        "prompt_ms": 705.968,
+        "prompt_per_token_ms": 18.578105263157894,
+        "prompt_per_second": 53.826802347981776,
+        "predicted_n": 75,
+        "predicted_ms": 7076.193,
+        "predicted_per_token_ms": 95.62422972972973,
+        "predicted_per_second": 10.45760057703344
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.4375,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "kk-ambiguous",
+    "source": "reference-diagnostic",
+    "text": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 4.18180530006066,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551530,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 41,
+        "prompt_tokens": 208,
+        "total_tokens": 249,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-2UtYZTUiHAKHVAPOZkUOnFxuWbwUDuHI",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 37,
+        "prompt_ms": 711.212,
+        "prompt_per_token_ms": 19.221945945945947,
+        "prompt_per_second": 52.02386911356951,
+        "predicted_n": 41,
+        "predicted_ms": 3427.838,
+        "predicted_per_token_ms": 85.69595000000001,
+        "predicted_per_second": 11.669162895095974
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.45703125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "mixed-single",
+    "source": "reference-diagnostic",
+    "text": "Морковь. Килограмы үш жүз теңге.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 4.046052200021222,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 2,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 2,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551534,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 44,
+        "prompt_tokens": 195,
+        "total_tokens": 239,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-0d3HFYlwLD6mWLxuO6Dv9mQ33WEuUShj",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 24,
+        "prompt_ms": 365.696,
+        "prompt_per_token_ms": 15.237333333333334,
+        "prompt_per_second": 65.6282814140707,
+        "predicted_n": 44,
+        "predicted_ms": 3636.557,
+        "predicted_per_token_ms": 84.57109302325581,
+        "predicted_per_second": 11.824371239059364
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.45703125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "mixed-multi",
+    "source": "reference-diagnostic",
+    "text": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 8.827471200027503,
+    "items": [
+      {
+        "product": "carrot",
+        "price": 2,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 80,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 3,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 2,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": 80,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551543,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 78,
+        "prompt_tokens": 210,
+        "total_tokens": 288,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-ty7Fm8jZC2HpZgt0meaYy2hRItVBEHcS",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 39,
+        "prompt_ms": 615.401,
+        "prompt_per_token_ms": 15.779512820512819,
+        "prompt_per_second": 63.373312685549756,
+        "predicted_n": 78,
+        "predicted_ms": 8124.229,
+        "predicted_per_token_ms": 105.50946753246754,
+        "predicted_per_second": 9.477822449367196
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.703125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "mixed-missing",
+    "source": "reference-diagnostic",
+    "text": "Форель за килограмм. Бағасын кейін айтамын.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 4.932432499947026,
+    "items": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 4,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551548,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 200,
+        "total_tokens": 243,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-ugV2pauXZS1ZcZ2RgtgUv1aKfP7qqRtC",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 29,
+        "prompt_ms": 668.633,
+        "prompt_per_token_ms": 23.056310344827587,
+        "prompt_per_second": 43.372074067537795,
+        "predicted_n": 43,
+        "predicted_ms": 4079.26,
+        "predicted_per_token_ms": 97.1252380952381,
+        "predicted_per_second": 10.295985056113118
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.703125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-single",
+    "source": "whisper.cpp",
+    "text": "и стартинги на геограмм.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 19.32235909998417,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 4,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551567,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 170,
+        "prompt_tokens": 187,
+        "total_tokens": 357,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-bauTe25V03OIiKgQxIY69mjCJO40UBBV",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 16,
+        "prompt_ms": 226.918,
+        "prompt_per_token_ms": 14.182375,
+        "prompt_per_second": 70.51005208930098,
+        "predicted_n": 170,
+        "predicted_ms": 18715.022,
+        "predicted_per_token_ms": 110.739775147929,
+        "predicted_per_second": 9.030179072191313
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 873.765625,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-multi",
+    "source": "whisper.cpp",
+    "text": "Каковидность и отеца, тень дилакия, бран. Я облакет, отецов, тень дилакия, бран.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 17.172724399948493,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551584,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 170,
+        "prompt_tokens": 215,
+        "total_tokens": 385,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-eTisQiGSNZAajQovsZqj0fgLMEPaRp3S",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 44,
+        "prompt_ms": 1070.577,
+        "prompt_per_token_ms": 24.331295454545455,
+        "prompt_per_second": 41.09933241607096,
+        "predicted_n": 170,
+        "predicted_ms": 15854.341,
+        "predicted_per_token_ms": 93.81266863905326,
+        "predicted_per_second": 10.659541131353237
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 878.9140625,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-ambiguous",
+    "source": "whisper.cpp",
+    "text": "сытнее отсот, единицу тачню потом.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 12.441471200087108,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 1,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551596,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 139,
+        "prompt_tokens": 190,
+        "total_tokens": 329,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-n9ZrXSA98sOCx8MV2xxdgg3joMpMVYpJ",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 19,
+        "prompt_ms": 378.847,
+        "prompt_per_token_ms": 19.93931578947368,
+        "prompt_per_second": 50.15217224895539,
+        "predicted_n": 139,
+        "predicted_ms": 11929.772,
+        "predicted_per_token_ms": 86.4476231884058,
+        "predicted_per_second": 11.567698024740121
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 894.0546875,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "kk-single",
+    "source": "whisper.cpp",
+    "text": "Сәміз көйлғамың шустінге",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 11.45509950001724,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 3,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551608,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 138,
+        "prompt_tokens": 194,
+        "total_tokens": 332,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-uaMa521ODdaGq8wkWFFFu6UTvOJ7Uh9Q",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 23,
+        "prompt_ms": 357.416,
+        "prompt_per_token_ms": 15.539826086956522,
+        "prompt_per_second": 64.35078451999911,
+        "predicted_n": 138,
+        "predicted_ms": 11033.268,
+        "predicted_per_token_ms": 80.53480291970803,
+        "predicted_per_second": 12.416991955601912
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 894.0546875,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "kk-multi",
+    "source": "whisper.cpp",
+    "text": "Ақтол, көй лұбғамыне көзюзе лұтенге. Алмары көй лұбғамыбе сүзтенге.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 11.870801899931394,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 0,
+    "extra_items": 1,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551620,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 106,
+        "prompt_tokens": 219,
+        "total_tokens": 325,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-O1KKEVZZOnBZqGZGnQ7gWtn91e6WLKOj",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 48,
+        "prompt_ms": 742.309,
+        "prompt_per_token_ms": 15.464770833333333,
+        "prompt_per_second": 64.66309852096634,
+        "predicted_n": 106,
+        "predicted_ms": 11065.405,
+        "predicted_per_token_ms": 105.38480952380954,
+        "predicted_per_second": 9.489033614223791
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 894.0546875,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "kk-ambiguous",
+    "source": "whisper.cpp",
+    "text": "жәпінші кер көбеес жөпін керің айтамін",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 4.900411100010388,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551625,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 203,
+        "total_tokens": 245,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-7mRb2Sg7upeiMRqlJdQg9hkzldVVMdQm",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 32,
+        "prompt_ms": 441.686,
+        "prompt_per_token_ms": 13.8026875,
+        "prompt_per_second": 72.44965880738806,
+        "predicted_n": 42,
+        "predicted_ms": 4333.622,
+        "predicted_per_token_ms": 105.69809756097561,
+        "predicted_per_second": 9.460908219498608
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 894.0546875,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "mixed-single",
+    "source": "whisper.cpp",
+    "text": "Markov, Kellogg-Gamos, who's being here.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 21.239098499994725,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 5,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"potato\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551646,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 202,
+        "prompt_tokens": 189,
+        "total_tokens": 391,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-zVuScCy7ABPWfsPvoIKdWyOHmCJyXpVC",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 18,
+        "prompt_ms": 451.661,
+        "prompt_per_token_ms": 25.092277777777777,
+        "prompt_per_second": 39.85289852345011,
+        "predicted_n": 202,
+        "predicted_ms": 20696.308,
+        "predicted_per_token_ms": 102.9667064676617,
+        "predicted_per_second": 9.711877113541217
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 894.0546875,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "mixed-multi",
+    "source": "whisper.cpp",
+    "text": "Kato, kayu, gamma, keju, melu, denger, makostor, bosin, gisat, tiendi, naikler.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 20.04174289992079,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 3,
+    "invented_missing_fields": 0,
+    "extra_items": 4,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"potato\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551666,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 202,
+        "prompt_tokens": 211,
+        "total_tokens": 413,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-OVLx8246ylcLqINyP2FLq8yS5STzJmXg",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 40,
+        "prompt_ms": 629.691,
+        "prompt_per_token_ms": 15.742275000000001,
+        "prompt_per_second": 63.52322011907427,
+        "predicted_n": 202,
+        "predicted_ms": 19209.52,
+        "predicted_per_token_ms": 95.5697512437811,
+        "predicted_per_second": 10.463561817265605
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 904.8515625,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "mixed-missing",
+    "source": "whisper.cpp",
+    "text": "ฟะเที่ยนรัม บ้าราสนเที่ยนหายธามัน",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 5.484372299979441,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551672,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 198,
+        "total_tokens": 240,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-rPXqMycNfYjHH32qjG4AY3RNMgDemIlJ",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 27,
+        "prompt_ms": 508.888,
+        "prompt_per_token_ms": 18.847703703703704,
+        "prompt_per_second": 53.056861234692114,
+        "predicted_n": 42,
+        "predicted_ms": 4249.41,
+        "predicted_per_token_ms": 103.64414634146341,
+        "predicted_per_second": 9.648398248227402
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 916.08203125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-single",
+    "source": "faster-whisper",
+    "text": "Кофта из-за 10 геограмм.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 4.723941499949433,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551676,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 190,
+        "total_tokens": 233,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-DIM7A6tcn9H9nD6zXcyzsLbM8jzofFAb",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 19,
+        "prompt_ms": 388.565,
+        "prompt_per_token_ms": 20.45078947368421,
+        "prompt_per_second": 48.89786779560691,
+        "predicted_n": 43,
+        "predicted_ms": 4237.19,
+        "predicted_per_token_ms": 100.88547619047618,
+        "predicted_per_second": 9.912229567236778
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 916.08203125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-multi",
+    "source": "faster-whisper",
+    "text": "Катофин из тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 36.04446449992247,
+    "items": [],
+    "field_correct": 0,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": "JSONDecodeError('Unterminated string starting at: line 49 column 7 (char 816)')",
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clar"
+          }
+        }
+      ],
+      "created": 1791551712,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 256,
+        "prompt_tokens": 399,
+        "total_tokens": 655,
+        "prompt_tokens_details": {
+          "cached_tokens": 172
+        }
+      },
+      "id": "chatcmpl-8kpqHNxtPJke1OvGG7lQvVDB5t90YISw",
+      "timings": {
+        "cache_n": 172,
+        "prompt_n": 227,
+        "prompt_ms": 3078.726,
+        "prompt_per_token_ms": 13.56266960352423,
+        "prompt_per_second": 73.73179685363361,
+        "predicted_n": 256,
+        "predicted_ms": 32777.931,
+        "predicted_per_token_ms": 128.54090588235292,
+        "predicted_per_second": 7.779624650500364
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 916.08203125,
+    "min_host_available_mib": 0.390625
+  },
+  {
+    "id": "ru-ambiguous",
+    "source": "faster-whisper",
+    "text": "сытнее отсот. Единец утащил потом.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 8.262198299984448,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 1,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551721,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 191,
+        "total_tokens": 233,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-E6ENY8ZWS9vpM8lBecAOOrn5nxpn3z2f",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 20,
+        "prompt_ms": 2786.524,
+        "prompt_per_token_ms": 139.3262,
+        "prompt_per_second": 7.177400948278213,
+        "predicted_n": 42,
+        "predicted_ms": 5033.439,
+        "predicted_per_token_ms": 122.76680487804879,
+        "predicted_per_second": 8.145524362170674
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 934.4296875,
+    "min_host_available_mib": 0.12890625
+  },
+  {
+    "id": "kk-single",
+    "source": "faster-whisper",
+    "text": "Сэмін кей лобгамо шустінгер.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 29.302387599949725,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 4,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551750,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 170,
+        "prompt_tokens": 193,
+        "total_tokens": 363,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-35aZBc17cPdxtfXVQ6cTGhQV2LA0BZOT",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 22,
+        "prompt_ms": 509.727,
+        "prompt_per_token_ms": 23.169409090909088,
+        "prompt_per_second": 43.16035838792138,
+        "predicted_n": 170,
+        "predicted_ms": 28606.56,
+        "predicted_per_token_ms": 169.26958579881656,
+        "predicted_per_second": 5.907735848001298
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 934.6015625,
+    "min_host_available_mib": 0.12890625
+  },
+  {
+    "id": "kk-multi",
+    "source": "faster-whisper",
+    "text": "қақто қаңғамың қаң жәл қың қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қа",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 39.66478009999264,
+    "items": [],
+    "field_correct": 0,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": "JSONDecodeError('Unterminated string starting at: line 49 column 7 (char 816)')",
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clar"
+          }
+        }
+      ],
+      "created": 1791551790,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 256,
+        "prompt_tokens": 354,
+        "total_tokens": 610,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-VF4Nq5emjQPStUGlOzUNUoSkCerD0sJ2",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 183,
+        "prompt_ms": 4086.516,
+        "prompt_per_token_ms": 22.330688524590165,
+        "prompt_per_second": 44.78142261036051,
+        "predicted_n": 256,
+        "predicted_ms": 35259.607,
+        "predicted_per_token_ms": 138.272968627451,
+        "predicted_per_second": 7.232071531597048
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 944.53125,
+    "min_host_available_mib": 0.12890625
+  },
+  {
+    "id": "kk-ambiguous",
+    "source": "faster-whisper",
+    "text": "өпінші кер кербе сюп өпін керің айтамын",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 5.9250723998993635,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 2,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 2,
+    "invented_missing_fields": 1,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551796,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 41,
+        "prompt_tokens": 204,
+        "total_tokens": 245,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-QAjGY7O1SEzxtGzglbcIqMG3rhAE8G8O",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 33,
+        "prompt_ms": 683.966,
+        "prompt_per_token_ms": 20.726242424242425,
+        "prompt_per_second": 48.24801232809818,
+        "predicted_n": 41,
+        "predicted_ms": 4792.322,
+        "predicted_per_token_ms": 119.80805000000001,
+        "predicted_per_second": 8.34668455082943
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 947.41015625,
+    "min_host_available_mib": 0.12890625
+  },
+  {
+    "id": "mixed-single",
+    "source": "faster-whisper",
+    "text": "Markof, Kellogg-Gamersz, Józdy Engier.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 22.726101799984463,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "potato",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 0,
+    "invented_missing_fields": 0,
+    "extra_items": 5,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"potato\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"cheese\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551818,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 202,
+        "prompt_tokens": 193,
+        "total_tokens": 395,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-YnVrcgNs8iPikoKhHQgBiZyvoY8nRu05",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 22,
+        "prompt_ms": 846.716,
+        "prompt_per_token_ms": 38.48709090909091,
+        "prompt_per_second": 25.982738013690543,
+        "predicted_n": 202,
+        "predicted_ms": 21720.303,
+        "predicted_per_token_ms": 108.06120895522388,
+        "predicted_per_second": 9.254014550349504
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 947.41015625,
+    "min_host_available_mib": 0.12890625
+  },
+  {
+    "id": "mixed-multi",
+    "source": "faster-whisper",
+    "text": "Kātob, kei loggāma, yā kēju mēl dēngē, mā kostobosigisat tēngē līgēr.",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 11.6482647000812,
+    "items": [
+      {
+        "product": "apple",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": null,
+        "unit": "liter",
+        "clarify": false
+      },
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "field_correct": 5,
+    "field_total": 8,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 1,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"apple\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"milk\",\n      \"price\": null,\n      \"unit\": \"liter\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"trout\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551830,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 106,
+        "prompt_tokens": 219,
+        "total_tokens": 325,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-kBnvfSP0DOCINDOGxXkWQOJ7996n6T6Q",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 48,
+        "prompt_ms": 754.061,
+        "prompt_per_token_ms": 15.709604166666667,
+        "prompt_per_second": 63.65532761938357,
+        "predicted_n": 106,
+        "predicted_ms": 10708.042,
+        "predicted_per_token_ms": 101.98135238095237,
+        "predicted_per_second": 9.805714247291897
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 967.27734375,
+    "min_host_available_mib": 0.12890625
+  },
+  {
+    "id": "mixed-missing",
+    "source": "faster-whisper",
+    "text": "ฟัยศัคิดอรัม บาทราสนคิดเยอะหายตามัน",
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "wall_s": 6.778196800034493,
+    "items": [
+      {
+        "product": "carrot",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "field_correct": 3,
+    "field_total": 4,
+    "unsupported_nonnull_fields": 1,
+    "invented_missing_fields": 0,
+    "extra_items": 0,
+    "error": null,
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791551837,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 194,
+        "total_tokens": 236,
+        "prompt_tokens_details": {
+          "cached_tokens": 171
+        }
+      },
+      "id": "chatcmpl-JHnXiWCvFrPHvAbBaDRfA1Zpks4bSs6k",
+      "timings": {
+        "cache_n": 171,
+        "prompt_n": 23,
+        "prompt_ms": 815.596,
+        "prompt_per_token_ms": 35.46069565217391,
+        "prompt_per_second": 28.200236391546795,
+        "predicted_n": 42,
+        "predicted_ms": 5390.787,
+        "predicted_per_token_ms": 131.48260975609756,
+        "predicted_per_second": 7.605568537580876
+      }
+    },
+    "peak_rss_mib": 1291.859375,
+    "peak_private_mib": 976.79296875,
+    "min_host_available_mib": 0.12890625
+  }
+]

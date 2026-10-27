@@ -1,0 +1,13 @@
+{
+  "revision": "c10ece1aade47bb51c153c893d14e5bf8e5b7117",
+  "runtime": "Piper 2023.11.14-2",
+  "files": {
+    "ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx": "f073356ebc4bd0f80c5af58df2953a5988bd5bdab1eb38635ce960b071fbefcb",
+    "ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx.json": "667ef3117bc642c2892dff7690d8bdc8ca4228aeaa783b2dc1416df632855e0d",
+    "ru/ru_RU/dmitri/medium/MODEL_CARD": "6d59c756776d57860232cea6484e1b2ea1fc1c8d2c3446ef246f706fd9875821",
+    "kk/kk_KZ/issai/high/kk_KZ-issai-high.onnx": "4dee767c893e8535da821447d12cb030e3569e11254c14030a1da5d8b2222c16",
+    "kk/kk_KZ/issai/high/kk_KZ-issai-high.onnx.json": "eb145ac8712b87beda9f0266e95b98cad76acce89d4626cd8b1408234e9842f0",
+    "kk/kk_KZ/issai/high/MODEL_CARD": "1b0704348a17a5f84fba84caa20d14a116eea9953bb9bc147ada4234d18687a2",
+    "piper.zip": "f3c58906402b24f3a96d92145f58acba6d86c9b5db896d207f78dc80811efcea"
+  }
+}

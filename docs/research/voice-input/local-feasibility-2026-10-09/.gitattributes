@@ -1,0 +1,5 @@
+# Preserve sealed research evidence byte-for-byte on every checkout.
+* -text whitespace=cr-at-eol
+# Raw console responses may contain CR/progress/trailing whitespace; do not rewrite evidence.
+baseline/** -whitespace
+diagnostic/** -whitespace

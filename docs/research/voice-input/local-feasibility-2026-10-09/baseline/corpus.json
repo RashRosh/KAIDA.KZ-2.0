@@ -1,0 +1,11 @@
+[
+ {"id":"ru-single","lang":"ru","segments":[["ru","Морковь триста тенге за килограмм."]],"expected":[{"product":"carrot","price":300,"unit":"kg","clarify":false}]},
+ {"id":"ru-multi","lang":"ru","segments":[["ru","Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм."]],"expected":[{"product":"potato","price":250,"unit":"kg","clarify":false},{"product":"apple","price":500,"unit":"kg","clarify":false}]},
+ {"id":"ru-ambiguous","lang":"ru","segments":[["ru","Сыр две пятьсот. Единицу уточню потом."]],"expected":[{"product":"cheese","price":null,"unit":null,"clarify":true}]},
+ {"id":"kk-single","lang":"kk","segments":[["kk","Сәбіз килограмы үш жүз теңге."]],"expected":[{"product":"carrot","price":300,"unit":"kg","clarify":false}]},
+ {"id":"kk-multi","lang":"kk","segments":[["kk","Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге."]],"expected":[{"product":"potato","price":250,"unit":"kg","clarify":false},{"product":"apple","price":500,"unit":"kg","clarify":false}]},
+ {"id":"kk-ambiguous","lang":"kk","segments":[["kk","Ірімшік екі бес жүз. Өлшемін кейін айтамын."]],"expected":[{"product":"cheese","price":null,"unit":null,"clarify":true}]},
+ {"id":"mixed-single","lang":"mixed","segments":[["ru","Морковь."],["kk","Килограмы үш жүз теңге."]],"expected":[{"product":"carrot","price":300,"unit":"kg","clarify":false}]},
+ {"id":"mixed-multi","lang":"mixed","segments":[["kk","Картоп килограмы екі жүз елу теңге."],["ru","Молоко сто восемьдесят тенге за литр."]],"expected":[{"product":"potato","price":250,"unit":"kg","clarify":false},{"product":"milk","price":180,"unit":"liter","clarify":false}]},
+ {"id":"mixed-missing","lang":"mixed","segments":[["ru","Форель за килограмм."],["kk","Бағасын кейін айтамын."]],"expected":[{"product":"trout","price":null,"unit":"kg","clarify":true}]}
+]

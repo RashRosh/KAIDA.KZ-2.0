@@ -1,0 +1,18 @@
+[
+  {
+    "model": "qwen2.5-0.5b-instruct-q4_k_m",
+    "load_s": 2.8854403999866918,
+    "jobs": 18,
+    "peak_rss_mib": 511.10546875,
+    "peak_private_mib": 245.94140625,
+    "min_host_available_mib": 1.8984375
+  },
+  {
+    "model": "qwen2.5-1.5b-instruct-q4_k_m",
+    "load_s": 10.779208600055426,
+    "jobs": 18,
+    "peak_rss_mib": 1017.171875,
+    "peak_private_mib": 913.4765625,
+    "min_host_available_mib": 0.12890625
+  }
+]

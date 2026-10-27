@@ -1,0 +1,221 @@
+[
+  {
+    "id": "ru-single",
+    "lang": "ru",
+    "segments": [
+      [
+        "ru",
+        "Морковь триста тенге за килограмм."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "reference": "Морковь триста тенге за килограмм.",
+    "duration_s": 2.3377777777777777,
+    "audio_sha256": "c74e9ff2807c8660d397e7e5cf0d95436c49c495fb293a3c942ff2bd29c8a585"
+  },
+  {
+    "id": "ru-multi",
+    "lang": "ru",
+    "segments": [
+      [
+        "ru",
+        "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "reference": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "duration_s": 5.682267573696145,
+    "audio_sha256": "869dd8709cb417671926600b20571b1a65660fb5ec50dd29c4508da808cf905a"
+  },
+  {
+    "id": "ru-ambiguous",
+    "lang": "ru",
+    "segments": [
+      [
+        "ru",
+        "Сыр две пятьсот. Единицу уточню потом."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "reference": "Сыр две пятьсот. Единицу уточню потом.",
+    "duration_s": 3.0853514739229024,
+    "audio_sha256": "57136d5249ba986b24dec2d53bf24131b94adafdce1b29b5c4a28ef36d7c08dd"
+  },
+  {
+    "id": "kk-single",
+    "lang": "kk",
+    "segments": [
+      [
+        "kk",
+        "Сәбіз килограмы үш жүз теңге."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "reference": "Сәбіз килограмы үш жүз теңге.",
+    "duration_s": 2.4926530612244897,
+    "audio_sha256": "b3dc358cd4c4330c88d8b3532c100e9a1cda2e473a5818fc1114a26520474d5e"
+  },
+  {
+    "id": "kk-multi",
+    "lang": "kk",
+    "segments": [
+      [
+        "kk",
+        "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "apple",
+        "price": 500,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "reference": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "duration_s": 5.701632653061225,
+    "audio_sha256": "93f2cf721b79a51fb158f4bd79654bfe360533b7b127ccd844245481cd379d9c"
+  },
+  {
+    "id": "kk-ambiguous",
+    "lang": "kk",
+    "segments": [
+      [
+        "kk",
+        "Ірімшік екі бес жүз. Өлшемін кейін айтамын."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "cheese",
+        "price": null,
+        "unit": null,
+        "clarify": true
+      }
+    ],
+    "reference": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "duration_s": 3.662766439909297,
+    "audio_sha256": "5020754b63b5069a3528a7c1e1ee765df6448c2625e55599751d0b18e4710216"
+  },
+  {
+    "id": "mixed-single",
+    "lang": "mixed",
+    "segments": [
+      [
+        "ru",
+        "Морковь."
+      ],
+      [
+        "kk",
+        "Килограмы үш жүз теңге."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "carrot",
+        "price": 300,
+        "unit": "kg",
+        "clarify": false
+      }
+    ],
+    "reference": "Морковь. Килограмы үш жүз теңге.",
+    "duration_s": 2.7429931972789117,
+    "audio_sha256": "d69e027003f823b8554a117c00b46011d577755af7bba7f2e537e549cde05db2"
+  },
+  {
+    "id": "mixed-multi",
+    "lang": "mixed",
+    "segments": [
+      [
+        "kk",
+        "Картоп килограмы екі жүз елу теңге."
+      ],
+      [
+        "ru",
+        "Молоко сто восемьдесят тенге за литр."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "potato",
+        "price": 250,
+        "unit": "kg",
+        "clarify": false
+      },
+      {
+        "product": "milk",
+        "price": 180,
+        "unit": "liter",
+        "clarify": false
+      }
+    ],
+    "reference": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "duration_s": 5.296825396825397,
+    "audio_sha256": "0b76a9c57571e15ff3502ac1f99ce542c9fc11ff96ec4e2a5958d21fffc076c0"
+  },
+  {
+    "id": "mixed-missing",
+    "lang": "mixed",
+    "segments": [
+      [
+        "ru",
+        "Форель за килограмм."
+      ],
+      [
+        "kk",
+        "Бағасын кейін айтамын."
+      ]
+    ],
+    "expected": [
+      {
+        "product": "trout",
+        "price": null,
+        "unit": "kg",
+        "clarify": true
+      }
+    ],
+    "reference": "Форель за килограмм. Бағасын кейін айтамын.",
+    "duration_s": 3.3779591836734695,
+    "audio_sha256": "a33904eb10d86cacb52f0561be5a995ebb0852a15dc7454d0d6b4dbdc8dfd55c"
+  }
+]

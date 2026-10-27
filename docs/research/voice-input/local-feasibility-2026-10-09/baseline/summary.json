@@ -1,0 +1,278 @@
+{
+  "robotic": {
+    "asr": [
+      {
+        "runtime": "faster-whisper",
+        "cases": 9,
+        "failures": 0,
+        "wer": 2.9558823529411766,
+        "wer_by_language": {
+          "ru": 5.5,
+          "kk": 2.391304347826087,
+          "mixed": 1.0869565217391304
+        },
+        "median_wall_s": 3.2581153000937775,
+        "max_wall_s": 5.246572699979879,
+        "total_wall_s": 31.0484512001276,
+        "peak_rss_mib": 323.3203125,
+        "peak_private_mib": 1313.83984375,
+        "min_host_available_mib": 368.2890625
+      },
+      {
+        "runtime": "whisper.cpp",
+        "cases": 9,
+        "failures": 0,
+        "wer": 1.0294117647058822,
+        "wer_by_language": {
+          "ru": 0.9545454545454546,
+          "kk": 1.0,
+          "mixed": 1.1304347826086956
+        },
+        "median_wall_s": 4.374503600061871,
+        "max_wall_s": 9.381693899980746,
+        "total_wall_s": 47.942263500066474,
+        "peak_rss_mib": 307.6875,
+        "peak_private_mib": 790.98046875,
+        "min_host_available_mib": 18.19140625
+      }
+    ],
+    "extraction": [
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "source": "faster-whisper",
+        "cases": 9,
+        "field_correct": 23,
+        "field_total": 48,
+        "field_accuracy": 0.4791666666666667,
+        "exact_cases": 0,
+        "invented_missing_fields": 1,
+        "unsupported_nonnull_fields": 8,
+        "extra_items": 21,
+        "invalid_or_truncated_outputs": 1,
+        "median_wall_s": 6.0130937999347225,
+        "max_wall_s": 10.153769999975339,
+        "peak_rss_mib": 502.16015625
+      },
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "source": "reference-diagnostic",
+        "cases": 9,
+        "field_correct": 27,
+        "field_total": 48,
+        "field_accuracy": 0.5625,
+        "exact_cases": 0,
+        "invented_missing_fields": 2,
+        "unsupported_nonnull_fields": 10,
+        "extra_items": 8,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 3.0766974999569356,
+        "max_wall_s": 4.640866799978539,
+        "peak_rss_mib": 502.16015625
+      },
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "source": "whisper.cpp",
+        "cases": 9,
+        "field_correct": 20,
+        "field_total": 48,
+        "field_accuracy": 0.4166666666666667,
+        "exact_cases": 0,
+        "invented_missing_fields": 1,
+        "unsupported_nonnull_fields": 8,
+        "extra_items": 19,
+        "invalid_or_truncated_outputs": 2,
+        "median_wall_s": 6.772153900004923,
+        "max_wall_s": 11.573432799894363,
+        "peak_rss_mib": 502.16015625
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "source": "faster-whisper",
+        "cases": 9,
+        "field_correct": 19,
+        "field_total": 48,
+        "field_accuracy": 0.3958333333333333,
+        "exact_cases": 0,
+        "invented_missing_fields": 2,
+        "unsupported_nonnull_fields": 6,
+        "extra_items": 10,
+        "invalid_or_truncated_outputs": 2,
+        "median_wall_s": 11.6482647000812,
+        "max_wall_s": 39.66478009999264,
+        "peak_rss_mib": 1291.859375
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "source": "reference-diagnostic",
+        "cases": 9,
+        "field_correct": 35,
+        "field_total": 48,
+        "field_accuracy": 0.7291666666666666,
+        "exact_cases": 2,
+        "invented_missing_fields": 3,
+        "unsupported_nonnull_fields": 12,
+        "extra_items": 0,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 6.2339598999824375,
+        "max_wall_s": 19.77309520007111,
+        "peak_rss_mib": 1291.859375
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "source": "whisper.cpp",
+        "cases": 9,
+        "field_correct": 24,
+        "field_total": 48,
+        "field_accuracy": 0.5,
+        "exact_cases": 0,
+        "invented_missing_fields": 2,
+        "unsupported_nonnull_fields": 11,
+        "extra_items": 23,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 12.441471200087108,
+        "max_wall_s": 21.239098499994725,
+        "peak_rss_mib": 1291.859375
+      }
+    ],
+    "runtime": [
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "load_s": 2.90768860001117,
+        "jobs": 27,
+        "peak_rss_mib": 502.16015625,
+        "peak_private_mib": 272.68359375,
+        "min_host_available_mib": 0.6171875
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "load_s": 5.616378900012933,
+        "jobs": 27,
+        "peak_rss_mib": 1291.859375,
+        "peak_private_mib": 976.79296875,
+        "min_host_available_mib": 0.12890625
+      }
+    ]
+  },
+  "neural": {
+    "asr": [
+      {
+        "runtime": "faster-whisper",
+        "cases": 9,
+        "failures": 0,
+        "wer": 1.25,
+        "wer_by_language": {
+          "ru": 0.8636363636363636,
+          "kk": 1.9565217391304348,
+          "mixed": 0.9130434782608695
+        },
+        "median_wall_s": 4.98176830005832,
+        "max_wall_s": 8.995865900069475,
+        "total_wall_s": 47.290303900139406,
+        "peak_rss_mib": 323.2890625,
+        "peak_private_mib": 1313.78125,
+        "min_host_available_mib": 4.09765625
+      },
+      {
+        "runtime": "whisper.cpp",
+        "cases": 9,
+        "failures": 0,
+        "wer": 0.9264705882352942,
+        "wer_by_language": {
+          "ru": 0.8636363636363636,
+          "kk": 0.9565217391304348,
+          "mixed": 0.9565217391304348
+        },
+        "median_wall_s": 5.9546925000613555,
+        "max_wall_s": 10.083155200001784,
+        "total_wall_s": 51.179536100127734,
+        "peak_rss_mib": 306.91015625,
+        "peak_private_mib": 790.71875,
+        "min_host_available_mib": 6.75
+      }
+    ],
+    "extraction": [
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "source": "faster-whisper",
+        "cases": 9,
+        "field_correct": 28,
+        "field_total": 48,
+        "field_accuracy": 0.5833333333333334,
+        "exact_cases": 0,
+        "invented_missing_fields": 2,
+        "unsupported_nonnull_fields": 9,
+        "extra_items": 23,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 5.325831299996935,
+        "max_wall_s": 7.96890960005112,
+        "peak_rss_mib": 511.10546875
+      },
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "source": "whisper.cpp",
+        "cases": 9,
+        "field_correct": 23,
+        "field_total": 48,
+        "field_accuracy": 0.4791666666666667,
+        "exact_cases": 0,
+        "invented_missing_fields": 2,
+        "unsupported_nonnull_fields": 11,
+        "extra_items": 17,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 4.737615799997002,
+        "max_wall_s": 8.726793700014241,
+        "peak_rss_mib": 511.10546875
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "source": "faster-whisper",
+        "cases": 9,
+        "field_correct": 21,
+        "field_total": 48,
+        "field_accuracy": 0.4375,
+        "exact_cases": 0,
+        "invented_missing_fields": 3,
+        "unsupported_nonnull_fields": 13,
+        "extra_items": 15,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 14.061840899987146,
+        "max_wall_s": 31.33901060000062,
+        "peak_rss_mib": 1017.171875
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "source": "whisper.cpp",
+        "cases": 9,
+        "field_correct": 22,
+        "field_total": 48,
+        "field_accuracy": 0.4583333333333333,
+        "exact_cases": 1,
+        "invented_missing_fields": 2,
+        "unsupported_nonnull_fields": 13,
+        "extra_items": 8,
+        "invalid_or_truncated_outputs": 0,
+        "median_wall_s": 14.180854499922134,
+        "max_wall_s": 26.545465599978343,
+        "peak_rss_mib": 990.38671875
+      }
+    ],
+    "runtime": [
+      {
+        "model": "qwen2.5-0.5b-instruct-q4_k_m",
+        "load_s": 2.8854403999866918,
+        "jobs": 18,
+        "peak_rss_mib": 511.10546875,
+        "peak_private_mib": 245.94140625,
+        "min_host_available_mib": 1.8984375
+      },
+      {
+        "model": "qwen2.5-1.5b-instruct-q4_k_m",
+        "load_s": 10.779208600055426,
+        "jobs": 18,
+        "peak_rss_mib": 1017.171875,
+        "peak_private_mib": 913.4765625,
+        "min_host_available_mib": 0.12890625
+      }
+    ]
+  }
+}

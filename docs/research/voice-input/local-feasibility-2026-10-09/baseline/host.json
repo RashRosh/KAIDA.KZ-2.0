@@ -1,0 +1,35 @@
+﻿{
+    "time_utc":  "2026-10-09T13:12:41.9023751Z",
+    "os":  {
+               "Caption":  "Microsoft Windows 11 Pro",
+               "TotalVisibleMemorySize":  8107288,
+               "FreePhysicalMemory":  54036
+           },
+    "cpu":  {
+                "Name":  "11th Gen Intel(R) Core(TM) i5-11260H @ 2.60GHz",
+                "NumberOfCores":  6,
+                "NumberOfLogicalProcessors":  12
+            },
+    "gpu":  [
+                {
+                    "Name":  "Intel(R) UHD Graphics",
+                    "AdapterRAM":  1073741824
+                },
+                {
+                    "Name":  "NVIDIA GeForce GTX 1650",
+                    "AdapterRAM":  4293918720
+                }
+            ],
+    "pagefile":  {
+                     "AllocatedBaseSize":  40000,
+                     "CurrentUsage":  9560,
+                     "PeakUsage":  20504
+                 },
+    "docker_memory_bytes":  "3962191872",
+    "recorded_initial_free_kib":  [
+                                      41548,
+                                      178160
+                                  ],
+    "threads":  2,
+    "inference_device":  "CPU only"
+}

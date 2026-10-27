@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\dev\KAIDA.KZ-2.0\tmp\voice-study\fw_worker.py", line 7, in <module>
+    loaded=time.perf_counter();segments,info=m.transcribe(sys.argv[1],language=None if sys.argv[2]=='mixed' else sys.argv[2],beam_size=5,best_of=5,condition_on_previous_text=False,vad_filter=False,temperature=0)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\KAIDA.KZ-2.0\tmp\voice-study\venv\Lib\site-packages\faster_whisper\transcribe.py", line 876, in transcribe
+    audio = decode_audio(audio, sampling_rate=sampling_rate)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\KAIDA.KZ-2.0\tmp\voice-study\venv\Lib\site-packages\faster_whisper\audio.py", line 46, in decode_audio
+    with av.open(input_file, mode="r", metadata_errors="ignore") as container:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "av/container/core.py", line 479, in av.container.core.open
+    def open(
+    ^^^^^^^^^^
+TypeError: open() got an unexpected keyword argument 'metadata_errors'

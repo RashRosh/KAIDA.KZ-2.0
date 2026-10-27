@@ -1,0 +1,764 @@
+[
+  {
+    "name": "original-english",
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers."
+        },
+        {
+          "role": "user",
+          "content": "Potato, 250 tenge per kilogram."
+        }
+      ],
+      "temperature": 0,
+      "seed": 42,
+      "cache_prompt": false,
+      "max_tokens": 256,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "draft",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "carrot",
+                        "potato",
+                        "apple",
+                        "cheese",
+                        "milk",
+                        "trout",
+                        null
+                      ]
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "kg",
+                        "liter",
+                        "piece",
+                        "package",
+                        null
+                      ]
+                    },
+                    "clarify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "price",
+                    "unit",
+                    "clarify"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "rendered_template": {
+      "prompt": "<|im_start|>system\nExtract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.<|im_end|>\n<|im_start|>user\nPotato, 250 tenge per kilogram.<|im_end|>\n<|im_start|>assistant\n"
+    },
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": null,\n      \"unit\": \"kg\",\n      \"clarify\": true\n    },\n    {\n      \"product\": \"potato\",\n      \"price\": 250,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791553789,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 78,
+        "prompt_tokens": 189,
+        "total_tokens": 267,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-R91d4vq31a4XSRze7X9k0TBvJqCsVlwX",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 189,
+        "prompt_ms": 2010.022,
+        "prompt_per_token_ms": 10.635037037037037,
+        "prompt_per_second": 94.02882157508725,
+        "predicted_n": 78,
+        "predicted_ms": 5701.937,
+        "predicted_per_token_ms": 74.05112987012987,
+        "predicted_per_second": 13.50418287680134
+      }
+    },
+    "wall_s": 7.735878600040451
+  },
+  {
+    "name": "original-ru-no-cache",
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers."
+        },
+        {
+          "role": "user",
+          "content": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм."
+        }
+      ],
+      "temperature": 0,
+      "seed": 42,
+      "cache_prompt": false,
+      "max_tokens": 256,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "draft",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "carrot",
+                        "potato",
+                        "apple",
+                        "cheese",
+                        "milk",
+                        "trout",
+                        null
+                      ]
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "kg",
+                        "liter",
+                        "piece",
+                        "package",
+                        null
+                      ]
+                    },
+                    "clarify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "price",
+                    "unit",
+                    "clarify"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "rendered_template": {
+      "prompt": "<|im_start|>system\nExtract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.<|im_end|>\n<|im_start|>user\nКартофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.<|im_end|>\n<|im_start|>assistant\n"
+    },
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 250,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": 500,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791553797,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 79,
+        "prompt_tokens": 210,
+        "total_tokens": 289,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-KV3lrttPAzLro5ecYurwiHlurLGL32FY",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 210,
+        "prompt_ms": 2038.809,
+        "prompt_per_token_ms": 9.708614285714285,
+        "prompt_per_second": 103.00131105954506,
+        "predicted_n": 79,
+        "predicted_ms": 5597.178,
+        "predicted_per_token_ms": 71.7586923076923,
+        "predicted_per_second": 13.935593972534017
+      }
+    },
+    "wall_s": 7.649678700021468
+  },
+  {
+    "name": "original-ru-reversed-enum",
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers."
+        },
+        {
+          "role": "user",
+          "content": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм."
+        }
+      ],
+      "temperature": 0,
+      "seed": 42,
+      "cache_prompt": false,
+      "max_tokens": 256,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "draft",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        null,
+                        "trout",
+                        "milk",
+                        "cheese",
+                        "apple",
+                        "potato",
+                        "carrot"
+                      ]
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "kg",
+                        "liter",
+                        "piece",
+                        "package",
+                        null
+                      ]
+                    },
+                    "clarify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "price",
+                    "unit",
+                    "clarify"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "rendered_template": {
+      "prompt": "<|im_start|>system\nExtract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.<|im_end|>\n<|im_start|>user\nКартофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.<|im_end|>\n<|im_start|>assistant\n"
+    },
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"items\": [\n    {\n      \"product\": \"carrot\",\n      \"price\": 250,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    },\n    {\n      \"product\": \"apple\",\n      \"price\": 500,\n      \"unit\": \"kg\",\n      \"clarify\": false\n    }\n  ]\n}"
+          }
+        }
+      ],
+      "created": 1791553806,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 79,
+        "prompt_tokens": 210,
+        "total_tokens": 289,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-i2Rb7l1n1vVI40YvawfJFlLCljgaIBXD",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 210,
+        "prompt_ms": 2071.988,
+        "prompt_per_token_ms": 9.866609523809522,
+        "prompt_per_second": 101.35193833168918,
+        "predicted_n": 79,
+        "predicted_ms": 6530.424,
+        "predicted_per_token_ms": 83.72338461538462,
+        "predicted_per_second": 11.944094288517865
+      }
+    },
+    "wall_s": 8.652226800099015
+  },
+  {
+    "name": "visible-schema-ru",
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.\nRequired output schema: {\"type\": \"object\", \"properties\": {\"items\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"product\": {\"type\": [\"string\", \"null\"], \"enum\": [\"carrot\", \"potato\", \"apple\", \"cheese\", \"milk\", \"trout\", null]}, \"price\": {\"type\": [\"number\", \"null\"]}, \"unit\": {\"type\": [\"string\", \"null\"], \"enum\": [\"kg\", \"liter\", \"piece\", \"package\", null]}, \"clarify\": {\"type\": \"boolean\"}}, \"required\": [\"product\", \"price\", \"unit\", \"clarify\"], \"additionalProperties\": false}}}, \"required\": [\"items\"], \"additionalProperties\": false}\nReturn exactly one item per product actually mentioned, never list the vocabulary. If the source does not state an unambiguous price or unit, that field MUST be null even when clarify is true."
+        },
+        {
+          "role": "user",
+          "content": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм."
+        }
+      ],
+      "temperature": 0,
+      "seed": 42,
+      "cache_prompt": false,
+      "max_tokens": 256,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "draft",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "carrot",
+                        "potato",
+                        "apple",
+                        "cheese",
+                        "milk",
+                        "trout",
+                        null
+                      ]
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "kg",
+                        "liter",
+                        "piece",
+                        "package",
+                        null
+                      ]
+                    },
+                    "clarify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "price",
+                    "unit",
+                    "clarify"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "rendered_template": {
+      "prompt": "<|im_start|>system\nExtract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.\nRequired output schema: {\"type\": \"object\", \"properties\": {\"items\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"product\": {\"type\": [\"string\", \"null\"], \"enum\": [\"carrot\", \"potato\", \"apple\", \"cheese\", \"milk\", \"trout\", null]}, \"price\": {\"type\": [\"number\", \"null\"]}, \"unit\": {\"type\": [\"string\", \"null\"], \"enum\": [\"kg\", \"liter\", \"piece\", \"package\", null]}, \"clarify\": {\"type\": \"boolean\"}}, \"required\": [\"product\", \"price\", \"unit\", \"clarify\"], \"additionalProperties\": false}}}, \"required\": [\"items\"], \"additionalProperties\": false}\nReturn exactly one item per product actually mentioned, never list the vocabulary. If the source does not state an unambiguous price or unit, that field MUST be null even when clarify is true.<|im_end|>\n<|im_start|>user\nКартофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.<|im_end|>\n<|im_start|>assistant\n"
+    },
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\":[{\"product\":\"potato\",\"price\":250,\"unit\":\"kg\",\"clarify\":false}]}"
+          }
+        }
+      ],
+      "created": 1791553812,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 410,
+        "total_tokens": 435,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-oXlpmaaspJ6vA1vvjw3MqWS8b7TgEfxY",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 410,
+        "prompt_ms": 4078.343,
+        "prompt_per_token_ms": 9.947178048780488,
+        "prompt_per_second": 100.53102448715079,
+        "predicted_n": 25,
+        "predicted_ms": 2041.557,
+        "predicted_per_token_ms": 85.064875,
+        "predicted_per_second": 11.755733491643877
+      }
+    },
+    "wall_s": 6.209821800002828
+  },
+  {
+    "name": "visible-schema-english",
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.\nRequired output schema: {\"type\": \"object\", \"properties\": {\"items\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"product\": {\"type\": [\"string\", \"null\"], \"enum\": [\"carrot\", \"potato\", \"apple\", \"cheese\", \"milk\", \"trout\", null]}, \"price\": {\"type\": [\"number\", \"null\"]}, \"unit\": {\"type\": [\"string\", \"null\"], \"enum\": [\"kg\", \"liter\", \"piece\", \"package\", null]}, \"clarify\": {\"type\": \"boolean\"}}, \"required\": [\"product\", \"price\", \"unit\", \"clarify\"], \"additionalProperties\": false}}}, \"required\": [\"items\"], \"additionalProperties\": false}\nReturn exactly one item per product actually mentioned, never list the vocabulary. If the source does not state an unambiguous price or unit, that field MUST be null even when clarify is true."
+        },
+        {
+          "role": "user",
+          "content": "Potato, 250 tenge per kilogram."
+        }
+      ],
+      "temperature": 0,
+      "seed": 42,
+      "cache_prompt": false,
+      "max_tokens": 256,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "draft",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "carrot",
+                        "potato",
+                        "apple",
+                        "cheese",
+                        "milk",
+                        "trout",
+                        null
+                      ]
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "kg",
+                        "liter",
+                        "piece",
+                        "package",
+                        null
+                      ]
+                    },
+                    "clarify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "price",
+                    "unit",
+                    "clarify"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "rendered_template": {
+      "prompt": "<|im_start|>system\nExtract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.\nRequired output schema: {\"type\": \"object\", \"properties\": {\"items\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"product\": {\"type\": [\"string\", \"null\"], \"enum\": [\"carrot\", \"potato\", \"apple\", \"cheese\", \"milk\", \"trout\", null]}, \"price\": {\"type\": [\"number\", \"null\"]}, \"unit\": {\"type\": [\"string\", \"null\"], \"enum\": [\"kg\", \"liter\", \"piece\", \"package\", null]}, \"clarify\": {\"type\": \"boolean\"}}, \"required\": [\"product\", \"price\", \"unit\", \"clarify\"], \"additionalProperties\": false}}}, \"required\": [\"items\"], \"additionalProperties\": false}\nReturn exactly one item per product actually mentioned, never list the vocabulary. If the source does not state an unambiguous price or unit, that field MUST be null even when clarify is true.<|im_end|>\n<|im_start|>user\nPotato, 250 tenge per kilogram.<|im_end|>\n<|im_start|>assistant\n"
+    },
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\":[{\"product\":\"potato\",\"price\":250,\"unit\":\"kg\",\"clarify\":false}]}"
+          }
+        }
+      ],
+      "created": 1791553818,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 389,
+        "total_tokens": 414,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-v9o7sCu65IJXoROtDYX2m9JsxkPFpMrh",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 389,
+        "prompt_ms": 3937.448,
+        "prompt_per_token_ms": 10.121974293059125,
+        "prompt_per_second": 98.79495551433315,
+        "predicted_n": 25,
+        "predicted_ms": 1580.096,
+        "predicted_per_token_ms": 65.83733333333333,
+        "predicted_per_second": 15.188950544777025
+      }
+    },
+    "wall_s": 5.555994999944232
+  },
+  {
+    "name": "visible-schema-ambiguous",
+    "request": {
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.\nRequired output schema: {\"type\": \"object\", \"properties\": {\"items\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"product\": {\"type\": [\"string\", \"null\"], \"enum\": [\"carrot\", \"potato\", \"apple\", \"cheese\", \"milk\", \"trout\", null]}, \"price\": {\"type\": [\"number\", \"null\"]}, \"unit\": {\"type\": [\"string\", \"null\"], \"enum\": [\"kg\", \"liter\", \"piece\", \"package\", null]}, \"clarify\": {\"type\": \"boolean\"}}, \"required\": [\"product\", \"price\", \"unit\", \"clarify\"], \"additionalProperties\": false}}}, \"required\": [\"items\"], \"additionalProperties\": false}\nReturn exactly one item per product actually mentioned, never list the vocabulary. If the source does not state an unambiguous price or unit, that field MUST be null even when clarify is true."
+        },
+        {
+          "role": "user",
+          "content": "Сыр две пятьсот. Единицу уточню потом."
+        }
+      ],
+      "temperature": 0,
+      "seed": 42,
+      "cache_prompt": false,
+      "max_tokens": 256,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "draft",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "carrot",
+                        "potato",
+                        "apple",
+                        "cheese",
+                        "milk",
+                        "trout",
+                        null
+                      ]
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "kg",
+                        "liter",
+                        "piece",
+                        "package",
+                        null
+                      ]
+                    },
+                    "clarify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "price",
+                    "unit",
+                    "clarify"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "rendered_template": {
+      "prompt": "<|im_start|>system\nExtract seller product drafts from Russian, Kazakh or mixed-language speech transcripts. Output JSON items in spoken order. Vocabulary: carrot=морковь/сәбіз, potato=картофель/картоп, apple=яблоко/алма, cheese=сыр/ірімшік, milk=молоко/сүт, trout=форель. Never invent products, prices or units. If price or price basis is absent or ambiguous, use null and clarify=true. If facts are clear, clarify=false. Do not repair unreliable recognition by guessing. Do not create locations, brands, sizes or facts not stated. Prices are numeric KZT amounts; kg means per kilogram, liter means per liter. Convert unambiguous spoken number words to numbers.\nRequired output schema: {\"type\": \"object\", \"properties\": {\"items\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"product\": {\"type\": [\"string\", \"null\"], \"enum\": [\"carrot\", \"potato\", \"apple\", \"cheese\", \"milk\", \"trout\", null]}, \"price\": {\"type\": [\"number\", \"null\"]}, \"unit\": {\"type\": [\"string\", \"null\"], \"enum\": [\"kg\", \"liter\", \"piece\", \"package\", null]}, \"clarify\": {\"type\": \"boolean\"}}, \"required\": [\"product\", \"price\", \"unit\", \"clarify\"], \"additionalProperties\": false}}}, \"required\": [\"items\"], \"additionalProperties\": false}\nReturn exactly one item per product actually mentioned, never list the vocabulary. If the source does not state an unambiguous price or unit, that field MUST be null even when clarify is true.<|im_end|>\n<|im_start|>user\nСыр две пятьсот. Единицу уточню потом.<|im_end|>\n<|im_start|>assistant\n"
+    },
+    "response": {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\"items\":[{\"product\":\"cheese\",\"price\":500,\"unit\":\"piece\",\"clarify\":true}]}"
+          }
+        }
+      ],
+      "created": 1791553823,
+      "model": "C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\models\\Qwen2.5-1.5B-Instruct-GGUF\\qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "system_fingerprint": "b11524-86a283532",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 394,
+        "total_tokens": 419,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "id": "chatcmpl-GwmX24EnvyXhcnsqwSRSRVayJEb8JkCn",
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 394,
+        "prompt_ms": 3699.388,
+        "prompt_per_token_ms": 9.38930964467005,
+        "prompt_per_second": 106.5041028407942,
+        "predicted_n": 25,
+        "predicted_ms": 1670.073,
+        "predicted_per_token_ms": 69.586375,
+        "predicted_per_second": 14.370629307820675
+      }
+    },
+    "wall_s": 5.4237256000051275
+  }
+]

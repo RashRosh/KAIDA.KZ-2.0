@@ -1,0 +1,21 @@
+{
+  "packages": {
+    "faster-whisper": "1.2.1",
+    "ctranslate2": "4.8.2",
+    "av": "15.1.0",
+    "psutil": "7.2.2",
+    "espeakng-loader": "0.2.4"
+  },
+  "whisper_cpp": "1.9.5 / b5454",
+  "llama_cpp": "0.6.0-dev / b11524 / 86a283532",
+  "licenses": {
+    "whisper_cpp": "MIT",
+    "faster-whisper": "MIT",
+    "ctranslate2": "MIT",
+    "llama_cpp": "MIT",
+    "Whisper base weights": "MIT",
+    "Qwen2.5 0.5B and 1.5B Instruct weights": "Apache-2.0",
+    "eSpeak NG synthesis": "GPL-3.0-or-later"
+  },
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+}

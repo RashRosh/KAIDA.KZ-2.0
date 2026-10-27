@@ -1,0 +1,12 @@
+{
+  "engine": "eSpeak NG",
+  "version": "1.52.0",
+  "sample_rate": 22050,
+  "rate": 145,
+  "voices": [
+    "ru",
+    "kk"
+  ],
+  "mixed": "concatenated RU/KK synthesized segments, not natural code switching",
+  "license": "GPL-3.0-or-later"
+}

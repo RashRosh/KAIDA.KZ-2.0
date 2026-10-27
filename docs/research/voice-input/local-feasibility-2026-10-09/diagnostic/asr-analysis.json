@@ -1,0 +1,5503 @@
+[
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "ru-single",
+    "lang": "ru",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\ru-single-16k.wav' (37405 samples, 2.3 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = ru, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Морковь триста тенге за килограмм.",
+    "transcript": "и стартинги на геограмм.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 4,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "триста",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "стартинги"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "на"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "геограмм"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 4,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "стартинги"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "на"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "геограмм"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "и",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "ru-multi",
+    "lang": "ru",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\ru-multi-16k.wav' (90917 samples, 5.7 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = ru, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "transcript": "Каковидность и отеца, тень дилакия, бран. Я облакет, отецов, тень дилакия, бран.",
+    "raw": {
+      "errors": 12,
+      "reference_tokens": 11,
+      "wer": 1.0909090909090908,
+      "substitutions": 11,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "каковидность"
+        },
+        {
+          "op": "substitution",
+          "reference": "картофель",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "двести",
+          "hypothesis": "отеца"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьдесят",
+          "hypothesis": "тень"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "дилакия"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "бран"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "я"
+        },
+        {
+          "op": "substitution",
+          "reference": "яблоки",
+          "hypothesis": "облакет"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "отецов"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "тень"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "дилакия"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "бран"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 12,
+      "reference_tokens": 10,
+      "wer": 1.2,
+      "substitutions": 10,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "каковидность"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "картофель",
+          "hypothesis": "отеца"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "тень"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "дилакия"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "бран"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "я"
+        },
+        {
+          "op": "substitution",
+          "reference": "яблоки",
+          "hypothesis": "облакет"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "отецов"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "тень"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "дилакия"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "бран"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "каковидность",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "ru-ambiguous",
+    "lang": "ru",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\ru-ambiguous-16k.wav' (49366 samples, 3.1 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = ru, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Сыр две пятьсот. Единицу уточню потом.",
+    "transcript": "сытнее отсот, единицу тачню потом.",
+    "raw": {
+      "errors": 4,
+      "reference_tokens": 6,
+      "wer": 0.6666666666666666,
+      "substitutions": 3,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "две",
+          "hypothesis": "сытнее"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "отсот"
+        },
+        {
+          "op": "equal",
+          "reference": "единицу",
+          "hypothesis": "единицу"
+        },
+        {
+          "op": "substitution",
+          "reference": "уточню",
+          "hypothesis": "тачню"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 4,
+      "reference_tokens": 6,
+      "wer": 0.6666666666666666,
+      "substitutions": 3,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "2",
+          "hypothesis": "сытнее"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "отсот"
+        },
+        {
+          "op": "equal",
+          "reference": "единицу",
+          "hypothesis": "единицу"
+        },
+        {
+          "op": "substitution",
+          "reference": "уточню",
+          "hypothesis": "тачню"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "сытнее",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "kk-single",
+    "lang": "kk",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\kk-single-16k.wav' (39883 samples, 2.5 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = kk, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Сәбіз килограмы үш жүз теңге.",
+    "transcript": "Сәміз көйлғамың шустінге",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сәбіз",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "сәміз"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "көйлғамың"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "шустінге"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 4,
+      "reference_tokens": 4,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сәбіз",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "сәміз"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "көйлғамың"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "шустінге"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "сәміз",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "kk-multi",
+    "lang": "kk",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\kk-multi-16k.wav' (91227 samples, 5.7 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = kk, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "transcript": "Ақтол, көй лұбғамыне көзюзе лұтенге. Алмары көй лұбғамыбе сүзтенге.",
+    "raw": {
+      "errors": 11,
+      "reference_tokens": 11,
+      "wer": 1.0,
+      "substitutions": 9,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картоп",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "ақтол"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "көй"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "лұбғамыне"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "көзюзе"
+        },
+        {
+          "op": "substitution",
+          "reference": "алма",
+          "hypothesis": "лұтенге"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "алмары"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "көй"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "лұбғамыбе"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "сүзтенге"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 9,
+      "reference_tokens": 8,
+      "wer": 1.125,
+      "substitutions": 8,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ақтол"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "көй"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "лұбғамыне"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "көзюзе"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "лұтенге"
+        },
+        {
+          "op": "substitution",
+          "reference": "алма",
+          "hypothesis": "алмары"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "көй"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "лұбғамыбе"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "сүзтенге"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "ақтол",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "kk-ambiguous",
+    "lang": "kk",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\kk-ambiguous-16k.wav' (58605 samples, 3.7 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = kk, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "transcript": "жәпінші кер көбеес жөпін керің айтамін",
+    "raw": {
+      "errors": 7,
+      "reference_tokens": 7,
+      "wer": 1.0,
+      "substitutions": 6,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "ірімшік",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "жәпінші"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "кер"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "көбеес"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "жөпін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "керің"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "айтамін"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "ірімшік",
+          "hypothesis": "жәпінші"
+        },
+        {
+          "op": "substitution",
+          "reference": "2",
+          "hypothesis": "кер"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "көбеес"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "жөпін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "керің"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "айтамін"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "жәпінші",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "mixed-single",
+    "lang": "mixed",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\mixed-single-16k.wav' (43888 samples, 2.7 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = auto, task = transcribe, timestamps = 0 ...",
+      "whisper_full_with_state: auto-detected language: en (p = 0.214722)"
+    ],
+    "reference": "Морковь. Килограмы үш жүз теңге.",
+    "transcript": "Markov, Kellogg-Gamos, who's being here.",
+    "raw": {
+      "errors": 7,
+      "reference_tokens": 5,
+      "wer": 1.4,
+      "substitutions": 5,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "markov"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "kellogg"
+        },
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "gamos"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "who"
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "s"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "being"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "here"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 4,
+      "wer": 1.75,
+      "substitutions": 4,
+      "deletions": 0,
+      "insertions": 3,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "markov"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "kellogg"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "gamos"
+        },
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "who"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "s"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "being"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "here"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "markov",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "mixed-multi",
+    "lang": "mixed",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\mixed-multi-16k.wav' (84750 samples, 5.3 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = auto, task = transcribe, timestamps = 0 ...",
+      "whisper_full_with_state: auto-detected language: id (p = 0.109061)"
+    ],
+    "reference": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "transcript": "Kato, kayu, gamma, keju, melu, denger, makostor, bosin, gisat, tiendi, naikler.",
+    "raw": {
+      "errors": 12,
+      "reference_tokens": 12,
+      "wer": 1.0,
+      "substitutions": 11,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картоп",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "kato"
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "kayu"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "gamma"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "keju"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "melu"
+        },
+        {
+          "op": "substitution",
+          "reference": "молоко",
+          "hypothesis": "denger"
+        },
+        {
+          "op": "substitution",
+          "reference": "сто",
+          "hypothesis": "makostor"
+        },
+        {
+          "op": "substitution",
+          "reference": "восемьдесят",
+          "hypothesis": "bosin"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "gisat"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "tiendi"
+        },
+        {
+          "op": "substitution",
+          "reference": "литр",
+          "hypothesis": "naikler"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 11,
+      "reference_tokens": 9,
+      "wer": 1.2222222222222223,
+      "substitutions": 9,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "kato"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "kayu"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "gamma"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "keju"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "melu"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "denger"
+        },
+        {
+          "op": "substitution",
+          "reference": "молоко",
+          "hypothesis": "makostor"
+        },
+        {
+          "op": "substitution",
+          "reference": "180",
+          "hypothesis": "bosin"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "gisat"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "tiendi"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_liter",
+          "hypothesis": "naikler"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "kato",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "whisper.cpp",
+    "id": "mixed-missing",
+    "lang": "mixed",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\audio\\mixed-missing-16k.wav' (54048 samples, 3.4 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = auto, task = transcribe, timestamps = 0 ...",
+      "whisper_full_with_state: auto-detected language: th (p = 0.411668)"
+    ],
+    "reference": "Форель за килограмм. Бағасын кейін айтамын.",
+    "transcript": "ฟะเที่ยนรัม บ้าราสนเที่ยนหายธามัน",
+    "raw": {
+      "errors": 7,
+      "reference_tokens": 6,
+      "wer": 1.1666666666666667,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ฟะเท"
+        },
+        {
+          "op": "substitution",
+          "reference": "форель",
+          "hypothesis": "ยนร"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "ม"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "บ"
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "าราสนเท"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "ยนหายธาม"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "น"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 6,
+      "wer": 1.1666666666666667,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ฟะเท"
+        },
+        {
+          "op": "substitution",
+          "reference": "форель",
+          "hypothesis": "ยนร"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "ม"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "บ"
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "าราสนเท"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "ยนหายธาม"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "น"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "ฟะเท",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "ru-single",
+    "lang": "ru",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Морковь триста тенге за килограмм.",
+    "transcript": "Кофта из-за 10 геограмм.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "кофта"
+        },
+        {
+          "op": "substitution",
+          "reference": "триста",
+          "hypothesis": "из"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "за"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "10"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "геограмм"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "кофта"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "из"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "за"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "10"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "геограмм"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "кофта",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "ru-multi",
+    "lang": "ru",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "transcript": "Катофин из тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя тя",
+    "raw": {
+      "errors": 111,
+      "reference_tokens": 11,
+      "wer": 10.090909090909092,
+      "substitutions": 11,
+      "deletions": 0,
+      "insertions": 100,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "катофин"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "из"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "картофель",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "двести",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьдесят",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "яблоки",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "тя"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 111,
+      "reference_tokens": 10,
+      "wer": 11.1,
+      "substitutions": 10,
+      "deletions": 0,
+      "insertions": 101,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "катофин"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "из"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "картофель",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "яблоки",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "тя"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "тя"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "тя",
+      "length": 109
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "ru-ambiguous",
+    "lang": "ru",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Сыр две пятьсот. Единицу уточню потом.",
+    "transcript": "сытнее отсот. Единец утащил потом.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 6,
+      "wer": 0.8333333333333334,
+      "substitutions": 4,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "две",
+          "hypothesis": "сытнее"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "отсот"
+        },
+        {
+          "op": "substitution",
+          "reference": "единицу",
+          "hypothesis": "единец"
+        },
+        {
+          "op": "substitution",
+          "reference": "уточню",
+          "hypothesis": "утащил"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 5,
+      "reference_tokens": 6,
+      "wer": 0.8333333333333334,
+      "substitutions": 4,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "2",
+          "hypothesis": "сытнее"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "отсот"
+        },
+        {
+          "op": "substitution",
+          "reference": "единицу",
+          "hypothesis": "единец"
+        },
+        {
+          "op": "substitution",
+          "reference": "уточню",
+          "hypothesis": "утащил"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "сытнее",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "kk-single",
+    "lang": "kk",
+    "detected_language": "kk",
+    "native_language_lines": [],
+    "reference": "Сәбіз килограмы үш жүз теңге.",
+    "transcript": "Сэмін кей лобгамо шустінгер.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 4,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сәбіз",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "сэмін"
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "кей"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "лобгамо"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "шустінгер"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 4,
+      "reference_tokens": 4,
+      "wer": 1.0,
+      "substitutions": 4,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "сәбіз",
+          "hypothesis": "сэмін"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "кей"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "лобгамо"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "шустінгер"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "сэмін",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "kk-multi",
+    "lang": "kk",
+    "detected_language": "kk",
+    "native_language_lines": [],
+    "reference": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "transcript": "қақто қаңғамың қаң жәл қың қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қаң қа",
+    "raw": {
+      "errors": 44,
+      "reference_tokens": 11,
+      "wer": 4.0,
+      "substitutions": 11,
+      "deletions": 0,
+      "insertions": 33,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қақто"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаңғамың"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "жәл"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қың"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "алма",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "қа"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 44,
+      "reference_tokens": 8,
+      "wer": 5.5,
+      "substitutions": 8,
+      "deletions": 0,
+      "insertions": 36,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қақто"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаңғамың"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "жәл"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қың"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "алма",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "қаң"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "қа"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "қаң",
+      "length": 38
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "kk-ambiguous",
+    "lang": "kk",
+    "detected_language": "kk",
+    "native_language_lines": [],
+    "reference": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "transcript": "өпінші кер кербе сюп өпін керің айтамын",
+    "raw": {
+      "errors": 6,
+      "reference_tokens": 7,
+      "wer": 0.8571428571428571,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "ірімшік",
+          "hypothesis": "өпінші"
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "кер"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "кербе"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "сюп"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "өпін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "керің"
+        },
+        {
+          "op": "equal",
+          "reference": "айтамын",
+          "hypothesis": "айтамын"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өпінші"
+        },
+        {
+          "op": "substitution",
+          "reference": "ірімшік",
+          "hypothesis": "кер"
+        },
+        {
+          "op": "substitution",
+          "reference": "2",
+          "hypothesis": "кербе"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "сюп"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "өпін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "керің"
+        },
+        {
+          "op": "equal",
+          "reference": "айтамын",
+          "hypothesis": "айтамын"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "өпінші",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "mixed-single",
+    "lang": "mixed",
+    "detected_language": "pl",
+    "native_language_lines": [],
+    "reference": "Морковь. Килограмы үш жүз теңге.",
+    "transcript": "Markof, Kellogg-Gamersz, Józdy Engier.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "markof"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "kellogg"
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "gamersz"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "józdy"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "engier"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 5,
+      "reference_tokens": 4,
+      "wer": 1.25,
+      "substitutions": 4,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "markof"
+        },
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "kellogg"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "gamersz"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "józdy"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "engier"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "markof",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "mixed-multi",
+    "lang": "mixed",
+    "detected_language": "la",
+    "native_language_lines": [],
+    "reference": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "transcript": "Kātob, kei loggāma, yā kēju mēl dēngē, mā kostobosigisat tēngē līgēr.",
+    "raw": {
+      "errors": 12,
+      "reference_tokens": 12,
+      "wer": 1.0,
+      "substitutions": 11,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картоп",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "kātob"
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "kei"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "loggāma"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "yā"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "kēju"
+        },
+        {
+          "op": "substitution",
+          "reference": "молоко",
+          "hypothesis": "mēl"
+        },
+        {
+          "op": "substitution",
+          "reference": "сто",
+          "hypothesis": "dēngē"
+        },
+        {
+          "op": "substitution",
+          "reference": "восемьдесят",
+          "hypothesis": "mā"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "kostobosigisat"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "tēngē"
+        },
+        {
+          "op": "substitution",
+          "reference": "литр",
+          "hypothesis": "līgēr"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 11,
+      "reference_tokens": 9,
+      "wer": 1.2222222222222223,
+      "substitutions": 9,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "kātob"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "kei"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "loggāma"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "yā"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "kēju"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "mēl"
+        },
+        {
+          "op": "substitution",
+          "reference": "молоко",
+          "hypothesis": "dēngē"
+        },
+        {
+          "op": "substitution",
+          "reference": "180",
+          "hypothesis": "mā"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "kostobosigisat"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "tēngē"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_liter",
+          "hypothesis": "līgēr"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "kātob",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "robotic",
+    "runtime": "faster-whisper",
+    "id": "mixed-missing",
+    "lang": "mixed",
+    "detected_language": "th",
+    "native_language_lines": [],
+    "reference": "Форель за килограмм. Бағасын кейін айтамын.",
+    "transcript": "ฟัยศัคิดอรัม บาทราสนคิดเยอะหายตามัน",
+    "raw": {
+      "errors": 8,
+      "reference_tokens": 6,
+      "wer": 1.3333333333333333,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ฟ"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ยศ"
+        },
+        {
+          "op": "substitution",
+          "reference": "форель",
+          "hypothesis": "ค"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "ดอร"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "ม"
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "บาทราสนค"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "ดเยอะหายตาม"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "น"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 8,
+      "reference_tokens": 6,
+      "wer": 1.3333333333333333,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ฟ"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ยศ"
+        },
+        {
+          "op": "substitution",
+          "reference": "форель",
+          "hypothesis": "ค"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "ดอร"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "ม"
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "บาทราสนค"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "ดเยอะหายตาม"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "น"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "ฟ",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "ru-single",
+    "lang": "ru",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\ru-single-16k.wav' (38594 samples, 2.4 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = ru, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Морковь триста тенге за килограмм.",
+    "transcript": "Марков 300 теньги за килограмм.",
+    "raw": {
+      "errors": 3,
+      "reference_tokens": 5,
+      "wer": 0.6,
+      "substitutions": 3,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "марков"
+        },
+        {
+          "op": "substitution",
+          "reference": "триста",
+          "hypothesis": "300"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "теньги"
+        },
+        {
+          "op": "equal",
+          "reference": "за",
+          "hypothesis": "за"
+        },
+        {
+          "op": "equal",
+          "reference": "килограмм",
+          "hypothesis": "килограмм"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 2,
+      "reference_tokens": 5,
+      "wer": 0.4,
+      "substitutions": 2,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "марков"
+        },
+        {
+          "op": "equal",
+          "reference": "300",
+          "hypothesis": "300"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "теньги"
+        },
+        {
+          "op": "equal",
+          "reference": "за",
+          "hypothesis": "за"
+        },
+        {
+          "op": "equal",
+          "reference": "unit_kg",
+          "hypothesis": "unit_kg"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "марков",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "ru-multi",
+    "lang": "ru",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\ru-multi-16k.wav' (82289 samples, 5.1 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = ru, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "transcript": "картофет 250 кг я блоки 500 кг",
+    "raw": {
+      "errors": 11,
+      "reference_tokens": 11,
+      "wer": 1.0,
+      "substitutions": 7,
+      "deletions": 4,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картофель",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "двести",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "пятьдесят",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "тенге",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "картофет"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "250"
+        },
+        {
+          "op": "substitution",
+          "reference": "яблоки",
+          "hypothesis": "кг"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "я"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "блоки"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "500"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "кг"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 10,
+      "wer": 0.7,
+      "substitutions": 4,
+      "deletions": 3,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "картофель",
+          "hypothesis": "картофет"
+        },
+        {
+          "op": "equal",
+          "reference": "250",
+          "hypothesis": "250"
+        },
+        {
+          "op": "deletion",
+          "reference": "currency_kzt",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "за",
+          "hypothesis": null
+        },
+        {
+          "op": "equal",
+          "reference": "unit_kg",
+          "hypothesis": "unit_kg"
+        },
+        {
+          "op": "deletion",
+          "reference": "яблоки",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "я"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "блоки"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "500"
+        },
+        {
+          "op": "equal",
+          "reference": "unit_kg",
+          "hypothesis": "unit_kg"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "картофет",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "ru-ambiguous",
+    "lang": "ru",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\ru-ambiguous-16k.wav' (53496 samples, 3.3 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = ru, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Сыр две пятьсот. Единицу уточню потом.",
+    "transcript": "и деницу точнюю потом.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 6,
+      "wer": 0.8333333333333334,
+      "substitutions": 3,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "две",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "единицу",
+          "hypothesis": "деницу"
+        },
+        {
+          "op": "substitution",
+          "reference": "уточню",
+          "hypothesis": "точнюю"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 5,
+      "reference_tokens": 6,
+      "wer": 0.8333333333333334,
+      "substitutions": 3,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "2",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "единицу",
+          "hypothesis": "деницу"
+        },
+        {
+          "op": "substitution",
+          "reference": "уточню",
+          "hypothesis": "точнюю"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "и",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "kk-single",
+    "lang": "kk",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\kk-single-16k.wav' (43609 samples, 2.7 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = kk, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Сәбіз килограмы үш жүз теңге.",
+    "transcript": "Сәбіз кілғрағма ұшіздыңге.",
+    "raw": {
+      "errors": 4,
+      "reference_tokens": 5,
+      "wer": 0.8,
+      "substitutions": 2,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "equal",
+          "reference": "сәбіз",
+          "hypothesis": "сәбіз"
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "үш",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "кілғрағма"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "ұшіздыңге"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 3,
+      "reference_tokens": 4,
+      "wer": 0.75,
+      "substitutions": 2,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "equal",
+          "reference": "сәбіз",
+          "hypothesis": "сәбіз"
+        },
+        {
+          "op": "deletion",
+          "reference": "unit_kg",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "кілғрағма"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "ұшіздыңге"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "сәбіз",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "kk-multi",
+    "lang": "kk",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\kk-multi-16k.wav' (79130 samples, 4.9 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = kk, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "transcript": "Артоп келайғраңа еқұрзейлыттенге, алма келайғраңа бейшістенге,",
+    "raw": {
+      "errors": 10,
+      "reference_tokens": 11,
+      "wer": 0.9090909090909091,
+      "substitutions": 5,
+      "deletions": 5,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картоп",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "екі",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "артоп"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "келайғраңа"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "еқұрзейлыттенге"
+        },
+        {
+          "op": "equal",
+          "reference": "алма",
+          "hypothesis": "алма"
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "бес",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "келайғраңа"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "бейшістенге"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 8,
+      "wer": 0.875,
+      "substitutions": 5,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картоп",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "артоп"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "келайғраңа"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "еқұрзейлыттенге"
+        },
+        {
+          "op": "equal",
+          "reference": "алма",
+          "hypothesis": "алма"
+        },
+        {
+          "op": "deletion",
+          "reference": "unit_kg",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "келайғраңа"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "бейшістенге"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "артоп",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "kk-ambiguous",
+    "lang": "kk",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\kk-ambiguous-16k.wav' (59255 samples, 3.7 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = kk, task = transcribe, timestamps = 0 ..."
+    ],
+    "reference": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "transcript": "енші ек кі біршість, бірші мін кейнайта мін.",
+    "raw": {
+      "errors": 8,
+      "reference_tokens": 7,
+      "wer": 1.1428571428571428,
+      "substitutions": 7,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "енші"
+        },
+        {
+          "op": "substitution",
+          "reference": "ірімшік",
+          "hypothesis": "ек"
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "кі"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "біршість"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "бірші"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "мін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "кейнайта"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "мін"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 8,
+      "reference_tokens": 6,
+      "wer": 1.3333333333333333,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 2,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "енші"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "ек"
+        },
+        {
+          "op": "substitution",
+          "reference": "ірімшік",
+          "hypothesis": "кі"
+        },
+        {
+          "op": "substitution",
+          "reference": "2",
+          "hypothesis": "біршість"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "бірші"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "мін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "кейнайта"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "мін"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "енші",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "mixed-single",
+    "lang": "mixed",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\mixed-single-16k.wav' (51366 samples, 3.2 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = auto, task = transcribe, timestamps = 0 ...",
+      "whisper_full_with_state: auto-detected language: lt (p = 0.459541)"
+    ],
+    "reference": "Морковь. Килограмы үш жүз теңге.",
+    "transcript": "Markov. Kilogramma, viš šiustingie.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 4,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "markov"
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "kilogramma"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "viš"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "šiustingie"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 4,
+      "reference_tokens": 4,
+      "wer": 1.0,
+      "substitutions": 4,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "морковь",
+          "hypothesis": "markov"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "kilogramma"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "viš"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "šiustingie"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "markov",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "mixed-multi",
+    "lang": "mixed",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\mixed-multi-16k.wav' (85360 samples, 5.3 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = auto, task = transcribe, timestamps = 0 ...",
+      "whisper_full_with_state: auto-detected language: uk (p = 0.633895)"
+    ],
+    "reference": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "transcript": "Картуп кілавраме, Юкжділю Тинге. Молоко 180 тень кізаліта.",
+    "raw": {
+      "errors": 11,
+      "reference_tokens": 12,
+      "wer": 0.9166666666666666,
+      "substitutions": 7,
+      "deletions": 4,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картоп",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "картуп"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "кілавраме"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "юкжділю"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "тинге"
+        },
+        {
+          "op": "equal",
+          "reference": "молоко",
+          "hypothesis": "молоко"
+        },
+        {
+          "op": "deletion",
+          "reference": "сто",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "восемьдесят",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "180"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "тень"
+        },
+        {
+          "op": "substitution",
+          "reference": "литр",
+          "hypothesis": "кізаліта"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 9,
+      "wer": 0.7777777777777778,
+      "substitutions": 6,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "картуп"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "кілавраме"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "юкжділю"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "тинге"
+        },
+        {
+          "op": "equal",
+          "reference": "молоко",
+          "hypothesis": "молоко"
+        },
+        {
+          "op": "equal",
+          "reference": "180",
+          "hypothesis": "180"
+        },
+        {
+          "op": "deletion",
+          "reference": "currency_kzt",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "тень"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_liter",
+          "hypothesis": "кізаліта"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "картуп",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "whisper.cpp",
+    "id": "mixed-missing",
+    "lang": "mixed",
+    "detected_language": null,
+    "native_language_lines": [
+      "main: processing 'C:\\dev\\KAIDA.KZ-2.0\\tmp\\voice-study\\neural\\audio\\mixed-missing-16k.wav' (54710 samples, 3.4 sec), 2 threads, 1 processors, 5 beams + best of 5, lang = auto, task = transcribe, timestamps = 0 ...",
+      "whisper_full_with_state: auto-detected language: lt (p = 0.326322)"
+    ],
+    "reference": "Форель за килограмм. Бағасын кейін айтамын.",
+    "transcript": "Karjevzikki logram. Ogas, minkinai tam.",
+    "raw": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "форель",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "karjevzikki"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "logram"
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "ogas"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "minkinai"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "tam"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "форель",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "karjevzikki"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "logram"
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "ogas"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "minkinai"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "tam"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "karjevzikki",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "ru-single",
+    "lang": "ru",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Морковь триста тенге за килограмм.",
+    "transcript": "Марков 305 кг.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "триста",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "марков"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "305"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "кг"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 4,
+      "reference_tokens": 5,
+      "wer": 0.8,
+      "substitutions": 2,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "300",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "марков"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "305"
+        },
+        {
+          "op": "equal",
+          "reference": "unit_kg",
+          "hypothesis": "unit_kg"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "марков",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "ru-multi",
+    "lang": "ru",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Картофель двести пятьдесят тенге за килограмм. Яблоки пятьсот тенге за килограмм.",
+    "transcript": "картофет 250 кг. Я блоки 500 кг.",
+    "raw": {
+      "errors": 11,
+      "reference_tokens": 11,
+      "wer": 1.0,
+      "substitutions": 7,
+      "deletions": 4,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "картофель",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "двести",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "пятьдесят",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "тенге",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "картофет"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "250"
+        },
+        {
+          "op": "substitution",
+          "reference": "яблоки",
+          "hypothesis": "кг"
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "я"
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "блоки"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "500"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмм",
+          "hypothesis": "кг"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 10,
+      "wer": 0.7,
+      "substitutions": 4,
+      "deletions": 3,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "картофель",
+          "hypothesis": "картофет"
+        },
+        {
+          "op": "equal",
+          "reference": "250",
+          "hypothesis": "250"
+        },
+        {
+          "op": "deletion",
+          "reference": "currency_kzt",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "за",
+          "hypothesis": null
+        },
+        {
+          "op": "equal",
+          "reference": "unit_kg",
+          "hypothesis": "unit_kg"
+        },
+        {
+          "op": "deletion",
+          "reference": "яблоки",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "я"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "блоки"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "500"
+        },
+        {
+          "op": "equal",
+          "reference": "unit_kg",
+          "hypothesis": "unit_kg"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "картофет",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "ru-ambiguous",
+    "lang": "ru",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Сыр две пятьсот. Единицу уточню потом.",
+    "transcript": "42500, единицу уточню потом.",
+    "raw": {
+      "errors": 3,
+      "reference_tokens": 6,
+      "wer": 0.5,
+      "substitutions": 1,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "две",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "пятьсот",
+          "hypothesis": "42500"
+        },
+        {
+          "op": "equal",
+          "reference": "единицу",
+          "hypothesis": "единицу"
+        },
+        {
+          "op": "equal",
+          "reference": "уточню",
+          "hypothesis": "уточню"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 3,
+      "reference_tokens": 6,
+      "wer": 0.5,
+      "substitutions": 1,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "сыр",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "2",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "42500"
+        },
+        {
+          "op": "equal",
+          "reference": "единицу",
+          "hypothesis": "единицу"
+        },
+        {
+          "op": "equal",
+          "reference": "уточню",
+          "hypothesis": "уточню"
+        },
+        {
+          "op": "equal",
+          "reference": "потом",
+          "hypothesis": "потом"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "42500",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "kk-single",
+    "lang": "kk",
+    "detected_language": "kk",
+    "native_language_lines": [],
+    "reference": "Сәбіз килограмы үш жүз теңге.",
+    "transcript": "Себіз келіғра ма ұшіз түнге.",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 5,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "сәбіз",
+          "hypothesis": "себіз"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "келіғра"
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "ма"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "ұшіз"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "түнге"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 5,
+      "reference_tokens": 4,
+      "wer": 1.25,
+      "substitutions": 4,
+      "deletions": 0,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "себіз"
+        },
+        {
+          "op": "substitution",
+          "reference": "сәбіз",
+          "hypothesis": "келіғра"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "ма"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "ұшіз"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "түнге"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "себіз",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "kk-multi",
+    "lang": "kk",
+    "detected_language": "kk",
+    "native_language_lines": [],
+    "reference": "Картоп килограмы екі жүз елу теңге. Алма килограмы бес жүз теңге.",
+    "transcript": "әртоп келғраңа и көзіл өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өтің өті�",
+    "raw": {
+      "errors": 33,
+      "reference_tokens": 11,
+      "wer": 3.0,
+      "substitutions": 11,
+      "deletions": 0,
+      "insertions": 22,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "әртоп"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "келғраңа"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "и"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "көзіл"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "алма",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "килограмы",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "өті"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 33,
+      "reference_tokens": 8,
+      "wer": 4.125,
+      "substitutions": 8,
+      "deletions": 0,
+      "insertions": 25,
+      "alignment": [
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "әртоп"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "келғраңа"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "и"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "көзіл"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "картоп",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "алма",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "өтің"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "өті"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "өтің",
+      "length": 28
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "kk-ambiguous",
+    "lang": "kk",
+    "detected_language": "kk",
+    "native_language_lines": [],
+    "reference": "Ірімшік екі бес жүз. Өлшемін кейін айтамын.",
+    "transcript": "өршемін кейнайта мін өршемін кейнайта мін",
+    "raw": {
+      "errors": 7,
+      "reference_tokens": 7,
+      "wer": 1.0,
+      "substitutions": 6,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "ірімшік",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "өршемін"
+        },
+        {
+          "op": "substitution",
+          "reference": "бес",
+          "hypothesis": "кейнайта"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "мін"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "өршемін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "кейнайта"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "мін"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 6,
+      "deletions": 0,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "substitution",
+          "reference": "ірімшік",
+          "hypothesis": "өршемін"
+        },
+        {
+          "op": "substitution",
+          "reference": "2",
+          "hypothesis": "кейнайта"
+        },
+        {
+          "op": "substitution",
+          "reference": "500",
+          "hypothesis": "мін"
+        },
+        {
+          "op": "substitution",
+          "reference": "өлшемін",
+          "hypothesis": "өршемін"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "кейнайта"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "мін"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "өршемін",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "mixed-single",
+    "lang": "mixed",
+    "detected_language": "lt",
+    "native_language_lines": [],
+    "reference": "Морковь. Килограмы үш жүз теңге.",
+    "transcript": "Narkov! Kilogramma viššiustingie",
+    "raw": {
+      "errors": 5,
+      "reference_tokens": 5,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 2,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "үш",
+          "hypothesis": "narkov"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "kilogramma"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "viššiustingie"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 4,
+      "reference_tokens": 4,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 1,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "морковь",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "narkov"
+        },
+        {
+          "op": "substitution",
+          "reference": "300",
+          "hypothesis": "kilogramma"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "viššiustingie"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "narkov",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "mixed-multi",
+    "lang": "mixed",
+    "detected_language": "ru",
+    "native_language_lines": [],
+    "reference": "Картоп килограмы екі жүз елу теңге. Молоко сто восемьдесят тенге за литр.",
+    "transcript": "картоп киловрамы и окружди лютинга. Молоко 180 теньги залита.",
+    "raw": {
+      "errors": 10,
+      "reference_tokens": 12,
+      "wer": 0.8333333333333334,
+      "substitutions": 7,
+      "deletions": 3,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "equal",
+          "reference": "картоп",
+          "hypothesis": "картоп"
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмы",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "екі",
+          "hypothesis": "киловрамы"
+        },
+        {
+          "op": "substitution",
+          "reference": "жүз",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "елу",
+          "hypothesis": "окружди"
+        },
+        {
+          "op": "substitution",
+          "reference": "теңге",
+          "hypothesis": "лютинга"
+        },
+        {
+          "op": "equal",
+          "reference": "молоко",
+          "hypothesis": "молоко"
+        },
+        {
+          "op": "deletion",
+          "reference": "сто",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "восемьдесят",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "тенге",
+          "hypothesis": "180"
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "теньги"
+        },
+        {
+          "op": "substitution",
+          "reference": "литр",
+          "hypothesis": "залита"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 7,
+      "reference_tokens": 9,
+      "wer": 0.7777777777777778,
+      "substitutions": 5,
+      "deletions": 1,
+      "insertions": 1,
+      "alignment": [
+        {
+          "op": "equal",
+          "reference": "картоп",
+          "hypothesis": "картоп"
+        },
+        {
+          "op": "insertion",
+          "reference": null,
+          "hypothesis": "киловрамы"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_kg",
+          "hypothesis": "и"
+        },
+        {
+          "op": "substitution",
+          "reference": "250",
+          "hypothesis": "окружди"
+        },
+        {
+          "op": "substitution",
+          "reference": "currency_kzt",
+          "hypothesis": "лютинга"
+        },
+        {
+          "op": "equal",
+          "reference": "молоко",
+          "hypothesis": "молоко"
+        },
+        {
+          "op": "equal",
+          "reference": "180",
+          "hypothesis": "180"
+        },
+        {
+          "op": "deletion",
+          "reference": "currency_kzt",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "за",
+          "hypothesis": "теньги"
+        },
+        {
+          "op": "substitution",
+          "reference": "unit_liter",
+          "hypothesis": "залита"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "картоп",
+      "length": 1
+    }
+  },
+  {
+    "corpus": "neural",
+    "runtime": "faster-whisper",
+    "id": "mixed-missing",
+    "lang": "mixed",
+    "detected_language": "lt",
+    "native_language_lines": [],
+    "reference": "Форель за килограмм. Бағасын кейін айтамын.",
+    "transcript": "Karevzakilogram. Avasamkii naitamin.",
+    "raw": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 3,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "форель",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "за",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "килограмм",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "karevzakilogram"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "avasamkii"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "naitamin"
+        }
+      ]
+    },
+    "presentation_normalized": {
+      "errors": 6,
+      "reference_tokens": 6,
+      "wer": 1.0,
+      "substitutions": 3,
+      "deletions": 3,
+      "insertions": 0,
+      "alignment": [
+        {
+          "op": "deletion",
+          "reference": "форель",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "за",
+          "hypothesis": null
+        },
+        {
+          "op": "deletion",
+          "reference": "unit_kg",
+          "hypothesis": null
+        },
+        {
+          "op": "substitution",
+          "reference": "бағасын",
+          "hypothesis": "karevzakilogram"
+        },
+        {
+          "op": "substitution",
+          "reference": "кейін",
+          "hypothesis": "avasamkii"
+        },
+        {
+          "op": "substitution",
+          "reference": "айтамын",
+          "hypothesis": "naitamin"
+        }
+      ]
+    },
+    "maximum_identical_token_run": {
+      "token": "karevzakilogram",
+      "length": 1
+    }
+  }
+]

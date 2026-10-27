@@ -1,0 +1,22 @@
+{
+  "av": {
+    "Version": "15.1.0",
+    "License": null,
+    "License-Expression": "BSD-3-Clause"
+  },
+  "faster-whisper": {
+    "Version": "1.2.1",
+    "License": "MIT",
+    "License-Expression": null
+  },
+  "ctranslate2": {
+    "Version": "4.8.2",
+    "License": "MIT",
+    "License-Expression": null
+  },
+  "espeakng-loader": {
+    "Version": "0.2.4",
+    "License": null,
+    "License-Expression": null
+  }
+}
