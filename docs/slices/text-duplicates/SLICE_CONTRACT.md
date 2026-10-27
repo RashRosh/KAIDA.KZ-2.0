@@ -1,8 +1,8 @@
 # Text duplicates — a repeated list shows existing cards instead of creating duplicates — Slice Contract
 
-**Status:** APPROVED, revision 3 (PO 2026-10-27), including D-1–D-6 and the stated recognition limits. Implementation
-authorized by the PO on 2026-10-27 on a separate branch; merge and checkpoint tag need a separate PO instruction. PO
-manual acceptance of the working scenario is pending.
+**Status:** CLOSED (PO 2026-10-27). Approved as revision 3 (PO 2026-10-27, D-1–D-6 and the stated recognition
+limits); PO acceptance 2026-10-27 (§13); merged through PR #198 (head `ed80dde3`); annotated checkpoint `v0.0.84-text-duplicates` on
+the merge commit (merge SHA and merged-main CI: `docs/agents/CURRENT_STATE.md`). Production text input stays `off`.
 
 **Preview:** [preview.html](preview.html), screenshots `1-repeat-list.png` … `6-after-reload.png` (static, synthetic,
 shipped seller CSS, mobile RU; not runtime proof). Rev. 3 adds no screens (PO 2026-10-27): the «possibly merged» warning
@@ -250,3 +250,31 @@ Point «А» has «Пельмени · 500 г, 1 400 ₸» on sale. The Seller s
 
 Price update through text (D-1 slice): one-tap «Обновить цену» and «Включить» proposals through the existing confirm;
 reducer/prompt work on brands (D-6); matching against drafts of earlier lists.
+
+## 13. Closure
+
+- **PO acceptance (2026-10-27):** the PO reported «я принял». Nothing else is attributed to the PO.
+- **ChatGPT browser check (reported by the PO; not PO acceptance, not an agent check):** ChatGPT used the acceptance
+  stand in a browser and left 6 test drafts and 3 list reviews in the stand database (titles «Сметана домашняя» ×2,
+  «Пельмени» ×2, «Горчица», «Сметана Простоквашино»). At closure the stand still had the 3 scenario cards unchanged
+  (revision 1, statuses as seeded) and 0 change sets: no Offer was created or changed.
+- **Agent checks (not PO acceptance):** browser run of the path on the stand over plain http
+  ([ACCEPTANCE.md](ACCEPTANCE.md)); it found the repeated conflict notice, fixed in `115a3e57`.
+- **Stand = final code:** the stand ran a production build made at 19:28 from `115a3e57` (committed 19:27); the later
+  commit `ed80dde3` changed only `ACCEPTANCE.md` and `CURRENT_STATE.md`.
+- **Automated:** PR #198 at `ed80dde3` — KAIDA verify 40521577717 (push) and 40521638072 (PR), CodeQL, Dependency
+  review green; locally all text-input E2E specs 17/17 (one worker), integration 69/69 on a fresh test DB, unit green
+  (one `typo-rules` failure in one full local run, not reproduced alone or in a second full run; search code untouched).
+- **Diff audit:** new files in `seller-input` (matching/comparison) and `seller-text-input` (one line per product,
+  held lines, draft on request), the review UI, i18n, one held-draft route, the fake parser pack regex. Confirm, change
+  sets, the offers repository, the DB schema and the reducer, prompt and model files are unchanged; no call creates or
+  changes an Offer. Additive JSON in the submission result only.
+- **Known limitation of the fake parser (documented, not fixed here, not a real-parser claim):** the test parser takes
+  the **first number** of a phrase as the price, so writing the pack before the price («Сметана домашняя 400 г 1500»)
+  yields price 400 and no pack; the acceptance texts put the price first («… 1500 за упаковку 400 г»). This is a
+  limitation of the deterministic CI/stand parser only; the real parser's behaviour is governed by slice 2 and is not
+  inferred from it.
+- **Not verified:** the «possibly merged» warning with a live model (replay of saved answers only); Kazakh strings
+  (provisional); phone browsers other than the stand runs.
+- **Follow-ups (not an approved queue):** `S-TEXT-PRICE-UPDATE` (D-1) — contract preparation requested by the PO
+  2026-10-27; reducer/prompt work on brands and positions (D-6); matching against drafts of earlier lists.
