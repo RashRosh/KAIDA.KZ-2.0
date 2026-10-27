@@ -5,6 +5,8 @@
 - Known limitations (B-READABILITY, accepted by PO): phone browsers, page zoom and phone system text size not verified; at 200 % long words in the narrow card column break mid-word; the browser font-size setting does not enlarge the px-sized product name and price. Earlier slices' limitations stay in their contracts (slice 2: §14 model limits; KK strings provisional).
 - Maintenance: O-CI-FLAKE-TYPO (EXECUTION_PLAN §5.12) — intermittent `search-typo-correction` E2E failure, cause unconfirmed; investigate if it recurs.
 - Infrastructure: previews stopped; acceptance DB `kaida_br_accept` dropped, dump in `C:\dev\KAIDA-backups\buyer-readability-2026-10-22\` (outside Git). Seller AI text input production `off`; Modal and the real-model stand stopped.
-- Open decisions: D-2 model licence confirmation before production; D-4 Kazakhstan deployment. `S-TEXT-AVAILABILITY` (EXECUTION_PLAN §5.3) — planning only.
-- Current task: none. The approved queue (EXECUTION_PLAN §2) is exhausted; no next slice is approved.
-- Next action: PO chooses the next work from EXECUTION_PLAN; a contract and a PO instruction are required before any implementation.
+- Open decisions: D-2 model licence confirmation before production; D-4 Kazakhstan deployment. `S-TEXT-DUPLICATES` (EXECUTION_PLAN §5.3) — discussion only.
+- PO direction 2026-10-27 (EXECUTION_PLAN, «Общая дорожная карта»): features first, then release; no redesign phase; pilot prep not moved ahead; priority = seller offer creation/maintenance via text, voice, photo, video.
+- Preserved, not to be changed: voice research branch `research/voice-input-local-feasibility-2026-10-09` @ `63623363` (pushed, no PR); local-only `wip/local-leftovers-2026-10-09` @ `335205de` (stale docs, never merge over current); stashes and old worktrees kept.
+- Current task: implementing `S-TEXT-AVAILABILITY` (contract `docs/slices/text-availability/SLICE_CONTRACT.md`, APPROVED rev. 3, PO 2026-10-27) on branch `slice/text-availability` from `main` d084fedd; the first commit holds the contract, preview and plan updates. Commit, push and PR allowed; merge and tag NOT. No model runs; production text input stays `off`.
+- Next action: implement per contract §4; targeted tests, full regression, branch CI; open PR; prepare local stand and PO manual-acceptance scenario. PO manual acceptance pending — do not mark it done.
