@@ -6,6 +6,7 @@ import type {
   AvailabilityStatement,
   AvailabilityStatementView,
 } from '../../seller-input/contracts/availability.contract';
+import type { DuplicateCandidate, DuplicateOutcome } from '../../seller-input/contracts/duplicates.contract';
 
 // A «нет в наличии» statement as a parser produced it; the matching against the point's cards lives in seller-input.
 export type UnavailableStatement = AvailabilityStatement;
@@ -32,6 +33,10 @@ export const parsedTextLineSchema = z.object({
   // seller-ai-text-real-parser §7: set by the real parser; absent → slice-1 mapping from `confidence`.
   uncertainFields: z.array(uncertainLineFieldSchema).optional(),
   notice: z.string().trim().min(1).max(300).optional(),
+  // text-duplicates §4.2: different prices for this line in one message; the price stays empty until the Seller chooses.
+  priceChoices: z.array(z.string().trim().min(1).max(40)).min(2).max(10).optional(),
+  // text-duplicates §4.3: the parser absorbed several mentions here; the Seller's original fragments for the warning.
+  mergedFragments: z.array(z.string().max(500)).min(2).max(10).optional(),
 }).strict();
 
 export const skippedTextLineSchema = z.object({
@@ -76,7 +81,26 @@ export type SellerTextInputResponse = {
   // switch-off proposals of this list that still wait for confirmation.
   availability: AvailabilityStatementView[];
   pendingChangeSetIds: string[];
+  // text-duplicates §4.1–§4.5: held lines, «другая фасовка» notes on drafts, price choices of drafts.
+  held: HeldLineView[];
+  draftNotes: DraftNoteView[];
+  priceChoices: { draftId: string; choices: string[] }[];
 };
+
+export type HeldLineView = {
+  index: number;
+  quote: string;
+  title: string;
+  priceChoices: string[] | null;
+  mergedFragments: string[] | null;
+  possiblyMerged: boolean;
+  outcome: DuplicateOutcome;
+  candidates: DuplicateCandidate[];
+  // The draft made from this line on the Seller's request, while it exists.
+  draftId: string | null;
+};
+
+export type DraftNoteView = { draftId: string; otherPacks: { title: string; packLabel: string | null }[] };
 
 // text-availability §4.1 item 5: what the Seller saw for each statement acted on, and what they ticked.
 export const availabilityProposalBodySchema = z.object({

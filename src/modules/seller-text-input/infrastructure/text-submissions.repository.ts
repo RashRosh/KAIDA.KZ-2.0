@@ -80,6 +80,11 @@ export async function listLiveSubmissions(db: Db, sellerId: string, now: Date, l
     .limit(limit);
 }
 
+// text-duplicates §4.5: the result after a held line got its draft; called under the row lock.
+export async function replaceSubmissionResult(db: Db, key: SubmissionKey, result: SellerTextSubmissionResult): Promise<void> {
+  await db.update(sellerTextSubmissions).set({ result }).where(and(byKey(key), eq(sellerTextSubmissions.status, 'succeeded')));
+}
+
 // text-availability §4.1 item 5: remember a switch-off proposal made from this review (bookkeeping only).
 export async function recordAvailabilityChangeSet(db: Pick<Database, 'execute'>, key: SubmissionKey, changeSetId: string): Promise<void> {
   await db.execute(sql`

@@ -228,6 +228,51 @@ export function statementVariant(item: ReducedItem, message: string, otherSpans:
   return { state: 'none' };
 }
 
+export const MERGE_WARNING = 'Возможно, здесь несколько товаров. Проверьте название и цену.';
+const PRICE_CONFLICT = 'В тексте разные цены — выберите цену';
+
+// text-duplicates §4.2–§4.3, from the reducer's own record (no reducer change): an item that absorbed several «have»
+// mentions is possibly merged, and prices it overwrote are a conflict for the Seller to resolve. A «fix» claim is an
+// explicit correction and keeps slice 2's «later value» rule. These are the only available signs: their absence does
+// not prove that the parser kept different products apart.
+function mergeSigns(item: ReducedItem, claims: ValidClaim[], trace: Record<string, unknown>[], message: string) {
+  const prices: string[] = [];
+  for (const entry of trace) {
+    if (entry.op !== 'price_overwritten' || entry.title !== item.title) continue;
+    if (claims[entry.i as number]?.status !== 'have') continue;
+    for (const value of [entry.old, entry.new]) if (typeof value === 'string' && !prices.includes(value)) prices.push(value);
+  }
+  // Only mentions inside this item's own source (the reducer spans of its mentions): another pack of the same product is
+  // a separate item with its own source.
+  const own = findSpan(message, item.source);
+  const inside = (text: string) => {
+    const span = findSpan(message, text);
+    return own !== null && span !== null && span[0] >= own[0] && span[1] <= own[1];
+  };
+  const fragments = [...new Set(claims
+    .filter((cl) => cl.status === 'have' && cl.product && cl.text && inside(cl.text) && sameProduct(cl.product, item.title, true))
+    .map((cl) => clip(cl.text!, 500)))];
+  return { prices, fragments };
+}
+
+function withMergeSigns(line: ParsedTextLine, signs: { prices: string[]; fragments: string[] }): ParsedTextLine {
+  const conflict = signs.prices.length > 1;
+  const merged = conflict || signs.fragments.length > 1;
+  if (!merged) return line;
+  const fields = new Set(line.uncertainFields ?? []);
+  fields.add('title');
+  if (conflict) fields.add('price');
+  const notes = [MERGE_WARNING, ...(conflict ? [PRICE_CONFLICT] : []), ...(line.notice ? [line.notice] : [])];
+  const out: ParsedTextLine = { ...line, confidence: 'low', uncertainFields: [...fields], notice: clip(notes.join('; '), 300) };
+  if (conflict) {
+    out.price = null;
+    out.priceChoices = signs.prices.slice(0, 10);
+  }
+  // With one fragment the row's own source quote already shows the Seller's words.
+  if (signs.fragments.length > 1) out.mergedFragments = signs.fragments.slice(0, 10);
+  return out;
+}
+
 function overlaps(a: [number, number], spans: [number, number][]): boolean {
   return spans.some(([s, e]) => a[0] < e && s < a[1]);
 }
@@ -283,7 +328,7 @@ export function claimsToParseResult(rawClaims: unknown[], message: string): Sell
       });
       continue;
     }
-    const line = mapItem(item, unitDropped);
+    const line = withMergeSigns(mapItem(item, unitDropped), mergeSigns(item, claims, reduced.trace, message));
     if (lines.length >= MAX_DRAFTS_PER_SUBMISSION) {
       skipped.push({ label: line.title, reason: REASON_OVERFLOW, sourceQuote: line.sourceQuote });
       continue;

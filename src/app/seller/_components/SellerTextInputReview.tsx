@@ -11,6 +11,7 @@ import { formatAmount } from '../../_components/format-amount';
 import { Bar, Ic, LoadError, LoginRequired, Phone, Thumb } from '../_kaida/ui';
 import { missingDraftFields } from './card-model';
 import { availabilitySummary, SellerTextAvailability } from './SellerTextAvailability';
+import { SellerTextHeld } from './SellerTextHeld';
 
 const REVIEW_STORAGE_PREFIX = 'kaida:text-input-review:';
 
@@ -112,13 +113,28 @@ export function SellerTextInputReviewScreen() {
     );
   }
   const nothingAtAll = submission.drafts.length === 0 && submission.skipped.length === 0 && submission.notices.length === 0
-    && submission.unavailableDrafts === 0 && submission.availability.length === 0;
+    && submission.unavailableDrafts === 0 && submission.availability.length === 0 && submission.held.length === 0;
+  const reload = () => { setReview({ kind: 'loading' }); setAttempt((value) => value + 1); };
+  // text-duplicates §4.2: a draft whose prices conflict stays unpublishable until the Seller chooses (empty price).
+  const choicesByDraft = new Map(submission.priceChoices.map((entry) => [entry.draftId, entry.choices]));
+  const notesByDraft = new Map(submission.draftNotes.map((entry) => [entry.draftId, entry.otherPacks]));
+  async function choosePrice(draft: OfferDraftView, price: string) {
+    const response = await fetch(`/api/seller/drafts/${draft.id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...draft.payload, price }),
+    }).catch(() => null);
+    if (response?.ok) reload();
+  }
   // text-availability §4.1 item 4: one summary line — counts only — when the list also holds «нет в наличии».
   const availability = availabilitySummary(submission.availability);
   const acted = submission.publishedDrafts > 0 || availability.off > 0 || availability.pending > 0;
-  const summary = submission.availability.length === 0 ? null : acted
+  const availabilityLine = submission.availability.length === 0 ? null : acted
     ? t('availability.summaryAfter', { published: submission.publishedDrafts, off: availability.off, waiting: submission.drafts.length + availability.open })
     : t('availability.summaryBefore', { drafts: submission.drafts.length, choose: availability.open });
+  // text-duplicates §4.5: held lines are counted in the same one-line summary.
+  const heldCount = submission.held.length;
+  const summary = heldCount === 0 ? availabilityLine : availabilityLine
+    ? `${availabilityLine} · ${t('duplicates.summaryPart', { count: heldCount })}`
+    : t('duplicates.summary', { drafts: submission.drafts.length, held: heldCount });
 
   return (
     <Phone>
@@ -146,7 +162,7 @@ export function SellerTextInputReviewScreen() {
             <p className="c" style={{ color: 'var(--ink)' }}>{summary}</p>
           </div>
         )}
-        {submission.availability.length > 0 && submission.drafts.length > 0 && (
+        {(submission.availability.length > 0 || heldCount > 0) && submission.drafts.length > 0 && (
           <div className="ov">{t('availability.newTitle', { count: submission.drafts.length })}</div>
         )}
         {nothingAtAll && (
@@ -161,6 +177,8 @@ export function SellerTextInputReviewScreen() {
           const missing = missingDraftFields(draft.payload);
           const uncertain = uncertainByDraft.get(draft.id);
           const price = draft.payload.price.trim();
+          const choices = price ? undefined : choicesByDraft.get(draft.id);
+          const otherPacks = notesByDraft.get(draft.id);
           return (
             <article key={draft.id} className="card p16" style={{ gap: 8 }} data-testid={`text-draft-${draft.id}`}>
               <button type="button" className="rowbtn" onClick={() => router.push(`/seller?draft=${draft.id}&back=${encodeURIComponent(`/seller/text-input/review?input=${submission.inputId}`)}`)}>
@@ -172,10 +190,29 @@ export function SellerTextInputReviewScreen() {
                 </div>
                 <Ic name="right" className="c2" />
               </button>
+              {choices && <span className="bd bd-warn" style={{ alignSelf: 'flex-start' }} data-testid="text-price-unready"><Ic name="alert" />{t('duplicates.unready')}</span>}
               {uncertain && <p className="c" role="status" data-testid="text-uncertain-notice">{uncertain.message}</p>}
+              {choices && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-testid="text-price-choices">
+                  <p className="c" style={{ color: 'var(--ink)' }}>{t('duplicates.choosePrice')}</p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {choices.map((choice) => (
+                      <button key={choice} type="button" className="chip" onClick={() => void choosePrice(draft, choice)}>
+                        {formatAmount(choice)} ₸{draft.payload.unit ? ` / ${unitShort(draft.payload.unit)}` : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {otherPacks && (
+                <p className="c c2" data-testid="text-other-pack">{t('duplicates.otherPack', {
+                  cards: otherPacks.map((other) => (other.packLabel ? `${other.title} · ${other.packLabel}` : other.title)).join(', '),
+                })}</p>
+              )}
             </article>
           );
         })}
+        {heldCount > 0 && <SellerTextHeld inputId={submission.inputId} held={submission.held} onChanged={reload} />}
         {submission.availability.length > 0 && (
           <SellerTextAvailability inputId={submission.inputId} locationId={submission.locationId}
             availability={submission.availability} pendingChangeSetIds={submission.pendingChangeSetIds} />
