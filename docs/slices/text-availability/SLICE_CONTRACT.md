@@ -1,8 +1,8 @@
 # Text availability updates — «нет в наличии» for existing offers — Slice Contract
 
-**Status:** APPROVED, revision 3 (PO 2026-10-27), including D-A–D-D and the limitation on unrecognised pack wording
-(§4.1 item 1). Implementation authorized by the PO on 2026-10-27 on a separate branch; merge and checkpoint tag need a
-separate PO instruction. PO manual acceptance of the working scenario is still pending.
+**Status:** CLOSED (PO 2026-10-27). Approved as revision 3 (PO 2026-10-27, D-A–D-D and the limitation on
+unrecognised pack wording, §4.1 item 1); PO acceptance 2026-10-27 (§13); merged as `04fcf9395b6012460c12c3c9b3deb387af94f582` (PR #196); annotated
+checkpoint `v0.0.83-text-availability`. Production text input stays `off`.
 
 **Preview:** [preview.html](preview.html) with screenshots `1-mixed-before.png` … `8-reload-pending.png` (static,
 synthetic, shipped seller CSS, mobile RU; not runtime proof). Accepted by the PO as the basis for implementation.
@@ -298,3 +298,29 @@ duplicates from repeated text input — a product that already has a card at the
 published, a second card (recorded as `S-TEXT-DUPLICATES`, EXECUTION_PLAN §5.3, open for discussion); price changes
 of existing offers through text. Voice, photo and video (S18–S20) are expected to
 reuse the parse result and this matching function; their order is not approved.
+
+## 13. Closure
+
+- **PO acceptance (2026-10-27):** the PO reported «принято». No individual checks are attributed to the PO beyond
+  that statement. Earlier the PO reported that «Разобрать в черновики» did nothing on the acceptance stand; the cause and
+  fix are below, and the PO accepted after the fix.
+- **Stand failure:** the list screen made its request id with `crypto.randomUUID()`, which browsers expose only in secure
+  contexts (HTTPS, localhost); the stand was opened over plain http on the LAN, so the click threw before any request.
+  Fix `920e536e` (fallback to a v4 UUID from `crypto.getRandomValues`, unit test). Code from slice 2; E2E on
+  `127.0.0.1` could not show it.
+- **Agent checks (not PO acceptance):** browser run of the whole path on the stand after the fix — login → point →
+  text → parse → «Нет в наличии» → switch-off proposal → confirm → statuses on return
+  ([ACCEPTANCE.md](ACCEPTANCE.md)). Diagnostics outside Git: `C:\dev\KAIDA-backups\text-availability-2026-10-27\`.
+- **Automated:** branch CI on `920e536e` green (KAIDA verify push 40493505970 and PR 40493512921 attempt 2 — attempt 1
+  was cancelled on the runner mid-E2E with no failed test; CodeQL 40493512922; Dependency review 40493512923);
+  merged-main KAIDA verify 40499935657 and CodeQL 40499935654 green.
+- **Found and fixed during implementation:** a remaining pack was pre-ticked on return (`6061d508`, rule clarified in
+  §4.1 item 3); the new E2E shared a phone with another spec (`102a028c`).
+- **Diff audit:** confirm semantics, the offers repository and the DB schema are unchanged (no diff); the existing
+  revision guard, atomic batch confirm and confirm-time locks are as before. Beyond the contract's files only the list
+  screen's request id changed (the stand fix).
+- **Not verified:** the real parser with a live model on statements (replay only, as planned); phone browsers other than
+  the PO's own run; Kazakh strings (provisional).
+- **Follow-ups (not an approved queue):** `S-TEXT-DUPLICATES` (§12); «снова есть»; price changes of existing offers
+  through text. Outside this slice: React #418 hydration warning on the first home-page load; the buyer report form also
+  calls `crypto.randomUUID`.
