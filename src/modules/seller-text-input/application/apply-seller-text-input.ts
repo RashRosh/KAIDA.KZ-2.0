@@ -59,7 +59,7 @@ import {
   readSellerTextInputMode,
 } from '../seller-text-input.config';
 import { mapParseLineToDraftPayload, uncertainMessage } from './map-parse-line-to-draft';
-import { mergeRepeatedLines } from './merge-repeated-lines';
+import { mergeRepeatedLines, PRICE_CONFLICT_NOTICE } from './merge-repeated-lines';
 
 // seller-ai-text-real-parser §6.4: retry protection lasts 24 hours; a processing attempt is live for the parser timeout
 // plus 30 seconds, after which another request may take it over.
@@ -441,11 +441,15 @@ async function createDraftFromLine(tx: Database, input: {
     { parser: input.parser, parserConfig: input.parser === 'real' ? PARSER_CONFIG_ID : undefined });
   const draft = await saveOfferDraft(input.userId, null, payload, { database: tx });
   if (uncertainFields.length === 0) return { draft, uncertain: null };
+  // A price conflict is told by the review's own choice row; the notice keeps only what else the Seller must check.
+  const notice = line.priceChoices
+    ? (line.notice ?? '').split('; ').filter((part) => part && part !== PRICE_CONFLICT_NOTICE).join('; ')
+    : line.notice;
+  if (line.priceChoices && !notice) return { draft, uncertain: null };
   const fragments = line.mergedFragments ? ` Фрагменты: ${line.mergedFragments.map((f) => `«${f}»`).join(' · ')}` : '';
-  const prices = line.priceChoices ? ` Цены в тексте: ${line.priceChoices.join(' и ')}.` : '';
   return {
     draft,
-    uncertain: { draftId: draft.id, fields: uncertainFields, message: `${uncertainMessage(uncertainFields, resolution.status, line.notice)}${prices}${fragments}` },
+    uncertain: { draftId: draft.id, fields: uncertainFields, message: `${uncertainMessage(uncertainFields, resolution.status, notice || undefined)}${fragments}` },
   };
 }
 
