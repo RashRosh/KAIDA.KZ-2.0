@@ -19,13 +19,13 @@ const STATUS: Record<AvailabilityCandidate['status'], { className: string; icon:
   off_before: { className: 'bd bd-n', icon: 'power', key: 'availability.statusOffBefore' },
 };
 
-// text-availability §4.1 item 3: one clear match is pre-ticked; several matches, an uncertain pack or a changed
-// statement wait for the Seller's own choice.
+// text-availability §4.1 item 3: one clear match — the only card found, and on sale — is pre-ticked; several matches
+// (even when the others are already switched off), an uncertain pack or a changed statement wait for the Seller.
 function defaultTicks(views: AvailabilityStatementView[], changed: Set<number>): Map<number, Set<string>> {
   const ticks = new Map<number, Set<string>>();
   for (const view of views) {
     const selectable = view.candidates.filter((candidate) => candidate.selectable);
-    const clear = selectable.length === 1 && view.variant.state !== 'uncertain' && !changed.has(view.index);
+    const clear = view.candidates.length === 1 && selectable.length === 1 && view.variant.state !== 'uncertain' && !changed.has(view.index);
     ticks.set(view.index, new Set(clear ? [selectable[0]!.offerId] : []));
   }
   return ticks;

@@ -95,8 +95,10 @@ paths and can be verified separately inside one review.
 3. **Outcome per statement.** The statements (label, quote, variant) are stored in the submission result when drafts
    are created; **candidates are computed from current data every time the review is shown** and again when a proposal
    is created (item 5). Outcomes:
-   - one selectable offer and variant `none` or `bound` → pre-ticked;
-   - several selectable offers, or variant `uncertain` → listed, none ticked;
+   - exactly one matching offer, selectable, and variant `none` or `bound` → pre-ticked;
+   - several matching offers (even when the others are already switched off or pending — e.g. on return after one pack
+     was switched off), or variant `uncertain` → listed, none ticked (implementation clarification 2026-10-27: a
+     remaining pack is never ticked for the Seller);
    - matching offers that are all already switched off → «Выключено раньше», no action;
    - no match → «Нет такой карточки в этой точке» with a link to «Товары точки».
 4. **Review screen** (preview screens 1–8):
