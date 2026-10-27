@@ -58,7 +58,8 @@ function parseUnit(word: string | undefined): ParsedTextLine['unit'] {
 }
 
 function parsePack(text: string): ParsedTextLine['pack'] {
-  const m = text.match(/(?:упаковк\w*|пачк\w*|pack)\s*(\d+(?:[.,]\d+)?)\s*(г|кг|g|kg|мл|л|ml|l)/iu);
+  // `\w` is ASCII-only in JavaScript, so «упаковку 400 г» needs `\p{L}` (text-duplicates acceptance texts).
+  const m = text.match(/(?:упаковк\p{L}*|пачк\p{L}*|pack)\s*(\d+(?:[.,]\d+)?)\s*(г|кг|g|kg|мл|л|ml|l)/iu);
   if (!m) return null;
   const amount = m[1].replace(',', '.');
   const rawUnit = m[2].toLowerCase();

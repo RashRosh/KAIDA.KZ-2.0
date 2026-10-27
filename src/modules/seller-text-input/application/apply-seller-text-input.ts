@@ -9,11 +9,16 @@ import { findSellerByOwner } from '../../sellers/infrastructure/sellers.reposito
 import type { Locale } from '../../../i18n/config';
 import { createDeactivationChangeSet } from '../../seller-input/application/create-batch-seller-change-set';
 import { matchAvailability } from '../../seller-input/application/match-availability';
+import { checkDuplicates, duplicateOutcome } from '../../seller-input/application/match-duplicates';
+import type { DuplicateLineInput } from '../../seller-input/contracts/duplicates.contract';
 import type { AvailabilityStatementView } from '../../seller-input/contracts/availability.contract';
 import { OfferChangedError } from '../../seller-input/contracts/seller-change-set.contract';
 import { findDeactivationItems } from '../../seller-input/infrastructure/seller-change-sets.repository';
 import {
   type AvailabilityProposalBody,
+  type HeldLineView,
+  type ParsedTextLine,
+  type DraftNoteView,
   type SellerTextInputResponse,
   TextAvailabilityChangedError,
   TextInputReviewUnavailableError,
@@ -40,6 +45,7 @@ import {
   markSubmissionSucceeded,
   purgeExpiredSubmissions,
   recordAvailabilityChangeSet,
+  replaceSubmissionResult,
   takeOverSubmission,
 } from '../infrastructure/text-submissions.repository';
 import { parseFakeSellerText } from '../parsers/fake-seller-text-parser';
@@ -53,6 +59,7 @@ import {
   readSellerTextInputMode,
 } from '../seller-text-input.config';
 import { mapParseLineToDraftPayload, uncertainMessage } from './map-parse-line-to-draft';
+import { mergeRepeatedLines, PRICE_CONFLICT_NOTICE } from './merge-repeated-lines';
 
 // seller-ai-text-real-parser §6.4: retry protection lasts 24 hours; a processing attempt is live for the parser timeout
 // plus 30 seconds, after which another request may take it over.
@@ -108,6 +115,47 @@ async function availabilityOf(database: Database, ownerUserId: string, row: Subm
   return { availability, pendingChangeSetIds };
 }
 
+function duplicateInput(line: ParsedTextLine): DuplicateLineInput {
+  return {
+    title: line.title,
+    price: line.price,
+    unit: line.unit,
+    pack: line.pack,
+    uncertain: line.uncertainFields ?? (line.confidence === 'low' ? ['unit'] : []),
+    priceChoices: line.priceChoices,
+    possiblyMerged: Boolean(line.mergedFragments) || (line.uncertainFields ?? []).includes('title'),
+  };
+}
+
+// text-duplicates §4.1, §4.5: held lines with candidates and differences from current data, notes on drafts that have
+// the same product in another pack, and the price choices of drafts whose price is still not chosen.
+async function duplicatesOf(database: Database, ownerUserId: string, result: SellerTextSubmissionResult,
+  drafts: OfferDraftView[], locale?: Locale) {
+  const locationId = result.locationId ?? null;
+  const heldLines = result.held ?? [];
+  const present = new Set(drafts.map((draft) => draft.id));
+  const heldChecks = await checkDuplicates(ownerUserId, locationId, heldLines.map((held) => duplicateInput(held.line)), { database, locale });
+  const held: HeldLineView[] = heldLines.map((entry, index) => ({
+    index,
+    quote: entry.line.sourceQuote ?? entry.line.title,
+    title: entry.line.title,
+    priceChoices: entry.line.priceChoices ?? null,
+    mergedFragments: entry.line.mergedFragments ?? null,
+    possiblyMerged: duplicateInput(entry.line).possiblyMerged === true,
+    outcome: duplicateOutcome(heldChecks[index]!.candidates),
+    candidates: heldChecks[index]!.candidates,
+    draftId: entry.draftId && present.has(entry.draftId) ? entry.draftId : null,
+  }));
+  const draftChecks = await checkDuplicates(ownerUserId, locationId, drafts.map((draft) => ({
+    title: draft.payload.title, price: draft.payload.price || null, unit: draft.payload.unit, pack: draft.payload.pack, uncertain: [],
+  })), { database, locale });
+  const draftNotes: DraftNoteView[] = drafts.flatMap((draft, k) => (draftChecks[k]!.otherPacks.length > 0
+    ? [{ draftId: draft.id, otherPacks: draftChecks[k]!.otherPacks.map((other) => ({ title: other.title, packLabel: other.packLabel })) }]
+    : []));
+  const priceChoices = (result.priceChoices ?? []).filter((entry) => present.has(entry.draftId));
+  return { held, draftNotes, priceChoices };
+}
+
 // The stored result with the drafts as they are now; a missing draft is published (recorded at confirm) or deleted.
 async function storedResult(database: Database, row: SubmissionRow, ownerUserId: string, locale?: Locale) {
   const result = row.result!;
@@ -127,6 +175,7 @@ async function storedResult(database: Database, row: SubmissionRow, ownerUserId:
     publishedDrafts,
     deletedDrafts: missing.length - publishedDrafts,
     ...await availabilityOf(database, ownerUserId, row, locale),
+    ...await duplicatesOf(database, ownerUserId, result, drafts, locale),
   };
 }
 
@@ -149,7 +198,8 @@ export async function getSellerTextSubmission(
   const base = { status: row.status, createdAt: row.createdAt.toISOString(), expiresAt: row.expiresAt.toISOString() };
   if (row.status !== 'succeeded') {
     return { ...base, inputId: row.requestId, parser: row.parser, locationId: null, drafts: [], skipped: [], uncertain: [],
-      notices: [], unavailableDrafts: 0, publishedDrafts: 0, deletedDrafts: 0, availability: [], pendingChangeSetIds: [] };
+      notices: [], unavailableDrafts: 0, publishedDrafts: 0, deletedDrafts: 0, availability: [], pendingChangeSetIds: [],
+      held: [], draftNotes: [], priceChoices: [] };
   }
   return { ...base, ...await storedResult(database, row, ownerUserId, dependencies.locale), locationId: row.result!.locationId ?? null };
 }
@@ -265,6 +315,7 @@ export async function applySellerTextInput(
       uncertain: committed.result.uncertain.length, unavailable: committed.result.unavailable?.length ?? 0, parser,
       config: parser === 'real' ? PARSER_CONFIG_ID : null });
     const availability = await matchAvailability(user.id, targetLocationId, committed.result.unavailable ?? [], [], { database });
+    const duplicates = await duplicatesOf(database, user.id, committed.result, committed.drafts);
     return {
       inputId: key.requestId,
       rawText: text,
@@ -278,6 +329,7 @@ export async function applySellerTextInput(
       deletedDrafts: 0,
       availability,
       pendingChangeSetIds: [],
+      ...duplicates,
       replayed: false,
     };
   }
@@ -297,22 +349,25 @@ async function commitDrafts(tx: Database, input: {
   const defaultLocationId = input.locationId;
   const drafts: OfferDraftView[] = [];
   const uncertain: UncertainDraftNotice[] = [];
-  for (const line of parsed.lines) {
-    const resolution = await resolveProduct(tx, line.title);
-    const catalog = resolution.status === 'resolved'
-      ? { productId: resolution.product.id, status: 'resolved' as const }
-      : { productId: null, status: resolution.status };
-    const { payload, uncertainFields } = mapParseLineToDraftPayload(line, key.requestId, defaultLocationId, catalog,
-      { parser, parserConfig: parser === 'real' ? PARSER_CONFIG_ID : undefined });
-    const draft = await saveOfferDraft(input.userId, null, payload, { database: tx });
-    drafts.push(draft);
-    if (uncertainFields.length > 0) {
-      uncertain.push({ draftId: draft.id, fields: uncertainFields, message: uncertainMessage(uncertainFields, resolution.status, line.notice) });
+  const priceChoices: NonNullable<SellerTextSubmissionResult['priceChoices']> = [];
+  const held: NonNullable<SellerTextSubmissionResult['held']> = [];
+  // text-duplicates §4.1–§4.2: one line per product of the message; a line with a possible match at the point is held
+  // back (no automatic draft), also when its prices conflict.
+  const lines = mergeRepeatedLines(parsed.lines);
+  const checks = await checkDuplicates(input.userId, defaultLocationId, lines.map(duplicateInput), { database: tx });
+  for (const [k, line] of lines.entries()) {
+    if (checks[k]!.candidates.length > 0) {
+      held.push({ line, draftId: null });
+      continue;
     }
+    const made = await createDraftFromLine(tx, { userId: input.userId, inputId: key.requestId, line, parser, locationId: defaultLocationId });
+    drafts.push(made.draft);
+    if (made.uncertain) uncertain.push(made.uncertain);
+    if (line.priceChoices) priceChoices.push({ draftId: made.draft.id, choices: line.priceChoices });
   }
   const result: SellerTextSubmissionResult = {
     draftIds: drafts.map((d) => d.id), skipped: parsed.skipped, uncertain, notices: parsed.notices ?? [],
-    locationId: input.locationId, unavailable: parsed.unavailable ?? [],
+    locationId: input.locationId, unavailable: parsed.unavailable ?? [], held, priceChoices,
   };
   await markSubmissionSucceeded(tx, key, result, input.now());
   return { drafts, result };
@@ -370,5 +425,73 @@ export async function proposeTextAvailability(
     await recordAvailabilityChangeSet(tx, key, changeSetId);
     logOutcome({ inputId, outcome: 'availability_proposed', offers: targets.size });
     return { changeSetId };
+  });
+}
+
+// One private draft from a parsed line, exactly as the list review creates it (slices 1–2), plus its notice.
+async function createDraftFromLine(tx: Database, input: {
+  userId: string; inputId: string; line: ParsedTextLine; parser: SellerTextParser; locationId: string | null;
+}) {
+  const { line } = input;
+  const resolution = await resolveProduct(tx, line.title);
+  const catalog = resolution.status === 'resolved'
+    ? { productId: resolution.product.id, status: 'resolved' as const }
+    : { productId: null, status: resolution.status };
+  const { payload, uncertainFields } = mapParseLineToDraftPayload(line, input.inputId, input.locationId, catalog,
+    { parser: input.parser, parserConfig: input.parser === 'real' ? PARSER_CONFIG_ID : undefined });
+  const draft = await saveOfferDraft(input.userId, null, payload, { database: tx });
+  if (uncertainFields.length === 0) return { draft, uncertain: null };
+  // A price conflict is told by the review's own choice row; the notice keeps only what else the Seller must check.
+  const notice = line.priceChoices
+    ? (line.notice ?? '').split('; ').filter((part) => part && part !== PRICE_CONFLICT_NOTICE).join('; ')
+    : line.notice;
+  if (line.priceChoices && !notice) return { draft, uncertain: null };
+  const fragments = line.mergedFragments ? ` Фрагменты: ${line.mergedFragments.map((f) => `«${f}»`).join(' · ')}` : '';
+  return {
+    draft,
+    uncertain: { draftId: draft.id, fields: uncertainFields, message: `${uncertainMessage(uncertainFields, resolution.status, notice || undefined)}${fragments}` },
+  };
+}
+
+// text-duplicates §4.5: «Это другой товар — создать черновик». The submission row is locked (as slice 2 §6.4 does for its
+// record), so a double tap, a second tab or a reload gets the same draft; a draft deleted since then is made anew.
+export async function createDraftFromHeldLine(
+  ownerUserId: string,
+  inputId: string,
+  index: number,
+  dependencies: { database?: Database; clock?: () => Date } = {},
+): Promise<{ draftId: string; created: boolean }> {
+  const database = dependencies.database ?? getDatabase();
+  const now = (dependencies.clock ?? (() => new Date()))();
+  return database.transaction(async (transaction) => {
+    const tx = transaction as unknown as Database;
+    const seller = await findSellerByOwner(tx, ownerUserId);
+    if (!seller) throw new TextInputReviewUnavailableError();
+    const key: SubmissionKey = { sellerId: seller.id, requestId: inputId };
+    const row = await findSubmission(tx, key, true);
+    if (!row || row.status !== 'succeeded' || row.expiresAt.getTime() <= now.getTime()) throw new TextInputReviewUnavailableError();
+    const result = row.result!;
+    const entry = result.held?.[index];
+    if (!entry) throw new TextInputReviewUnavailableError();
+    if (entry.draftId && (await findSellerDraftsByIds(tx, seller.id, [entry.draftId])).length === 1) {
+      return { draftId: entry.draftId, created: false };
+    }
+    const made = await createDraftFromLine(tx, {
+      userId: ownerUserId, inputId, line: entry.line, parser: row.parser, locationId: result.locationId ?? null,
+    });
+    const held = [...result.held!];
+    held[index] = { ...entry, draftId: made.draft.id };
+    const next: SellerTextSubmissionResult = {
+      ...result,
+      held,
+      draftIds: [...result.draftIds, made.draft.id],
+      uncertain: made.uncertain ? [...result.uncertain, made.uncertain] : result.uncertain,
+      priceChoices: entry.line.priceChoices
+        ? [...(result.priceChoices ?? []), { draftId: made.draft.id, choices: entry.line.priceChoices }]
+        : result.priceChoices,
+    };
+    await replaceSubmissionResult(tx, key, next);
+    logOutcome({ inputId, outcome: 'held_draft_created', index });
+    return { draftId: made.draft.id, created: true };
   });
 }
