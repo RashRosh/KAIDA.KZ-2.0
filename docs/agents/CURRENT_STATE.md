@@ -8,5 +8,6 @@
 - Open decisions: D-2 model licence; D-4 Kazakhstan deployment.
 - PO direction 2026-10-27: features first, then release; no redesign phase; pilot prep not moved ahead; priority = seller offer creation/maintenance via text, voice, photo, video (voice/photo/video order not approved).
 - Preserved, not to be changed: voice research branch `research/voice-input-local-feasibility-2026-10-09` @ `63623363`; local-only `wip/local-leftovers-2026-10-09` @ `335205de`; stashes and old worktrees kept.
-- Current task: none authorized. The approved queue is exhausted (EXECUTION_PLAN §0); no slice has an approved contract.
-- Next action: PO chooses the next task from EXECUTION_PLAN; no contract or implementation work starts without a PO instruction.
+- Current task: Implement `S-TEXT-SWITCH-ON` under rev. 2 with the two final clarifications, approved by PO 2026-10-28. D-1–D-5 accepted; narrow S5 §4/§16 change authorized; S12 kept. Commit/push/PR authorized; NO merge or checkpoint tag. No model runs or production enablement.
+- Last completed: Contract and preview clarifications preserved; GitHub main verified at `743b795b55b9c063745ed481b464125aa9600d57`, KAIDA verify 40707434291 and CodeQL 40707434208 green. Local `main` is older; use current `origin/main` as implementation base.
+- Next action: Commit only prepared contract/preview/screenshots/plan/handoff on `docs/text-switch-on-contract`; create `slice/text-switch-on` from current main and carry that documentation commit, then implement and verify. Preserve unrelated local files.
