@@ -1,4 +1,5 @@
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { sellerTextSubmissions } from '../../seller-text-input/db/seller-text-submissions.table';
+import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type { Database } from '../../../db/client';
 import type { LocationType } from '../../locations/contracts/location.contract';
 import { locations } from '../../locations/db/locations.table';
@@ -179,6 +180,14 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id));
 
+  const textRows = rows.some((row) => row.action === 'activate_offer') ? await database.select({ result: sellerTextSubmissions.result })
+    .from(sellerTextSubmissions).where(and(eq(sellerTextSubmissions.sellerId, sellerId),
+      sql`${sellerTextSubmissions.result}->'priceProposals' @> ${JSON.stringify([{ changeSetId }])}::jsonb`)) : [];
+  const cardPrices = new Set(textRows.flatMap(({ result }) => (result?.priceProposals ?? [])
+    .filter((p) => p.changeSetId === changeSetId).flatMap((p) => p.items.filter((i) => {
+      const line = result?.held?.[i.index]?.line;
+      return i.action === 'activate_offer' && line && !line.price && !line.priceChoices;
+    }).map((i) => i.offerId))));
   const itemPhotos = await findItemPhotoIds(database, rows.map((row) => row.id));
   // Before confirmation an update shows «было → стало»: the target Offer still holds the previous price.
   const targetIds = rows.flatMap((row) => row.targetOfferId ? [row.targetOfferId] : []);
@@ -198,6 +207,7 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
       return {
       id: row.id,
       action: row.action,
+      ...(row.targetOfferId && cardPrices.has(row.targetOfferId) ? { priceFromCard: true } : {}),
       product: { id: row.productId, name: row.title },
       cardId: row.cardId,
       priceOwn: row.priceOwn,
@@ -326,7 +336,7 @@ export async function findPriceUpdateItems(
   database: Pick<Database, 'select'>,
   sellerId: string,
   changeSetIds: string[],
-): Promise<(TrackedAvailabilityItem & { priceAmount: string | null })[]> {
+): Promise<(TrackedAvailabilityItem & { priceAmount: string | null; action: 'update_offer' | 'activate_offer' | 'deactivate_offer' })[]> {
   if (changeSetIds.length === 0) return [];
   const rows = await database.select({
     changeSetId: sellerChangeItems.changeSetId,
@@ -334,14 +344,15 @@ export async function findPriceUpdateItems(
     offerId: sellerChangeItems.targetOfferId,
     expectedRevision: sellerChangeItems.expectedOfferRevision,
     priceAmount: sellerChangeItems.priceAmount,
+    action: sellerChangeItems.action,
   }).from(sellerChangeItems)
     .innerJoin(sellerChangeSets, eq(sellerChangeSets.id, sellerChangeItems.changeSetId))
     .where(and(
       eq(sellerChangeSets.sellerId, sellerId),
       inArray(sellerChangeSets.id, changeSetIds),
-      eq(sellerChangeItems.action, 'update_offer'),
+      inArray(sellerChangeItems.action, ['update_offer', 'activate_offer', 'deactivate_offer']),
     ));
   return rows.flatMap((row) => (row.offerId !== null && row.expectedRevision !== null
-    ? [{ changeSetId: row.changeSetId, changeSetStatus: row.changeSetStatus, offerId: row.offerId, expectedRevision: row.expectedRevision, priceAmount: row.priceAmount }]
+    ? [{ changeSetId: row.changeSetId, changeSetStatus: row.changeSetStatus, offerId: row.offerId, expectedRevision: row.expectedRevision, priceAmount: row.priceAmount, action: row.action as 'update_offer' | 'activate_offer' | 'deactivate_offer' }]
     : []));
 }

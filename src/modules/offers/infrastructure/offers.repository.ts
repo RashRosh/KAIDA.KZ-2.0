@@ -190,9 +190,11 @@ export async function applyOfferActivation(database: OfferWriteDb, values: {
   offerId: string;
   expectedRevision: number;
   confirmationTime: Date;
+  newPrice?: { amount: string; priceOwn: boolean };
 }) {
   return database.update(offers).set({
     status: 'active',
+    ...(values.newPrice ? { priceAmount: values.newPrice.amount, priceOwn: values.newPrice.priceOwn } : {}),
     lastConfirmedAt: values.confirmationTime,
     updatedAt: values.confirmationTime,
     revision: sql`${offers.revision} + 1`,

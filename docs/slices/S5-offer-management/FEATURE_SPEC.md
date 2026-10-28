@@ -312,6 +312,10 @@ revision = revision + 1
 
 ## 6. `activate_offer`
 
+Approved revision (PO 2026-10-28): text-review activation may atomically apply the shown new price at one selected point;
+showcase and batch activation keep the existing current-price behaviour, and comments never change.
+See [S-TEXT-SWITCH-ON](../text-switch-on/SLICE_CONTRACT.md) §5.1 and IMPLEMENTATION_CONTRACT §4/§16.
+
 `activate_offer` является явным подтверждением, что Offer снова или всё ещё актуален.
 
 Разрешено для трёх случаев.

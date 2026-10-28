@@ -77,6 +77,20 @@ export function priceDiffers(price: string, card: { price: { amount: string } | 
   return card.price !== null && amount(card.price.amount) !== amount(price);
 }
 
+export function returnEligible(line: DuplicateLineInput, card: Pick<SellerOfferView, 'status' | 'price' | 'removal'>): boolean {
+  if (card.status !== 'inactive' || card.removal || !card.price) return false;
+  const unit = line.unit?.code;
+  if (!unit || line.uncertain.includes('unit') || !CANONICAL_UNITS.has(unit) || unit !== card.price.unitChoice?.code) return false;
+  return (line.priceChoices?.length ?? 0) > 1 || line.price === null || line.price.trim() === '' || !line.uncertain.includes('price');
+}
+
+export function preselectedForReturn(line: DuplicateLineInput, candidates: DuplicateCandidate[]): string | null {
+  if (candidates.length !== 1 || line.possiblyMerged || (line.priceChoices?.length ?? 0) > 1) return null;
+  const only = candidates[0]!;
+  if (!only.returnEligible || only.blocked || !only.packKnown || !packKnown(line)) return null;
+  return only.differences.every((d) => d.kind === 'price' || d.kind === 'priceNotStated') ? only.offerId : null;
+}
+
 // text-price-update §3.2 (D-1): pre-selected only for exactly one candidate whose name, pack and unit are KNOWN on both
 // sides and equal, with only the price different; unknown is never a match, a pack missing in the text never
 // pre-selects, nor does a possibly merged line or a price taken from a conflict.
@@ -136,6 +150,7 @@ export async function checkDuplicates(
         status: offer.status === 'active' ? 'live' : 'off',
         differences: lineDifferences(line, offer, dictionary),
         priceEligible: priceEligible(line, offer),
+        returnEligible: returnEligible(line, offer),
         packKnown: offer.pack !== null,
       });
     }

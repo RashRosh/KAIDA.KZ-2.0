@@ -104,7 +104,8 @@ export type HeldLineView = {
   draftId: string | null;
   // text-price-update §3.2, §3.5: the card pre-selected for a new price, and this line's latest price proposal.
   pricePreselect: string | null;
-  priceProposal: { changeSetId: string; state: PriceProposalState; offerId: string; price: string } | null;
+  returnPreselect?: string | null;
+  priceProposal: { changeSetId: string; state: PriceProposalState; offerId: string; price: string; action?: 'update_offer' | 'activate_offer' } | null;
 };
 
 export type DraftNoteView = { draftId: string; otherPacks: { title: string; packLabel: string | null }[] };
@@ -209,7 +210,8 @@ export const priceProposalBodySchema = z.object({
     index: z.number().int().min(0).max(59),
     shown: z.array(z.object({ offerId: z.uuid(), revision: z.number().int().min(1) }).strict()).max(60),
     offerId: z.uuid(),
-    price: z.string().trim().min(1).max(40),
+    price: z.string().trim().min(1).max(40).nullable(),
+    action: z.enum(['update_offer', 'activate_offer']).optional(),
   }).strict()).min(1).max(60),
 }).strict();
 
@@ -226,8 +228,8 @@ export class TextPriceChangedError extends Error {
 
 // A request the server refuses whatever the cards are: a price that is not the line's, or two prices for one card.
 export class TextPriceRejectedError extends Error {
-  constructor(readonly code: 'TEXT_PRICE_NOT_ALLOWED' | 'TEXT_PRICE_SAME_CARD_CONFLICT', readonly indexes: number[]) {
-    super(code === 'TEXT_PRICE_SAME_CARD_CONFLICT'
+  constructor(readonly code: 'TEXT_PRICE_NOT_ALLOWED' | 'TEXT_PRICE_SAME_CARD_CONFLICT' | 'TEXT_PRICE_LINE_CONFLICT', readonly indexes: number[]) {
+    super(code === 'TEXT_PRICE_LINE_CONFLICT' ? 'Выберите одну карточку для строки.' : code === 'TEXT_PRICE_SAME_CARD_CONFLICT'
       ? 'Две строки предлагают разные цены для одной карточки — оставьте одну.'
       : 'Эта цена не из вашего текста.');
     this.name = 'TextPriceRejectedError';

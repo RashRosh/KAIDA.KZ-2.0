@@ -208,17 +208,23 @@ export async function createDeactivationChangeSet(
 export async function createPriceUpdateChangeSet(
   tx: Parameters<typeof findOwnedLocation>[0],
   sellerId: string,
-  targets: { offerId: string; expectedRevision: number; price: string }[],
+  targets: { offerId: string; expectedRevision: number; price: string; action?: 'update_offer' | 'activate_offer' }[],
 ): Promise<string> {
   assertNoBatchOfferConflicts(targets.map((target) => ({ action: 'update_offer' as const, offerId: target.offerId,
     price: { amount: target.price, unit: null }, sellerComment: null })));
   const prepared: PreparedManagementItem[] = [];
   for (const target of targets) {
     const offer = await findOwnedOfferForManagement(tx, target.offerId, sellerId);
-    if (!offer || offer.status !== 'active' || offer.revision !== target.expectedRevision) throw new OfferChangedError();
+    const action = target.action ?? 'update_offer';
+    if (!offer || offer.status !== (action === 'activate_offer' ? 'inactive' : 'active') || offer.revision !== target.expectedRevision) throw new OfferChangedError();
     let next: PreparedItem;
     try {
-      next = await prepareItem(tx, sellerId, {
+      if (action === 'activate_offer') {
+        next = await prepareItem(tx, sellerId, { action, offerId: offer.id });
+        next = { ...next, priceAmount: target.price, card: Number(target.price) === Number(offer.priceAmount)
+          ? currentCardFields(offer)
+          : await perOfferUpdateCardFields(tx, offer, { price: target.price, unit: offer.priceUnit, sellerComment: offer.sellerComment, photosChanged: false }) };
+      } else next = await prepareItem(tx, sellerId, {
         action: 'update_offer',
         offerId: offer.id,
         price: { amount: target.price, unit: offer.priceUnit },
@@ -228,7 +234,7 @@ export async function createPriceUpdateChangeSet(
       if (error instanceof OfferUpdateNoChangesError) throw new OfferChangedError();
       throw error;
     }
-    if (next.action !== 'update_offer' || next.expectedOfferRevision !== target.expectedRevision) throw new OfferChangedError();
+    if (next.action !== action || next.expectedOfferRevision !== target.expectedRevision) throw new OfferChangedError();
     prepared.push(next);
   }
   const changeSet = await createChangeSet(tx, sellerId);

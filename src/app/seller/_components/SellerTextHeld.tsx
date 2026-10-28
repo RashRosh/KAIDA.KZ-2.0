@@ -39,7 +39,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
   // text-price-update §3.2–§3.3: one chosen card per line (pre-selected only by the server's strict rule) and the
   // price chosen from a conflict.
   const [chosen, setChosen] = useState<Map<number, string>>(() => new Map(held.flatMap((line) =>
-    (line.pricePreselect && line.priceProposal?.state !== 'pending' ? [[line.index, line.pricePreselect] as [number, string]] : []))));
+    ((line.pricePreselect || line.returnPreselect) && line.priceProposal?.state !== 'pending' ? [[line.index, (line.pricePreselect || line.returnPreselect)!] as [number, string]] : []))));
   const [pickedPrice, setPickedPrice] = useState<Map<number, string>>(new Map());
   const [changed, setChanged] = useState<Set<number>>(new Set());
   const [rejected, setRejected] = useState<{ code: string; indexes: Set<number> } | null>(null);
@@ -51,8 +51,10 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
   const newPrice = (line: HeldLineView) => line.priceChoices && line.priceChoices.length > 1 ? pickedPrice.get(line.index) ?? null : line.linePrice;
   const proposals = useMemo(() => held.flatMap((line) => {
     const offerId = chosen.get(line.index);
-    const value = newPrice(line);
-    return offerId && value ? [{ line, offerId, price: value }] : [];
+    const candidate = line.candidates.find((c) => c.offerId === offerId);
+    const value = newPrice(line) ?? (candidate?.returnEligible && !line.priceChoices ? candidate.price?.amount ?? null : null);
+    return offerId && value && candidate && !candidate.blocked && line.priceProposal?.state !== 'pending'
+      && (candidate.returnEligible || candidate.priceEligible) ? [{ line, offerId, price: value, returning: Boolean(candidate.returnEligible) }] : [];
   }), [held, chosen, pickedPrice]); // eslint-disable-line react-hooks/exhaustive-deps
   // §3.4: two lines choosing one card with different prices block the action until one is unselected.
   const clashes = useMemo(() => {
@@ -100,11 +102,12 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
       const response = await fetch(`/api/seller/text-input/${encodeURIComponent(inputId)}/held/price?locale=${locale}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines: proposals.map(({ line, offerId, price: value }) => ({
+        body: JSON.stringify({ lines: proposals.map(({ line, offerId, price: value, returning }) => ({
           index: line.index,
           shown: line.candidates.map((candidate) => ({ offerId: candidate.offerId, revision: candidate.revision })),
           offerId,
-          price: value,
+          price: returning && line.linePrice === null && !line.priceChoices ? null : value,
+          ...(returning ? { action: 'activate_offer' } : {}),
         })) }),
       });
       const data = await response.json() as { changeSetId?: string; error?: { code: string }; indexes?: number[] };
@@ -143,13 +146,14 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
     const name = candidate.packLabel ? `${candidate.title} · ${candidate.packLabel}` : candidate.title;
     const proposal = line.priceProposal?.offerId === candidate.offerId ? line.priceProposal : null;
     const pending = proposal?.state === 'pending';
-    const value = newPrice(line);
-    const offerable = candidate.priceEligible && !pending && line.priceProposal?.state !== 'pending'
-      && value !== null && candidate.price !== null && amountOf(candidate.price.amount) !== amountOf(value);
+    const returning = Boolean(candidate.returnEligible) || proposal?.action === 'activate_offer';
+    const value = newPrice(line) ?? (pending ? proposal!.price : null) ?? (returning && !line.priceChoices ? candidate.price?.amount ?? null : null);
+    const offerable = !candidate.blocked && (candidate.priceEligible || returning) && !pending && line.priceProposal?.state !== 'pending'
+      && value !== null && candidate.price !== null && (returning || amountOf(candidate.price.amount) !== amountOf(value));
     const selected = chosen.get(line.index) === candidate.offerId;
     const unit = candidate.price?.unit ? ` / ${candidate.price.unit}` : '';
     const priceDiffers = candidate.differences.some((item) => item.kind === 'price' || item.kind === 'priceConflict');
-    const select = () => setChosen((current) => new Map(current).set(line.index, candidate.offerId));
+    const select = () => setChosen((current) => { const next = new Map(current); if (next.get(line.index) === candidate.offerId) next.delete(line.index); else next.set(line.index, candidate.offerId); return next; });
     return (
       <div key={candidate.offerId} style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid={`held-candidate-${candidate.offerId}`}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', minHeight: 56 }}>
@@ -165,7 +169,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div className="ts">{name}</div>
             {candidate.price && (offerable || pending) && value
-              ? <p className="c num" style={{ color: 'var(--ink)' }} data-testid="price-change">{price(candidate.price.amount)} → <b>{price(pending ? proposal!.price : value)}</b>{unit}</p>
+              ? <p className="c num" style={{ color: 'var(--ink)' }} data-testid="price-change">{amountOf(candidate.price.amount) !== amountOf(pending ? proposal!.price : value) && <>{price(candidate.price.amount)} → </>}<b>{price(pending ? proposal!.price : value)}</b>{unit}{returning && line.linePrice === null && !line.priceChoices && <> · {t('switchOn.cardPrice')}</>}</p>
               : candidate.price && <p className="c c2 num">{price(candidate.price.amount)}{unit}</p>}
             {pending
               ? <span className="bd bd-warn"><Ic name="clock" />{t('price.pending')}</span>
@@ -175,6 +179,8 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
           </div>
           <Link className="btn btn-g sm" style={{ padding: '0 4px' }} href={`/seller?card=${candidate.cardId}`}>{t('duplicates.open')}</Link>
         </div>
+        {candidate.blocked && !pending && warn(t(candidate.blocked.kind === 'contradiction' ? 'switchOn.contradiction' : 'switchOn.blocked'))}
+        {candidate.blocked?.kind === 'pending' && !pending && <Link className="btn btn-o sm" href={confirmHref(candidate.blocked.changeSetId)}>{t('availability.openConfirm')}</Link>}
         {candidate.differences.length > 0 && !(offerable && candidate.differences.every((item) => item.kind === 'price')) && (
           <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 2 }} data-testid="held-differences">
             {candidate.differences.map((item, k) => <li key={k} className="c" style={{ color: 'var(--ink)' }}>{difference(item)}</li>)}
@@ -187,8 +193,8 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
     );
   };
 
-  const anyOfferable = held.some((line) => line.priceProposal?.state !== 'pending' && line.candidates.some((candidate) => candidate.priceEligible
-    && ((line.priceChoices?.length ?? 0) > 1 || (line.linePrice !== null && candidate.price !== null && amountOf(candidate.price.amount) !== amountOf(line.linePrice)))));
+  const anyOfferable = held.some((line) => line.priceProposal?.state !== 'pending' && line.candidates.some((candidate) => !candidate.blocked && (candidate.returnEligible || candidate.priceEligible)
+    && (candidate.returnEligible || (line.priceChoices?.length ?? 0) > 1 || (line.linePrice !== null && candidate.price !== null && amountOf(candidate.price.amount) !== amountOf(line.linePrice)))));
   const action = anyOfferable && (
     <div className={stickyAction ? 'foot' : 'card p16'} style={stickyAction ? { position: 'sticky', bottom: -16, margin: '0 -16px -16px', zIndex: 1 } : { gap: 8 }} data-testid="price-action">
       <p className="c c2">{t('price.rule')}</p>
@@ -196,7 +202,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
       <button type="button" className={`btn btn-p lg w${proposals.length === 0 || clashes.size > 0 ? ' dis' : ''}`}
         disabled={proposals.length === 0 || clashes.size > 0 || proposing} aria-busy={proposing || undefined}
         onClick={() => void proposePrices()} data-testid="price-submit">
-        {proposing && <span className="spin" />}{t('price.submit', { count: proposals.length })}
+        {proposing && <span className="spin" />}{t(proposals.some((p) => p.returning) ? proposals.every((p) => p.returning) ? 'switchOn.submit' : 'switchOn.mixedSubmit' : 'price.submit', { count: new Set(proposals.map((p) => p.offerId)).size })}
       </button>
     </div>
   );
@@ -205,7 +211,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
     <>
       {pendingChangeSetIds.length > 0 && (
         <div className="banner warn" role="status" style={{ padding: '12px 14px', borderRadius: 14, gap: 8 }} data-testid="price-pending">
-          <p className="c" style={{ color: 'var(--ink)' }}><b>{t('price.pendingBanner')}</b></p>
+          <p className="c" style={{ color: 'var(--ink)' }}><b>{t('switchOn.pendingBanner')}</b></p>
           <Link className="btn btn-o sm" style={{ alignSelf: 'flex-start' }} href={confirmHref(pendingChangeSetIds[0]!)}>{t('availability.openConfirm')}</Link>
         </div>
       )}
@@ -214,8 +220,8 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
         {held.map((line) => {
           const conflict = Boolean(line.priceChoices && line.priceChoices.length > 1);
           // A line offers a new price only when some eligible card would actually change (or a conflict is to be chosen).
-          const offerable = line.priceProposal?.state !== 'pending' && line.candidates.some((candidate) => candidate.priceEligible
-            && (conflict || (line.linePrice !== null && candidate.price !== null && amountOf(candidate.price.amount) !== amountOf(line.linePrice))));
+          const offerable = line.priceProposal?.state !== 'pending' && line.candidates.some((candidate) => !candidate.blocked && (candidate.returnEligible || candidate.priceEligible)
+            && (candidate.returnEligible || conflict || (line.linePrice !== null && candidate.price !== null && amountOf(candidate.price.amount) !== amountOf(line.linePrice))));
           return (
             <article key={line.index} className="card p16" style={{ gap: 10 }} data-testid={`held-${line.index}`}>
               <div className="ts">«{line.quote}»</div>
@@ -231,9 +237,9 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
               {(changed.has(line.index) || line.priceProposal?.state === 'stale') && warn(t('price.changed'), 'price-changed')}
               {rejected?.code === 'TEXT_PRICE_SAME_CARD_CONFLICT' && rejected.indexes.has(line.index) && warn(t('price.sameCard'))}
               {clashes.has(line.index) && warn(t('price.sameCard'), 'price-same-card')}
-              {line.priceProposal?.state === 'applied' && <p className="c" role="status" style={{ color: 'var(--success)' }} data-testid="price-applied">{t('price.applied', { price: price(line.priceProposal.price) })}</p>}
+              {line.priceProposal?.state === 'applied' && <p className="c" role="status" style={{ color: 'var(--success)' }} data-testid="price-applied">{t(line.priceProposal.action === 'activate_offer' ? 'switchOn.applied' : 'price.applied', { price: price(line.priceProposal.price) })}</p>}
               <p className="c" style={{ color: 'var(--ink)' }} data-testid="held-headline">
-                <b>{offerable ? t(line.candidates.length > 1 ? 'price.chooseCard' : 'price.newPrice') : t(HEADLINE[line.outcome])}</b>
+                <b>{offerable ? t(line.candidates.length > 1 ? 'price.chooseCard' : line.candidates.some((c) => c.returnEligible) ? 'switchOn.return' : 'price.newPrice') : t(line.priceProposal?.action === 'activate_offer' && line.priceProposal.state === 'pending' ? 'switchOn.return' : HEADLINE[line.outcome])}</b>
               </p>
               {offerable && conflict && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-testid="price-conflict">
@@ -242,7 +248,7 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
                     {line.priceChoices!.map((choice) => (
                       <button key={choice} type="button" className={`chip${pickedPrice.get(line.index) === choice ? ' on' : ''}`}
                         aria-pressed={pickedPrice.get(line.index) === choice}
-                        onClick={() => setPickedPrice((current) => new Map(current).set(line.index, choice))}>{price(choice)}</button>
+                        onClick={() => { setPickedPrice((current) => new Map(current).set(line.index, choice)); setChosen((current) => { const next = new Map(current); next.delete(line.index); return next; }); }}>{price(choice)}</button>
                     ))}
                   </div>
                   <p className="c c2">{t('price.choiceNotName')}</p>

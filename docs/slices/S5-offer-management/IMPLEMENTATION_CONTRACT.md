@@ -203,7 +203,13 @@ No client-controlled price/comment changes exist.
 
 Server may persist the current Offer price/comment into the Item for stable preview, but these values are not write commands during status-only confirmation.
 
-Confirmation of these actions must not modify price/comment.
+Showcase and batch confirmation of these actions must not modify price/comment.
+
+**Approved revision, S-TEXT-SWITCH-ON (PO 2026-10-28):** a text-review `activate_offer` item may carry the explicitly
+shown new price. Numerically equal item/current prices keep the status-only behaviour; a different item price is
+applied atomically with activation under the same expected revision, at the selected point only. The existing
+per-offer price rule determines this point's own price; other points and the comment remain unchanged. One composite
+item per offer preserves S12. See [contract](../text-switch-on/SLICE_CONTRACT.md) §5.1.
 
 ## 5. S5 request validation
 
@@ -733,7 +739,7 @@ revision = revision + 1
 Unchanged:
 
 ```text
-price_*
+price_* (except the approved text activation price revision in §4; amount and price-own change atomically with status)
 seller_comment
 product_id
 seller_id

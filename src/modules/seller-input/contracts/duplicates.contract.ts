@@ -44,6 +44,8 @@ export type DuplicateCandidate = {
   // text-price-update §3.1: a price from this line may be proposed for this card (on sale, same known unit, one bound
   // price or a conflict to choose from). Whether the chosen price differs is checked with that price.
   priceEligible: boolean;
+  returnEligible?: boolean;
+  blocked?: { kind: 'contradiction' } | { kind: 'pending'; changeSetId: string; action: 'activate_offer' | 'update_offer' | 'deactivate_offer' };
   packKnown: boolean;
 };
 

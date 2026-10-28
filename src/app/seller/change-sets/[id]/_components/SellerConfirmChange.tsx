@@ -265,21 +265,22 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
       <div key={item.id} className="card p16" style={{ gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div className="ts" style={{ flex: 1 }}>{item.product.name}</div>
-          <span className="bd bd-p">{t(kindKey[item.action])}</span>
+          <span className="bd bd-p">{t(fromTextReview && item.action === 'activate_offer' ? 'switchOn.return' : kindKey[item.action])}</span>
         </div>
         <div className="hr" />
         {item.action === 'deactivate_offer' && item.packLabel && <Kv label={t('confirm.pack')} value={item.packLabel} />}
         <Kv label={t('confirm.point')} value={item.location.name} />
         {/* text-price-update §3.6: point, product, pack, unit and old → new price for a price change from a text review. */}
-        {fromTextReview && item.action === 'update_offer' ? (
+        {fromTextReview && (item.action === 'update_offer' || item.action === 'activate_offer') ? (
           <>
             <Kv label={t('confirm.product')} value={item.product.name} />
+            {item.action === 'activate_offer' && <Kv label={t('switchOn.status')} value={t('switchOn.transition')} />}
             <Kv label={t('confirm.pack')} value={item.packLabel ?? t('confirm.notStated')} />
             <Kv label={t('confirm.unit')} value={item.price?.unit ?? t('confirm.notStated')} />
-            <Kv label={t('confirm.price')} value={item.price ? `${formatAmount(item.price.amount)} ₸` : t('review.noPrice')}
-              old={item.previousPriceAmount ? `${formatAmount(item.previousPriceAmount)} ₸` : null} />
+            <Kv label={t('confirm.price')} value={item.price ? `${formatAmount(item.price.amount)} ₸${item.priceFromCard ? ` · ${t('switchOn.cardPrice')}` : ''}` : t('review.noPrice')}
+              old={item.previousPriceAmount && Number(item.previousPriceAmount) !== Number(item.price?.amount) ? `${formatAmount(item.previousPriceAmount)} ₸` : null} />
             {(owned ?? []).some((offer) => offer.cardId === item.cardId && offer.location.id !== item.location.id) && (
-              <p className="c c2" data-testid="confirm-other-points">{t('confirm.otherPointsKeep')}</p>
+              <p className="c c2" data-testid="confirm-other-points">{t(item.action === 'activate_offer' ? 'switchOn.otherPoints' : 'confirm.otherPointsKeep')}</p>
             )}
           </>
         ) : (
@@ -390,9 +391,10 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
   const primaryLabel = phase === 'failed'
     ? t('cabinet.retry')
     : busy ? (publishes ? t('confirm.publishing') : t('confirm.confirming'))
+      : fromTextReview ? t('confirm.confirm')
       : withoutPhotos ? t('confirm.publishWithoutPhoto')
         : publishes ? t('confirm.publish') : t('confirm.confirm');
-  const secondary = isCreate || first.action === 'update_offer' ? t('confirm.backToEdit') : t('confirm.cancel');
+  const secondary = fromTextReview ? t('confirm.cancel') : isCreate || first.action === 'update_offer' ? t('confirm.backToEdit') : t('confirm.cancel');
 
   if (phase === 'conflict') {
     return shell(t('confirm.title'), (

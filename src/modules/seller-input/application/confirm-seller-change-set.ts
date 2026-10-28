@@ -292,6 +292,8 @@ export async function confirmSellerChangeSet(
           offerId: targetOffer.id,
           expectedRevision: item.expectedOfferRevision!,
           confirmationTime,
+          ...(Number(item.priceAmount) !== Number(targetOffer.priceAmount)
+            ? { newPrice: { amount: item.priceAmount, priceOwn: item.priceOwn } } : {}),
         });
       }
 
