@@ -101,7 +101,7 @@ test.describe('text return through confirmation',()=>{
   await expect(page.getByText('Выключено → На витрине')).toHaveCount(2);await expect(page.getByText('1 100 ₸ → 1 200 ₸')).toBeVisible();
   await page.getByRole('link',{name:'Отмена',exact:true}).click();await page.reload();await expect(page.getByTestId('price-pending')).toBeVisible();
   await page.getByTestId('price-pending').getByRole('link').click();await page.getByRole('button',{name:'Подтвердить',exact:true}).click();
-  await expect(page.getByText('На витрине: 2 900 ₸')).toBeVisible();expect([await priceOf(ids.tvorog.id),await priceOf(ids.tvorogB.id)]).toEqual(['1200','1100']);
+  await expect(page.getByText('На витрине: 2 900 ₸')).toBeVisible();await expect(page.getByTestId('held-candidate-'+ids.syr.id).getByRole('radio')).toHaveCount(0);expect([await priceOf(ids.tvorog.id),await priceOf(ids.tvorogB.id)]).toEqual(['1200','1100']);
   await submitList(page,ids.pointA,'[fixture:switch-on-no-price]');await expect(page.getByTestId('price-submit')).toHaveText('Вернуть на витрину · 1');await expect(page.getByTestId('held-block')).toContainText('по цене карточки');
   await page.getByTestId('price-submit').click();await expect(page.getByText('600 ₸ · по цене карточки',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Подтвердить',exact:true}).click();await expect(page.getByText('На витрине: 600 ₸')).toBeVisible();
  });

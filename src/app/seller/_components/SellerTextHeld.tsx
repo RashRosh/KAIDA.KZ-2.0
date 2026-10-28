@@ -148,8 +148,8 @@ export function SellerTextHeld({ inputId, held, pendingChangeSetIds, stickyActio
     const pending = proposal?.state === 'pending';
     const returning = Boolean(candidate.returnEligible) || proposal?.action === 'activate_offer';
     const value = newPrice(line) ?? (pending ? proposal!.price : null) ?? (returning && !line.priceChoices ? candidate.price?.amount ?? null : null);
-    const offerable = !candidate.blocked && (candidate.priceEligible || returning) && !pending && line.priceProposal?.state !== 'pending'
-      && value !== null && candidate.price !== null && (returning || amountOf(candidate.price.amount) !== amountOf(value));
+    const offerable = !candidate.blocked && (candidate.priceEligible || candidate.returnEligible) && !pending && line.priceProposal?.state !== 'pending'
+      && value !== null && candidate.price !== null && (candidate.returnEligible || amountOf(candidate.price.amount) !== amountOf(value));
     const selected = chosen.get(line.index) === candidate.offerId;
     const unit = candidate.price?.unit ? ` / ${candidate.price.unit}` : '';
     const priceDiffers = candidate.differences.some((item) => item.kind === 'price' || item.kind === 'priceConflict');
