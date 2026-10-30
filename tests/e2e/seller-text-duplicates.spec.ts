@@ -92,7 +92,7 @@ test.describe('a repeated text list', () => {
     // (the existing editor link stays for rows that are not eligible).
     await expect(page.getByTestId('held-1').getByTestId('held-headline')).toHaveText('Новая цена для карточки');
     await expect(page.getByTestId(`held-candidate-${ids.pelm05}`).getByTestId('price-change')).toHaveText('1 400 ₸ → 1 500 ₸ / упак.');
-    await expect(page.getByTestId('held-2').getByTestId('held-headline')).toHaveText('Есть выключенная карточка');
+    await expect(page.getByTestId('held-2').getByTestId('held-headline')).toHaveText('Вернуть на витрину');
     await expect(page.locator('[data-testid^="text-draft-"]')).toHaveCount(3);
     await expect(page.getByTestId('text-other-pack')).toHaveText('В точке уже есть: Пельмени · 500 г — другая фасовка');
     await expect(page.getByTestId('text-price-unready')).toHaveText('Цена не выбрана · не готов к публикации');
