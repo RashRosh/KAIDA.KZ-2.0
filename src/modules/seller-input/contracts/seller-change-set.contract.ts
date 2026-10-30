@@ -94,6 +94,7 @@ export type SellerChangeSetItemView = {
   packLabel: string | null;
   // Proposed updates only: the target Offer's price before this change.
   previousPriceAmount?: string;
+  priceFromCard?: boolean;
   location: { id: string; name: string; addressText: string; type: LocationType };
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;
   sellerComment: string | null;

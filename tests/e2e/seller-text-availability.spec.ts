@@ -155,7 +155,7 @@ test.describe('«нет в наличии» from the text list', () => {
     await page.reload();
     await expect(page.getByTestId('availability-pending')).toBeVisible();
     await expect(page.getByTestId(`availability-row-${ids.smetanaA}`)).toContainText('Ждёт подтверждения');
-    await page.getByRole('link', { name: 'Открыть подтверждение' }).click();
+    await page.getByTestId('availability-pending').getByRole('link', { name: 'Открыть подтверждение' }).click();
     await expect(page).toHaveURL(/\/seller\/change-sets\/[0-9a-f-]+/);
     expect(await statusOf(ids.smetanaA)).toBe('active');
   });

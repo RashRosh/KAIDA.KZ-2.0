@@ -1,4 +1,15 @@
 export const ru = {
+  'switchOn.otherPoints': 'В других точках карточка не изменится.',
+  'switchOn.applied': 'На витрине: {price}',
+  'switchOn.return': "Вернуть на витрину",
+  'switchOn.submit': "Вернуть на витрину · {count}",
+  'switchOn.mixedSubmit': "Применить изменения · {count}",
+  'switchOn.cardPrice': "по цене карточки",
+  'switchOn.contradiction': "В списке для этой карточки и «нет», и предложение — уберите одну строку или измените карточку вручную",
+  'switchOn.blocked': "Для этой карточки уже ждёт подтверждения другое действие.",
+  'switchOn.pendingBanner': "Изменения ждут подтверждения. До подтверждения карточки не изменятся.",
+  'switchOn.status': "Статус",
+  'switchOn.transition': "Выключено → На витрине",
   'fav.title': "Избранное",
   'fav.save': "Добавить в избранное",
   'fav.saved': "В избранном",
@@ -1059,6 +1070,17 @@ export type MessageKey = keyof typeof ru;
 
 // Native-speaker verification: PENDING. Merge is blocked until reviewer/date are recorded here.
 export const kk = {
+  'switchOn.otherPoints': 'Басқа нүктелерде карточка өзгермейді.',
+  'switchOn.applied': 'Витринада: {price}',
+  'switchOn.return': "Витринаға қайтару",
+  'switchOn.submit': "Витринаға қайтару · {count}",
+  'switchOn.mixedSubmit': "Өзгерістерді қолдану · {count}",
+  'switchOn.cardPrice': "карточка бағасымен",
+  'switchOn.contradiction': "Бұл карточка үшін тізімде «жоқ» және ұсыныс бар — бір жолды алып тастаңыз немесе карточканы қолмен өзгертіңіз",
+  'switchOn.blocked': "Бұл карточканың басқа әрекеті растауды күтіп тұр.",
+  'switchOn.pendingBanner': "Өзгерістер растауды күтіп тұр. Растағанға дейін карточкалар өзгермейді.",
+  'switchOn.status': "Күйі",
+  'switchOn.transition': "Өшірулі → Витринада",
   'fav.title': "Таңдаулылар",
   'fav.save': "Таңдаулыға қосу",
   'fav.saved': "Таңдаулыда",

@@ -24,7 +24,8 @@ export type SellerTextSubmissionResult = {
   held?: { line: ParsedTextLine; draftId: string | null }[];
   priceChoices?: { draftId: string; choices: string[] }[];
   // text-price-update §3.5: price proposals made from held lines, keyed by their exact set of (line, offer, price).
-  priceProposals?: { key: string; changeSetId: string; items: { index: number; offerId: string; price: string }[] }[];
+  unselectedHeldIndices?: number[];
+  priceProposals?: { key: string; changeSetId: string; items: { index: number; offerId: string; price: string; action?: 'update_offer' | 'activate_offer' }[] }[];
 };
 
 // seller-ai-text-real-parser §6.4: durable retry protection for 24 hours. Holds a salted digest of the text, never the

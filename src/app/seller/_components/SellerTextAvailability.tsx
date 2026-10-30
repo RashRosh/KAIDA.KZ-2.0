@@ -147,6 +147,8 @@ export function SellerTextAvailability({ inputId, locationId, availability, pend
                     <Thumb photoUrl={null} size={48} />
                     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <div className="ts">{name}</div>
+                      {candidate.blocked && <p className="c" role="status">{t(candidate.blocked.kind === 'contradiction' ? 'switchOn.contradiction' : 'switchOn.blocked')}</p>}
+                      {candidate.blocked?.kind === 'pending' && <Link className="btn btn-o sm" href={`/seller/change-sets/${candidate.blocked.changeSetId}?back=${encodeURIComponent('/seller/text-input/review?input=' + inputId)}`}>{t('availability.openConfirm')}</Link>}
                       {candidate.price && <p className="c c2 num">{formatAmount(candidate.price.amount)} ₸{candidate.price.unit ? ` / ${candidate.price.unit}` : ''}</p>}
                       <span className={status.className}><Ic name={status.icon} />{t(status.key)}</span>
                     </div>

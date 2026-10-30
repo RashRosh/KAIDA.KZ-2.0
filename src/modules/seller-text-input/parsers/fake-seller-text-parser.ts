@@ -3,6 +3,7 @@ import type {
 } from '../contracts/seller-text-input.contract';
 
 const FIXTURES: Record<string, SellerTextParseResult> = {
+  'switch-on-no-price': { lines: [{ title: 'Кефир', price: null, unit: { code: 'package' }, pack: { amount: '1', unit: 'l' }, confidence: 'high', sourceQuote: 'Кефир за упаковку 1 л' }], skipped: [] },
   'e2e-catalog': {
     lines: [{ title: 'Баранина', price: '4500', unit: { code: 'kg' }, pack: null, confidence: 'high', sourceQuote: 'Баранина 4500 за кг' }],
     skipped: [],

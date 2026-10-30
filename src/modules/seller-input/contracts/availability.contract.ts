@@ -29,6 +29,7 @@ export type AvailabilityCandidate = {
   price: { amount: string; unit: string | null } | null;
   status: AvailabilityCandidateStatus;
   selectable: boolean;
+  blocked?: { kind: 'contradiction' } | { kind: 'pending'; changeSetId: string; action: 'activate_offer' | 'update_offer' | 'deactivate_offer' };
 };
 
 // The same product in another pack or unit: shown so the Seller sees it stays as it is; never selectable.

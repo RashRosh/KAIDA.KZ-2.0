@@ -1,3 +1,4 @@
+import { findActiveRemovalsBySeller } from '../../moderation/infrastructure/moderation.repository';
 import { createHash, randomUUID } from 'node:crypto';
 import type { Database } from '../../../db/client';
 import { getDatabase } from '../../../db/client';
@@ -9,7 +10,7 @@ import { findSellerByOwner } from '../../sellers/infrastructure/sellers.reposito
 import type { Locale } from '../../../i18n/config';
 import { createDeactivationChangeSet } from '../../seller-input/application/create-batch-seller-change-set';
 import { matchAvailability } from '../../seller-input/application/match-availability';
-import { checkDuplicates, duplicateOutcome, preselectedForPrice, priceDiffers } from '../../seller-input/application/match-duplicates';
+import { checkDuplicates, duplicateOutcome, preselectedForPrice, preselectedForReturn, priceDiffers } from '../../seller-input/application/match-duplicates';
 import { createPriceUpdateChangeSet } from '../../seller-input/application/create-batch-seller-change-set';
 import { findOwnedOfferForManagement } from '../../offers/infrastructure/offers.repository';
 import type { DuplicateLineInput, PriceProposalState } from '../../seller-input/contracts/duplicates.contract';
@@ -113,6 +114,11 @@ async function availabilityOf(database: Database, ownerUserId: string, row: Subm
   const tracked = await findDeactivationItems(database, row.sellerId, result.availabilityChangeSetIds ?? []);
   const availability = await matchAvailability(ownerUserId, result.locationId ?? null, result.unavailable ?? [], tracked,
     { database, locale });
+  const blocks = await reviewBlocks(database, ownerUserId, row.sellerId, result, locale);
+  for (const view of availability) for (const candidate of view.candidates) {
+    candidate.blocked = blocks.get(candidate.offerId);
+    if (candidate.blocked) candidate.selectable = false;
+  }
   const pendingRevision = new Map(availability.flatMap((view) => view.candidates)
     .filter((candidate) => candidate.status === 'pending').map((candidate) => [candidate.offerId, candidate.revision]));
   const pendingChangeSetIds = [...new Set(tracked.filter((item) => item.changeSetStatus === 'proposed'
@@ -143,9 +149,14 @@ async function duplicatesOf(database: Database, ownerUserId: string, result: Sel
   const sellerId = drafts.length > 0 || heldLines.length > 0 ? (await findSellerByOwner(database, ownerUserId))?.id ?? null : null;
   const states = sellerId ? await priceProposalStates(database, sellerId, result.priceProposals ?? []) : new Map<string, PriceProposalState>();
   // The latest proposal that includes the line is the one the row shows.
-  const latestByLine = new Map<number, { changeSetId: string; offerId: string; price: string }>();
+  const latestByLine = new Map<number, { changeSetId: string; offerId: string; price: string; action?: 'update_offer' | 'activate_offer' }>();
+  const blocks = sellerId ? await reviewBlocks(database, ownerUserId, sellerId, result, locale) : new Map();
+  for (const check of heldChecks) for (const candidate of check.candidates) {
+    candidate.blocked = blocks.get(candidate.offerId);
+    if (candidate.blocked) { candidate.priceEligible = false; candidate.returnEligible = false; }
+  }
   for (const proposal of result.priceProposals ?? []) {
-    for (const item of proposal.items) latestByLine.set(item.index, { changeSetId: proposal.changeSetId, offerId: item.offerId, price: item.price });
+    for (const item of proposal.items) latestByLine.set(item.index, { changeSetId: proposal.changeSetId, offerId: item.offerId, price: item.price, action: item.action });
   }
   const held: HeldLineView[] = heldLines.map((entry, index) => {
     const latest = latestByLine.get(index);
@@ -162,7 +173,8 @@ async function duplicatesOf(database: Database, ownerUserId: string, result: Sel
       candidates: heldChecks[index]!.candidates,
       draftId: entry.draftId && present.has(entry.draftId) ? entry.draftId : null,
       // §3.5: after a refused or stale proposal the Seller chooses again — the card is never re-selected for them.
-      pricePreselect: priceProposal?.state === 'stale' ? null : preselectedForPrice(duplicateInput(entry.line), heldChecks[index]!.candidates),
+      pricePreselect: priceProposal?.state === 'stale' || result.unselectedHeldIndices?.includes(index) ? null : preselectedForPrice(duplicateInput(entry.line), heldChecks[index]!.candidates),
+      returnPreselect: priceProposal?.state === 'stale' || result.unselectedHeldIndices?.includes(index) ? null : preselectedForReturn(duplicateInput(entry.line), heldChecks[index]!.candidates),
       priceProposal,
     };
   });
@@ -335,7 +347,8 @@ export async function applySellerTextInput(
       drafts: committed.drafts.length, skipped: parsed.skipped.length, notices: committed.result.notices.length,
       uncertain: committed.result.uncertain.length, unavailable: committed.result.unavailable?.length ?? 0, parser,
       config: parser === 'real' ? PARSER_CONFIG_ID : null });
-    const availability = await matchAvailability(user.id, targetLocationId, committed.result.unavailable ?? [], [], { database });
+    const saved = (await findSubmission(database, key))!;
+    const { availability } = await availabilityOf(database, user.id, saved);
     const duplicates = await duplicatesOf(database, user.id, committed.result, committed.drafts);
     return {
       inputId: key.requestId,
@@ -524,6 +537,7 @@ async function priceProposalStates(database: Database, sellerId: string,
   const states = new Map<string, PriceProposalState>();
   if (proposals.length === 0) return states;
   const items = await findPriceUpdateItems(database, sellerId, proposals.map((proposal) => proposal.changeSetId));
+  const removals = await findActiveRemovalsBySeller(database, sellerId);
   for (const proposal of proposals) {
     const own = items.filter((item) => item.changeSetId === proposal.changeSetId);
     if (own.length === 0) { states.set(proposal.changeSetId, 'stale'); continue; }
@@ -531,11 +545,34 @@ async function priceProposalStates(database: Database, sellerId: string,
     let pending = true;
     for (const item of own) {
       const offer = await findOwnedOfferForManagement(database, item.offerId, sellerId);
-      if (!offer || offer.revision !== item.expectedRevision || offer.status !== 'active') pending = false;
+      if (!offer || offer.revision !== item.expectedRevision || offer.status !== (item.action === 'activate_offer' ? 'inactive' : 'active')
+        || (item.action === 'activate_offer' && removals.has(offer.cardId))) pending = false;
     }
     states.set(proposal.changeSetId, pending ? 'pending' : 'stale');
   }
   return states;
+}
+
+// All sections share the submission lock at proposal time. A blocked target rejects the entire request.
+async function reviewBlocks(database: Database, ownerUserId: string, sellerId: string,
+  result: SellerTextSubmissionResult, locale?: Locale) {
+  type Block = NonNullable<HeldLineView['candidates'][number]['blocked']>;
+  const blocks = new Map<string, Block>();
+  const checks = await checkDuplicates(ownerUserId, result.locationId ?? null,
+    (result.held ?? []).map((h) => duplicateInput(h.line)), { database, locale });
+  const offered = new Set(checks.flatMap((c) => c.candidates.map((o) => o.offerId)));
+  const absent = await matchAvailability(ownerUserId, result.locationId ?? null, result.unavailable ?? [], [], { database, locale });
+  for (const c of absent.flatMap((v) => v.candidates)) if (offered.has(c.offerId)) blocks.set(c.offerId, { kind: 'contradiction' });
+  const proposals = result.priceProposals ?? [];
+  const states = await priceProposalStates(database, sellerId, [...proposals,
+    ...(result.availabilityChangeSetIds ?? []).map((changeSetId) => ({ changeSetId, key: '', items: [] }))]);
+  const tracked = await findPriceUpdateItems(database, sellerId, [...proposals.map((p) => p.changeSetId), ...(result.availabilityChangeSetIds ?? [])]);
+  for (const item of tracked) {
+    if (item.changeSetStatus !== 'proposed') continue;
+    const pending = states.get(item.changeSetId) === 'pending';
+    if (pending && !blocks.has(item.offerId)) blocks.set(item.offerId, { kind: 'pending', changeSetId: item.changeSetId, action: item.action });
+  }
+  return blocks;
 }
 
 const canonicalPrice = (price: string) => String(Number(price.replace(',', '.')));
@@ -566,23 +603,32 @@ export async function proposeTextPrices(
     for (const line of body.lines) {
       const heldLine = result.held?.[line.index]?.line;
       const input = heldLine ? duplicateInput(heldLine) : null;
+      const noPriceReturn = line.action === 'activate_offer' && heldLine && (heldLine.price === null || heldLine.price.trim() === '') && !heldLine.priceChoices;
+      if (noPriceReturn && line.price === null) continue;
       const allowed = !heldLine || !input ? [] : (heldLine.priceChoices && heldLine.priceChoices.length > 1)
         ? heldLine.priceChoices
         : (heldLine.price && !input.uncertain.includes('price') ? [heldLine.price] : []);
-      if (!allowed.map(canonicalPrice).includes(canonicalPrice(line.price))) notAllowed.push(line.index);
+      if (line.price === null || !allowed.map(canonicalPrice).includes(canonicalPrice(line.price))) notAllowed.push(line.index);
     }
     if (notAllowed.length > 0) throw new TextPriceRejectedError('TEXT_PRICE_NOT_ALLOWED', notAllowed);
 
     // §3.4: at most one price per card.
     const byOffer = new Map<string, Set<string>>();
-    for (const line of body.lines) byOffer.set(line.offerId, (byOffer.get(line.offerId) ?? new Set()).add(canonicalPrice(line.price)));
+    for (const line of body.lines) {
+      const price = line.price ?? (await findOwnedOfferForManagement(tx, line.offerId, seller.id))?.priceAmount ?? 'card';
+      byOffer.set(line.offerId, (byOffer.get(line.offerId) ?? new Set()).add(price === 'card' ? price : canonicalPrice(price)));
+    }
+    const byLine = new Map<number, Set<string>>();
+    for (const line of body.lines) byLine.set(line.index, (byLine.get(line.index) ?? new Set()).add(line.offerId));
+    const multiple = [...byLine].filter(([, offers]) => offers.size > 1).map(([index]) => index);
+    if (multiple.length > 0) throw new TextPriceRejectedError('TEXT_PRICE_LINE_CONFLICT', multiple);
     const clashing = body.lines.filter((line) => byOffer.get(line.offerId)!.size > 1).map((line) => line.index);
     if (clashing.length > 0) throw new TextPriceRejectedError('TEXT_PRICE_SAME_CARD_CONFLICT', clashing);
 
     // Condition 2: the exact set of (line, offer, price) is the idempotency key; a different set is its own proposal.
-    const items = [...new Map(body.lines.map((line) => [`${line.index}:${line.offerId}`, { index: line.index, offerId: line.offerId, price: canonicalPrice(line.price) }])).values()]
+    const items = [...new Map(body.lines.map((line) => [`${line.index}:${line.offerId}`, { index: line.index, offerId: line.offerId, price: line.price === null ? 'card' : canonicalPrice(line.price), ...(line.action === 'activate_offer' ? { action: line.action } : {}) }])).values()]
       .sort((a, b) => a.index - b.index || a.offerId.localeCompare(b.offerId));
-    const setKey = items.map((item) => `${item.index}:${item.offerId}:${item.price}`).join('|');
+    const setKey = items.map((item) => `${item.index}:${item.offerId}:${item.price}${'action' in item ? ':activate_offer' : ''}`).join('|');
     const recorded = (result.priceProposals ?? []).filter((proposal) => proposal.key === setKey).at(-1);
     if (recorded) {
       const state = (await priceProposalStates(tx, seller.id, [recorded])).get(recorded.changeSetId);
@@ -594,18 +640,20 @@ export async function proposeTextPrices(
     const lines = body.lines.map((line) => duplicateInput(result.held![line.index]!.line));
     const checks = await checkDuplicates(ownerUserId, result.locationId ?? null, lines, { database: tx, locale: dependencies.locale });
     const changed: number[] = [];
-    const targets = new Map<string, { offerId: string; expectedRevision: number; price: string }>();
+    const targets = new Map<string, { offerId: string; expectedRevision: number; price: string; action?: 'update_offer' | 'activate_offer' }>();
+    const blocks = await reviewBlocks(tx, ownerUserId, seller.id, result, dependencies.locale);
     body.lines.forEach((line, k) => {
       const candidates = checks[k]!.candidates;
       const shown = new Set(line.shown.map((c) => `${c.offerId}:${c.revision}`));
       const present = new Set(candidates.map((c) => `${c.offerId}:${c.revision}`));
       const chosen = candidates.find((c) => c.offerId === line.offerId);
       const same = shown.size === present.size && [...shown].every((entry) => present.has(entry));
-      if (!same || !chosen || !chosen.priceEligible || !priceDiffers(line.price, chosen)) {
+      const returning = line.action === 'activate_offer';
+      if (!same || !chosen || blocks.has(line.offerId) || (returning ? !chosen.returnEligible : (!chosen.priceEligible || line.price === null || !priceDiffers(line.price, chosen)))) {
         changed.push(line.index);
         return;
       }
-      targets.set(chosen.offerId, { offerId: chosen.offerId, expectedRevision: chosen.revision, price: canonicalPrice(line.price) });
+      targets.set(chosen.offerId, { offerId: chosen.offerId, expectedRevision: chosen.revision, price: line.price === null ? chosen.price!.amount : canonicalPrice(line.price), action: line.action });
     });
     if (changed.length > 0) throw new TextPriceChangedError(changed);
 
@@ -618,9 +666,23 @@ export async function proposeTextPrices(
     }
     await replaceSubmissionResult(tx, key, {
       ...result,
-      priceProposals: [...(result.priceProposals ?? []), { key: setKey, changeSetId, items }],
+      priceProposals: [...(result.priceProposals ?? []), { key: setKey, changeSetId, items: items.map((item) => ({ ...item, price: targets.get(item.offerId)!.price })) }],
     });
     logOutcome({ inputId, outcome: 'price_proposed', offers: targets.size });
-    return { changeSetId, state: 'pending', created: true };
+    return { changeSetId, state: 'pending' as const, created: true };
+  }).catch(async (error: unknown) => {
+    // The failed proposal is fully rolled back; only the need for an explicit choice is remembered separately.
+    if (error instanceof TextPriceChangedError) {
+      await database.transaction(async (transaction) => {
+        const tx = transaction as unknown as Database;
+        const seller = await findSellerByOwner(tx, ownerUserId);
+        if (!seller) return;
+        const key = { sellerId: seller.id, requestId: inputId };
+        const row = await findSubmission(tx, key, true);
+        if (row?.result) await replaceSubmissionResult(tx, key, { ...row.result,
+          unselectedHeldIndices: [...new Set([...(row.result.unselectedHeldIndices ?? []), ...error.changed])] });
+      });
+    }
+    throw error;
   });
 }
