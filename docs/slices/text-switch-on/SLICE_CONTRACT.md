@@ -1,8 +1,9 @@
 # Text switch-on — a seller offers a product again and returns a switched-off card after confirmation — Slice Contract
 
-**Status:** APPROVED, revision 2 with the two final clarifications (PO 2026-10-28).
-Decisions D-1–D-5 and the narrow S5 change (§5.1) accepted; implementation authorized by the PO.
-Commit, push and PR authorized; merge and checkpoint tag require a further PO instruction.
+**Status:** CLOSED (PO 2026-10-31). Approved as revision 2 with the two final clarifications (PO 2026-10-28;
+D-1–D-5 and the narrow S5 change of §5.1); PO acceptance 2026-10-31 (§12); merged through PR #201 (head `86256dc3`,
+accepted executable `d6111340`); annotated checkpoint `v0.0.86-text-switch-on` on the merge commit (merge SHA and
+merged-main CI: `docs/agents/CURRENT_STATE.md`). Production text input stays `off`.
 
 **Preview:** [preview.html](preview.html), screenshots `1-same-price.png` … `7-confirm.png` (static, synthetic, shipped
 seller CSS, mobile RU; not runtime proof).
@@ -253,3 +254,16 @@ live together with the switch-on — mitigated by the explicit old → new displ
 
 Switching on at all points at once; returns for drafts of earlier lists; voice, photo and video reuse of the same
 proposals (order not approved).
+
+## 12. Closure
+
+- **PO acceptance (2026-10-31):** «Принимаю slice», after the browser PASS reported by another agent. No check of
+  their own is attributed to the PO.
+- **Browser check (another agent, reported to the PO; not PO acceptance):** PASS on the :3400 stand — mixed list,
+  pending after cancel and reload, prices only at the selected point, return without a price in the text, stale
+  before proposal and before confirm. Evidence and limits: [ACCEPTANCE.md](ACCEPTANCE.md).
+- **Automated:** KAIDA verify 41111686548 on the accepted executable `d6111340` green (731 unit, 435 integration,
+  338 E2E PASS / 68 skipped); merged-main KAIDA verify 41118179892 and CodeQL 41118179737 green on the merge commit.
+- **Known limitations kept:** as listed in [ACCEPTANCE.md](ACCEPTANCE.md) and `CURRENT_STATE.md` at closure — no
+  pre-selection after a stale or refused proposal; the fake parser takes the first number as the price except
+  explicit fixtures; live-model quality verified by replay only; KK copy provisional.
