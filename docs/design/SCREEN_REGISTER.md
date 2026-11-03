@@ -1,6 +1,6 @@
 # KAIDA.KZ: реестр экранов и состояний
 
-Снимок: 03.11.2026. Версия атласа: 0.1.
+Снимок: 03.11.2026. Версия атласа: 0.2.
 
 База реализованного интерфейса: `dcd26adba9fe124a37a800df047810d6b30ae481`.
 Принятые дополнения: Feature Map из PR #202 на `10a7cfd09d71f8236534f079f61857459859e717`.
@@ -9,9 +9,9 @@
 
 Этот документ и вайрфреймы описывают интерфейс и трассировку. Они не меняют порядок разработки, закрытые контракты и не являются утверждённым новым визуальным эталоном.
 
-Проверено чтением исходников: 19 файлов страниц; 79 frontend TS/TSX-файлов; 28 относящихся к работе Slice Contracts; русские подписи i18n. В работающем приложении эта сессия не проверялась.
+Проверено чтением исходников: 19 файлов страниц; 79 frontend TS/TSX-файлов; 28 относящихся к работе Slice Contracts; русские подписи i18n. Дополнительно 03.11.2026 выполнена браузерная сверка пути покупателя на изолированном синтетическом стенде: поиск → предложение → вход → Избранное → выключение продавцом → недоступность. RU, 360×800; одно недоступное состояние также 320×800. Точный SHA исполняемого стенда через UI не подтверждён; сверка не заменяет приёмку baseline целиком.
 
-Вайрфреймы показывают основные композиции; дополнительные состояния перечислены рядом с ними. Наличие состояния в реестре не означает, что для него уже нарисован отдельный кадр.
+Вайрфреймы показывают основные композиции; дополнительные состояния перечислены рядом с ними. Для наблюдавшегося пути добавлены 12 отдельных кадров с суффиксами. Для остальных условий наличие в реестре ещё не означает отдельный графический кадр.
 
 ## Статусы
 
@@ -34,9 +34,9 @@
 | [B09](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209607959) | Покупатель | Избранное | CODE | `/favourites` |
 | [B10](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209607960) | Покупатель | Недоступное в Избранном | CODE | `/favourites: вариант карточки` |
 | [B11](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209607961) | Покупатель | Ещё покупателя: baseline | CODE | `/more` |
-| [B12](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209607962) | Покупатель | Жалоба: причина | CODE | `Поверх /offers/[id]` |
-| [B13](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608269) | Покупатель | Жалоба: фото и комментарий | CODE | `Поверх /offers/[id]` |
-| [B14](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608270) | Покупатель | Жалоба отправлена | CODE | `Поверх /offers/[id]` |
+| [B12](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209607962) | Покупатель | Жалоба: причина | FLAG | `Поверх /offers/[id]` |
+| [B13](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608269) | Покупатель | Жалоба: фото и комментарий | FLAG | `Поверх /offers/[id]` |
+| [B14](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608270) | Покупатель | Жалоба отправлена | FLAG | `Поверх /offers/[id]` |
 | [A01](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608271) | Общий вход | Вход: телефон | CODE | `Общая модалка /login` |
 | [A02](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608272) | Общий вход | Вход: код | CODE | `Общая модалка /login` |
 | [S01](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209608273) | Продавец | Моя витрина | CODE | `/seller` |
@@ -79,6 +79,18 @@
 | [T02](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209798765) | Принятая цель | Принятая цель: сетка Рядом | TARGET | `Будущий /nearby` |
 | [T03](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209941180) | Принятая цель | Принятая цель: Ещё покупателя | TARGET | `Будущий /more` |
 | [T04](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689209941181) | Принятая цель | Принятые дополнения предложения | TARGET | `Будущий /offers/[id]` |
+| [B03-R](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227058679) | Покупатель | Выдача: проверенная композиция | CODE | `/?q=…` |
+| [B08-G](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227058680) | Покупатель | Предложение: гость | CODE | `/offers/[id]` |
+| [B08-S](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227058681) | Покупатель | Предложение: сохранено после входа | CODE | `/offers/[id]` |
+| [B09-A](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098095) | Покупатель | Избранное: доступное предложение | CODE | `/favourites` |
+| [B09-E](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098096) | Покупатель | Избранное: пусто | CODE | `/favourites` |
+| [B09-G](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098097) | Покупатель | Избранное: гостевой вход | CODE | `/favourites` |
+| [B10-O](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098254) | Покупатель | Избранное: продавец выключил | CODE | `/favourites: вариант карточки` |
+| [B08-U](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098255) | Покупатель | Прямая ссылка: недоступно | CODE | `/offers/[id]` |
+| [A01-P](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098256) | Общий вход | Контекстный вход: телефон | CODE | `Общая модалка /login` |
+| [A01-E](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098483) | Общий вход | Вход: неверный телефон | CODE | `Общая модалка /login` |
+| [A02-C](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098484) | Общий вход | Вход: код и ожидание повтора | CODE | `Общая модалка /login` |
+| [A02-E](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227098485) | Общий вход | Вход: неверный код | CODE | `Общая модалка /login` |
 
 ## B01. Первое посещение
 
@@ -181,11 +193,12 @@
 - Нет результатов: товар известен → B05.
 - Нет результатов: запрос неизвестен → B06.
 
-Текущий список ResultCard сохранён как baseline. Маленькое фото слева и четыре вкладки относятся к принятой цели T01.
+Фото слева уже реализовано: ResultCard использует миниатюру 112×112 px. На стенде это подтверждено. Четыре нижние вкладки остаются целью T01; дальнейшие размеры и оформление требуют решения.
 
 Источники:
 
 - [src/app/(buyer)/_ui/SearchScreen.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/SearchScreen.tsx)
+- [src/app/(buyer)/_ui/buyer-ui.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/buyer-ui.tsx)
 - [Контракт search-sort-control-refresh](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md)
 - [Контракт search-typo-suggestions](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/search-typo-suggestions/SLICE_CONTRACT.md)
 - [Контракт buyer-screens-mockup](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md)
@@ -343,7 +356,7 @@
 - Маршрут  /  доступные контакты
 - Продавец
 - Отслеживать товар
-- Пожаловаться
+- Пожаловаться, только при включённом флаге
 
 Состояния и условия:
 
@@ -361,10 +374,10 @@
 
 - Сердце: гостю вход → A01.
 - Избранное → B09.
-- Пожаловаться → B12.
+- Пожаловаться, если включён флаг → B12.
 - Вернуться к выдаче → B03.
 
-Избранное сохраняет Offer+точку; отслеживание относится к Product. Это разные действия. Контакты и маршрут зависят от данных и прав доступа.
+Избранное сохраняет Offer+точку; отслеживание относится к Product. Это разные действия. Контакты и маршрут зависят от данных и прав доступа. Жалобы зависят от reportsEnabled(); на проверенном стенде флаг выключен.
 
 Источники:
 
@@ -404,7 +417,7 @@
 - Недоступная карточка → B10.
 - Найти товар → B02.
 
-Сохранения мест и отдельной вкладки Места нет. Удалённые и снятые оператором записи исключаются из видимого списка.
+Сохранения мест и отдельной вкладки Места нет. Удалённые и снятые оператором записи исключаются из видимого списка. В гостевом состоянии найдена неточность текста: «сохранить это предложение» при прямом открытии списка без выбранного предложения. Требуется решение по копирайтингу.
 
 Источники:
 
@@ -483,7 +496,7 @@
 
 ## B12. Жалоба: причина
 
-Роль: Покупатель. Статус: **CODE**. Контекст: `Поверх /offers/[id]`.
+Роль: Покупатель. Статус: **FLAG**. Контекст: `Поверх /offers/[id]`.
 Вход: Пожаловаться на предложение.
 
 Содержание:
@@ -507,16 +520,17 @@
 - Выбрать причину → B13.
 - Назад → B08.
 
-Содержимое жалобы не передаётся продавцу.
+Содержимое жалобы не передаётся продавцу. Доступ только при reportsEnabled(); на проверенном стенде флаг выключен. Браузерная проверка этой ветки не выполнялась. Доступ только при reportsEnabled(); на проверенном стенде флаг выключен. Браузерная проверка этой ветки не выполнялась.
 
 Источники:
 
 - [src/app/(buyer)/offers/[id]/BuyerReportFlow.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/BuyerReportFlow.tsx)
+- [src/app/(buyer)/offers/[id]/page.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/page.tsx)
 - [Контракт buyer-offer-reports](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-offer-reports/SLICE_CONTRACT.md)
 
 ## B13. Жалоба: фото и комментарий
 
-Роль: Покупатель. Статус: **CODE**. Контекст: `Поверх /offers/[id]`.
+Роль: Покупатель. Статус: **FLAG**. Контекст: `Поверх /offers/[id]`.
 Вход: Причина уже выбрана.
 
 Содержание:
@@ -544,16 +558,17 @@
 - Войти при необходимости → A01.
 - Назад к причинам → B12.
 
-После входа жалоба автоматически не отправляется.
+После входа жалоба автоматически не отправляется. Доступ только при reportsEnabled(); на проверенном стенде флаг выключен. Браузерная проверка этой ветки не выполнялась. Доступ только при reportsEnabled(); на проверенном стенде флаг выключен. Браузерная проверка этой ветки не выполнялась.
 
 Источники:
 
 - [src/app/(buyer)/offers/[id]/BuyerReportFlow.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/BuyerReportFlow.tsx)
+- [src/app/(buyer)/offers/[id]/page.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/page.tsx)
 - [Контракт buyer-offer-reports](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-offer-reports/SLICE_CONTRACT.md)
 
 ## B14. Жалоба отправлена
 
-Роль: Покупатель. Статус: **CODE**. Контекст: `Поверх /offers/[id]`.
+Роль: Покупатель. Статус: **FLAG**. Контекст: `Поверх /offers/[id]`.
 Вход: Сервер принял жалобу.
 
 Содержание:
@@ -572,11 +587,12 @@
 
 - К карточке → B08.
 
-Этот экран не обещает автоматического снятия карточки или снижения рейтинга.
+Этот экран не обещает автоматического снятия карточки или снижения рейтинга. Доступ только при reportsEnabled(); на проверенном стенде флаг выключен. Браузерная проверка этой ветки не выполнялась. Доступ только при reportsEnabled(); на проверенном стенде флаг выключен. Браузерная проверка этой ветки не выполнялась.
 
 Источники:
 
 - [src/app/(buyer)/offers/[id]/BuyerReportFlow.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/BuyerReportFlow.tsx)
+- [src/app/(buyer)/offers/[id]/page.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/page.tsx)
 - [Контракт buyer-offer-reports](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-offer-reports/SLICE_CONTRACT.md)
 
 ## A01. Вход: телефон
@@ -1989,7 +2005,7 @@
 - Избранное → B09.
 - Ещё: цель → T03.
 
-Это принятая цель, не готовая реализация и не разрешение менять закрытые контракты без slice.
+Фото слева уже есть в baseline и подтверждено на стенде; это сохраняемый паттерн, а не новая функция. Четыре нижние вкладки и дальнейшее оформление остаются принятой целью и требуют своего slice.
 
 Источники:
 
@@ -2099,6 +2115,405 @@
 - [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
 - [Контракт buyer-offer-reports](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-offer-reports/SLICE_CONTRACT.md)
 
+## B03-R. Выдача: проверенная композиция
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/?q=…`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Баранина / очистить / искать
+- Популярные запросы
+- По умолчанию
+- Слева фото или fallback 112×112; справа название, цена 4 200 ₸/кг, точка и адрес
+- Актуальность продавца; часы работы
+- Маршрут / доступные контакты
+
+Состояния и условия:
+
+- Одна найденная тестовая карточка
+- Фото-заглушка уже слева
+- Нижняя навигация: Поиск / Рядом / Ещё
+
+Действия:
+
+- Открыть предложение → B08-G.
+
+Пример выдачи с синтетическими данными. Проверено положение фото; это не новый дизайн карточки.
+
+Источники:
+
+- [src/app/(buyer)/_ui/SearchScreen.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/SearchScreen.tsx)
+- [src/app/(buyer)/_ui/buyer-ui.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/buyer-ui.tsx)
+- [Контракт search-sort-control-refresh](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/search-sort-control-refresh/SLICE_CONTRACT.md)
+- [Контракт search-typo-suggestions](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/search-typo-suggestions/SLICE_CONTRACT.md)
+- [Контракт buyer-screens-mockup](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md)
+
+## B08-G. Предложение: гость
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/offers/[id]`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Фото или нейтральная заглушка
+- Давность подтверждения продавцом
+- Баранина
+- 4 200 ₸/кг / пустое сердце
+- Точка / адрес / часы / продавец
+- Маршрут / доступные контакты
+- Отслеживать товар
+
+Состояния и условия:
+
+- Сердце не нажато
+- Жалобы на стенде выключены
+- Отслеживание и Избранное раздельны
+
+Действия:
+
+- Нажать сердце → A01-P.
+- Назад к результатам → B03-R.
+
+Источники:
+
+- [src/app/(buyer)/offers/[id]/BuyerOfferView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/BuyerOfferView.tsx)
+- [src/app/(buyer)/_ui/offer-details.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/offer-details.tsx)
+- [Контракт buyer-screens-mockup](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md)
+- [Контракт offer-photos](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-photos/SLICE_CONTRACT.md)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+- [Контракт S13-interests](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/S13-interests/SLICE_CONTRACT.md)
+
+## B08-S. Предложение: сохранено после входа
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/offers/[id]`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Фото или нейтральная заглушка
+- Давность подтверждения продавцом
+- Баранина
+- 4 200 ₸/кг / заполненное сердце
+- Точка / адрес / часы / продавец
+- Маршрут / доступные контакты
+- Отслеживать товар
+
+Состояния и условия:
+
+- Модальное окно входа закрывается
+- Сохраняется именно выбранное предложение
+- Сердце: «В избранном», aria-pressed=true
+
+Действия:
+
+- Ещё → Избранное → B09-A.
+- Отменить сохранение → B08.
+
+Связь Offer+точка сохранена после успешного входа. Удаление в авторизованной сессии меняет только сохранение, а не статус входа.
+
+Источники:
+
+- [src/app/(buyer)/offers/[id]/BuyerOfferView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/BuyerOfferView.tsx)
+- [src/app/(buyer)/_ui/offer-details.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/offer-details.tsx)
+- [Контракт buyer-screens-mockup](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md)
+- [Контракт offer-photos](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-photos/SLICE_CONTRACT.md)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+- [Контракт S13-interests](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/S13-interests/SLICE_CONTRACT.md)
+
+## B09-A. Избранное: доступное предложение
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/favourites`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Избранное
+- Фото/fallback · название · текущая цена
+- Точка · адрес · продавец · актуальность
+- Убрать из избранного
+
+Состояния и условия:
+
+- Предложение открывается из личного списка
+- Назад возвращает в Избранное
+- Последняя запись удалена → пустой список
+
+Действия:
+
+- Открыть с возвратом в список → B08-S.
+- Удалить последнюю запись → B09-E.
+- Продавец выключил карточку → B10-O.
+
+У перехода на подробное предложение сохраняется return=/favourites. Отдельной вкладки Избранное в baseline ещё нет.
+
+Источники:
+
+- [src/app/(buyer)/favourites/FavouritesView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/favourites/FavouritesView.tsx)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+
+## B09-E. Избранное: пусто
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/favourites`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Избранное
+- Пустой список: ещё нет сохранённых предложений
+- Найти товар
+
+Состояния и условия:
+
+- Получено после удаления последней записи
+- Личный список пуст; пользователь авторизован
+
+Действия:
+
+- Найти товар → B02.
+
+Источники:
+
+- [src/app/(buyer)/favourites/FavouritesView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/favourites/FavouritesView.tsx)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+
+## B09-G. Избранное: гостевой вход
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/favourites`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Войдите, чтобы открыть избранное
+- Войдите, чтобы сохранить это предложение и видеть своё избранное.
+- Войти
+
+Состояния и условия:
+
+- Прямое открытие /favourites без входа
+- Личные записи не показываются
+- Повторно проверено после выхода
+
+Действия:
+
+- Войти → A01.
+
+Текущий текст сохранён дословно. Найдена неточность: «это предложение» при открытии списка без выбранной карточки. A01-P показывает вход с намерением сохранить; для входа из списка такое намерение передавать нельзя.
+
+Источники:
+
+- [src/app/(buyer)/favourites/FavouritesView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/favourites/FavouritesView.tsx)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+
+## B10-O. Избранное: продавец выключил
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/favourites: вариант карточки`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Избранное
+- Нейтральное фото · название · точка · продавец
+- Сейчас недоступно
+- Убрать из избранного
+
+Состояния и условия:
+
+- Переход доступно → выключено наблюдался
+- Нет цены, адреса, актуальности, маршрута и контактов
+- Нет ссылки на подробное предложение
+- 320 px: переполнения по ширине не наблюдалось; Убрать 258×44 px
+
+Действия:
+
+- Убрать последнюю запись → B09-E.
+- Прямая старая ссылка → B08-U.
+
+Проверена только причина seller-off. Просрочка, удаление и снятие оператором здесь не проходились. Это ограниченная проверка одного состояния, не полная проверка доступности интерфейса.
+
+Источники:
+
+- [src/app/(buyer)/favourites/FavouritesView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/favourites/FavouritesView.tsx)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+- [Контракт offer-photos](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-photos/SLICE_CONTRACT.md)
+
+## B08-U. Прямая ссылка: недоступно
+
+Роль: Покупатель. Статус: **CODE**. Контекст: `/offers/[id]`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Предложение больше недоступно
+- Сообщение о недоступности предложения
+- К поиску
+
+Состояния и условия:
+
+- Прямая ссылка на выключенное предложение
+- Цена, контакты и содержимое предложения скрыты
+
+Действия:
+
+- К поиску → B02.
+
+Проверено после выключения собственной синтетической карточки, без параметра seller preview.
+
+Источники:
+
+- [src/app/(buyer)/offers/[id]/BuyerOfferView.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/offers/[id]/BuyerOfferView.tsx)
+- [src/app/(buyer)/_ui/offer-details.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/(buyer)/_ui/offer-details.tsx)
+- [Контракт buyer-screens-mockup](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/buyer-screens-mockup/SLICE_CONTRACT.md)
+- [Контракт offer-photos](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-photos/SLICE_CONTRACT.md)
+- [Контракт offer-favourites](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/offer-favourites/SLICE_CONTRACT.md)
+- [Контракт S13-interests](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/S13-interests/SLICE_CONTRACT.md)
+
+## A01-P. Контекстный вход: телефон
+
+Роль: Общий вход. Статус: **CODE**. Контекст: `Общая модалка /login`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Вход поверх предложения
+- Номер телефона +7
+- Получить код
+- Закрыть / отменить
+
+Состояния и условия:
+
+- Открыт нажатием сердца гостем
+- Отмена закрывает окно
+- При отмене сердце остаётся не нажатым
+
+Действия:
+
+- Получить код → A02-C.
+- Неверный телефон → A01-E.
+- Отмена → B08-G.
+
+Конкретный телефон и действительный одноразовый код в схему не включены. Использовался только тестовый вход без SMS.
+
+Источники:
+
+- [src/app/_components/AuthModal.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/_components/AuthModal.tsx)
+- [Контракт UX1A2-auth-modal](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/UX1A2-auth-modal/SLICE_CONTRACT.md)
+- [Контракт auth-otp-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-protection/SLICE_CONTRACT.md)
+- [Контракт auth-otp-source-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-source-protection/SLICE_CONTRACT.md)
+
+## A01-E. Вход: неверный телефон
+
+Роль: Общий вход. Статус: **CODE**. Контекст: `Общая модалка /login`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Вход
+- Номер телефона +7 1
+- Введите корректный номер телефона.
+- Получить код
+- Закрыть
+
+Состояния и условия:
+
+- Короткий телефон отклонён
+- Ошибка рядом с полем
+- Намерение сохранить предложение остаётся в контексте
+
+Действия:
+
+- Исправить и запросить код → A02-C.
+- Отмена → B08-G.
+
+Источники:
+
+- [src/app/_components/AuthModal.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/_components/AuthModal.tsx)
+- [Контракт UX1A2-auth-modal](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/UX1A2-auth-modal/SLICE_CONTRACT.md)
+- [Контракт auth-otp-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-protection/SLICE_CONTRACT.md)
+- [Контракт auth-otp-source-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-source-protection/SLICE_CONTRACT.md)
+
+## A02-C. Вход: код и ожидание повтора
+
+Роль: Общий вход. Статус: **CODE**. Контекст: `Общая модалка /login`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Введите код
+- Код для синтетического тестового номера
+- Одноразовый код
+- На тестовом стенде код показан интерфейсом
+- Таймер перед повторным запросом
+- Подтвердить
+- Изменить номер / закрыть
+
+Состояния и условия:
+
+- Успешный вход завершает выбранное сохранение
+- Сеть SMS не использовалась
+- Повторная отправка по таймеру отдельно не проверялась
+
+Действия:
+
+- Верный код: сохранить предложение → B08-S.
+- Неверный код → A02-E.
+- Изменить номер → A01-P.
+
+Состояние таймера наблюдалось; это не проверка истечения таймера, resend или срока жизни кода.
+
+Источники:
+
+- [src/app/_components/AuthModal.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/_components/AuthModal.tsx)
+- [Контракт auth-otp-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-protection/SLICE_CONTRACT.md)
+- [Контракт auth-otp-source-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-source-protection/SLICE_CONTRACT.md)
+
+## A02-E. Вход: неверный код
+
+Роль: Общий вход. Статус: **CODE**. Контекст: `Общая модалка /login`.
+Вход: Наблюдалось 03.11.2026 на изолированном стенде, RU, 360×800..
+
+Содержание:
+
+- Введите код
+- 000000
+- Неверный код.
+- Таймер повторного запроса
+- Подтвердить
+- Изменить номер / закрыть
+
+Состояния и условия:
+
+- Один неверный код отклонён
+- После исправления вход выполнен
+- Сохранение не происходит до успеха входа
+
+Действия:
+
+- Исправить код: сохранено → B08-S.
+- Изменить номер → A01-P.
+
+Блокировка за много попыток и лимиты в этом прогоне не проверялись.
+
+Источники:
+
+- [src/app/_components/AuthModal.tsx](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/src/app/_components/AuthModal.tsx)
+- [Контракт auth-otp-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-protection/SLICE_CONTRACT.md)
+- [Контракт auth-otp-source-protection](https://github.com/RashRosh/KAIDA.KZ-2.0/blob/dcd26adba9fe124a37a800df047810d6b30ae481/docs/slices/auth-otp-source-protection/SLICE_CONTRACT.md)
+
+## Выполненная браузерная сверка, 03.11.2026
+
+[Раздел со снимками и состояниями в Miro](https://miro.com/app/board/uXjVES0IAlE=/?moveToWidget=3458764689227058038).
+
+- PASS: выдача по популярному запросу; открытие предложения; отмена входа без сохранения; неверный телефон; неверный код; успешный тестовый вход и сохранение именно выбранного Offer+точки.
+- PASS: открытие из Избранного и возврат в свой список; удаление последней записи и пустое состояние; прямой гостевой вход в список после выхода.
+- PASS: отдельная собственная синтетическая карточка опубликована вручную, сохранена покупателем, выключена продавцом. В списке остаются название, точка, продавец и «Сейчас недоступно»; цена, адрес, актуальность, контакты, маршрут и ссылка на детали скрыты. Прямая ссылка показывает недоступность.
+- LIMITED: в состоянии seller-off при ширине 320 px не наблюдалось горизонтального переполнения; кнопка удаления 258×44 px. Это не проверка доступности всего приложения.
+- CORRECTED IN ATLAS: фото слева уже реализовано; buyer reports B12–B14 зависят от флага. На проверенном стенде жалобы выключены.
+- OPEN COPY ISSUE: гостевое Избранное говорит «сохранить это предложение», когда предложение не выбрано. Текущий текст сохранён в baseline, решение не подменено вымышленной формулировкой.
+- CLEANUP: тестовые сохранения удалены; созданная карточка выключена; выполнен выход. Синтетическая торговая точка остаётся. Исходные карточки продавцов не менялись. Тестовый номер, OTP и внутренние идентификаторы в этот реестр не включены.
+
+Подробный журнал: `docs/design/BUYER_BROWSER_AUDIT_2026-11-03.md`. Вне прогона: SMS, resend/истечение кода, галерея с реальными фото, просрочка, модерация, удаление Offer, жалобы, KK, клавиатура/фокус, 200% текста и полная responsive-матрица.
+
 ## Проверка сквозных сценариев
 
 Ниже перечислены связи для ручной проверки будущего макета. Это не утверждение о выполненной браузерной приёмке.
@@ -2114,8 +2529,8 @@
 
 ## Открытые вопросы и границы передачи
 
-- GAP-01: браузерная сверка этой версии приложения не выполнена в этой сессии. Нужно пройти перечисленные сценарии на синтетических данных.
-- GAP-02: не все состояния имеют отдельные графические кадры. Для конкретной передачи дизайнеру отмечать кадр для каждого существенного состояния, а общие загрузки/ошибки переиспользовать.
+- GAP-01: браузерная сверка выполнена частично: путь поиска, входа, Избранного и seller-off. Жалобы, просрочка, удаление Offer, снятие оператором и остальные роли ещё не проверены этим прогоном.
+- GAP-02: добавлены 12 отдельных кадров наблюдавшихся состояний; не все остальные состояния имеют собственные графические кадры. Для конкретной передачи дизайнеру отмечать кадр для каждого существенного состояния, а общие загрузки/ошибки переиспользовать.
 - GAP-03: responsive baseline и масштаб текста 200% описаны требованиями проекта; эти схемы не являются проверкой адаптивной реализации. Нужны конкретные кадры mobile/tablet/desktop там, где меняется компоновка.
 - GAP-04: казахские подписи предварительные. Вайрфреймы на русском, но переход между RU/KK и длинные строки должны входить в дизайн-проверку.
 - GAP-05: точные кадры целевой сетки Рядом, параметры Поделиться и формат давности подтверждения требуют собственных решений/контрактов.
