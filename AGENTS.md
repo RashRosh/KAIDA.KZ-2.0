@@ -30,8 +30,7 @@
 
 ## UI / UX
 
-Перед UI/UX Slice Contract прочитай `docs/PROJECT_RULES.md` §18.1 (какой макет главный), §18.4 (обязательные UI-правила), §18.6 (как собираются экраны продавца), `docs/product/UX_REFERENCE_INDEX.md` и только релевантные внешние references (advisory). Отдельного документа дизайн-системы нет: стиль задаёт принятый макет.
-
+Перед UI/UX Slice Contract прочитай `docs/product/DESIGN_BASELINE.md`: только два Claude Artifact, принятые PO 2026-11-05, задают главный визуальный стандарт. Старые brief/revision, exports, Wonder и внешние guides не являются визуальными целями. `PROJECT_RULES.md` §18.2–18.5 сохраняет продуктовые и accessibility boundaries. Конфликт с закрытым поведением — STOP, а не молчаливая замена. Полноту исследования источников и статус миграции проверяй по baseline и текущему Slice Contract.
 ## KAIDA Controller
 
 Если PO просит `Проверь <slice>`, `Запусти KAIDA Controller`, проверить contract, diff, readiness к manual acceptance/merge/checkpoint — прочитай `docs/agents/KAIDA_CONTROLLER.md`. Controller не проектирует и не реализует slice, он проверяет exact repository evidence и даёт gate verdict.

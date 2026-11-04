@@ -11,7 +11,7 @@
 - Закрытые/DONE пункты здесь не архивируются — для истории достаточно Git history, Issues и Slice Contracts.
 - Текущая очередь всегда берётся из `docs/product/EXECUTION_PLAN.md`.
 - Какой макет главный и обязательные UI-правила — `docs/PROJECT_RULES.md` §18.1 и §18.4.
-- Перед UI/UX Slice Contract использовать `docs/product/UX_REFERENCE_INDEX.md` и релевантные external references.
+- Перед UI/UX Slice Contract использовать только визуальные источники из `docs/product/DESIGN_BASELINE.md`; старые внешние guides не добавляют дизайн-ограничений.
 
 ## Текущие неповышенные наблюдения
 
@@ -24,7 +24,7 @@
 - Search sorting / geo trigger / visible distance → Issue #12;
 - Nearby result-first correction → Issue #34;
 - актуальность (бывш. freshness) и напоминания → Issues #31/#32;
-- AI-first витрина продавца → `SELLER_AI_FIRST_DESIGN_BRIEF.md`, ревизия 1, `EXECUTION_PLAN.md` этап 1;
+- AI-first витрина продавца → продуктовая модель в `FEATURE_MAP.md`; визуальная цель — `DESIGN_BASELINE.md`; очередь — `EXECUTION_PLAN.md`;
 - controlled choice вместо свободного ввода (бывш. `UX-OBS-001`) → единица цены (`offer-price-unit`), справочник адресов
   (`FEATURE_MAP.md`);
 - системные состояния (бывш. `UX-OBS-002`) → `PROJECT_RULES.md` §18.4.

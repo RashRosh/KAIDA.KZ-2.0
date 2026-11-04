@@ -58,8 +58,8 @@ UI → API → business logic → DB → tests → manual acceptance
 - [`docs/agents/CURRENT_STATE.md`](docs/agents/CURRENT_STATE.md) — verified checkpoint, активная работа и операционные ограничения;
 - [`docs/agents/CURRENT_STATE.md`](docs/agents/CURRENT_STATE.md) — verified checkpoint, активная работа и операционные ограничения;
 - [`docs/product/EXECUTION_HISTORY.md`](docs/product/EXECUTION_HISTORY.md) и [`docs/product/REQUIREMENTS_SOURCE_MAP.md`](docs/product/REQUIREMENTS_SOURCE_MAP.md) — архив и сохранённый снимок инвентаризации (читать при необходимости истории или трассировки);
-- [`docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md`](docs/product/SELLER_AI_FIRST_DESIGN_BRIEF.md) и ревизия 1 — целевой UX продавца; какой макет главный — `PROJECT_RULES.md` §18.1;
-- [`docs/product/UX_REFERENCE_INDEX.md`](docs/product/UX_REFERENCE_INDEX.md) — маршрутизация по внешним UX references;
+- [`docs/product/DESIGN_BASELINE.md`](docs/product/DESIGN_BASELINE.md) — два единственных главных визуальных источника KAIDA, принятые PO 2026-11-05;
+- Прежние дизайнерские ТЗ, макеты и внешний UX corpus — исторические материалы, не визуальные правила; продуктовые решения остаются в Feature Map и закрытых контрактах;
 - `docs/slices/**/SLICE_CONTRACT.md` — точное поведение отдельного slice и историческое evidence закрытых contracts;
 - GitHub Issues — подробные требования к ещё не закрытой работе.
 

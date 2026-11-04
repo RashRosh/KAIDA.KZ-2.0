@@ -1,5 +1,7 @@
 # KAIDA.KZ — ТЗ дизайнеру: доработка макета AI-first витрины продавца (ревизия 1)
 
+> **SUPERSEDED — 2026-11-05.** Этот документ больше не задаёт визуальные правила и не является implementation target. Главные источники — два Claude Artifact в [DESIGN_BASELINE.md](DESIGN_BASELINE.md). Продуктовые решения и закрытое поведение сохраняются по owning contracts. Старый текст ниже оставлен для безопасного отделения продуктовых требований от визуальных; полная очистка ещё не завершена.
+
 > **Дата:** 2026-09-25.
 > **Макет:** [KAIDA · AI-first витрина продавца](https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4).
 > **Основное ТЗ:** [`SELLER_AI_FIRST_DESIGN_BRIEF.md`](./SELLER_AI_FIRST_DESIGN_BRIEF.md) — остаётся в силе; этот документ

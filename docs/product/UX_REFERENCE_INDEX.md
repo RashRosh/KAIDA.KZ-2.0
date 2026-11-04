@@ -1,5 +1,7 @@
 # KAIDA.KZ 2.0 — UX Reference Index
 
+> **SUPERSEDED — 2026-11-05.** Этот документ больше не задаёт визуальные правила и не является implementation target. Главные источники — два Claude Artifact в [DESIGN_BASELINE.md](DESIGN_BASELINE.md). Продуктовые решения и закрытое поведение сохраняются по owning contracts. Старый текст ниже оставлен для безопасного отделения продуктовых требований от визуальных; полная очистка ещё не завершена.
+
 ## Status
 
 `AUDITED / APPROVED` — Product Owner approved the Issue #37 UX corpus reconciliation. No blocking GAP was found for the next scheduled slice, Seller Entry (#35).
