@@ -323,3 +323,27 @@ test('keyboard: the trigger announces its state, Escape closes the list, and the
   await expect(list(page)).toHaveCount(0);
   await expect(trigger(page)).toBeFocused();
 });
+
+test('rapid reopen survives the outgoing timer; reduced motion and keyboard stay usable', async ({ page }) => {
+  await searchProduct(page);
+  await page.clock.install();
+  await trigger(page).click();
+  await expect(list(page)).toBeVisible();
+  // A second tap closes logically while the visual exit may still be running.
+  await trigger(page).click();
+  await trigger(page).click();
+  await expect(list(page)).toBeVisible();
+  await expect(list(page)).toHaveCount(1);
+  await page.clock.fastForward(200);
+  await expect(list(page)).toBeVisible();
+  await item(page, /^По цене/).click();
+  await expectOrder(page, ['whole', 'prefix', 'linked']);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await trigger(page).focus();
+  await page.keyboard.press('Enter');
+  await expect(item(page, 'По цене, применить: дороже первыми')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(list(page)).toHaveCount(0);
+  await expect(trigger(page)).toBeFocused();
+});
