@@ -19,7 +19,7 @@
   font-family: Roboto, Geologica, system-ui, sans-serif;
 }
 
-.trigger {
+.root .trigger {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -75,7 +75,7 @@
   pointer-events: none;
 }
 
-.item {
+.root .item {
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -102,11 +102,13 @@
   .trigger:hover { color: var(--sort-primary); }
 }
 
-.item:not([aria-disabled='true']):active:not(:focus-visible) { transform: scale(.97); }
-.trigger:active:not(:focus-visible) { transform: scale(.97); }
+@media (prefers-reduced-motion: no-preference) {
+  .item:not([aria-disabled='true']):active:not(:focus-visible) { transform: scale(.97); }
+  .trigger:active:not(:focus-visible) { transform: scale(.97); }
+}
 .root[data-motion='false'] .menu { transition: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .menu, .item, .trigger { transition: none; }
-  .menu, .menu[data-state='closed'], .item:active, .trigger:active { transform: none; }
+  .root .menu, .root .item, .root .trigger { transition: none; }
+  .root .menu { transform: none; }
 }
