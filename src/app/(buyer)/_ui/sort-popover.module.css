@@ -8,6 +8,8 @@
   --sort-surface: #fdfbff;
   --sort-sunken: #f4e9fb;
   --sort-muted: #745784;
+  --sort-ease-out: cubic-bezier(.33, 1, .68, 1);
+  --sort-ease-in: cubic-bezier(.32, 0, .67, 0);
   position: relative;
   display: flex;
   align-items: center;
@@ -32,7 +34,7 @@
   font: 500 16px/24px Roboto, Geologica, system-ui, sans-serif;
   text-align: left;
   cursor: pointer;
-  transition: color 120ms ease-out, transform 100ms ease-out;
+  transition: color 120ms var(--sort-ease-out), transform 100ms var(--sort-ease-out);
 }
 
 .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -59,7 +61,7 @@
   opacity: 1;
   transform: translateY(0) scale(1);
   transform-origin: top left;
-  transition: opacity 120ms ease-out, transform 120ms ease-out;
+  transition: opacity 120ms var(--sort-ease-out), transform 120ms var(--sort-ease-out);
 }
 
 @starting-style {
@@ -69,7 +71,7 @@
 .menu[data-state='closed'] {
   opacity: 0;
   transform: translateY(-4px) scale(.98);
-  transition-timing-function: ease-in;
+  transition-timing-function: var(--sort-ease-in);
   pointer-events: none;
 }
 
@@ -88,7 +90,7 @@
   font: 400 15px/22px Roboto, Geologica, system-ui, sans-serif;
   text-align: left;
   cursor: pointer;
-  transition: background-color 120ms ease-out, color 120ms ease-out, transform 100ms ease-out;
+  transition: background-color 120ms var(--sort-ease-out), color 120ms var(--sort-ease-out), transform 100ms var(--sort-ease-out);
 }
 
 .item[aria-pressed='true'] { color: var(--sort-primary); background: var(--sort-soft); font-weight: 700; }

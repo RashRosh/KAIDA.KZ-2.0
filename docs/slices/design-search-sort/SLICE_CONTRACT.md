@@ -8,7 +8,7 @@
 
 ## Scope и visual evidence
 
-Только контрол и anchored меню B04.ST01–ST04 в [новом холсте](https://claude.ai/artifact/X7VZCf7SrZ1pDbn9qZTZDn#play-c011725c5a1c) и компонент Menu / motion [новой системы](https://claude.ai/artifact/5xzk5XmbEnpxawj3ZTQovr). Просмотрены screenshot, DOM и computed styles B03-Sort.dc.html версии `1793830896-9a07`: surface #FDFBFF, ink #1F1026, primary #9900CC, selected #F8E5FF, line #E9D9F2, radius 14, padding 6, rows 56 px, text 15/22 px, trigger 16/24 px weight 500 gap 8 и touch 44. Тень: 0 4px 12px #5B0A7A/12% + 0 2px 4px #1F1026/7%. Menu enter/exit 120 ms, opacity/translateY(-4)/scale(.98), origin у триггера; reduced motion и keyboard — без движения.
+Только контрол и anchored меню B04.ST01–ST04 в [новом холсте](https://claude.ai/artifact/X7VZCf7SrZ1pDbn9qZTZDn#play-c011725c5a1c) и компонент Menu / motion [новой системы](https://claude.ai/artifact/5xzk5XmbEnpxawj3ZTQovr). Просмотрены screenshot, DOM и computed styles B03-Sort.dc.html версии `1793830896-9a07`: surface #FDFBFF, ink #1F1026, primary #9900CC, selected #F8E5FF, line #E9D9F2, radius 14, padding 6, rows 56 px, text 15/22 px, trigger 16/24 px weight 500 gap 8 и touch 44. Тень: 0 4px 12px #5B0A7A/12% + 0 2px 4px #1F1026/7%. Menu enter/exit 120 ms, opacity/translateY(-4)/scale(.98), origin у триггера; кривые из computed styles и tokens.json: cubic-bezier(.33,1,.68,1) / cubic-bezier(.32,0,.67,0); reduced motion и keyboard — без движения.
 
 Сохраняются текущая позиция над выдачей, API wiring, labels, критерии/direction и доступные имена. Новые стили локальны этому компоненту, не global overrides. Модули: buyer presentation SortControl и его локальные стили; существующий Search/API/DB используются без изменения.
 
