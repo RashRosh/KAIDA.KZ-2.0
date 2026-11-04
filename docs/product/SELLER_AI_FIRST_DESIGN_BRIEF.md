@@ -11,11 +11,11 @@
 > Desktop и отдельный комплект казахских экранов в эту итерацию не входят.
 >
 > **Визуальная база:** существующий
-> [Claude artifact](https://claude.ai/artifact/VEioj7KKfjKfhD1RZpivdQ) (Pass 3 + Media Pass) и дизайн-система, на
+> Claude artifact (историческая ссылка удалена; актуальный [visual baseline](DESIGN_BASELINE.md)) (Pass 3 + Media Pass) и дизайн-система, на
 > которой он собран. Отдельный `DESIGN_SYSTEM.md` удалён 2026-09-25; обязательные UI-правила —
 > [`PROJECT_RULES.md`](../PROJECT_RULES.md) §18.4.
 >
-> **Результат и решения после него:** первый макет — https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4. Решения PO,
+> **Результат и решения после него:** первый макет — историческая визуальная ссылка удалена; актуальный [visual baseline](DESIGN_BASELINE.md). Решения PO,
 > принятые по нему, — [`SELLER_AI_FIRST_DESIGN_REVISION_1.md`](./SELLER_AI_FIRST_DESIGN_REVISION_1.md); при
 > расхождении с этим документом побеждает ревизия (модерация при недоступном ИИ, контакты от предыдущей точки,
 > цена во всех точках, предупреждение об ответственности).

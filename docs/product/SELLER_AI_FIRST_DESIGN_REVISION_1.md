@@ -3,7 +3,7 @@
 > **SUPERSEDED — 2026-11-05.** Этот документ больше не задаёт визуальные правила и не является implementation target. Главные источники — два Claude Artifact в [DESIGN_BASELINE.md](DESIGN_BASELINE.md). Продуктовые решения и закрытое поведение сохраняются по owning contracts. Старый текст ниже оставлен для безопасного отделения продуктовых требований от визуальных; полная очистка ещё не завершена.
 
 > **Дата:** 2026-09-25.
-> **Макет:** [KAIDA · AI-first витрина продавца](https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4).
+> **Макет:** KAIDA · AI-first витрина продавца (историческая ссылка удалена; актуальный [visual baseline](DESIGN_BASELINE.md)).
 > **Основное ТЗ:** [`SELLER_AI_FIRST_DESIGN_BRIEF.md`](./SELLER_AI_FIRST_DESIGN_BRIEF.md) — остаётся в силе; этот документ
 > только дополняет его.
 > **Формат:** как и раньше — mobile, русский язык, переключатель `RU / KK` на месте. Desktop и казахские экраны не нужны.
