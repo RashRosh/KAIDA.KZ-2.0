@@ -1,13 +1,35 @@
-# Current state — D2 rework for PO review
+# Current state — передача D2 (2026-11-05)
 
-- Isolated clone design-migration, branch slice/design-baseline-search-sort, draft PR207. Base main a0b6fb159a76ffb899ae47daee69d0d30ffb893e; last checkpoint v0.0.86-text-switch-on -> dcd26adba9fe124a37a800df047810d6b30ae481. Original C:/dev/KAIDA.KZ-2.0 remains dirty/read-only; sources/ read-only.
-- Two new Claude Artifacts are the sole visual authority: docs/product/DESIGN_BASELINE.md. Full87/91 audit remains incomplete; exact coverage DESIGN_SOURCE_AUDIT.md. /welcome fully deferred by PO; keep conditional arrow.
-- PO rejected previous head55caf3c visually. Same first slice D2 was reworked around supplied B03/B04 screenshots: no results chips/hours, functional hearts using existing shared hook,4nav, seller caption, exact typography/photo104/card14/SVG paths, real minute/hour freshness, distance caption, geo panel ABOVE toolbar, source loading/correction. Compact current Slice Contract supersedes contradictory earlier scope descriptions. No next slice.
-- Product boundaries preserved: search/typed/last-state/Back/ranking/expiry/verified contacts/routes/eligibility/private favourites. Additive optional lastConfirmedAt ISO in SearchOffer from existing public BuyerOffer confirmation time; no DB migration. PublicAPI/auth risk flags and explicit source adaptations documented. Error retains closed S0 behavior (clear old offers), no new saved/offline model or geo-dialog.
-- Source parity/state E2E captures at360 plus actual Chrome preview inspected. Independent computed assertions: photo104×104, hearttop/right0, price22, point500, address13, radius14. Old cascade/clear/geo-trigger clipping corrected. Own review and intentional differences: docs/slices/design-search-sort/VISUAL_REVIEW.md. This is NOT PO acceptance.
-- Verification snapshot before final CI: lint/typecheck/build PASS; unit731PASS; source/state/favourites/typed final9E2E PASS. Full integration434/435PASS with one unchanged importer timeout; isolated importer7/8PASS with another timeout, no limit/test weakening. Full E2E324PASS/16FAIL/72SKIP/2notrun:14old projection/presentation expectations, one milk-fixture cross-worker race, one unrelated seller30s timeout. Expectations revised only for explicit D2 changes; own milk fixtures now isolate locale/order comparison. Final7files54E2E PASS on both mobile/desktop, including all formerly failed paths and the unchanged seller flow. Final branch CI must prove clean full regression; old55caf3c and superseded rework runs do not prove this SHA. Follow PR207 checks/body for final run/results.
-- Local preview http://127.0.0.1:3500/?q=помидоры; production build server session31903. Synthetic4Offer fixture is opt-in tests/fixtures/design-search/prepare-preview.ts, restricted to127.0.0.1:55439/kaida_design. Honest guest/default sort/unknown distance may differ from static18/saved-hearts/known-distance illustration. Never hardcode source data into runtime.
-- Docker clusters kaida-design-verify55439 (preview+integration) and kaida-design-e2e55440 (E2E), separate kaida_design/kaida_test DBs. Ignored.env contains only synthetic local credentials. Stable source/evidence outside repo in sibling verification-evidence. Build can change next-env.d.ts: restore generated-only diff before commit.
-- No manual acceptance, merge/tag or checkpoint. After final checks present one whole working Search screen with screenshot, then PO evaluates UI. Do not request per-element approvals. No next slice before closure.
+## Current task
 
-Final motion self-review: source B03 uses whole-heart press .97, nav-pill-only press .94,100ms and cubic-bezier(.33,1,.68,1). Replaced the incorrect inner-SVG .88 press and legacy whole-nav press, including reduced-motion cascade. Source/state/heart/focus/menu final6E2E PASS; lint/build/TypeScript PASS. Full pre-motion SHA7628489 CI42002517885 PASS (731unit,435integration,342E2E,72intentional skips); final press follow-up requires its own branch CI. No further runtime change planned. Preview production server session65629 at3500; reload the existing third IAB tab for final assets.
+- Миграция дизайна: реализована только выдача поиска D2. Ждём ручную приёмку PO; следующий экран не выбран.
+- Продолжать из ветки `slice/design-baseline-search-sort`, [draft PR207](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/207). В main этих изменений ещё нет.
+- Main: `a0b6fb159a76ffb899ae47daee69d0d30ffb893e`. Последний checkpoint: annotated `v0.0.86-text-switch-on` → `dcd26adba9fe124a37a800df047810d6b30ae481`; remote refs проверены. S-TEXT-SWITCH-ON повторно не реализовывать.
+- Проверенный runtime D2: `dc3d6ecb2143ed08dc9377bd9caa26d27b938966`. Текущий follow-up меняет только документацию; код тот же.
+
+## Last completed / verification
+
+- Выдача B03/B04: карточки, hearts через существующий favourites flow,4nav, typography/SVG/spacing, реальная давность, сортировка, geo/loading/error/correction. [Контракт](../slices/design-search-sort/SLICE_CONTRACT.md), [визуальная сверка и адаптации](../slices/design-search-sort/VISUAL_REVIEW.md).
+- [Полный CI42004819351](https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/42004819351) SUCCESS: lint/types/migrations/seed/build;731unit,435integration,343E2E PASS,73намеренных project skips. CodeQL42004819048 / dependency42004819159 SUCCESS. Локальные targeted54 и final motion/state6 PASS. Прежние падения не являются текущими blockers.
+- Сверены normal/denied/loading/error/correction, размеры, press/reduced-motion и реальный preview. Это проверка агента, не приёмка PO. Merge/tag D2 и deploy не выполнялись.
+- Единственная визуальная authority — два Artifact в [DESIGN_BASELINE](../product/DESIGN_BASELINE.md). Старые visual targets superseded, продуктовые contracts сохранены. Полный аудит87досок/91файла ещё НЕ завершён: [точное покрытие](../product/DESIGN_SOURCE_AUDIT.md).
+- `/welcome` полностью отложен PO; стрелку при вводе сохранить. [Заметка](../slices/design-first-entry/SLICE_CONTRACT.md). Home/Nearby/Offer/Favourites/Seller/Operator целиком не мигрированы.
+
+## Next action
+
+1. Сверить ветку/PR/CI с этим snapshot; не начинать заново перенос выдачи.
+2. Получить ручную приёмку PO по сценарию D2 целиком. Если замечания — исправить этот же slice и выполнить необходимые проверки.
+3. После приёмки и поручения PO: diff audit → merge → merged-main CI → annotated checkpoint по PROJECT_RULES. До этого следующий slice не начинать.
+4. Перед дальнейшей миграцией завершить аудит источников и согласовать с PO следующий цельный экран; составить его Slice Contract. Порядок принадлежит только [EXECUTION_PLAN](../product/EXECUTION_PLAN.md). Не выбирать экран по старому ТЗ или номеру Sxx. Конфликт закрытого поведения — STOP с объяснением.
+
+## Администратору / перенос среды
+
+- Это передача кода, не production deployment. `127.0.0.1:3500` — preview на текущем компьютере; ссылка/сессии/локальная БД не переносятся через GitHub.
+- Запуск: README и [LOCAL_BOOTSTRAP](../ops/LOCAL_BOOTSTRAP.md); версии брать из `.node-version` / `package.json`. Развёртывание: [DEPLOYMENT](../ops/DEPLOYMENT.md), [BACKUP_RESTORE](../ops/BACKUP_RESTORE.md); ограничения Test OTP и production gates сохраняются. Секреты и доступы передаются отдельно, не коммитятся.
+- D2 не меняет инфраструктуру, миграции БД или production-настройки. Источники — живые ссылки: при необходимости авторизации использовать браузер PO, не подменять старым макетом.
+
+## Evidence / локальные ограничения
+
+- CI screenshots/report: artifact `13404847181` в указанном run, retention до2026-11-12. После expiry воспроизвести через tests/e2e/design-search-results.spec.ts; fixtures хранятся в Git. Локальные sibling verification-evidence не являются переносимым Git evidence.
+- Synthetic preview fixture opt-in: tests/fixtures/design-search/prepare-preview.ts, только loopback55439/kaida_design. Не использовать вместо реальных Offers.
+- Текущий clone: design-migration. Оригинальный C:/dev/KAIDA.KZ-2.0 dirty, не трогать; sources/ read-only. Локальные кластеры55439/55440 содержат только test data; не путать их с рабочей средой администратора.

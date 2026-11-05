@@ -56,7 +56,6 @@ UI → API → business logic → DB → tests → manual acceptance
 - [`docs/product/FEATURE_MAP.md`](docs/product/FEATURE_MAP.md) — долгосрочная capability/dependency map;
 - [`docs/product/REQUIREMENTS_REGISTER.md`](docs/product/REQUIREMENTS_REGISTER.md) — индекс требований: ID → источники → вспомогательные подробности (без состояний и приоритетов; требования по существу остаются в первоисточниках); не очередь и не разрешение на реализацию;
 - [`docs/agents/CURRENT_STATE.md`](docs/agents/CURRENT_STATE.md) — verified checkpoint, активная работа и операционные ограничения;
-- [`docs/agents/CURRENT_STATE.md`](docs/agents/CURRENT_STATE.md) — verified checkpoint, активная работа и операционные ограничения;
 - [`docs/product/EXECUTION_HISTORY.md`](docs/product/EXECUTION_HISTORY.md) и [`docs/product/REQUIREMENTS_SOURCE_MAP.md`](docs/product/REQUIREMENTS_SOURCE_MAP.md) — архив и сохранённый снимок инвентаризации (читать при необходимости истории или трассировки);
 - [`docs/product/DESIGN_BASELINE.md`](docs/product/DESIGN_BASELINE.md) — два единственных главных визуальных источника KAIDA, принятые PO 2026-11-05;
 - Прежние дизайнерские ТЗ, макеты и внешний UX corpus — исторические материалы, не визуальные правила; продуктовые решения остаются в Feature Map и закрытых контрактах;
