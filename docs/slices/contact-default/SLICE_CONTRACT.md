@@ -1,12 +1,15 @@
 # Contact default — login number offered as the point's contact — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** CLOSED (PO 2026-10-14). Approved by the Product Owner on 2026-10-14 with the ten decisions of §6 and the previews of §9; manual acceptance PASS at `14a3a124bfd7394a4fd1a313277f39ac758b2f8b`; merged as `9dff3f42ca52ec024d27191c0ce43309607a22f4`; annotated checkpoint `v0.0.79-contact-default`.
 
 **Queue:** S-CONTACT-DEFAULT, item 8 of the PO-approved order of 2026-10-13 (after S-ACTUALITY-WORDS, before B-READABILITY; one at a time). Order and state are owned by `docs/product/EXECUTION_PLAN.md`.
 
 **Base:** `main` at `14785751a1e4b60308d93531b8e1a77875f953f5` (checkpoint `v0.0.78-actuality-words`).
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `AI-S12A · Point · Contacts (first point)` / `(copied)`. The mockup has no frame for the login-number chip, the WhatsApp chip or their notices; §9 draws them as DRAFT previews (a design gap, to be approved by the PO).
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `AI-S12A · Point · Contacts (first point)` / `(copied)`. The mockup has no frame for the login-number chip, the WhatsApp chip or their notices; §9 draws them as DRAFT previews (a design gap, to be approved by the PO).
 
 ## 1. User task
 

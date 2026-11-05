@@ -1,10 +1,13 @@
 # «Моя витрина» and the manual editor — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-27 (mixed product name and decisions a–g in §8).
 
 **Stage 1, item 3** of `docs/product/EXECUTION_PLAN.md`.
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1), AI-off
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1), AI-off
 variants first: `OFF1` (showcase, editor, edit published, published), `OFF2` (Confirm · AI off), `S01` (showcase empty,
 statuses, loading, error), `S02` (source sheet · AI outage), `S09` / `S09b` (editor, unit sheet, pack fields,
 validation, submitting, submit error, discard confirm, returned from point, card points, one-point price), `S10`

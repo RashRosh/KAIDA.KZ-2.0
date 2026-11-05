@@ -685,7 +685,7 @@ h1, h2, p, dl, dd { margin: 0; }
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
 }
 /* Ported verbatim from the accepted mockup (docs/product/mockup/seller-ai-first-rev1/kaida.css), scoped to .kaida;
-   icons are the mockup's own files under /kaida/icons. Do not restyle here: change the mockup first. */
+   icons are the mockup's own files under /kaida/icons. Historical snapshot only; current visual authority is docs/product/DESIGN_BASELINE.md. */
 /* KAIDA · AI-first seller concept — shared styles. Tokens = KAIDA design system (light theme). */
 .kaida{
   --bg:#faf8fb;--surface:#ffffff;--raised:#ffffff;--sunken:#f4f1f6;--line:#e8e4eb;--line-control:#8b858e;

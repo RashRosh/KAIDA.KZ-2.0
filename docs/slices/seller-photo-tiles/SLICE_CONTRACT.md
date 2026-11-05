@@ -1,5 +1,8 @@
 # Seller photo tiles — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-29 (design/permission requests of §6 answered: 1–3 yes; point 4 below is
 a proposal that stands unless the PO objects).
 

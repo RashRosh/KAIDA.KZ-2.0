@@ -1,5 +1,8 @@
 # First Entry — buyer start page (phone) — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** BUILT on the PO's order «Начинай» (2026-09-29) — the mockup is the source, existing code is fitted to it
 (PO: «выкинь решения Pass 3, идём от эталона»). The design requests of §6 were decided as proposed there (navigation
 stays under the strip, no location control on the start, column 480, the caption «Пример» stays); the PO asked not to

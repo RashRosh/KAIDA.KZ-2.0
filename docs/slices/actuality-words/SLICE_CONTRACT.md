@@ -1,12 +1,15 @@
 # Actuality words and one-tap «Всё актуально» — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** CLOSED (PO 2026-10-14). Approved by the Product Owner on 2026-10-13 with the decisions of §6 and §6.1 and the previews of §9; manual acceptance PASS at `dbee3e7d7af83491badf53be59571fa92078b89d`; merged as `ca1429037b6b983e6d4fd62033d2a731820cf4db`; annotated checkpoint `v0.0.78-actuality-words`. See §12.
 
 **Queue:** S-ACTUALITY-WORDS, first of three independent slices ordered by PO on 2026-10-13 (then S-CONTACT-DEFAULT, then B-READABILITY; one at a time, each with its own contract, PO acceptance and checkpoint). Order and state are owned by `docs/product/EXECUTION_PLAN.md`.
 
 **Base:** `main` at `5cb570b331965c2ad0e1c1427fcd00b1bcf5aecc` (checkpoint `v0.0.77-offer-favourites`).
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `S01` (task block), `S15` (card screen), `S16` («Актуальность», «Всё актуально»). The mockup has no frame for the one-tap button, the undo toast, the partial-success state or the per-row confirm; the previews in §9, approved by the PO on 2026-10-13, stand in for them. Mobile, Russian (`PROJECT_RULES.md` §18.5); every new key also gets a provisional Kazakh string.
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `S01` (task block), `S15` (card screen), `S16` («Актуальность», «Всё актуально»). The mockup has no frame for the one-tap button, the undo toast, the partial-success state or the per-row confirm; the previews in §9, approved by the PO on 2026-10-13, stand in for them. Mobile, Russian (`PROJECT_RULES.md` §18.5); every new key also gets a provisional Kazakh string.
 
 ## 1. User task
 

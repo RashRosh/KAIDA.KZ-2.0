@@ -1,11 +1,14 @@
 # Actuality reminders — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-28 (decisions in §8; the self-made choices of the draft accepted as written).
 
 **Stage 1, item 5 (part b)** of `docs/product/EXECUTION_PLAN.md`; GitHub Issue #32. Builds on part a
 (`docs/slices/offer-actuality/SLICE_CONTRACT.md`): the due state, the task block and «Всё актуально» live there.
 
-**UX target:** accepted mockup copy (`PROJECT_RULES.md` §18.1): `S01` (the in-app block when push is off), `S18`
+**Historical visual reference (superseded):** archived mockup copy (`PROJECT_RULES.md` §18.1): `S01` (the in-app block when push is off), `S18`
 («Включить push», reminder texts). The inbox screen of `S18` is not built (§3). Mobile, Russian.
 
 **Base:** part a merged.

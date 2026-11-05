@@ -1,10 +1,13 @@
 # Point contacts and opening hours — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-26 (migration rule and first-point hours template approved as written).
 
 **Stage 1, item 2** of `docs/product/EXECUTION_PLAN.md`.
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1):
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1):
 `AI-S12A · Point · Contacts (first point)` / `· Contacts (copied)`, `AI-S13` (contact verification), `AI-B01`
 (icon-only contacts, route-only card). Opening hours have no frame in the mockup; the buyer line format, colors and
 icon rule below are Product Owner decisions (`FEATURE_MAP.md` «Seller AI-first model» п. 13) and stand in for the

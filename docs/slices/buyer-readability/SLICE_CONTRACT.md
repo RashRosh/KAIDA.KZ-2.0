@@ -1,5 +1,8 @@
 # Buyer readability — point, address and seller lines — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** CLOSED (PO 2026-10-22). Approved at `e7796ee9` in PR #193 with decisions D1–D3 (§8.1); acceptance and
 limitations in §12; merged as `7175479f0c6255ce64466b6d0cf0722a754078ab` (PR #194, after PR #193); annotated checkpoint
 `v0.0.82-buyer-readability`.
@@ -15,7 +18,7 @@ limitations in §12; merged as `7175479f0c6255ce64466b6d0cf0722a754078ab` (PR #1
 («Читаемость второстепенного текста на реальном телефоне; вывод «всё по 12 px» неверен, часть проверенного текста —
 14 px»). Both are expert opinion from 390 px screenshots, not user research; UXA did not measure sizes in px (UXA §8).
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `B01`
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `B01`
 (result card) and `B02` (offer page). This slice deliberately deviates from both frames in two text properties (§6).
 
 ## 1. User task
