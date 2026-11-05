@@ -189,8 +189,10 @@ function assertDiscoveryPrivacy(body: unknown) {
 function assertSearchPrivacy(body: unknown) {
   const serialized = JSON.stringify(body);
   // stage #5: the derived whole-meter distanceMeters of a location-aware request is a legitimate public field;
-  // raw coordinates stay forbidden (slice contract §3).
-  for (const forbidden of ['"geo"', '"latitude"', '"longitude"', '"buyerLocation"', '"lastConfirmedAt"']) {
+  // D2 also publishes the existing BuyerOffer confirmation time for minute/hour badges. Discovery is unchanged.
+  expect(serialized).toContain('"lastConfirmedAt"');
+  // Raw coordinates stay forbidden (slice contract §3).
+  for (const forbidden of ['"geo"', '"latitude"', '"longitude"', '"buyerLocation"']) {
     expect(serialized).not.toContain(forbidden);
   }
 }

@@ -104,6 +104,8 @@ async function expectCardOrder(page: import('@playwright/test').Page, locationNa
 
 function assertPublicPrivacy(body: unknown) {
   const serialized = JSON.stringify(body);
+  // D2: the existing public BuyerOffer confirmation time now also drives Search minute/hour badges.
+  expect(serialized).toContain('"lastConfirmedAt"');
   // stage #5: the derived whole-meter distanceMeters of a location-aware request is a legitimate public field;
   // raw Buyer/Seller coordinates and private ranking inputs stay forbidden (slice contract §3).
   for (const forbidden of [
@@ -111,7 +113,6 @@ function assertPublicPrivacy(body: unknown) {
     '"latitude"',
     '"longitude"',
     '"buyerLocation"',
-    '"lastConfirmedAt"',
     '"rank"',
     '"score"',
   ]) {
