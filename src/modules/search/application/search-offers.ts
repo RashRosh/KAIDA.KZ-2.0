@@ -96,6 +96,7 @@ export async function searchOffersDetailed(
   const offers = ranked.map(({ offer, lastConfirmedAt, rankingDistanceMeters }) => ({
     ...offer,
     actuality: buyerActuality(lastConfirmedAt, now, policy),
+    lastConfirmedAt: lastConfirmedAt.toISOString(),
     // stage #5: the derived whole-meter distance is public only when the request carried the buyer location;
     // a geo-less Offer (or a location-less request) exposes no distance at all.
     ...(lifecycleOptions.buyerLocation && rankingDistanceMeters !== null

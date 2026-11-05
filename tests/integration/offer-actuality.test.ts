@@ -94,6 +94,8 @@ describe('buyer side', () => {
     await card('Актуальность мёд почти', [points[0]!], 168 - 1 / 60);
 
     const search = (await searchOffers('Актуальность', db, { ...read, buyerLocation: buyer })).offers;
+    expect(search[0]!.lastConfirmedAt).toBe(ago(1).toISOString());
+    expect(search[1]!.lastConfirmedAt).toBe(ago(60).toISOString());
     expect(search.map((offer) => [offer.product.name, offer.actuality])).toEqual([
       ['Актуальность мёд свежий', { days: 0, ageing: false }],
       ['Актуальность мёд старый', { days: 2, ageing: true }],
