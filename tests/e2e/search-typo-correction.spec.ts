@@ -102,7 +102,7 @@ test('«машина» is left alone; a query that returns Offers is not correct
   const connection = createDatabase(testDatabaseUrl());
   const offerIds: string[] = [];
   try {
-    for (const title of [`Малина свежая ${marker}`, `Молоко фермерское ${marker}`]) {
+    for (const title of [`Малина свежая ${marker}`, `Молоко фермерское ${marker}`, `Молоко цельное ${marker}`]) {
       const id = randomUUID();
       offerIds.push(id);
       await connection.pool.query(
@@ -138,7 +138,11 @@ test('«машина» is left alone; a query that returns Offers is not correct
     const ru = await (await request.get('/api/search?q=' + encodeURIComponent('малако') + '&correct=1&locale=ru')).json();
     const kk = await (await request.get('/api/search?q=' + encodeURIComponent('малако') + '&correct=1&locale=kk')).json();
     expect(kk.correction).toEqual(ru.correction);
-    expect(kk.offers.map((offer: { id: string }) => offer.id)).toEqual(ru.offers.map((offer: { id: string }) => offer.id));
+    // Other parallel tests own and remove their own milk Offers between these requests. Compare this fixture's
+    // two milk Offers, preserving the locale/order assertion without depending on another worker's lifetime.
+    const ownOrder = (offers: Array<{id:string}>) => offers.filter(offer => offerIds.includes(offer.id)).map(offer => offer.id);
+    expect(ownOrder(ru.offers)).toHaveLength(2);
+    expect(ownOrder(kk.offers)).toEqual(ownOrder(ru.offers));
   } finally {
     await connection.pool.query('DELETE FROM offers WHERE id = ANY($1)', [offerIds]);
     await connection.pool.end();
