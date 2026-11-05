@@ -42,10 +42,10 @@ test('a mistyped query shows the corrected results with two text lines; «search
     await page.goto('/');
     await search(page, typo);
     // two compact text lines above the results: the corrected query in bold, then the link to the original
-    const status = page.getByRole('status').filter({ hasText: 'Показаны результаты по запросу' });
+    const status = page.getByRole('status').filter({ hasText: 'Показаны результаты для' });
     await expect(status).toBeVisible();
     await expect(status.locator('strong')).toHaveText('молоко');
-    const instead = page.getByRole('link', { name: `Искать вместо этого «${typo}»` });
+    const instead = page.getByRole('link', { name: `Искать «${typo}» как введено` });
     await expect(instead).toBeVisible();
     await expect(instead).toHaveAttribute('href', `/?${new URLSearchParams({ q: typo, typed: '1' })}`);
     await expect(page.getByRole('article').filter({ hasText: milk })).toHaveCount(1);
@@ -65,13 +65,13 @@ test('a mistyped query shows the corrected results with two text lines; «search
     await instead.click();
     await expect(page).toHaveURL(/typed=1/);
     await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
-    await expect(page.getByText('Показаны результаты по запросу')).toHaveCount(0);
+    await expect(page.getByText('Показаны результаты для')).toHaveCount(0);
     await expect(page.getByRole('article')).toHaveCount(0);
     expect((await events()).length).toBe(before + 1);
     // reload keeps the choice
     await page.reload();
     await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
-    await expect(page.getByText('Показаны результаты по запросу')).toHaveCount(0);
+    await expect(page.getByText('Показаны результаты для')).toHaveCount(0);
     // the «Поиск» tab after another tab keeps it too (the last Search of this tab, version 4)
     await page.goto('/more');
     await page.getByRole('navigation').getByRole('link', { name: 'Поиск' }).click();
@@ -86,10 +86,10 @@ test('a mistyped query shows the corrected results with two text lines; «search
     await expect(page.getByRole('status').filter({ hasText: `Ничего не найдено по запросу «${typo}»` })).toBeVisible();
     await page.goBack();
     await expect(page).toHaveURL(/\/\?q=[^&]*$/);
-    await expect(page.getByText('Показаны результаты по запросу')).toBeVisible();
+    await expect(page.getByText('Показаны результаты для')).toBeVisible();
     // a new deliberate search with the same text switches the correction on again
     await search(page, typo);
-    await expect(page.getByText('Показаны результаты по запросу')).toBeVisible();
+    await expect(page.getByText('Показаны результаты для')).toBeVisible();
     expect(new URL(page.url()).searchParams.get('typed')).toBeNull();
   } finally {
     await connection.pool.query('DELETE FROM offers WHERE id = ANY($1)', [offerIds]);
@@ -102,7 +102,7 @@ test('«машина» is left alone; a query that returns Offers is not correct
   const connection = createDatabase(testDatabaseUrl());
   const offerIds: string[] = [];
   try {
-    for (const title of [`Малина свежая ${marker}`, `Молоко фермерское ${marker}`]) {
+    for (const title of [`Малина свежая ${marker}`, `Молоко фермерское ${marker}`, `Молоко цельное ${marker}`]) {
       const id = randomUUID();
       offerIds.push(id);
       await connection.pool.query(
@@ -114,12 +114,12 @@ test('«машина» is left alone; a query that returns Offers is not correct
     await page.goto('/');
     await search(page, 'машина');
     await expect(page.getByRole('status').filter({ hasText: 'Ничего не найдено по запросу «машина»' })).toBeVisible();
-    await expect(page.getByText('Показаны результаты по запросу')).toHaveCount(0);
+    await expect(page.getByText('Показаны результаты для')).toHaveCount(0);
     await expect(page.getByRole('article')).toHaveCount(0);
 
     await search(page, 'молоко');
     await expect(page.getByRole('article').filter({ hasText: marker }).first()).toBeVisible();
-    await expect(page.getByText('Показаны результаты по запросу')).toHaveCount(0);
+    await expect(page.getByText('Показаны результаты для')).toHaveCount(0);
 
     // API: without the flag the answer is the original one; with it the correction is added; a bad value is refused
     const plain = await (await request.get('/api/search?q=' + encodeURIComponent('малако'))).json();
@@ -138,7 +138,11 @@ test('«машина» is left alone; a query that returns Offers is not correct
     const ru = await (await request.get('/api/search?q=' + encodeURIComponent('малако') + '&correct=1&locale=ru')).json();
     const kk = await (await request.get('/api/search?q=' + encodeURIComponent('малако') + '&correct=1&locale=kk')).json();
     expect(kk.correction).toEqual(ru.correction);
-    expect(kk.offers.map((offer: { id: string }) => offer.id)).toEqual(ru.offers.map((offer: { id: string }) => offer.id));
+    // Other parallel tests own and remove their own milk Offers between these requests. Compare this fixture's
+    // two milk Offers, preserving the locale/order assertion without depending on another worker's lifetime.
+    const ownOrder = (offers: Array<{id:string}>) => offers.filter(offer => offerIds.includes(offer.id)).map(offer => offer.id);
+    expect(ownOrder(ru.offers)).toHaveLength(2);
+    expect(ownOrder(kk.offers)).toEqual(ownOrder(ru.offers));
   } finally {
     await connection.pool.query('DELETE FROM offers WHERE id = ANY($1)', [offerIds]);
     await connection.pool.end();
@@ -160,7 +164,7 @@ test('Kazakh interface and narrow, large text: the same correction, two lines th
     await page.goto('/');
     await search(page, 'малако');
     await expect(page.getByText('сұрауы бойынша нәтижелер көрсетілді')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Оның орнына «малако» деп іздеу' })).toBeVisible();
+    await expect(page.getByRole('link', { name: '«малако» деп енгізілгендей іздеу' })).toBeVisible();
     await page.setViewportSize({ width: 320, height: 800 });
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
     const fits = await page.evaluate(() => ({

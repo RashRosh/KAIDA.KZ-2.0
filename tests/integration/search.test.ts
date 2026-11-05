@@ -12,6 +12,7 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
 
   it('finds the exact lamb offer and its Product / Seller / Location', async () => {
     const result = await searchOffers('баранина', connection.db);
+    const confirmed = await connection.pool.query('SELECT last_confirmed_at FROM offers WHERE id=$1', [seedIds.lambOffer]);
     expect(result).toEqual({
       query: 'баранина',
       resolvedProduct: { id: seedIds.lambProduct, name: 'Баранина' },
@@ -19,6 +20,7 @@ describe('S0 Search regression against PostgreSQL 18 after Mandatory Offer Price
         id: seedIds.lambOffer,
         // offer-actuality: the seed confirms the offer when the test database is prepared.
         actuality: { days: 0, ageing: false },
+        lastConfirmedAt: confirmed.rows[0].last_confirmed_at.toISOString(),
         product: { id: seedIds.lambProduct, name: 'Баранина' },
         seller: {
           id: seedIds.seller,

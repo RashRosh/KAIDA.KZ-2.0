@@ -71,13 +71,13 @@ describe('S1 Offer Lifecycle against PostgreSQL 18', () => {
     if (visible) expect(result.offers[0]?.id).toBe(OFFER_ID);
   });
 
-  it('keeps the S0 Search response contract and never exposes lifecycle fields', async () => {
+  it('publishes the confirmation time for the badge, never internal lifecycle status', async () => {
     await setLifecycle('active', new Date('2026-09-04T12:00:00.001Z'));
     const result = await searchFixture();
     expect(searchResponseSchema.safeParse(result).success).toBe(true);
     expect(result.offers).toHaveLength(1);
     expect(result.offers[0]).not.toHaveProperty('status');
-    expect(result.offers[0]).not.toHaveProperty('lastConfirmedAt');
+    expect(result.offers[0]?.lastConfirmedAt).toBe('2026-09-04T12:00:00.001Z');
   });
 
   it('returns an ordinary empty result for an expired Offer', async () => {

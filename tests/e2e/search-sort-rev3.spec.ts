@@ -214,7 +214,7 @@ test('a denied geolocation falls back to the default relevance with a short noti
   await expectOrder(page, [points.far1, points.geoless, points.near, points.far2]);
 
   await (await menu(page)).getByRole('button', { name: /^По расстоянию/ }).click();
-  await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
+  await expect(page.getByText('Расстояние недоступно.')).toBeVisible();
   // Back to the default relevance — in the visible state (the row says «По умолчанию»), the order and the tab state alike.
   await expect(trigger(page)).toHaveAttribute('aria-label', 'Порядок результатов: По умолчанию');
   await expectOrder(page, [points.geoless, points.far2, points.near, points.far1]);
@@ -225,7 +225,7 @@ test('a denied geolocation falls back to the default relevance with a short noti
 
   // Choosing another criterion clears the notice; no further prompt without another «Расстояние» tap.
   await (await menu(page)).getByRole('button', { name: /^По цене/ }).click();
-  await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toHaveCount(0);
+  await expect(page.getByText('Расстояние недоступно.')).toHaveCount(0);
   expect(await geoCalls(page)).toBe(1);
 });
 

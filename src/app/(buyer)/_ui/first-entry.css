@@ -1,6 +1,5 @@
-/* First Entry — the buyer start page (phone). Ported from the accepted mockup's fe.css (docs/product/mockup/
-   seller-ai-first-rev1/fe.css, version 1790680691-0123), mobile and live-demo rules only, scoped to .kaida.
-   Do not restyle here: change the mockup first. */
+/* Legacy First Entry runtime styles. Visual authority: docs/product/DESIGN_BASELINE.md.
+   PO deferred migration of this entire screen on 2026-11-05. */
 .kaida .fe-hdr{height:60px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
 .kaida .fe-logo{display:flex;align-items:center;gap:8px;font:700 20px/24px var(--display);letter-spacing:.02em;color:var(--ink)}
 .kaida .fe-logo .ic{width:22px;height:27px;color:var(--primary)}

@@ -1,0 +1,1 @@
+Test-only illustrations from current Claude B03 canvas 1793830896-9a07 supplied by PO. Source: https://claude.ai/artifact/X7VZCf7SrZ1pDbn9qZTZDn . Only isolated mocked visual acceptance; never real Offer photos.

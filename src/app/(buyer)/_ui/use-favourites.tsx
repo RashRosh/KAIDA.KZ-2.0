@@ -73,18 +73,22 @@ export function useFavourites(target: Target | null = null, enabled = true) {
     finally { if (ticket === epoch.current || ticket + 1 === epoch.current) { busy.current = false; setPendingId(null); } }
   }
   const activeEntry = target && state.kind === 'ready' ? state.favourites.find(f => f.offerId === target.offerId && f.locationId === target.locationId) : undefined;
-  function toggle(event: React.MouseEvent<HTMLElement>) {
-    if (!enabled || !target || busy.current) return;
+  function toggleOffer(event: React.MouseEvent<HTMLElement>, chosen: Target) {
+    if (!enabled || busy.current) return;
     trigger.current = event.currentTarget;
-    if (state.kind === 'anonymous') { intent.current = target; trigger.current = event.currentTarget; setAuthOpen(true); return; }
-    if (state.kind === 'ready') void write(activeEntry ? 'DELETE' : 'PUT', activeEntry ? { id: activeEntry.id } : target);
+    if (state.kind === 'anonymous') { intent.current = chosen; setAuthOpen(true); return; }
+    const existing = state.kind === 'ready' ? state.favourites.find(f => f.offerId === chosen.offerId && f.locationId === chosen.locationId) : undefined;
+    if (state.kind === 'ready') void write(existing ? 'DELETE' : 'PUT', existing ? { id: existing.id } : chosen);
+  }
+  function toggle(event: React.MouseEvent<HTMLElement>) {
+    if (target) toggleOffer(event, target);
   }
   // Own successful login callback receives its captured target even though the session broadcast invalidates stale work.
   const capturedIntent = intent.current;
   const modal = authOpen ? <AuthModal open description={t('fav.authDescription')}
     onClose={() => { intent.current = null; setAuthOpen(false); requestAnimationFrame(() => trigger.current?.focus()); }}
     onAuthenticated={() => { setAuthOpen(false); intent.current = null; if (capturedIntent) void write('PUT', capturedIntent); else void load(); }} /> : null;
-  return { state, error, unavailable, pendingId, active: !!activeEntry, toggle, modal, reload: load,
+  return { state, error, unavailable, pendingId, active: !!activeEntry, toggle, toggleOffer, modal, reload: load,
     available: enabled && (state.kind === 'ready' || state.kind === 'anonymous'),
     remove: (id: string) => write('DELETE', { id }),
     signIn: (event: React.MouseEvent<HTMLElement>) => { intent.current = null; trigger.current = event.currentTarget; setAuthOpen(true); } };

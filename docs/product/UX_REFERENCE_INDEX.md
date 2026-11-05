@@ -1,28 +1,12 @@
 # KAIDA.KZ 2.0 — UX Reference Index
 
-## Status
+> **SUPERSEDED — 2026-11-05.** Этот документ больше не задаёт визуальные правила и не является implementation target. Главные источники — два Claude Artifact в [DESIGN_BASELINE.md](DESIGN_BASELINE.md). Продуктовые решения и закрытое поведение сохраняются по owning contracts. Старый текст ниже оставлен для безопасного отделения продуктовых требований от визуальных; полная очистка ещё не завершена.
 
-`AUDITED / APPROVED` — Product Owner approved the Issue #37 UX corpus reconciliation. No blocking GAP was found for the next scheduled slice, Seller Entry (#35).
+## Status — HISTORICAL PRODUCT EVIDENCE ONLY
 
-This file maps external UX reference material to KAIDA.KZ UI areas. It is **not** a product contract and does not override `docs/PROJECT_RULES.md`, closed Slice Contracts or `docs/DESIGN_SYSTEM.md`.
+Прежний UX corpus больше не используется как набор визуальных правил. Для UI Slice Contract и реализации читать только [DESIGN_BASELINE.md](DESIGN_BASELINE.md), действующие продуктовые решения и закрытые контракты. Исторический аудит Issue #37 ниже сохранён для трассировки продуктовых ограничений; его прежние Use for / KEEP / ADAPT / GAP не являются актуальными дизайнерскими поручениями.
 
-Reference corpus folder supplied by Product Owner:
-
-https://drive.google.com/drive/folders/1y0IGHOKeGmOcgr7fMeO_ZITSDJyUozUa
-
-(The link previously recorded here — `1Yb8ZWU5JnyzL4nj_7LS1SxRiW7tTEjk-` — resolves to an empty shortcut folder named `UX-UI`; the actual 26-file corpus lives at the link above, titled `UX-UI — гайдлайны e-commerce`. Corrected 2026-09-21 after a broken-link check.)
-
-## How agents must use this index
-
-For a UI/UX Slice Contract or implementation:
-
-1. establish current repository state and closed contracts;
-2. read `docs/PROJECT_RULES.md` §18.1 (current mockup) and §18.4 (mandatory UI rules);
-3. use this index to select only the references relevant to the user task;
-4. compare reference guidance with KAIDA product semantics;
-5. classify findings as `KEEP`, `ADAPT`, `REJECT`, or `GAP`;
-6. never silently change a closed contract because a generic e-commerce guide recommends another pattern.
-
+Прямые ссылки на прежние внешние гайды удалены по поручению PO 2026-11-05. История исходных ссылок сохраняется в Git. Старый статус approval относился к аудиту 2026-09, а не к новому дизайну.
 Definitions:
 
 - `KEEP` — current KAIDA rule already fits;
@@ -39,7 +23,7 @@ The corpus is largely about conventional e-commerce. KAIDA.KZ is not a checkout 
 Primary reference:
 
 - `UXUI поисковой строки в интернет-магазине 177 гайдлайнов.md`
-  https://drive.google.com/file/d/12VXVN9FLG4dAxLEXqwLT4Wqd9Nm404QU/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use for:
 
@@ -62,7 +46,7 @@ Do not copy automatically:
 Primary reference:
 
 - `Проектируем сортировку листинга товаров в интернет-магазине 63 гайдлайна.md`
-  https://drive.google.com/file/d/1s5uXSxMKMkmSFKuTtEsgaeJkDVqcIPtU/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use for:
 
@@ -78,7 +62,7 @@ KAIDA-specific contract direction is Issue #12: `Актуальнее`, `Бли�
 Primary reference:
 
 - `Проектируем фильтры в листинге товаров интернет-магазина 155 гайдлайнов.md`
-  https://drive.google.com/file/d/1Fyu6KRfQ8bQlY9hCxMGMhg2dOHsqvXs-/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use only when a filter slice is actually scheduled. The current product decision is to avoid a giant speculative filter drawer. True filters require supporting data and demonstrated usefulness.
 
@@ -89,7 +73,7 @@ Use only when a filter slice is actually scheduled. The current product decision
 Reference:
 
 - `Проектируем каталог товаров в интернет-магазине 152 гайдлайна.md`
-  https://drive.google.com/file/d/14AspnEvKfGKEGSnoa_WfCYLf4qdIpgft/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use selectively for hierarchy/navigation patterns. Do not turn KAIDA into a conventional store catalog or allow user queries to create Products.
 
@@ -100,7 +84,7 @@ Use selectively for hierarchy/navigation patterns. Do not turn KAIDA into a conv
 Primary reference:
 
 - `Проектируем карточки товаров в листинге интернет-магазина 173 гайдлайна.md`
-  https://drive.google.com/file/d/1kVyCAxU6YFLEOx3R9ydZBGz-XaAvBVrU/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use for:
 
@@ -124,7 +108,7 @@ KAIDA adaptations:
 Reference:
 
 - `Проектируем цену и скидки на странице товара в интернет-магазине 56 моментов, которые стоит учитывать.md`
-  https://drive.google.com/file/d/1UKpOp1NSzw8dySMiwIRIeXJuVbaWJDg5/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use for:
 
@@ -147,7 +131,7 @@ Do not introduce discounts, old-price logic, club pricing or checkout semantics 
 Primary reference:
 
 - `Фото на странице товара в интернет-магазине 136 гайдлайнов.md`
-  https://drive.google.com/file/d/1ReKhvH0UpVwZthvp5A8du9ShkoW3z08a/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Secondary:
 
@@ -165,7 +149,7 @@ Approved KAIDA boundary:
 Reference:
 
 - `Проектируем характеристики и описание на странице товара в интернет-магазине 101 гайдлайн.md`
-  https://drive.google.com/file/d/1BmwfhNzH62ySsEDGS7TRegGqikzEcwT0/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use only when a scheduled slice actually exposes richer Offer/Product descriptions. Do not invent attributes/schema from generic e-commerce guidance.
 
@@ -174,7 +158,7 @@ Use only when a scheduled slice actually exposes richer Offer/Product descriptio
 Reference (newly indexed 2026-09-21, previously not mapped in this file):
 
 - `Проектируем работу с Избранным в интернет-магазине 117 гайдлайнов.md`
-  https://drive.google.com/file/d/1b6ycxXqcQGlvyjkCUIAvCeiweeDGCgwc/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use for:
 
@@ -191,7 +175,7 @@ KAIDA adaptation — does **not** require touching the closed S13 Interests API/
 Reference:
 
 - `Проектируем рейтинг и отзывы на странице товара в интернет-магазине 146 гайдлайнов.md`
-  https://drive.google.com/file/d/1cS7USDXrLYsApD3nNelqXc92tGdDtPW-/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Reviews/Rating are a planned KAIDA capability, not current data. Do not render fake stars or ratings. Existing KAIDA decisions about review media and moderation belong to their future contracts.
 
@@ -202,7 +186,7 @@ Reviews/Rating are a planned KAIDA capability, not current data. Do not render f
 Primary reference:
 
 - `Проектируем процесс авторизации по номеру телефона 130 гайдлайнов.md`
-  https://drive.google.com/file/d/1qr_073Me3dKbvnO5agTXLozJUEmA5hmf/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use for:
 
@@ -223,7 +207,7 @@ Reference §6 "Согласие с политиками" (consent text near the 
 Reference:
 
 - `Проектируем экраны онбординга в мобильном приложении 100 гайдлайнов.md`
-  https://drive.google.com/file/d/1rkLbdQM9m_OnhR10JnEyQDnkoLIaziwG/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use as heuristic for:
 
@@ -249,7 +233,7 @@ Current KAIDA S8/UX2 implementation requires the seller to be physically at the 
 Reference:
 
 - `Соц.сети и мессенджеры в eCommerce 52 гайдлайна.md`
-  https://drive.google.com/file/d/1lO1FaAg956Lnh7DoPnhNxtVbwgEq_WbK/view
+  прежняя UX-ссылка удалена; актуальный [baseline](DESIGN_BASELINE.md)
 
 Use selectively for contact-action discoverability and messenger UX. KAIDA contacts remain structured Seller identifiers/handles where possible; do not copy generic social marketing, store/catalog duplication or advertising guidance into product contracts.
 
@@ -330,7 +314,7 @@ Only finding 1 requires the `PROJECT_RULES.md` §4 STOP procedure before any Sli
 Source: bundled wireframe artifact commissioned per `docs/product/WIREFRAME_BRIEF.md` — the "second pass" that
 brief was written to prepare for. 42 screens, identifiers `1a`–`5e` continuing the first-pass
 `KAIDA Wireframes.dc.html` numbering, self-reported as "Мобильный набор по брифу закрыт: 42 экрана, Tier 0–4…
-Осталась desktop-раскладка под UX1A/UX2A." Link: https://claude.ai/artifact/5KhjaPcLntxAY4Mk2BC9zF
+Осталась desktop-раскладка под UX1A/UX2A." Link: историческая визуальная ссылка удалена; актуальный [visual baseline](DESIGN_BASELINE.md)
 
 **Status changed later the same day (2026-09-22):** the table below was originally written under the
 `KEEP/ADAPT/REJECT/GAP` discipline used for third-party advisory material. The Product Owner has since judged the

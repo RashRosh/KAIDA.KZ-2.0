@@ -129,10 +129,10 @@ test('the default row is sliders / «По умолчанию» / an indicator, o
   await expect(page.getByRole('button', { name: /Сбросить/ })).toHaveCount(0);
   await expect(page.getByText(/^Порядок:/)).toHaveCount(0);
   await expect(page.getByText(/Сортировк|Сортировать|соответств/)).toHaveCount(0);
-  const chips = (await page.locator('.chips-row').boundingBox())!;
+  const header = (await page.getByRole('search').boundingBox())!;
   const box = (await trigger(page).boundingBox())!;
   const firstCard = (await page.getByRole('article').first().boundingBox())!;
-  expect(box.y).toBeGreaterThanOrEqual(chips.y + chips.height - 8);
+  expect(box.y).toBeGreaterThanOrEqual(header.y + header.height - 8);
   expect(box.y + box.height).toBeLessThanOrEqual(firstCard.y + 8);
   expect(box.height).toBeGreaterThanOrEqual(44);
   await expectOneLine(page);
@@ -265,7 +265,7 @@ test('«По расстоянию» without geolocation: a denied prompt gives t
   });
   await searchProduct(page);
   await choose(page, /^По расстоянию/);
-  await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
+  await expect(page.getByText('Расстояние недоступно.')).toBeVisible();
   await expect(trigger(page)).toHaveAttribute('aria-label', 'Порядок результатов: По умолчанию');
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');
@@ -319,6 +319,30 @@ test('keyboard: the trigger announces its state, Escape closes the list, and the
   await trigger(page).click();
   await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true');
   await expect(list(page)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(list(page)).toHaveCount(0);
+  await expect(trigger(page)).toBeFocused();
+});
+
+test('rapid reopen survives the outgoing timer; reduced motion and keyboard stay usable', async ({ page }) => {
+  await searchProduct(page);
+  await page.clock.install();
+  await trigger(page).click();
+  await expect(list(page)).toBeVisible();
+  // A second tap closes logically while the visual exit may still be running.
+  await trigger(page).click();
+  await trigger(page).click();
+  await expect(list(page)).toBeVisible();
+  await expect(list(page)).toHaveCount(1);
+  await page.clock.fastForward(200);
+  await expect(list(page)).toBeVisible();
+  await item(page, /^По цене/).click();
+  await expectOrder(page, ['whole', 'prefix', 'linked']);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await trigger(page).focus();
+  await page.keyboard.press('Enter');
+  await expect(item(page, 'По цене, применить: дороже первыми')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(list(page)).toHaveCount(0);
   await expect(trigger(page)).toBeFocused();

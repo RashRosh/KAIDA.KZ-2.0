@@ -194,7 +194,6 @@ describe('S9 Search ranking on PostgreSQL 18 after UX1D eligibility', () => {
       '"latitude"',
       '"longitude"',
       '"buyerLocation"',
-      '"lastConfirmedAt"',
       '"rank"',
       '"score"',
     ]) {

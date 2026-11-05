@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useI18n } from '../../../i18n/I18nProvider';
 
-// Building blocks of the accepted mockup (docs/product/mockup/seller-ai-first-rev1): the same class names as its
-// kaida.css, so every screen renders exactly as its frame.
+// Legacy shared runtime building blocks. Visual authority: docs/product/DESIGN_BASELINE.md.
+// Individual surfaces migrate through scoped slices; existing defaults preserve unmigrated screens.
 
 // Motion page · «out: 200 ms · ease-in»: React removes a closed sheet or toast at once, so an inert copy stays in its
 // place for the exit animation (.leaving in kaida-app.css). Works for every caller, whatever closes the element.

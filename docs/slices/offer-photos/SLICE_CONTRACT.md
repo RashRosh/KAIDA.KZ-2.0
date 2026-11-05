@@ -1,11 +1,14 @@
 # Offer photos: upload, storage, buyer offer page — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-25, with the changes recorded in §8.
 
 **Stage 1, item 1** of `docs/product/EXECUTION_PLAN.md` (seller without AI). This is M1, moved ahead of the frozen
 queue.
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1):
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1):
 `AI-S09 · Editor · Media` (seller), `AI-B01` result card and `AI-B02` offer detail (buyer),
 `States1`/`States2` media tile states. Mandatory UI rules: `PROJECT_RULES.md` §18.4.
 

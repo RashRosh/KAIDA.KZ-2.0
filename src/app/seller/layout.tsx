@@ -8,8 +8,8 @@ import '@fontsource/geologica/700.css';
 import './kaida.css';
 import './kaida-app.css';
 
-// seller-showcase-editor: the seller screens are the accepted mockup (PROJECT_RULES.md §18.1) one to one — its
-// stylesheet, icons and fonts (Roboto, Geologica), served from this app. No language screen intercepts a route
+// Shared legacy runtime support; new visual authority is docs/product/DESIGN_BASELINE.md, migrated per slice.
+// Existing stylesheet/icons/fonts remain until their surface migrates. No language screen intercepts a route
 // (stage 6B): the language is the saved choice, else the browser's, else Russian.
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
   return children;

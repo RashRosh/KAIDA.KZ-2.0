@@ -85,7 +85,7 @@ Feature freeze сохраняется: новые product capabilities вне э
 | # | Шаг | Статус на 2026-09-25 |
 |---|---|---|
 | 1 | ТЗ дизайнеру AI-first витрины продавца | Сделано: `SELLER_AI_FIRST_DESIGN_BRIEF.md` |
-| 2 | Первый макет | Сдан: https://claude.ai/artifact/3z2pznybpsJAJbWGTxgwE4 |
+| 2 | Первый макет | Сдан: историческая визуальная ссылка удалена; актуальный [visual baseline](DESIGN_BASELINE.md) |
 | 3 | Ревизия 1: правки редактора, решения PO, экраны «ИИ выключен», прототип ручного пути | Сдана в тот же макет (кадры `Rev 1`); сверка с §5 ТЗ ревизии — все 13 пунктов закрыты |
 | 4 | Visual acceptance макета после ревизии 1 | Принят PO 2026-09-25; копия — `docs/product/mockup/seller-ai-first-rev1/` |
 | 5 | Slice Contracts этапа 1 (ИИ выключен) | Все пять утверждены |

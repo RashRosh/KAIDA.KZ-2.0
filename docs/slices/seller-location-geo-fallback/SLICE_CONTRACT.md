@@ -1,5 +1,8 @@
 # Seller Location geo fallback — approved S8 revision
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** `READY FOR PR — PRODUCT OWNER MANUAL ACCEPTANCE PASSED 2026-10-01`
 
 **Approved:** 2026-09-22, Product Owner (RashRosh), in-conversation approval of Section 0's STOP write-up. Sections

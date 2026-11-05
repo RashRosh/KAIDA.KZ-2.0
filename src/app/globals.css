@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
 
-  /* Pass 3 palette (DESIGN_SYSTEM.md §2.1), copied from the accepted prototype. */
+  /* Legacy runtime palette; not the design baseline. Migrate scoped surfaces per docs/product/DESIGN_BASELINE.md. */
   --kp-purple-100: #f6e6fe;
   --kp-purple-600: #9900cc;
   --kp-purple-700: #7900a3;

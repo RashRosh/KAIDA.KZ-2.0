@@ -62,8 +62,8 @@ test('a result card opens the offer page with seller, comment and interest; navi
   await expect(card.getByRole('link', { name: /^Маршрут до Тестовая мясная точка/ })).toBeVisible();
   await expect(card.getByRole('link', { name: 'Позвонить продавцу' })).toHaveAttribute('href', /^tel:\+7/);
   // B01: seller, comment and interest are not on the result card.
-  await expect(card).not.toContainText('Асыл Ет');
-  await expect(card.getByRole('button', { name: /избранн/ })).toHaveCount(0);
+  await expect(card).toContainText('Асыл Ет');
+  await expect(card.getByRole('button', { name: /избранн/ })).toHaveCount(1);
 
   await card.getByRole('link', { name: 'Баранина' }).click();
   await expect(page).toHaveURL(/\/offers\//);

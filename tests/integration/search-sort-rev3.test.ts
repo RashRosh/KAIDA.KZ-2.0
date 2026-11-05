@@ -110,7 +110,8 @@ describe('Search explicit sorting on PostgreSQL 18 (stage 6 Rev 3)', () => {
     const result = await searchOffers(productName, db, { ...lifecycleOptions, sort: 'distance', buyerLocation });
     expect(searchResponseSchema.safeParse(result).success).toBe(true);
     const serialized = JSON.stringify(result);
-    for (const forbidden of ['"latitude"', '"longitude"', '"buyerLocation"', '"lastConfirmedAt"', '"score"', '"rank"']) {
+    // D2 makes confirmation time public, as it already was on BuyerOffer; raw geo/ranking stay private.
+    for (const forbidden of ['"latitude"', '"longitude"', '"buyerLocation"', '"score"', '"rank"']) {
       expect(serialized).not.toContain(forbidden);
     }
   });

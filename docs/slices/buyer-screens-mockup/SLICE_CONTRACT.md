@@ -1,10 +1,13 @@
 # Buyer screens on the accepted mockup — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-29 (decisions a–e in §8; the self-made choices of the draft accepted as written).
 
 **Stage:** first stage after stage 1 (PO decision 2026-09-29, `docs/product/EXECUTION_PLAN.md`).
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `B01`
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `B01`
 (result card, variants, loading / error) and `B02` (offer detail: full, fallback without contacts, media error). Screens
 without a frame (search start, «Рядом», sign-in, the buyer app frame) are built from the mockup's own classes, as was
 done for the seller. Mandatory UI rules: `PROJECT_RULES.md` §18.4. Mobile and Russian as for the seller (PO

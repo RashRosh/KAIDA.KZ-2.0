@@ -90,6 +90,8 @@ export const searchOfferSchema = z.object({
   coverPhotoId: z.uuid().optional(),
   // offer-actuality: whole days since the Seller's last confirmation (badge «Сегодня» … «6 дней») and the tier.
   actuality: z.object({ days: z.number().int().min(0), ageing: z.boolean() }).optional(),
+  // Public confirmation timestamp, already exposed on BuyerOffer; optional for older clients/fixtures.
+  lastConfirmedAt: z.iso.datetime().optional(),
   // stage #5: derived whole-meter distance, present only on geo-known Offers of a request that carried the buyer
   // location (any sort mode); raw Buyer/Seller coordinates never appear in the public DTO.
   distanceMeters: z.number().int().nonnegative().optional(),

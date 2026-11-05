@@ -1,11 +1,14 @@
 # Offer actuality 2 / 7 / 14 — Slice Contract
 
+> Visual authority superseded — 2026-11-05: [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) and its two Claude Artifacts are the only current visual targets. Former mockup links, previews and visual restrictions below are historical delivery evidence. Product/UX contracts remain unless explicitly revised by a later approved Slice Contract.
+
+
 **Status:** APPROVED — Product Owner, 2026-09-28 (decisions in §8; the self-made choices of the draft accepted as written).
 
 **Stage 1, item 5 (part a)** of `docs/product/EXECUTION_PLAN.md`; GitHub Issue #31. Part b — reminders — is
 `docs/slices/actuality-reminders/SLICE_CONTRACT.md` (Issue #32).
 
-**UX target:** accepted mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `S01`
+**Historical visual reference (superseded):** archived mockup copy `docs/product/mockup/seller-ai-first-rev1/` (`PROJECT_RULES.md` §18.1): `S01`
 (task «Пора подтвердить актуальность», status «Нужно подтвердить»), `S15` (card: «Подтвердить актуальность», confirmed),
 `S16` (mass actuality «Всё актуально», «Как работает актуальность»), `S17` (archive list and restore), `B01` / `B02`
 (buyer badges «Сегодня» … «6 дней»). Word «актуальность», never «свежесть». Mobile, Russian (PO 2026-09-27). Buyer

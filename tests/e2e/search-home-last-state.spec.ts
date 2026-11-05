@@ -52,20 +52,20 @@ test('the Search Home shows the centered field and at most five chips, with no f
   expect(await storedState(page)).toBeNull();
 });
 
-test('a chip search moves the field and the chips to the top and keeps the chips visible', async ({ page }) => {
+test('a Home chip starts Search; B03 results and empty state omit the chips', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Баранина', exact: true }).click();
   await expect(page.getByRole('article').first()).toBeVisible();
   const box = await field(page).boundingBox();
   expect(box?.y ?? 999).toBeLessThan(120);
-  await expect(chips(page)).toHaveCount(5);
+  await expect(chips(page)).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^Порядок результатов: / })).toBeVisible();
 
-  // The chips stay when there is nothing to show as well.
+  // The empty state keeps the editable query, without a second query row.
   await field(page).fill('несуществующийтовар');
   await field(page).press('Enter');
   await expect(page.getByText('По вашему запросу ничего не найдено.').or(page.getByText(/ничего не найден/i)).first()).toBeVisible();
-  await expect(chips(page)).toHaveCount(5);
+  await expect(chips(page)).toHaveCount(0);
 });
 
 test('an empty query creates no Search state and the Home layout stays', async ({ page }) => {

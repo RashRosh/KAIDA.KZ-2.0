@@ -37,7 +37,7 @@
 4. `docs/product/EXECUTION_PLAN.md` — current scheduling/status context;
 5. `docs/product/FEATURE_MAP.md` — long-range capability/dependency context;
 6. detailed GitHub Issue текущего stage;
-7. принятый макет и `PROJECT_RULES.md` §18.1/§18.4 / UX references, если проверяется UI/presentation;
+7. только два Artifact из `docs/product/DESIGN_BASELINE.md` и `PROJECT_RULES.md` §18 при проверке UI/presentation; прежние UX references — историческое продуктовое evidence, не визуальные цели;
 8. сообщения пользователя как дополнительный context.
 
 Если chat/status text расходится с repository state, Controller опирается на repository evidence и явно отмечает расхождение.

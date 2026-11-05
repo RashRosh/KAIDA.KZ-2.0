@@ -26,8 +26,9 @@ test('a known Product without Offers and an unknown query show their own state, 
   await expect(status).toContainText('Ничего не найдено по запросу «единорог»');
   await expect(status).toContainText('Проверьте написание');
   await expect(status).not.toContainText('каталоге KAIDA');
-  // nothing about notifications, favourites or typo suggestions
-  await expect(page.getByText(/Сообщить|уведом|Возможно, вы ищете|Избранное/i)).toHaveCount(0);
+  // No new empty-state CTA; existing Favourites now has a normal navigation destination in B03.
+  await expect(page.getByRole('main').getByText(/Сообщить|уведом|Возможно, вы ищете|Избранное/i)).toHaveCount(0);
+  await expect(page.getByRole('navigation').getByRole('link', {name:'Избранное',exact:true})).toBeVisible();
 });
 
 test('the same states in Kazakh', async ({ page }) => {

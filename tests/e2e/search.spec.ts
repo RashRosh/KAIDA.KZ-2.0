@@ -36,8 +36,9 @@ test('lamb: search by the arrow, full offer, responsive layout and refresh', asy
   await expect(seedCard).toContainText(/4\s200\s₸\s\/\sкг/);
   await expect(seedCard).toContainText('Тестовая мясная точка');
   await expect(seedCard).toContainText('Алматы, Зелёный базар, тестовый павильон 12');
-  // B01: the seller and the comment are on the offer page, not on the result card.
-  await expect(seedCard).not.toContainText('Асыл Ет, тестовый продавец');
+  // New B03 exposes the existing Seller caption; the full comment stays on the Offer page.
+  await expect(seedCard).toContainText('Асыл Ет, тестовый продавец');
+  await expect(seedCard).not.toContainText('Свежий привоз.');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await testInfo.attach('lamb-offer', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
   await seedCard.getByRole('link', { name: 'Баранина', exact: true }).click();
@@ -50,14 +51,18 @@ test('lamb: search by the arrow, full offer, responsive layout and refresh', asy
   await expect(seedCard.getByRole('heading', { name: 'Баранина', exact: true })).toBeVisible();
 });
 
-test('popular shortcut under an empty result executes the same real Search flow', async ({ page }) => {
+test('editing an empty result executes the same real Search flow', async ({ page }) => {
   await page.goto('/');
-  // The start page carries the example instead of the shortcuts; they wait under a result with nothing in it.
+  // B03 omits result chips; the existing edit action starts the next deliberate search.
   await page.getByLabel('Какой товар ищете?').fill('единорог');
   await page.getByLabel('Какой товар ищете?').press('Enter');
   await expect(page.getByRole('status')).toContainText('Ничего не найдено по запросу');
+  await expect(page.getByRole('group', { name: 'Популярные запросы' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Изменить запрос', exact: true }).click();
+  await expect(page.getByRole('searchbox')).toBeFocused();
+  await page.getByRole('searchbox').fill('Баранина');
   const responsePromise = page.waitForResponse((response) => response.url().includes('/api/search?'));
-  await page.getByRole('group', { name: 'Популярные запросы' }).getByRole('button', { name: 'Баранина', exact: true }).click();
+  await page.getByRole('searchbox').press('Enter');
   const response = await responsePromise;
   expect(response.status()).toBe(200);
   await expect(page.getByLabel('Какой товар ищете?')).toHaveValue('Баранина');
