@@ -34,7 +34,7 @@ SearchOffer получает optional lastConfirmedAt ISO из существу�
 1. B03: search52, padding16, gap10, cards radius14/photo104; title Roboto40015/20, price Geologica70022/26, basis13/18, point50014/20, address13/18; footer44 и четыре nav. Цвета/SVG paths берутся из нового источника.
 2. Сердце находится в правом верхнем углу фото; сохранение/удаление/ошибка/повтор/вход работают без открытия Offer. После выхода чужие сохранения не видны.
 3. Давность использует реальное время подтверждения, минуты/часы/дни и пятицветную шкалу источника, со значком и доступным именем. Eligibility/ranking не зависят от новой визуальной шкалы.
-4. Count и sort в одной области, normal trigger с funnel/chevron; denied variant с outline/up-down. Меню56px, enter/exit120ms с исходными кривыми; focus/Escape/outside/reopen/reduced-motion работают.
+4. Count и sort в одной области, trigger с funnel/chevron и счётчик «Найдено N» одинаковы во всех состояниях (решение PO 2026-11-05: отдельный denied variant B04 с outline/up-down и «Найдено N предложений» не используется). Меню56px, enter/exit120ms с исходными кривыми; focus/Escape/outside/reopen/reduced-motion работают.
 5. B04 denied notice над toolbar, заголовок/текст/Retry соответствуют источнику; запрос geo только по действию пользователя. Кнопка маршрута показывает расстояние только при наличии текущего distanceMeters, иначе «Маршрут».
 6. Loading повторяет форму B03 skeletons; correction над toolbar и ссылка typed-search сохраняет смысл/URL; error/empty сохраняют закрытые действия, честно отделяя адаптации поведения от визуального совпадения.
 7. Offer/Back, повторный запрос, сортировка, цены/упаковка и verified contacts сохраняют прежнюю бизнес-логику; прямое действие не открывает карточку.

@@ -30,7 +30,7 @@ Next: revise same D2 contract around these explicit findings; resolve only genui
 | Place/seller | Точка14/20 medium/dark, адрес+продавец13/18 rem, single-line ellipsis; полный DOM/title;200% проверяет readability suite |
 | Freshness | Реальные lastConfirmedAt, 2ч/3дня/40мин/1день в фиксированной fixture; leaf SVG и5цветов из source; source timestamp не влияет на eligibility |
 | Footer/nav | Контакты44, route44/radius14/distance when known;4nav с Favourites и More dots; часы остаются на Offer |
-| Geo denied | Panel надtoolbar, exacttitle/body/NBSP/Retry; outline up-down trigger14/20; исправлена обрезка trigger; menu320 в viewport; навигация имеет видимую геометрию внизу |
+| Geo denied | Panel надtoolbar, exacttitle/body/NBSP/Retry; trigger и счётчик как в normal (решение PO 2026-11-05 при приёмке: один вариант сортировки на экране, намеренное отличие от B04); menu320 в viewport; навигация имеет видимую геометрию внизу |
 | Loading | Четыре source-shaped skeletons, toolbar/spacer18, исходные ширины текстовых полос, круги контактов и route placeholder; pulse1400 и reduced-motion |
 | Correction | Banner надtoolbar, source copy/typed link, прежняя typed семантика; обе locale проверяются |
 

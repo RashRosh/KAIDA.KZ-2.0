@@ -504,8 +504,8 @@ export function SearchScreen() {
           </div>
         )}
         {visibleOffers.length > 0 && <div className={design.orderRow}>
-          <span aria-hidden="true" className={design.count}>{distanceNotice ? offerCount(locale, visibleOffers.length) : t('search.foundCount', { count: visibleOffers.length })}</span>
-          <SortControl align="end" denied={distanceNotice} sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
+          <span aria-hidden="true" className={design.count}>{t('search.foundCount', { count: visibleOffers.length })}</span>
+          <SortControl align="end" sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
         </div>}
         {loading && visibleOffers.length === 0 && <div className={design.orderRow} aria-hidden="true"><span className="sk" style={{width:140,height:14}} /><span className="sk" style={{width:130,height:20}} /></div>}
         {/* One persistent live region: the empty-state title and hint (search-empty-states) or the count line. */}
