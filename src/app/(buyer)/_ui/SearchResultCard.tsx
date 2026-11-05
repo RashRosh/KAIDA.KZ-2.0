@@ -15,7 +15,8 @@ import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
 import { SearchIcon } from './SearchIcon';
 import styles from './search-results.module.css';
 
-function ConfirmationBadge({ offer }: { offer: SearchOffer }) {
+// Shared with the Offer page (D3), which draws the same scale as a pill under the price.
+export function ConfirmationBadge({ offer, className = styles.confirmation }: { offer: SearchOffer; className?: string }) {
   const { locale, t } = useI18n();
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -32,7 +33,7 @@ function ConfirmationBadge({ offer }: { offer: SearchOffer }) {
   const days = hours === null ? offer.actuality.days : Math.floor(hours / 24);
   const label = minutes === null ? actualityText(days, t) : minutes < 60 ? `${minutes} мин` : hours! < 24 ? `${hours} ${locale === 'ru' ? 'ч' : 'сағ'}` : t(`actuality.days.${pluralForm(days)}` as MessageKey, { count: days });
   const tier = hours !== null && hours < 3 ? 1 : days === 0 ? 2 : days < 3 ? 3 : days < 7 ? 4 : 5;
-  return <span className={styles.confirmation} data-tier={tier} role="img" aria-label={t('actuality.label', { when: label })}><SearchIcon name="leaf" />{label}</span>;
+  return <span className={className} data-tier={tier} role="img" aria-label={t('actuality.label', { when: label })}><SearchIcon name="leaf" />{label}</span>;
 }
 
 export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: React.ReactNode }) {

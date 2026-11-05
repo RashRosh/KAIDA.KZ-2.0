@@ -12,7 +12,7 @@ import { resultCard, setLocaleCookie } from './buyer-helpers';
 
 const INK2 = 'rgb(97, 91, 100)';
 const INK3 = 'rgb(110, 104, 113)';
-const SEARCH_INK2 = 'rgb(91, 64, 106)'; // New baseline; Offer/Favourites remain on the legacy palette.
+const SEARCH_INK2 = 'rgb(91, 64, 106)'; // New baseline (Search, Offer); Favourites remain on the legacy palette.
 const LONG_POINT = 'Павильон «Мясо, молочные продукты и мёд от фермерского хозяйства Жаксылык»';
 const LONG_ADDRESS = 'Алматы, ул. Райымбека батыра, 351/1, торговый центр «Алтын Орда», второй этаж, павильон 12, ряд 4, место 31';
 const LONG_SELLER = 'Ержан Абдрахманович Жаксылыков и сыновья';
@@ -127,15 +127,16 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     const seller = page.getByTestId('offer-seller');
     await expect(address).toHaveText(LONG_ADDRESS);
     await expect(seller).toHaveText(LONG_SELLER);
-    await expectReadable(address);
-    await expectReadable(seller);
+    // D3 · B08: the address is the 13/18 caption and the seller the 14/20 label of the new baseline, both in rem.
+    await expectReadable(address, '13px', '18px', SEARCH_INK2);
+    await expectReadable(seller, '14px', '20px', 'rgb(31, 16, 38)');
     expect(await page.getByTestId('opening-hours').evaluate((element) => getComputedStyle(element).fontSize)).toBe('13px');
     await expectUsable(page);
     await address.scrollIntoViewIfNeeded();
     await shot('offer-360-ru');
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
-    await expectReadable(address, '28px', '40px');
-    await expectReadable(seller, '28px', '40px');
+    await expectReadable(address, '26px', '36px', SEARCH_INK2);
+    await expectReadable(seller, '28px', '40px', 'rgb(31, 16, 38)');
     for (const width of [360, 320]) {
       await page.setViewportSize({ width, height: 800 });
       await expectUsable(page);
@@ -152,7 +153,7 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
     await expectUsable(page);
     await page.goto(`/offers/${offerId}`);
-    await expectReadable(page.getByTestId('offer-seller'));
+    await expectReadable(page.getByTestId('offer-seller'), '14px', '20px', 'rgb(31, 16, 38)');
     await expectUsable(page);
     await setLocaleCookie(page.context(), 'ru');
 

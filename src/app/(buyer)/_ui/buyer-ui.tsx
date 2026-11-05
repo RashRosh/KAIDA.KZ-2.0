@@ -72,8 +72,10 @@ export function BuyerNav({ active, modern = false }: { active: BuyerSection; mod
   );
 }
 
-export function BuyerScreen({ section, top, children, overlay, className }: {
+export function BuyerScreen({ section, top, children, overlay, className, nav = true }: {
   className?: string;
+  // D3: the Offer page (B08) has no bottom navigation; the way back is the arrow in its top bar.
+  nav?: boolean;
   section: BuyerSection;
   top?: React.ReactNode;
   children: React.ReactNode;
@@ -83,7 +85,7 @@ export function BuyerScreen({ section, top, children, overlay, className }: {
     <Phone>
       {top}
       {children}
-      <BuyerNav active={section} modern={Boolean(className)} />
+      {nav && <BuyerNav active={section} modern={Boolean(className)} />}
       {overlay}
     </Phone>
   );

@@ -102,7 +102,7 @@ export function CardPreviewScreen({ state, onClose, onRetry, onPublish, onComple
       />
       {status}
       <main className="body np" style={{ gap: 0 }} data-testid="card-preview">
-        <OfferDetails offer={page.offer} back={null} inert scheduleLabel={t('preview.showSchedule')} />
+        <OfferDetails offer={page.offer} inert scheduleLabel={t('preview.showSchedule')} />
       </main>
       {foot}
     </Phone>

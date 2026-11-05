@@ -102,7 +102,7 @@ test('the preview from the editor: new card, several points, edit; private, iner
     await schedule.locator('summary').click();
     await expect(schedule).toHaveAttribute('open', '');
     await expect(page.getByTestId('preview-actions')).toContainText('кнопки связи');
-    await expect(page.getByTestId('card-preview').getByRole('heading', { level: 1 })).toHaveText(`Предпросмотр новая ${tag}`);
+    await expect(page.getByTestId('card-preview').locator('#offer-title')).toHaveText(`Предпросмотр новая ${tag}`);
     await expect(page.getByTestId('card-preview')).toContainText('Свежая партия');
     await expect(page.getByTestId('card-preview').getByText(/1\s?200\s?₸/).first()).toBeVisible();
     await expect(page.getByTestId('offer-actions-inert')).toHaveAttribute('aria-disabled', 'true');
@@ -135,7 +135,7 @@ test('the preview from the editor: new card, several points, edit; private, iner
     await expect(rows).toHaveCount(2);
     await expect(rows.first()).toContainText(/1\s?200\s?₸/);
     await rows.nth(1).click();
-    await expect(page.getByTestId('card-preview').getByRole('heading', { level: 1 })).toHaveText(`Предпросмотр новая ${tag}`);
+    await expect(page.getByTestId('card-preview').locator('#offer-title')).toHaveText(`Предпросмотр новая ${tag}`);
     await page.getByRole('button', { name: 'К списку точек' }).first().click();
     await expect(rows).toHaveCount(2);
     await page.getByRole('button', { name: 'Вернуться к редактированию' }).first().click();
@@ -163,7 +163,7 @@ test('the preview from the editor: new card, several points, edit; private, iner
 
     // the synthetic id has no address of its own
     await page.goto('/offers/preview:0');
-    await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Предложение недоступно' })).toBeVisible();
 
     // edit of a published card: the note says buyers still see the old version; the new price is shown, the real page is unchanged
     await page.goto(`/seller?card=${existing.card}`);

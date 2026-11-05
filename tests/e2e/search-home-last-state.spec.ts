@@ -96,11 +96,12 @@ test('«Поиск» reopens the last search with fresh results after Рядом
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(0);
   }
 
-  // From an Offer page.
+  // From an Offer page: D3 (B08) has no bottom navigation there, the way back is the arrow in its top bar.
   await page.getByRole('article').first().getByRole('link').first().click();
   await expect(page).toHaveURL(/\/offers\//);
+  await expect(page.getByRole('navigation')).toHaveCount(0);
   const again = page.waitForRequest((r) => new URL(r.url()).pathname === '/api/search');
-  await nav(page, 'Поиск').click();
+  await page.getByRole('link', { name: 'Назад' }).click();
   await again;
   await expect(page.getByRole('article').first()).toBeVisible();
   await expect(field(page)).toHaveValue('Баранина');

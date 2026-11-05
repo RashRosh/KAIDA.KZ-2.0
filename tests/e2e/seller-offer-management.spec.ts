@@ -84,7 +84,7 @@ async function search(page: import('@playwright/test').Page) {
 // B01 has no seller comment: the buyer reads it on the offer page.
 async function expectBuyerComment(page: import('@playwright/test').Page, card: import('@playwright/test').Locator, comment: string, absent?: string) {
   await openOffer(card, 'Баранина');
-  await expect(page.getByTestId('offer-comment')).toHaveText(comment);
+  await expect(page.getByTestId('offer-comment').getByText(comment, { exact: true })).toBeVisible();
   if (absent) await expect(page.getByText(absent, { exact: true })).toHaveCount(0);
 }
 

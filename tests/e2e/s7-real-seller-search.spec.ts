@@ -194,7 +194,7 @@ test('S7 buyer finds the exact buyer-eligible Seller-created Offer through canon
     // B02: the seller and the comment are on the offer page.
     await openOffer(sellerOfferCard, 'мясо барана');
     await expect(buyerPage.getByText(sellerName, { exact: true })).toBeVisible();
-    await expect(buyerPage.getByTestId('offer-comment')).toHaveText(sellerComment);
+    await expect(buyerPage.getByTestId('offer-comment').getByText(sellerComment, { exact: true })).toBeVisible();
 
     // seller-showcase-editor: switching a point off lives on the card screen of «Моя витрина».
     await sellerPage.goto('/seller');

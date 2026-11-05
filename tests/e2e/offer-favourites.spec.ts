@@ -138,7 +138,7 @@ test('list login never adds; Offer expiring during heart login is not saved; lis
     const secondCode=await enterPhone('+77000280411');
     await pool.query("UPDATE offers SET last_confirmed_at=now()-interval '169 hours' WHERE id=$1",[offer]);
     await page.getByLabel('Код из 6 цифр',{exact:true}).fill(secondCode);await page.getByRole('dialog').getByRole('button',{name:'Войти',exact:true}).click();
-    await expect(page.getByText('Предложение больше недоступно',{exact:true})).toBeVisible();await page.getByRole('link',{name:'Назад в избранное'}).click();
+    await expect(page.getByText('Предложение недоступно',{exact:true})).toBeVisible();await page.getByRole('link',{name:'Назад в избранное'}).click();
     expect((await pool.query('SELECT * FROM buyer_offer_favourites WHERE offer_id=$1',[offer])).rows).toHaveLength(0);
     // Successful login has no saved target after server-side eligibility revalidation.
     await page.goto('/favourites');
@@ -152,7 +152,7 @@ test('detail actions retain touch targets and wrap at narrow widths and enlarged
   test.skip(info.project.name !== 'mobile', 'Approved mobile RU boundary');
   await page.goto('/offers/' + seedIds.lambOffer);
   const heart = page.getByTestId('favourite-heart');
-  const report = page.getByRole('button', { name: 'Пожаловаться', exact: true });
+  const report = page.getByRole('button', { name: 'Пожаловаться на карточку', exact: true });
   const tracking = page.getByRole('button', { name: 'Отслеживать товар', exact: true });
   await expect(heart).toHaveAccessibleName('Добавить в избранное');
   await expect(tracking).toBeEnabled();
@@ -163,15 +163,15 @@ test('detail actions retain touch targets and wrap at narrow widths and enlarged
       expect(box!.width).toBeGreaterThanOrEqual(44);
       expect(box!.height).toBeGreaterThanOrEqual(44);
     }
-    const layout = await page.locator('.offer-text-actions').evaluate(el => {
+    const layout = await page.getByTestId('offer-links').evaluate(el => {
       const boxes = [...el.querySelectorAll('button')].map(button => button.getBoundingClientRect());
       return { overflow: el.scrollWidth > el.clientWidth, wraps: boxes[1]!.top > boxes[0]!.top };
     });
     expect(layout.overflow).toBe(false);
     if (width === 320) expect(layout.wraps).toBe(true);
   }
-  await page.addStyleTag({ content: '.kaida .offer-text-action{font-size:28px;line-height:40px}' });
-  const enlarged = await page.locator('.offer-text-actions').evaluate(el => ({ overflow: el.scrollWidth > el.clientWidth, buttons: [...el.querySelectorAll('button')].map(button => ({height:button.getBoundingClientRect().height, font:parseFloat(getComputedStyle(button).fontSize)})) }));
+  await page.addStyleTag({ content: '[data-testid="offer-links"] button{font-size:28px;line-height:40px}' });
+  const enlarged = await page.getByTestId('offer-links').evaluate(el => ({ overflow: el.scrollWidth > el.clientWidth, buttons: [...el.querySelectorAll('button')].map(button => ({height:button.getBoundingClientRect().height, font:parseFloat(getComputedStyle(button).fontSize)})) }));
   expect(enlarged.overflow).toBe(false);
   for (const action of enlarged.buttons) { expect(action.height).toBeGreaterThanOrEqual(44); expect(action.font).toBe(28); }
   await report.click();

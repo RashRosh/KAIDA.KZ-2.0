@@ -133,7 +133,7 @@ test('Seller adds photos, makes the second the cover and publishes; Buyer opens 
     // The photo is public now; a direct open of an unknown Offer page is neutral.
     expect((await page.request.get(`/media/photos/${photoIds[0]}/display`)).status()).toBe(200);
     await page.goto('/offers/00000000-0000-4000-8000-000000000000');
-    await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Предложение недоступно' })).toBeVisible();
   } finally {
     await cleanup(phone);
   }
