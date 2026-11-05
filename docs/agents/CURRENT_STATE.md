@@ -1,26 +1,23 @@
-# Current state — передача D2 (2026-11-05)
+# Current state — после закрытия D2 (2026-11-05)
 
 ## Current task
 
-- Миграция дизайна: реализована только выдача поиска D2. Ждём ручную приёмку PO; следующий экран не выбран.
-- Продолжать из ветки `slice/design-baseline-search-sort`, [draft PR207](https://github.com/RashRosh/KAIDA.KZ-2.0/pull/207). В main этих изменений ещё нет.
-- Main: `a0b6fb159a76ffb899ae47daee69d0d30ffb893e`. Последний checkpoint: annotated `v0.0.86-text-switch-on` → `dcd26adba9fe124a37a800df047810d6b30ae481`; remote refs проверены. S-TEXT-SWITCH-ON повторно не реализовывать.
-- Проверенный runtime D2: `dc3d6ecb2143ed08dc9377bd9caa26d27b938966`. Текущий follow-up меняет только документацию; код тот же.
+- Миграция дизайна: D2 (цельная выдача поиска) **закрыт**. Следующий экран не выбран.
+- Main: `7cb100cc7a66c0659ebf319f59d360cbf597d815` (merge PR #207). Checkpoint: annotated `v0.0.87-design-search` → этот commit. Проверить `git ls-remote --tags origin v0.0.87-design-search`: облачная сессия не смогла отправить tag (push тегов закрыт прокси), его отправляет PO.
+- Предыдущий checkpoint `v0.0.86-text-switch-on` → `dcd26adb…`; S-TEXT-SWITCH-ON повторно не реализовывать.
 
 ## Last completed / verification
 
-- Выдача B03/B04: карточки, hearts через существующий favourites flow,4nav, typography/SVG/spacing, реальная давность, сортировка, geo/loading/error/correction. [Контракт](../slices/design-search-sort/SLICE_CONTRACT.md), [визуальная сверка и адаптации](../slices/design-search-sort/VISUAL_REVIEW.md).
-- [Полный CI42004819351](https://github.com/RashRosh/KAIDA.KZ-2.0/actions/runs/42004819351) SUCCESS: lint/types/migrations/seed/build;731unit,435integration,343E2E PASS,73намеренных project skips. CodeQL42004819048 / dependency42004819159 SUCCESS. Локальные targeted54 и final motion/state6 PASS. Прежние падения не являются текущими blockers.
-- Сверены normal/denied/loading/error/correction, размеры, press/reduced-motion и реальный preview. Это проверка агента, не приёмка PO. Merge/tag D2 и deploy не выполнялись.
-- Единственная визуальная authority — два Artifact в [DESIGN_BASELINE](../product/DESIGN_BASELINE.md). Старые visual targets superseded, продуктовые contracts сохранены. Полный аудит87досок/91файла ещё НЕ завершён: [точное покрытие](../product/DESIGN_SOURCE_AUDIT.md).
-- `/welcome` полностью отложен PO; стрелку при вводе сохранить. [Заметка](../slices/design-first-entry/SLICE_CONTRACT.md). Home/Nearby/Offer/Favourites/Seller/Operator целиком не мигрированы.
+- D2: выдача B03/B04 — карточки, hearts через существующий favourites flow, 4 nav, реальная давность, сортировка, geo/loading/error/correction. [Контракт](../slices/design-search-sort/SLICE_CONTRACT.md), [визуальная сверка](../slices/design-search-sort/VISUAL_REVIEW.md).
+- Приёмка PO 2026-11-05 по скриншотам пяти состояний (360 px) с правкой: trigger сортировки и счётчик одинаковы во всех состояниях (вариант B04 outline/up-down убран, da09685).
+- Branch CI 42080515695 success; merged-main CI: verify 42083058297, CodeQL 42083058370 success.
+- Единственная визуальная authority — два Artifact в [DESIGN_BASELINE](../product/DESIGN_BASELINE.md). Полный аудит 87 досок/91 файла ещё НЕ завершён: [покрытие](../product/DESIGN_SOURCE_AUDIT.md).
+- `/welcome` (D1) отложен PO целиком; стрелку при вводе сохранить. Home/Nearby/Offer/Favourites/Seller/Operator не мигрированы.
 
 ## Next action
 
-1. Сверить ветку/PR/CI с этим snapshot; не начинать заново перенос выдачи.
-2. Получить ручную приёмку PO по сценарию D2 целиком. Если замечания — исправить этот же slice и выполнить необходимые проверки.
-3. После приёмки и поручения PO: diff audit → merge → merged-main CI → annotated checkpoint по PROJECT_RULES. До этого следующий slice не начинать.
-4. Перед дальнейшей миграцией завершить аудит источников и согласовать с PO следующий цельный экран; составить его Slice Contract. Порядок принадлежит только [EXECUTION_PLAN](../product/EXECUTION_PLAN.md). Не выбирать экран по старому ТЗ или номеру Sxx. Конфликт закрытого поведения — STOP с объяснением.
+1. Убедиться, что tag `v0.0.87-design-search` есть на origin.
+2. Завершить аудит источников и согласовать с PO следующий цельный экран; составить его Slice Contract. Порядок — только [EXECUTION_PLAN](../product/EXECUTION_PLAN.md). Конфликт закрытого поведения — STOP с объяснением.
 
 ## Администратору / перенос среды
 
