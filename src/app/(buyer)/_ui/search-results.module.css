@@ -3,6 +3,7 @@
   --bg:#faf3fe; --surface:#fdfbff; --raised:#fdfbff; --sunken:#f4e9fb;
   --line:#e9d9f2; --line-control:#9073a0; --ink:#1f1026; --ink2:#5b406a; --ink3:#745784;
   --text:#1f1026; --muted:#745784; --danger:#b21f41; --danger-soft:#ffeced;
+  --ease-out:cubic-bezier(.33,1,.68,1); --ease-in:cubic-bezier(.32,0,.67,0);
   background:var(--bg); font:400 15px/22px Roboto,Geologica,system-ui,sans-serif;
 }
 .screen :global(.kaida.kaida-app > .ph) { max-width:720px; }
@@ -35,7 +36,9 @@
 .screen .resultCard .heart { position:absolute; z-index:2; top:0; right:0; padding:0; width:44px; height:44px; border:0; background:transparent; color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer; }
 .heart::before { content:''; position:absolute; inset:5px; background:var(--surface); border-radius:14px; }
 .heart > svg { position:relative; }
+.screen .heart { transition:background-color 100ms var(--ease-out),color 100ms var(--ease-out),transform 100ms var(--ease-out); }
 .screen .heart[aria-pressed='true'] { color:var(--primary); }
+.screen .heart[data-error='true'] { color:var(--danger); }
 .heart[aria-busy='true'] svg { opacity:.45; }
 .screen .confirmation { position:absolute; bottom:6px; left:6px; display:inline-flex; align-items:center; gap:3px; border-radius:999px; padding:2px 7px 2px 5px; font:500 12px/16px var(--sans); color:white; background:#007950; }
 .confirmation svg { width:14px; height:14px; }
@@ -51,7 +54,7 @@
 .screen :global(.nav a) { color:var(--ink2); }
 .screen :global(.nav a.on) { color:var(--ink); font-weight:700; }
 .screen :global(.nav .on)::before { display:none; }
-.screen [data-part='nav-pill'] { width:56px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:14px; }
+.screen [data-part='nav-pill'] { width:56px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:14px; transition:background-color 100ms var(--ease-out),color 100ms var(--ease-out),transform 100ms var(--ease-out); }
 .screen :global(.nav a.on) [data-part='nav-pill'] { background:var(--primary-soft); color:var(--primary); }
 .screen :global(.btn) { border-radius:14px; }
 .screen :global(.h3) { font-weight:400; }
@@ -60,8 +63,12 @@
 @media (min-width:600px) { .screen .header { padding-left:24px; padding-right:24px; } .screen .results { padding-left:24px; padding-right:24px; } }
 @media (max-width:359px) { .screen .orderRow { flex-wrap:wrap; } }
 @media (hover:hover) and (pointer:fine) { .contact:hover, .route:hover { background:var(--sunken); color:var(--ink); } }
-@media (prefers-reduced-motion:no-preference) { .heart:active svg { transform:scale(.88); } .contact:active,.route:active { transform:scale(.97); } }
-@media (prefers-reduced-motion:reduce) { .screen :global(.kaida.motion) :is(a,button,.sk) { animation:none; transition:none; transform:none; } }
+.screen :global(.kaida.motion .nav a:active) { transform:none; }
+@media (prefers-reduced-motion:no-preference) {
+  .screen .heart:not(:disabled):active,.contact:active,.route:active { transform:scale(.97); }
+  .screen :global(.nav a:active) [data-part='nav-pill'] { transform:scale(.94); }
+}
+@media (prefers-reduced-motion:reduce) { .screen :global(.kaida.motion) :is(a,button,.sk,[data-part='nav-pill']) { animation:none; transition:none; transform:none; } }
 .heart[aria-busy='true']::after { content:''; position:absolute; width:22px; height:22px; border:2.5px solid var(--line); border-top-color:var(--primary); border-radius:50%; animation:spin 800ms linear infinite; }
 .heart[aria-busy='true'] svg { visibility:hidden; }
 .heart[data-error='true']::after { content:'!'; position:absolute; right:5px; top:5px; width:16px; height:16px; border-radius:50%; background:var(--danger); color:white; font:700 12px/16px var(--sans); }

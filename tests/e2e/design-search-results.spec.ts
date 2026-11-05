@@ -119,3 +119,24 @@ test('B03 loading/error/retry/correction: matching state screenshots and the cor
   expect((await link.boundingBox())!.y).toBeLessThan((await order.boundingBox())!.y);
   await page.screenshot({path:info.outputPath('B03-correction-360.png'),animations:'disabled'});
 });
+
+test('source press feedback: whole heart97%, nav pill94%, reduced motion has no scaling', async ({page}, info) => {
+  test.skip(info.project.name !== 'mobile', 'One source-motion check is enough.');
+  await page.goto('/?q=Баранина');
+  const heart=page.getByTestId('favourite-heart').first();
+  await expect(heart).toBeEnabled();
+  const nav=page.getByRole('navigation').getByRole('link',{name:'Поиск',exact:true});
+  const pill=nav.locator('[data-part="nav-pill"]');
+  for(const reduced of [false,true]) {
+    await page.emulateMedia({reducedMotion:reduced?'reduce':'no-preference'});
+    for(const [target,visual,scale] of [[heart,heart,.97],[nav,pill,.94]] as const) {
+      const box=(await target.boundingBox())!;
+      await page.mouse.move(box.x+box.width/2,box.y+box.height/2); await page.mouse.down();
+      await expect.poll(()=>visual.evaluate(el=>getComputedStyle(el).transform)).toBe(reduced?'none':`matrix(${scale}, 0, 0, ${scale}, 0, 0)`);
+      if(target===heart) expect(await heart.locator('svg').evaluate(el=>getComputedStyle(el).transform)).toBe('none');
+      else expect(await nav.evaluate(el=>getComputedStyle(el).transform)).toBe('none');
+      await page.mouse.move(0,0); await page.mouse.up();
+    }
+  }
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
