@@ -36,11 +36,16 @@
 
 Если PO просит `Проверь <slice>`, `Запусти KAIDA Controller`, проверить contract, diff, readiness к manual acceptance/merge/checkpoint — прочитай `docs/agents/KAIDA_CONTROLLER.md`. Controller не проектирует и не реализует slice, он проверяет exact repository evidence и даёт gate verdict.
 
+## Скиллы исполнителя
+
+Когда реализуешь поведение из Slice Contract и пишешь тесты, прочитай `.agents/skills/tdd/SKILL.md`. Когда что-то сломано, падает или тормозит и причина не очевидна, прочитай `.agents/skills/diagnosing-bugs/SKILL.md`. Это способы работы внутри процесса `PROJECT_RULES.md`, а не его замена; при расхождении правила проекта сильнее.
+
 Не создавай параллельный roadmap или второй набор инструкций без объективной необходимости: у каждого типа информации один владелец (`PROJECT_RULES.md` §2).
 
 ## Git и среда
 
-- Product Owner — нетехнический, пишет по-русски. Commit, push, PR, merge, tag — только по его прямому поручению.
+- Product Owner — нетехнический, пишет по-русски. Commit, push, PR и tag — только по его прямому поручению.
+- Merge агент делает сам, без отдельной команды, когда PR прошёл весь gate по `PROJECT_RULES.md` §6: зелёный branch CI на финальном head, нет конфликтов, для product slice — manual acceptance PO и положительный verdict KAIDA Controller. Если хоть что-то из этого не выполнено, merge не делать.
 - Никогда не коммитить личные файлы PO: `docs/reviews/localization-foundation-kk-review.docx`, `scripts/`, `tmp/`, `.vscode/`. Идентификаторы моделей в коммиты и документы не писать.
 - Облачный контейнер: `dockerd` запускать вручную, затем `docker compose up -d --wait`; `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:test:prepare` (пересоздаёт тестовую БД). E2E идёт на production build (`pnpm build`, затем `pnpm test:e2e`; серверы 3100/3101). Integration с `ECONNREFUSED 5432` = БД не запущена. Операционные процедуры — `docs/ops/`.
 
