@@ -1,5 +1,5 @@
-/* Ported verbatim from the accepted mockup (docs/product/mockup/seller-ai-first-rev1/kaida.css), scoped to .kaida;
-   icons are the mockup's own files under /kaida/icons. Do not restyle here: change the mockup first. */
+/* Legacy runtime stylesheet, scoped to .kaida; historical icons live under /kaida/icons.
+   Visual authority is docs/product/DESIGN_BASELINE.md; migrate through scoped slices. */
 /* KAIDA · AI-first seller concept — shared styles. Tokens = KAIDA design system (light theme). */
 .kaida{
   --bg:#faf8fb;--surface:#ffffff;--raised:#ffffff;--sunken:#f4f1f6;--line:#e8e4eb;--line-control:#8b858e;
