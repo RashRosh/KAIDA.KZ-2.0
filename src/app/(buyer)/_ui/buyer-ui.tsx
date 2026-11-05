@@ -14,6 +14,7 @@ import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
 import { OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { Ic, Phone } from '../../seller/_kaida/ui';
 import lines from './buyer-lines.module.css';
+import { SearchIcon, type SearchIconName } from './SearchIcon';
 
 // Shared runtime frame/card. New visual authority: docs/product/DESIGN_BASELINE.md.
 // Optional presentation hooks let Search migrate without changing other buyer surfaces.
@@ -23,10 +24,11 @@ export const NEARBY_NAV_INTENT_KEY = 'kaida:nearby-nav-intent';
 // A result card opens the offer page by a client-side transition, which leaves document.referrer empty; this flag
 // (reset by any full page load) tells the offer page that Back returns to the list it came from.
 let openedFromList = false;
+export function markBuyerOfferOpened() { openedFromList = true; }
 export function cameFromList() {
   return openedFromList;
 }
-export type BuyerSection = 'search' | 'nearby' | 'more';
+export type BuyerSection = 'search' | 'nearby' | 'more' | 'favourites';
 
 // «Рядом» from the navigation starts locating at once (UX1C); a modified click just opens the page.
 export function markNearbyIntent(event: MouseEvent<HTMLAnchorElement>) {
@@ -50,7 +52,8 @@ export function BuyerNav({ active, modern = false }: { active: BuyerSection; mod
   const items: { key: BuyerSection; href: string; icon: string; label: string }[] = [
     { key: 'search', href: searchHref, icon: 'search', label: t('nav.search') },
     { key: 'nearby', href: '/nearby', icon: 'pin', label: t('nav.nearby') },
-    { key: 'more', href: '/more', icon: 'menu', label: t('buyer.more') },
+    ...(modern ? [{ key: 'favourites' as const, href: '/favourites', icon: 'heart', label: t('fav.title') }] : []),
+    { key: 'more', href: '/more', icon: modern ? 'more' : 'menu', label: t('buyer.more') },
   ];
   return (
     <nav className="nav" aria-label={t('nav.main')}>
@@ -62,7 +65,7 @@ export function BuyerNav({ active, modern = false }: { active: BuyerSection; mod
           aria-current={active === item.key ? 'page' : undefined}
           onClick={item.key === 'nearby' ? markNearbyIntent : undefined}
         >
-          {modern ? <span data-part="nav-pill"><Ic name={item.icon} /></span> : <Ic name={item.icon} />}{item.label}
+          {modern ? <span data-part="nav-pill"><SearchIcon name={item.icon as SearchIconName} /></span> : <Ic name={item.icon} />}{item.label}
         </Link>
       ))}
     </nav>

@@ -14,15 +14,16 @@ const arrowOf = (direction: SearchSortDirection) => (direction === 'asc' ? '↑'
 const opposite = (direction: SearchSortDirection): SearchSortDirection => (direction === 'asc' ? 'desc' : 'asc');
 
 // Exact paths from the new B04 canvas; no shared legacy icon changes.
-function SortIcon({ chevron = false }: { chevron?: boolean }) {
+function SortIcon({ chevron = false, denied = false }: { chevron?: boolean; denied?: boolean }) {
   return (
     <svg className={chevron ? styles.chevron : styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={chevron ? 'M6 9l6 6 6-6' : 'M4 5h16l-6 8v5l-4 2v-7z'} />
+      <path d={chevron ? 'M6 9l6 6 6-6' : denied ? 'M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4' : 'M4 5h16l-6 8v5l-4 2v-7z'} />
     </svg>
   );
 }
 
-export function SortControl({ sort, direction, busy, disabled, onChoose, onReset, align = 'start' }: {
+export function SortControl({ sort, direction, busy, disabled, onChoose, onReset, align = 'start', denied = false }: {
+  denied?: boolean;
   align?: 'start' | 'end';
   sort: SearchSortMode;
   direction: SearchSortDirection;
@@ -92,7 +93,7 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
   }
 
   return (
-    <div ref={root} className={styles.root} data-motion={motion} data-align={align}>
+    <div ref={root} className={styles.root} data-motion={motion} data-align={align} data-variant={denied ? 'denied' : 'normal'}>
       <button
         ref={trigger}
         type="button"
@@ -109,12 +110,12 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
           setOpen(true);
         }}
       >
-        <SortIcon />
+        <SortIcon denied={denied} />
         <span className={styles.label}>
           {explicit ? criterionName(sort) : t('search.criterion.default')}
         </span>
         {explicit && <b aria-hidden="true" className={styles.arrow}>{arrowOf(direction)}</b>}
-        <SortIcon chevron />
+        {!denied && <SortIcon chevron />}
       </button>
       {mounted && (
         <div

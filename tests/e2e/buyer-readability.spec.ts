@@ -37,11 +37,11 @@ async function expectReadable(locator: Locator, size = '14px', line = '20px', co
 async function expectUsable(page: Page) {
   const report = await page.evaluate(() => {
     const lines = [...document.querySelectorAll<HTMLElement>('[data-testid="card-point"], [data-testid="card-place"], [data-testid="offer-address"], [data-testid="offer-seller"], [data-testid="unavailable-line"]')];
-    const actions = [...document.querySelectorAll<HTMLElement>('article .ct, [data-testid="favourite-heart"]')];
+    const actions = [...document.querySelectorAll<HTMLElement>('article a[target], article a[href^="tel:"], [data-testid="favourite-heart"]')];
     const vw = window.innerWidth;
     return {
       page: document.documentElement.scrollWidth <= vw,
-      wideLines: lines.filter((element) => element.scrollWidth > element.clientWidth + 1).length,
+      wideLines: lines.filter((element) => element.scrollWidth > element.clientWidth + 1 && !(getComputedStyle(element).textOverflow === 'ellipsis' && element.title === element.textContent)).length,
       badActions: actions.map((element) => element.getBoundingClientRect())
         .filter((box) => box.width < 43.5 || box.height < 43.5 || box.left < -0.5 || box.right > vw + 0.5).length,
       actions: actions.length,
@@ -92,16 +92,17 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     const point = card.getByTestId('card-point');
     const place = card.getByTestId('card-place');
     await expect(point).toHaveText(LONG_POINT);
-    await expect(place).toHaveText(LONG_ADDRESS);
-    await expectReadable(point, '14px', '20px', SEARCH_INK2);
-    await expectReadable(place, '14px', '20px', SEARCH_INK2);
+    await expect(place).toHaveText(LONG_ADDRESS + ' · ' + LONG_SELLER);
+    await expectReadable(point, '14px', '20px', 'rgb(31, 16, 38)');
+    await expectReadable(place, '13px', '18px', SEARCH_INK2);
     // D2 replaces Search presentation; scalable where-lines and opening-hours remain unchanged.
     expect((await textStyle(card.getByRole('heading', { level: 3 }))).size).toBe('15px');
-    expect(await card.getByTestId('opening-hours').evaluate((element) => [getComputedStyle(element).fontSize, getComputedStyle(element).fontWeight])).toEqual(['13px', '600']);
+    await expect(card.getByTestId('opening-hours')).toHaveCount(0);
     const caption = page.locator('main p.c').filter({ hasText: /Найдено/ }).first();
     expect(await textStyle(caption)).toEqual({ size: '13px', line: '18px', color: SEARCH_INK2 });
-    // the long lines wrap by words (more than one line), nothing is cut
-    expect(await place.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThan(20);
+    // Source B03 uses one address line; complete text remains in title/accessible text and Offer details.
+    await expect(place).toHaveAttribute('title', LONG_ADDRESS + ' · ' + LONG_SELLER);
+    expect(await place.evaluate((element) => element.getBoundingClientRect().height)).toBe(18);
     await shot('card-360-ru');
     for (const width of [360, 320]) {
       await page.setViewportSize({ width, height: 800 });
@@ -111,8 +112,8 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     // ---- 200 % root text: the lines grow, the card may grow, nothing is clipped, actions stay usable ----
     await page.setViewportSize({ width: 360, height: 800 });
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
-    await expectReadable(point, '28px', '40px', SEARCH_INK2);
-    await expectReadable(place, '28px', '40px', SEARCH_INK2);
+    await expectReadable(point, '28px', '40px', 'rgb(31, 16, 38)');
+    await expectReadable(place, '26px', '36px', SEARCH_INK2);
     for (const width of [360, 320]) {
       await page.setViewportSize({ width, height: 800 });
       expect(await expectUsable(page)).toBeGreaterThan(0);
@@ -145,7 +146,7 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto('/');
     await search(suffix);
-    await expectReadable(resultCard(page, title).getByTestId('card-place'), '14px', '20px', SEARCH_INK2);
+    await expectReadable(resultCard(page, title).getByTestId('card-place'), '13px', '18px', SEARCH_INK2);
     await expect(resultCard(page, title).getByTestId('card-point')).toHaveText(LONG_POINT);
     await expectUsable(page);
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });

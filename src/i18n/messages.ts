@@ -1,4 +1,8 @@
 export const ru = {
+  'search.foundCount': 'Найдено {count}',
+  'search.distanceUnavailable': 'Расстояние недоступно.',
+  'search.distanceDenied': 'Местоположение не разрешено, поэтому порядок вернули к «По умолчанию». Разрешить доступ можно в настройках браузера.',
+  'search.geoRetry': 'Попробовать снова',
   'switchOn.otherPoints': 'В других точках карточка не изменится.',
   'switchOn.applied': 'На витрине: {price}',
   'switchOn.return': "Вернуть на витрину",
@@ -132,8 +136,8 @@ export const ru = {
   'preview.needTitlePrice': 'Укажите название и цену',
   'preview.needPoint': 'Выберите точку',
   'preview.loadError': 'Не удалось собрать просмотр. Попробуйте ещё раз.',
-  'search.correctionShown': 'Показаны результаты по запросу «{query}»',
-  'search.correctionInstead': 'Искать вместо этого «{query}»',
+  'search.correctionShown': 'Показаны результаты для «{query}». Запрос «{original}» исправлен автоматически.',
+  'search.correctionInstead': 'Искать «{query}» как введено',
   'search.seeNearby': 'Посмотреть рядом',
   'search.locationEnabled': 'Местоположение будет учтено при следующем поиске.',
   'search.locationError': 'Не удалось определить местоположение. Поиск работает без учёта расстояния.',
@@ -1070,6 +1074,10 @@ export type MessageKey = keyof typeof ru;
 
 // Native-speaker verification: PENDING. Merge is blocked until reviewer/date are recorded here.
 export const kk = {
+  'search.foundCount': 'Табылды: {count}',
+  'search.distanceUnavailable': 'Қашықтық қолжетімсіз.',
+  'search.distanceDenied': 'Орналасуға рұқсат берілмеді, сондықтан «Әдепкі» реті қайтарылды. Рұқсатты браузер баптауларынан беруге болады.',
+  'search.geoRetry': 'Қайталап көру',
   'switchOn.otherPoints': 'Басқа нүктелерде карточка өзгермейді.',
   'switchOn.applied': 'Витринада: {price}',
   'switchOn.return': "Витринаға қайтару",
@@ -1203,8 +1211,8 @@ export const kk = {
   'preview.needTitlePrice': 'Атауы мен бағасын көрсетіңіз',
   'preview.needPoint': 'Нүктені таңдаңыз',
   'preview.loadError': 'Қарауды дайындау мүмкін болмады. Қайталап көріңіз.',
-  'search.correctionShown': '«{query}» сұрауы бойынша нәтижелер көрсетілді',
-  'search.correctionInstead': 'Оның орнына «{query}» деп іздеу',
+  'search.correctionShown': '«{query}» сұрауы бойынша нәтижелер көрсетілді. «{original}» сұрауы автоматты түрде түзетілді.',
+  'search.correctionInstead': '«{query}» деп енгізілгендей іздеу',
   'search.seeNearby': 'Жақын жердегіні көру',
   'search.locationEnabled': 'Келесі іздеуде орналасқан жеріңіз ескеріледі.',
   'search.locationError': 'Орналасқан жерді анықтау мүмкін болмады. Іздеу қашықтықты есепке алмай жұмыс істейді.',

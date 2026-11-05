@@ -129,10 +129,10 @@ test('the default row is sliders / «По умолчанию» / an indicator, o
   await expect(page.getByRole('button', { name: /Сбросить/ })).toHaveCount(0);
   await expect(page.getByText(/^Порядок:/)).toHaveCount(0);
   await expect(page.getByText(/Сортировк|Сортировать|соответств/)).toHaveCount(0);
-  const chips = (await page.locator('.chips-row').boundingBox())!;
+  const header = (await page.getByRole('search').boundingBox())!;
   const box = (await trigger(page).boundingBox())!;
   const firstCard = (await page.getByRole('article').first().boundingBox())!;
-  expect(box.y).toBeGreaterThanOrEqual(chips.y + chips.height - 8);
+  expect(box.y).toBeGreaterThanOrEqual(header.y + header.height - 8);
   expect(box.y + box.height).toBeLessThanOrEqual(firstCard.y + 8);
   expect(box.height).toBeGreaterThanOrEqual(44);
   await expectOneLine(page);
@@ -265,7 +265,7 @@ test('«По расстоянию» without geolocation: a denied prompt gives t
   });
   await searchProduct(page);
   await choose(page, /^По расстоянию/);
-  await expect(page.getByText('Для сортировки по расстоянию нужен доступ к местоположению.')).toBeVisible();
+  await expect(page.getByText('Расстояние недоступно.')).toBeVisible();
   await expect(trigger(page)).toHaveAttribute('aria-label', 'Порядок результатов: По умолчанию');
   expect(await geoCalls(page)).toBe(1);
   expect(sorts).not.toContain('distance');

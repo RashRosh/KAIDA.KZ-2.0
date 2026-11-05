@@ -6,6 +6,54 @@ import { testDatabaseUrl } from '../integration/database';
 import { seedIds } from '../../src/db/seed';
 import { createDiskPhotoStorage } from '../../src/modules/media/storage/photo-storage';
 
+test('Search hearts reuse private favourites: guest cancel, login/save, remove, retry and logout', async ({page}, info) => {
+  test.skip(info.project.name !== 'mobile', 'One real privacy/mutation flow is enough.');
+  const phone = '+77000280203';
+  const {pool} = createDatabase(testDatabaseUrl());
+  const cleanup = async () => {
+    await pool.query('DELETE FROM buyer_offer_favourites WHERE user_id IN (SELECT id FROM users WHERE phone_e164=$1)',[phone]);
+    await pool.query('DELETE FROM auth_sessions WHERE user_id IN (SELECT id FROM users WHERE phone_e164=$1)',[phone]);
+    await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=$1',[phone]);
+    await pool.query('DELETE FROM users WHERE phone_e164=$1',[phone]);
+  };
+  try {
+    await cleanup();
+    await page.goto('/?q=Баранина');
+    const card=page.getByRole('article').filter({has:page.locator(`a[href="/offers/${seedIds.lambOffer}"]`)});
+    const heart=card.getByTestId('favourite-heart');
+    await expect(heart).toBeEnabled();
+    await heart.click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('button',{name:'Закрыть',exact:true}).click();
+    await expect(heart).toBeFocused();
+    await expect(heart).toHaveAttribute('aria-pressed','false');
+    await expect(page).toHaveURL(/\?q=/);
+    await heart.click();
+    await page.getByLabel('Телефон',{exact:true}).fill(phone);
+    const code=page.waitForResponse(r=>r.url().endsWith('/api/auth/otp/request'));
+    await page.getByRole('button',{name:'Получить код',exact:true}).click();
+    const issued=await(await code).json();
+    await page.getByLabel('Код из 6 цифр',{exact:true}).fill(issued.delivery.code);
+    await page.getByRole('dialog').getByRole('button',{name:'Войти',exact:true}).click();
+    await expect(heart).toHaveAttribute('aria-pressed','true');
+    await heart.click();
+    await expect(heart).toHaveAttribute('aria-pressed','false');
+    await page.route('**/api/favourites',route=>route.fulfill({status:503,json:{}}));
+    await heart.click();
+    await expect(page.getByRole('alert').filter({hasText:'Не удалось изменить избранное.'})).toBeVisible();
+    await expect(heart).toHaveAttribute('aria-pressed','false');
+    await page.unroute('**/api/favourites');
+    await heart.click();
+    await expect(heart).toHaveAttribute('aria-pressed','true');
+    await page.getByRole('navigation').getByRole('link',{name:'Избранное',exact:true}).click();
+    await expect(page.getByTestId('favourite-entry')).toHaveCount(1);
+    await page.request.post('/api/auth/logout');
+    await page.goto('/?q=Баранина');
+    await expect(heart).toBeEnabled();
+    await expect(heart).toHaveAttribute('aria-pressed','false');
+  } finally { await cleanup(); await pool.end(); }
+});
+
 test('private favourites: guest intent, two points, current price, unavailable/restoration, safe return and late-session response',async({page},info)=>{
   test.skip(info.project.name!=='mobile','Approved mobile RU boundary');
   const {pool}=createDatabase(testDatabaseUrl());

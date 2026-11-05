@@ -5,6 +5,7 @@ import { offerTitleSearchText } from '../../src/modules/offers/title/offer-title
 import { templateOpeningHours, type DaySchedule, type OpeningHours, type Weekday } from '../../src/modules/locations/hours/opening-hours';
 import { testDatabaseUrl } from '../integration/database';
 import { resultCard } from './buyer-helpers';
+import { setLocaleCookie } from './buyer-helpers';
 
 // card-opening-hours (docs/slices/card-opening-hours): the result card says in words whether the point is open and when it
 // opens or closes; the Offer page shows the grouped week. The spec owns its Seller, points and Offers (letters-only suffix
@@ -56,7 +57,7 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     }
     // the search field is found by its role, so the same steps work in the Russian and the Kazakh interface
     const search = async (query: string) => { const input = page.getByRole('search').locator('input[type="search"]').first(); await input.fill(query); await input.press('Enter'); };
-    const statusOf = async (key: string) => resultCard(page, ids.get(key)!.title).getByTestId('opening-hours');
+    const statusOf = async (key: string) => { await page.goto(`/offers/${ids.get(key)!.offerId}`); return page.getByTestId('opening-hours'); };
     const noOverflow = () => page.evaluate(() => {
       const wide = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-hours"], [data-testid="opening-schedule"]')].filter((element) => element.scrollWidth > element.clientWidth + 1);
       return { page: document.documentElement.scrollWidth <= window.innerWidth, wide: wide.length };
@@ -67,6 +68,8 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     await page.goto('/');
     await search(suffix);
     await expect(resultCard(page, ids.get('open')!.title)).toHaveCount(1);
+    await expect(page.getByTestId('opening-hours')).toHaveCount(0);
+    await expect(page.getByTestId('opening-schedule')).toHaveCount(0);
     await expect(await statusOf('open')).toHaveText('Открыто до 18:00');
     await expect(await statusOf('open')).toHaveAttribute('data-state', 'open');
     await expect(await statusOf('closing')).toHaveText('Закрывается в 11:30');
@@ -77,7 +80,6 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     await expect(await statusOf('around')).toHaveText('Открыто круглосуточно');
     await expect(await statusOf('never')).toHaveText('Закрыто, рабочих дней нет');
     // the card carries no schedule, button or expansion
-    await expect(page.getByTestId('opening-schedule')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Расписание|Кесте/ })).toHaveCount(0);
 
     // narrow screen and enlarged text: nothing clipped, no sideways scroll
@@ -87,7 +89,7 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     await page.setViewportSize({ width: 390, height: 844 });
 
     // ---- Kazakh (cookie) ----
-    await page.context().addCookies([{ name: 'kaida_locale', value: 'kk', url: page.url() }]);
+    await setLocaleCookie(page.context(), 'kk');
     await page.goto('/');
     await search(suffix);
     await expect(await statusOf('open')).toHaveText('18:00 дейін ашық');
@@ -95,7 +97,7 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     await expect(await statusOf('never')).toHaveText('Жабық, жұмыс күндері жоқ');
     await page.setViewportSize({ width: 320, height: 800 });
     expect(await noOverflow()).toEqual({ page: true, wide: 0 });
-    await page.context().addCookies([{ name: 'kaida_locale', value: 'ru', url: page.url() }]);
+    await setLocaleCookie(page.context(), 'ru');
     await page.setViewportSize({ width: 390, height: 844 });
 
     // ---- Offer page: the grouped week, today in bold ----

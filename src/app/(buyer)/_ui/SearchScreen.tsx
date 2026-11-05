@@ -19,11 +19,14 @@ import {
 } from '../../../modules/search/contracts/search.contract';
 import { normalizeGeoDependentState, readLastSearchState, writeLastSearchState } from '../../../modules/search/last-search-state';
 import { Ic } from '../../seller/_kaida/ui';
-import { BuyerScreen, markNearbyIntent, ResultCard, ResultSkeletons } from './buyer-ui';
+import { BuyerScreen, markNearbyIntent } from './buyer-ui';
 import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } from './product-suggestions';
 import { SortControl } from './SortPopover';
 import { IntentSuppression, consumeFirstEntryHandoff, intentKey } from './search-intent';
 import design from './search-results.module.css';
+import { SearchResultCard, SearchResultSkeletons } from './SearchResultCard';
+import { SearchIcon } from './SearchIcon';
+import { useFavourites } from './use-favourites';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
 // S0 / S7 / S9: explicit submit, optional transient buyer location, popular queries, the query kept in the address.
@@ -82,6 +85,8 @@ export function SearchScreen() {
   // Stage 6C: the Search Home (field + chips, no feed) shows until a deliberate search starts; `ready` is false only
   // while a plain `/` still decides between the Home and the last Search of this tab (storage is read after mount).
   const [started, setStarted] = useState(Boolean(addressQuery));
+  const favourites = useFavourites(null, started);
+  const [favouriteTargetId, setFavouriteTargetId] = useState<string | null>(null);
   const [ready, setReady] = useState(Boolean(addressQuery));
   const [searchedQuery, setSearchedQuery] = useState('');
   const [searchedTyped, setSearchedTyped] = useState(false);
@@ -401,7 +406,7 @@ export function SearchScreen() {
       <div className={compact ? `inp ${design.searchField}` : 'inp'} style={compact
         ? undefined
         : { flex: 1, minWidth: 0 }}>
-        <Ic name="search" className="c2" />
+        {compact ? <SearchIcon name="search" /> : <Ic name="search" className="c2" />}
         <input
           ref={input}
           id="product-query"
@@ -424,9 +429,9 @@ export function SearchScreen() {
           autoComplete="off"
           enterKeyHint="search"
         />
-        {query && !loading && (
-          <button type="button" className="ib" aria-label={t('search.clear')} style={{ width: 44, height: 44, margin: '0 -12px 0 0' }}
-            onClick={() => { setQuery(''); setSelected(null); input.current?.focus(); }}><Ic name="close" className="c2" /></button>
+        {query && !loading && (!compact || !distanceNotice) && (
+          <button type="button" className="ib" aria-label={t('search.clear')} style={{ width: 44, height: 44, margin: compact ? 0 : '0 -12px 0 0' }}
+            onClick={() => { setQuery(''); setSelected(null); input.current?.focus(); }}>{compact ? <SearchIcon name="close" /> : <Ic name="close" className="c2" />}</button>
         )}
       </div>
       {suggestOpen && <ProductSuggestionList id="product-suggestions" label={t('card.suggestions')} suggestions={suggestions} activeIndex={activeSuggestion} onChoose={chooseSuggestion} />}
@@ -475,35 +480,36 @@ export function SearchScreen() {
     <BuyerScreen
       section="search"
       className={design.screen}
+      overlay={favourites.modal}
       top={<header className={design.header}>{form(true)}</header>}
     >
-      <div className={`chips-row ${design.quickQueries}`}>{chips}</div>
-      {visibleOffers.length > 0 && (
-        <div className={design.orderRow}>
-          <span aria-hidden="true" className={design.count}>{offerCount(locale, visibleOffers.length)}</span>
-          <SortControl align="end" sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
-        </div>
-      )}
-      <main className={`body ${design.results}`} aria-busy={loading || undefined}>
+      <main className={`body ${design.results}`} data-geo-denied={distanceNotice || undefined} aria-busy={loading || undefined}>
         {validation}
         {distanceNotice && (
-          <div className="banner gray" role="alert" style={{ gap: 8, padding: 12, borderRadius: 14 }}>
-            <div style={{ display: 'flex', gap: 10 }}><Ic name="locate" className="c2" /><p className="c c2" style={{ flex: 1 }}>{t('search.distanceNeedsLocation')}</p></div>
+          <div className={design.geoNotice} role="alert">
+            <SearchIcon name="alert" />
+            <div><p><strong>{t('search.distanceUnavailable')}</strong> {t('search.distanceDenied')}</p>
+              <button type="button" onClick={() => void chooseCriterion('distance')} disabled={loading || locationState.kind === 'requesting'}>{t('search.geoRetry')}</button>
+            </div>
           </div>
         )}
         {shown?.correction && (
-          // search-typo-suggestions: two plain text lines (no panel, no buttons). The second one is a real link that turns on «search as typed».
-          <div role="status" style={{ display: 'flex', flexDirection: 'column', padding: '2px 4px 0' }}>
-            <p className="t" style={{ margin: 0, overflowWrap: 'anywhere' }}>{withBoldQuery(t('search.correctionShown', { query: QUERY_MARK }), shown.correction.to)}</p>
+          // Source B03.ST03 presentation; the existing typed-search link keeps its URL and behavior.
+          <div role="status" className={design.correctionNotice}>
+            <div><SearchIcon name="alert" /><p>{withBoldQuery(t('search.correctionShown', { query: QUERY_MARK, original: shown.correction.from }), shown.correction.to)}</p></div>
             <Link
               href={`/?${new URLSearchParams({ q: shown.correction.from, ...(searchedProductId ? { product: searchedProductId } : {}), typed: '1' })}`}
-              className="t"
-              style={{ margin: '-10px 0', padding: '10px 0', display: 'block', textDecoration: 'underline', overflowWrap: 'anywhere' }}
+              className={design.noticeLink}
             >{t('search.correctionInstead', { query: shown.correction.from })}</Link>
           </div>
         )}
+        {visibleOffers.length > 0 && <div className={design.orderRow}>
+          <span aria-hidden="true" className={design.count}>{distanceNotice ? offerCount(locale, visibleOffers.length) : t('search.foundCount', { count: visibleOffers.length })}</span>
+          <SortControl align="end" denied={distanceNotice} sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
+        </div>}
+        {loading && visibleOffers.length === 0 && <div className={design.orderRow} aria-hidden="true"><span className="sk" style={{width:140,height:14}} /><span className="sk" style={{width:130,height:20}} /></div>}
         {/* One persistent live region: the empty-state title and hint (search-empty-states) or the count line. */}
-        <div role="status" aria-live="polite" aria-atomic="true" className={emptyKind ? undefined : visibleOffers.length > 0 && !loading ? 'vh' : undefined}
+        <div role="status" aria-live="polite" aria-atomic="true" className={emptyKind ? undefined : loading || visibleOffers.length > 0 ? 'vh' : undefined}
           style={emptyKind ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center', padding: '24px 8px 0' } : undefined}>
           {emptyKind && shown ? (
             <>
@@ -521,22 +527,30 @@ export function SearchScreen() {
           </div>
         )}
         {state.kind === 'error' && (
-          <div className="banner err" role="alert" style={{ padding: '12px 14px', borderRadius: 14, gap: 8 }}>
-            <div style={{ display: 'flex', gap: 10 }}><Ic name="alert" className="dn" /><p className="c" style={{ color: 'var(--ink)', flex: 1 }}>{t('search.error')}</p></div>
+          <div className={design.errorNotice} role="alert">
+            <div><SearchIcon name="alert" /><p>{t('search.error')}</p></div>
             {lastSearch.current && (
-              <button type="button" className="btn btn-o sm" style={{ alignSelf: 'flex-start' }}
+              <button type="button" className={design.noticeLink}
                 onClick={() => lastSearch.current && void executeSearch(lastSearch.current.query, buyerLocation, lastSearch.current.sort, lastSearch.current.direction, lastSearch.current.productId, undefined, lastSearch.current.typed)}>
                 <Ic name="refresh" className="sm" />{t('cabinet.retry')}
               </button>
             )}
           </div>
         )}
-        {loading && visibleOffers.length === 0 && <ResultSkeletons className={design.card} />}
+        {loading && visibleOffers.length === 0 && <><div style={{minHeight:18}} aria-hidden="true" /><SearchResultSkeletons /></>}
         {visibleOffers.length > 0 && (
           <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {visibleOffers.map((offer) => <li key={offer.id}><ResultCard className={design.card} offer={offer} distanceMeters={offer.distanceMeters} /></li>)}
+            {visibleOffers.map((offer) => {
+              const entry = favourites.state.kind === 'ready' ? favourites.state.favourites.find(entry => entry.offerId === offer.id && entry.locationId === offer.location.id) : undefined;
+              const active = Boolean(entry);
+              const pending = favourites.pendingId !== null && (favourites.pendingId === offer.id || favourites.pendingId === entry?.id);
+              return <li key={offer.id}><SearchResultCard offer={offer} heart={<button type="button" className={design.heart} data-testid="favourite-heart" data-error={favourites.error && favouriteTargetId === offer.id || undefined} aria-label={active ? t('fav.remove') : t('fav.save')} aria-pressed={active} aria-busy={pending} disabled={!favourites.available || favourites.pendingId !== null} onClick={event => { setFavouriteTargetId(offer.id); favourites.toggleOffer(event, { offerId: offer.id, locationId: offer.location.id }); }}><SearchIcon name="heart" filled={active} /></button>} /></li>;
+            })}
           </ul>
         )}
+        {favourites.error && <p role="alert">{t('fav.writeError')}</p>}
+        {favourites.unavailable && <p role="status">{t('fav.unavailable')}</p>}
+        {favourites.state.kind === 'error' && <div role="alert"><p>{t('fav.loadError')}</p><button type="button" onClick={() => void favourites.reload()}>{t('cabinet.retry')}</button></div>}
       </main>
     </BuyerScreen>
   );

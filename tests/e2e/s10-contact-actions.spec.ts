@@ -128,8 +128,7 @@ test('point contacts are verified by code and reach the buyer card with the hour
     await expect(offer.getByRole('link', { name: `Маршрут до ${pointName}`, exact: true })).toHaveAttribute('href', /\/api\/offers\/[0-9a-f-]+\/route$/);
     // card-opening-hours: the card shows only the status in words (no schedule, no button) ...
     const hours = offer.getByTestId('opening-hours');
-    await expect(hours).toHaveText('Закрывается в 18:00');
-    await expect(hours).toHaveAttribute('data-state', 'closing');
+    await expect(hours).toHaveCount(0);
     await expect(offer.getByTestId('opening-schedule')).toHaveCount(0);
     await expect(offer.getByRole('button', { name: 'Расписание' })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

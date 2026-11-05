@@ -82,7 +82,7 @@ test('buyers see how fresh offers are; the Seller confirms due cards and restore
     const results = page.getByRole('article').filter({ hasText: tag });
     await expect(results).toHaveCount(2);
     await expect(results.nth(0)).toContainText(names.fresh);
-    await expect(results.nth(0)).toContainText('Сегодня');
+    await expect(results.nth(0).getByRole('img', { name: /Продавец подтвердил/ })).toContainText(/мин/);
     await expect(results.nth(1)).toContainText(names.ageing);
     await expect(results.nth(1)).toContainText('2 дня');
 

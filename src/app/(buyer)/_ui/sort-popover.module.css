@@ -114,3 +114,7 @@
   .root .menu, .root .item, .root .trigger { transition: none; }
   .root .menu { transform: none; }
 }
+.root[data-variant='denied'] .trigger { min-height:44px; border:1px solid #9073a0; border-radius:999px; padding:0 14px; background:#fdfbff; }
+.root[data-variant='denied'] .trigger { font:500 14px/20px Roboto,Geologica,system-ui,sans-serif; gap:6px; white-space:nowrap; }
+.root[data-variant='denied'] { flex-shrink:0; }
+.root[data-variant='denied'] .icon { width:20px; height:20px; }
