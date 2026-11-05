@@ -36,6 +36,10 @@
 
 Если PO просит `Проверь <slice>`, `Запусти KAIDA Controller`, проверить contract, diff, readiness к manual acceptance/merge/checkpoint — прочитай `docs/agents/KAIDA_CONTROLLER.md`. Controller не проектирует и не реализует slice, он проверяет exact repository evidence и даёт gate verdict.
 
+## Скиллы исполнителя
+
+Когда реализуешь поведение из Slice Contract и пишешь тесты, прочитай `.agents/skills/tdd/SKILL.md`. Когда что-то сломано, падает или тормозит и причина не очевидна, прочитай `.agents/skills/diagnosing-bugs/SKILL.md`. Это способы работы внутри процесса `PROJECT_RULES.md`, а не его замена; при расхождении правила проекта сильнее.
+
 Не создавай параллельный roadmap или второй набор инструкций без объективной необходимости: у каждого типа информации один владелец (`PROJECT_RULES.md` §2).
 
 ## Git и среда
