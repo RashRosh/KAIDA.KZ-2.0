@@ -1,36 +1,48 @@
 # D2 — Цельная выдача поиска по новому дизайну
 
-Поручение PO 2026-11-05: продолжать цельными экранами без приёмки отдельных элементов. Первая menu-only попытка не принята как недостаточно заметная; scope пересмотрен в той же ветке/PR207. Не checkpoint. /welcome целиком отложен.
+Редакция PO 2026-11-05 после отклонения menu-only и частичного переноса. Это единственный действующий контракт D2; прежние исключения hearts/4nav и сохранение chips/hours в выдаче отменены поручением переделать экран по предоставленным B03/B04. Приёмки PO пока нет. /welcome полностью отложен, стрелка при вводе сохранена.
 
-## User task / scope
+## User task и scope
 
-Покупатель находит предложение, сравнивает цену/место/актуальность, меняет порядок и открывает предложение или связь. Переносится начатый Search B03–B06: шапка, существующие chips, count/sort, список/карточки, loading, validation/error/retry, correction, empty/geo notice и оформление существующей навигации. Модули: только buyer presentation и локальный CSS; shared helpers получают optional presentation hooks, прежние вызовы сохраняются.
+Покупатель находит предложение, сравнивает цену, место и давность подтверждения, меняет порядок, сохраняет конкретное предложение или открывает его/связь/маршрут. Мигрируется начатый Search: шапка, count/sort, карточки, loading, correction, error/retry, empty/geo notice, четыре существующих назначения навигации. Authority — два Artifact в [baseline](../../product/DESIGN_BASELINE.md); конкретные B03-Results, B03-Sort, B04-Empty. Модули: buyer presentation, общий существующий favourites hook, совместимое расширение Search DTO.
 
-Sources: два Artifact из DESIGN_BASELINE.md. B03-Results.dc.html версии1793830896-9a07 непосредственно прочитан (DOM/CSS), осмотрен и сохранён в локальном verification-evidence/B03-Results-current-source.html; B03-Sort и B04 empty прочитаны ранее. Система: tokens/motion/Menu. B03: search52px, padding16, gap10, cards radius14, фото104, title Roboto400 15/20, price Geologica700 22/26, footer border/actions44. Menu: rows56, radius14, padding6, text15/22, enter/exit120ms, exact ease-out/in; reduced motion отключает движение.
+## Explicit out of scope
 
-## Explicit out of scope / совместимость
+Search Home, First Entry, Nearby/Offer/Favourites/Seller/Operator целиком не мигрируются. Home сохраняет пять быстрых запросов; часы остаются на Offer. Нет новых доменных функций, geo-dialog, offline/cache, dark theme, изменения ranking/expiry/price/контактов. Иллюстрации и демонстрационные числа не подменяют реальные Offer. Desktop — адаптация одного списка до720px; отсутствующий desktop кадр не объявляется проверенным источником.
 
-Search Home, First Entry, Nearby/Offer/Seller/Operator не мигрируются. Не добавляются heart, четвёртый nav item, geo-dialog, новые функции, dark theme, offline/cache, данные/thresholds из иллюстраций. Реальные photos/data не заменяются нарисованными помидорами. Сохраняются пять chips после поиска, три существующих nav destinations, часы работы, полные scalable where-lines14/20 и текущая семантика свежести/geo. Системный max1200 не означает растянуть читаемый список: desktop single column720 — адаптация без отсутствующего desktop кадра.
+## Пересмотр визуальных ограничений и закрытые contracts
 
-## Closed contracts / risk flags
+Начатая выдача не содержит chips и hours line; четыре nav destinations включают существующий /favourites; hearts вызывают существующие auth/save/remove/retry/privacy flows. Адрес с продавцом — caption13/18 в rem, одна строка с ellipsis, полный текст остаётся в DOM/title и подробностях. Точка — dark medium14/20. Эти явно описанные визуальные изменения заменяют прежние prescriptions, вызвавшие расхождения с экраном PO; полнота данных и масштабируемость проверяются отдельно.
 
-Сохраняются search-sort-control-refresh/rev3, search-home-last-state, search-known-zero, typo-correction, buyer-readability, card-price-packaging/opening-hours, UX1D, Search/Product/typed/last-state и D0. Ранжирование, nominal prices, actual sort directions, explicit geo intent, routeAvailable/verified contacts, URLs, доступные имена и privacy не меняются. Новое оформление заменяет только прежние visual prescriptions. Стрелка меню показывает применяемое направление, trigger — текущее. При ином конфликте поведения — STOP.
+Search/typed/Product/last-state/Back, направления сортировки, conscious-submit analytics, explicit geo intent, verified-only contacts, routeAvailable, номинальная цена/упаковка, приватность избранного и server-side eligibility сохраняются. При ошибке запроса прежняя выдача очищается по закрытому S0: дизайн с сохранёнными offline данными не внедряется без отдельной ревизии поведения. Геолокация запрашивается существующим явным выбором расстояния; дополнительный диалог B04.ST05 не вводится. Новый продуктовый конфликт требует STOP с объяснением.
 
-DB migration/public API/auth/concurrency/data loss/external service: все false — API/domain/DB и внешние flows не меняются. UI lifecycle риска menu exit/reopen проверяется targeted E2E.
+SearchOffer получает optional lastConfirmedAt ISO из существующего offers.last_confirmed_at, уже публичного в BuyerOffer. Старые days/ageing остаются; клиенты/fixtures без нового поля валидны. Точные минуты/часы не выводятся из целых дней. Это additive public metadata, не новая lifecycle policy.
+
+## Risk flags
+
+| Flag | Есть | Проверка |
+|---|---|---|
+| Public API | да | Timestamp соответствует БД, optional schema; прежние поля/границы privacy не меняются |
+| Auth/security/privacy | да | Новый вход в существующее избранное: guest cancel/focus, login/save/remove/retry/logout; один load на экран, защита от поздних session responses |
+| DB migration | нет | Миграции/таблицы не меняются |
+| Concurrency/atomicity | нет новых | Переиспользуются busy/epoch/server eligibility существующего hook |
+| Data loss | нет | Изменение представления, synthetic fixture только в изолированной preview DB |
+| External service | нет новых | Старые контактные ссылки; тесты не связываются с продавцами |
 
 ## Acceptance criteria
 
-1. Вся начатая выдача использует новый фон, шапку, шрифты, cards/footer/nav treatment, включая отсутствие фото.
-2. Цена/название/точка/адрес из прежнего SearchResponse; where-lines сохраняют полноту, scalable14/20 и contrast.
-3. Count и sort в одной области; trigger и меню остаются в viewport320, поддерживают направления/focus/Escape/outside/reopen/reduced motion.
-4. Card открывает прежний Offer; контакты и route сохраняют URL, verified-only и routeAvailable; отдельное действие не открывает card.
-5. Loading/error/retry/empty/correction/geo notice сохраняют существующие действия/тексты RU/KK и получают новое оформление.
-6. Query/Product/typed/last Search/Back/chips/geo intent сохраняются; API/domain/DB diff отсутствует.
-7. На320/390/768/1440 нет horizontal overflow; 200% text не теряет where-lines/actions; desktop остаётся single list.
-8. Search Home, /welcome, Nearby/Offer/Seller/Operator не получают новые стили через shared helpers.
+1. B03: search52, padding16, gap10, cards radius14/photo104; title Roboto40015/20, price Geologica70022/26, basis13/18, point50014/20, address13/18; footer44 и четыре nav. Цвета/SVG paths берутся из нового источника.
+2. Сердце находится в правом верхнем углу фото; сохранение/удаление/ошибка/повтор/вход работают без открытия Offer. После выхода чужие сохранения не видны.
+3. Давность использует реальное время подтверждения, минуты/часы/дни и пятицветную шкалу источника, со значком и доступным именем. Eligibility/ranking не зависят от новой визуальной шкалы.
+4. Count и sort в одной области, normal trigger с funnel/chevron; denied variant с outline/up-down. Меню56px, enter/exit120ms с исходными кривыми; focus/Escape/outside/reopen/reduced-motion работают.
+5. B04 denied notice над toolbar, заголовок/текст/Retry соответствуют источнику; запрос geo только по действию пользователя. Кнопка маршрута показывает расстояние только при наличии текущего distanceMeters, иначе «Маршрут».
+6. Loading повторяет форму B03 skeletons; correction над toolbar и ссылка typed-search сохраняет смысл/URL; error/empty сохраняют закрытые действия, честно отделяя адаптации поведения от визуального совпадения.
+7. Offer/Back, повторный запрос, сортировка, цены/упаковка и verified contacts сохраняют прежнюю бизнес-логику; прямое действие не открывает карточку.
+8. Нет горизонтального overflow на320/360/390/768/1440; при200% текста caption масштабируется, полные where данные доступны, действия остаются44px. Shared defaults вне начатого Search не меняются.
+9. До показа PO агент сравнивает реализацию с соответствующим состоянием источника на одинаковой CSS ширине/данных, проверяет computed sizes и сохраняет screenshots/report. Зелёный CI не заменяет визуальную проверку.
 
-## Verification / manual
+## Verification и manual acceptance
 
-Targeted existing search/sort/home/empty/correction/readability/price/hours/contacts E2E. Затем full unit/integration/E2E, lint/types/build и branch CI на итоговый runtime. Повтор только по failure/новому diff. Manual PO: запрос → сравнить карточки → sort/reverse/default → Offer/Back → другой запрос/empty. Agent visual review и PO acceptance раздельно. Diff audit: scoped CSS, presentation only, отсутствие API/domain/DB changes. No merge/tag до приёмки и поручения PO.
+Targeted: source-parity/state captures, sort/geo, Home/Back/typed, price/hours/contacts/readability, настоящая mutation/auth/privacy избранного и timestamp integration. Затем полный unit/integration/E2E, lint/types/build, branch CI, diff audit. Повторы только после failure/изменения. [Visual review](VISUAL_REVIEW.md) содержит реальные пределы соответствия.
 
-Evidence menu-only head fe47e05: full CI41932227244 PASS; не доказательство новой ревизии. Новый runtime verification IN PROGRESS. Первый targeted42:41PASS, menu320 fails; исправлено выравнивание справа при переносе. Root cause локальной нестабильности продавца в прежнем полном прогоне не установлен, соседние код/тесты не менялись. Новая PO acceptance отсутствует. Полный аудит87/91 источников не завершён и не заявляется.
+PO принимает цельный сценарий: открыть выдачу → сравнить карточки с B03 → сохранить/убрать → сортировка и направление/default → Offer/Back → пустая выдача/ошибка geo. Проверка агента не является manual acceptance PO. До приёмки и поручения PO нет merge/tag; следующий slice не начинается. Полное исследование всех87/91 материалов и миграция всего приложения не заявляются завершёнными.
