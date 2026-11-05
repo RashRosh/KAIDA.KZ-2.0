@@ -22,7 +22,8 @@ function SortIcon({ chevron = false }: { chevron?: boolean }) {
   );
 }
 
-export function SortControl({ sort, direction, busy, disabled, onChoose, onReset }: {
+export function SortControl({ sort, direction, busy, disabled, onChoose, onReset, align = 'start' }: {
+  align?: 'start' | 'end';
   sort: SearchSortMode;
   direction: SearchSortDirection;
   // True while the browser geolocation requested by an explicit «По расстоянию» is pending.
@@ -91,7 +92,7 @@ export function SortControl({ sort, direction, busy, disabled, onChoose, onReset
   }
 
   return (
-    <div ref={root} className={styles.root} data-motion={motion}>
+    <div ref={root} className={styles.root} data-motion={motion} data-align={align}>
       <button
         ref={trigger}
         type="button"

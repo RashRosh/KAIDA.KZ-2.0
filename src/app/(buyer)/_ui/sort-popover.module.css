@@ -75,6 +75,8 @@
   pointer-events: none;
 }
 
+.root[data-align='end'] .menu { left: auto; right: 0; transform-origin: top right; }
+
 .root .item {
   box-sizing: border-box;
   display: flex;

@@ -23,6 +23,7 @@ import { BuyerScreen, markNearbyIntent, ResultCard, ResultSkeletons } from './bu
 import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } from './product-suggestions';
 import { SortControl } from './SortPopover';
 import { IntentSuppression, consumeFirstEntryHandoff, intentKey } from './search-intent';
+import design from './search-results.module.css';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
 // S0 / S7 / S9: explicit submit, optional transient buyer location, popular queries, the query kept in the address.
@@ -397,8 +398,8 @@ export function SearchScreen() {
       style={{ display: 'flex', alignItems: 'center', gap: 8, flex: compact ? 1 : 'none', minWidth: 0 }}>
       <label htmlFor="product-query" className="vh">{t('search.question')}</label>
       <div ref={fieldRef} style={{ position: 'relative', flex: 1, minWidth: 0, scrollMarginTop: 12 }}>
-      <div className="inp" style={compact
-        ? { flex: 1, minWidth: 0, height: 44, borderRadius: 999, background: 'var(--sunken)', borderColor: 'transparent' }
+      <div className={compact ? `inp ${design.searchField}` : 'inp'} style={compact
+        ? undefined
         : { flex: 1, minWidth: 0 }}>
         <Ic name="search" className="c2" />
         <input
@@ -473,15 +474,17 @@ export function SearchScreen() {
   return (
     <BuyerScreen
       section="search"
-      top={<header className="bar" style={{ padding: '0 12px', gap: 8 }}>{form(true)}</header>}
+      className={design.screen}
+      top={<header className={design.header}>{form(true)}</header>}
     >
-      <div className="chips-row" style={{ padding: '8px 12px 0', flex: 'none', background: 'var(--bg)' }}>{chips}</div>
+      <div className={`chips-row ${design.quickQueries}`}>{chips}</div>
       {visibleOffers.length > 0 && (
-        <div style={{ padding: '4px 12px 0', flex: 'none', background: 'var(--bg)' }}>
-          <SortControl sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
+        <div className={design.orderRow}>
+          <span aria-hidden="true" className={design.count}>{offerCount(locale, visibleOffers.length)}</span>
+          <SortControl align="end" sort={sort} direction={direction} busy={locationState.kind === 'requesting'} disabled={loading || locationState.kind === 'requesting'} onChoose={(criterion) => void chooseCriterion(criterion)} onReset={resetSort} />
         </div>
       )}
-      <main className="body" style={{ gap: 12, padding: 12 }} aria-busy={loading || undefined}>
+      <main className={`body ${design.results}`} aria-busy={loading || undefined}>
         {validation}
         {distanceNotice && (
           <div className="banner gray" role="alert" style={{ gap: 8, padding: 12, borderRadius: 14 }}>
@@ -528,10 +531,10 @@ export function SearchScreen() {
             )}
           </div>
         )}
-        {loading && visibleOffers.length === 0 && <ResultSkeletons />}
+        {loading && visibleOffers.length === 0 && <ResultSkeletons className={design.card} />}
         {visibleOffers.length > 0 && (
-          <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {visibleOffers.map((offer) => <li key={offer.id}><ResultCard offer={offer} distanceMeters={offer.distanceMeters} /></li>)}
+          <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {visibleOffers.map((offer) => <li key={offer.id}><ResultCard className={design.card} offer={offer} distanceMeters={offer.distanceMeters} /></li>)}
           </ul>
         )}
       </main>
