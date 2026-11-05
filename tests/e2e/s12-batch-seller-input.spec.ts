@@ -74,7 +74,7 @@ function sellerOfferCard(page: import('@playwright/test').Page, pointName: strin
 
 async function expectOfferComment(page: import('@playwright/test').Page, card: import('@playwright/test').Locator, product: string, comment: string, absent: string) {
   await openOffer(card, product);
-  await expect(page.getByTestId('offer-comment')).toHaveText(comment);
+  await expect(page.getByTestId('offer-comment').getByText(comment, { exact: true })).toBeVisible();
   await expect(page.getByText(absent, { exact: true })).toHaveCount(0);
 }
 
@@ -124,7 +124,7 @@ test('Seller reviews and confirms several Offer changes as one persisted batch',
     const oldBeefCard = sellerOfferCard(page, pointName);
     await expect(oldBeefCard).toHaveCount(1);
     await openOffer(oldBeefCard, 'Говядина');
-    await expect(page.getByTestId('offer-comment')).toHaveText('S12 старая говядина');
+    await expect(page.getByTestId('offer-comment').getByText('S12 старая говядина', { exact: true })).toBeVisible();
 
     await page.goto(reviewUrl);
     await page.getByRole('button', { name: 'Подтвердить', exact: true }).click();

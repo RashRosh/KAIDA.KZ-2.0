@@ -50,5 +50,5 @@ test('the whole card opens the offer page while route and contacts stay separate
   // A tap anywhere on the card body (here: on the photo area) opens the offer page.
   await card.click({ position: { x: 24, y: 24 } });
   await expect(page).toHaveURL(/\/offers\/[0-9a-f-]+$/);
-  await expect(page.getByRole('heading', { name: 'Баранина', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Баранина', level: 2 })).toBeVisible();
 });

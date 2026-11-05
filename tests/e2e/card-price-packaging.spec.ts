@@ -73,12 +73,12 @@ test('the price line reads «/ quantity» or «/ unit» on the card and the Offe
 
     // the Offer page: the same line, large amount, no pack line or size note
     await openOffer(resultCard(page, titles.get('curd')!), titles.get('curd')!);
-    const offerPrice = page.locator('.pr-lg').locator('xpath=..');
+    const offerPrice = page.getByTestId('offer-price');
     await expect(offerPrice).toHaveText('4 000 ₸ / 800 г');
     await expect(page.getByText('Размер упаковки не указан')).toHaveCount(0);
     await page.goBack();
     await openOffer(resultCard(page, titles.get('nopack')!), titles.get('nopack')!);
-    await expect(page.locator('.pr-lg').locator('xpath=..')).toHaveText('800 ₸ / упак.');
+    await expect(page.getByTestId('offer-price')).toHaveText('800 ₸ / упак.');
     await expect(page.getByText('Размер упаковки не указан')).toHaveCount(0);
     await page.goBack();
 

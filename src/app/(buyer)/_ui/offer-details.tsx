@@ -202,7 +202,7 @@ export function OfferDetails({ offer, inert = false, titleAction, afterTitle, fo
       <div className={styles.heading}>
         <div>
           <h2 id="offer-title" lang={offer.product.nameLocale}>{offer.product.name}</h2>
-          <div className={styles.price}><b>{formatAmount(offer.price.amount)} ₸</b>{basis && <span>{basis}</span>}</div>
+          <div className={styles.price} data-testid="offer-price"><b>{formatAmount(offer.price.amount)} ₸</b>{basis && <>{' '}<span>{basis}</span></>}</div>
         </div>
         {titleAction}
       </div>

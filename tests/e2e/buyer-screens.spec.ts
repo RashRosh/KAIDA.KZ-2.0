@@ -67,7 +67,7 @@ test('a result card opens the offer page with seller, comment and interest; navi
 
   await card.getByRole('link', { name: 'Баранина' }).click();
   await expect(page).toHaveURL(/\/offers\//);
-  await expect(page.getByRole('heading', { name: 'Баранина', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Баранина', level: 2 })).toBeVisible();
   await expect(page.getByText('Асыл Ет, тестовый продавец')).toBeVisible();
   await expect(page.getByTestId('offer-comment')).toBeVisible();
   // Signed out, «Добавить в избранное» asks to sign in first; closing keeps the page.

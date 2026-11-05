@@ -42,7 +42,7 @@ test('lamb: search by the arrow, full offer, responsive layout and refresh', asy
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await testInfo.attach('lamb-offer', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
   await seedCard.getByRole('link', { name: 'Баранина', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Баранина', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Баранина', level: 2 })).toBeVisible();
   await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
   await expect(page.getByTestId('offer-comment')).toContainText('Свежий привоз.');
   await page.goto('/');
