@@ -80,12 +80,12 @@ test('the buyer page in preview mode: a note and a way back, no interest action;
   // an Offer that is not available: the buyer's own answer; with a safe return the way back is the card, not the search
   const missing = randomUUID();
   await page.goto(`/offers/${missing}`);
-  await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'К поиску' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Предложение недоступно' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Вернуться к выдаче' })).toBeVisible();
   await page.goto(`/offers/${missing}?preview=1&return=${encodeURIComponent('/seller?card=abc')}`);
-  await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Предложение недоступно' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Вернуться к карточке' })).toHaveAttribute('href', '/seller?card=abc');
-  await expect(page.getByRole('link', { name: 'К поиску' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Вернуться к выдаче' })).toHaveCount(0);
 
   // Kazakh
   await setLocaleCookie(page.context(), 'kk');
@@ -135,7 +135,7 @@ test('the Seller cabinet: the action only for what buyers can see, in the agreed
     await action.click();
     await expect(page).toHaveURL(new RegExp(`/offers/${ids.oneOffer}\\?preview=1`));
     await expect(page.getByRole('note')).toContainText('Так карточку видят покупатели');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(names.one);
+    await expect(page.locator('#offer-title')).toHaveText(names.one);
     await page.getByRole('note').getByRole('link', { name: 'Вернуться к карточке' }).click();
     await expect(page).toHaveURL(new RegExp(`/seller\\?card=${ids.oneCard}`));
     await expect(page.getByTestId('preview-action')).toBeVisible();
@@ -157,7 +157,7 @@ test('the Seller cabinet: the action only for what buyers can see, in the agreed
     for (let index = 1; index < boxes.length; index += 1) expect(boxes[index]![0]).toBeGreaterThanOrEqual(boxes[index - 1]![1]! - 0.5);
     // the own price of the second point is what its page shows
     await pointCards.nth(1).getByTestId('preview-action').click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(names.many);
+    await expect(page.locator('#offer-title')).toHaveText(names.many);
     await expect(page.getByText(/4\s?700\s?₸/).first()).toBeVisible();
     await page.getByRole('note').getByRole('link', { name: 'Вернуться к карточке' }).click();
     await expect(page).toHaveURL(new RegExp(`/seller\\?card=${ids.manyCard}`));
@@ -166,7 +166,7 @@ test('the Seller cabinet: the action only for what buyers can see, in the agreed
     await page.goto(`/seller?card=${ids.staleCard}`);
     await expect(page.getByTestId('preview-action')).toHaveCount(0);
     await page.goto(href(ids.staleOffer, ids.staleCard));
-    await expect(page.getByRole('heading', { name: 'Предложение больше недоступно' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Предложение недоступно' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Вернуться к карточке' })).toBeVisible();
 
     // right after publishing (seller-ai-text-real-parser §19, PO 2026-10-21): no lasting highlight; the brief message
