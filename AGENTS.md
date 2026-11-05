@@ -44,7 +44,8 @@
 
 ## Git и среда
 
-- Product Owner — нетехнический, пишет по-русски. Commit, push, PR, merge, tag — только по его прямому поручению.
+- Product Owner — нетехнический, пишет по-русски. Commit, push, PR и tag — только по его прямому поручению.
+- Merge агент делает сам, без отдельной команды, когда PR прошёл весь gate по `PROJECT_RULES.md` §6: зелёный branch CI на финальном head, нет конфликтов, для product slice — manual acceptance PO и положительный verdict KAIDA Controller. Если хоть что-то из этого не выполнено, merge не делать.
 - Никогда не коммитить личные файлы PO: `docs/reviews/localization-foundation-kk-review.docx`, `scripts/`, `tmp/`, `.vscode/`. Идентификаторы моделей в коммиты и документы не писать.
 - Облачный контейнер: `dockerd` запускать вручную, затем `docker compose up -d --wait`; `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:test:prepare` (пересоздаёт тестовую БД). E2E идёт на production build (`pnpm build`, затем `pnpm test:e2e`; серверы 3100/3101). Integration с `ECONNREFUSED 5432` = БД не запущена. Операционные процедуры — `docs/ops/`.
 
