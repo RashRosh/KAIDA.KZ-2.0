@@ -43,6 +43,9 @@ async function noOverflow(page: Page) {
   await page.setViewportSize({ width: 360, height: 800 });
 }
 
+// Screenshots for a person are taken at 2× so text renders as on a phone screen, not blurred at 1×.
+test.use({ deviceScaleFactor: 2 });
+
 test.beforeEach(async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile', 'Source viewport driven explicitly.');
   await page.setViewportSize({ width: 360, height: 800 });
