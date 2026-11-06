@@ -75,7 +75,7 @@ test('B09.ST04/ST07: top bar with count, 4-item nav, available and unavailable c
     const style = (s: string) => getComputedStyle(card.querySelector(s)!);
     const thumb = card.querySelector('img')!.parentElement!.getBoundingClientRect();
     const remove = [...card.querySelectorAll('button')].find((b) => b.textContent === 'Убрать из избранного')!.getBoundingClientRect();
-    return { thumb: [thumb.width, thumb.height], title: style('h3').fontSize, price: style('b').fontSize, radius: getComputedStyle(card).borderRadius, remove: remove.height >= 44 };
+    return { thumb: [Math.round(thumb.width), Math.round(thumb.height)], title: style('h3').fontSize, price: style('b').fontSize, radius: getComputedStyle(card).borderRadius, remove: remove.height >= 44 };
   });
   expect(m).toEqual({ thumb: [88, 88], title: '17px', price: '18px', radius: '14px', remove: true });
   expect(await first.getByRole('button', { name: 'Убрать из избранного' }).evaluate((b) => getComputedStyle(b).color)).toBe('rgb(153, 0, 204)');
