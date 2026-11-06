@@ -1,5 +1,5 @@
 // Paths transcribed from the current B03/B04 canvas, not the legacy icon pack.
-export type SearchIconName = 'search' | 'pin' | 'heart' | 'more' | 'phone' | 'whatsapp' | 'telegram' | 'route' | 'leaf' | 'alert' | 'close' | 'left' | 'right' | 'user' | 'refresh';
+export type SearchIconName = 'search' | 'pin' | 'heart' | 'more' | 'phone' | 'whatsapp' | 'telegram' | 'route' | 'leaf' | 'alert' | 'close' | 'left' | 'right' | 'user' | 'refresh' | 'blocked';
 export function SearchIcon({ name, filled = false }: { name: SearchIconName; filled?: boolean }) {
   const paths: Record<SearchIconName, React.ReactNode> = {
     search: <><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.5-4.5" /></>,
@@ -13,6 +13,7 @@ export function SearchIcon({ name, filled = false }: { name: SearchIconName; fil
     leaf: <><path d="M12 3c4 2.5 6 5.5 6 9s-2.5 6-6 7c-3.5-1-6-3.5-6-7s2-6.5 6-9z" /><path d="M12 22V9M12 15l-3-2M12 12l3-2" /></>,
     alert: <><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16.5v.01" /></>,
     close: <path d="M6 6l12 12M18 6L6 18" />,
+    blocked: <><circle cx="12" cy="12" r="9" /><path d="M5.6 5.6l12.8 12.8" /></>,
     left: <path d="M15 5l-7 7 7 7" />,
     right: <path d="M9 5l7 7-7 7" />,
     user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
