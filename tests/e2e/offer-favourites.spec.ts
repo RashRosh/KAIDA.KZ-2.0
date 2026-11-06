@@ -95,19 +95,19 @@ test('private favourites: guest intent, two points, current price, unavailable/r
     const unavailable=await(await page.request.get('/api/favourites')).json();for(const row of unavailable.favourites){expect(row).not.toHaveProperty('price');expect(row).not.toHaveProperty('offer');}
     expect(unavailable.favourites.find((r:{offerId:string})=>r.offerId===ids.offer2)).not.toHaveProperty('coverPhotoId');
     await info.attach('favourites-unavailable',{body:await page.screenshot(),contentType:'image/png'});
-    await page.route(`**/media/photos/${ids.photo}/thumb`,route=>route.abort());await page.reload();await expect(first.locator('img')).toHaveCount(0);await expect(first.locator('.i-logo')).toHaveCount(1);await page.unroute(`**/media/photos/${ids.photo}/thumb`);
+    await page.route(`**/media/photos/${ids.photo}/thumb`,route=>route.abort());await page.reload();await expect(first.locator('img')).toHaveCount(0);await expect(first.locator('svg[viewBox="0 0 18.23 27.17"]')).toHaveCount(1);await page.unroute(`**/media/photos/${ids.photo}/thumb`);
     await page.goto(`/offers/${ids.offer}?return=%2Ffavourites`);await page.getByRole('link',{name:'Назад в избранное'}).click();await expect(page).toHaveURL(/\/favourites$/);
     // Existing public media authorization passes for expired-active, never through a favourite grant.
     expect((await page.request.get(`/media/photos/${ids.photo}/thumb`)).status()).toBe(200);
     await pool.query("UPDATE offers SET status='inactive' WHERE id=$1",[ids.offer]);await page.reload();await expect(page.getByTestId('favourite-entry').locator('img')).toHaveCount(0);
     expect((await page.request.get(`/media/photos/${ids.photo}/thumb`)).status()).toBe(404);
     await pool.query("UPDATE offers SET status='active',last_confirmed_at=now() WHERE id=$1",[ids.offer]);await page.reload();await expect(first).toContainText('1 750');await expect(first.locator('a').first()).toBeVisible();
-    await pool.query("INSERT INTO offer_card_removals(card_id,seller_id,reason,removed_by_user_id) VALUES($1,$2,'other',$3)",[ids.card,ids.seller,ids.sellerOwner]);await page.reload();await expect(rows).toHaveCount(0);await expect(page.getByText('Пока нет избранных предложений')).toBeVisible();
+    await pool.query("INSERT INTO offer_card_removals(card_id,seller_id,reason,removed_by_user_id) VALUES($1,$2,'other',$3)",[ids.card,ids.seller,ids.sellerOwner]);await page.reload();await expect(rows).toHaveCount(0);await expect(page.getByText('В избранном пока пусто')).toBeVisible();
     const hidden=await(await page.request.get('/api/favourites')).json();expect(hidden.count).toBe(0);expect(JSON.stringify(hidden)).not.toContain(ids.photo);
     await pool.query('DELETE FROM offer_card_removals WHERE card_id=$1',[ids.card]);await page.reload();
     await page.route('**/api/favourites',async route=>{if(route.request().method()==='DELETE')await route.fulfill({status:503,json:{error:{code:'FAVOURITES_UNAVAILABLE'}}});else await route.continue();});
-    await second.getByRole('button',{name:'Убрать из избранного'}).click();await expect(page.getByText('Не удалось изменить избранное. Повторите.')).toBeVisible();await expect(rows).toHaveCount(2);await page.unroute('**/api/favourites');
-    await second.getByRole('button',{name:'Убрать из избранного'}).click();await expect(rows).toHaveCount(1);
+    await second.getByRole('button',{name:'Убрать из избранного'}).click();await expect(second.getByText('Не удалось убрать из избранного. Запись осталась в списке.')).toBeVisible();await expect(rows).toHaveCount(2);await page.unroute('**/api/favourites');
+    await second.getByRole('button',{name:'Убрать ещё раз'}).click();await expect(rows).toHaveCount(1);
     expect(await(await page.request.get('/api/interests')).json()).toEqual(beforeInterest);
     // A deliberately delayed old-account GET must never restore data after the application's session-change signal.
     let release!:()=>void;const wait=new Promise<void>(r=>release=r);let seen!:()=>void;const intercepted=new Promise<void>(r=>seen=r);
@@ -132,7 +132,7 @@ test('list login never adds; Offer expiring during heart login is not saved; lis
   try{
     await pool.query("INSERT INTO users(id,phone_e164,created_at) VALUES($1,'+77000280401',now()),($2,'+77000280402',now()),($3,'+77000280411',now())",[user,owner,secondUser]);await pool.query("INSERT INTO sellers(id,owner_user_id,display_name) VALUES($1,$2,'Login race test seller')",[seller,owner]);await pool.query("INSERT INTO locations(id,seller_id,name,type,address_text) VALUES($1,$2,'Login race point','shop','Synthetic address')",[point,seller]);
     await pool.query("INSERT INTO offers(id,card_id,title,title_search,seller_id,location_id,price_amount,price_currency,status,last_confirmed_at) VALUES($1,$2,'Login race private target','login race private target',$3,$4,1300,'KZT','active',now())",[offer,card,seller,point]);
-    await page.goto('/favourites');await page.getByRole('button',{name:'Войти',exact:true}).click();const code=await enterPhone('+77000280401');await page.getByLabel('Код из 6 цифр',{exact:true}).fill(code);await page.getByRole('dialog').getByRole('button',{name:'Войти',exact:true}).click();await expect(page.getByText('Пока нет избранных предложений')).toBeVisible();
+    await page.goto('/favourites');await page.getByRole('button',{name:'Войти',exact:true}).click();const code=await enterPhone('+77000280401');await page.getByLabel('Код из 6 цифр',{exact:true}).fill(code);await page.getByRole('dialog').getByRole('button',{name:'Войти',exact:true}).click();await expect(page.getByText('В избранном пока пусто')).toBeVisible();
     expect((await pool.query('SELECT * FROM buyer_offer_favourites WHERE user_id=$1',[user])).rows).toHaveLength(0);
     await page.request.post('/api/auth/logout');await page.goto(`/offers/${offer}?return=%2Ffavourites`);await page.getByTestId('favourite-heart').click();
     const secondCode=await enterPhone('+77000280411');
@@ -142,7 +142,7 @@ test('list login never adds; Offer expiring during heart login is not saved; lis
     expect((await pool.query('SELECT * FROM buyer_offer_favourites WHERE offer_id=$1',[offer])).rows).toHaveLength(0);
     // Successful login has no saved target after server-side eligibility revalidation.
     await page.goto('/favourites');
-    await page.route('**/api/favourites?locale=ru',route=>route.fulfill({status:503,json:{error:{code:'FAVOURITES_UNAVAILABLE'}}}));await page.reload();await expect(page.getByText('Не удалось загрузить избранное. Повторите.')).toBeVisible();await expect(page.getByText('Пока нет избранных предложений')).toHaveCount(0);await page.unroute('**/api/favourites?locale=ru');await page.getByRole('button',{name:'Повторить',exact:true}).click();await expect(page.getByText('Пока нет избранных предложений')).toBeVisible();
+    await page.route('**/api/favourites?locale=ru',route=>route.fulfill({status:503,json:{error:{code:'FAVOURITES_UNAVAILABLE'}}}));await page.reload();await expect(page.getByRole('alert').filter({hasText:'Не удалось загрузить избранное.'})).toBeVisible();await expect(page.getByText('В избранном пока пусто')).toHaveCount(0);await page.unroute('**/api/favourites?locale=ru');await page.getByRole('button',{name:'Повторить',exact:true}).click();await expect(page.getByText('В избранном пока пусто')).toBeVisible();
   }finally{
     await pool.query('DELETE FROM buyer_offer_favourites WHERE offer_id=$1 OR user_id=$2',[offer,user]);await pool.query('DELETE FROM offers WHERE id=$1',[offer]);await pool.query('DELETE FROM locations WHERE id=$1',[point]);await pool.query('DELETE FROM sellers WHERE id=$1',[seller]);await pool.query("DELETE FROM auth_sessions WHERE user_id IN (SELECT id FROM users WHERE phone_e164=ANY($1::text[]))",[['+77000280401','+77000280402','+77000280411']]);await pool.query('DELETE FROM auth_otp_challenges WHERE phone_e164=ANY($1::text[])',[['+77000280401','+77000280411']]);await pool.query('DELETE FROM users WHERE phone_e164=ANY($1::text[])',[['+77000280401','+77000280402','+77000280411']]);await pool.end();
   }

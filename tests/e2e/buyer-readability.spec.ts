@@ -12,7 +12,7 @@ import { resultCard, setLocaleCookie } from './buyer-helpers';
 
 const INK2 = 'rgb(97, 91, 100)';
 const INK3 = 'rgb(110, 104, 113)';
-const SEARCH_INK2 = 'rgb(91, 64, 106)'; // New baseline (Search, Offer); Favourites remain on the legacy palette.
+const SEARCH_INK2 = 'rgb(91, 64, 106)'; // New baseline (Search, Offer, Favourites).
 const LONG_POINT = 'Павильон «Мясо, молочные продукты и мёд от фермерского хозяйства Жаксылык»';
 const LONG_ADDRESS = 'Алматы, ул. Райымбека батыра, 351/1, торговый центр «Алтын Орда», второй этаж, павильон 12, ряд 4, место 31';
 const LONG_SELLER = 'Ержан Абдрахманович Жаксылыков и сыновья';
@@ -165,13 +165,15 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     } }));
     await page.goto('/favourites');
     const unavailable = page.getByTestId('unavailable-line');
-    await expect(unavailable).toHaveCount(3);
-    for (let index = 0; index < 3; index++) await expectReadable(unavailable.nth(index));
+    // D4 · B10: the state line (13/18 ink) and «seller · point» (13/18 ink2) of the new baseline, both in rem.
+    await expect(unavailable).toHaveCount(2);
+    await expectReadable(unavailable.nth(0), '13px', '18px', 'rgb(31, 16, 38)');
+    await expectReadable(unavailable.nth(1), '13px', '18px', SEARCH_INK2);
     await expectUsable(page);
     await shot('favourites-unavailable-360-ru');
-    // the seller line is a flex row (icon + name): at 200 % a long word must still wrap inside the narrow card
+    // at 200 % a long seller and point must still wrap inside the narrow card
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
-    await expectReadable(unavailable.nth(2), '28px', '40px');
+    await expectReadable(unavailable.nth(1), '26px', '36px', SEARCH_INK2);
     for (const width of [360, 320]) {
       await page.setViewportSize({ width, height: 800 });
       await expectUsable(page);
