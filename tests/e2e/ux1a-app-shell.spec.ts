@@ -7,10 +7,12 @@ type Page = import('@playwright/test').Page;
 
 const NAV_NAME = 'Основная навигация';
 
-async function expectBuyerShell(page: Page) {
+async function expectBuyerShell(page: Page, navItems: string[] = ['Поиск', 'Рядом', 'Ещё'], columnMax = 480) {
   const nav = page.getByRole('navigation', { name: NAV_NAME });
   await expect(nav).toBeVisible();
-  await expect(nav.getByRole('link')).toHaveText(['Поиск', 'Рядом', 'Ещё']);
+  // design-favourites/design-nearby: migrated buyer screens carry the D2 four-item navigation with a standalone
+  // «Избранное» tab; the not-yet-migrated routes keep the original three.
+  await expect(nav.getByRole('link')).toHaveText(navItems);
   await expect(page.getByRole('banner').filter({ has: page.getByRole('link', { name: 'KAIDA.KZ, главная' }) })).toHaveCount(0);
   await expect(page.getByRole('search', { name: 'Поиск из шапки' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Открыть меню', exact: true })).toHaveCount(0);
@@ -20,7 +22,8 @@ async function expectBuyerShell(page: Page) {
   const column = await page.locator('.kaida-app > .ph').boundingBox();
   const viewport = page.viewportSize()!;
   expect(column).not.toBeNull();
-  expect(column!.width).toBeLessThanOrEqual(480);
+  // design-search/design-nearby: the migrated result surfaces widen to the 720 px adaptation of the new baseline.
+  expect(column!.width).toBeLessThanOrEqual(columnMax);
   expect(Math.abs(column!.x + column!.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(1);
   const navBox = (await nav.boundingBox())!;
   expect(Math.abs(navBox.y + navBox.height - viewport.height)).toBeLessThanOrEqual(1);
@@ -29,7 +32,7 @@ async function expectBuyerShell(page: Page) {
 test('buyer routes share the mockup phone column and bottom navigation without horizontal overflow', async ({ page }) => {
   for (const path of ['/', '/nearby', '/more', '/login']) {
     await page.goto(path);
-    await expectBuyerShell(page);
+    await expectBuyerShell(page, path === '/nearby' ? ['Поиск', 'Рядом', 'Избранное', 'Ещё'] : undefined, path === '/nearby' ? 720 : undefined);
     if (path === '/login') await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
   }
 

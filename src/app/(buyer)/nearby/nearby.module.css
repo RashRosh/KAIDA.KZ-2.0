@@ -1,0 +1,95 @@
+/* D5 · B07 source; scoped to Nearby, never Search/Home/Seller. */
+.screen :global(.kaida) {
+  --bg:#faf3fe; --surface:#fdfbff; --raised:#fdfbff; --sunken:#f4e9fb;
+  --line:#e9d9f2; --line-control:#9073a0; --ink:#1f1026; --ink2:#5b406a; --ink3:#745784;
+  --primary:#9900cc; --primary-t:#9900cc; --primary-s:#f8e5ff; --focus:#9900cc;
+  --success:#007950; --danger:#b21f41; --danger-soft:#ffeced; --on-primary:#ffffff;
+  --ease-out:cubic-bezier(.33,1,.68,1);
+  background:var(--bg); font:400 15px/22px Roboto,Geologica,system-ui,sans-serif;
+}
+.screen :global(.kaida.kaida-app > .ph) { max-width:720px; }
+.screen .top { display:flex; align-items:center; gap:8px; min-height:64px; padding:12px 16px 8px; background:var(--bg); }
+.screen .top h1 { font:400 26px/32px Geologica,Roboto,system-ui,sans-serif; letter-spacing:-.015em; margin:0; flex:1; color:var(--ink); font-weight:400; }
+.screen .refresh { width:44px; height:44px; flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; color:var(--ink); border-radius:14px; padding:0; cursor:pointer; transition:background-color 100ms var(--ease-out),color 100ms var(--ease-out),transform 100ms var(--ease-out); }
+.screen .refresh:active { transform:scale(.97); }
+@media (hover:hover) and (pointer:fine) { .screen .refresh:hover { background:var(--sunken); } }
+.screen .refresh:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+
+.screen .body { flex:1; display:flex; flex-direction:column; gap:12px; padding:4px 16px 24px; min-height:0; }
+.screen .bodyStart { padding-top:8px; }
+
+/* B07.ST01/ST04/ST05: центрированное объяснение с иллюстрацией */
+.screen .empty { display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:56px 8px 8px; }
+.screen .empty svg { width:160px; height:120px; flex:none; }
+.screen .empty h2 { font:400 21px/28px Geologica,Roboto,system-ui,sans-serif; letter-spacing:-.01em; margin:0; color:var(--ink); font-weight:400; }
+.screen .empty p { margin:0; color:var(--ink2); }
+.screen .choices { display:flex; flex-direction:column; gap:4px; margin-top:8px; }
+.screen .choicesLink { align-self:center; }
+
+/* кнопки — системные классы btn btn-p / btn-o; здесь только защита текста ссылок-кнопок от глобального a:hover */
+.screen a.btn { text-decoration:none; }
+.screen a.btn:hover { color:var(--on-primary); }
+
+.screen .link { color:var(--primary-t); font:500 14px/20px Roboto,Geologica,system-ui,sans-serif; text-decoration:underline; text-underline-offset:3px; display:inline-flex; align-items:center; min-height:44px; }
+.screen .link:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+
+/* B07.ST02/ST08: уведомление о ходе определения + скелетон сетки */
+.screen .notice { display:flex; gap:10px; padding:12px; border-radius:14px; background:var(--surface); border:1px solid var(--line); color:var(--ink); font:400 14px/20px Roboto,Geologica,system-ui,sans-serif; align-items:center; }
+.screen .spin { width:18px; height:18px; border-radius:50%; border:2px solid var(--line); border-top-color:var(--primary); flex:none; }
+.screen :global(.kaida.motion .spin) { animation:nb-rot 800ms linear infinite; }
+@keyframes nb-rot { to { transform:rotate(360deg); } }
+
+/* сетка и карточка-плитка */
+.screen .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:0; margin:0; list-style:none; align-items:start; }
+.screen .tile { display:flex; flex-direction:column; gap:6px; min-width:0; position:relative; }
+.screen .thumb { width:100%; aspect-ratio:1/1; border-radius:14px; background:var(--sunken); display:flex; align-items:center; justify-content:center; color:var(--primary); flex:none; overflow:hidden; position:relative; }
+.screen .thumb > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.screen .thumb > :global(svg) { width:40px; height:auto; opacity:.1; fill:var(--primary); }
+.screen .nm { display:flex; align-items:flex-start; justify-content:space-between; gap:0; }
+.screen .tt { font:400 15px/20px Roboto,Geologica,system-ui,sans-serif; margin:0; min-width:0; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.screen .tt a { color:inherit; text-decoration:none; }
+.screen .heart { width:44px; height:44px; margin:-8px -8px 0 0; flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; border-radius:14px; color:var(--ink); padding:0; cursor:pointer; transition:color 100ms var(--ease-out),transform 100ms var(--ease-out); }
+.screen .heart[aria-pressed='true'] { color:var(--primary-t); }
+.screen .heart[data-error='true'] { color:var(--danger); }
+.screen .heart:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.screen .heart:active :global(svg) { transform:scale(.88); }
+.screen .heart[aria-busy='true'] :global(svg) { visibility:hidden; }
+.screen .heart[aria-busy='true']::after { content:''; position:absolute; width:22px; height:22px; border:2.5px solid var(--line); border-top-color:var(--primary); border-radius:50%; animation:nb-rot 800ms linear infinite; }
+@media (prefers-reduced-motion:reduce) { .screen .heart[aria-busy='true']::after { animation:none; } }
+.screen .price { font:700 20px/24px Geologica,Roboto,system-ui,sans-serif; font-variant-numeric:tabular-nums; white-space:nowrap; margin:0; }
+.screen .price small { font:400 13px/18px Roboto,Geologica,system-ui,sans-serif; color:var(--ink2); }
+/* плашка давности: та же шкала, что в выдаче и на странице предложения */
+.screen .fresh { display:inline-flex; align-items:center; gap:3px; align-self:flex-start; padding:2px 8px 2px 6px; border-radius:999px; font:500 13px/18px Roboto,Geologica,system-ui,sans-serif; color:#fff; background:#007950; }
+.screen .fresh :global(svg) { width:14px; height:14px; }
+.screen .fresh[data-tier='2'] { background:#a6d04a; color:var(--ink); }
+.screen .fresh[data-tier='3'] { background:#f2b13a; color:var(--ink); }
+.screen .fresh[data-tier='4'] { background:var(--primary); }
+.screen .fresh[data-tier='5'] { background:#2a0640; }
+.screen .cap2 { font:400 13px/18px Roboto,Geologica,system-ui,sans-serif; color:var(--ink2); }
+
+/* B07.ST06/ST08: ошибка загрузки над приглушённым скелетоном */
+.screen .errNotice { display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:14px; background:var(--danger-soft); border:0; color:var(--ink); font:400 14px/20px Roboto,Geologica,system-ui,sans-serif; }
+.screen .errNotice > div { display:flex; gap:10px; align-items:flex-start; }
+.screen .errNotice :global(svg) { flex:none; color:var(--danger); width:20px; height:20px; margin-top:0; }
+.screen .errNotice p { margin:0; }
+.screen .errNotice :global(b) { font-weight:500; }
+.screen .errButton { align-self:flex-start; margin-left:34px; } /* PO 2026-11-10: кнопка выровнена по началу текста (иконка 24px + отступ 10px) */
+.screen .dimmed { opacity:.6; }
+
+/* скелетоны той же формы, что сетка */
+.screen .sk { display:block; background:var(--sunken); border-radius:14px; }
+.screen :global(.kaida.motion .sk) { animation:nb-pulse 1400ms ease-in-out infinite; }
+@keyframes nb-pulse { 50% { opacity:.55; } }
+
+/* нижняя навигация D2 */
+.screen :global(.nav) { grid-template-columns:repeat(4,minmax(0,1fr)); height:calc(64px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); }
+.screen :global(.nav a) { color:var(--ink2); }
+.screen :global(.nav a.on) { color:var(--ink); font-weight:700; }
+.screen :global(.nav .on)::before { display:none; }
+.screen [data-part='nav-pill'] { width:56px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:14px; transition:background-color 100ms var(--ease-out),color 100ms var(--ease-out),transform 100ms var(--ease-out); }
+.screen :global(.nav a.on) [data-part='nav-pill'] { background:var(--primary-s); color:var(--primary-t); }
+.screen :global(.kaida.motion .nav a:active) { transform:none; }
+@media (prefers-reduced-motion:reduce) {
+  .screen :global(.kaida.motion) :is(a,button,.sk,[data-part='nav-pill'],.spin) { animation:none; transition:none; transform:none; }
+}
+@media (min-width:600px) { .screen .top, .screen .body { padding-left:24px; padding-right:24px; } }

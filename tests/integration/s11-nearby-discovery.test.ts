@@ -175,12 +175,14 @@ describe('S11 Nearby Discovery on PostgreSQL 18 after UX1D eligibility', () => {
 
     const serialized = JSON.stringify(result);
     expect(serialized).toContain('"distanceMeters"');
+    // design-nearby (PO decision 2026-11-10, same basis as the D2 Search projection): the existing BuyerOffer
+    // confirmation timestamp is public for the minute/hour freshness badge; ranking inputs stay private.
+    expect(serialized).toContain('"lastConfirmedAt"');
     for (const forbidden of [
       '"geo"',
       '"latitude"',
       '"longitude"',
       '"buyerLocation"',
-      '"lastConfirmedAt"',
       '"nearbyRadiusMeters"',
       '"rank"',
       '"score"',
