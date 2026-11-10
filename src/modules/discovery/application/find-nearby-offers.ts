@@ -48,8 +48,15 @@ export async function findNearbyOffers(
 
   const policy = readActualityPolicy();
   const actualityByOffer = new Map(candidates.map((candidate) => [candidate.offer.id, buyerActuality(candidate.lastConfirmedAt, now, policy)]));
+  // design-nearby (PO decision 2026-11-10, same basis as the D2 Search projection): the existing public confirmation
+  // timestamp powers the minute/hour freshness badge. Raw coordinates and ranking metadata stay private.
+  const confirmedAtByOffer = new Map(candidates.map((candidate) => [candidate.offer.id, candidate.lastConfirmedAt]));
   return {
     offers: selectNearbyOffers(candidates, buyerLocation, nearbyRadiusMeters, ageingSince(now, policy))
-      .map((offer) => ({ ...offer, actuality: actualityByOffer.get(offer.id) })),
+      .map((offer) => ({
+        ...offer,
+        actuality: actualityByOffer.get(offer.id),
+        lastConfirmedAt: confirmedAtByOffer.get(offer.id)?.toISOString(),
+      })),
   };
 }
