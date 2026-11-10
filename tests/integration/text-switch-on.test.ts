@@ -19,7 +19,9 @@ import { connectTestDatabase, testDatabaseUrl } from './database';
 
 // text-price-update (docs/slices/text-price-update/SLICE_CONTRACT.md §7, §9): one line → one card, server-side
 // admissibility, idempotency per set of changes, stale data before proposal and at confirm, rollback. Fake parser.
-const T0 = new Date('2026-10-27T08:00:00.000Z');
+// Relative base date: offers must stay inside the 14-day actuality window whenever the suite runs.
+// A fixed calendar date (2026-10-27) became a time bomb once that window expired.
+const T0 = new Date(Date.now() - 36 * 3600_000);
 const A = { id: '50000000-0000-4000-8000-000000009701', phoneE164: '+77000009701' };
 const B = { id: '50000000-0000-4000-8000-000000009702', phoneE164: '+77000009702' };
 const env = { SELLER_TEXT_INPUT: 'fake' };
