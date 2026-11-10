@@ -7,7 +7,7 @@ import { testDatabaseUrl } from '../integration/database';
 test.describe.configure({ mode: 'serial' });
 
 const EARTH_MEAN_RADIUS_METERS = 6_371_008.8;
-const buyerLocation = { latitude: 1.234567, longitude: 2.345678 };
+let buyerLocation = { latitude: 1.234567, longitude: 2.345678 };
 
 function pointNorthByMeters(meters: number) {
   return {
@@ -45,6 +45,9 @@ async function cleanup() {
 }
 
 test.beforeAll(async ({}, workerInfo) => {
+  // Mobile and desktop run in parallel against one test database: unique longitudes keep the two fixtures
+  // far outside each other's Nearby radius, so neither project sees the other's offers.
+  buyerLocation = { latitude: 1.234567, longitude: 2.345678 + workerInfo.workerIndex * 10 + workerInfo.project.name.length };
   const suffix = `${workerInfo.project.name}-${randomUUID().slice(0, 8)}`;
   productId = randomUUID();
   sellerId = randomUUID();
@@ -172,12 +175,14 @@ function distanceText(meters: number) {
 function assertDiscoveryPrivacy(body: unknown) {
   const serialized = JSON.stringify(body);
   expect(serialized).toContain('"distanceMeters"');
+  // design-nearby (PO decision 2026-11-10, same basis as the D2 Search projection): the existing BuyerOffer
+  // confirmation timestamp is public for the minute/hour freshness badge; ranking inputs stay private.
+  expect(serialized).toContain('"lastConfirmedAt"');
   for (const forbidden of [
     '"geo"',
     '"latitude"',
     '"longitude"',
     '"buyerLocation"',
-    '"lastConfirmedAt"',
     '"nearbyRadiusMeters"',
     '"rank"',
     '"score"',
@@ -212,17 +217,14 @@ test('Buyer clicks Nearby once, gets only nearby buyer-eligible Offers, keeps ac
   expect(nearbyRequests).toBe(1);
 
   const cards = page.getByRole('article');
-  await expect(cards.nth(0)).toContainText(insideLocationName);
+  // design-nearby (B07): the Nearby grid shows photo, name, price, freshness and distance; point, seller, contacts,
+  // route and hours moved to the offer page (PO decision 2026-11-03, presentation revision of the Nearby card).
+  await expect(cards.nth(0).getByRole('link', { name: productName })).toHaveAttribute('href', `/offers/${insideOfferId}`);
   await expect(cards.nth(0)).toContainText(distanceText(1000));
-  await expect(cards.nth(1)).toContainText(boundaryLocationName);
+  await expect(cards.nth(1).getByRole('link', { name: productName })).toHaveAttribute('href', `/offers/${boundaryOfferId}`);
   await expect(cards.nth(1)).toContainText(distanceText(NEARBY_RADIUS_METERS_DEFAULT));
   await expect(page.getByText(outsideLocationName)).toHaveCount(0);
   await expect(page.getByText(geolessLocationName)).toHaveCount(0);
-
-  const firstCard = cards.nth(0);
-  for (const label of ['Позвонить продавцу', `Маршрут до ${insideLocationName}`, 'Написать в WhatsApp']) {
-    await expect(firstCard.getByRole('link', { name: label, exact: true })).toBeVisible();
-  }
 
   const browserPersistence = await page.evaluate(() => ({
     localStorage: Object.entries(localStorage),
@@ -235,7 +237,7 @@ test('Buyer clicks Nearby once, gets only nearby buyer-eligible Offers, keeps ac
   expect(browserPersistence.sessionStorage).not.toContainEqual(['kaida:nearby-nav-intent', '1']);
 
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Определить местоположение', exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(0);
   expect(nearbyRequests).toBe(1);
   await expect(page.getByRole('article')).toHaveCount(0);
@@ -251,7 +253,7 @@ test('one-click Nearby geolocation denial shows an error and does not fall back 
   await page.goto('/');
   await openNearbyFromShell(page);
   await expect(page).toHaveURL(/\/nearby$/);
-  await expect(page.getByText('Не удалось определить местоположение. Раздел «Рядом» работает только с разрешённой геолокацией.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Не удалось определить местоположение' })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(1);
   expect(nearbyRequests).toBe(0);
   await expect(page.getByRole('article')).toHaveCount(0);
@@ -260,11 +262,11 @@ test('one-click Nearby geolocation denial shows an error and does not fall back 
 test('direct Nearby deep link waits for an explicit action and can produce the empty state', async ({ page }) => {
   await mockGeolocation(page, { latitude: -40.123456, longitude: -50.654321 });
   await page.goto('/nearby');
-  await expect(page.getByRole('button', { name: 'Показать товары рядом', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Определить местоположение', exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(0);
 
-  await page.getByRole('button', { name: 'Показать товары рядом', exact: true }).click();
-  await expect(page.getByText('Рядом пока нет актуальных предложений.')).toBeVisible();
+  await page.getByRole('button', { name: 'Определить местоположение', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Рядом пока нет предложений' })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __s11GeoCalls: number }).__s11GeoCalls)).toBe(1);
   await expect(page.getByRole('article')).toHaveCount(0);
 });
