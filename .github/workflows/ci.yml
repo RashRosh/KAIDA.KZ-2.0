@@ -65,7 +65,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kaida-browser-report-${{ github.sha }}
+          # Traces contain auth cookies/responses; exclude raw and HTML-report copies.
           path: |
             playwright-report/
             test-results/
+            !playwright-report/data/*.zip
+            !test-results/**/trace.zip
           retention-days: 7

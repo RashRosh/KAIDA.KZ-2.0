@@ -130,10 +130,19 @@ test('B07.ST03: a two-column grid with photo, name, heart, price, freshness and 
       priceFont: price.fontSize,
       badgeBg: getComputedStyle(badge).backgroundColor,
       capColor: getComputedStyle(cap).color,
-      heart: (el.querySelector('button')!.getBoundingClientRect().height) >= 44,
     };
   });
-  expect(sizes).toEqual({ thumbRatio: 1, priceFont: '20px', badgeBg: 'rgb(0, 121, 80)', capColor: 'rgb(91, 64, 106)', heart: true });
+  expect(sizes).toEqual({ thumbRatio: 1, priceFont: '20px', badgeBg: 'rgb(0, 121, 80)', capColor: 'rgb(91, 64, 106)' });
+  const heart = await first.getByRole('button', { name: 'В избранное' }).evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const css = getComputedStyle(el);
+    return { width: box.width, height: box.height, cssWidth: css.width, cssHeight: css.height };
+  });
+  // Keep the exact 44px CSS and both hit-target dimensions. During ancestor translation Windows Chromium
+  // measured 43.99998474121094px; 0.0001px covers that float noise, not a smaller layout or scaled button.
+  expect(heart).toMatchObject({ cssWidth: '44px', cssHeight: '44px' });
+  expect(heart.width, JSON.stringify(heart)).toBeGreaterThanOrEqual(44 - 0.0001);
+  expect(heart.height, JSON.stringify(heart)).toBeGreaterThanOrEqual(44 - 0.0001);
   await shot(page, info, 'B07-ST03-grid-360');
   await noOverflow(page);
 });
