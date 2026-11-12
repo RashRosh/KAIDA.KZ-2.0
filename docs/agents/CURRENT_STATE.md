@@ -2,28 +2,29 @@
 
 ## Current task
 
-- PO authorized investigation/fix, targeted/full regression and branch CI for #219. Branch `maintenance/219-windows-e2e`.
-- No merge/checkpoint tag without PO approval. No D6, unrelated product/closed-contract edits, OS network changes or arbitrary retries. Raw auth traces stay local.
+- Scoped maintenance complete on `maintenance/219-windows-e2e`; awaiting PO review. No merge/checkpoint tag without PO approval.
+- No D6, production code or closed behavioral contract edits; no OS network changes, custom browser flags or retry policy changes. Raw auth traces remain local.
 
 ## Verified base
 
-- Fetched main `e1b4d93d35b5b043913f68cec500e88699a18156`; KAIDA verify 42966213173 and CodeQL 42966213209 success.
-- Annotated checkpoint `v0.0.90-design-nearby` → `7cfed6fcd40496a5e4505b7089a2db4125dbbdcd`.
+- Main `e1b4d93d35b5b043913f68cec500e88699a18156`; KAIDA verify 42966213173 / CodeQL 42966213209 success.
+- Annotated checkpoint `v0.0.90-design-nearby` → `7cfed6fcd40496a5e4505b7089a2db4125dbbdcd`. Unchanged.
 
 ## Last completed / verification
 
-- Upgraded only Playwright 1.63 → 1.65 and lockfile; installed matching Chromium 158.0.8127.18 (revision 1254), built-in TcpPortRandomizationWin mitigation confirmed. No custom launch flags; workers 2 / retries 0 unchanged.
-- Baseline seven network specs: 32 pass / 6 expected skips; 38 local traces, 420 ERR_ABORTED, zero buffer/address errors. Original network instability not reproduced in this bounded baseline.
-- Baseline geometry repeats: 28 pass / 2 float failures / 10 expected skips; address 18 ±0.000015258789062. Heart 8 additional runs: all pass, frame measurements 43.99998474121094–44.00001525878906 at exact computed 44px. Both TEST IMPLEMENTATION float comparisons; narrow tolerances added, exact CSS and both 44px target dimensions retained.
-- CI artifact paths exclude raw trace ZIP and HTML-report ZIP copies to honor privacy boundary.
-- Unit 731 pass; lint/typecheck/build completed without reported errors. Integration in progress; a failure appeared in seller-text-real-parser and requires classification. Targeted 1.65 run stopped before tests to avoid sharing DB with integration; no pass claim.
+- Executable commit `e9e4b36e71f27068996768b5f14cae67fb341c15` pushed. Playwright 1.65 / Chromium 158.0.8127.18 (1254); actual launch has one disable-features argument with built-in TcpPortRandomizationWin mitigation.
+- Both geometry failures diagnosed independently as float serialization during ancestor translation; narrow tolerances retain exact CSS, visual/accessibility checks and both 44px heart dimensions. No production changes.
+- Local Windows on this executable SHA: lint/typecheck/build PASS; unit 731/731; prepared-DB integration 435/435; targeted E2E 40 pass / 12 existing skips; tenfold geometry 30 pass / 10 existing skips; normal full E2E 357 pass / 87 existing skips, 0 failures (9.8m), 2 workers / 0 retries.
+- All 52 targeted traces inspected: 4,435 network records; only 53 ERR_ABORTED, zero ERR_NO_BUFFER_SPACE / ERR_ADDRESS_IN_USE. Original network flake was not reproduced in the bounded 1.63 baseline either; no claim of permanent stability.
+- Branch CI on executable SHA: KAIDA verify 43219572100 PASS (lint/types/migrations/seed/build, unit 731, integration 435, E2E 357 pass / 87 existing skips).
+- CI upload excludes raw trace ZIP and HTML-report ZIP copies. Evidence and procedure classification: `docs/reviews/windows-e2e-219.md`.
 
 ## Next action
 
-- Finish/classify integration, then targeted 1.65 E2E, geometry repeats and normal full 2-worker E2E sequentially on the test DB. Commit/push scoped changes for branch CI, report exact SHA/results.
+- PO review of maintenance branch and report. No merge or checkpoint tag until explicit approval. No remaining test failure observed; nondeterministic Windows recurrence remains possible.
 
-## Local constraints / hypotheses
+## Local constraints
 
-- Use pnpm.cmd (PowerShell blocks pnpm.ps1); sandbox escalation required for network and Git metadata outside worktree.
-- Local evidence in tmp/219-*.log and tmp/219-baseline-network; never stage tmp/, scripts/, .vscode/ or personal review DOCX.
-- Network hypothesis: upstream Windows TCP randomization defect; if errors survive upgrade, inspect TCP state read-only before rerun. Float geometry hypothesis confirmed independently; no production fix needed.
+- Use pnpm.cmd (PowerShell blocks pnpm.ps1); sandbox escalation needed for network and external worktree Git metadata.
+- Run integration after db:test:prepare and before E2E: E2E imports Production KB into kaida_test. Initial invalid-order integration attempt was interrupted; corrected clean-DB run passed. No DB-sharing parallel tests.
+- Private local evidence in tmp/219-* and test-results/; temporary geometry probes/scanner removed. Never stage tmp/, scripts/, .vscode/ or personal review DOCX. No raw authentication traces uploaded.
