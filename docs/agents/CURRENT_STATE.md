@@ -15,11 +15,11 @@
 
 - Windows E2E maintenance #219 merged as PR #220. Final PR head `3aac4c32396c87f7658720187e2aedf901a3316a`; branch verify 43233655905 passed. Main checkpoint CI above passed.
 - On the #219 executable commit `e9e4b36e71f27068996768b5f14cae67fb341c15`: lint/typecheck/build, unit 731/731, integration 435/435, full E2E 357 passed / 87 existing skips, 0 failures. Detailed bounded evidence: [windows-e2e-219.md](../reviews/windows-e2e-219.md).
-- PR #215 head `99bb0f658eb35ca402dfbc031882bfec8d1f2e27` contains the approved contract and D5/D6 plan updates on the verified main. The original #216 implementation and E2E patch is preserved above it; prior D6 checks are stale for this rebased head.
+- PR #215 head `99bb0f658eb35ca402dfbc031882bfec8d1f2e27` contains the approved contract and D5/D6 plan updates on the verified main. The original #216 implementation and E2E patch is preserved and published above it; confirm checks on the latest heads.
 
 ## Next action
 
-- Publish the reconciled #216 head and verify required full branch CI on both final PR heads; review the CI artifacts and diff scope. Once green, request PO visual acceptance of the three 360px / 2x screenshots against live B02 and the manual flow below. Do not merge or tag before explicit PO approval.
+- Confirm full branch CI, CodeQL and dependency review are green on the latest #215 and #216 heads. Then request PO visual acceptance of the three 360px / 2x screenshots against live B02 and the manual flow below. Do not merge or tag before explicit PO approval.
 - D6 E2E seams: `design-search-home` covers the three B02 visual states and no initial search; `search-home-last-state` and `first-entry-correction` cover unchanged home/return behavior; `ux1a-app-shell` covers unchanged root and navigation behavior. These do not replace PO visual acceptance against B02.
 - After green final-head CI, request PO visual acceptance of the three 360px / 2x screenshots and manual flow in the D6 contract. Do not merge or tag until PO approval.
 
