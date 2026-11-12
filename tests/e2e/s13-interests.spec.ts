@@ -1,7 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { PLAIN_SEARCH_URL } from './browser-state';
 import { Pool } from 'pg';
+import { randomUUID } from 'node:crypto';
 import { testDatabaseUrl } from '../integration/database';
+import { seedIds } from '../../src/db/seed';
 import { expectSignedIn, openOffer, SEED_POINT, signOutInMore } from './buyer-helpers';
 
 function phoneFor(projectName: string) {
@@ -51,6 +53,56 @@ async function openSeedOffer(page: Page) {
   await openOffer(card, 'Баранина');
   await expect(page.getByText('Асыл Ет, тестовый продавец', { exact: true })).toBeVisible();
 }
+
+test('a guest can track a product after signing in from Favourites and opening an existing favourite', async ({ page }, testInfo) => {
+  const phone = testInfo.project.name === 'mobile' ? '+77000000901' : '+77000000902';
+  const pool = new Pool({ connectionString: testDatabaseUrl(), max: 1 });
+  const userId = randomUUID();
+  await cleanup(phone);
+  try {
+    await pool.query('INSERT INTO users (id, phone_e164, created_at) VALUES ($1, $2, now())', [userId, phone]);
+    await pool.query(
+      'INSERT INTO buyer_offer_favourites (user_id, offer_id, location_id) VALUES ($1, $2, $3)',
+      [userId, seedIds.lambOffer, seedIds.location],
+    );
+
+    await page.goto('/favourites');
+    await expect(page.getByText('Войдите, чтобы открыть избранное')).toBeVisible();
+    let otpRequests = 0;
+    page.on('request', (request) => {
+      if (request.url().endsWith('/api/auth/otp/request') && request.method() === 'POST') otpRequests++;
+    });
+
+    await page.getByRole('button', { name: 'Войти', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('textbox', { name: 'Телефон', exact: true }).fill(formattedPhone(phone));
+    const requestResponse = page.waitForResponse((response) =>
+      response.url().endsWith('/api/auth/otp/request') && response.request().method() === 'POST',
+    );
+    await dialog.getByRole('button', { name: 'Получить код', exact: true }).click();
+    const requested = await (await requestResponse).json();
+    await dialog.getByRole('textbox', { name: 'Код из 6 цифр', exact: true }).fill(requested.delivery.code);
+    await dialog.getByRole('button', { name: 'Войти', exact: true }).click();
+
+    await expect(dialog).toBeHidden();
+    const entry = page.getByTestId('favourite-entry');
+    await expect(entry).toHaveCount(1);
+    await entry.getByRole('link', { name: 'Баранина', exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/offers/${seedIds.lambOffer}[?]return=%2Ffavourites$`));
+
+    const tracking = page.getByRole('button', { name: 'Отслеживать товар', exact: true });
+    await tracking.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(tracking).toHaveAttribute('aria-pressed', 'true');
+    expect(otpRequests).toBe(1);
+    const session = await (await page.request.get('/api/auth/me')).json();
+    expect(session.user.phone).toBe(phone);
+  } finally {
+    await pool.end();
+    await cleanup(phone);
+  }
+});
 
 test('signing in through an Offer favourite also authorizes tracking without another OTP prompt', async ({ page }, testInfo) => {
   const phone = testInfo.project.name === 'mobile' ? '+77000000897' : '+77000000898';
