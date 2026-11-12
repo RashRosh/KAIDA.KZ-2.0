@@ -1,28 +1,29 @@
-# Current state — D5 «Рядом» (B07) закрыт (2026-11-10)
+﻿# Current state — Windows E2E maintenance #219 (2026-11-12)
 
 ## Current task
 
-- D5 «Рядом» (B07) **CLOSED**: приёмка PO 2026-11-10 по скриншотам шести состояний (360 px, 2x), PO rework применён (ST05 — белый текст без подчёркивания; ST06 «Повторить» — по началу текста, 34px; иконки `refresh`/`aim` — QingIcon `System/refresh.svg` / `Map/crosshair-3.svg`, Apache-2.0).
-- Следующий экран не выбран. Порядок — только `docs/product/EXECUTION_PLAN.md`; до прямой команды PO и утверждённого Slice Contract реализация не начинается.
+- PO authorized investigation/fix, targeted/full regression and branch CI for #219. Branch `maintenance/219-windows-e2e`.
+- No merge/checkpoint tag without PO approval. No D6, unrelated product/closed-contract edits, OS network changes or arbitrary retries. Raw auth traces stay local.
 
-## Checkpoint
+## Verified base
 
-- `main` = `7cfed6f`; annotated tag `v0.0.90-design-nearby` указывает на него.
-- Merged-main CI на `7cfed6f`: KAIDA verify 42875946418 (10m52s) success, CodeQL 42875946340 success.
-- PR #214 (ветка `slice/design-nearby`): branch CI 42777479253 / 42777825395 success.
-- `7cfed6f` — отдельный фикс тестовой «мины времени»: фиксированная T0 = 2026-10-27 в `text-price-update` / `text-switch-on` истекла 10 ноября (14-дневное окно актуальности), из-за чего 23 интеграционных теста падали на любом коммите, включая прежний main. T0 теперь относительная (36 часов назад); проверки и продуктовые гарантии не менялись.
+- Fetched main `e1b4d93d35b5b043913f68cec500e88699a18156`; KAIDA verify 42966213173 and CodeQL 42966213209 success.
+- Annotated checkpoint `v0.0.90-design-nearby` → `7cfed6fcd40496a5e4505b7089a2db4125dbbdcd`.
 
 ## Last completed / verification
 
-- local: unit 731 ✅, integration 435 ✅, design-nearby E2E 6/6 ✅, s11-nearby-discovery 10/10 ✅, lint/typecheck/production build ✅.
-- STOP по `lastConfirmedAt` решён PO 2026-11-10 (вариант 1): optional `lastConfirmedAt` ISO в Nearby-ответе — та же additive public metadata, что в D2 для Search; ranking/eligibility/радиус/privacy не менялись.
-- Известный флейк: `tests/e2e/search-typo-correction.spec.ts` изредка падает в полном параллельном прогоне (изолированно проходит), к D5 не относится; кандидат на отдельную maintenance-задачу.
+- Upgraded only Playwright 1.63 → 1.65 and lockfile; installed matching Chromium 158.0.8127.18 (revision 1254), built-in TcpPortRandomizationWin mitigation confirmed. No custom launch flags; workers 2 / retries 0 unchanged.
+- Baseline seven network specs: 32 pass / 6 expected skips; 38 local traces, 420 ERR_ABORTED, zero buffer/address errors. Original network instability not reproduced in this bounded baseline.
+- Baseline geometry repeats: 28 pass / 2 float failures / 10 expected skips; address 18 ±0.000015258789062. Heart 8 additional runs: all pass, frame measurements 43.99998474121094–44.00001525878906 at exact computed 44px. Both TEST IMPLEMENTATION float comparisons; narrow tolerances added, exact CSS and both 44px target dimensions retained.
+- CI artifact paths exclude raw trace ZIP and HTML-report ZIP copies to honor privacy boundary.
+- Unit 731 pass; lint/typecheck/build completed without reported errors. Integration in progress; a failure appeared in seller-text-real-parser and requires classification. Targeted 1.65 run stopped before tests to avoid sharing DB with integration; no pass claim.
 
 ## Next action
 
-1. Ожидать выбора PO: какой экран мигрируется следующим. Очерёдность — только `docs/product/EXECUTION_PLAN.md`. Затем Slice Contract, реализация, приёмка, merge и checkpoint по `PROJECT_RULES.md` §6.
+- Finish/classify integration, then targeted 1.65 E2E, geometry repeats and normal full 2-worker E2E sequentially on the test DB. Commit/push scoped changes for branch CI, report exact SHA/results.
 
-## Evidence / локальные ограничения
+## Local constraints / hypotheses
 
-- Исходники досок B07 (1/2, 2/2) и `tokens.json` дизайн-системы — `docs/slices/design-nearby/verification-evidence-source/` (локальный evidence, по прецеденту D2 в Git не включён; iframe-версия `1793830896-9a07` совпадает с baseline).
-- Контролёр-вердикт формально не получен: независимая сессия дважды блокировалась на системном подтверждении команд, проверка выполнена исполнителем с явной пометкой о независимости.
+- Use pnpm.cmd (PowerShell blocks pnpm.ps1); sandbox escalation required for network and Git metadata outside worktree.
+- Local evidence in tmp/219-*.log and tmp/219-baseline-network; never stage tmp/, scripts/, .vscode/ or personal review DOCX.
+- Network hypothesis: upstream Windows TCP randomization defect; if errors survive upgrade, inspect TCP state read-only before rerun. Float geometry hypothesis confirmed independently; no production fix needed.

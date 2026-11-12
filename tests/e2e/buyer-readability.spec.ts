@@ -102,7 +102,10 @@ test('buyer point, address and seller lines: 14/20 px --ink2, long text, ru and 
     expect(await textStyle(caption)).toEqual({ size: '13px', line: '18px', color: SEARCH_INK2 });
     // Source B03 uses one address line; complete text remains in title/accessible text and Offer details.
     await expect(place).toHaveAttribute('title', LONG_ADDRESS + ' · ' + LONG_SELLER);
-    expect(await place.evaluate((element) => element.getBoundingClientRect().height)).toBe(18);
+    const placeHeight = await place.evaluate((element) => element.getBoundingClientRect().height);
+    // Animated ancestor translation can serialize 18px as 17.999984741210938 on Windows Chromium.
+    // CSS line-height above stays exact; allow only floating-point noise in the single-line rectangle.
+    expect(placeHeight).toBeCloseTo(18, 4);
     await shot('card-360-ru');
     for (const width of [360, 320]) {
       await page.setViewportSize({ width, height: 800 });
