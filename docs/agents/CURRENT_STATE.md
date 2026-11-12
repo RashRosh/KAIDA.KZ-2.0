@@ -1,9 +1,9 @@
-﻿# Current state — Windows E2E maintenance #219 (2026-11-12)
+﻿# Current state — D6 Search Home and Windows E2E maintenance #219 (2026-11-12)
 
 ## Current task
 
-- Scoped maintenance complete on `maintenance/219-windows-e2e`; awaiting PO review. No merge/checkpoint tag without PO approval.
-- No D6, production code or closed behavioral contract edits; no OS network changes, custom browser flags or retry policy changes. Raw auth traces remain local.
+- D6 Search Home (B02) remains active and unmerged. Approved contract: PR #215; implementation: PR #216, which includes #215. PR #216 reports PO acceptance is pending; its existing verification status is unchanged (356 E2E passed, 1 failed, 87 skipped; the isolated rerun of B07.ST03 passed 6/6; both published `verify` runs failed). Do not mark D6 closed based on the independent maintenance work.
+- Independent Windows E2E maintenance for #219 is complete on `maintenance/219-windows-e2e`; draft PR #220 awaits PO review. No D6 or production behavior changes; no OS network changes, custom browser flags or retry policy changes. Raw auth traces remain local. No merge/checkpoint tag without PO approval.
 
 ## Verified base
 
@@ -21,7 +21,7 @@
 
 ## Next action
 
-- PO review of maintenance branch and report. No merge or checkpoint tag until explicit approval. No remaining test failure observed; nondeterministic Windows recurrence remains possible.
+- Continue D6 from the open PR #216 state; PO acceptance remains pending. Review maintenance PR #220 and its report. No merge or checkpoint tag until explicit approval. No remaining #219 test failure observed; nondeterministic Windows recurrence remains possible.
 
 ## Local constraints
 
