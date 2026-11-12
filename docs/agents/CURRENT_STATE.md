@@ -1,30 +1,29 @@
-﻿# Current state — D6 Search Home and Windows E2E maintenance #219 (2026-11-12)
+# Current state — D6 Search Home (B02), reconciling PRs #215/#216 (2026-11-12)
 
 ## Current task
 
-- D6 Search Home (B02) remains active and unmerged. Approved contract: PR #215; implementation: PR #216, which includes #215. PR #216 reports PO acceptance is pending; its existing verification status is unchanged (356 E2E passed, 1 failed, 87 skipped; the isolated rerun of B07.ST03 passed 6/6; both published `verify` runs failed). Do not mark D6 closed based on the independent maintenance work.
-- Independent Windows E2E maintenance for #219 is complete on `maintenance/219-windows-e2e`; draft PR #220 awaits PO review. No D6 or production behavior changes; no OS network changes, custom browser flags or retry policy changes. Raw auth traces remain local. No merge/checkpoint tag without PO approval.
+- D6 Search Home remains active and unmerged. PO-approved contract is in #215; #216 contains its implementation and tests, now rebased onto the reconciled contract branch. The approved behavior is unchanged.
+- PO visual acceptance of the implementation is pending. No D6 merge or checkpoint tag without explicit PO approval.
 
 ## Verified base
 
-- Main `e1b4d93d35b5b043913f68cec500e88699a18156`; KAIDA verify 42966213173 / CodeQL 42966213209 success.
-- Annotated checkpoint `v0.0.90-design-nearby` → `7cfed6fcd40496a5e4505b7089a2db4125dbbdcd`. Unchanged.
+- `main` / checkpoint `v0.0.91-windows-e2e-219` → `2ccaacc1abcc974049c4bfb5df75e42b4b57826f`.
+- Merged-main CI on this SHA: KAIDA verify 43243565884, CodeQL 43243565727, OpenSSF Scorecard 43243565916 — success.
+- Previous product checkpoint `v0.0.90-design-nearby` → `7cfed6fcd40496a5e4505b7089a2db4125dbbdcd` remains unchanged.
 
 ## Last completed / verification
 
-- Executable commit `e9e4b36e71f27068996768b5f14cae67fb341c15` pushed. Playwright 1.65 / Chromium 158.0.8127.18 (1254); actual launch has one disable-features argument with built-in TcpPortRandomizationWin mitigation.
-- Both geometry failures diagnosed independently as float serialization during ancestor translation; narrow tolerances retain exact CSS, visual/accessibility checks and both 44px heart dimensions. No production changes.
-- Local Windows on this executable SHA: lint/typecheck/build PASS; unit 731/731; prepared-DB integration 435/435; targeted E2E 40 pass / 12 existing skips; tenfold geometry 30 pass / 10 existing skips; normal full E2E 357 pass / 87 existing skips, 0 failures (9.8m), 2 workers / 0 retries.
-- All 52 targeted traces inspected: 4,435 network records; only 53 ERR_ABORTED, zero ERR_NO_BUFFER_SPACE / ERR_ADDRESS_IN_USE. Original network flake was not reproduced in the bounded 1.63 baseline either; no claim of permanent stability.
-- Branch CI on executable SHA: KAIDA verify 43219572100 PASS (lint/types/migrations/seed/build, unit 731, integration 435, E2E 357 pass / 87 existing skips).
-- CI upload excludes raw trace ZIP and HTML-report ZIP copies. Evidence and procedure classification: `docs/reviews/windows-e2e-219.md`.
+- Windows E2E maintenance #219 merged as PR #220. Final PR head `3aac4c32396c87f7658720187e2aedf901a3316a`; branch verify 43233655905 passed. Main checkpoint CI above passed.
+- On the #219 executable commit `e9e4b36e71f27068996768b5f14cae67fb341c15`: lint/typecheck/build, unit 731/731, integration 435/435, full E2E 357 passed / 87 existing skips, 0 failures. Detailed bounded evidence: [windows-e2e-219.md](../reviews/windows-e2e-219.md).
+- PR #215 head `99bb0f658eb35ca402dfbc031882bfec8d1f2e27` contains the approved contract and D5/D6 plan updates on the verified main. The original #216 implementation and E2E patch is preserved and published above it; confirm checks on the latest heads.
 
 ## Next action
 
-- Continue D6 from the open PR #216 state; PO acceptance remains pending. Review maintenance PR #220 and its report. No merge or checkpoint tag until explicit approval. No remaining #219 test failure observed; nondeterministic Windows recurrence remains possible.
+- Confirm full branch CI, CodeQL and dependency review are green on the latest #215 and #216 heads. Then request PO visual acceptance of the three 360px / 2x screenshots against live B02 and the manual flow below. Do not merge or tag before explicit PO approval.
+- D6 E2E seams: `design-search-home` covers the three B02 visual states and no initial search; `search-home-last-state` and `first-entry-correction` cover unchanged home/return behavior; `ux1a-app-shell` covers unchanged root and navigation behavior. These do not replace PO visual acceptance against B02.
+- After green final-head CI, request PO visual acceptance of the three 360px / 2x screenshots and manual flow in the D6 contract. Do not merge or tag until PO approval.
 
-## Local constraints
+## Evidence / local constraints
 
-- Use pnpm.cmd (PowerShell blocks pnpm.ps1); sandbox escalation needed for network and external worktree Git metadata.
-- Run integration after db:test:prepare and before E2E: E2E imports Production KB into kaida_test. Initial invalid-order integration attempt was interrupted; corrected clean-DB run passed. No DB-sharing parallel tests.
-- Private local evidence in tmp/219-* and test-results/; temporary geometry probes/scanner removed. Never stage tmp/, scripts/, .vscode/ or personal review DOCX. No raw authentication traces uploaded.
+- Local B02 source evidence remains untracked by design: `Main.dc.html`, version `1794254812-c359`. `/welcome` B01 and the other screens listed in the D6 contract remain out of scope.
+- Keep `tmp/`, `scripts/`, `.vscode/`, local evidence, and personal review files unstaged. Integration must run after `pnpm db:test:prepare` and before E2E; no DB-sharing parallel tests.
