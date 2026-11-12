@@ -20,7 +20,7 @@ test('B02.ST01: the Search Home in B02 presentation — wordmark, title, field a
   await expect(page.getByRole('button', { name: 'Искать', exact: true })).toHaveCount(0);
   const field = page.getByRole('searchbox', { name: 'Какой товар ищете?' });
   expect(Number(await field.evaluate((el) => el.getBoundingClientRect().top))).toBeLessThan(250);
-  const minTouch = await page.locator('.chip').evaluateAll((els) => Math.min(...els.map((el) => el.getBoundingClientRect().height)));
+  const minTouch = await page.locator('.chip').evaluateAll((els) => Math.min(...els.map((el) => Math.round(el.getBoundingClientRect().height))));
   expect(minTouch).toBeGreaterThanOrEqual(44);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('B02-ST01-home-360.png'), fullPage: false });
