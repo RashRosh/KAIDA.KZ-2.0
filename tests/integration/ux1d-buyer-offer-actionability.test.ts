@@ -137,6 +137,11 @@ describe('UX1D buyer Offer actionability on PostgreSQL 18', () => {
 
   it('resolves a route only for a currently buyer-eligible Offer and returns no destination for all ineligible states', async () => {
     await expect(resolveBuyerOfferRoute(offerIds.eligible, { database: db, ...options })).resolves.toEqual(point);
+    // External 2GIS navigation needs the address only for a server-side city slug; the ordinary
+    // closed resolution contract must remain exactly {latitude, longitude}.
+    await expect(resolveBuyerOfferRoute(offerIds.eligible, {
+      database: db, ...options, includeAddressForExternalRoute: true,
+    })).resolves.toEqual({ ...point, addressText: 'Almaty eligible' });
     await expect(resolveBuyerOfferRoute(offerIds.noPhone, { database: db, ...options })).resolves.toEqual(point);
     for (const offerId of [offerIds.noGeo, offerIds.neither, offerIds.inactive, offerIds.stale]) {
       await expect(resolveBuyerOfferRoute(offerId, { database: db, ...options })).resolves.toBeNull();

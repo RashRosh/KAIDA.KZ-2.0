@@ -17,6 +17,7 @@ type BuyerOfferRouteOptions = {
   database?: Database;
   clock?: Clock;
   validityPeriodHours?: number;
+  includeAddressForExternalRoute?: boolean;
 };
 
 export async function resolveBuyerOfferRoute(
@@ -28,5 +29,10 @@ export async function resolveBuyerOfferRoute(
     ? readOfferValidityPeriodHours()
     : validateOfferValidityPeriodHours(options.validityPeriodHours);
   const cutoff = calculateOfferCutoff(now, validityPeriodHours);
-  return findBuyerOfferRouteDestination(options.database ?? getDatabase(), offerId, cutoff);
+  return findBuyerOfferRouteDestination(
+    options.database ?? getDatabase(),
+    offerId,
+    cutoff,
+    options.includeAddressForExternalRoute === true,
+  );
 }

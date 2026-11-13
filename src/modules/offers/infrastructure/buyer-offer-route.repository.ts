@@ -15,6 +15,7 @@ export async function findBuyerOfferRouteDestination(
   database: Database,
   offerId: string,
   cutoff: Date,
+  includeAddress = false,
 ): Promise<BuyerOfferRouteDestination | null> {
   const rows = await database.select({
     latitude: locations.latitude,
@@ -31,5 +32,9 @@ export async function findBuyerOfferRouteDestination(
 
   const row = rows[0];
   if (!row || row.latitude === null || row.longitude === null) return null;
-  return { latitude: row.latitude, longitude: row.longitude, addressText: row.addressText };
+  return {
+    latitude: row.latitude,
+    longitude: row.longitude,
+    ...(includeAddress ? { addressText: row.addressText } : {}),
+  };
 }

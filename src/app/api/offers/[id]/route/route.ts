@@ -18,7 +18,7 @@ export async function GET(
   }
 
   try {
-    const destination = await resolveBuyerOfferRoute(parsedOfferId.data);
+    const destination = await resolveBuyerOfferRoute(parsedOfferId.data, { includeAddressForExternalRoute: true });
     if (!destination) {
       return Response.json(notFoundBody, { status: 404, headers: noStoreHeaders });
     }
