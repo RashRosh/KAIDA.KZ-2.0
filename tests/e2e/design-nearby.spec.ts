@@ -114,7 +114,7 @@ test('B07.ST03: a two-column grid with photo, name, heart, price, freshness and 
   await expect(first.getByText('1 450')).toBeVisible();
   await expect(first.getByText('/ кг')).toBeVisible();
   await expect(first.getByRole('img', { name: /Продавец подтвердил: 2 ч/ })).toBeVisible();
-  await expect(first.getByText('400 м')).toBeVisible();
+  await expect(first.getByText('400 м · по прямой')).toBeVisible();
   await expect(first.getByRole('link', { name: 'Помидоры розовые' })).toHaveAttribute('href', `/offers/${id(1)}`);
   await expect(first.getByRole('button', { name: 'В избранное' })).toBeVisible();
   // the fourth tile has no photo: the KAIDA mark is the fallback
@@ -124,7 +124,7 @@ test('B07.ST03: a two-column grid with photo, name, heart, price, freshness and 
     const thumb = el.querySelector('div')!.getBoundingClientRect();
     const price = getComputedStyle(el.querySelector('p')!);
     const badge = [...el.querySelectorAll('span')].find((s) => s.getAttribute('role') === 'img')!;
-    const cap = [...el.querySelectorAll('span')].find((s) => s.textContent === '400 м')!;
+    const cap = [...el.querySelectorAll('span')].find((s) => s.textContent === '400 м · по прямой')!;
     return {
       thumbRatio: Math.round(thumb.width / thumb.height * 100) / 100,
       priceFont: price.fontSize,

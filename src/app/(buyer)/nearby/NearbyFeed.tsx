@@ -315,7 +315,7 @@ export function NearbyFeed() {
                         {formatAmount(offer.price.amount)}&nbsp;₸{basis && <>{' '}<small>{basis}</small></>}
                       </p>
                       <ConfirmationBadge offer={offer} className={styles.fresh} />
-                      <span className={styles.cap2}>{formatDistance(offer.distanceMeters, t)}</span>
+                      <span className={styles.cap2}>{t('offer.distanceStraightLine', { distance: formatDistance(offer.distanceMeters, t) })}</span>
                     </article>
                   </li>
                 );
