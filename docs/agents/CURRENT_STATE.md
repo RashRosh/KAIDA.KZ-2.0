@@ -1,26 +1,28 @@
-# Current state — Issue #221 exact acceptance flow (2026-11-12)
+# Current state — buyer design migration and maintenance (2026-11-13)
 
-## Current task
+This file is a concise handoff, not the canonical queue. Queue and decisions: `docs/product/EXECUTION_PLAN.md`; approved visual authority: `docs/product/DESIGN_BASELINE.md`. Check GitHub SHA and CI again before acting.
 
-- Complete PR #222 coverage for the exact PO journey: guest opens `/favourites`, completes OTP sign-in, opens an existing favourite Offer, and tracks its product.
-- Independent branch `maintenance/issue-221-otp-session`, based on verified main/checkpoint `v0.0.91-windows-e2e-219` at `2ccaacc1abcc974049c4bfb5df75e42b4b57826f`.
-- D6 PRs #215 (`99bb0f65`) and #216 (`632e6fd8`) remain active and untouched.
+## Verified main checkpoint
 
-## Last completed / verification
+- `main` at `2ccaacc1abcc974049c4bfb5df75e42b4b57826f` before Issue #221 merge; annotated checkpoint `v0.0.91-windows-e2e-219`.
+- Windows E2E maintenance Issue #219 / PR #220 **merged and closed**, merged-main verification 43243565884 PASS; CodeQL and Scorecard PASS. See `docs/reviews/windows-e2e-219.md` for test evidence. The original nondeterministic network symptom was not proven permanently eliminated.
+- Visual migration checkpoints: D2 Search results `v0.0.87-design-search` (closed); D3 Offer page `v0.0.88-design-offer` (closed); D4 Favourites `v0.0.89-design-favourites` (closed); D5 Nearby `v0.0.90-design-nearby` (closed).
 
-- `useInterest` session invalidation fix: commit `b723eea0403754e6454e927b39c337fa98a7d403`; full verify passed on that implementation SHA (run 43271252892).
-- Before the fix, same-mounted favourite-first E2E reproduced the second OTP dialog twice; after, the existing focused login/logout regressions passed 4/4 across mobile and desktop.
-- Added exact PO-reported `/favourites` → OTP → existing saved Offer → tracking E2E with an isolated existing-favourite fixture. It asserts the session remains authenticated, no second dialog/OTP, and tracking succeeds.
-- Exact-flow targeted run passed 2/2 (mobile and desktop). No production code change for this acceptance request.
-- Local lint/typecheck/build, unit 731/731 and integration 435/435 had passed on the implementation before this test-only change.
-- Updated PR head `2b96d27458778d1d8aa4b626575da894e068e963`: push verify 43280437196 and PR verify 43280446898, CodeQL 43280446777/131400689123, Dependency Review 43280446759 — all success.
+## Independent active workstreams
 
-## Next action
+1. **Issue #221 / draft PR #222**, repeated OTP when a signed-in buyer tracks a product after entering through Favourites. Branch `maintenance/issue-221-otp-session`, original implementation `b723eea0403754e6454e927b39c337fa98a7d403`. `useInterest` now consumes the existing session-change signal and invalidates stale in-flight reads on logout. Red E2E reproduced original symptom twice; post-fix targeted E2E 4/4 mobile/desktop. Exact `/favourites → OTP → existing Offer → tracking` targeted E2E 2/2 PASS. User manually reported the flow working during 2026-11-12 acceptance. Local lint/typecheck/build, unit 731, integration 435 PASS. Final-head (before this handoff edit) `fdfed590ceac1d7b8c4d27110a42a34740a93b6e`: push/PR verify, CodeQL, Dependency Review all PASS. **Merge, merged-main CI and checkpoint/tag are still release gates**; don't represent the feature as closed before they pass.
+2. **Issue #223**, buyer 2GIS route opens an unusable `dgis://` custom-protocol deep link on desktop; PO approved documented HTTPS web/app fallback and a visible straight-line distance label in Search and Nearby. Requires a *narrow, explicit revision* of the closed UX1D route target contract, including RU/KZ copy, accessibility, eligible-only route checks, targeted tests and desktop manual acceptance. No code implementation yet; separate maintenance branch, do not bundle with #221 or D6.
+3. **D6 Search Home (B02)**, contract PR #215 at `99bb0f65`, implementation PR #216 at `632e6fd8`; neither merged. D6 visuals reviewed positively by PO on 2026-11-12; independent OTP defect uncovered during acceptance and handled as #221. Before D6 closure re-evaluate/rebase over verified main and complete exact-head branch CI, PO manual acceptance, merged-main CI and annotated checkpoint. Do not treat #221 as a D6 code change.
+4. **D1 First Entry `/welcome`** intentionally deferred by PO; buyer More/auth UI and later seller/operator design migration not yet sliced or scheduled as approved contracts.
 
-- PO review of draft PR #222. The exact acceptance path is automated; no implementation defect was revealed. Do not merge or create a checkpoint tag without explicit PO approval.
-- No merge or checkpoint tag without explicit PO approval.
+## Next actions
+
+- Complete #221 independent release workflow: verify latest PR head and required checks, obtain/record PO acceptance, merge, run CI on merged main, annotate checkpoint, close Issue #221.
+- Then implement and close #223 in a new slice/branch, with documented UX1D revision and manual 2GIS fallback check.
+- Then reconcile D6 PRs with verified main, close D6, and plan remaining buyer redesign before seller/operator UI, one vertical slice at a time.
 
 ## Local constraints
 
-- Preserve untracked `tmp/`; never stage `tmp/`, `scripts/`, `.vscode/`, local evidence or personal review files.
-- No merge or checkpoint tag without explicit PO approval.
+- Windows PowerShell uses `pnpm.cmd`. Prepare test DB and run integration before E2E to avoid shared-DB ordering conflicts. Do not parallelize DB-sharing tests.
+- Never stage personal/untracked `tmp/`, `scripts/`, `.vscode/`, screenshot traces or private browser data.
+- No merge/tag/checkpoint without PO approval and required verification. Preserve all closed contracts not explicitly revised.
