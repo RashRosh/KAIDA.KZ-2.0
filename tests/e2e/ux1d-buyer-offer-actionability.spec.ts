@@ -165,7 +165,7 @@ test('UX1D result card exposes Route and the verified contacts as icons, and Rou
 
   const redirect = await request.get(`/api/offers/${offerId}/route`, { maxRedirects: 0 });
   expect(redirect.status()).toBe(302);
-  expect(redirect.headers().location).toBe('https://2gis.ru/directions/tab/car/points/|76.889709,43.238949');
+  expect(redirect.headers().location).toBe('https://2gis.kz/almaty/directions/points/|76.889709,43.238949');
 
   await connection.pool.query('UPDATE locations SET whatsapp_phone_e164=NULL WHERE id=$1', [locationId]);
   card = await runSearch(page);

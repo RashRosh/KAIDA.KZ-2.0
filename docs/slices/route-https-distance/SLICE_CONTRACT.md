@@ -59,3 +59,11 @@ https://help.2gis.ru/question/razrabotchikam-zapusk-ideystviya-vmobilnom-prilozh
 
 Suggested current format:
 `https://2gis.ru/directions/tab/car/points/|{longitude},{latitude}`
+
+## PO browser acceptance finding and narrow URL revision (2026-11-13)
+
+On the candidate `2gis.ru/directions/tab/car/points/|{lon},{lat}`, PO's actual desktop browser redirected to `2gis.ru/moscow/...` although the seeded Location and destination coordinates were in Almaty. PO tested `2gis.kz/almaty/directions/points/|76.9568,43.2636`: the **Almaty** map opened with the correct lon/lat still in the URL, but 2GIS automatically labeled the destination as the broader **Medeuskiy District**, not the fictional seller. The first screenshot is a real failure, not a PASS. The second confirms Kazakhstan map region but alone does not prove accurate entrance-by-entrance navigation.
+
+For #223, use the official current **HTTPS destinations-only** route format at `https://2gis.kz/[known-city]/directions/points/|{lon},{lat}`. Derive `known-city` strictly from an **explicit city name in the existing Location address**, with a small mapping of supported and verified 2GIS city slugs; do not infer the buyer city or hardcode Almaty for every Seller. When a city is not recognized, use `https://2gis.kz/directions/points/|{lon},{lat}` (country entry) and retain source coordinates. No coordinates or private buyer data before explicit click; the city label is resolved server-side and is not sent as an arbitrary string.
+
+**Known limitation:** free-form address does not reliably contain a canonical city, and 2GIS may map arbitrary coordinate destinations to a region/object label. Long-term Kazakhstan-wide reliability needs normalized city and/or verified 2GIS object/entrance ID; do not fabricate provider IDs. The buyer may need to select `Моё местоположение` inside 2GIS, since KAIDA does not pass their coordinates to the external provider. PO must re-check the exact candidate's car directions and map marker on desktop before approval.
