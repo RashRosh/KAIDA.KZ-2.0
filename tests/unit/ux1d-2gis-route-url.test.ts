@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { build2GisRouteUrl } from '../../src/modules/offers/routing/build-2gis-route-url';
 
-describe('UX1D 2GIS route deeplink', () => {
+describe('UX1D 2GIS HTTPS route link', () => {
   it('uses only the seller destination in documented longitude,latitude order', () => {
     const url = build2GisRouteUrl({ latitude: 43.238949, longitude: 76.889709 });
-    expect(url).toBe('dgis://2gis.ru/routeSearch/rsType/car/to/76.889709,43.238949');
-    expect(url).not.toContain('from/');
+    expect(url).toBe('https://2gis.ru/directions/tab/car/points/|76.889709,43.238949');
+    expect(new URL(url).protocol).toBe('https:');
+    expect(new URL(url).hostname).toBe('2gis.ru');
+    expect(url).not.toContain('/from/');
     expect(url).not.toContain('key=');
   });
 

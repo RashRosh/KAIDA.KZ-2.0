@@ -5,5 +5,5 @@ export function build2GisRouteUrl(destination: BuyerOfferRouteDestination): stri
   const point = locationGeoSchema.parse(destination);
   const longitude = encodeURIComponent(String(point.longitude));
   const latitude = encodeURIComponent(String(point.latitude));
-  return `dgis://2gis.ru/routeSearch/rsType/car/to/${longitude},${latitude}`;
+  return `https://2gis.ru/directions/tab/car/points/|${longitude},${latitude}`;
 }

@@ -138,3 +138,9 @@ After targeted verification: full regression suite and branch CI on final execut
 5. Nearby keeps the same actions plus distance and unchanged UX1C geo flow.
 6. Seller missing phone and/or Location missing geo remains seller-side but its Offer is absent from Search/Nearby.
 7. Mobile and desktop have no horizontal overflow.
+
+## Narrow superseding revision — Issue #223 (PO approved 2026-11-12/13)
+
+The original delivery used the custom `dgis://` route deeplink. In browsers without a registered 2GIS native handler this left the buyer at the technical URL, so PO approved a **narrow revision to the external route target**: after the existing eligible-only same-origin Offer route redirect, use the current official `https://2gis.ru/directions/tab/car/points/|{lon},{lat}` URL. This is a 2GIS HTTPS deeplink with web fallback, not a new provider or routing API. All previous rules for buyer visibility, same-origin href, Offer-ID validation, no pre-click coordinate exposure, seller destination-only redirect, and no buyer-origin coordinates remain unchanged.
+
+In Search and Nearby, existing Haversine distance values now receive a visible RU/KK **straight-line distance** qualifier. This is not a driving distance. No change to computation, radius filtering, sort or location privacy. The owning delivery and acceptance criteria are `docs/slices/route-https-distance/SLICE_CONTRACT.md`; it supersedes only the parts of this UX1D contract that prescribed the custom-scheme target.

@@ -62,8 +62,8 @@ export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: 
         {...(action.label === 'Позвонить' ? {} : { target: '_blank', rel: 'noopener noreferrer' })}>
         <SearchIcon name={action.label === 'Позвонить' ? 'phone' : action.label === 'WhatsApp' ? 'whatsapp' : 'telegram'} />
       </a>)}
-      {offer.routeAvailable && <a className={styles.route} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" aria-label={t('offer.routeTo', { place: offer.location.name })}>
-        <SearchIcon name="route" />{offer.distanceMeters === undefined ? t('offer.route') : formatDistance(offer.distanceMeters, t)}
+      {offer.routeAvailable && <a className={styles.route} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" aria-label={t('offer.routeTo', { place: offer.location.name })} aria-describedby={offer.distanceMeters === undefined ? undefined : `route-distance-${offer.id}`}>
+        <SearchIcon name="route" />{offer.distanceMeters === undefined ? t('offer.route') : <span id={`route-distance-${offer.id}`}>{t('offer.distanceStraightLine', { distance: formatDistance(offer.distanceMeters, t) })}</span>}
       </a>}
     </div>
   </article>;
