@@ -114,7 +114,10 @@ test('B07.ST03: a two-column grid with photo, name, heart, price, freshness and 
   await expect(first.getByText('1 450')).toBeVisible();
   await expect(first.getByText('/ кг')).toBeVisible();
   await expect(first.getByRole('img', { name: /Продавец подтвердил: 2 ч/ })).toBeVisible();
-  await expect(first.getByText('400 м · по прямой')).toBeVisible();
+  const distanceNote = page.getByText('Расстояния указаны по прямой', { exact: true });
+  await expect(distanceNote).toHaveCount(1);
+  await expect(distanceNote).toBeVisible();
+  await expect(first.getByText('400 м', { exact: true })).toBeVisible();
   await expect(first.getByRole('link', { name: 'Помидоры розовые' })).toHaveAttribute('href', `/offers/${id(1)}`);
   await expect(first.getByRole('button', { name: 'В избранное' })).toBeVisible();
   // the fourth tile has no photo: the KAIDA mark is the fallback
@@ -124,7 +127,7 @@ test('B07.ST03: a two-column grid with photo, name, heart, price, freshness and 
     const thumb = el.querySelector('div')!.getBoundingClientRect();
     const price = getComputedStyle(el.querySelector('p')!);
     const badge = [...el.querySelectorAll('span')].find((s) => s.getAttribute('role') === 'img')!;
-    const cap = [...el.querySelectorAll('span')].find((s) => s.textContent === '400 м · по прямой')!;
+    const cap = [...el.querySelectorAll('span')].find((s) => s.textContent === '400 м')!;
     return {
       thumbRatio: Math.round(thumb.width / thumb.height * 100) / 100,
       priceFont: price.fontSize,
@@ -165,6 +168,7 @@ test('B07.ST05: a successful query without offers explains the radius', async ({
   await page.getByRole('button', { name: 'Определить местоположение', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Рядом пока нет предложений' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Искать по названию' })).toBeVisible();
+  await expect(page.getByText('Расстояния указаны по прямой', { exact: true })).toHaveCount(0);
   await shot(page, info, 'B07-ST05-empty-360');
   await noOverflow(page);
 });

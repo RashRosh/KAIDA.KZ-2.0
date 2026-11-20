@@ -63,7 +63,7 @@ export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: 
         <SearchIcon name={action.label === 'Позвонить' ? 'phone' : action.label === 'WhatsApp' ? 'whatsapp' : 'telegram'} />
       </a>)}
       {offer.routeAvailable && <a className={styles.route} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" aria-label={t('offer.routeTo', { place: offer.location.name })} aria-describedby={offer.distanceMeters === undefined ? undefined : `route-distance-${offer.id}`}>
-        <SearchIcon name="route" />{offer.distanceMeters === undefined ? t('offer.route') : <span id={`route-distance-${offer.id}`}>{t('offer.distanceStraightLine', { distance: formatDistance(offer.distanceMeters, t) })}</span>}
+        <SearchIcon name="route" />{offer.distanceMeters === undefined ? t('offer.route') : <span id={`route-distance-${offer.id}`}>{formatDistance(offer.distanceMeters, t)}</span>}
       </a>}
     </div>
   </article>;

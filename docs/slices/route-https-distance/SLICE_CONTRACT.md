@@ -8,10 +8,14 @@ Base verified checkpoint: `v0.0.92-otp-session-221` at `41c302ccff7802abacde80ae
 
 Покупатель, увидев расстояние до товара, понимает, что это расстояние **по прямой**, и может открыть маршрут до Location продавца в 2ГИС, даже когда мобильное приложение 2ГИС не установлено.
 
+## PO clarification (2026-11-20)
+
+Show a single straight-line distance notice immediately above each results list. This covers CJM P1-04.3 and P1-05.2. P1-07.2 checks the exact destination pin in 2GIS web.
+
 ## Scope
 
 - Route action keeps the existing same-origin Offer-ID endpoint and server eligibility check, but redirects to **documented HTTPS 2GIS directions** with car mode and destination only, no explicit buyer origin.
-- Visible `по прямой` qualifier beside/under computed distance in buyer Search results and Nearby; compact at 320px and with enlarged text.
+- Show one visible list-level notice, `Расстояния указаны по прямой`, immediately before the Search offer list (below count/sort) and immediately before the Nearby grid. Show it only when at least one result in the list displays a distance. Keep it readable at 320px and with enlarged text; individual cards display the distance without the repeated qualifier.
 - RU and KK language variants in the current i18n system. Use existing distance units and existing geolocation calculation.
 - Directly related tests and narrow amendment to the existing UX1D route-link target contract.
 
@@ -37,12 +41,12 @@ UX1D `docs/slices/UX1D-buyer-offer-actionability/SLICE_CONTRACT.md` prescribed a
 
 ## Acceptance criteria
 
-1. Search with buyer geolocation displays existing Haversine distance and a **visible** `по прямой` qualifier; a hidden tooltip alone is not sufficient.
-2. Nearby displays the same qualifier and unchanged distance; distance itself and sorting/ranking are not altered.
+1. Search displays existing Haversine distances on result cards and exactly one visible notice above the results, below the count/sort controls, when at least one displayed result has a distance.
+2. Nearby displays the same notice once above the grid when distances are visible. On both screens the notice is absent from empty/no-distance results and the qualifier is not repeated on individual cards. Distance values and sorting/ranking are preserved.
 3. Without buyer location, Search action still displays `Маршрут`, with no invented distance.
 4. Existing `/api/offers/{id}/route` responds 302 only for an eligible Offer, to an HTTPS 2GIS car directions URL with **destination longitude,latitude** and no explicit buyer origin.
 5. For missing, expired, ineligible or no-geo Offer, existing non-disclosing responses remain unchanged; no coordinates leak before the explicit click.
-6. RU/KK visible text and accessible route action remain intelligible, tap targets at least 44px, and 320/360/390 widths have no horizontal overflow, including enlarged text.
+6. Localize the notice and accessible route action in RU/KK. The notice is available to assistive technology, tap targets remain at least 44px, and 320/360/390 widths have no horizontal overflow, including enlarged text.
 7. Regression E2E checks the route href still same-origin and new HTTPS Location, while not depending on external 2GIS availability.
 8. Unit checks exact URL construction and coordinate validation (including rejected invalid/NaN values).
 9. Full regression suite and branch CI pass; minimal diff stays in this user journey.
@@ -50,7 +54,7 @@ UX1D `docs/slices/UX1D-buyer-offer-actionability/SLICE_CONTRACT.md` prescribed a
 
 ## Manual acceptance scenario
 
-Open buyer Search, enable geolocation, search `баранина`. Confirm the label `3,9 км · по прямой` (actual value varies by location), click route and check the destination in 2GIS web. Then open Nearby to inspect the same qualifier and test narrow/mobile viewport. Verify Search without location still says `Маршрут`. Record desktop/web behavior and mobile/app if available.
+Open buyer Search, enable geolocation, search `баранина`. Confirm one `Расстояния указаны по прямой` notice immediately above the offer list, and compact distances such as `3,9 км` on cards. Click route and check the destination in 2GIS web. Open Nearby, inspect the one notice above the grid, and test a narrow/mobile viewport. Verify Search without location still says `Маршрут` and shows no distance notice. Record desktop/web behavior and mobile/app if available.
 
 ## External reference
 
