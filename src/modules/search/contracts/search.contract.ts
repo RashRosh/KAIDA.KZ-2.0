@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { openingHoursSchema } from '../../locations/hours/opening-hours';
 import { pointPublicContactsSchema } from '../../locations/details/point-public-contacts';
+import { distanceBasisSchema } from '../../geo/distance-basis';
 
 export const searchQuerySchema = z.string().trim().min(1, 'Введите название товара.');
 
@@ -95,6 +96,7 @@ export const searchOfferSchema = z.object({
   // stage #5: derived whole-meter distance, present only on geo-known Offers of a request that carried the buyer
   // location (any sort mode); raw Buyer/Seller coordinates never appear in the public DTO.
   distanceMeters: z.number().int().nonnegative().optional(),
+  roadDistanceMeters: z.number().int().nonnegative().optional(),
   // Present only while the translator is enabled and the comment is not already in the interface locale.
   sellerCommentTranslation: z.discriminatedUnion('status', [
     z.object({
@@ -112,6 +114,7 @@ export const searchResponseSchema = z.object({
   // S15B-2: the catalog Product the query resolved to (exact canonical / localized name / alias), else null.
   resolvedProduct: z.object({ id: z.uuid(), name: z.string() }).nullable().optional(),
   offers: z.array(searchOfferSchema),
+  distanceBasis: distanceBasisSchema.optional(),
   // search-typo-suggestions: present only when the original text found nothing and its confident correction was searched
   // instead (`from` is what the buyer typed, `to` the corrected text the Offers belong to); only with the `correct` flag.
   correction: z.object({ from: z.string(), to: z.string() }).optional(),

@@ -25,6 +25,7 @@ import { SortControl } from './SortPopover';
 import { IntentSuppression, consumeFirstEntryHandoff, intentKey } from './search-intent';
 import design from './search-results.module.css';
 import { SearchResultCard, SearchResultSkeletons } from './SearchResultCard';
+import { clearOfferDistance } from './offer-distance';
 import { SearchIcon } from './SearchIcon';
 import { useFavourites } from './use-favourites';
 
@@ -179,7 +180,12 @@ export function SearchScreen() {
     const carried = pendingIntent.current !== null && pendingIntent.current.key === intentId ? pendingIntent.current : null;
     const intent = carried !== null && !suppression.current.isSuppressed(intentId) ? carried.entry : undefined;
     pending.current = true;
+    clearOfferDistance();
     const asTyped = typed === true && entry === undefined;
+    const previousLocation = lastSearch.current?.location;
+    if (previousLocation && (previousLocation.latitude !== buyerLocation?.latitude || previousLocation.longitude !== buyerLocation?.longitude)) {
+      setShown(null);
+    }
     lastSearch.current = { query: parsed.data, productId, location: buyerLocation, sort: mode, direction: order, ...(asTyped ? { typed: true } : {}) };
     setStarted(true);
     setSearchedQuery(parsed.data);
@@ -468,7 +474,8 @@ export function SearchScreen() {
   }
 
   const visibleOffers = shown?.offers ?? [];
-  const showsDistance = visibleOffers.some((offer) => offer.routeAvailable && offer.distanceMeters !== undefined);
+  const showsStraightDistance = shown?.distanceBasis !== 'road'
+    && visibleOffers.some((offer) => offer.routeAvailable && offer.distanceMeters !== undefined);
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
@@ -539,14 +546,14 @@ export function SearchScreen() {
           </div>
         )}
         {loading && visibleOffers.length === 0 && <><div style={{minHeight:18}} aria-hidden="true" /><SearchResultSkeletons /></>}
-        {showsDistance && <span className={design.count} id="search-distance-note">{t('offer.distanceStraightLineNote')}</span>}
+            {showsStraightDistance && <span className={design.count} id="search-distance-note">{t('offer.distanceStraightLineNote')}</span>}
         {visibleOffers.length > 0 && (
-          <ul aria-label={t('search.offers')} aria-describedby={showsDistance ? 'search-distance-note' : undefined} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <ul aria-label={t('search.offers')} aria-describedby={showsStraightDistance ? 'search-distance-note' : undefined} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {visibleOffers.map((offer) => {
               const entry = favourites.state.kind === 'ready' ? favourites.state.favourites.find(entry => entry.offerId === offer.id && entry.locationId === offer.location.id) : undefined;
               const active = Boolean(entry);
               const pending = favourites.pendingId !== null && (favourites.pendingId === offer.id || favourites.pendingId === entry?.id);
-              return <li key={offer.id}><SearchResultCard offer={offer} heart={<button type="button" className={design.heart} data-testid="favourite-heart" data-error={favourites.error && favouriteTargetId === offer.id || undefined} aria-label={active ? t('fav.remove') : t('fav.save')} aria-pressed={active} aria-busy={pending} disabled={!favourites.available || favourites.pendingId !== null} onClick={event => { setFavouriteTargetId(offer.id); favourites.toggleOffer(event, { offerId: offer.id, locationId: offer.location.id }); }}><SearchIcon name="heart" filled={active} /></button>} /></li>;
+                return <li key={offer.id}><SearchResultCard offer={offer} distanceBasis={shown?.distanceBasis} heart={<button type="button" className={design.heart} data-testid="favourite-heart" data-error={favourites.error && favouriteTargetId === offer.id || undefined} aria-label={active ? t('fav.remove') : t('fav.save')} aria-pressed={active} aria-busy={pending} disabled={!favourites.available || favourites.pendingId !== null} onClick={event => { setFavouriteTargetId(offer.id); favourites.toggleOffer(event, { offerId: offer.id, locationId: offer.location.id }); }}><SearchIcon name="heart" filled={active} /></button>} /></li>;
             })}
           </ul>
         )}

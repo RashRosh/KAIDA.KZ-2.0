@@ -14,7 +14,7 @@ import type { BuyerLocation } from '../contracts/buyer-location.contract';
 import { resolveSearchOrder, searchQuerySchema, type SearchResponse, type SearchSortDirection, type SearchSortMode } from '../contracts/search.contract';
 import { findOffersByProductOrTitleWords } from '../infrastructure/search.repository';
 import { queryWords } from '../../offers/title/offer-title';
-import { rankSearchOfferCandidates } from '../ranking/search-ranking';
+import { rankSearchOfferCandidates, type RankedSearchCandidate } from '../ranking/search-ranking';
 import { classifyMatchLevel } from '../ranking/search-relevance';
 import { buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import type { Locale } from '../../../i18n/config';
@@ -30,11 +30,16 @@ type SearchLifecycleOptions = {
   direction?: SearchSortDirection;
   // S15B-3/4a: the Product the buyer selected from the suggestions; it joins the candidate set as a signal.
   productId?: string;
+  includeDistanceCandidates?: boolean;
 };
 
 // S15C / D0: how the Search response was reached, for the internal search event only — never part of the public response.
 export type SearchResolutionKind = 'selected' | 'resolved' | 'ambiguous' | 'unresolved';
-export type SearchOutcome = { response: SearchResponse; resolution: SearchResolutionKind };
+export type SearchOutcome = {
+  response: SearchResponse;
+  resolution: SearchResolutionKind;
+  distanceCandidates?: RankedSearchCandidate[];
+};
 
 export async function searchOffers(
   input: string,
@@ -103,5 +108,9 @@ export async function searchOffersDetailed(
       ? { distanceMeters: rankingDistanceMeters }
       : {}),
   }));
-  return { response: { query, resolvedProduct, offers }, resolution };
+  return {
+    response: { query, resolvedProduct, offers },
+    resolution,
+    ...(lifecycleOptions.includeDistanceCandidates && lifecycleOptions.buyerLocation ? { distanceCandidates: ranked } : {}),
+  };
 }

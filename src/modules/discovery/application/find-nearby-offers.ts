@@ -15,7 +15,8 @@ import {
 } from '../config/discovery.config';
 import type { NearbyResponse } from '../contracts/discovery.contract';
 import { findVisibleDiscoveryCandidates } from '../infrastructure/discovery.repository';
-import { selectNearbyOffers } from '../ranking/nearby-discovery';
+import { rankNearbyOffers, selectNearbyCandidates } from '../ranking/nearby-discovery';
+import { roadDistancesForOffers } from '../../geo/road-distances';
 import { ageingSince, buyerActuality, readActualityPolicy } from '../../offers/actuality/actuality';
 import type { Locale } from '../../../i18n/config';
 
@@ -47,16 +48,20 @@ export async function findNearbyOffers(
     : await findVisibleDiscoveryCandidates(db, cutoff, options.locale, options.commentTranslationEnabled);
 
   const policy = readActualityPolicy();
-  const actualityByOffer = new Map(candidates.map((candidate) => [candidate.offer.id, buyerActuality(candidate.lastConfirmedAt, now, policy)]));
+  const nearby = selectNearbyCandidates(candidates, buyerLocation, nearbyRadiusMeters);
+  const roadDistances = await roadDistancesForOffers(buyerLocation, nearby);
   // design-nearby (PO decision 2026-11-10, same basis as the D2 Search projection): the existing public confirmation
   // timestamp powers the minute/hour freshness badge. Raw coordinates and ranking metadata stay private.
-  const confirmedAtByOffer = new Map(candidates.map((candidate) => [candidate.offer.id, candidate.lastConfirmedAt]));
+  const decorated = nearby.map((candidate) => ({
+    ...candidate,
+    offer: {
+      ...candidate.offer,
+      actuality: buyerActuality(candidate.lastConfirmedAt, now, policy),
+      lastConfirmedAt: candidate.lastConfirmedAt.toISOString(),
+    },
+  }));
   return {
-    offers: selectNearbyOffers(candidates, buyerLocation, nearbyRadiusMeters, ageingSince(now, policy))
-      .map((offer) => ({
-        ...offer,
-        actuality: actualityByOffer.get(offer.id),
-        lastConfirmedAt: confirmedAtByOffer.get(offer.id)?.toISOString(),
-      })),
+    offers: rankNearbyOffers(decorated, ageingSince(now, policy), roadDistances ?? undefined),
+    ...(roadDistances !== null ? { distanceBasis: 'road' } : {}),
   };
 }

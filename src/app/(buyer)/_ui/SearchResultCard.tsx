@@ -10,6 +10,8 @@ import { actualityText } from '../../_components/actuality-text';
 import { pluralForm } from '../../../i18n/format';
 import type { MessageKey } from '../../../i18n/messages';
 import { formatDistance, markBuyerOfferOpened } from './buyer-ui';
+import type { DistanceBasis } from '@/modules/geo/distance-basis';
+import { displayedDistance, rememberOfferDistance } from './offer-distance';
 import { formatAmount } from '../../_components/format-amount';
 import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
 import { SearchIcon } from './SearchIcon';
@@ -36,8 +38,9 @@ export function ConfirmationBadge({ offer, className = styles.confirmation }: { 
   return <span className={className} data-tier={tier} role="img" aria-label={t('actuality.label', { when: label })}><SearchIcon name="leaf" />{label}</span>;
 }
 
-export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: React.ReactNode }) {
+export function SearchResultCard({ offer, heart, distanceBasis }: { offer: SearchOffer; heart: React.ReactNode; distanceBasis?: DistanceBasis }) {
   const { t } = useI18n();
+  const distance = displayedDistance(offer, distanceBasis);
   const contacts = offer.location.contacts ? buildContactActions(offer.location.contacts) : [];
   const basis = priceBasisText(offer.price.unit, offer.pack);
   return <article className={`linkcard ${styles.resultCard}`} aria-labelledby={`offer-${offer.id}`}>
@@ -50,7 +53,7 @@ export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: 
         {heart}
       </div>
       <div className={styles.cardText}>
-        <h3 id={`offer-${offer.id}`} lang={offer.product.nameLocale}><Link href={`/offers/${offer.id}`} className="stretch" onClick={markBuyerOfferOpened}>{offer.product.name}</Link></h3>
+        <h3 id={`offer-${offer.id}`} lang={offer.product.nameLocale}><Link href={`/offers/${offer.id}`} className="stretch" onNavigate={() => { markBuyerOfferOpened(); rememberOfferDistance(offer, distanceBasis); }}>{offer.product.name}</Link></h3>
         <div className={styles.price}><b className="pr">{formatAmount(offer.price.amount)} ₸</b>{basis && <> <span>{basis}</span></>}</div>
         <p className={styles.point} data-testid="card-point">{offer.location.name}</p>
         <p className={styles.address} data-testid="card-place" title={[offer.location.addressText, offer.seller.displayName].filter(Boolean).join(' · ')}>{offer.location.addressText}<span>{offer.location.addressText && offer.seller.displayName ? ' · ' : ''}{offer.seller.displayName}</span></p>
@@ -62,8 +65,8 @@ export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: 
         {...(action.label === 'Позвонить' ? {} : { target: '_blank', rel: 'noopener noreferrer' })}>
         <SearchIcon name={action.label === 'Позвонить' ? 'phone' : action.label === 'WhatsApp' ? 'whatsapp' : 'telegram'} />
       </a>)}
-      {offer.routeAvailable && <a className={styles.route} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" aria-label={t('offer.routeTo', { place: offer.location.name })} aria-describedby={offer.distanceMeters === undefined ? undefined : `route-distance-${offer.id}`}>
-        <SearchIcon name="route" />{offer.distanceMeters === undefined ? t('offer.route') : <span id={`route-distance-${offer.id}`}>{formatDistance(offer.distanceMeters, t)}</span>}
+      {offer.routeAvailable && <a className={styles.route} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" aria-label={t('offer.routeTo', { place: offer.location.name })} aria-describedby={distance === undefined ? undefined : `route-distance-${offer.id}`}>
+        <SearchIcon name="route" />{distance === undefined ? t('offer.route') : <span id={`route-distance-${offer.id}`}>{formatDistance(distance, t)}</span>}
       </a>}
     </div>
   </article>;
