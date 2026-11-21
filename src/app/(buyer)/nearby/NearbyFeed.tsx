@@ -275,7 +275,8 @@ export function NearbyFeed() {
             <p className="vh" role="status" aria-live="polite" aria-atomic="true">
               {t('nearby.found', { count: state.result.offers.length })}
             </p>
-            <ul className={styles.grid} aria-label={t('nearby.offersTitle')}>
+            <span className={styles.cap2} id="nearby-distance-note">{t('offer.distanceStraightLineNote')}</span>
+            <ul className={styles.grid} aria-label={t('nearby.offersTitle')} aria-describedby="nearby-distance-note">
               {state.result.offers.map((offer) => {
                 const basis = priceBasisText(offer.price.unit, offer.pack);
                 const active = favourites.state.kind === 'ready'

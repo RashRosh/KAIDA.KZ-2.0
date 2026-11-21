@@ -468,6 +468,7 @@ export function SearchScreen() {
   }
 
   const visibleOffers = shown?.offers ?? [];
+  const showsDistance = visibleOffers.some((offer) => offer.routeAvailable && offer.distanceMeters !== undefined);
   const feedback = loading
     ? t('search.loadingOffers')
     : state.kind === 'success'
@@ -538,8 +539,9 @@ export function SearchScreen() {
           </div>
         )}
         {loading && visibleOffers.length === 0 && <><div style={{minHeight:18}} aria-hidden="true" /><SearchResultSkeletons /></>}
+        {showsDistance && <span className={design.count} id="search-distance-note">{t('offer.distanceStraightLineNote')}</span>}
         {visibleOffers.length > 0 && (
-          <ul aria-label={t('search.offers')} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <ul aria-label={t('search.offers')} aria-describedby={showsDistance ? 'search-distance-note' : undefined} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {visibleOffers.map((offer) => {
               const entry = favourites.state.kind === 'ready' ? favourites.state.favourites.find(entry => entry.offerId === offer.id && entry.locationId === offer.location.id) : undefined;
               const active = Boolean(entry);

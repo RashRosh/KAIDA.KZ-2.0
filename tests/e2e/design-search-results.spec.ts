@@ -55,6 +55,9 @@ test('B03/B04 source parity: four cards, real age labels, one favourites load, 4
       radius:getComputedStyle(card).borderRadius};
   });
   expect(metrics).toEqual({photo:[104,104],heartTop:0,heartRight:0,price:'22px',pointWeight:'500',addressSize:'13px',radius:'14px'});
+  const distanceNote = page.getByText('Расстояния указаны по прямой', { exact: true });
+  await expect(distanceNote).toHaveCount(1);
+  await expect(distanceNote).toBeVisible();
   await expect(page.getByRole('article').first().getByRole('link',{name:/Маршрут до/})).toHaveText('1,2 км');
   await page.evaluate(()=>document.fonts.ready);
   await page.screenshot({path:info.outputPath('B03-normal-360.png'),animations:'disabled'});
@@ -71,6 +74,8 @@ test('B03/B04 source parity: four cards, real age labels, one favourites load, 4
   expect(await trigger.locator('span').first().evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
   expect((await notice.boundingBox())!.y).toBeLessThan((await trigger.boundingBox())!.y);
   await expect(page.getByRole('article')).toHaveCount(2);
+  await expect(page.getByRole('article').first().getByRole('link', { name: /Маршрут до/ })).toHaveText('Маршрут');
+  await expect(distanceNote).toHaveCount(0);
   const navBox=(await page.getByRole('navigation').boundingBox())!;
   expect(navBox.y+navBox.height).toBeLessThanOrEqual(1060);
   expect(navBox.y).toBeGreaterThanOrEqual(990);
