@@ -283,6 +283,7 @@ export function NearbyFeed() {
               {state.result.offers.map((offer) => {
                 const basis = priceBasisText(offer.price.unit, offer.pack);
                 const distance = displayedDistance(offer, distanceBasis);
+                const distanceLabel = distance === undefined ? null : formatDistance(distance, t);
                 const active = favourites.state.kind === 'ready'
                   && favourites.state.favourites.some(f => f.offerId === offer.id && f.locationId === offer.location.id);
                 return (
@@ -320,7 +321,17 @@ export function NearbyFeed() {
                         {formatAmount(offer.price.amount)}&nbsp;₸{basis && <>{' '}<small>{basis}</small></>}
                       </p>
                       <ConfirmationBadge offer={offer} className={styles.fresh} />
-                      {distance !== undefined && <span className={styles.cap2}>{formatDistance(distance, t)}</span>}
+                      {distanceLabel !== null && (offer.routeAvailable ? (
+                        <a
+                          className={`${styles.cap2} ${styles.distanceLink}`}
+                          href={`/api/offers/${offer.id}/route`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${t('offer.routeTo', { place: offer.location.name })} · ${distanceLabel}`}
+                        >
+                          {distanceLabel}
+                        </a>
+                      ) : <span className={styles.cap2}>{distanceLabel}</span>)}
                     </article>
                   </li>
                 );

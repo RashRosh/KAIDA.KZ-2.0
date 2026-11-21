@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { seedIds } from '../../src/db/seed';
 import { nearbyResponseSchema } from '../../src/modules/discovery/contracts/discovery.contract';
 
-test('Nearby shows and hands off road distance, then labels straight distance after a new position', async ({ page, context }) => {
+test('Nearby distance opens the map and the offer keeps the distance from its tile', async ({ page, context }) => {
   await context.grantPermissions(['geolocation']);
   const start = { latitude: 43.2504, longitude: 76.9487 };
   const moved = { latitude: 43.255, longitude: 76.9487 };
@@ -23,11 +23,27 @@ test('Nearby shows and hands off road distance, then labels straight distance af
 
   const note = page.getByText('Расстояния указаны по прямой', { exact: true });
   const lamb = page.getByTestId('nearby-tile').filter({ hasText: 'Баранина' });
+  const routePath = `/api/offers/${seedIds.lambOffer}/route`;
+  let mapDestination: string | undefined;
+  await context.route(`**${routePath}`, async route => {
+    const redirect = await route.fetch({ maxRedirects: 0 });
+    expect(redirect.status()).toBe(302);
+    mapDestination = redirect.headers().location;
+    await route.fulfill({ body: '2GIS destination' });
+  });
   await page.goto('/nearby');
   await page.getByRole('button', { name: 'Определить местоположение', exact: true }).click();
   await expect(lamb.getByText('4,2 км', { exact: true })).toBeVisible();
   await expect(page.getByTestId('nearby-tile').getByText('4,2 км', { exact: true })).toHaveCount(2);
   await expect(note).toHaveCount(0);
+  const [map] = await Promise.all([
+    page.waitForEvent('popup'),
+    lamb.getByRole('link', { name: /4,2 км/ }).click(),
+  ]);
+  await expect(map.getByText('2GIS destination')).toBeVisible();
+  expect(mapDestination).toMatch(/^https:\/\/2gis\.kz\/almaty\/directions\/points\//);
+  await map.close();
+  await expect(page).toHaveURL(/\/nearby$/);
   await lamb.getByRole('link', { name: 'Баранина' }).click();
   await expect(page.getByTestId('offer-distance')).toHaveText('4,2 км');
   await expect(page.locator(`a[href="/api/offers/${seedIds.lambOffer}/route"]`)).toBeVisible();
@@ -37,6 +53,7 @@ test('Nearby shows and hands off road distance, then labels straight distance af
   await page.getByRole('button', { name: 'Определить местоположение', exact: true }).click();
   await expect(note).toBeVisible();
   await expect(lamb.getByText('1,8 км', { exact: true })).toBeVisible();
+  await expect(lamb.getByRole('link', { name: /1,8 км/ })).toHaveAttribute('href', routePath);
   await lamb.getByRole('link', { name: 'Баранина' }).click();
   await expect(page.getByTestId('offer-distance')).toHaveText('1,8 км · по прямой');
   expect(origins).toEqual([start, moved]);
