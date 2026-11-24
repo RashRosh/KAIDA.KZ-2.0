@@ -7,6 +7,7 @@ import { offers } from '../../offers/db/offers.table';
 import type { OfferStatus } from '../../offers/db/offers.table';
 import { formatPriceUnit, priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { formatPack, packFromColumns, type Pack } from '../../offers/pack/pack';
+import { formatWholesaleBatch, wholesaleFromColumns, wholesaleToColumns, type Wholesale } from '../../offers/wholesale/wholesale';
 import type { Locale } from '../../../i18n/config';
 import { sellers } from '../../sellers/db/sellers.table';
 import type { TrackedAvailabilityItem } from '../contracts/availability.contract';
@@ -24,6 +25,8 @@ export type ChangeItemCardFields = {
   cardId: string;
   priceOwn: boolean;
   pack: Pack | null;
+  // wholesale-price: the card's wholesale line; null = none.
+  wholesale: Wholesale | null;
 };
 
 function cardColumns(card: ChangeItemCardFields) {
@@ -34,6 +37,7 @@ function cardColumns(card: ChangeItemCardFields) {
     priceOwn: card.priceOwn,
     packAmount: card.pack?.amount ?? null,
     packUnit: card.pack?.unit ?? null,
+    ...wholesaleToColumns(card.wholesale),
   };
 }
 
@@ -160,6 +164,11 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     priceOwn: sellerChangeItems.priceOwn,
     packAmount: sellerChangeItems.packAmount,
     packUnit: sellerChangeItems.packUnit,
+    wholesalePriceAmount: sellerChangeItems.wholesalePriceAmount,
+    wholesaleBatchCount: sellerChangeItems.wholesaleBatchCount,
+    wholesaleContainer: sellerChangeItems.wholesaleContainer,
+    wholesaleContainerText: sellerChangeItems.wholesaleContainerText,
+    wholesalePerContainer: sellerChangeItems.wholesalePerContainer,
     targetOfferId: sellerChangeItems.targetOfferId,
     locationId: locations.id,
     locationName: locations.name,
@@ -191,10 +200,26 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
   const itemPhotos = await findItemPhotoIds(database, rows.map((row) => row.id));
   // Before confirmation an update shows «было → стало»: the target Offer still holds the previous price.
   const targetIds = rows.flatMap((row) => row.targetOfferId ? [row.targetOfferId] : []);
-  const previous = header.status === 'proposed' && targetIds.length > 0
-    ? new Map((await database.select({ id: offers.id, priceAmount: offers.priceAmount }).from(offers).where(inArray(offers.id, targetIds)))
-      .map((row) => [row.id, row.priceAmount]))
-    : new Map<string, string | null>();
+  const targets = header.status === 'proposed' && targetIds.length > 0
+    ? await database.select({
+      id: offers.id,
+      priceAmount: offers.priceAmount,
+      priceUnitCode: offers.priceUnitCode,
+      priceUnitValue: offers.priceUnitValue,
+      wholesalePriceAmount: offers.wholesalePriceAmount,
+      wholesaleBatchCount: offers.wholesaleBatchCount,
+      wholesaleContainer: offers.wholesaleContainer,
+      wholesaleContainerText: offers.wholesaleContainerText,
+      wholesalePerContainer: offers.wholesalePerContainer,
+    }).from(offers).where(inArray(offers.id, targetIds))
+    : [];
+  const previous = new Map(targets.map((row) => [row.id, row.priceAmount]));
+  // wholesale-price: «было» of the wholesale line before an update (null = there was none).
+  const previousWholesale = new Map(targets.map((row) => {
+    const value = wholesaleFromColumns(row);
+    const unit = formatPriceUnit(priceUnitFromColumns(row.priceUnitCode, row.priceUnitValue), locale);
+    return [row.id, value === null ? null : { ...value, batch: formatWholesaleBatch(value, unit, locale) }] as const;
+  }));
 
   return {
     id: header.id,
@@ -204,6 +229,7 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     seller: { id: header.sellerId, displayName: header.sellerDisplayName },
     items: rows.map((row) => {
       const unit = priceUnitFromColumns(row.priceUnitCode, row.priceUnitValue);
+      const wholesale = wholesaleFromColumns(row);
       return {
       id: row.id,
       action: row.action,
@@ -213,6 +239,8 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
       priceOwn: row.priceOwn,
       pack: packFromColumns(row.packAmount, row.packUnit),
       packLabel: formatPack(packFromColumns(row.packAmount, row.packUnit), locale),
+      wholesale: wholesale === null ? null : { ...wholesale, batch: formatWholesaleBatch(wholesale, formatPriceUnit(unit, locale), locale) },
+      ...(row.targetOfferId && previousWholesale.has(row.targetOfferId) ? { previousWholesale: previousWholesale.get(row.targetOfferId)! } : {}),
       ...(row.targetOfferId && previous.get(row.targetOfferId) ? { previousPriceAmount: previous.get(row.targetOfferId)! } : {}),
       location: { id: row.locationId, name: row.locationName, addressText: row.locationAddressText, type: row.locationType as LocationType },
       price: row.priceAmount === null ? null : {
@@ -263,6 +291,11 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     priceOwn: sellerChangeItems.priceOwn,
     packAmount: sellerChangeItems.packAmount,
     packUnit: sellerChangeItems.packUnit,
+    wholesalePriceAmount: sellerChangeItems.wholesalePriceAmount,
+    wholesaleBatchCount: sellerChangeItems.wholesaleBatchCount,
+    wholesaleContainer: sellerChangeItems.wholesaleContainer,
+    wholesaleContainerText: sellerChangeItems.wholesaleContainerText,
+    wholesalePerContainer: sellerChangeItems.wholesalePerContainer,
     locationId: sellerChangeItems.locationId,
     priceAmount: sellerChangeItems.priceAmount,
     priceCurrency: sellerChangeItems.priceCurrency,
@@ -278,10 +311,14 @@ export async function lockChangeItems(database: SellerInputDb, changeSetId: stri
     .where(eq(sellerChangeItems.changeSetId, changeSetId))
     .orderBy(asc(sellerChangeItems.id))
     .for('update');
-  return rows.map(({ priceUnitCode, priceUnitValue, packAmount, packUnit, ...row }) => ({
+  return rows.map(({
+    priceUnitCode, priceUnitValue, packAmount, packUnit,
+    wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer, ...row
+  }) => ({
     ...row,
     priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue),
     pack: packFromColumns(packAmount, packUnit),
+    wholesale: wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer }),
   }));
 }
 

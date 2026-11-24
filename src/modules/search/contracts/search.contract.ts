@@ -81,6 +81,13 @@ export const searchOfferSchema = z.object({
     currency: z.literal('KZT'),
     unit: z.string().nullable(),
   }),
+  // wholesale-price: present only when the card has a wholesale line; the price is in the retail price's basis, batch is
+  // the ready text of the minimum batch («от 1 ящика (≈ 10 кг)»).
+  wholesale: z.object({
+    amount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    currency: z.literal('KZT'),
+    batch: z.string(),
+  }).optional(),
   sellerComment: z.string().nullable(),
   // stage 5A: public route capability — tells the client whether the current route capability is available for this
   // Offer (in the current implementation derived from the existing route prerequisite: complete Location

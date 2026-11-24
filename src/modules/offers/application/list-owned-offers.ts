@@ -11,6 +11,7 @@ import { findOfferPhotoIdsByOffer, listOffersBySeller } from '../infrastructure/
 import { calculateOfferCutoff, systemClock, type Clock } from '../lifecycle/offer-lifecycle';
 import { formatPriceUnit } from '../price-unit/price-unit';
 import { formatPack } from '../pack/pack';
+import { formatWholesaleBatch } from '../wholesale/wholesale';
 import { findActiveRemovalsBySeller } from '../../moderation/infrastructure/moderation.repository';
 import { actualityView, readActualityPolicy, validateActualityPolicy, type ActualityPolicy } from '../actuality/actuality';
 
@@ -63,6 +64,7 @@ export async function listOwnedOffers(
       priceOwn: row.priceOwn,
       pack: row.pack,
       packLabel: formatPack(row.pack, locale),
+      wholesale: row.wholesale === null ? null : { ...row.wholesale, batch: formatWholesaleBatch(row.wholesale, formatPriceUnit(row.priceUnit, locale), locale) },
       location: { id: row.locationId, name: row.locationName, addressText: row.locationAddressText },
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,

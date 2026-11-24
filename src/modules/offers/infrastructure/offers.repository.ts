@@ -6,6 +6,7 @@ import { offerPhotos } from '../db/offer-photos.table';
 import { offers } from '../db/offers.table';
 import { priceUnitFromColumns, priceUnitToColumns, type PriceUnit } from '../price-unit/price-unit';
 import { packFromColumns, type Pack } from '../pack/pack';
+import { wholesaleFromColumns, wholesaleToColumns, type Wholesale } from '../wholesale/wholesale';
 import { offerTitleSearchText } from '../title/offer-title';
 
 export type OfferWriteDb = Pick<Database, 'insert' | 'select' | 'update'>;
@@ -19,6 +20,11 @@ const managementOfferSelection = {
   priceOwn: offers.priceOwn,
   packAmount: offers.packAmount,
   packUnit: offers.packUnit,
+  wholesalePriceAmount: offers.wholesalePriceAmount,
+  wholesaleBatchCount: offers.wholesaleBatchCount,
+  wholesaleContainer: offers.wholesaleContainer,
+  wholesaleContainerText: offers.wholesaleContainerText,
+  wholesalePerContainer: offers.wholesalePerContainer,
   locationId: offers.locationId,
   priceAmount: offers.priceAmount,
   priceCurrency: offers.priceCurrency,
@@ -33,9 +39,21 @@ const managementOfferSelection = {
   updatedAt: offers.updatedAt,
 };
 
-function withPriceUnit<T extends { priceUnitCode: string | null; priceUnitValue: string | null; packAmount: string | null; packUnit: string | null }>(row: T) {
-  const { priceUnitCode, priceUnitValue, packAmount, packUnit, ...rest } = row;
-  return { ...rest, priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue), pack: packFromColumns(packAmount, packUnit) };
+function withPriceUnit<T extends {
+  priceUnitCode: string | null; priceUnitValue: string | null; packAmount: string | null; packUnit: string | null;
+  wholesalePriceAmount: string | null; wholesaleBatchCount: number | null; wholesaleContainer: string | null;
+  wholesaleContainerText: string | null; wholesalePerContainer: string | null;
+}>(row: T) {
+  const {
+    priceUnitCode, priceUnitValue, packAmount, packUnit,
+    wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer, ...rest
+  } = row;
+  return {
+    ...rest,
+    priceUnit: priceUnitFromColumns(priceUnitCode, priceUnitValue),
+    pack: packFromColumns(packAmount, packUnit),
+    wholesale: wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer }),
+  };
 }
 
 // seller-showcase-editor: shared card fields written together on every Offer of a card.
@@ -45,6 +63,7 @@ export type OfferCardFields = {
   cardId: string;
   priceOwn: boolean;
   pack: Pack | null;
+  wholesale: Wholesale | null;
 };
 
 function sharedCardColumns(card: Omit<OfferCardFields, 'cardId'>) {
@@ -55,6 +74,7 @@ function sharedCardColumns(card: Omit<OfferCardFields, 'cardId'>) {
     priceOwn: card.priceOwn,
     packAmount: card.pack?.amount ?? null,
     packUnit: card.pack?.unit ?? null,
+    ...wholesaleToColumns(card.wholesale),
   };
 }
 

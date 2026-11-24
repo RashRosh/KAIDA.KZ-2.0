@@ -7,6 +7,19 @@ import type { SellerOfferView } from '../../../modules/offers/contracts/seller-o
 import type { OfferDraftView } from '../../../modules/offers/drafts/offer-draft.contract';
 import { PACK_UNIT_LABELS, PACK_UNITS, type PackUnit } from '../../../modules/offers/pack/pack';
 import { PRICE_UNIT_LABELS } from '../../../modules/offers/price-unit/price-unit';
+import { formatPack } from '../../../modules/offers/pack/pack';
+import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
+import {
+  canonicalDecimal,
+  formatWholesaleBatch,
+  isListedContainer,
+  WHOLESALE_LISTED_CONTAINERS,
+  WHOLESALE_PER_CONTAINER_PATTERN,
+  wholesaleContainerName,
+  wholesaleInOne,
+  type WholesaleContainer,
+} from '../../../modules/offers/wholesale/wholesale';
+import { WholesaleLine } from '../../(buyer)/_ui/WholesaleLine';
 import type { SellerChangeSetView } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { SellerView } from '../../../modules/sellers/contracts/seller.contract';
 import { useI18n } from '../../../i18n/I18nProvider';
@@ -23,6 +36,12 @@ import {
   createBody,
   draftPayload,
   emptyCardValues,
+  emptyWholesaleDraft,
+  markWholesaleReview,
+  validPrice,
+  validateWholesale,
+  wholesaleBasisKey,
+  wholesaleDraftFrom,
   FIELD_ORDER,
   keepsLink,
   acceptAmountInput,
@@ -40,6 +59,8 @@ import {
   type CardValues,
   type UnitCode,
   type UnitDraft,
+  type WholesaleDraft,
+  type WholesaleErrors,
 } from './card-editor-state';
 import { derivedSellerName } from './offer-editor-state';
 
@@ -90,6 +111,7 @@ function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: 
       packAmount: lead.pack?.amount ?? '',
       packUnit: lead.pack?.unit ?? 'g',
       comment: lead.sellerComment ?? '',
+      wholesale: wholesaleDraftFrom(lead.wholesale),
       applyPrice: Object.fromEntries(mode.card.offers.map((offer) => [offer.id, !offer.priceOwn])),
     };
   }
@@ -129,7 +151,11 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const [attempted, setAttempted] = useState(false);
   const [busy, setBusy] = useState<'send' | 'draft' | 'delete' | null>(null);
   const [failure, setFailure] = useState<'send' | 'draft' | 'conflict' | 'noChanges' | null>(null);
-  const [overlay, setOverlay] = useState<'discard' | 'deleteDraft' | 'unit' | 'points' | null>(null);
+  const [overlay, setOverlay] = useState<'discard' | 'deleteDraft' | 'unit' | 'points' | 'wholesale' | null>(null);
+  // wholesale-price §3.1: the sheet edits its own copy; «Сохранить» puts it into the editor values as a whole.
+  const [wholesaleForm, setWholesaleForm] = useState<WholesaleDraft>(emptyWholesaleDraft);
+  const [wholesaleErrors, setWholesaleErrors] = useState<WholesaleErrors>({});
+  const [wholesaleAttempted, setWholesaleAttempted] = useState(false);
   // Full-screen steps of the editor: the form, the per-point prices (AI-S11), one point's price, a new point.
   const [view, setView] = useState<'form' | 'prices' | 'newPoint' | { pricePoint: string } | { editPoint: string }>('form');
   // pre-publication-buyer-preview: the Seller's private preview of this card (a screen of the editor; the form stays mounted)
@@ -260,7 +286,11 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
 
   function update(patch: Partial<CardValues>) {
     setValues((current) => {
-      const next = { ...current, ...patch };
+      let next = { ...current, ...patch };
+      // A change of the retail unit or pack sends the wholesale line back for review (wholesale-price §3.1).
+      if (next.wholesale && !('wholesale' in patch) && wholesaleBasisKey(next) !== wholesaleBasisKey(current)) {
+        next = { ...next, wholesale: markWholesaleReview(next.wholesale) };
+      }
       if (attempted) setErrors(validateCard(next, mode.kind, locations.length).errors);
       return next;
     });
@@ -459,6 +489,73 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       setFailure('send');
     }
   }
+
+  // The wholesale line as the buyer will read it: the retail unit label and basis, the batch with its forms.
+  const wholesaleUnit = values.unit.code === '' ? '' : values.unit.code === 'other' ? values.unit.custom.trim() : PRICE_UNIT_LABELS[locale][values.unit.code];
+  const packAmountNow = normalizeAmount(values.packAmount);
+  const packText = packAllowed(values.unit.code) && values.packOpen && packAmountNow !== '' && Number(packAmountNow) > 0
+    ? formatPack({ amount: packAmountNow, unit: values.packUnit }, locale) : null;
+  const wholesaleBasis = priceBasisText(wholesaleUnit || null, packText);
+  function wholesaleBatchText(draft: WholesaleDraft): string {
+    if (draft.container === '') return '…';
+    const per = normalizeAmount(draft.perContainer);
+    const perOk = WHOLESALE_PER_CONTAINER_PATTERN.test(per) && Number(per) > 0;
+    const count = Number(draft.batchCount.replace(/\s/g, ''));
+    const text = formatWholesaleBatch({
+      amount: '0',
+      batchCount: Number.isInteger(count) && count > 0 ? count : 1,
+      container: draft.container,
+      containerText: draft.containerText.trim() || '…',
+      perContainer: draft.container !== 'unit' && perOk ? canonicalDecimal(per) : null,
+    }, wholesaleUnit, locale);
+    return draft.container === 'unit' || perOk ? text : `${text} (≈\u00a0?\u00a0${wholesaleUnit})`;
+  }
+  const wholesaleShown = (draft: WholesaleDraft) => ({
+    wholesale: { amount: validPrice(draft.amount) ?? (normalizeAmount(draft.amount) || '0'), currency: 'KZT' as const, batch: wholesaleBatchText(draft) },
+    price: { amount: '0', currency: 'KZT' as const, unit: wholesaleUnit || null },
+    ...(packText ? { pack: packText } : {}),
+  });
+  const containerLabel = (container: WholesaleContainer) => container === 'unit' ? wholesaleUnit
+    : container === 'other' ? t('wholesale.containerOther') : wholesaleContainerName(container, locale);
+  const perContainerLabel = (draft: WholesaleDraft) => draft.container === 'other'
+    ? t('wholesale.perContainerOther', { unit: wholesaleUnit, text: draft.containerText.trim() || '…' })
+    : isListedContainer(draft.container) ? t('wholesale.perContainer', { unit: wholesaleUnit, inOne: wholesaleInOne(draft.container, locale) }) : '';
+  const wholesaleReviewText = (draft: WholesaleDraft) => isListedContainer(draft.container)
+    ? t('wholesale.reviewPer', { unit: wholesaleUnit, inOne: wholesaleInOne(draft.container, locale) })
+    : t('wholesale.reviewRequired');
+
+  function openWholesale() {
+    setWholesaleForm(values.wholesale ? { ...values.wholesale } : emptyWholesaleDraft());
+    setWholesaleErrors({});
+    setWholesaleAttempted(false);
+    setOverlay('wholesale');
+  }
+  function saveWholesale() {
+    const checked = validateWholesale(wholesaleForm);
+    setWholesaleErrors(checked.errors);
+    setWholesaleAttempted(true);
+    if (!checked.input) {
+      shakeErrors();
+      const first = (['amount', 'batch', 'containerText', 'perContainer'] as const).find((field) => checked.errors[field]);
+      if (first) document.getElementById(`${ids}-ws-${first}`)?.focus();
+      return;
+    }
+    update({ wholesale: { ...wholesaleForm, needsReview: false } });
+    setOverlay(null);
+    focusField(`${ids}-wholesale`);
+  }
+  function removeWholesale() {
+    update({ wholesale: null });
+    setOverlay(null);
+    focusField(`${ids}-wholesale-add`);
+  }
+  // After the first «Сохранить» the errors follow the fields as they are corrected.
+  const setWholesaleField = (patch: Partial<WholesaleDraft>) => {
+    const next = { ...wholesaleForm, ...patch };
+    setWholesaleForm(next);
+    if (wholesaleAttempted) setWholesaleErrors(validateWholesale(next).errors);
+  };
+  const wsErr = (field: keyof WholesaleErrors) => wholesaleErrors[field] ? `${ids}-ws-${field}-error` : undefined;
 
   const unitLabel = (code: UnitDraft['code'], custom: string) => code === '' ? ''
     : code === 'other' ? custom.trim() || t('card.unitOther') : code === 'piece' ? 'шт.' : PRICE_UNIT_LABELS[locale][code];
@@ -682,6 +779,9 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               </div>
               <div className="fld"><div className="fl">Цена за</div><div className="inp dis"><span style={{ flex: 1 }}>{lead.price?.unit ?? '—'}</span><Ic name="down" className="c2" /></div></div>
             </div>
+            {values.wholesale && (
+              <div className="fld"><div className="fl">{t('wholesale.title')}</div><div className="inp dis" style={{ height: 'auto', padding: '10px 14px' }}><WholesaleLine offer={wholesaleShown(values.wholesale)} size="md" /></div></div>
+            )}
             {pointOffer.priceOwn && common && (
               <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => void send(true)} disabled={disabled}>
                 <Ic name="history" className="sm" />{t('card.resetPrice', { price: price(common) })}
@@ -788,6 +888,26 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                 <Ic name="plus" className="sm" />{t('card.packAdd')}
               </button>
             ))}
+
+            {values.wholesale ? (
+              <div className="fld" data-testid="wholesale-row">
+                <div className="fl" id={`${ids}-wholesale-label`}>{t('wholesale.title')}</div>
+                <div className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: '10px 8px 10px 14px', border: values.wholesale.needsReview || errors.wholesale ? '2px solid var(--danger)' : undefined }}>
+                  <div style={{ flex: 1, minWidth: 0 }}><WholesaleLine offer={wholesaleShown(values.wholesale)} size="md" /></div>
+                  <button id={`${ids}-wholesale`} type="button" className="btn btn-g sm" style={{ minHeight: 44 }} onClick={openWholesale} disabled={disabled}
+                    aria-haspopup="dialog" aria-describedby={[`${ids}-wholesale-label`, values.wholesale.needsReview || errors.wholesale ? err('wholesale') ?? `${ids}-wholesale-error` : ''].filter(Boolean).join(' ')}>
+                    {values.wholesale.needsReview ? t('wholesale.review') : t('wholesale.change')}
+                  </button>
+                </div>
+                {values.wholesale.needsReview
+                  ? <ErrorLine id={`${ids}-wholesale-error`}>{wholesaleReviewText(values.wholesale)}</ErrorLine>
+                  : errors.wholesale && <ErrorLine id={err('wholesale')}>{t(errors.wholesale)}</ErrorLine>}
+              </div>
+            ) : values.unit.code !== '' && (
+              <button id={`${ids}-wholesale-add`} type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0, minHeight: 44 }} onClick={openWholesale} disabled={disabled} aria-haspopup="dialog">
+                <Ic name="plus" className="sm" />{t('wholesale.add')}
+              </button>
+            )}
 
             <div className="fld">
               <label className="fl" htmlFor={`${ids}-comment`}>{t('card.comment')} <span className="req">· необязательно</span></label>
@@ -937,6 +1057,66 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               </button>
             ))}
           </div>
+        </Sheet>
+      )}
+
+      {overlay === 'wholesale' && (
+        <Sheet title={t('wholesale.title')} onClose={() => setOverlay(null)}>
+          <div className="fld">
+            <label htmlFor={`${ids}-ws-amount`}>{t('wholesale.price')}</label>
+            <div className={`inp num${wholesaleErrors.amount ? ' er' : ''}`}>
+              <input id={`${ids}-ws-amount`} data-autofocus value={wholesaleForm.amount} inputMode="decimal" autoComplete="off"
+                onChange={(event) => setWholesaleField({ amount: acceptAmountInput(wholesaleForm.amount, event.target.value) })}
+                aria-invalid={wholesaleErrors.amount ? true : undefined} aria-describedby={[wsErr('amount'), `${ids}-ws-amount-hint`].filter(Boolean).join(' ')} />
+              <span className="c2" style={{ whiteSpace: 'nowrap' }}>₸{wholesaleBasis ? ` ${wholesaleBasis}` : ''}</span>
+            </div>
+            <span className="hint" id={`${ids}-ws-amount-hint`}>{t('wholesale.priceHint')}</span>
+            {wholesaleErrors.amount && <ErrorLine id={wsErr('amount')}>{t(wholesaleErrors.amount)}</ErrorLine>}
+          </div>
+          <div className="fld">
+            <div className="fl" id={`${ids}-ws-batch-label`}>{t('wholesale.batch')}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input id={`${ids}-ws-batch`} className={`inp num${wholesaleErrors.batch ? ' er' : ''}`} style={{ width: 96 }} value={wholesaleForm.batchCount} inputMode="numeric" autoComplete="off" maxLength={4}
+                onChange={(event) => setWholesaleField({ batchCount: event.target.value.replace(/\D/g, '') })}
+                aria-label={t('wholesale.batchCount')} aria-invalid={wholesaleErrors.batch ? true : undefined} aria-describedby={wsErr('batch')} />
+              <select className={`inp${wholesaleErrors.batch && wholesaleForm.container === '' ? ' er' : ''}`} style={{ flex: 1, minWidth: 0 }} aria-label={t('wholesale.container')} value={wholesaleForm.container}
+                onChange={(event) => setWholesaleField({ container: event.target.value as WholesaleContainer | '' })} aria-describedby={wsErr('batch')}>
+                {wholesaleForm.container === '' && <option value="">—</option>}
+                {WHOLESALE_LISTED_CONTAINERS.map((container) => <option key={container} value={container}>{containerLabel(container)}</option>)}
+                {wholesaleUnit && <option value="unit">{containerLabel('unit')}</option>}
+                <option value="other">{containerLabel('other')}</option>
+              </select>
+            </div>
+            {wholesaleErrors.batch && <ErrorLine id={wsErr('batch')}>{t(wholesaleErrors.batch)}</ErrorLine>}
+          </div>
+          {wholesaleForm.container === 'other' && (
+            <div className="fld">
+              <label htmlFor={`${ids}-ws-containerText`}>{t('wholesale.containerText')}</label>
+              <input id={`${ids}-ws-containerText`} className={`inp${wholesaleErrors.containerText ? ' er' : ''}`} value={wholesaleForm.containerText} maxLength={20} autoComplete="off"
+                placeholder={t('wholesale.containerTextPlaceholder')} onChange={(event) => setWholesaleField({ containerText: event.target.value })}
+                aria-invalid={wholesaleErrors.containerText ? true : undefined} aria-describedby={wsErr('containerText')} />
+              {wholesaleErrors.containerText && <ErrorLine id={wsErr('containerText')}>{t(wholesaleErrors.containerText)}</ErrorLine>}
+            </div>
+          )}
+          {wholesaleForm.container !== 'unit' && wholesaleForm.container !== '' && (
+            <div className="fld">
+              <label htmlFor={`${ids}-ws-perContainer`}>{perContainerLabel(wholesaleForm)}</label>
+              <div className={`inp num${wholesaleErrors.perContainer ? ' er' : ''}`}>
+                <input id={`${ids}-ws-perContainer`} value={wholesaleForm.perContainer} inputMode="decimal" autoComplete="off"
+                  onChange={(event) => setWholesaleField({ perContainer: acceptAmountInput(wholesaleForm.perContainer, event.target.value) })}
+                  aria-invalid={wholesaleErrors.perContainer ? true : undefined} aria-describedby={wsErr('perContainer')} />
+                <span className="c2">{wholesaleUnit}</span>
+              </div>
+              {wholesaleErrors.perContainer && <ErrorLine id={wsErr('perContainer')}>{t(wholesaleErrors.perContainer)}</ErrorLine>}
+            </div>
+          )}
+          {validateWholesale(wholesaleForm).input && (
+            <p className="c c2" data-testid="wholesale-buyer-sees">{t('wholesale.buyerSees', { text: wholesaleBatchText(wholesaleForm) })}</p>
+          )}
+          <button type="button" className="btn btn-p lg w" onClick={saveWholesale}>{t('wholesale.save')}</button>
+          {values.wholesale && (
+            <button type="button" className="btn btn-g w" style={{ color: 'var(--danger)' }} onClick={removeWholesale}>{t('wholesale.remove')}</button>
+          )}
         </Sheet>
       )}
 

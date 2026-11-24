@@ -10,6 +10,7 @@ import type { MessageKey } from '../../../../../i18n/messages';
 import { formatOfferPrice } from '../../../_components/cabinet-data';
 import { photoUrl } from '../../../../../modules/media/contracts/photo.contract';
 import { formatAmount } from '../../../../_components/format-amount';
+import { priceBasisText } from '../../../../../modules/offers/price-unit/price-basis';
 import { pluralKey } from '../../../_components/card-model';
 import { Bar, Ic, LoadError, LoginRequired, Phone, Thumb } from '../../../_kaida/ui';
 
@@ -43,6 +44,13 @@ function safeBack(value: string | null, fallback: string) {
 function priceText(price: SellerChangeSetItemView['price']) {
   const formatted = formatOfferPrice(price);
   return formatted ? `${formatted.amount}${formatted.unit ? ` / ${formatted.unit}` : ''}` : null;
+}
+
+// wholesale-price §3.1: «650 ₸ / кг · от 1 ящика (≈ 10 кг)», in the retail price's basis of the same item.
+function wholesaleText(wholesale: SellerChangeSetItemView['wholesale'] | undefined, item: Pick<SellerChangeSetItemView, 'price' | 'packLabel'>) {
+  if (!wholesale) return null;
+  const basis = priceBasisText(item.price?.unit, item.packLabel);
+  return `${formatAmount(wholesale.amount)} ₸${basis ? ` ${basis}` : ''} · ${wholesale.batch}`;
 }
 
 function Kv({ label, value, old }: { label: string; value: string; old?: string | null }) {
@@ -286,6 +294,10 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
         ) : (
           <Kv label={t('confirm.price')} value={priceText(item.price) ?? t('review.noPrice')} old={old ? priceText(old.price) : null} />
         )}
+        {editsCard && (item.wholesale || item.previousWholesale) && (
+          <Kv label={t('wholesale.title')} value={wholesaleText(item.wholesale, item) ?? t('wholesale.none')}
+            old={item.previousWholesale !== undefined ? wholesaleText(item.previousWholesale, item) ?? t('wholesale.none') : null} />
+        )}
         {editsCard && <Kv label={t('confirm.comment')} value={item.sellerComment ?? t('confirm.noComment')} old={old ? old.sellerComment ?? t('confirm.noComment') : null} />}
         {editsCard && <Kv label={t('confirm.photos')} value={photoIds.length > 0 ? String(photoIds.length) : t('confirm.noPhotos')} />}
       </div>
@@ -364,6 +376,10 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
                 const value = before && Number(before) !== Number(now) ? `${formatAmount(before)} → ${formatAmount(now)}` : amount(now);
                 return <Kv key={item.id} label={item.location.name} value={`${value}${item.priceOwn ? ` · ${t('cardScreen.own')}` : ''}`} />;
               })}
+              {(first.wholesale || first.previousWholesale) && (
+                <Kv label={t('wholesale.title')} value={wholesaleText(first.wholesale, first) ?? t('wholesale.none')}
+                  old={first.previousWholesale !== undefined ? wholesaleText(first.previousWholesale, first) ?? t('wholesale.none') : null} />
+              )}
               {cardPhotoIds !== undefined && <Kv label={t('confirm.photos')} value={cardPhotoIds.length > 0 ? String(cardPhotoIds.length) : t('confirm.noPhotos')} />}
               {cardPhotoIds !== undefined && first.sellerComment && <Kv label={t('confirm.comment')} value={first.sellerComment} />}
             </>
