@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="UTF-8"><style id="qw-theme">:root {
+  --contextual-navbar-foreground-color: #000000 !important;
+  --connection-foreground-color: #FFFFFF !important;
+  --automation-foreground-color: #FFFFFF !important;
+  --global-navbar-background-color: #F3F3F7 !important;
+  --accent-foreground-color: #FFFFFF !important;
+  --primary-foreground-color: #000000 !important;
+  --measure-foreground-color: #CB7600 !important;
+  --dimension-foreground-color: #1B84BF !important;
+  --warning-background-color: #FF9800 !important;
+  --warning-foreground-color: #000000 !important;
+  --success-background-color: #27700E !important;
+  --info-foreground-color: #FFFFFF !important;
+  --secondary-foreground-color: #000000 !important;
+  --info-background-color: #2196F3 !important;
+  --measure-background-color: #FFF8EF !important;
+  --contextual-navbar-background-color: #FFFFFF !important;
+  --accent-background-color: #4200DB !important;
+  --visualization-background-color: #6842FF !important;
+  --connection-background-color: #FF4B14 !important;
+  --secondary-background-color: #F9F9FB !important;
+  --danger-background-color: #C82745 !important;
+  --automation-background-color: #D600BA !important;
+  --success-foreground-color: #FFFFFF !important;
+  --danger-foreground-color: #FFFFFF !important;
+  --dimension-background-color: #EEF8FF !important;
+  --insight-foreground-color: #FFFFFF !important;
+  --primary-background-color: #FFFFFF !important;
+  --insight-background-color: #78008A !important;
+  --visualization-foreground-color: #FFFFFF !important;
+  --global-navbar-foreground-color: #5A5A5B !important;
+  --chat-column-base: 720px !important;
+  --chat-column-max: clamp(888px, 50vw, 1200px) !important;
+  --color-bg: #faf9fc !important;
+  --color-navbar-bg: #f9f9fb !important;
+  --color-navbar-fg: #131920 !important;
+  --color-navbar-divider: rgba(0, 0, 0, .12) !important;
+  --color-leftnav-bg: #ffffff !important;
+  --color-bg-chat-view: #f9f9fb !important;
+  --color-bg-secondary: #ffffff !important;
+  --color-bg-tertiary: #f9fafb !important;
+  --color-bg-hover: #f3f4f6 !important;
+  --color-surface: #f9fafb !important;
+  --color-surface-hover: #f3f4f6 !important;
+  --color-surface-active: #e5e7eb !important;
+  --color-border: rgba(0, 0, 0, .12) !important;
+  --color-border-light: rgba(0, 0, 0, .06) !important;
+  --color-border-strong: #d1d5db !important;
+  --background-toggle-off-default: rgba(255, 255, 255, 0) !important;
+  --color-primary: #4200db !important;
+  --color-primary-dark: #35009e !important;
+  --color-primary-light: #8575ff !important;
+  --color-primary-bg: #e8e6ff !important;
+  --color-primary-hover-border: #35009e !important;
+  --color-nav-icon-active: #4200db !important;
+  --color-nav-hover-border: #4200db !important;
+  --color-primary-alpha-3: color-mix(in srgb, #4200db 3%, transparent) !important;
+  --color-primary-alpha-5: color-mix(in srgb, #4200db 5%, transparent) !important;
+  --color-primary-alpha-8: color-mix(in srgb, #4200db 8%, transparent) !important;
+  --color-primary-alpha-12: color-mix(in srgb, #4200db 12%, transparent) !important;
+  --color-primary-alpha-15: color-mix(in srgb, #4200db 15%, transparent) !important;
+  --color-primary-alpha-20: color-mix(in srgb, #4200db 20%, transparent) !important;
+  --color-primary-alpha-25: color-mix(in srgb, #4200db 25%, transparent) !important;
+  --color-primary-alpha-30: color-mix(in srgb, #4200db 30%, transparent) !important;
+  --color-primary-alpha-40: color-mix(in srgb, #4200db 40%, transparent) !important;
+  --color-primary-alpha-50: color-mix(in srgb, #4200db 50%, transparent) !important;
+  --color-primary-alpha-60: color-mix(in srgb, #4200db 60%, transparent) !important;
+  --color-primary-subtle: color-mix(in srgb, #4200db 12%, transparent) !important;
+  --color-primary-border: color-mix(in srgb, #4200db 30%, transparent) !important;
+  --color-focus-ring: #4200db !important;
+  --color-sidebar-hover: color-mix(in srgb, #4200db 12%, transparent) !important;
+  --color-sidebar-hover-solid: color-mix(in srgb, #4200db 12%, #faf9fc) !important;
+  --block-selection-outline-offset: 2px !important;
+  --color-accent: #4200db !important;
+  --color-accent-foreground: #4200db !important;
+  --color-accent-dark: #35009e !important;
+  --color-accent-light: #e8e6ff !important;
+  --color-accent-inverse: #ffffff !important;
+  --color-link: #4200db !important;
+  --color-brand-ai-gradient-start: #6842ff !important;
+  --color-brand-ai-gradient-mid: #d600ba !important;
+  --color-brand-ai-gradient-end: #ff4b14 !important;
+  --color-brand-kiro: #9147ff !important;
+  --color-primary-gradient-end: #e8e6ff !important;
+  --color-primary-bg-solid: #e8e6ff !important;
+  --color-user-bubble: #F3F3F7 !important;
+  --color-user-bubble-text: #131920 !important;
+  --color-text: #131920 !important;
+  --color-text-secondary: #5e5e5e !important;
+  --color-text-tertiary: #656871 !important;
+  --color-text-muted: #656871 !important;
+  --color-text-on-primary: #ffffff !important;
+  --color-success: #00802f !important;
+  --color-success-dark: #00471e !important;
+  --color-success-light: #d9ffd6 !important;
+  --color-success-hover: #005c26 !important;
+  --color-success-bg: #e6f5eb !important;
+  --color-success-border: #b3d9bf !important;
+  --color-success-foreground: #00802f !important;
+  --color-success-dark-foreground: #00471e !important;
+  --color-success-text: #00471e !important;
+  --color-error: #db0000 !important;
+  --color-error-dark: #700000 !important;
+  --color-error-light: #ffe0e0 !important;
+  --color-error-hover: #ffe0e0 !important;
+  --color-error-bg: #fceaea !important;
+  --color-error-border: #f2cccc !important;
+  --color-error-active-border: #db0000 !important;
+  --color-error-foreground: #db0000 !important;
+  --color-error-dark-foreground: #700000 !important;
+  --color-error-inverse: #ffffff !important;
+  --color-error-text: #700000 !important;
+  --color-warning: #f2b100 !important;
+  --color-warning-dark: #573a00 !important;
+  --color-warning-light: #fffbbd !important;
+  --color-warning-hover: #db9200 !important;
+  --color-warning-bg: #fef7e6 !important;
+  --color-warning-border: #f9dfa3 !important;
+  --color-warning-foreground: #f2b100 !important;
+  --color-warning-dark-foreground: #573a00 !important;
+  --color-warning-inverse: #573a00 !important;
+  --color-surface-warning: #fffbbd !important;
+  --color-text-warning: #573a00 !important;
+  --color-info: #006ce0 !important;
+  --color-info-dark: #002a66 !important;
+  --color-info-light: #d1f1ff !important;
+  --color-info-hover: #003b8f !important;
+  --color-info-bg: #ebf3fc !important;
+  --color-info-border: #b3d1f0 !important;
+  --color-info-foreground: #006ce0 !important;
+  --color-info-dark-foreground: #002a66 !important;
+  --color-info-inverse: #ffffff !important;
+  --color-overlay: rgba(0, 0, 0, .5) !important;
+  --color-shadow: rgba(0, 0, 0, .08) !important;
+  --color-hover: rgba(0, 0, 0, .05) !important;
+  --color-tooltip-bg: rgba(0, 0, 0, .85) !important;
+  --color-tooltip-text: #ffffff !important;
+  --color-voice-purple: #8575ff !important;
+  --color-voice-purple-dark: #4200db !important;
+  --color-voice-purple-light: #8575ff !important;
+  --color-voice-red: #db0000 !important;
+  --color-voice-red-dark: #700000 !important;
+  --color-voice-amber: #f2b100 !important;
+  --color-voice-purple-glow: rgba(66, 0, 219, .4) !important;
+  --color-voice-red-glow: rgba(219, 0, 0, .4) !important;
+  --font-sans: "Amazon Ember", "Helvetica Neue", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  --font-mono: "SF Mono", "Monaco", "Menlo", "Consolas", monospace !important;
+  --text-2xs: .5625rem !important;
+  --text-xs: .625rem !important;
+  --text-sm: .6875rem !important;
+  --text-base: .75rem !important;
+  --text-md: .8125rem !important;
+  --text-lg: .875rem !important;
+  --text-xl: 1rem !important;
+  --text-2xl: 1.125rem !important;
+  --text-3xl: 1.25rem !important;
+  --text-4xl: 1.5rem !important;
+  --text-5xl: 2rem !important;
+  --spacing-1: calc(.25rem * 1) !important;
+  --spacing-1-5: calc(.25rem * 1.5) !important;
+  --spacing-2: calc(.25rem * 2) !important;
+  --spacing-3: calc(.25rem * 3) !important;
+  --spacing-4: calc(.25rem * 4) !important;
+  --spacing-5: calc(.25rem * 5) !important;
+  --spacing-6: calc(.25rem * 6) !important;
+  --spacing-7: calc(.25rem * 7) !important;
+  --spacing-8: calc(.25rem * 8) !important;
+  --spacing-9: calc(.25rem * 9) !important;
+  --spacing-10: calc(.25rem * 10) !important;
+  --border-radius-rounded-lg: 8px !important;
+  --radius-sm: 6px !important;
+  --radius-md: 10px !important;
+  --radius-card: 12px !important;
+  --radius-lg: 16px !important;
+  --radius-pill: 8px !important;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .05) !important;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, .08) !important;
+  --shadow-lg: 0 4px 16px 4px rgba(0, 0, 0, .16), 0 2px 6px 1px rgba(0, 0, 0, .16) !important;
+  --color-success-bg-solid: #d9ffd6 !important;
+  --color-error-bg-solid: #ffe0e0 !important;
+  --color-error-border-solid: #ffe0e0 !important;
+  --color-warning-bg-solid: #fffbbd !important;
+  --color-warning-text: #573a00 !important;
+  --color-info-bg-solid: #d1f1ff !important;
+  --color-info-bg-solid-alt: #d1f1ff !important;
+  --color-info-text: #002a66 !important;
+  --color-info-text-alt: #002a66 !important;
+  --color-emerald: #10b981 !important;
+  --color-teal: #4ecdc4 !important;
+  --color-code-bg: #F3F3F7 !important;
+  --color-code-header-bg: #f1f3f5 !important;
+  --color-code-text: #24292e !important;
+  --color-code-border: #e1e4e8 !important;
+  --color-code-muted: #6a737d !important;
+  --color-inline-code-bg: #F3F3F7 !important;
+  --color-inline-code-text: #24292e !important;
+  --color-inline-code-border: #e1e4e8 !important;
+  --color-scrollbar-thumb: #d1d5db !important;
+  --color-scrollbar-track: transparent !important;
+  --qs-data-cat-01: #4338CA !important;
+  --qs-data-cat-02: #D97706 !important;
+  --qs-data-cat-03: #0891B2 !important;
+  --qs-data-cat-04: #8B5CF6 !important;
+  --qs-data-cat-05: #15803D !important;
+  --qs-data-cat-06: #0C4A6E !important;
+  --qs-data-cat-07: #D946EF !important;
+  --qs-data-cat-08: #65A30D !important;
+  --qs-data-cat-09: #1D4ED8 !important;
+  --qs-data-cat-10: #831843 !important;
+  --qs-data-cat-11: #C2410C !important;
+  --qs-data-cat-12: #115E59 !important;
+  --qs-data-cat-other: #737373 !important;
+  --qs-content: #fff !important;
+  --qs-main: #f9f9fb !important;
+  --qs-primary-foreground: #131920 !important;
+  --qs-secondary-foreground: #656871 !important;
+  --qs-tertiary-foreground: #656871 !important;
+  --qs-placeholder-foreground: #656871 !important;
+  --qs-divider: #dedee3 !important;
+  --qs-default-border: #8c8c94 !important;
+  --qs-neutral-soft: #b4b4bb !important;
+  --qs-neutral-gray-50: #f9fafb !important;
+  --qs-tertiary-background: #f9fafb !important;
+  --qs-action-hover: #f3f3f7 !important;
+  --qs-primary-default: #4200db !important;
+  --qs-primary-dark: #35009e !important;
+  --qs-primary-medium: #8575ff !important;
+  --qs-primary-light: #e8e6ff !important;
+  --qs-primary-inverse: #fff !important;
+  --qs-success-default: #00802f !important;
+  --qs-success-dark: #00471e !important;
+  --qs-success-light: #d9ffd6 !important;
+  --qs-error-default: #db0000 !important;
+  --qs-error-dark: #700000 !important;
+  --qs-warning-default: #f2b100 !important;
+  --qs-warning-dark: #573a00 !important;
+  --qs-warning-light: #fffbbd !important;
+  --qs-info-default: #006ce0 !important;
+  --qs-info-dark: #002a66 !important;
+  --qs-font-sans: "Amazon Ember", "Helvetica Neue", "Segoe UI", Helvetica, Arial, sans-serif !important;
+  --safe-top: 0px !important;
+  --safe-bottom: 0px !important;
+  --safe-left: 0px !important;
+  --safe-right: 0px !important;
+  --qs-action-active: #e8e6ff !important;
+  --qs-action-active-hover: #b2a8ff !important;
+  --qs-action-disabled: #f3f3f7 !important;
+  --qs-active-border: #4200db !important;
+  --qs-application-navbar: #4200db !important;
+  --qs-application-navbar-dark: #35009e !important;
+  --qs-application-navbar-foreground: #fff !important;
+  --qs-application-navbar-light: #e8e6ff !important;
+  --qs-automation-dark: #660052 !important;
+  --qs-automation-default: #d600ba !important;
+  --qs-automation-light: #ffe0fb !important;
+  --qs-automation-medium: #b3008f !important;
+  --qs-automation-soft: #ff94f1 !important;
+  --qs-avatar-blue-bg: #d1f1ff !important;
+  --qs-avatar-blue-fg: #002a66 !important;
+  --qs-avatar-fuchsia-bg: #fce6ff !important;
+  --qs-avatar-fuchsia-fg: #590066 !important;
+  --qs-avatar-green-bg: #d9ffd6 !important;
+  --qs-avatar-green-fg: #00471e !important;
+  --qs-avatar-neutral-bg: #dedee3 !important;
+  --qs-avatar-neutral-fg: #131920 !important;
+  --qs-avatar-orange-bg: #ffe0d6 !important;
+  --qs-avatar-orange-fg: #661800 !important;
+  --qs-avatar-pink-bg: #ffe0fb !important;
+  --qs-avatar-pink-fg: #660052 !important;
+  --qs-avatar-primary-bg: #e8e6ff !important;
+  --qs-avatar-primary-fg: #35009e !important;
+  --qs-avatar-red-bg: #ffe0e0 !important;
+  --qs-avatar-red-fg: #700000 !important;
+  --qs-avatar-violet-bg: #f2e5ff !important;
+  --qs-avatar-violet-fg: #45008a !important;
+  --qs-avatar-yellow-bg: #fffbbd !important;
+  --qs-avatar-yellow-fg: #573a00 !important;
+  --qs-blue-100: #e2ebff !important;
+  --qs-blue-1000: #060d27 !important;
+  --qs-blue-200: #c2d5ff !important;
+  --qs-blue-300: #9fbdff !important;
+  --qs-blue-400: #7ea0fc !important;
+  --qs-blue-50: #fafbff !important;
+  --qs-blue-500: #517df6 !important;
+  --qs-blue-600: #2d5fe8 !important;
+  --qs-blue-700: #1d3cb9 !important;
+  --qs-blue-800: #162c85 !important;
+  --qs-blue-900: #102165 !important;
+  --qs-blue-950: #0b1746 !important;
+  --qs-brand: #fff !important;
+  --qs-brand-foreground: #131920 !important;
+  --qs-brand-navbar: #131920 !important;
+  --qs-brand-navbar-dark: #000 !important;
+  --qs-brand-navbar-foreground: #fff !important;
+  --qs-brand-navbar-light: #dedee3 !important;
+  --qs-coachmark: #006ce0 !important;
+  --qs-connection-dark: #661800 !important;
+  --qs-connection-default: #db3300 !important;
+  --qs-connection-light: #ffe0d6 !important;
+  --qs-connection-soft: #ff997a !important;
+  --qs-content-inverse: #333843 !important;
+  --qs-content-inverse-active: #131920 !important;
+  --qs-contrast-foreground: #131920 !important;
+  --qs-control-selected-bg: #4200db !important;
+  --qs-control-selected-hover-bg: #35009e !important;
+  --qs-darkpurple1-100: #eee1ef !important;
+  --qs-darkpurple1-1000: #130b14 !important;
+  --qs-darkpurple1-200: #dcc0dd !important;
+  --qs-darkpurple1-300: #c99ecc !important;
+  --qs-darkpurple1-400: #b57ab8 !important;
+  --qs-darkpurple1-50: #f8f2f8 !important;
+  --qs-darkpurple1-500: #97529b !important;
+  --qs-darkpurple1-600: #754078 !important;
+  --qs-darkpurple1-700: #542e57 !important;
+  --qs-darkpurple1-800: #472749 !important;
+  --qs-darkpurple1-900: #341c35 !important;
+  --qs-darkpurple1-950: #241325 !important;
+  --qs-darkpurple2-100: #f1e3fc !important;
+  --qs-darkpurple2-1000: #1b042f !important;
+  --qs-darkpurple2-200: #e7d0fb !important;
+  --qs-darkpurple2-300: #d6b0f8 !important;
+  --qs-darkpurple2-400: #be81f3 !important;
+  --qs-darkpurple2-50: #f8f1fe !important;
+  --qs-darkpurple2-500: #a652ef !important;
+  --qs-darkpurple2-600: #8e24eb !important;
+  --qs-darkpurple2-700: #7413c9 !important;
+  --qs-darkpurple2-800: #580e98 !important;
+  --qs-darkpurple2-900: #36095d !important;
+  --qs-darkpurple2-950: #260642 !important;
+  --qs-data-categorical-01: #4338ca !important;
+  --qs-data-categorical-02: #d97706 !important;
+  --qs-data-categorical-03: #0891b2 !important;
+  --qs-data-categorical-04: #8b5cf6 !important;
+  --qs-data-categorical-05: #15803d !important;
+  --qs-data-categorical-06: #0c4a6e !important;
+  --qs-data-categorical-07: #d946ef !important;
+  --qs-data-categorical-08: #65a30d !important;
+  --qs-data-categorical-09: #1d4ed8 !important;
+  --qs-data-categorical-10: #831843 !important;
+  --qs-data-categorical-11: #c2410c !important;
+  --qs-data-categorical-12: #115e59 !important;
+  --qs-data-categorical-other: #737373 !important;
+  --qs-data-divergent-negative: #ea580c !important;
+  --qs-data-divergent-positive: #4f46e5 !important;
+  --qs-data-divergent-red-green-negative: #dc2626 !important;
+  --qs-data-divergent-red-green-positive: #16a34a !important;
+  --qs-data-missing: #d4d4d4 !important;
+  --qs-data-sentiment-neutral: #737373 !important;
+  --qs-data-sentiment-warning: #9e6900 !important;
+  --qs-data-sequential-duochromatic-high: #1e1b4b !important;
+  --qs-data-sequential-duochromatic-low: #8b5cf6 !important;
+  --qs-data-sequential-monochromatic-high: #4f46e5 !important;
+  --qs-default-badge: #b4b4bb !important;
+  --qs-default-badge-dot: #656871 !important;
+  --qs-dimension: #4200db !important;
+  --qs-dimension-experimental: #4200db !important;
+  --qs-dimension-experimental-foreground: #4200db !important;
+  --qs-dimension-foreground: #fff !important;
+  --qs-disabled: #8c8c94 !important;
+  --qs-disabled-border: #dedee3 !important;
+  --qs-disabled-foreground: #b4b4bb !important;
+  --qs-divider-light: #f3f3f7 !important;
+  --qs-error-active-border: #db0000 !important;
+  --qs-error-border: #ffe0e0 !important;
+  --qs-error-foreground: #db0000 !important;
+  --qs-error-inverse: #fff !important;
+  --qs-error-light: #ffe0e0 !important;
+  --qs-error-medium: #900 !important;
+  --qs-error-soft: #ff9e9e !important;
+  --qs-focus-offset: 1px !important;
+  --qs-font-base-letter-spacing: .15px !important;
+  --qs-font-display: "Amazon Ember", "Helvetica Neue", "Segoe UI", Helvetica, Arial, sans-serif !important;
+  --qs-font-family: "Amazon Ember", "Helvetica Neue", "Segoe UI", Helvetica, Arial, sans-serif !important;
+  --qs-gradient-automation-light-stop: #ffe0fb !important;
+  --qs-gradient-automation-medium-stop: #b3008f !important;
+  --qs-gradient-automation-stop: #d600ba !important;
+  --qs-gradient-connection-light-stop: #ffe0d6 !important;
+  --qs-gradient-connection-stop: #db3300 !important;
+  --qs-gradient-insight-light-stop: #fce6ff !important;
+  --qs-gradient-insight-stop: #a000b8 !important;
+  --qs-gradient-visualization-light-stop: #f2e5ff !important;
+  --qs-gradient-visualization-stop: #7300e5 !important;
+  --qs-green-100: #ccffd8 !important;
+  --qs-green-1000: #001409 !important;
+  --qs-green-200: #a9efba !important;
+  --qs-green-300: #84d39a !important;
+  --qs-green-400: #71c68c !important;
+  --qs-green-50: #f0fff3 !important;
+  --qs-green-500: #5bbe7a !important;
+  --qs-green-600: #3c955a !important;
+  --qs-green-700: #227340 !important;
+  --qs-green-800: #00441f !important;
+  --qs-green-900: #003317 !important;
+  --qs-green-950: #002410 !important;
+  --qs-grid-gap: 16px !important;
+  --qs-grid-gap-xl: 24px !important;
+  --qs-hero-banner-button-hover: color-mix(in srgb, #fff, transparent 60%) !important;
+  --qs-hover-border: #333843 !important;
+  --qs-info-inverse: #fff !important;
+  --qs-info-light: #d1f1ff !important;
+  --qs-info-medium: #003b8f !important;
+  --qs-info-soft: #75cfff !important;
+  --qs-insight-dark: #590066 !important;
+  --qs-insight-default: #a000b8 !important;
+  --qs-insight-light: #fce6ff !important;
+  --qs-insight-soft: #f299ff !important;
+  --qs-main-foreground: #131920 !important;
+  --qs-main-secondary-foreground: #656871 !important;
+  --qs-measure: #00802f !important;
+  --qs-measure-experimental: #f2b100 !important;
+  --qs-measure-experimental-foreground: #f2b100 !important;
+  --qs-measure-foreground: #fff !important;
+  --qs-neutral-0: #fff !important;
+  --qs-neutral-100: #f5f3ef !important;
+  --qs-neutral-1000: #0b0a0a !important;
+  --qs-neutral-200: #ece9e4 !important;
+  --qs-neutral-300: #e2dfda !important;
+  --qs-neutral-400: #cdc9c1 !important;
+  --qs-neutral-50: #faf9f7 !important;
+  --qs-neutral-500: #adaaa3 !important;
+  --qs-neutral-600: #94918b !important;
+  --qs-neutral-700: #7d7a73 !important;
+  --qs-neutral-800: #5e5b56 !important;
+  --qs-neutral-900: #302f2c !important;
+  --qs-neutral-950: #151310 !important;
+  --qs-neutral-black: #000 !important;
+  --qs-neutral-dark: #333843 !important;
+  --qs-neutral-deep: #656871 !important;
+  --qs-neutral-default: #dedee3 !important;
+  --qs-neutral-light: #f3f3f7 !important;
+  --qs-neutral-lightest: #f9f9fb !important;
+  --qs-neutral-medium: #8c8c94 !important;
+  --qs-neutral-strong: #131920 !important;
+  --qs-neutral-white: #fff !important;
+  --qs-overlay: color-mix(in srgb, #131920, transparent 50%) !important;
+  --qs-popover-border: transparent !important;
+  --qs-primary-inverse-foreground: #fff !important;
+  --qs-primary-soft: #b2a8ff !important;
+  --qs-progress-active: #4200db !important;
+  --qs-red-100: #ffe4e1 !important;
+  --qs-red-1000: #240004 !important;
+  --qs-red-200: #ffc7c2 !important;
+  --qs-red-300: #ffa099 !important;
+  --qs-red-400: #eb6560 !important;
+  --qs-red-50: #fff6f5 !important;
+  --qs-red-500: #c33c38 !important;
+  --qs-red-600: #aa2b2b !important;
+  --qs-red-700: #8a0f0f !important;
+  --qs-red-800: #6e000d !important;
+  --qs-red-900: #57000a !important;
+  --qs-red-950: #3d0007 !important;
+  --qs-secondary: #dedee3 !important;
+  --qs-secondary-dark: #b4b4bb !important;
+  --qs-secondary-light: #f3f3f7 !important;
+  --qs-shadow: #00000029 !important;
+  --qs-shadow-lg: 0 4px 16px 4px #00000029, 0 2px 6px 1px #00000029 !important;
+  --qs-shadow-md: 0 0 2px 0 #00000029, 0 2px 8px 1px #00000029 !important;
+  --qs-shadow-pin-left: inset -4px 0 4px -4px #00000029 !important;
+  --qs-shadow-pin-right: inset 4px 0 4px -4px #00000029 !important;
+  --qs-shadow-sm: 0 0 2px 0 #00000029, 0 0 4px 0 #00000029 !important;
+  --qs-shadow-xl: 0 4px 8px 2px #00000029, 0 6px 20px 4px #00000029 !important;
+  --qs-spice: #ff9800 !important;
+  --qs-success-inverse: #fff !important;
+  --qs-success-medium: #005c26 !important;
+  --qs-success-soft: #aeffa8 !important;
+  --qs-tag-default: #dedee3 !important;
+  --qs-tag-soft-border: #b4b4bb !important;
+  --qs-toggle-tile-lg: calc(.25rem * 15) !important;
+  --qs-toggle-tile-md: calc(.25rem * 12) !important;
+  --qs-toggle-tile-sm: calc(.25rem * 8) !important;
+  --qs-transparent: transparent !important;
+  --qs-visualization-dark: #45008a !important;
+  --qs-visualization-default: #7300e5 !important;
+  --qs-visualization-light: #f2e5ff !important;
+  --qs-visualization-soft: #d4a8ff !important;
+  --qs-warning-experimental: #f2b100 !important;
+  --qs-warning-experimental-light: #fffbbd !important;
+  --qs-warning-experimental-light-foreground: #fffbbd !important;
+  --qs-warning-inverse: #573a00 !important;
+  --qs-warning-medium: #db9200 !important;
+  --qs-warning-soft: #ffed4d !important;
+  --qs-width-modal-lg: 1136px !important;
+  --qs-width-modal-md: 600px !important;
+  --qs-width-modal-sm: 384px !important;
+  --qs-yellow-100: #fff5cf !important;
+  --qs-yellow-1000: #1f1100 !important;
+  --qs-yellow-200: #ffe79e !important;
+  --qs-yellow-300: #fbd86f !important;
+  --qs-yellow-400: #facb3d !important;
+  --qs-yellow-50: #fffcf0 !important;
+  --qs-yellow-500: #e2ac36 !important;
+  --qs-yellow-600: #ca8d2b !important;
+  --qs-yellow-700: #9d672f !important;
+  --qs-yellow-800: #7a4c19 !important;
+  --qs-yellow-900: #522e00 !important;
+  --qs-yellow-950: #381f00 !important;
+  --qs-duration-reorder: .125s !important;
+  --qs-ease-reorder: ease-in-out !important;
+  --z-subtask-modal: 10000 !important;
+  --z-above-subtask-modal: 10001 !important;
+  --react-pdf-text-layer: 1 !important;
+  --highlight-bg-color: rgba(180, 0, 170, 1) !important;
+  --highlight-selected-bg-color: rgba(0, 100, 0, 1) !important;
+  --react-pdf-annotation-layer: 1 !important;
+  --annotation-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>") !important;
+  --input-focus-border-color: Highlight !important;
+  --input-focus-outline: 1px solid Canvas !important;
+  --input-unfocused-border-color: transparent !important;
+  --input-disabled-border-color: transparent !important;
+  --input-hover-border-color: black !important;
+  --link-outline: none !important;
+}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KAIDA.KZ — карта пути, редакция 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans+Condensed:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="top">
+  <p class="kicker">KAIDA.KZ · карта пути · редакция 3 · черновик от 24.11.2026</p>
+  <h1>Один путь для всех покупателей, один для продавцов. Связывает их петля доверия к цене.</h1>
+  <p class="dek">Верхний слой: 11 этапов и 33 шага основного пути. Подробная спецификация шагов для контрактов и приёмки — <a href="CUSTOMER_JOURNEY_MAP.md">CUSTOMER_JOURNEY_MAP.md</a> (142 шага, 47 сценариев, ID стабильны). Закупка партией — не отдельная персона, а ситуация: та же карточка, вторая строка с оптовой ценой. Эмоции, боли и гипотезы H1–H11 приняты как рабочие (решение PO 24.11): интервью до релиза не проводятся, после релиза каждая гипотеза проверяется метрикой этапа, интервью — только если метрика хромает.</p>
+</header>
+<style nonce="b8DU1aSMlLsovFr8ZK9pfw==">
+:root{
+  --page-bg:#FFFFFF; --page-tint:#F8FAFC; --page-ink:#334155; --page-mid:#64748B; --page-light:#CBD5E1; --page-route:#EA580C; --page-route-tint:#FFF1E8;
+  --page-sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --page-cond:'IBM Plex Sans Condensed','IBM Plex Sans',system-ui,Arial,sans-serif;
+  --page-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page-bg);color:var(--page-ink);font-family:var(--page-sans);font-size:15px;line-height:1.5}
+.top,.wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+.top{padding-top:36px;padding-bottom:8px}
+.kicker{font-family:var(--page-mono);font-size:12px;color:var(--page-mid);margin:0 0 12px}
+h1{font-size:clamp(24px,3.4vw,38px);line-height:1.15;font-weight:700;margin:0 0 14px;max-width:900px;color:#1E293B}
+.dek{max-width:820px;color:var(--page-mid);margin:0;font-size:16px}
+h2{font-size:clamp(19px,2.2vw,24px);line-height:1.25;margin:0 0 6px;color:#1E293B}
+.sub{color:var(--page-mid);margin:0 0 18px;max-width:820px}
+section{padding:36px 0;border-top:1px solid var(--page-light)}
+section:first-of-type{border-top:0}
+.mapbox{overflow-x:auto;margin:8px -28px 0;padding:0 28px;-webkit-overflow-scrolling:touch}
+svg.map{display:block;min-width:960px;width:100%;height:auto}
+.map text{font-family:var(--page-sans)}
+.map .lane{font-family:var(--page-cond);font-weight:600;font-size:15px;fill:#1E293B;letter-spacing:.02em}
+.map .row{font-family:var(--page-mono);font-size:10.5px;fill:var(--page-mid)}
+.map .sname{font-family:var(--page-cond);font-weight:600;font-size:14.5px;fill:#1E293B}
+.map .scount{font-family:var(--page-mono);font-size:10.5px;fill:var(--page-mid)}
+.map .clabel{font-family:var(--page-sans);font-size:11.5px;fill:var(--page-route);font-weight:500}
+.map .elabel{font-family:var(--page-sans);font-size:10.5px;fill:var(--page-mid)}
+.map .st{cursor:pointer;outline:none}
+.map .st circle.ring{fill:#fff;stroke:var(--page-ink);stroke-width:4;transition:fill .15s ease}
+.map .st.mot circle.ring{stroke:var(--page-route)}
+.map .st .halo{fill:none;stroke:var(--page-route);stroke-width:2;stroke-dasharray:3 3;opacity:0;transition:opacity .15s ease}
+.map .st.hl .halo{opacity:1}
+.map .st:hover circle.ring,.map .st:focus-visible circle.ring{fill:var(--page-light)}
+.map .st.sel circle.ring{fill:var(--page-ink)}
+.map .st.mot.sel circle.ring{fill:var(--page-route)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:12.5px;color:var(--page-mid);margin:10px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.lg-dot{width:12px;height:12px;border-radius:50%;border:3px solid var(--page-ink);background:#fff;display:inline-block}
+.lg-dot.mot{border-color:var(--page-route)}
+.lg-line{width:22px;height:0;border-top:3px solid var(--page-route);display:inline-block}
+.lg-emo{width:22px;height:0;border-top:2px solid var(--page-mid);display:inline-block}
+/* detail */
+.detail{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0 40px;margin-top:26px;border-top:3px solid var(--page-ink);padding-top:18px}
+.detail.mot{border-top-color:var(--page-route)}
+.d-head{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:12px}
+.d-id{font-family:var(--page-mono);font-size:13px;color:var(--page-mid)}
+.d-name{font-size:clamp(22px,2.6vw,30px);font-weight:700;color:#1E293B;margin:0}
+.d-goal{grid-column:1/-1;font-size:16px;margin:0 0 18px;max-width:860px}
+.d-col{min-width:0}
+.lbl{font-family:var(--page-mono);font-size:11px;color:var(--page-mid);text-transform:none;margin:16px 0 6px;letter-spacing:.02em}
+.lbl:first-child{margin-top:0}
+.steps{list-style:none;margin:0;padding:0}
+.steps li{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;padding:9px 0;border-bottom:1px solid var(--page-light);align-items:baseline}
+.steps .sid{font-family:var(--page-mono);font-size:12.5px;color:var(--page-mid)}
+.steps .old{display:block;font-family:var(--page-mono);font-size:11px;color:var(--page-mid);margin-top:2px}
+.tag{font-family:var(--page-mono);font-size:10.5px;padding:2px 7px;border-radius:3px;white-space:nowrap;border:1px solid var(--page-light);color:var(--page-mid)}
+.tag.base{background:var(--page-ink);color:#fff;border-color:var(--page-ink)}
+.tag.target{border-style:dashed}
+.tag.out{background:var(--page-tint)}
+.kv{margin:0}
+.kv p{margin:0 0 4px}
+.truth{background:var(--page-route-tint);border-left:3px solid var(--page-route);padding:10px 14px;margin:16px 0 0}
+.truth b{color:var(--page-route)}
+.lot{border:1px dashed var(--page-mid);padding:10px 14px;margin:16px 0 0;background:var(--page-tint)}
+.emo{display:flex;align-items:center;gap:10px}
+.emo-scale{display:flex;gap:3px}
+.emo-scale i{width:16px;height:8px;background:var(--page-light);display:block}
+.emo-scale i.on{background:var(--page-ink)}
+.emo-scale i.neg.on{background:var(--page-mid)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--page-mono);font-size:12px;border:1px solid var(--page-route);color:var(--page-route);background:#fff;padding:3px 9px;border-radius:3px;cursor:pointer}
+.chip:hover,.chip.on{background:var(--page-route);color:#fff}
+.change{font-size:13.5px;color:var(--page-mid);margin-top:16px}
+/* hypotheses */
+.hyps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:0 36px}
+.hyp{display:grid;width:100%;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px solid var(--page-light);cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit;color:inherit}
+.hyp:hover .hid,.hyp.on .hid{color:#fff;background:var(--page-route)}
+.hid{font-family:var(--page-mono);font-size:12px;color:var(--page-route);border:1px solid var(--page-route);border-radius:3px;height:22px;display:flex;align-items:center;justify-content:center}
+.hyp .sig{display:block;font-size:13px;color:var(--page-ink);margin-top:4px}
+.hyp .where{display:block;font-family:var(--page-mono);font-size:11px;color:var(--page-mid);margin-top:2px}
+.hyp.new .htxt::after{content:' · обновлена 24.11';font-family:var(--page-mono);font-size:11px;color:var(--page-route)}
+/* card mocks */
+.mocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:22px;margin-top:8px}
+.mock-cap{font-family:var(--page-mono);font-size:11.5px;color:var(--page-mid);margin:0 0 8px}
+.card{border:1px solid var(--page-light);border-radius:6px;padding:14px 16px;background:#fff}
+.card .nm{font-weight:600;font-size:16px;color:#1E293B;margin:0 0 6px}
+.card .pr{font-family:var(--page-mono);font-size:22px;font-weight:500;color:#1E293B;line-height:1.2}
+.card .pr.dash{color:var(--page-mid)}
+.card .op{display:flex;align-items:center;gap:8px;margin-top:4px;font-family:var(--page-mono);font-size:14px;color:var(--page-ink);flex-wrap:wrap}
+.badge{font-family:var(--page-cond);font-weight:600;font-size:11px;background:var(--page-ink);color:#fff;padding:1px 6px;border-radius:3px;letter-spacing:.03em}
+.sugg{border:1px dashed var(--page-route);color:var(--page-route);padding:0 6px;border-radius:3px;font-size:12.5px}
+.card .meta{font-size:12.5px;color:var(--page-mid);margin-top:10px;border-top:1px solid var(--page-light);padding-top:8px}
+.fresh{color:var(--page-ink);font-weight:500}
+.note-sugg{font-size:12.5px;color:var(--page-route);margin:14px 0 0}
+.form{border:1px solid var(--page-light);border-radius:6px;padding:16px;max-width:420px;background:#fff}
+.form .ttl{font-weight:600;margin:0 0 12px;color:#1E293B}
+.frow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px;align-items:center;margin-bottom:10px;font-size:13.5px}
+.fin{display:flex;gap:6px}
+.fin span{font-family:var(--page-mono);border:1px solid var(--page-light);padding:5px 9px;border-radius:4px;font-size:13px;background:var(--page-tint)}
+.fin span.sel::after{content:' ▾';color:var(--page-mid)}
+.frow.sg{color:var(--page-route)}
+.frow.sg .fin span{border-style:dashed;border-color:var(--page-route)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;margin-top:28px}
+ol.q{margin:0;padding-left:22px}
+ol.q li{margin:0 0 12px;padding-left:4px}
+ol.q b{color:#1E293B}
+/* mapping */
+.tblbox{overflow-x:auto}
+table.mp{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px}
+.mp th{text-align:left;font-family:var(--page-mono);font-weight:500;font-size:11.5px;color:var(--page-mid);padding:8px 10px;border-bottom:2px solid var(--page-ink)}
+.mp td{padding:9px 10px;border-bottom:1px solid var(--page-light);vertical-align:top}
+.mp td.c1{font-weight:600;white-space:nowrap;color:#1E293B}
+.mp td.c2{font-family:var(--page-mono);font-size:12px;color:var(--page-mid)}
+.mp tr.grp td{background:var(--page-tint);font-family:var(--page-mono);font-size:11.5px;color:var(--page-mid);font-weight:500}
+footer{max-width:1200px;margin:0 auto;padding:24px 28px 40px;font-family:var(--page-mono);font-size:11.5px;color:var(--page-mid);border-top:1px solid var(--page-light)}
+@media (max-width:760px){
+  .top,.wrap{padding:0 18px}.top{padding-top:24px}.mapbox{margin:8px -18px 0;padding:0 18px}
+  .detail,.two{grid-template-columns:minmax(0,1fr)}
+  .steps li{grid-template-columns:44px minmax(0,1fr)}
+  .steps li .tag{grid-column:2;justify-self:start}
+  .frow{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .loopdraw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+  .loopdraw.go{transition:stroke-dashoffset .5s ease-out;stroke-dashoffset:0}
+}
+</style>
+
+<main>
+<section class="wrap" id="map-sec">
+  <h2>Петля держится на трёх моментах: поверил и поехал, визит удался, продавец увидел отдачу</h2>
+  <p class="sub">Нажмите на станцию, чтобы увидеть шаги, точки контакта, боли и метрики этапа. Оранжевые переходы — то, что передаётся между покупателем и продавцом.</p>
+  <div class="mapbox"><svg class="map" id="map" viewBox="0 0 1160 520" role="img" aria-label="Карта пути покупателя и продавца KAIDA.KZ с петлёй доверия"></svg></div>
+  <div class="legend">
+    <span><i class="lg-dot"></i>этап</span>
+    <span><i class="lg-dot mot"></i>момент истины</span>
+    <span><i class="lg-line"></i>передаётся между сторонами</span>
+    <span><i class="lg-emo"></i>эмоция, гипотеза (пунктир — неудачный исход)</span>
+  </div>
+  <div class="detail" id="detail" aria-live="polite"></div>
+</section>
+
+<section class="wrap" id="hyp-sec">
+  <h2>Одиннадцать рабочих гипотез и метрики, которые проверят их после релиза</h2>
+  <p class="sub">Нажмите на гипотезу, чтобы подсветить этапы, которые от неё зависят. Принимаются как рабочие и проверяются после релиза метрикой-сигналом; если метрика хромает — интервью именно по этой гипотезе.</p>
+  <div class="hyps" id="hyps"></div>
+</section>
+
+<section class="wrap" id="card-sec">
+  <h2>Карточка одна для всех. Опт — вторая строка, а не отдельный путь</h2>
+  <p class="sub">Решение от 24.11: продавец по тапу «Оптовая цена» указывает цену и минимальную партию; в выдаче опт показан мельче, с меткой «опт». Фильтра «опт / розница» у покупателя нет. Оранжевым пунктиром — детали, принятые PO 24.11.</p>
+  <div class="mocks">
+    <div>
+      <p class="mock-cap">Розница и опт</p>
+      <div class="card">
+        <p class="nm">Перец болгарский</p>
+        <div class="pr">900 ₸/кг</div>
+        <div class="op"><span class="badge">ОПТ</span>650 ₸/кг <span class="sugg">от 1 ящика</span></div>
+        <div class="meta"><span class="fresh">Подтверждено сегодня</span> · 6 км · до 18:00</div>
+      </div>
+    </div>
+    <div>
+      <p class="mock-cap">Только опт</p>
+      <div class="card">
+        <p class="nm">Картофель</p>
+        <div class="pr dash">—</div>
+        <div class="op"><span class="badge">ОПТ</span>180 ₸/кг <span class="sugg">от 1 мешка</span></div>
+        <div class="meta"><span class="fresh">Подтверждено вчера</span> · 9 км · с 05:00</div>
+      </div>
+    </div>
+    <div>
+      <p class="mock-cap">Только розница</p>
+      <div class="card">
+        <p class="nm">Казы домашние</p>
+        <div class="pr">9 000 ₸/кг</div>
+        <div class="op" style="visibility: hidden;"><span class="badge">ОПТ</span>—</div>
+        <div class="meta"><span class="fresh">Подтверждено 3 дня назад</span> · 7,5 км · до 17:00</div>
+      </div>
+    </div>
+  </div>
+  <p class="note-sugg">Минимальная партия видна в выдаче (решение PO). Без неё человек, которому нужен 1 кг, увидит «180 ₸/кг», поедет — и узнает про мешок только на месте. Цены на макетах условные.</p>
+
+  <div class="two">
+    <div>
+      <p class="lbl">Продавец: окно «Оптовая цена»</p>
+      <div class="form">
+        <p class="ttl">Оптовая цена</p>
+        <div class="frow"><span>Цена</span><div class="fin"><span>650</span><span class="sel">₸ / кг</span></div></div>
+        <div class="frow"><span>Минимальная партия</span><div class="fin"><span>1</span><span class="sel">ящик</span></div></div>
+        <div class="frow sg"><span>В ящике примерно</span><div class="fin"><span>10</span><span class="sel">кг</span></div></div>
+        <div class="frow"><span>Наличие</span><div class="fin"><span class="sel">есть</span></div></div>
+      </div>
+      <p class="note-sugg">Если есть розничная цена, оптовая — в той же единице (здесь кг), а пересчёт партии в эту единицу (ящик ≈ 10 кг) обязателен: он позволяет сравнить опт и розницу и понять реальный объём. Для «только опт» единица свободная, пересчёт — по желанию.</p>
+    </div>
+    <div>
+      <p class="lbl">Решения PO от 24.11</p>
+      <ol class="q">
+        <li><b>Единица оптовой цены.</b> Если есть розничная цена, оптовая указывается в той же единице, что зафиксирована в розничной (650 ₸/кг от 1 ящика), и продавец обязательно указывает, сколько этих единиц в партии. Если розничной нет («только опт»), единица оптовой цены свободная.</li>
+        <li><b>Минимальная партия видна в выдаче</b> рядом с оптовой ценой.</li>
+        <li><b>Сортировка по цене:</b> предложения «только опт» идут после предложений с розничной ценой, между собой — по цене за единицу (кг, шт), если продавец указал пересчёт партии; без пересчёта — в конце списка.</li>
+        <li><b>Одно подтверждение актуальности</b> обновляет обе цены, партию и наличие.</li>
+        <li><b>Фильтра «опт / розница» нет.</b> Сигнал, что он нужен, — жалобы «Цена другая» с комментарием «не продали в розницу».</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="map-old">
+  <h2>Все 47 сценариев подробной карты: где они на этой карте</h2>
+  <p class="sub">Номера — из CUSTOMER_JOURNEY_MAP.md (редакция от 24.11.2026). Подробная карта остаётся спецификацией: на этой карте каждый её сценарий относится к одному из 11 этапов, к целевому развитию, к гипотезам вне пути или к внутренним процессам.</p>
+  <div class="tblbox"><table class="mp" id="mp"></table></div>
+</section>
+</main>
+<footer>Источник: CUSTOMER_JOURNEY_MAP.md, редакция от 24.11.2026; решения из обсуждения 24.11.2026. Эмоции, боли и моменты истины — рабочие гипотезы; после релиза уточняются метриками, при расхождении — интервью. Цифры в примерах условные.</footer>
+
+<script>
+const BUYER = [
+ {id:'В1',name:'Потребность',goal:'Достать то, чего нет у дома: к поводу, редкое или национальное, сезонное — или сразу партией.',
+  steps:[['В1.1','Понимает, что у дома этого нет: казы к гостям, кумыс, хурма в сезон, мешок перца впрок','out',''],['В1.2','Приходит в KAIDA: по ссылке от знакомого, из поиска в интернете или повторно','base','P1-01']],
+  tin:'Ссылка, главная страница с поиском',tout:'Знакомые, районные чаты, 2ГИС, звонок постоянному продавцу',
+  sees:'Сразу поиск по товару и предложения в радиусе поездки — без регистрации.',
+  pain:'Не знает, где искать. По привычке звонит знакомым или едет «наугад» на большой рынок.',
+  emo:-1,emoT:'Неопределённость: «где это сейчас вообще есть?»',metric:'Доля новых пользователей по источникам; доля повторных визитов.',
+  hyps:['H10'],change:'Контекст P1-01 «Нужен товар к ужину» заменён: повседневные покупки у дома — не сценарий KAIDA.'},
+ {id:'В2',name:'Нашёл',goal:'Быстро понять, есть ли товар в радиусе поездки.',
+  steps:[['В2.1','Ищет по названию и видит предложения в радиусе поездки','base','P1-02, P1-05'],['В2.2','Ничего не нашёл: исправление запроса и заметная кнопка «Сообщить, когда появится» — она сохраняет сам запрос (товар и район) в «Сохранённое» с включённым уведомлением','base','P1-03, P1-11']],
+  tin:'Поиск, выдача, пустое состояние',tout:'—',
+  sees:'Выдача по товару; при пустом результате — исправление запроса и кнопка «Сообщить, когда появится». Слово «Сохранить» здесь не используется: сохранять нечего, сохраняется запрос.',
+  pain:'На старте пустая выдача будет частой. Без крючка человек уходит и не возвращается.',
+  emo:1,emoT:'Облегчение, если нашёл; разочарование, если пусто',metric:'Доля поисков с нулевой выдачей; доля оставивших «Сообщить, когда появится».',
+  hyps:['H7','H10'],change:'«Сообщить, когда появится» поднято из целевого развития в базовый путь.'},
+ {id:'В3',name:'Оценил',goal:'Выбрать, к кому ехать, и поверить, что данные правдивы.',
+  steps:[['В3.1','Сравнивает в выдаче цену, оптовую цену, давность подтверждения и расстояние','base','P1-04'],['В3.2','Открывает предложение: фото, минимальная партия, комментарий, точка продавца','base','P1-06, P1-15'],['В3.3','Понимает, справедлива ли цена','target','P1-17'],['В3.4','В карточке предложения видит две кнопки: «Всё совпало» и «Есть проблема»; проблему можно отметить и до поездки (например, фото не то)','base','P1-14']],
+  tin:'Выдача, карточка предложения, витрина точки',tout:'Звонок знакомым, чтобы сравнить',
+  sees:'Одна карточка для всех: розничная цена, оптовая (мельче, с меткой «опт»), минимальная партия и давность подтверждения.',
+  pain:'Не видно, насколько свежая цена. Дешёвый опт вводит в заблуждение, если партия не видна сразу.',
+  emo:0,emoT:'Сомнение: «а это правда?»',metric:'Переходы из выдачи в предложение; доля открытий предложений «только опт».',
+  hyps:['H9','H11'],lot:'Смотрит на оптовую цену и минимальную партию. Если партии нет в выдаче, открывает каждую карточку — лишний шаг.',
+  change:'Отдельной развилки для закупщика нет: всё видно в одной карточке.'},
+ {id:'В4',name:'Решил ехать',mot:true,goal:'Убедиться, что поездка не впустую, и добраться.',
+  steps:[['В4.1','Звонит или пишет продавцу','base','P1-07'],['В4.2','Строит маршрут','base','P1-07'],['В4.3','Делится предложением с тем, с кем едет или для кого покупает','base','P1-08']],
+  tin:'Кнопки «Позвонить», «Маршрут», «Поделиться»',tout:'Телефон, WhatsApp, 2ГИС, Яндекс Карты',
+  sees:'Контакт продавца, часы работы, маршрут во внешнем приложении.',
+  pain:'Если данным не верит — звонит каждый раз, и KAIDA становится справочником телефонов.',
+  emo:-1,emoT:'Тревога: «а вдруг приеду, а товара нет»',truth:'Поверил данным настолько, чтобы поехать, — или сначала звонит.',
+  metric:'Доля просмотров, закончившихся звонком или маршрутом; доля маршрутов без звонка.',
+  hyps:['H6'],lot:'Звонит чаще: уточнить объём и цену от партии.',change:'Шеринг поднят в базовый путь: для локального сервиса это естественный канал роста.'},
+ {id:'В5',name:'На месте',mot:true,goal:'Купить то, за чем приехал, по ожидаемой цене.',
+  steps:[['В5.1','Покупает или не покупает','out',''],['В5.2','После визита отвечает одной из двух кнопок: «Всё совпало» (плюс продавцу) или «Есть проблема» — она открывает стандартный набор: «Товара не было», «Цена другая», «Не как на фото», «Точка закрыта», «Другое»; комментарий и фото по желанию','base','P1-14, P1-07'],['В5.3','Если предложение исчезло по дороге — видит предупреждение и альтернативы рядом','base','P1-13']],
+  tin:'Две кнопки в карточке и в напоминании после визита, уведомление об исчезновении предложения',tout:'Прилавок, разговор с продавцом, торг',
+  sees:'В карточке и в напоминании после звонка или маршрута — две кнопки: «Всё совпало» и «Есть проблема». «Всё совпало» даёт плюс к рейтингу продавца. «Есть проблема» открывает стандартный набор жалоб; ответ уходит продавцу и в разбор X-03. Защита от накрутки (решение PO 24.11): в рейтинг продавца — и плюс, и минус — засчитываются только ответы с подтверждённого номера, не чаще одного на продавца за период, с учётом признаков визита (маршрут или звонок из KAIDA), а на жалобу продавец может ответить до того, как она будет учтена; анонимный ответ в рейтинг не идёт, только сигналом на проверку.',
+  pain:'Поездка впустую. Жалоба сейчас требует входа по коду — самый ценный сигнал о качестве данных теряется.',
+  emo:2,emoF:-2,emoT:'Удача — или раздражение, если товара не было',truth:'Визит удался — или есть проблема: товара не было, цена другая, не как на фото, точка закрыта. Здесь продукт подтверждает или теряет доверие.',
+  metric:'Доля ответивших; доля «Всё совпало» среди ответов — главная метрика правдивости данных; распределение причин проблем; доля ответов, отсеянных защитой от накрутки.',
+  hyps:['H6','H9'],lot:'Главный риск — опт не дали или не хватило объёма. Это «Есть проблема» → «Цена другая»; уточнение — в необязательном комментарии.',
+  change:'Жалоба (P1-14) стала одной из двух кнопок исхода: «Всё совпало» (плюс продавцу) и «Есть проблема» со стандартным набором жалоб. В рейтинг идут только проверенные ответы; анонимные — сигнал на проверку X-03.'},
+ {id:'В6',name:'Вернулся',goal:'Вернуться к товару позже без лишних усилий.',
+  steps:[['В6.1','На карточке нажимает «Сохранить» с переключателем «Сообщить мне»','base','P1-09, P1-10'],['В6.2','Входит по номеру телефона, только когда нужны уведомления','base','P1-16'],['В6.3','Лента интересов и отзывы','target','P1-12, P1-18']],
+  tin:'«Сохранить», уведомления',tout:'Скриншоты, заметки, пересланное себе',
+  sees:'Один список «Сохранённое»: в нём и предложения с карточек, и запросы из пустой выдачи. У каждой записи в «Сохранённом» свой переключатель уведомлений. По умолчанию: для запроса из пустой выдачи он включён, для карточки выключен; включённый на карточке сообщает «снова в наличии» и «цена изменилась». Зачем сохраняют: вернуться к своему продавцу, отложить поездку, дождаться появления, дождаться цены.',
+  pain:'Три разных механизма «вернуться позже» человек не различает.',
+  emo:1,emoT:'Спокойствие: «мне сообщат»',metric:'Доля вернувшихся за 30 дней; доля сработавших «Сообщить мне».',
+  hyps:['H8'],change:'Избранное, отслеживание товара и ожидание появления объединены в один список и один механизм уведомлений. Входа два: «Сохранить» на карточке и «Сообщить, когда появится» в пустой выдаче.'}
+];
+const SELLER = [
+ {id:'П1',name:'Решился',goal:'Понять, зачем это нужно, и решиться показать цены открыто.',
+  steps:[['П1.1','Узнаёт о KAIDA: от соседа по ряду, от команды на рынке, от покупателя','out','новый'],['П1.2','Решает, что показывать: розничную цену, оптовую или обе','base','новый'],['П1.3','Входит по номеру телефона','base','P2-01']],
+  tin:'Вход по номеру',tout:'Соседи по ряду, команда KAIDA на рынке',
+  sees:'Короткое объяснение выгоды и примеры карточек продавцов рядом.',
+  pain:'Страх открытых цен: соседи, сравнение, торг, налоги. Для оптовой цены — сильнее.',
+  emo:-1,emoT:'Настороженность',metric:'Доля продавцов, опубликовавших первую карточку после знакомства.',
+  hyps:['H3'],change:'Новый этап: в старой карте путь продавца начинался сразу со входа.'},
+ {id:'П2',name:'Выставил',goal:'Выложить товары с минимальными усилиями.',
+  steps:[['П2.1','Добавляет точку и адрес','base','P2-02'],['П2.2','Добавляет товары 1–2 способами: вручную или фото ценника и списком','base','P2-04…P2-09'],['П2.3','По тапу «Оптовая цена» указывает цену и минимальную партию: при розничной цене — в её единице и с пересчётом партии, для «только опт» — в свободной единице','base','новый'],['П2.4','Проверяет, что станет публичным: товар, цену, точку — и явно подтверждает','base','P2-11'],['П2.5','Видит, опубликована ли карточка; если снята — причину и как исправить','base','P2-12']],
+  tin:'Кабинет продавца, карточка товара',tout:'Тетрадь учёта, ценники, WhatsApp',
+  sees:'Карточка товара: цена за единицу, комментарий; по тапу — оптовая цена и минимальная партия.',
+  pain:'Много товаров и мало времени; непонятно, в какой единице указывать опт.',
+  emo:0,emoT:'Усилие: «это надолго?»',metric:'Время до первой публикации; доля карточек с оптовой ценой.',
+  hyps:['H5','H3'],change:'На пилоте 1–2 способа ввода; голос, видео и пакетная публикация — в целевом развитии.'},
+ {id:'П3',name:'Поддерживает',goal:'Держать цены и наличие актуальными без лишней рутины.',
+  steps:[['П3.1','Получает напоминание в ритме своей категории','base','P2-14'],['П3.2','Подтверждает или правит розничную цену, оптовую, партию и наличие','base','P2-14, P2-08'],['П3.3','Меняет цену, выключает товар в одной точке и возвращает после поставки','base','P2-13, P2-08'],['П3.4','Получает сигнал о расхождении от покупателей и исправляет карточку','base','X-03, P2-12']],
+  tin:'Напоминание, экран «Мои цены»',tout:'—',
+  sees:'Список товаров с давностью подтверждения; «Всё актуально» и правка по одной позиции.',
+  pain:'Рутина без видимой пользы; соблазн нажать «Всё актуально» не глядя.',
+  emo:-1,emoT:'Рутина',metric:'Доля карточек, подтверждённых в срок; доля подтверждений без единой правки.',
+  hyps:['H1','H2'],change:'Подтверждение распространяется на оптовую цену и партию; пороги свежести — по категориям. Ответы покупателей о расхождении приходят продавцу как повод исправить карточку.'},
+ {id:'П4',name:'Получил покупателя',goal:'Продать.',
+  steps:[['П4.1','Отвечает на звонок или встречает покупателя, который нашёл его в KAIDA','out','новый']],
+  tin:'—',tout:'Телефон, прилавок',
+  sees:'—',pain:'Не знает, что покупатель пришёл из KAIDA.',
+  emo:2,emoT:'Удовлетворение',metric:'Звонки и маршруты к продавцу в неделю.',
+  hyps:['H4'],change:'Новый этап: визит связывает пути покупателя и продавца.'},
+ {id:'П5',name:'Увидел отдачу',mot:true,goal:'Понять, что KAIDA приводит покупателей.',
+  steps:[['П5.1','Видит просмотры, звонки и маршруты к себе','base','P2-18'],['П5.2','Видит исходы визитов («Всё совпало» и проблемы), может ответить на жалобу до её учёта, видит спрос рядом','base','P2-16, X-03'],['П5.3','Тарифы, продвижение, сеть точек','target','P2-20, P2-21']],
+  tin:'Сводка в кабинете, уведомление раз в неделю',tout:'—',
+  sees:'Простая сводка, например: «к вам 12 раз строили маршрут, 4 звонка, 3 покупателя подтвердили наличие».',
+  pain:'Без сигнала отдачи продавец перестаёт обновлять данные, и вся петля рушится.',
+  emo:1,emoF:-2,emoT:'Мотивация продолжать — или «не работает», и бросает',truth:'Есть отдача — продолжает подтверждать цены. Нет — бросает.',
+  metric:'Доля продавцов, активных через 4 недели.',hyps:['H4'],change:'Минимальный сигнал отдачи поднят из целевого развития в базовый путь.'}
+];
+const HYPS = [
+ ['H1','Продавец готов регулярно подтверждать цены, если это занимает меньше минуты.',false,'Доля карточек, подтверждённых в срок, и время подтверждения. Хромает, если доля падает неделя к неделе.'],
+ ['H2','Частота изменения цен зависит от категории: единые пороги 2/7/14 суток не подходят.',false,'Доля подтверждений с правкой цены по категориям. Хромает, если в категории карточки массово уходят в скрытие по свежести, хотя цена не менялась, — или цена меняется чаще порога.'],
+ ['H3','Часть продавцов не хочет показывать цены открыто — особенно оптовые.',false,'Доля продавцов, опубликовавших первую карточку после входа; доля карточек с оптовой ценой. Хромает, если после входа продавцы не публикуют.'],
+ ['H4','Без видимой отдачи продавец перестанет обновлять данные.',false,'Доля продавцов, активных через 4 недели, у тех, кто получил сводку отдачи, и у тех, кто нет. Хромает, если активность падает и у тех, кто сводку видел.'],
+ ['H5','На старте хватит 1–2 способов ввода товаров.',false,'Время до первой публикации; доля брошенных черновиков. Хромает, если продавцы бросают ввод на середине.'],
+ ['H6','Поездка впустую — частая и ощутимая боль.',false,'Доля «Есть проблема → Товара не было»; доля звонков перед маршрутом. Хромает, если звонят почти всегда — данным не верят.'],
+ ['H7','При пустой выдаче человек готов оставить «Сообщить, когда появится».',false,'Доля поисков с нулевой выдачей, после которых оставили «Сообщить, когда появится». Хромает, если почти никто не оставляет.'],
+ ['H8','Покупателю нужен один способ вернуться позже, а не три.',false,'Доля вернувшихся за 30 дней; доля сохранённого с включённым «Сообщить мне». Хромает, если сохраняют, но не возвращаются.'],
+ ['H9','Покупатель отметит исход визита, если это одна из двух кнопок в карточке, а подтверждать номер нужно, только чтобы ответ повлиял на рейтинг.',false,'Доля визитов (маршрут или звонок) с отмеченным исходом; доля подтвердивших номер. Хромает, если исход почти не отмечают.'],
+ ['H10','Дальше дома едут только за определёнными категориями или ради заметной разницы в цене.',false,'Расстояние до выбранного предложения по категориям. Хромает, если поездки дальше дома не концентрируются в отдельных категориях.'],
+ ['H11','Покупке партией хватает одной карточки: розничная цена, оптовая и минимальная партия.',true,'Доля «Цена другая» с комментарием про опт или партию; доля открытий «только опт» без звонка или маршрута. Хромает, если эти доли растут.']
+];
+const MAP = [
+ ['grp','Покупатель'],
+ ['В1 Потребность','P1-01','Контекст «к ужину» заменён поездкой за конкретным товаром; добавлен шаг вне KAIDA'],
+ ['В2 Нашёл','P1-02, P1-03, P1-05, P1-11','«Сообщить, когда появится» — в базовом пути; сохраняет запрос в общий список «Сохранённое»'],
+ ['В3 Оценил','P1-04, P1-06, P1-14, P1-15, P1-17','Оптовая цена и партия в той же карточке; в карточке две кнопки исхода; P1-17 — целевое'],
+ ['В4 Решил ехать','P1-07, P1-08','Шеринг поднят в базовый путь'],
+ ['В5 На месте','P1-07, P1-13, P1-14, X-03','Жалоба → две кнопки: «Всё совпало» (плюс продавцу) и «Есть проблема» со стандартным набором; в рейтинг — только проверенные ответы, анонимные идут в разбор X-03'],
+ ['В6 Вернулся','P1-09, P1-10, P1-11, P1-16','Три механизма → один список «Сохранённое» и одни уведомления; входы: «Сохранить» на карточке и «Сообщить, когда появится» в пустой выдаче'],
+ ['grp','Продавец'],
+ ['П1 Решился','P2-01','Новый шаг: решение, какие цены показывать'],
+ ['П2 Выставил','P2-02…P2-09, P2-11, P2-12','1–2 способа ввода на пилоте; новый шаг «Оптовая цена»; предпросмотр, подтверждение и статус публикации'],
+ ['П3 Поддерживает','P2-08, P2-13, P2-14, X-03','Подтверждение покрывает опт и партию; пороги по категориям; правка и выключение в одной точке; исправление по сигналам покупателей'],
+ ['П4 Получил покупателя','—','Новый этап, связка с X-01 («контакт — попытка, не сделка»)'],
+ ['П5 Увидел отдачу','P2-16, P2-18','Минимальный сигнал отдачи — в базовом пути'],
+ ['grp','Уходит из пути'],
+ ['Целевое развитие','P1-12, P1-17, P1-18, P2-07, P2-09, P2-10, P2-15, P2-17, P2-20, P2-21, X-02','Лента, справедливая цена, отзывы, пакетная публикация, голос, фото, видео и Telegram, архив, оповещения продавца, тарифы, сети, путь от пустого поиска до нового товара'],
+ ['Гипотезы вне пути','P2-19, X-06','Сравнение цены с рынком, временное уличное предложение — вне пути, пока метрики после релиза не покажут спрос'],
+ ['Внутренние процессы','X-04, X-05, X-07, X-08','В сервис-блюпринт: операции каталога, запуск зоны и холодный старт, рекламная поверхность, допуск реальных пользователей. X-05 — условие запуска с приоритетом 1, а не шаг пути']
+];
+
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('map');
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e}
+function txt(x,y,s,cls,anchor,parent){const t=el('text',{x:x,y:y,class:cls,'text-anchor':anchor||'middle'},parent);t.textContent=s;return t}
+
+const bx=[170,352,534,716,898,1080], sx=[170,400,630,860,1080];
+const BY=190, SY=330, BE=95, SE=478, ES=13;
+const ROUTE='#EA580C', INK='#334155', MID='#64748B', LIGHT='#CBD5E1';
+
+const defs=el('defs',{});
+const mk=el('marker',{id:'arr',viewBox:'0 0 10 10',refX:'8',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'},defs);
+el('path',{d:'M0,0 L10,5 L0,10 z',fill:ROUTE},mk);
+
+// row labels
+txt(28,34,'Покупатель','lane','start');
+txt(28,BE+4,'эмоция','row','start');
+txt(28,SY-30,'Продавец','lane','start');
+txt(28,SE+4,'эмоция','row','start');
+
+// emotion strips
+function emoStrip(xs,data,base){
+  el('line',{x1:xs[0]-20,x2:xs[xs.length-1]+20,y1:base,y2:base,stroke:LIGHT,'stroke-width':1,'stroke-dasharray':'2 4'});
+  const pts=data.map((d,i)=>[xs[i],base-d.emo*ES]);
+  el('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:MID,'stroke-width':2});
+  pts.forEach(p=>el('circle',{cx:p[0],cy:p[1],r:3.5,fill:MID}));
+  data.forEach((d,i)=>{ if(d.emoF!==undefined){
+    const p0=pts[i-1], pf=[xs[i],base-d.emoF*ES];
+    el('line',{x1:p0[0],y1:p0[1],x2:pf[0],y2:pf[1],stroke:MID,'stroke-width':2,'stroke-dasharray':'4 4'});
+    el('circle',{cx:pf[0],cy:pf[1],r:3.5,fill:'#fff',stroke:MID,'stroke-width':1.5});
+    const last=i===xs.length-1;
+    txt(last?pf[0]-10:pf[0]+8,pf[1]+4,d.id==='В5'?'товара не было':'отдачи не видно','elabel',last?'end':'start');
+  }});
+}
+emoStrip(bx,BUYER,BE);
+emoStrip(sx,SELLER,SE);
+
+// lines
+el('line',{x1:bx[0],x2:bx[5],y1:BY,y2:BY,stroke:INK,'stroke-width':6,'stroke-linecap':'round'});
+el('line',{x1:sx[0],x2:sx[4],y1:SY,y2:SY,stroke:INK,'stroke-width':6,'stroke-linecap':'round'});
+
+// connectors
+const conns=[
+ {d:`M${sx[2]},${SY-14} V262 H${bx[2]} V${BY+14}`,lx:(sx[2]+bx[2])/2,ly:254,t:'цена, опт и свежесть'},
+ {d:`M${bx[3]},${BY+14} V284 H${sx[3]} V${SY-14}`,lx:(bx[3]+sx[3])/2,ly:278,t:'звонок, маршрут, визит'},
+ {d:`M${bx[4]},${BY+14} V236 H${sx[4]} V${SY-14}`,lx:(bx[4]+sx[4])/2,ly:229,t:'исход визита: плюс или проблема'},
+ {d:`M${sx[4]},386 V412 H${sx[2]} V388`,lx:(sx[2]+sx[4])/2,ly:430,t:'увидел отдачу → снова подтверждает цены'}
+];
+const loopPaths=[];
+conns.forEach(c=>{const p=el('path',{d:c.d,fill:'none',stroke:ROUTE,'stroke-width':3,'marker-end':'url(#arr)',class:'loopdraw'});loopPaths.push(p);txt(c.lx,c.ly,c.t,'clabel')});
+
+// stations
+const stEls={};
+function station(s,x,y,above){
+  const g=el('g',{class:'st'+(s.mot?' mot':''),tabindex:'0',role:'button','aria-label':s.id+' '+s.name});
+  el('circle',{cx:x,cy:y,r:19,class:'halo'},g);
+  el('circle',{cx:x,cy:y,r:s.mot?13:11,class:'ring'},g);
+  const n=s.steps.length, cnt=n+(n===1?' шаг':(n<5?' шага':' шагов'));
+  if(above){txt(x,y-42,s.name,'sname','middle',g);txt(x,y-26,s.id+' · '+cnt,'scount','middle',g);}
+  else{txt(x,y+36,s.name,'sname','middle',g);txt(x,y+52,s.id+' · '+cnt,'scount','middle',g);}
+  el('rect',{x:x-60,y:above?y-60:y-20,width:120,height:above?80:80,fill:'transparent'},g);
+  g.addEventListener('click',()=>select(s.id));
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(s.id)}});
+  stEls[s.id]=g;
+}
+BUYER.forEach((s,i)=>station(s,bx[i],BY,true));
+SELLER.forEach((s,i)=>station(s,sx[i],SY,false));
+
+// detail
+const ALL=Object.fromEntries([...BUYER,...SELLER].map(s=>[s.id,s]));
+const HTXT=Object.fromEntries(HYPS.map(h=>[h[0],h[1]]));
+const TAGN={base:'базовый',target:'целевое',out:'вне KAIDA'};
+function emoScale(v){let h='';for(let i=-2;i<=2;i++){if(i===0)continue;const on=(v>0&&i>0&&i<=v)||(v<0&&i<0&&i>=v);h+=`<i class="${i<0?'neg ':''}${on?'on':''}"></i>`}return `<span class="emo-scale" aria-hidden="true">${h}</span>`}
+function select(id){
+  const s=ALL[id];
+  Object.values(stEls).forEach(g=>g.classList.remove('sel'));stEls[id].classList.add('sel');
+  const lane=id[0]==='В'?'Покупатель':'Продавец';
+  const d=document.getElementById('detail');
+  d.className='detail'+(s.mot?' mot':'');
+  d.innerHTML=`
+   <div class="d-head"><span class="d-id">${lane} · ${s.id}</span><h3 class="d-name">${s.name}</h3></div>
+   <p class="d-goal">${s.goal}</p>
+   <div class="d-col">
+     <p class="lbl">Шаги</p>
+     <ul class="steps">${s.steps.map(t=>`<li><span class="sid">${t[0]}</span><span>${t[1]}${t[3]?`<span class="old">${t[3].startsWith('P')?'было: ':''}${t[3]}</span>`:''}</span><span class="tag ${t[2]}">${TAGN[t[2]]}</span></li>`).join('')}</ul>
+     ${s.truth?`<div class="truth"><b>Момент истины.</b> ${s.truth}</div>`:''}
+     ${s.lot?`<div class="lot"><b>Если покупка партией.</b> ${s.lot}</div>`:''}
+     <p class="change">${s.change}</p>
+   </div>
+   <div class="d-col">
+     <p class="lbl">Точки контакта</p>
+     <div class="kv"><p><b>В KAIDA:</b> ${s.tin}</p><p><b>Вне KAIDA:</b> ${s.tout}</p></div>
+     <p class="lbl">Что видит и делает KAIDA</p><p class="kv">${s.sees}</p>
+     <p class="lbl">Боли и риски · гипотеза</p><p class="kv">${s.pain}</p>
+     <p class="lbl">Эмоция · гипотеза</p><div class="emo">${emoScale(s.emo)}<span>${s.emoT}</span></div>
+     <p class="lbl">Метрика</p><p class="kv">${s.metric}</p>
+     <p class="lbl">Зависит от гипотез</p>
+     <div class="chips">${s.hyps.map(h=>`<button class="chip" data-h="${h}" title="${HTXT[h]}">${h}</button>`).join('')}</div>
+   </div>`;
+  d.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{hl(c.dataset.h);document.getElementById('hyp-sec').scrollIntoView({behavior:'smooth',block:'start'})}));
+}
+
+// hypotheses
+const hypBox=document.getElementById('hyps');
+HYPS.forEach(h=>{
+  const where=[...BUYER,...SELLER].filter(s=>s.hyps.includes(h[0])).map(s=>s.id+' '+s.name).join(' · ');
+  const b=document.createElement('button');b.className='hyp'+(h[2]?' new':'');b.dataset.h=h[0];
+  b.innerHTML=`<span class="hid">${h[0]}</span><span><span class="htxt">${h[1]}</span><span class="sig"><b>Сигнал после релиза.</b> ${h[3]}</span><span class="where">${where}</span></span>`;
+  b.addEventListener('click',()=>{hl(h[0]);document.getElementById('map-sec').scrollIntoView({behavior:'smooth',block:'start'})});
+  hypBox.appendChild(b);
+});
+let curH=null;
+function hl(h){
+  curH=(curH===h)?null:h;
+  Object.entries(stEls).forEach(([id,g])=>g.classList.toggle('hl',!!curH&&ALL[id].hyps.includes(curH)));
+  document.querySelectorAll('.hyp').forEach(b=>b.classList.toggle('on',b.dataset.h===curH));
+}
+
+// mapping table
+const mp=document.getElementById('mp');
+mp.innerHTML='<thead><tr><th>Куда</th><th>Шаги старой карты</th><th>Что изменилось</th></tr></thead><tbody>'+
+ MAP.map(r=>r[0]==='grp'?`<tr class="grp"><td colspan="3">${r[1]}</td></tr>`:`<tr><td class="c1">${r[0]}</td><td class="c2">${r[1]}</td><td>${r[2]}</td></tr>`).join('')+'</tbody>';
+
+select('В3');
+
+// draw the loop once
+loopPaths.forEach(p=>{const L=p.getTotalLength();p.style.setProperty('--len',L);});
+requestAnimationFrame(()=>requestAnimationFrame(()=>loopPaths.forEach(p=>p.classList.add('go'))));
+</script>
+
+
+</body></html>

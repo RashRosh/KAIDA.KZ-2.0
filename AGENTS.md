@@ -24,6 +24,8 @@
 
 Прочитай утверждённый `docs/slices/**/SLICE_CONTRACT.md`, contracts закрытых slices, которые реально затрагивает изменение, и detailed GitHub Issue, если на него ссылается запись реестра. Slice Contract определяет точное поведение и acceptance; Issue, Feature Map и макет не расширяют его scope молча. Какие документы обновлять при закрытии — `PROJECT_RULES.md` §19.1.
 
+При подготовке Slice Contract найди затронутые шаги в [карте пути KAIDA](docs/product/CUSTOMER_JOURNEY_MAP.md) и заполни «Сверка с CJM» по [§3.1](docs/PROJECT_RULES.md#31-сверка-с-cjm). Несогласие вынеси Product Owner до реализации. Для неподтверждённого расхождения сначала нужно решение PO.
+
 ## Commercial / Monetization / Backoffice
 
 Перед planning или implementation, связанными с Free / Pro / Boost / Business, тарифами, entitlements, usage, Billing, Promotion или административными workflows, прочитай `docs/product/KAIDA.KZ_COMMERCIAL_ENTITLEMENTS_MODEL_v0.1.md`, `docs/product/KAIDA.KZ_BACKOFFICE_DEVELOPMENT_PIPELINE_v1.1.md` и, если затронут Demand, `docs/product/KAIDA_DEMAND_PRODUCT_CONCEPT_v0.1.md`. Это parent planning sources, а не разрешение на реализацию (`PROJECT_RULES.md` §17).
