@@ -48,7 +48,8 @@ test('B03/B04 source parity: four cards, real age labels, one favourites load, 4
     const heart=card.querySelector<HTMLElement>('[data-testid="favourite-heart"]')!;
     const photo=heart.parentElement!;
     const hb=heart.getBoundingClientRect(), pb=photo.getBoundingClientRect();
-    return {photo:[pb.width,pb.height],heartTop:hb.top-pb.top,heartRight:pb.right-hb.right,
+    // Rounded to whole pixels: the layout may land a fraction of a pixel off (104.00001), which is not a visual change.
+    return {photo:[Math.round(pb.width),Math.round(pb.height)],heartTop:Math.round(hb.top-pb.top),heartRight:Math.round(pb.right-hb.right),
       price:getComputedStyle(card.querySelector('.pr')!).fontSize,
       pointWeight:getComputedStyle(card.querySelector('[data-testid="card-point"]')!).fontWeight,
       addressSize:getComputedStyle(card.querySelector('[data-testid="card-place"]')!).fontSize,
