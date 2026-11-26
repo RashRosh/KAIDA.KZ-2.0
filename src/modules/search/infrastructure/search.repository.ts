@@ -16,6 +16,8 @@ import { isSellerCommentTranslationEnabled } from '../../offers/translation/sell
 import type { SearchRankingCandidate } from '../ranking/search-ranking';
 import { getWordFormDictionary } from '../word-forms/word-forms';
 import { projectBuyerOffer } from '../projection/buyer-offer-projection';
+import { offerWholesaleSelection } from '../../offers/wholesale/wholesale-selection';
+import { wholesaleFromColumns } from '../../offers/wholesale/wholesale';
 
 // A read projection across the four owning modules; lifecycle and buyer-visibility semantics stay outside Search.
 // S9 private ranking metadata remains beside, never inside, the public SearchOffer payload.
@@ -103,6 +105,7 @@ async function findBuyerVisibleOffers(
     priceCurrency: offers.priceCurrency,
     priceUnitCode: offers.priceUnitCode,
     priceUnitValue: offers.priceUnitValue,
+    ...offerWholesaleSelection,
     sellerComment: offers.sellerComment,
     coverPhotoId: offerCoverPhotoIdSelection,
     ...currentCommentTranslationSelection,
@@ -140,6 +143,11 @@ async function findBuyerVisibleOffers(
     commentTranslationText,
     commentTranslationSourceLanguage,
     coverPhotoId,
+    wholesalePriceAmount,
+    wholesaleBatchCount,
+    wholesaleContainer,
+    wholesaleContainerText,
+    wholesalePerContainer,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
@@ -162,6 +170,7 @@ async function findBuyerVisibleOffers(
       priceAmount,
       priceUnitCode,
       priceUnitValue,
+      wholesale: wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer }),
       sellerComment: rest.sellerComment,
       coverPhotoId: coverPhotoId ?? null,
       locationLatitude,

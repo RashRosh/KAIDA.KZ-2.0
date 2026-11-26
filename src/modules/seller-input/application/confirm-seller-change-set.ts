@@ -226,7 +226,7 @@ export async function confirmSellerChangeSet(
       assertPricedItem(item);
       if (item.action === 'create_offer') {
         const offer = await createOffer(tx, {
-          card: { title: item.title, productId: item.productId, cardId: item.cardId, priceOwn: item.priceOwn, pack: item.pack },
+          card: { title: item.title, productId: item.productId, cardId: item.cardId, priceOwn: item.priceOwn, pack: item.pack, wholesale: item.wholesale },
           sellerId: seller.id,
           locationId: item.locationId,
           priceAmount: item.priceAmount,
@@ -254,7 +254,7 @@ export async function confirmSellerChangeSet(
       if (item.action === 'update_offer') {
         applied = await applyOfferUpdateSnapshot(tx, {
           offerId: targetOffer.id,
-          card: { title: item.title, productId: item.productId, priceOwn: item.priceOwn, pack: item.pack },
+          card: { title: item.title, productId: item.productId, priceOwn: item.priceOwn, pack: item.pack, wholesale: item.wholesale },
           expectedRevision: item.expectedOfferRevision!,
           priceAmount: item.priceAmount,
           priceCurrency: 'KZT',

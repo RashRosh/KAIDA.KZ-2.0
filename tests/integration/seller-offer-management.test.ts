@@ -115,6 +115,7 @@ describe('S5 offer management on PostgreSQL 18 after Mandatory Offer Price', () 
         priceOwn: false,
         pack: null,
         packLabel: null,
+        wholesale: null,
         location: { id: seller.locations[0]!.id, name: seller.locations[0]!.name, addressText: seller.locations[0]!.addressText },
         price: { amount: '4200.00', currency: 'KZT', unit: 'кг', unitChoice: { code: 'kg' } },
         sellerComment: 'Исходная партия',

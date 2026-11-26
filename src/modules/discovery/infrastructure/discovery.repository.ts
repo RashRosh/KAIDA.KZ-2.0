@@ -18,6 +18,8 @@ import { projectPointPublicContacts } from '../../locations/details/point-public
 import { sellers } from '../../sellers/db/sellers.table';
 import type { SearchOffer } from '../../search/contracts/search.contract';
 import type { NearbyDiscoveryCandidate } from '../ranking/nearby-discovery';
+import { offerWholesaleSelection } from '../../offers/wholesale/wholesale-selection';
+import { formatWholesaleBatch, wholesaleFromColumns } from '../../offers/wholesale/wholesale';
 
 // Read-only Discovery projection. Owning modules keep lifecycle, buyer-visibility, geo and contact semantics.
 export async function findVisibleDiscoveryCandidates(
@@ -41,6 +43,7 @@ export async function findVisibleDiscoveryCandidates(
     priceCurrency: offers.priceCurrency,
     priceUnitCode: offers.priceUnitCode,
     priceUnitValue: offers.priceUnitValue,
+    ...offerWholesaleSelection,
     sellerComment: offers.sellerComment,
     coverPhotoId: offerCoverPhotoIdSelection,
     ...currentCommentTranslationSelection,
@@ -75,12 +78,19 @@ export async function findVisibleDiscoveryCandidates(
     commentTranslationText,
     commentTranslationSourceLanguage,
     coverPhotoId,
+    wholesalePriceAmount,
+    wholesaleBatchCount,
+    wholesaleContainer,
+    wholesaleContainerText,
+    wholesalePerContainer,
     ...rest
   }) => {
     if (priceAmount === null || priceCurrency !== 'KZT') {
       throw new Error('Buyer-visible Offer has invalid price');
     }
     const pack = formatPack(packFromColumns(packAmount, packUnit), locale);
+    const unit = formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale);
+    const wholesale = wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer });
 
     const offer: SearchOffer = {
       ...rest,
@@ -91,7 +101,9 @@ export async function findVisibleDiscoveryCandidates(
         ...rest.location,
         ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164, telegramUsername: locationTelegramUsername }, verifiedBySeller.get(rest.seller.id)),
       },
-      price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale) },
+      price: { amount: priceAmount, currency: 'KZT', unit },
+      // wholesale-price: the same second line as in Search
+      ...(wholesale === null ? {} : { wholesale: { amount: wholesale.amount, currency: 'KZT' as const, batch: formatWholesaleBatch(wholesale, unit, locale) } }),
       // Nearby requires complete Location coordinates (geo overlay), so the route capability is always available here.
       routeAvailable: true,
       ...(coverPhotoId ? { coverPhotoId } : {}),

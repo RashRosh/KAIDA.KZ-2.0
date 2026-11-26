@@ -8,6 +8,7 @@ import type { MessageKey } from '../../../i18n/messages';
 import type { Favourite } from '../../../modules/favourites/contracts/favourites.contract';
 import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
+import { WholesaleLine } from '../_ui/WholesaleLine';
 import { formatAmount } from '../../_components/format-amount';
 import { BuyerScreen, markBuyerOfferOpened } from '../_ui/buyer-ui';
 import { KaidaMark } from '../_ui/offer-details';
@@ -61,6 +62,7 @@ function AvailableCard({ entry, onOpen, remove, failed }: { entry: Extract<Favou
             <Link href={`/offers/${entry.offerId}?return=%2Ffavourites`} className="stretch" onClick={() => { markBuyerOfferOpened(); onOpen(); }}>{offer.product.name}</Link>
           </h3>
           <div className={styles.price}><b>{formatAmount(offer.price.amount)} ₸</b>{basis && <> <span>{basis}</span></>}</div>
+          <WholesaleLine offer={offer} />
           <p className={styles.label} data-testid="card-point">{offer.location.name}</p>
           <p className={styles.caption} data-testid="card-seller">{offer.seller.displayName}</p>
         </div>

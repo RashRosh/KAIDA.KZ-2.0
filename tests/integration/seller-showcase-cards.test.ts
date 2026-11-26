@@ -28,7 +28,7 @@ import {
 import { OfferChangedError, OfferUpdateNoChangesError, sellerOfferChangeBodySchema } from '../../src/modules/seller-input/contracts/seller-change-set.contract';
 import { setupSeller } from '../../src/modules/sellers/application/setup-seller';
 import { connectTestDatabase } from './database';
-import { withMigrationTestDatabase } from './migration-test-database';
+import { NO_WHOLESALE_COLUMNS, withMigrationTestDatabase } from './migration-test-database';
 
 // seller-showcase-editor §7: multi-point atomicity and revisions, own-price protection, one-point edit, adding a point,
 // drafts CRUD and ownership, search by words plus aliases, migration on a fixture of old offers.
@@ -314,6 +314,7 @@ describe('migration 0016', () => {
         price_own: false,
         pack_amount: null,
         pack_unit: null,
+        ...NO_WHOLESALE_COLUMNS,
       })));
       const constraints = await migrationPool.query(`SELECT conname, convalidated FROM pg_constraint
         WHERE conname IN ('offers_future_price_required','seller_change_items_future_price_required') ORDER BY conname`);

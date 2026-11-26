@@ -28,6 +28,15 @@ export const offerDraftPayloadSchema = z.object({
   photoIds: z.array(z.uuid()).max(5),
   points: z.array(z.object({ locationId: z.uuid(), ownPrice: z.string().max(40).nullable() }).strict()).max(50),
   aiHints: offerDraftAiHintsSchema.optional(),
+  // wholesale-price: the wholesale sheet as typed; older drafts have none.
+  wholesale: z.object({
+    amount: z.string().max(40),
+    batchCount: z.string().max(10),
+    container: z.enum(['box', 'bag', 'carton', 'net', 'package', 'unit', 'other', '']),
+    containerText: z.string().max(40),
+    perContainer: z.string().max(20),
+    needsReview: z.boolean(),
+  }).strict().nullable().optional(),
 }).strict();
 
 export type OfferDraftPayload = z.infer<typeof offerDraftPayloadSchema>;
