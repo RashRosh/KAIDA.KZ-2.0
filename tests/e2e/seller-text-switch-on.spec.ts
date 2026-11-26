@@ -109,7 +109,7 @@ test.describe('text return through confirmation',()=>{
   const ids=await returns(page,phoneFor(2));await submitList(page,ids.pointA,'Сыр 3000 за упаковку 400 г.');
   await page.getByTestId('price-submit').click();await expect(page).toHaveURL(/change-sets/);
   const second=await context.newPage();await second.goto('/seller?edit='+ids.syr.card_id);const editor=offerEditor(second);await editor.getByRole('textbox',{name:'Цена',exact:true}).fill('2950');await editor.getByRole('button',{name:'Проверить и сохранить'}).click();await second.getByRole('button',{name:publishButton}).click();
-  await page.getByRole('button',{name:'Подтвердить',exact:true}).click();await expect(page.getByRole('alert')).toBeVisible();await page.getByRole('button',{name:'Отмена',exact:true}).click();await expect(page).toHaveURL(/text-input\/review\?input=/);await page.reload();
+  await page.getByRole('button',{name:'Подтвердить',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Предложение уже изменилось'})).toBeVisible();await page.getByRole('button',{name:'Отмена',exact:true}).click();await expect(page).toHaveURL(/text-input\/review\?input=/);await page.reload();
   await expect(page.getByTestId('held-0').getByRole('radio')).toHaveAttribute('aria-checked','false');await expect(page.getByTestId('price-submit')).toBeDisabled();expect(await priceOf(ids.syr.id)).toBe('2950');await second.close();
  });
 });
