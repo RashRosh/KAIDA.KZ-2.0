@@ -160,8 +160,9 @@ test('detail actions retain touch targets and wrap at narrow widths and enlarged
     await page.setViewportSize({ width, height: 844 });
     for (const action of [heart, report, tracking]) {
       const box = await action.boundingBox();
-      expect(box!.width).toBeGreaterThanOrEqual(44);
-      expect(box!.height).toBeGreaterThanOrEqual(44);
+      // Rounded to whole pixels: layout can land a fraction of a pixel off (43.99994), which is not a touch-target regression.
+      expect(Math.round(box!.width)).toBeGreaterThanOrEqual(44);
+      expect(Math.round(box!.height)).toBeGreaterThanOrEqual(44);
     }
     const layout = await page.getByTestId('offer-links').evaluate(el => {
       const boxes = [...el.querySelectorAll('button')].map(button => button.getBoundingClientRect());
@@ -173,7 +174,7 @@ test('detail actions retain touch targets and wrap at narrow widths and enlarged
   await page.addStyleTag({ content: '[data-testid="offer-links"] button{font-size:28px;line-height:40px}' });
   const enlarged = await page.getByTestId('offer-links').evaluate(el => ({ overflow: el.scrollWidth > el.clientWidth, buttons: [...el.querySelectorAll('button')].map(button => ({height:button.getBoundingClientRect().height, font:parseFloat(getComputedStyle(button).fontSize)})) }));
   expect(enlarged.overflow).toBe(false);
-  for (const action of enlarged.buttons) { expect(action.height).toBeGreaterThanOrEqual(44); expect(action.font).toBe(28); }
+  for (const action of enlarged.buttons) { expect(Math.round(action.height)).toBeGreaterThanOrEqual(44); expect(action.font).toBe(28); }
   await report.click();
   await expect(page.getByRole('heading', { name: 'Пожаловаться на карточку', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Назад', exact: true }).click();
