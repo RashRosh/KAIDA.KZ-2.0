@@ -79,6 +79,17 @@ function directed(comparison: number, direction: SearchSortDirection): number {
   return direction === 'asc' ? comparison : -comparison;
 }
 
+export function compareSearchDistance(
+  a: RankedSearchCandidate,
+  b: RankedSearchCandidate,
+  direction: SearchSortDirection,
+): number {
+  if (a.rankingDistanceMeters === null && b.rankingDistanceMeters === null) return compareFreshnessThenId(a, b);
+  if (a.rankingDistanceMeters === null) return 1;
+  if (b.rankingDistanceMeters === null) return -1;
+  return directed(a.rankingDistanceMeters - b.rankingDistanceMeters, direction) || compareFreshnessThenId(a, b);
+}
+
 export function rankSearchOfferCandidates(
   candidates: readonly SearchRankingCandidate[],
   buyerLocation: BuyerLocation | undefined,
@@ -113,10 +124,7 @@ export function rankSearchOfferCandidates(
     }
     // distance: every geo-known Offer precedes every geo-less one for both directions; geo-less Offers never get a
     // distance and keep the order «fresher first → id».
-    if (a.rankingDistanceMeters === null && b.rankingDistanceMeters === null) return compareFreshnessThenId(a, b);
-    if (a.rankingDistanceMeters === null) return 1;
-    if (b.rankingDistanceMeters === null) return -1;
-    return directed(a.rankingDistanceMeters - b.rankingDistanceMeters, options.direction) || compareFreshnessThenId(a, b);
+    return compareSearchDistance(a, b, options.direction);
   });
 
   return ranked;

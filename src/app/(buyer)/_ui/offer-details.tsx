@@ -11,6 +11,8 @@ import { formatAmount } from '../../_components/format-amount';
 import { ConfirmationBadge } from './SearchResultCard';
 import { SearchIcon } from './SearchIcon';
 import styles from './offer.module.css';
+import { formatDistance } from './buyer-ui';
+import type { OfferDistance } from './offer-distance';
 
 // D3 · B08 offer detail (new baseline), as ONE component: square gallery (or «no photo», or a photo error that keeps the
 // data), name, price and the heart slot, the confirmation pill, the point card (place, seller, hours), contacts, the seller
@@ -186,13 +188,14 @@ export function OfferRoute({ offer, className }: { offer: BuyerOfferPage; classN
 
 // `scheduleLabel` (seller preview only, seller-ai-text-real-parser §20): the week sits behind an explicit disclosure under
 // the status line; the buyer page itself keeps the whole week visible (card-opening-hours §3.3).
-export function OfferDetails({ offer, inert = false, titleAction, afterTitle, footer, scheduleLabel }: {
+export function OfferDetails({ offer, inert = false, titleAction, afterTitle, footer, scheduleLabel, distance }: {
   offer: BuyerOfferPage;
   inert?: boolean;
   titleAction?: ReactNode;
   afterTitle?: ReactNode;
   footer?: ReactNode;
   scheduleLabel?: string;
+  distance?: OfferDistance | null;
 }) {
   const { t } = useI18n();
   const basis = priceBasisText(offer.price.unit, offer.pack);
@@ -214,6 +217,7 @@ export function OfferDetails({ offer, inert = false, titleAction, afterTitle, fo
           <div>
             <p className={styles.label}>{offer.location.name}</p>
             <p className={styles.caption} data-testid="offer-address">{offer.location.addressText}</p>
+              {distance && <p className={styles.caption} data-testid="offer-distance">{formatDistance(distance.meters, t)}{distance.basis === 'straight' ? ` · ${t('offer.distanceStraightLine')}` : ''}</p>}
           </div>
         </div>
         <div className={styles.kv}>

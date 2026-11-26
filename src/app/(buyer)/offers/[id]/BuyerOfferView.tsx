@@ -15,6 +15,7 @@ import styles from '../../_ui/offer.module.css';
 import { useFavourites } from '../../_ui/use-favourites';
 import { favouritesReturn } from '@/modules/favourites/safe-return';
 import { useInterest } from '../../_ui/use-interest';
+import { useOfferDistance } from '../../_ui/offer-distance';
 
 // buyer-screens-mockup · B02 offer detail: gallery (or neutral fallback, or a photo error that keeps the data), the
 // actuality plaque, name, pack, price, the seller comment, the point block with route and contacts, the seller and
@@ -88,6 +89,7 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
   const returnTo = previewReturn ?? (params.get('preview') === '1' ? null : favouritesReturn(params.get('return')));
   // in the Seller's preview there is no interest action and no request for it
   const preview = params.get('preview') === '1';
+  const distance = useOfferDistance(offer);
   const interest = useInterest(previewReturn === null ? offer.product.id : null);
   const fav = useFavourites({ offerId: offer.id, locationId: offer.location.id }, !preview);
   if (fav.unavailable) return <OfferUnavailable failed={false} />;
@@ -99,6 +101,7 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
         {previewReturn !== null && <PreviewNote returnTo={previewReturn} />}
         <OfferDetails
           offer={offer}
+          distance={!preview && returnTo !== '/favourites' && offer.routeAvailable ? distance : null}
           titleAction={!preview && <button data-testid="favourite-heart" type="button" className={styles.heart} data-error={fav.error || undefined} aria-label={fav.active ? t('fav.saved') : t('fav.save')} aria-pressed={fav.active} aria-busy={fav.pendingId !== null} disabled={!fav.available || fav.pendingId !== null} onClick={fav.toggle}><SearchIcon name="heart" filled={fav.active} /></button>}
           afterTitle={!preview && fav.active && <p className={styles.savedNote}>{t('offer.savedNote')}</p>}
           footer={(

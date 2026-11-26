@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { buyerLocationSchema } from '../../search/contracts/buyer-location.contract';
 import { searchOfferSchema } from '../../search/contracts/search.contract';
+import { distanceBasisSchema } from '../../geo/distance-basis';
 
 export const nearbyRequestSchema = z.strictObject({
   buyerLocation: buyerLocationSchema,
@@ -12,6 +13,7 @@ export const discoveryOfferSchema = searchOfferSchema.extend({
 
 export const nearbyResponseSchema = z.strictObject({
   offers: z.array(discoveryOfferSchema),
+  distanceBasis: distanceBasisSchema.optional(),
 });
 
 export type NearbyRequest = z.infer<typeof nearbyRequestSchema>;

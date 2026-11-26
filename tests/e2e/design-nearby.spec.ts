@@ -127,7 +127,7 @@ test('B07.ST03: a two-column grid with photo, name, heart, price, freshness and 
     const thumb = el.querySelector('div')!.getBoundingClientRect();
     const price = getComputedStyle(el.querySelector('p')!);
     const badge = [...el.querySelectorAll('span')].find((s) => s.getAttribute('role') === 'img')!;
-    const cap = [...el.querySelectorAll('span')].find((s) => s.textContent === '400 м')!;
+    const cap = el.querySelector('a[href$="/route"]')!;
     return {
       thumbRatio: Math.round(thumb.width / thumb.height * 100) / 100,
       priceFont: price.fontSize,

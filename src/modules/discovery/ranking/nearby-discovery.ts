@@ -10,16 +10,16 @@ export type NearbyDiscoveryCandidate = {
   locationGeo: BuyerLocation | null;
 };
 
-type RankedNearbyOffer = {
-  offer: SearchOffer;
-  lastConfirmedAt: Date;
+type RankedNearbyOffer = NearbyDiscoveryCandidate & {
   distanceMeters: number;
+  roadDistanceMeters?: number;
 };
 
 function compareNearbyOffers(a: RankedNearbyOffer, b: RankedNearbyOffer, ageingSince?: Date): number {
   const tier = compareActualityTier(a, b, ageingSince);
   if (tier !== 0) return tier;
-  if (a.distanceMeters !== b.distanceMeters) return a.distanceMeters - b.distanceMeters;
+  const distanceOrder = (a.roadDistanceMeters ?? a.distanceMeters) - (b.roadDistanceMeters ?? b.distanceMeters);
+  if (distanceOrder !== 0) return distanceOrder;
 
   const aTime = a.lastConfirmedAt.getTime();
   const bTime = b.lastConfirmedAt.getTime();
@@ -29,25 +29,42 @@ function compareNearbyOffers(a: RankedNearbyOffer, b: RankedNearbyOffer, ageingS
   return a.offer.id < b.offer.id ? -1 : 1;
 }
 
+export function selectNearbyCandidates(
+  candidates: readonly NearbyDiscoveryCandidate[],
+  buyerLocation: BuyerLocation,
+  nearbyRadiusMeters: number,
+): RankedNearbyOffer[] {
+  const radius = validateNearbyRadiusMeters(nearbyRadiusMeters);
+
+  return candidates.flatMap((candidate) => {
+    if (candidate.locationGeo === null) return [];
+    const distanceMeters = distanceMetersForRanking(buyerLocation, candidate.locationGeo);
+    return distanceMeters > radius ? [] : [{ ...candidate, distanceMeters }];
+  });
+}
+
+export function rankNearbyOffers(
+  candidates: RankedNearbyOffer[],
+  ageingSince?: Date,
+  roadDistances?: ReadonlyMap<string, number>,
+): DiscoveryOffer[] {
+  const measured = candidates.map((candidate) => ({
+    ...candidate,
+    roadDistanceMeters: roadDistances?.get(candidate.offer.location.id),
+  }));
+  return measured.sort((a, b) => compareNearbyOffers(a, b, ageingSince))
+    .map(({ offer, distanceMeters, roadDistanceMeters }) => ({
+      ...offer,
+      distanceMeters,
+      ...(roadDistanceMeters !== undefined ? { roadDistanceMeters } : {}),
+    }));
+}
+
 export function selectNearbyOffers(
   candidates: readonly NearbyDiscoveryCandidate[],
   buyerLocation: BuyerLocation,
   nearbyRadiusMeters: number,
   ageingSince?: Date,
 ): DiscoveryOffer[] {
-  const radius = validateNearbyRadiusMeters(nearbyRadiusMeters);
-
-  return candidates
-    .flatMap((candidate): RankedNearbyOffer[] => {
-      if (candidate.locationGeo === null) return [];
-      const distanceMeters = distanceMetersForRanking(buyerLocation, candidate.locationGeo);
-      if (distanceMeters > radius) return [];
-      return [{
-        offer: candidate.offer,
-        lastConfirmedAt: candidate.lastConfirmedAt,
-        distanceMeters,
-      }];
-    })
-    .sort((a, b) => compareNearbyOffers(a, b, ageingSince))
-    .map(({ offer, distanceMeters }) => ({ ...offer, distanceMeters }));
+  return rankNearbyOffers(selectNearbyCandidates(candidates, buyerLocation, nearbyRadiusMeters), ageingSince);
 }

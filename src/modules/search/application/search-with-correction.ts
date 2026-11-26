@@ -1,11 +1,13 @@
 import { sql } from 'drizzle-orm';
 import { getDatabase, type Database } from '../../../db/client';
-import type { SearchResponse } from '../contracts/search.contract';
+import { resolveSearchOrder, type SearchResponse } from '../contracts/search.contract';
 import { readTypoCorrectionConfig, TYPO_WORK_STATEMENT_TIMEOUT_MS, type TypoCorrectionConfig } from '../typo/typo-config';
 import { runCorrectionPass } from '../typo/typo-limiter';
 import { proposeCorrection } from '../typo/typo-rules';
 import { typoVocabularyFor } from '../typo/typo-vocabulary';
 import { searchOffersDetailed, type SearchOutcome } from './search-offers';
+import { roadDistancesForOffers } from '../../geo/road-distances';
+import { compareSearchDistance } from '../ranking/search-ranking';
 
 // search-typo-suggestions (contract rev 3 §3.2): the original Search always runs first and unchanged. Only a Search that found
 // nothing and recognised no product may be corrected, once, and only when the corrected text really returns Offers.
@@ -17,6 +19,35 @@ export type CorrectedSearchOutcome = SearchOutcome & {
 };
 
 export async function searchOffersWithCorrection(
+  input: string,
+  database: Database | undefined,
+  options: SearchOptions,
+  settings: { correct: boolean; config?: TypoCorrectionConfig },
+): Promise<CorrectedSearchOutcome> {
+  const { distanceCandidates, ...outcome } = await searchWithCorrection(input, database, {
+    ...options, includeDistanceCandidates: options.buyerLocation !== undefined,
+  }, settings);
+  if (!distanceCandidates) return outcome;
+
+  // The correction transaction has finished, and only the offers shown to the buyer need routes.
+  const distances = await roadDistancesForOffers(options.buyerLocation, distanceCandidates);
+  if (distances === null) return outcome;
+
+  const order = resolveSearchOrder(options.sort, options.direction);
+  const measured = distanceCandidates.map((candidate, index) => ({
+    ...candidate,
+    offer: outcome.response.offers[index],
+    rankingDistanceMeters: candidate.locationGeo ? distances.get(candidate.offer.location.id) ?? null : null,
+  }));
+  if (order?.sort === 'distance') measured.sort((a, b) => compareSearchDistance(a, b, order.direction));
+  const offers = measured.map(({ offer, rankingDistanceMeters }) => ({
+    ...offer,
+    ...(rankingDistanceMeters !== null ? { roadDistanceMeters: rankingDistanceMeters } : {}),
+  }));
+  return { ...outcome, response: { ...outcome.response, offers, distanceBasis: 'road' } };
+}
+
+async function searchWithCorrection(
   input: string,
   database: Database | undefined,
   options: SearchOptions,
@@ -57,5 +88,5 @@ export async function searchOffersWithCorrection(
     offers: verified.response.offers,
     correction: { from: original.response.query, to: proposal.to },
   };
-  return { response, resolution: original.resolution, correction: { from: original.response.query, to: proposal.to, offerCount: verified.response.offers.length } };
+  return { response, resolution: original.resolution, distanceCandidates: verified.distanceCandidates, correction: { from: original.response.query, to: proposal.to, offerCount: verified.response.offers.length } };
 }

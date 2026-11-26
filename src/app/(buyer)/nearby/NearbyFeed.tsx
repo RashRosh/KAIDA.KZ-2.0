@@ -12,6 +12,7 @@ import { ConfirmationBadge } from '../_ui/SearchResultCard';
 import { KaidaMark } from '../_ui/offer-details';
 import { SearchIcon } from '../_ui/SearchIcon';
 import { useFavourites } from '../_ui/use-favourites';
+import { clearOfferDistance, displayedDistance, rememberOfferDistance } from '../_ui/offer-distance';
 import styles from './nearby.module.css';
 
 // D5 · B07 «Рядом»: the grid of nearby offers. Launch behaviour, privacy and the discovery API stay as closed by
@@ -117,6 +118,7 @@ export function NearbyFeed() {
   const requestNearby = useCallback(() => {
     if (pending.current) return;
     pending.current = true;
+    clearOfferDistance();
 
     // B07.ST06 copy assumes the location may already be known: an explicit retry after a request error repeats the
     // query for the same transient coordinates without a new geolocation call (UX1C/S9 semantics unchanged).
@@ -167,6 +169,7 @@ export function NearbyFeed() {
 
   const busy = state.kind === 'locating' || state.kind === 'loading';
   const hasResults = state.kind === 'success' && state.result.offers.length > 0;
+  const distanceBasis = state.kind === 'success' ? state.result.distanceBasis : undefined;
 
   const top = (
     <header className={styles.top}>
@@ -275,10 +278,12 @@ export function NearbyFeed() {
             <p className="vh" role="status" aria-live="polite" aria-atomic="true">
               {t('nearby.found', { count: state.result.offers.length })}
             </p>
-            <span className={styles.cap2} id="nearby-distance-note">{t('offer.distanceStraightLineNote')}</span>
-            <ul className={styles.grid} aria-label={t('nearby.offersTitle')} aria-describedby="nearby-distance-note">
+            {distanceBasis !== 'road' && <span className={styles.cap2} id="nearby-distance-note">{t('offer.distanceStraightLineNote')}</span>}
+            <ul className={styles.grid} aria-label={t('nearby.offersTitle')} aria-describedby={distanceBasis !== 'road' ? 'nearby-distance-note' : undefined}>
               {state.result.offers.map((offer) => {
                 const basis = priceBasisText(offer.price.unit, offer.pack);
+                const distance = displayedDistance(offer, distanceBasis);
+                const distanceLabel = distance === undefined ? null : formatDistance(distance, t);
                 const active = favourites.state.kind === 'ready'
                   && favourites.state.favourites.some(f => f.offerId === offer.id && f.locationId === offer.location.id);
                 return (
@@ -293,7 +298,7 @@ export function NearbyFeed() {
                       </div>
                       <div className={styles.nm}>
                         <h3 className={styles.tt} id={`nearby-${offer.id}`} lang={offer.product.nameLocale}>
-                          <Link href={`/offers/${offer.id}`} className="stretch" onClick={markBuyerOfferOpened}>{offer.product.name}</Link>
+                          <Link href={`/offers/${offer.id}`} className="stretch" onNavigate={() => { markBuyerOfferOpened(); rememberOfferDistance(offer, distanceBasis); }}>{offer.product.name}</Link>
                         </h3>
                         <button
                           type="button"
@@ -316,7 +321,17 @@ export function NearbyFeed() {
                         {formatAmount(offer.price.amount)}&nbsp;₸{basis && <>{' '}<small>{basis}</small></>}
                       </p>
                       <ConfirmationBadge offer={offer} className={styles.fresh} />
-                      <span className={styles.cap2}>{formatDistance(offer.distanceMeters, t)}</span>
+                      {distanceLabel !== null && (offer.routeAvailable ? (
+                        <a
+                          className={`${styles.cap2} ${styles.distanceLink}`}
+                          href={`/api/offers/${offer.id}/route`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${t('offer.routeTo', { place: offer.location.name })} · ${distanceLabel}`}
+                        >
+                          {distanceLabel}
+                        </a>
+                      ) : <span className={styles.cap2}>{distanceLabel}</span>)}
                     </article>
                   </li>
                 );

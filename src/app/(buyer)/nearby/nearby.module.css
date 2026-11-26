@@ -66,6 +66,8 @@
 .screen .fresh[data-tier='4'] { background:var(--primary); }
 .screen .fresh[data-tier='5'] { background:#2a0640; }
 .screen .cap2 { font:400 13px/18px Roboto,Geologica,system-ui,sans-serif; color:var(--ink2); }
+.screen .distanceLink { position:relative; z-index:1; align-self:flex-start; display:inline-flex; align-items:center; min-width:44px; min-height:44px; text-decoration:underline; text-underline-offset:2px; }
+.screen .distanceLink:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
 /* B07.ST06/ST08: ошибка загрузки над приглушённым скелетоном */
 .screen .errNotice { display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:14px; background:var(--danger-soft); border:0; color:var(--ink); font:400 14px/20px Roboto,Geologica,system-ui,sans-serif; }
