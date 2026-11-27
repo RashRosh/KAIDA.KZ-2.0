@@ -204,8 +204,8 @@ describe.sequential('Seller comment translation on PostgreSQL 18', () => {
 
       // Names, point and unit stay exactly as the Seller wrote them in every locale.
       const kk = await buyerCard(offerId, 'kk');
-      expect([kk.seller.displayName, kk.location.name, kk.location.addressText, kk.price.unit])
-        .toEqual([ru.seller.displayName, ru.location.name, ru.location.addressText, ru.price.unit]);
+      expect([kk.seller.displayName, kk.location.name, kk.location.addressText, kk.price?.unit])
+        .toEqual([ru.seller.displayName, ru.location.name, ru.location.addressText, ru.price?.unit]);
     } finally {
       await cleanupUser(fixture.userId, fixture.phone);
     }

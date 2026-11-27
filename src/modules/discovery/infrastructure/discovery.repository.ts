@@ -85,12 +85,12 @@ export async function findVisibleDiscoveryCandidates(
     wholesalePerContainer,
     ...rest
   }) => {
-    if (priceAmount === null || priceCurrency !== 'KZT') {
+    const wholesale = wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer });
+    if (priceAmount !== null ? priceCurrency !== 'KZT' : (priceCurrency !== null || wholesale === null)) {
       throw new Error('Buyer-visible Offer has invalid price');
     }
     const pack = formatPack(packFromColumns(packAmount, packUnit), locale);
     const unit = formatPriceUnit(priceUnitFromColumns(priceUnitCode, priceUnitValue), locale);
-    const wholesale = wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer });
 
     const offer: SearchOffer = {
       ...rest,
@@ -101,9 +101,16 @@ export async function findVisibleDiscoveryCandidates(
         ...rest.location,
         ...projectPointPublicContacts({ phoneE164: locationPhoneE164, whatsappPhoneE164: locationWhatsappPhoneE164, telegramUsername: locationTelegramUsername }, verifiedBySeller.get(rest.seller.id)),
       },
-      price: { amount: priceAmount, currency: 'KZT', unit },
-      // wholesale-price: the same second line as in Search
-      ...(wholesale === null ? {} : { wholesale: { amount: wholesale.amount, currency: 'KZT' as const, batch: formatWholesaleBatch(wholesale, unit, locale) } }),
+      price: priceAmount === null ? null : { amount: priceAmount, currency: 'KZT', unit },
+      // wholesale-price / wholesale-only: the same line as in Search
+      ...(wholesale === null ? {} : {
+        wholesale: {
+          amount: wholesale.amount,
+          currency: 'KZT' as const,
+          ...(priceAmount === null ? { unit } : {}),
+          batch: formatWholesaleBatch(wholesale, unit, locale),
+        },
+      }),
       // Nearby requires complete Location coordinates (geo overlay), so the route capability is always available here.
       routeAvailable: true,
       ...(coverPhotoId ? { coverPhotoId } : {}),

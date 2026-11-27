@@ -46,10 +46,10 @@ function priceText(price: SellerChangeSetItemView['price']) {
   return formatted ? `${formatted.amount}${formatted.unit ? ` / ${formatted.unit}` : ''}` : null;
 }
 
-// wholesale-price §3.1: «650 ₸ / кг · от 1 ящика (≈ 10 кг)», in the retail price's basis of the same item.
-function wholesaleText(wholesale: SellerChangeSetItemView['wholesale'] | undefined, item: Pick<SellerChangeSetItemView, 'price' | 'packLabel'>) {
+// wholesale-price §3.1 / wholesale-only §2.1: «650 ₸ / кг · от 1 ящика (≈ 10 кг)» or «450 ₸ / кг · от 1 мешка».
+function wholesaleText(wholesale: SellerChangeSetItemView['wholesale'] | SellerChangeSetItemView['previousWholesale'] | undefined, item: Pick<SellerChangeSetItemView, 'price' | 'packLabel'>) {
   if (!wholesale) return null;
-  const basis = priceBasisText(item.price?.unit, item.packLabel);
+  const basis = priceBasisText(item.price?.unit ?? wholesale.unit, item.packLabel);
   return `${formatAmount(wholesale.amount)} ₸${basis ? ` ${basis}` : ''} · ${wholesale.batch}`;
 }
 
@@ -266,7 +266,6 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
 
   function describe(item: SellerChangeSetItemView, withOld: boolean) {
     const old = withOld && current && item.action === 'update_offer' ? current : undefined;
-    const photoIds = resultingPhotoIds(item);
     // A price change from a text review keeps the comment and photos; only the price rows are shown (text-price-update §3.6).
     const editsCard = (item.action === 'create_offer' || item.action === 'update_offer') && !fromTextReview;
     return (
@@ -292,14 +291,13 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
             )}
           </>
         ) : (
-          <Kv label={t('confirm.price')} value={priceText(item.price) ?? t('review.noPrice')} old={old ? priceText(old.price) : null} />
+          <Kv label={t('confirm.price')} value={priceText(item.price) ?? (item.wholesale ? `${wholesaleText(item.wholesale, item)} (${t('wholesale.onlyLabel')})` : t('review.noPrice'))} old={old ? (priceText(old.price) ?? (old.wholesale ? t('wholesale.onlyLabel') : null)) : null} />
         )}
         {editsCard && (item.wholesale || item.previousWholesale) && (
           <Kv label={t('wholesale.title')} value={wholesaleText(item.wholesale, item) ?? t('wholesale.none')}
             old={item.previousWholesale !== undefined ? wholesaleText(item.previousWholesale, item) ?? t('wholesale.none') : null} />
         )}
         {editsCard && <Kv label={t('confirm.comment')} value={item.sellerComment ?? t('confirm.noComment')} old={old ? old.sellerComment ?? t('confirm.noComment') : null} />}
-        {editsCard && <Kv label={t('confirm.photos')} value={photoIds.length > 0 ? String(photoIds.length) : t('confirm.noPhotos')} />}
       </div>
     );
   }
@@ -324,7 +322,7 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
     const commonItem = items.find((item) => !item.priceOwn) ?? first;
     const amount = (value: string) => `${formatAmount(value)} ₸`;
     const title = updates > 0 ? t('confirm.changesTitle') : t('confirm.cardTitle');
-    const previous = commonItem.previousPriceAmount && commonItem.price && Number(commonItem.previousPriceAmount) !== Number(commonItem.price.amount)
+    const previous = commonItem.previousPriceAmount && (!commonItem.price || Number(commonItem.previousPriceAmount) !== Number(commonItem.price.amount))
       ? commonItem.previousPriceAmount : null;
     const countText = updates === 0
       ? t(pluralKey('confirm.willPublish', creates), { count: creates })
@@ -336,16 +334,29 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div className="ts">{first.product.name}</div>
           {first.packLabel && phase === 'pending' && <p className="c c2">{first.packLabel}</p>}
-          {commonItem.price && <div><span className="pr">{amount(commonItem.price.amount)}</span>{commonItem.price.unit && <> <span className="c2">/ {commonItem.price.unit}</span></>}</div>}
+          {commonItem.price ? (
+            <div><span className="pr">{amount(commonItem.price.amount)}</span>{commonItem.price.unit && <> <span className="c2">/ {commonItem.price.unit}</span></>}</div>
+          ) : commonItem.wholesale ? (
+            <div>
+              <span className="pr">{amount(commonItem.wholesale.amount)}</span>
+              {commonItem.wholesale.unit && <> <span className="c2">/ {commonItem.wholesale.unit}</span></>}{' '}
+              <span className="bd bd-p">{t('offer.wholesaleTag')}</span>
+              <p className="c c2">{commonItem.wholesale.batch}</p>
+            </div>
+          ) : null}
           {previous && phase === 'pending' && <p className="c num">{t('card.pricePrevious', { price: amount(previous) }).toLowerCase()}</p>}
         </div>
       </div>
     );
 
     if (phase === 'conflict') {
-      const mine = commonItem.price ? amount(commonItem.price.amount) : t('review.noPrice');
+      const mine = commonItem.price
+        ? amount(commonItem.price.amount)
+        : commonItem.wholesale ? `${amount(commonItem.wholesale.amount)} (${t('wholesale.onlyLabel')})` : t('review.noPrice');
       const live = owned?.find((offer) => offer.cardId === commonItem.cardId && offer.location.id === commonItem.location.id);
-      const now = live?.price ? amount(live.price.amount) : null;
+      const now = live?.price
+        ? amount(live.price.amount)
+        : live?.wholesale ? `${amount(live.wholesale.amount)} (${t('wholesale.onlyLabel')})` : null;
       return shell(title, (
         <>
           {conflictBanner(t('card.changedElsewhere'), now ? t('confirm.conflictPrice', { now, mine }) : t('confirm.conflictText'))}
@@ -371,16 +382,21 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
             <>
               <div className="hr" />
               {single ? <Kv label={t('confirm.point')} value={first.location.name} /> : items.map((item) => {
-                const now = item.price?.amount ?? '';
+                const now = item.price?.amount ?? null;
                 const before = item.previousPriceAmount;
-                const value = before && Number(before) !== Number(now) ? `${formatAmount(before)} → ${formatAmount(now)}` : amount(now);
+                let value: string;
+                if (now === null) {
+                  const ws = item.wholesale ? `${amount(item.wholesale.amount)} · ${t('offer.wholesaleTag')}` : t('wholesale.onlyLabel');
+                  value = before ? `${formatAmount(before)} → ${ws}` : ws;
+                } else {
+                  value = before && Number(before) !== Number(now) ? `${formatAmount(before)} → ${formatAmount(now)}` : amount(now);
+                }
                 return <Kv key={item.id} label={item.location.name} value={`${value}${item.priceOwn ? ` · ${t('cardScreen.own')}` : ''}`} />;
               })}
               {(first.wholesale || first.previousWholesale) && (
                 <Kv label={t('wholesale.title')} value={wholesaleText(first.wholesale, first) ?? t('wholesale.none')}
                   old={first.previousWholesale !== undefined ? wholesaleText(first.previousWholesale, first) ?? t('wholesale.none') : null} />
               )}
-              {cardPhotoIds !== undefined && <Kv label={t('confirm.photos')} value={cardPhotoIds.length > 0 ? String(cardPhotoIds.length) : t('confirm.noPhotos')} />}
               {cardPhotoIds !== undefined && first.sellerComment && <Kv label={t('confirm.comment')} value={first.sellerComment} />}
             </>
           )}

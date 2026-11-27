@@ -246,8 +246,9 @@
 .kaida .shutter.idle i{width:56px;height:56px;border-radius:28px}
 .kaida .vfbtn{width:48px;height:48px;border-radius:24px;background:#ffffff26;display:flex;align-items:center;justify-content:center;color:#fff}
 /* stats row */
-.kaida .kv{display:flex;justify-content:space-between;gap:12px;font:400 15px/22px var(--sans)}
-.kaida .kv span:first-child{color:var(--ink2)}
+.kaida .kv{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font:400 15px/22px var(--sans)}
+.kaida .kv>span:first-child{color:var(--ink2);flex:0 0 auto;max-width:48%;min-width:0}
+.kaida .kv>span:last-child{flex:1 1 auto;text-align:right;min-width:0}
 .kaida .steps{display:flex;flex-direction:column;gap:10px}
 .kaida .step{display:flex;gap:10px;align-items:flex-start}
 .kaida .step .n{width:24px;height:24px;border-radius:12px;background:var(--primary-soft);color:var(--primary-text);font:600 12px/24px var(--sans);text-align:center;flex:none}

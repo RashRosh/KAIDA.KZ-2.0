@@ -14,8 +14,8 @@ This file is a concise handoff, not the canonical queue. Queue and decisions: `d
 
 ## Current task & next action
 
-- **Current task:** drafting `S-WHOLESALE` slice 2 («Только опт») Slice Contract for PO sign-off (no code authorized yet).
-- **Next action:** await PO answers on the 3 open contract questions for `S-WHOLESALE` slice 2 (whether wholesale-only cards skip wholesale price sorting altogether and sit at the end of `sort=price` by freshness vs unit-price sorting; allowed wholesale-only price unit; explicit «Только оптом» toggle in editor).
+- **Current task:** `S-WHOLESALE` slice 2 («Только опт») — approved PO 2026-11-26 (contract `docs/slices/wholesale-only/SLICE_CONTRACT.md` + CJM sync); implemented on `slice/wholesale-only` with migration `0033_wholesale_only.sql`, domain/API/UI changes, unit + integration + mobile E2E tests, and 360×780 acceptance screenshots.
+- **Next action:** complete branch CI + KAIDA Controller audit on the `slice/wholesale-only` PR and await PO visual acceptance before merge and checkpoint tag `v0.0.96-wholesale-only`.
 - **Other open candidate PRs / directions:**
   - **OSRM road distance pilot:** draft PR #230 (`slice/road-distance-osrm`), pending live stand browser acceptance and graph-build peak memory measurement.
   - **Deferred UI polish (PO 2026-11-26):** old seller no-photo placeholder logo (`kaida.css`) and unstyled favourites error rows in `SearchScreen.tsx` (lines 553–555) — deferred to design migration.

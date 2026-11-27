@@ -103,8 +103,8 @@ describe.sequential('Offer price unit through S4, S5, S12 and every read', () =>
     await confirmSellerChangeSet(userId, custom.id, { database: db, clock: () => later(3) });
     expect(await stored()).toMatchObject({ price_amount: '4200.00', price_unit_code: 'other', price_unit_value: 'ведро', revision: 3 });
     expect(await owned('kk')).toEqual({ amount: '4200.00', currency: 'KZT', unit: 'ведро', unitChoice: { code: 'other', value: 'ведро' } });
-    expect((await searched('kk')).unit).toBe('ведро');
-    expect((await searched()).unit).toBe('ведро');
+    expect((await searched('kk'))?.unit).toBe('ведро');
+    expect((await searched())?.unit).toBe('ведро');
 
     // Same unit, same amount and comment is still a no-op.
     await expect(createOfferManagementChangeSet(userId, offerId, sellerOfferChangeBodySchema.parse({

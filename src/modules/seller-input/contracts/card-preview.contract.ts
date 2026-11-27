@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { packInputSchema } from '../../offers/pack/pack';
-import { wholesaleInputSchema } from '../../offers/wholesale/wholesale';
+import { wholesaleFlexibleInputSchema, wholesaleNeedsPerContainer } from '../../offers/wholesale/wholesale';
 import {
   CARD_POINT_LIMIT,
   cardCommentSchema,
@@ -18,13 +18,14 @@ const uniqueBy = <T>(key: (item: T) => string) => (items: T[]) => new Set(items.
 
 const previewFields = {
   title: cardTitleSchema,
-  price: cardPriceAmountSchema,
+  // wholesale-only: null when previewing a wholesale-only card.
+  price: cardPriceAmountSchema.nullable(),
   unit: cardUnitSchema.nullable(),
   pack: packInputSchema.nullable(),
   sellerComment: cardCommentSchema,
   photoIds: cardPhotoIdsSchema,
-  // wholesale-price: the editor's wholesale line; omitted or null = none (shown only with a unit, like publication)
-  wholesale: wholesaleInputSchema.nullable().optional().transform((value) => value ?? null),
+  // wholesale-price / wholesale-only: the editor's wholesale line; omitted or null = none (shown only with a unit, like publication)
+  wholesale: wholesaleFlexibleInputSchema.nullable().optional().transform((value) => value ?? null),
 };
 
 export const cardPreviewBodySchema = z.discriminatedUnion('kind', [
@@ -46,6 +47,10 @@ export const cardPreviewBodySchema = z.discriminatedUnion('kind', [
     // points the card is added to, each at the common price
     addPoints: z.array(z.uuid()).max(CARD_POINT_LIMIT).refine(uniqueBy((id: string) => id), 'Points must be unique'),
   }).strict(),
-]).refine((value) => value.pack === null || (value.unit !== null && (value.unit.code === 'package' || value.unit.code === 'piece')), 'Pack is only for packages and pieces');
+])
+  .refine((value) => value.pack === null || (value.unit !== null && (value.unit.code === 'package' || value.unit.code === 'piece')), 'Pack is only for packages and pieces')
+  .refine((value) => value.price !== null || (value.wholesale !== null && value.unit !== null), 'Retail or wholesale price with unit is required')
+  .refine((value) => value.price === null || value.wholesale === null || !wholesaleNeedsPerContainer(value.wholesale), 'A container other than the unit needs its quantity')
+  .refine((value) => value.price !== null || value.kind !== 'create' || value.points.every((point) => point.ownPrice === undefined), 'Point own price is not allowed for wholesale-only cards');
 
 export type CardPreviewInput = z.infer<typeof cardPreviewBodySchema>;

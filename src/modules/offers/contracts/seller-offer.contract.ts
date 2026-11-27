@@ -15,8 +15,8 @@ export type SellerOfferView = {
   priceOwn: boolean;
   pack: Pack | null;
   packLabel: string | null;
-  // wholesale-price: the card's wholesale line (batch = the buyer's text); null = none.
-  wholesale: (Wholesale & { batch: string }) | null;
+  // wholesale-price / wholesale-only: the card's wholesale line (batch = the buyer's text); unit/unitChoice present when price === null.
+  wholesale: (Wholesale & { batch: string; unit?: string | null; unitChoice?: PriceUnit | null }) | null;
   location: { id: string; name: string; addressText: string };
   // unit is the display label in the requested locale; unitChoice is the stored structured value for edit forms.
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;

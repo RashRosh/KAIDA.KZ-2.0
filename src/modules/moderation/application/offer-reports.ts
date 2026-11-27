@@ -17,6 +17,8 @@ const digest = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).di
 type CardRow = {
   id: string; card_id: string; seller_id: string; title: string; pack_amount: string | null; pack_unit: string | null;
   price_amount: string | null; price_currency: string | null; price_unit_code: string | null; price_unit_value: string | null;
+  wholesale_price_amount: string | null; wholesale_batch_count: number | null; wholesale_container: string | null;
+  wholesale_container_text: string | null; wholesale_per_container: string | null;
   seller_comment: string | null; display_comment: string | null; status: string; last_confirmed_at: Date; revision: number;
   location_id: string; location_name: string; address_text: string; photo_ids: string[];
 };
@@ -39,7 +41,8 @@ async function contextOf(db: Db, offerId: string, locale: 'ru' | 'kk', now: Date
   await db.execute(sql`select id from locations where id in (select location_id from offers where card_id=${cardId}) order by id for share`);
   const result = await db.execute<CardRow>(sql`
     select o.id,o.card_id,o.seller_id,o.title,o.pack_amount::text,o.pack_unit,o.price_amount::text,o.price_currency,
-      o.price_unit_code,o.price_unit_value,o.seller_comment,o.status,o.last_confirmed_at,o.revision,
+      o.price_unit_code,o.price_unit_value,o.wholesale_price_amount::text,o.wholesale_batch_count,o.wholesale_container,
+      o.wholesale_container_text,o.wholesale_per_container::text,o.seller_comment,o.status,o.last_confirmed_at,o.revision,
       l.id as location_id,l.name as location_name,l.address_text,
       case when ${isSellerCommentTranslationEnabled()} and t.status='available' then t.translated_text else o.seller_comment end as display_comment,
       coalesce((select array_agg(op.photo_id::text order by op.position) from offer_photos op where op.offer_id=o.id),array[]::text[]) as photo_ids
@@ -57,6 +60,7 @@ async function contextOf(db: Db, offerId: string, locale: 'ru' | 'kk', now: Date
   const version = digest({ event: events.rows[0]?.id ?? 'legacy', content: rows.map(r => ({
     id:r.id, locationId:r.location_id, name:r.location_name, address:r.address_text,
     title:r.title, pack:[r.pack_amount,r.pack_unit], price:[r.price_amount,r.price_currency,r.price_unit_code,r.price_unit_value],
+    ...(r.wholesale_price_amount !== null ? { wholesale:[r.wholesale_price_amount,r.wholesale_batch_count,r.wholesale_container,r.wholesale_container_text,r.wholesale_per_container] } : {}),
     comment:r.seller_comment, photos:r.photo_ids,
   })) });
   const pack = formatPack(packFromColumns(chosen.pack_amount, chosen.pack_unit), locale);
@@ -64,10 +68,12 @@ async function contextOf(db: Db, offerId: string, locale: 'ru' | 'kk', now: Date
     cardId, offerId, locale, version, title:chosen.title, pack, originalComment:chosen.seller_comment,
     displayedComment:chosen.display_comment, photoIds:chosen.photo_ids,
     points:rows.map(r => ({ offerId:r.id, locationId:r.location_id, name:r.location_name, address:r.address_text,
-      amount:r.price_amount, currency:r.price_currency,
+      amount:r.price_amount ?? r.wholesale_price_amount,
+      currency:r.price_currency ?? (r.wholesale_price_amount !== null ? 'KZT' : null),
       basis:formatPack(packFromColumns(r.pack_amount,r.pack_unit),locale) ?? formatPriceUnit(priceUnitFromColumns(r.price_unit_code,r.price_unit_value),locale) })),
   };
-  const available = chosen.status === 'active' && chosen.price_amount!==null && chosen.price_currency==='KZT' && new Date(chosen.last_confirmed_at).getTime() > now.getTime()-readOfferValidityPeriodHours()*3600000 && !active;
+  const hasPrice = (chosen.price_amount !== null && chosen.price_currency === 'KZT') || chosen.wholesale_price_amount !== null;
+  const available = chosen.status === 'active' && hasPrice && new Date(chosen.last_confirmed_at).getTime() > now.getTime()-readOfferValidityPeriodHours()*3600000 && !active;
   return { evidence, available, token:digest({ version, rows:rows.map(r=>[r.id,r.status,r.revision]), history:history.rows, available }),
     removal:active ? {id:active.id,reason:active.reason,comment:active.comment,at:new Date(active.removed_at).toISOString()} : null };
 }

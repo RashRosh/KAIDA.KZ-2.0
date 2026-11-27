@@ -106,7 +106,7 @@ describe('wholesale price of a card', () => {
 
     const buyer = await found('Перец оптовый');
     expect(buyer).toHaveLength(2);
-    expect(buyer.map((offer) => [offer.price.amount, offer.wholesale?.amount, offer.wholesale?.currency, plain(offer.wholesale?.batch)]))
+    expect(buyer.map((offer) => [offer.price?.amount, offer.wholesale?.amount, offer.wholesale?.currency, plain(offer.wholesale?.batch)]))
       .toEqual(expect.arrayContaining([['900', '650', 'KZT', 'от 1 ящика (≈ 10 кг)'], ['950', '650', 'KZT', 'от 1 ящика (≈ 10 кг)']]));
   });
 

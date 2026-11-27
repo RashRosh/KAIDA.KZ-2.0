@@ -28,6 +28,8 @@ export const offerDraftPayloadSchema = z.object({
   photoIds: z.array(z.uuid()).max(5),
   points: z.array(z.object({ locationId: z.uuid(), ownPrice: z.string().max(40).nullable() }).strict()).max(50),
   aiHints: offerDraftAiHintsSchema.optional(),
+  // wholesale-only: true when the editor's «Только оптом» toggle is on; older drafts omit it (= false).
+  wholesaleOnly: z.boolean().optional(),
   // wholesale-price: the wholesale sheet as typed; older drafts have none.
   wholesale: z.object({
     amount: z.string().max(40),

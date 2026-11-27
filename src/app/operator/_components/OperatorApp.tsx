@@ -35,8 +35,8 @@ function ago(iso: string): string {
   return new Intl.DateTimeFormat('ru-KZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
 }
 
-function priceText(price: { amount: string; unit: string } | null) {
-  return price ? `${formatAmount(price.amount)} ₸${price.unit ? ` / ${price.unit}` : ''}` : '';
+function priceText(price: { amount: string; unit: string; wholesaleOnly?: boolean } | null) {
+  return price ? `${formatAmount(price.amount)} ₸${price.unit ? ` / ${price.unit}` : ''}${price.wholesaleOnly ? ' ОПТ' : ''}` : '';
 }
 
 async function send(url: string, init: RequestInit): Promise<OperatorCardView> {

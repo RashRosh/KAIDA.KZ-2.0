@@ -36,8 +36,10 @@ function removalView(removal: ActiveRemoval | undefined): OperatorRemovalView | 
 }
 
 function offerPrice(row: OperatorOfferRow) {
-  if (row.price_amount === null) return null;
-  return { amount: row.price_amount, unit: formatPriceUnit(priceUnitFromColumns(row.price_unit_code, row.price_unit_value)) ?? '' };
+  const unit = formatPriceUnit(priceUnitFromColumns(row.price_unit_code, row.price_unit_value)) ?? '';
+  if (row.price_amount !== null) return { amount: row.price_amount, unit };
+  if (row.wholesale_price_amount !== null) return { amount: row.wholesale_price_amount, unit, wholesaleOnly: true as const };
+  return null;
 }
 
 function packLabel(row: OperatorOfferRow) {

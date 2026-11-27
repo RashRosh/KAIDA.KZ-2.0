@@ -49,8 +49,13 @@ import {
 type LockedOffer = NonNullable<Awaited<ReturnType<typeof lockOfferById>>>;
 type LockedItem = Awaited<ReturnType<typeof lockChangeItems>>[number];
 
-function assertPricedItem(item: LockedItem): asserts item is LockedItem & { priceAmount: string; priceCurrency: 'KZT' } {
-  if (item.priceAmount === null || item.priceCurrency !== 'KZT') {
+function hasRetailOrWholesalePrice(row: { priceAmount: string | null; priceCurrency: string | null; wholesale: unknown }): boolean {
+  if (row.priceAmount !== null) return row.priceCurrency === 'KZT';
+  return row.priceCurrency === null && row.wholesale !== null;
+}
+
+function assertPricedItem(item: LockedItem) {
+  if (!hasRetailOrWholesalePrice(item)) {
     throw new OfferPriceRequiredError();
   }
 }
@@ -189,7 +194,7 @@ export async function confirmSellerChangeSet(
         throw new SellerInputInvariantError('Undo Item не содержит время для восстановления.');
       }
       assertPricedItem(item);
-      if (item.action === 'activate_offer' && (targetOffer.priceAmount === null || targetOffer.priceCurrency !== 'KZT')) {
+      if (item.action === 'activate_offer' && !hasRetailOrWholesalePrice(targetOffer)) {
         throw new OfferPriceRequiredError();
       }
     }
@@ -224,13 +229,14 @@ export async function confirmSellerChangeSet(
 
     for (const item of items) {
       assertPricedItem(item);
+      const priceCurrency = item.priceAmount === null ? null : 'KZT' as const;
       if (item.action === 'create_offer') {
         const offer = await createOffer(tx, {
           card: { title: item.title, productId: item.productId, cardId: item.cardId, priceOwn: item.priceOwn, pack: item.pack, wholesale: item.wholesale },
           sellerId: seller.id,
           locationId: item.locationId,
           priceAmount: item.priceAmount,
-          priceCurrency: 'KZT',
+          priceCurrency,
           priceUnit: item.priceUnit,
           sellerComment: item.sellerComment,
           confirmedAt: confirmationTime,
@@ -257,7 +263,7 @@ export async function confirmSellerChangeSet(
           card: { title: item.title, productId: item.productId, priceOwn: item.priceOwn, pack: item.pack, wholesale: item.wholesale },
           expectedRevision: item.expectedOfferRevision!,
           priceAmount: item.priceAmount,
-          priceCurrency: 'KZT',
+          priceCurrency,
           priceUnit: item.priceUnit,
           sellerComment: item.sellerComment,
           sellerCommentChanged: item.sellerComment !== targetOffer.sellerComment,
@@ -292,7 +298,7 @@ export async function confirmSellerChangeSet(
           offerId: targetOffer.id,
           expectedRevision: item.expectedOfferRevision!,
           confirmationTime,
-          ...(Number(item.priceAmount) !== Number(targetOffer.priceAmount)
+          ...(item.priceAmount !== null && targetOffer.priceAmount !== null && Number(item.priceAmount) !== Number(targetOffer.priceAmount)
             ? { newPrice: { amount: item.priceAmount, priceOwn: item.priceOwn } } : {}),
         });
       }

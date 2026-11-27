@@ -40,7 +40,7 @@ export type OperatorFeedRow = {
   at: string;
   title: string;
   packLabel: string | null;
-  price: { amount: string; unit: string } | null;
+  price: { amount: string; unit: string; wholesaleOnly?: boolean } | null;
   pointName: string;
   morePoints: number;
   sellerPhone: string;
@@ -62,7 +62,7 @@ export type OperatorCardView = {
   sellerComment: string | null;
   photoIds: string[];
   sellerPhone: string;
-  points: { offerId: string; name: string; addressText: string; price: { amount: string; unit: string } | null; active: boolean }[];
+  points: { offerId: string; name: string; addressText: string; price: { amount: string; unit: string; wholesaleOnly?: boolean } | null; active: boolean }[];
   removal: OperatorRemovalView | null;
 };
 

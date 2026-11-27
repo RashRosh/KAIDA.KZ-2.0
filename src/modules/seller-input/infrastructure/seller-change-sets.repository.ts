@@ -214,11 +214,15 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     }).from(offers).where(inArray(offers.id, targetIds))
     : [];
   const previous = new Map(targets.map((row) => [row.id, row.priceAmount]));
-  // wholesale-price: «было» of the wholesale line before an update (null = there was none).
+  // wholesale-price / wholesale-only: «было» of the wholesale line before an update (null = there was none).
   const previousWholesale = new Map(targets.map((row) => {
     const value = wholesaleFromColumns(row);
     const unit = formatPriceUnit(priceUnitFromColumns(row.priceUnitCode, row.priceUnitValue), locale);
-    return [row.id, value === null ? null : { ...value, batch: formatWholesaleBatch(value, unit, locale) }] as const;
+    return [row.id, value === null ? null : {
+      ...value,
+      batch: formatWholesaleBatch(value, unit, locale),
+      ...(row.priceAmount === null ? { unit } : {}),
+    }] as const;
   }));
 
   return {
@@ -229,6 +233,7 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
     seller: { id: header.sellerId, displayName: header.sellerDisplayName },
     items: rows.map((row) => {
       const unit = priceUnitFromColumns(row.priceUnitCode, row.priceUnitValue);
+      const unitLabel = formatPriceUnit(unit, locale);
       const wholesale = wholesaleFromColumns(row);
       return {
       id: row.id,
@@ -239,14 +244,18 @@ export async function findChangeSetViewByIdAndSeller(database: SellerInputDb, ch
       priceOwn: row.priceOwn,
       pack: packFromColumns(row.packAmount, row.packUnit),
       packLabel: formatPack(packFromColumns(row.packAmount, row.packUnit), locale),
-      wholesale: wholesale === null ? null : { ...wholesale, batch: formatWholesaleBatch(wholesale, formatPriceUnit(unit, locale), locale) },
+      wholesale: wholesale === null ? null : {
+        ...wholesale,
+        batch: formatWholesaleBatch(wholesale, unitLabel, locale),
+        ...(row.priceAmount === null ? { unit: unitLabel, unitChoice: unit } : {}),
+      },
       ...(row.targetOfferId && previousWholesale.has(row.targetOfferId) ? { previousWholesale: previousWholesale.get(row.targetOfferId)! } : {}),
       ...(row.targetOfferId && previous.get(row.targetOfferId) ? { previousPriceAmount: previous.get(row.targetOfferId)! } : {}),
       location: { id: row.locationId, name: row.locationName, addressText: row.locationAddressText, type: row.locationType as LocationType },
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,
         currency: row.priceCurrency as 'KZT',
-        unit: formatPriceUnit(unit, locale),
+        unit: unitLabel,
         unitChoice: unit,
       },
       sellerComment: row.sellerComment,

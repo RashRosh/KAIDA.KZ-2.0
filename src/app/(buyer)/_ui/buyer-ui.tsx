@@ -15,6 +15,7 @@ import { OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { Ic, Phone } from '../../seller/_kaida/ui';
 import lines from './buyer-lines.module.css';
 import { SearchIcon, type SearchIconName } from './SearchIcon';
+import { WholesaleLine } from './WholesaleLine';
 
 // Shared runtime frame/card. New visual authority: docs/product/DESIGN_BASELINE.md.
 // Optional presentation hooks let Search migrate without changing other buyer surfaces.
@@ -149,6 +150,7 @@ export function RouteButton({ offer }: { offer: SearchOffer }) {
 }
 
 export function PriceLine({ offer, large = false }: { offer: SearchOffer; large?: boolean }) {
+  if (!offer.price) return <WholesaleLine offer={offer} size={large ? 'lg' : 'sm'} />;
   // card-price-packaging: one line; the amount never breaks, the basis («/ 800 г», «/ л», «/ упак.») wraps by words.
   const basis = priceBasisText(offer.price.unit, offer.pack);
   return (

@@ -127,7 +127,7 @@ describe('cards in several points', () => {
       .find((offer) => offer.product.name === 'Баранина, в упаковке');
     expect(found?.product.id).toBe(seedIds.lambProduct);
     expect(found?.pack).toBe('0,6 кг');
-    expect(found?.price.unit).toBe('упак.');
+    expect(found?.price?.unit).toBe('упак.');
   });
 
   it('an exact whole-name match links silently; suggestions match word starts in names and aliases', async () => {

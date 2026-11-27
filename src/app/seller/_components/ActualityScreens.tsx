@@ -91,11 +91,14 @@ export function ActualityTask({ due, oneTap, busy, error, onCheck, onConfirmAll 
   );
 }
 
-function priceText(card: SellerCard) {
+function priceText(card: SellerCard, t: ReturnType<typeof useI18n>['t']) {
   const lead = card.lead;
   const amount = card.commonPrice ?? card.lowestPrice;
-  if (!amount) return '';
-  return `${formatAmount(amount)} ₸${lead.price?.unit ? ` / ${lead.price.unit}` : ''}`;
+  if (amount) return `${formatAmount(amount)} ₸${lead.price?.unit ? ` / ${lead.price.unit}` : ''}`;
+  if (lead.wholesale) {
+    return `${formatAmount(lead.wholesale.amount)} ₸${lead.wholesale.unit ? ` / ${lead.wholesale.unit}` : ''} ${t('offer.wholesaleTag')}`;
+  }
+  return '';
 }
 
 // S16 · Actuality · Default: every due card with its age; «Всё актуально» confirms them all.
@@ -135,17 +138,18 @@ export function ActualityScreen({ due, oneTap, bulk, onClose, onConfirmAll, onRe
           const hidden = actuality.stage === 'hidden';
           const age = hidden ? t('actuality.hiddenShort', { days: daysLabel(actuality.days, t) }) : actualityText(actuality.days, t);
           const name = `${card.lead.product.name}${card.lead.packLabel ? ` · ${card.lead.packLabel}` : ''}`;
+          const bothPrices = card.lead.price !== null && card.lead.wholesale !== null;
           return (
             <div key={card.cardId} className="li" data-testid={`actuality-row-${card.cardId}`}>
               <Thumb photoUrl={card.lead.photos?.[0] ? photoUrl(card.lead.photos[0].id, 'thumb') : null} size={44} radius={8} />
               <div className="mid">
                 <div className="ts">{name}</div>
-                <p className="c num" style={hidden ? { color: 'var(--warning)' } : undefined}>{priceText(card)} · {age}</p>
+                <p className="c num" style={hidden ? { color: 'var(--warning)' } : undefined}>{priceText(card, t)} · {age}</p>
                 {card.lead.wholesale && card.lead.price && (
                   <WholesaleLine offer={{ wholesale: { amount: card.lead.wholesale.amount, currency: 'KZT', batch: card.lead.wholesale.batch }, price: card.lead.price, ...(card.lead.packLabel ? { pack: card.lead.packLabel } : {}) }} />
                 )}
               </div>
-              <button type="button" className="ib" disabled={busy} aria-label={t(card.lead.wholesale ? 'actuality.confirmItemBoth' : 'actuality.confirmItem', { name })} data-testid={`actuality-confirm-${card.cardId}`}
+              <button type="button" className="ib" disabled={busy} aria-label={t(bothPrices ? 'actuality.confirmItemBoth' : 'actuality.confirmItem', { name })} data-testid={`actuality-confirm-${card.cardId}`}
                 onClick={async () => { if (await confirm([card.cardId])) { setRowDone(true); onRefresh(); } }}>
                 <Ic name="check" className="sm" style={{ color: 'var(--primary-text)' }} />
               </button>

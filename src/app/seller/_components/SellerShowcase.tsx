@@ -19,6 +19,7 @@ import { CardEditor, type CardEditorInitial, type CardEditorMode } from './CardE
 import { SellerTradingPoints } from './SellerTradingPoints';
 import { valuesFromChangeSet, type CardValues } from './card-editor-state';
 import { findCard, groupCards, isOneTapCard, missingDraftFields, pluralKey, showcaseEntries, type SellerCard } from './card-model';
+import { WholesaleLine } from '../../(buyer)/_ui/WholesaleLine';
 import { BulkToast, useBulkConfirm } from './useBulkConfirm';
 
 type Data =
@@ -243,15 +244,24 @@ function isOverlayOpen(params: URLSearchParams, cards: SellerCard[], drafts: Off
 }
 
 function priceLine(card: SellerCard, t: ReturnType<typeof useI18n>['t']) {
-  const unit = card.lead.price?.unit;
-  const amount = card.commonPrice ?? card.lowestPrice;
-  if (!amount) return null;
-  const text = `${formatAmount(amount)} ₸`;
   const points = card.offers.length;
+  const amount = card.commonPrice ?? card.lowestPrice;
+  if (amount) {
+    const unit = card.lead.price?.unit;
+    const text = `${formatAmount(amount)} ₸`;
+    return (
+      <div className="c c2">
+        <b className="num" style={{ color: 'var(--ink)' }}>{card.commonPrice ? text : t('showcase.priceFrom', { price: text })}</b>
+        {unit ? ` / ${unit}` : ''} · {t(pluralKey('showcase.points', points), { count: points })}
+      </div>
+    );
+  }
+  const wholesale = card.lead.wholesale;
+  if (!wholesale) return null;
   return (
     <div className="c c2">
-      <b className="num" style={{ color: 'var(--ink)' }}>{card.commonPrice ? text : t('showcase.priceFrom', { price: text })}</b>
-      {unit ? ` / ${unit}` : ''} · {t(pluralKey('showcase.points', points), { count: points })}
+      <b className="num" style={{ color: 'var(--ink)' }}>{formatAmount(wholesale.amount)} ₸</b>
+      {wholesale.unit ? ` / ${wholesale.unit}` : ''} · {t('offer.wholesaleTag')} · {t(pluralKey('showcase.points', points), { count: points })}
     </div>
   );
 }
@@ -542,8 +552,13 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
   const lead = card.lead;
   const cover = lead.photos?.[0];
   const title = `${lead.product.name}${lead.packLabel ? ` · ${lead.packLabel}` : ''}`;
+  const bothPrices = lead.price !== null && lead.wholesale !== null;
   // the amount with «₸» never breaks; the unit follows by words (large text)
-  const priceParts = (offer: SellerOfferView) => offer.price ? <><span style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.price.amount)} ₸</span>{offer.price.unit ? ` / ${offer.price.unit}` : ''}</> : null;
+  const priceParts = (offer: SellerOfferView) => offer.price
+    ? <><span style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.price.amount)} ₸</span>{offer.price.unit ? ` / ${offer.price.unit}` : ''}</>
+    : offer.wholesale
+      ? <><span style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.wholesale.amount)} ₸</span>{offer.wholesale.unit ? ` / ${offer.wholesale.unit}` : ''} · {t('offer.wholesaleTag')}</>
+      : null;
   const badge = (offer: SellerOfferView) => offer.status === 'active'
     ? <span className="bd bd-ok"><Ic name="check" />{t('showcase.statusLive')}{!offer.buyerVisible ? ` · ${t('offers.hidden')}` : ''}</span>
     : <span className="bd bd-n"><Ic name="power" />{t('showcase.statusOff')}</span>;
@@ -593,7 +608,11 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
             // Hidden or archived: the actuality state replaces «На витрине» (buyers do not see the card).
             ? actualityStatus
             : <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{badge(offer)}{actuality?.due && actualityStatus}</div>}
-          {offer.price && <div><span className="pr-lg">{formatAmount(offer.price.amount)} ₸</span>{offer.price.unit && <> <span className="c2">/ {offer.price.unit}</span></>}</div>}
+          {offer.price ? (
+            <div><span className="pr-lg">{formatAmount(offer.price.amount)} ₸</span>{offer.price.unit && <> <span className="c2">/ {offer.price.unit}</span></>}</div>
+          ) : offer.wholesale ? (
+            <WholesaleLine offer={{ wholesale: { amount: offer.wholesale.amount, currency: 'KZT', unit: offer.wholesale.unit ?? null, batch: offer.wholesale.batch }, price: null, ...(offer.packLabel ? { pack: offer.packLabel } : {}) }} size="lg" />
+          ) : null}
           <p className="c">{offer.location.name}</p>
           {errorBanner}
           {reconfirmError}
@@ -606,7 +625,7 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
           ) : (
             <div className="card" style={{ gap: 0, padding: '0 12px' }}>
               <button type="button" className="li" onClick={() => void confirmActuality()} disabled={reconfirm.busy} style={{ background: 'transparent', border: 0 }}>
-                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t(card.lead.wholesale ? 'actuality.confirmBoth' : 'actuality.confirm')}</div></div>
+                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t(bothPrices ? 'actuality.confirmBoth' : 'actuality.confirm')}</div></div>
               </button>
               <button type="button" className="li" onClick={() => go(`edit=${card.cardId}`)} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
                 <Ic name="pencil" className="c2" /><div className="mid"><div className="ts">{t('cardScreen.edit')}</div></div>
@@ -654,7 +673,7 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
         {actualityStatus}
         {actuality && (
           <button type="button" className="btn btn-p w" onClick={() => void confirmActuality()} disabled={reconfirm.busy}>
-            <Ic name="check" className="sm" />{t(card.lead.wholesale ? 'actuality.confirmBoth' : 'actuality.confirm')}
+            <Ic name="check" className="sm" />{t(bothPrices ? 'actuality.confirmBoth' : 'actuality.confirm')}
           </button>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
@@ -677,7 +696,9 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
             {!offer.buyerVisible && <p className="c c2" style={{ margin: 0 }} data-testid="preview-unavailable">{t('preview.notShown')}</p>}
             {/* post-publication-buyer-preview §3.2 (2): a compact stack of quiet actions, 44 px targets edge to edge */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0 }}>
-              <button type="button" className="act" onClick={() => go(`point=${offer.id}`)}><Ic name="pencilpart" className="sm" /><span>{t('cardScreen.editPoint')}</span></button>
+              {offer.price !== null && (
+                <button type="button" className="act" onClick={() => go(`point=${offer.id}`)}><Ic name="pencilpart" className="sm" /><span>{t('cardScreen.editPoint')}</span></button>
+              )}
               {offer.buyerVisible && (
                 <Link href={previewHref(offer.id, `/seller?card=${card.cardId}`)} className="act" data-testid="preview-action"><Ic name="eye" className="sm" /><span>{t('preview.action')}</span></Link>
               )}

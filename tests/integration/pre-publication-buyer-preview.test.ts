@@ -110,7 +110,7 @@ describe('pre-publication buyer preview', () => {
       kind: 'create', title: 'Мёд', price: '3000', unit: { code: 'piece' }, pack: null, sellerComment: '', photoIds: [],
       points: [{ locationId: seller.locations[0]!.id }, { locationId: second.rows[0].id, ownPrice: '2500' }],
     }), { database: db, clock: () => T1 });
-    expect(pages.map((page) => page.offer.price.amount)).toEqual(['3000.00', '2500.00']);
+    expect(pages.map((page) => page.offer.price?.amount)).toEqual(['3000.00', '2500.00']);
     expect(new Set(pages.map((page) => page.offer.id)).size).toBe(2);
   });
 
