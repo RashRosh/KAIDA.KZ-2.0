@@ -3,6 +3,7 @@ import type { OpeningHours } from '../../locations/hours/opening-hours';
 import { projectPointPublicContacts } from '../../locations/details/point-public-contacts';
 import { formatPack, packFromColumns } from '../../offers/pack/pack';
 import { formatPriceUnit, priceUnitFromColumns } from '../../offers/price-unit/price-unit';
+import { formatWholesaleBatch, type Wholesale } from '../../offers/wholesale/wholesale';
 import type { SearchOffer } from '../contracts/search.contract';
 
 // The buyer's public view of ONE Offer, built from plain fields by one pure function. It is the only place where the stored
@@ -28,6 +29,8 @@ export type BuyerOfferFields = {
   priceAmount: string;
   priceUnitCode: string | null;
   priceUnitValue: string | null;
+  // wholesale-price: the card's wholesale line, if any
+  wholesale: Wholesale | null;
   sellerComment: string | null;
   coverPhotoId: string | null;
   locationLatitude: number | null;
@@ -39,6 +42,7 @@ export function projectBuyerOffer(fields: BuyerOfferFields, locale: Locale): { o
     ? null
     : { latitude: fields.locationLatitude, longitude: fields.locationLongitude };
   const pack = formatPack(packFromColumns(fields.packAmount, fields.packUnit), locale);
+  const unit = formatPriceUnit(priceUnitFromColumns(fields.priceUnitCode, fields.priceUnitValue), locale);
   const offer: SearchOffer = {
     id: fields.id,
     // The card title is the Seller's own text in every interface language; id is the optional catalog link.
@@ -49,7 +53,10 @@ export function projectBuyerOffer(fields: BuyerOfferFields, locale: Locale): { o
       ...fields.location,
       ...projectPointPublicContacts({ phoneE164: fields.locationPhoneE164, whatsappPhoneE164: fields.locationWhatsappPhoneE164, telegramUsername: fields.locationTelegramUsername }, fields.verifiedPhones),
     },
-    price: { amount: fields.priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnitFromColumns(fields.priceUnitCode, fields.priceUnitValue), locale) },
+    price: { amount: fields.priceAmount, currency: 'KZT', unit },
+    ...(fields.wholesale === null ? {} : {
+      wholesale: { amount: fields.wholesale.amount, currency: 'KZT' as const, batch: formatWholesaleBatch(fields.wholesale, unit, locale) },
+    }),
     sellerComment: fields.sellerComment,
     // stage 5A: public route capability, derived from the existing route prerequisite (complete Location coordinates);
     // the coordinates themselves never enter the public payload.

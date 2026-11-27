@@ -66,6 +66,7 @@ export async function createSellerChangeSet(
         priceOwn: false,
         pack: null,
         packLabel: null,
+        wholesale: null,
         location: { id: location.id, name: location.name, addressText: location.addressText, type: location.type },
         price: { amount: priceAmount, currency: 'KZT', unit: formatPriceUnit(priceUnit), unitChoice: priceUnit },
         sellerComment,

@@ -8,16 +8,19 @@ import { buyerGeoVisibleOffersPredicate } from '../visibility/buyer-offer-visibi
 export type BuyerOfferRouteDestination = {
   latitude: number;
   longitude: number;
+  addressText?: string;
 };
 
 export async function findBuyerOfferRouteDestination(
   database: Database,
   offerId: string,
   cutoff: Date,
+  includeAddress = false,
 ): Promise<BuyerOfferRouteDestination | null> {
   const rows = await database.select({
     latitude: locations.latitude,
     longitude: locations.longitude,
+    addressText: locations.addressText,
   }).from(offers)
     .innerJoin(sellers, eq(sellers.id, offers.sellerId))
     .innerJoin(locations, eq(locations.id, offers.locationId))
@@ -29,5 +32,9 @@ export async function findBuyerOfferRouteDestination(
 
   const row = rows[0];
   if (!row || row.latitude === null || row.longitude === null) return null;
-  return { latitude: row.latitude, longitude: row.longitude };
+  return {
+    latitude: row.latitude,
+    longitude: row.longitude,
+    ...(includeAddress ? { addressText: row.addressText } : {}),
+  };
 }

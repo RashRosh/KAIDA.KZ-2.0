@@ -1,29 +1,31 @@
-# Current state — D6 Search Home (B02), reconciling PRs #215/#216 (2026-11-12)
+# Current state — post S-WHOLESALE slice 1 closure (2026-11-26)
 
-## Current task
+This file is a concise handoff, not the canonical queue. Queue and decisions: `docs/product/EXECUTION_PLAN.md`; approved visual authority: `docs/product/DESIGN_BASELINE.md`. Check GitHub SHA and CI directly before acting.
 
-- D6 Search Home remains active and unmerged. PO-approved contract is in #215; #216 contains its implementation and tests, now rebased onto the reconciled contract branch. The approved behavior is unchanged.
-- PO visual acceptance of the implementation is pending. No D6 merge or checkpoint tag without explicit PO approval.
+## Verified main checkpoint
 
-## Verified base
+- **Latest verified checkpoint:** annotated tag `v0.0.94-wholesale-price` at `6d121b4222ff3b9ade19eef951fcc124c0750de2` (`Merge pull request #233 from RashRosh/slice/wholesale-price`).
+- **Merged-main CI on `6d121b4`:** `KAIDA verify` `45884779691` PASS, `CodeQL` `45884779613` PASS.
+- **Recently closed work:**
+  - `S-WHOLESALE` slice 1 («Оптовая цена рядом с розницей», item 15) — CLOSED at `v0.0.94-wholesale-price` (PR #231 contract + PR #233 implementation; Controller PASS WITH NOTE; PO visual acceptance 2026-11-26 on 390×844 mobile screenshots).
+  - Test-only E2E maintenance PR #234 (`b98ab4b`, merged-main CI `45878614280` / `45878614302` PASS) — closed Issue #224 (`seller-text-switch-on.spec.ts` alert locator) and fixed sub-pixel touch-target flake (`offer-favourites.spec.ts`).
+  - Maintenance PR #232 (`25f2a46`) — rounded search card photo geometry check.
+  - CJM contract-review process PR #229 (`26981b6`) — recorded 24.11 PO decisions and §3.1 CJM review rule.
+  - `v0.0.93-route-https-223` (PR #225, Issue #223), `v0.0.92-otp-session-221` (PR #222, Issue #221), `v0.0.91-windows-e2e-219` (PR #220), `v0.0.90-design-nearby` (D5), `v0.0.89-design-favourites` (D4), `v0.0.88-design-offer` (D3), `v0.0.87-design-search` (D2).
 
-- `main` / checkpoint `v0.0.91-windows-e2e-219` → `2ccaacc1abcc974049c4bfb5df75e42b4b57826f`.
-- Merged-main CI on this SHA: KAIDA verify 43243565884, CodeQL 43243565727, OpenSSF Scorecard 43243565916 — success.
-- Previous product checkpoint `v0.0.90-design-nearby` → `7cfed6fcd40496a5e4505b7089a2db4125dbbdcd` remains unchanged.
+## Current task & next action
 
-## Last completed / verification
+- **Current task:** none (no next product slice is scheduled or authorized).
+- **Next action:** await PO choice of the next slice before preparing a Slice Contract or touching product code.
+- **Main open candidate PRs / directions:**
+  - **D6 Search Home (B02):** contract PR #215 and implementation PR #216 (both `CONFLICTING` with `main`, need rebase/reconciliation before closure).
+  - **S-WHOLESALE slice 2 («Только опт» + sorting):** next step of 24.11 wholesale decision (requires `mandatory-offer-price` and `search-sort-rev3` contract revision).
+  - **OSRM road distance pilot:** draft PR #230 (`slice/road-distance-osrm`), pending browser acceptance on live stand and graph-build peak memory measurement.
+  - **Deferred UI polish (PO 2026-11-26):** old seller no-photo placeholder logo (`kaida.css`) and unstyled favourites error rows in `SearchScreen.tsx` (lines 553–555) — deferred to design migration.
+  - **Other open docs PRs / issues:** CJM 24.11 follow-ups (visit outcome, unified saved list, minimal seller return signal), B08 polish Issues #226 / #227, stale docs PRs (#186, #187, #203–#206, #218).
 
-- Windows E2E maintenance #219 merged as PR #220. Final PR head `3aac4c32396c87f7658720187e2aedf901a3316a`; branch verify 43233655905 passed. Main checkpoint CI above passed.
-- On the #219 executable commit `e9e4b36e71f27068996768b5f14cae67fb341c15`: lint/typecheck/build, unit 731/731, integration 435/435, full E2E 357 passed / 87 existing skips, 0 failures. Detailed bounded evidence: [windows-e2e-219.md](../reviews/windows-e2e-219.md).
-- PR #215 head `99bb0f658eb35ca402dfbc031882bfec8d1f2e27` contains the approved contract and D5/D6 plan updates on the verified main. The original #216 implementation and E2E patch is preserved and published above it; confirm checks on the latest heads.
+## Local constraints
 
-## Next action
-
-- Confirm full branch CI, CodeQL and dependency review are green on the latest #215 and #216 heads. Then request PO visual acceptance of the three 360px / 2x screenshots against live B02 and the manual flow below. Do not merge or tag before explicit PO approval.
-- D6 E2E seams: `design-search-home` covers the three B02 visual states and no initial search; `search-home-last-state` and `first-entry-correction` cover unchanged home/return behavior; `ux1a-app-shell` covers unchanged root and navigation behavior. These do not replace PO visual acceptance against B02.
-- After green final-head CI, request PO visual acceptance of the three 360px / 2x screenshots and manual flow in the D6 contract. Do not merge or tag until PO approval.
-
-## Evidence / local constraints
-
-- Local B02 source evidence remains untracked by design: `Main.dc.html`, version `1794254812-c359`. `/welcome` B01 and the other screens listed in the D6 contract remain out of scope.
-- Keep `tmp/`, `scripts/`, `.vscode/`, local evidence, and personal review files unstaged. Integration must run after `pnpm db:test:prepare` and before E2E; no DB-sharing parallel tests.
+- Cloud container: start `docker compose up -d --wait`, then `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:test:prepare`; E2E runs on production build (`pnpm build`, then `pnpm test:e2e`).
+- Never commit personal/untracked `tmp/`, `scripts/`, `.vscode/`, `docs/reviews/localization-foundation-kk-review.docx`, or model identifiers.
+- No product implementation, commit, push, PR, or tag without PO instruction; preserve all closed contracts unless explicitly revised (§4).

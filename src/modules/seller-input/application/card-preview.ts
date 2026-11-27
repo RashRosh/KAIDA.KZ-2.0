@@ -104,6 +104,7 @@ export async function buildCardPreview(
       priceAmount: row.priceAmount,
       priceUnitCode: unit === null ? null : unit.code,
       priceUnitValue: unit !== null && unit.code === 'other' ? unit.value : null,
+      wholesale: unit === null ? null : input.wholesale,
       sellerComment: input.sellerComment,
       coverPhotoId: input.photoIds[0] ?? null,
       locationLatitude: where.latitude,

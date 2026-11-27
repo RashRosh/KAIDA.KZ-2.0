@@ -1,6 +1,7 @@
 import type { OfferStatus } from '../db/offers.table';
 import type { PriceUnit } from '../price-unit/price-unit';
 import type { Pack } from '../pack/pack';
+import type { Wholesale } from '../wholesale/wholesale';
 import type { SellerRemovalView } from '../../moderation/contracts/moderation.contract';
 import type { ActualityView } from '../actuality/actuality';
 
@@ -14,6 +15,8 @@ export type SellerOfferView = {
   priceOwn: boolean;
   pack: Pack | null;
   packLabel: string | null;
+  // wholesale-price: the card's wholesale line (batch = the buyer's text); null = none.
+  wholesale: (Wholesale & { batch: string }) | null;
   location: { id: string; name: string; addressText: string };
   // unit is the display label in the requested locale; unitChoice is the stored structured value for edit forms.
   price: { amount: string; currency: 'KZT'; unit: string | null; unitChoice: PriceUnit | null } | null;

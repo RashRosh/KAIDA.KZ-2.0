@@ -3,6 +3,7 @@ import type { LocationType } from '../../locations/contracts/location.contract';
 import type { OfferStatus } from '../../offers/db/offers.table';
 import { priceUnitInputSchema, type PriceUnit } from '../../offers/price-unit/price-unit';
 import type { Pack } from '../../offers/pack/pack';
+import type { Wholesale } from '../../offers/wholesale/wholesale';
 import type { SellerChangeAction } from '../db/seller-change-items.table';
 import type { SellerChangeSetStatus } from '../db/seller-change-sets.table';
 
@@ -92,6 +93,9 @@ export type SellerChangeSetItemView = {
   priceOwn: boolean;
   pack: Pack | null;
   packLabel: string | null;
+  // wholesale-price: the card's wholesale line in this item (batch = the buyer's text), and before a proposed update.
+  wholesale: (Wholesale & { batch: string }) | null;
+  previousWholesale?: (Wholesale & { batch: string }) | null;
   // Proposed updates only: the target Offer's price before this change.
   previousPriceAmount?: string;
   priceFromCard?: boolean;

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { packInputSchema } from '../../offers/pack/pack';
+import { wholesaleInputSchema } from '../../offers/wholesale/wholesale';
 import {
   CARD_POINT_LIMIT,
   cardCommentSchema,
@@ -22,6 +23,8 @@ const previewFields = {
   pack: packInputSchema.nullable(),
   sellerComment: cardCommentSchema,
   photoIds: cardPhotoIdsSchema,
+  // wholesale-price: the editor's wholesale line; omitted or null = none (shown only with a unit, like publication)
+  wholesale: wholesaleInputSchema.nullable().optional().transform((value) => value ?? null),
 };
 
 export const cardPreviewBodySchema = z.discriminatedUnion('kind', [

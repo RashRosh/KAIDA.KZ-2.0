@@ -606,7 +606,7 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
           ) : (
             <div className="card" style={{ gap: 0, padding: '0 12px' }}>
               <button type="button" className="li" onClick={() => void confirmActuality()} disabled={reconfirm.busy} style={{ background: 'transparent', border: 0 }}>
-                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t('actuality.confirm')}</div></div>
+                <Ic name="check" className="pt" /><div className="mid"><div className="ts">{t(card.lead.wholesale ? 'actuality.confirmBoth' : 'actuality.confirm')}</div></div>
               </button>
               <button type="button" className="li" onClick={() => go(`edit=${card.cardId}`)} style={{ background: 'transparent', border: 0, borderTop: '1px solid var(--line)' }}>
                 <Ic name="pencil" className="c2" /><div className="mid"><div className="ts">{t('cardScreen.edit')}</div></div>
@@ -654,7 +654,7 @@ function CardScreen({ card, seller, onClose, go, onRefresh }: { card: SellerCard
         {actualityStatus}
         {actuality && (
           <button type="button" className="btn btn-p w" onClick={() => void confirmActuality()} disabled={reconfirm.busy}>
-            <Ic name="check" className="sm" />{t('actuality.confirm')}
+            <Ic name="check" className="sm" />{t(card.lead.wholesale ? 'actuality.confirmBoth' : 'actuality.confirm')}
           </button>
         )}
         <div style={{ display: 'flex', gap: 8 }}>

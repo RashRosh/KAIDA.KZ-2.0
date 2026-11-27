@@ -5,6 +5,7 @@ import { sellers } from '../../sellers/db/sellers.table';
 import { locations } from '../../locations/db/locations.table';
 import type { PriceUnitCode } from '../price-unit/price-unit';
 import type { PackUnit } from '../pack/pack';
+import type { WholesaleContainer } from '../wholesale/wholesale';
 
 export type OfferStatus = 'active' | 'inactive';
 
@@ -27,6 +28,12 @@ export const offers = pgTable('offers', {
   priceCurrency: char('price_currency', { length: 3 }),
   priceUnitCode: text('price_unit_code').$type<PriceUnitCode>(),
   priceUnitValue: text('price_unit_value'),
+  // wholesale-price: the optional wholesale line, shared by the card like the unit and the pack (all null = none).
+  wholesalePriceAmount: numeric('wholesale_price_amount'),
+  wholesaleBatchCount: integer('wholesale_batch_count'),
+  wholesaleContainer: text('wholesale_container').$type<WholesaleContainer>(),
+  wholesaleContainerText: text('wholesale_container_text'),
+  wholesalePerContainer: numeric('wholesale_per_container'),
   sellerComment: text('seller_comment'),
   sellerCommentVersion: integer('seller_comment_version').notNull().default(1),
   status: text('status').$type<OfferStatus>().notNull(),
@@ -54,4 +61,18 @@ export const offers = pgTable('offers', {
     ${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'
   )`),
   check('offers_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
+  check('offers_wholesale_valid', sql`(
+    ${table.wholesalePriceAmount} IS NULL AND ${table.wholesaleBatchCount} IS NULL AND ${table.wholesaleContainer} IS NULL
+    AND ${table.wholesaleContainerText} IS NULL AND ${table.wholesalePerContainer} IS NULL
+  ) OR (
+    ${table.wholesalePriceAmount} IS NOT NULL AND ${table.wholesaleBatchCount} IS NOT NULL AND ${table.wholesaleContainer} IS NOT NULL
+    AND ${table.wholesalePriceAmount} > 0 AND ${table.wholesalePriceAmount} NOT IN ('NaN'::numeric, 'Infinity'::numeric)
+    AND ${table.wholesaleBatchCount} BETWEEN 1 AND 9999
+    AND ${table.wholesaleContainer} IN ('box', 'bag', 'carton', 'net', 'package', 'unit', 'other')
+    AND (${table.wholesaleContainer} = 'other') = (${table.wholesaleContainerText} IS NOT NULL)
+    AND (${table.wholesaleContainerText} IS NULL OR (${table.wholesaleContainerText} = btrim(${table.wholesaleContainerText}) AND char_length(${table.wholesaleContainerText}) BETWEEN 1 AND 20))
+    AND (${table.wholesaleContainer} = 'unit') = (${table.wholesalePerContainer} IS NULL)
+    AND (${table.wholesalePerContainer} IS NULL OR ${table.wholesalePerContainer} > 0)
+    AND ${table.priceUnitCode} IS NOT NULL
+  )`),
 ]);

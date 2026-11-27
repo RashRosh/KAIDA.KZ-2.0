@@ -48,13 +48,17 @@ test('B03/B04 source parity: four cards, real age labels, one favourites load, 4
     const heart=card.querySelector<HTMLElement>('[data-testid="favourite-heart"]')!;
     const photo=heart.parentElement!;
     const hb=heart.getBoundingClientRect(), pb=photo.getBoundingClientRect();
-    return {photo:[pb.width,pb.height],heartTop:hb.top-pb.top,heartRight:pb.right-hb.right,
+    // Rounded to whole pixels: the layout may land a fraction of a pixel off (104.00001), which is not a visual change.
+    return {photo:[Math.round(pb.width),Math.round(pb.height)],heartTop:Math.round(hb.top-pb.top),heartRight:Math.round(pb.right-hb.right),
       price:getComputedStyle(card.querySelector('.pr')!).fontSize,
       pointWeight:getComputedStyle(card.querySelector('[data-testid="card-point"]')!).fontWeight,
       addressSize:getComputedStyle(card.querySelector('[data-testid="card-place"]')!).fontSize,
       radius:getComputedStyle(card).borderRadius};
   });
   expect(metrics).toEqual({photo:[104,104],heartTop:0,heartRight:0,price:'22px',pointWeight:'500',addressSize:'13px',radius:'14px'});
+  const distanceNote = page.getByText('Расстояния указаны по прямой', { exact: true });
+  await expect(distanceNote).toHaveCount(1);
+  await expect(distanceNote).toBeVisible();
   await expect(page.getByRole('article').first().getByRole('link',{name:/Маршрут до/})).toHaveText('1,2 км');
   await page.evaluate(()=>document.fonts.ready);
   await page.screenshot({path:info.outputPath('B03-normal-360.png'),animations:'disabled'});
@@ -71,6 +75,8 @@ test('B03/B04 source parity: four cards, real age labels, one favourites load, 4
   expect(await trigger.locator('span').first().evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
   expect((await notice.boundingBox())!.y).toBeLessThan((await trigger.boundingBox())!.y);
   await expect(page.getByRole('article')).toHaveCount(2);
+  await expect(page.getByRole('article').first().getByRole('link', { name: /Маршрут до/ })).toHaveText('Маршрут');
+  await expect(distanceNote).toHaveCount(0);
   const navBox=(await page.getByRole('navigation').boundingBox())!;
   expect(navBox.y+navBox.height).toBeLessThanOrEqual(1060);
   expect(navBox.y).toBeGreaterThanOrEqual(990);

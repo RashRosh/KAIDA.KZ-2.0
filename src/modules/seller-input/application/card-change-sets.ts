@@ -5,6 +5,7 @@ import { resolveProduct } from '../../catalog/application/resolve-product';
 import { findCatalogProductById } from '../../catalog/infrastructure/products.repository';
 import { findOfferPhotoIdsByOffer, findOwnedOfferForManagement, lockCardOffers } from '../../offers/infrastructure/offers.repository';
 import { samePack, type Pack } from '../../offers/pack/pack';
+import { sameWholesale, type Wholesale } from '../../offers/wholesale/wholesale';
 import { DraftNotFoundError, findOwnedDraft } from '../../offers/drafts/offer-drafts';
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
@@ -13,6 +14,7 @@ import {
   CardNotFoundError,
   CardPointAlreadyAddedError,
   CommonPriceMissingError,
+  WholesaleReviewRequiredError,
   type CardCreateInput,
   type CardUpdateInput,
   type PointPriceInput,
@@ -98,7 +100,7 @@ export async function createCardChangeSet(
       const own = point.ownPrice !== undefined && !sameAmount(point.ownPrice, input.price);
       const item = await createChangeItem(tx, {
         changeSetId: changeSet.id,
-        card: { title: input.title, productId, cardId, priceOwn: own, pack: input.pack },
+        card: { title: input.title, productId, cardId, priceOwn: own, pack: input.pack, wholesale: input.wholesale },
         locationId: point.locationId,
         priceAmount: own ? point.ownPrice! : input.price,
         priceCurrency: 'KZT',
@@ -116,9 +118,10 @@ type CardOffer = Awaited<ReturnType<typeof lockCardOffers>>[number];
 function sharedFieldsUnchanged(
   offer: CardOffer,
   photoIds: string[],
-  next: { title: string; productId: string | null; unit: PriceUnit; pack: Pack | null; sellerComment: string | null; photoIds: string[] },
+  next: { title: string; productId: string | null; unit: PriceUnit; pack: Pack | null; wholesale: Wholesale | null; sellerComment: string | null; photoIds: string[] },
 ) {
   return offer.title === next.title
+    && sameWholesale(offer.wholesale, next.wholesale)
     && offer.productId === next.productId
     && samePriceUnit(offer.priceUnit, next.unit)
     && samePack(offer.pack, next.pack)
@@ -151,7 +154,12 @@ export async function updateCardChangeSet(
     }
     await assertPhotosOwnedBy(tx, input.photoIds, ownerUserId);
     const productId = await catalogLink(tx, input.title, input.productId);
-    const next = { ...input, productId };
+    // wholesale-price §3.4: omitted keeps the card's wholesale, but not across a change of the unit or the pack.
+    const current = cardOffers[0]!;
+    const unitOrPackChanged = !samePriceUnit(current.priceUnit, input.unit) || !samePack(current.pack, input.pack);
+    if (input.wholesale === undefined && current.wholesale !== null && unitOrPackChanged) throw new WholesaleReviewRequiredError();
+    const wholesale = input.wholesale === undefined ? current.wholesale : input.wholesale;
+    const next = { ...input, productId, wholesale };
 
     const photosByOffer = await findOfferPhotoIdsByOffer(tx, cardOffers.map((offer) => offer.id));
     const planned = cardOffers.map((offer) => {
@@ -166,7 +174,7 @@ export async function updateCardChangeSet(
     if (input.addPoints.length === 0 && planned.every((item) => item.unchanged)) throw new OfferUpdateNoChangesError();
 
     const changeSet = await createChangeSet(tx, seller.id);
-    const shared = { title: input.title, productId, cardId, pack: input.pack };
+    const shared = { title: input.title, productId, cardId, pack: input.pack, wholesale };
     for (const { offer, priceAmount, priceOwn } of planned) {
       const item = await createOfferManagementChangeItem(tx, {
         changeSetId: changeSet.id,
@@ -236,7 +244,7 @@ export async function pointPriceChangeSet(
     await createOfferManagementChangeItem(tx, {
       changeSetId: changeSet.id,
       action: 'update_offer',
-      card: { title: offer.title, productId: offer.productId, cardId: offer.cardId, priceOwn, pack: offer.pack },
+      card: { title: offer.title, productId: offer.productId, cardId: offer.cardId, priceOwn, pack: offer.pack, wholesale: offer.wholesale },
       locationId: offer.locationId,
       priceAmount,
       priceCurrency: 'KZT',

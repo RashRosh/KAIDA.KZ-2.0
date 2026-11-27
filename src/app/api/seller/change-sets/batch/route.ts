@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
 import { createBatchSellerChangeSet } from '@/modules/seller-input/application/create-batch-seller-change-set';
-import { CardSharedFieldsError } from '@/modules/seller-input/contracts/seller-card.contract';
+import { CardSharedFieldsError, WholesaleReviewRequiredError } from '@/modules/seller-input/contracts/seller-card.contract';
 import {
   BatchOfferConflictError,
   LocationNotFoundError,
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       || error instanceof OfferPriceRequiredError
       || error instanceof BatchOfferConflictError
       || error instanceof CardSharedFieldsError
+      || error instanceof WholesaleReviewRequiredError
     ) {
       return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: 409, headers: noStore });
     }
