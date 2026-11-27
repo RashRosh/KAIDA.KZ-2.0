@@ -1,6 +1,6 @@
 # S-WHOLESALE (slice 2): «Только опт» — Slice Contract
 
-**Статус: APPROVED — PO, 26.11.2026** (решения по 3 открытым вопросам делегированы PO с критерием максимального комфорта для большинства пользователей; уточнение по сортировке: оптовая цена не участвует в сортировке). Основание: [CJM](../../product/CUSTOMER_JOURNEY_MAP.md#решения-от-24112026), [реестр влияния §1](../../reviews/CJM_DECISIONS_2026-11-24_CONTRACT_IMPACT.md#1-опт--вторая-строка-той-же-карточки) и закрытый [slice 1](../wholesale-price/SLICE_CONTRACT.md) (`v0.0.94-wholesale-price`).
+**Статус: CLOSED — PO, 27.11.2026** (`v0.0.96-wholesale-only`, merge `aa9493a`). Решения по 3 открытым вопросам делегированы PO 26.11.2026 с критерием максимального комфорта для большинства пользователей; уточнение по сортировке: оптовая цена не участвует в сортировке; уточнение PO 27.11.2026 на визуальной приёмке: убрана строка количества фото на экране проверки перед публикацией и выровнена сводная таблица `.kv`. Основание: [CJM](../../product/CUSTOMER_JOURNEY_MAP.md#решения-от-24112026), [реестр влияния §1](../../reviews/CJM_DECISIONS_2026-11-24_CONTRACT_IMPACT.md#1-опт--вторая-строка-той-же-карточки) и закрытый [slice 1](../wholesale-price/SLICE_CONTRACT.md) (`v0.0.94-wholesale-price`).
 
 ## 1. Пользовательская задача
 
@@ -98,3 +98,34 @@
 3. Покупатель включает сортировку «По цене» (дешевле / дороже): розничные предложения выше «только опт».
 4. Продавец открывает карточку на витрине и жмёт «Товар есть, цена та же» — бейдж «Сегодня», опт сохранён.
 5. Продавец выключает «Только оптом», вводит розничную цену `600 ₸`: редактор просит заполнить пересчёт для мешка; после ввода `20 кг` карточка публикуется как смешанная.
+
+## 10. Закрытие и свидетельства (27.11.2026)
+
+- **PR / SHA / Tag:**
+  - Реализация и контракт: PR #237 (`slice/wholesale-only`, final head `ab2db17284457b3d74b7561e7302e5e38c2544f4`), merged в `main` `aa9493afacbbb3d0bc2fc7bb084e41c3b9c331b1`.
+  - Аннотированный checkpoint-тег: `v0.0.96-wholesale-only` → `aa9493afacbbb3d0bc2fc7bb084e41c3b9c331b1`.
+- **Automated CI:**
+  - Branch CI (`ab2db17`): `KAIDA verify` PR `45999751686` PASS, push `45999740910` PASS, `CodeQL / Analyze JavaScript / TypeScript` `45999751633` PASS, `CodeQL` `140508673675` PASS, `Dependency review` `45999751700` PASS.
+  - Merged-main CI (`aa9493a`): `KAIDA verify` `46001171537` PASS, `CodeQL` `46001171574` PASS.
+- **KAIDA Controller:** `PASS` по всем 4 секциям (`Diff vs Slice Contract`, `Closed contracts`, `Risk proof`, `Gate verdict: APPROVED FOR MERGE` на `ab2db17` → `CHECKPOINT APPROVED` на `aa9493a` / `v0.0.96-wholesale-only`).
+- **Приёмка (разделение ролей):**
+  - **Выполнено агентом:** живой прогон всех 5 шагов §9 на production-сборке с PostgreSQL 18 в мобильном Chromium `360×780` (2x, RU) с фиксацией 6 скриншотов, unit (`794/794`), полная integration-сюита (`85/85` файлов, `445/445` тестов, включая негативные SQL-проверки `0033_wholesale_only.sql`), мобильный E2E (`wholesale-only.spec.ts`, `offer-photos.spec.ts`, `wholesale-price.spec.ts`, `seller-showcase-editor.spec.ts`).
+  - **Принято PO (27.11.2026):** визуальная приёмка шагов 1, 2/3, 2б, 4 и 5 по мобильным скриншотам; по замечанию PO на шаге 1б (экран проверки) выровнена сводная таблица `.kaida .kv` и полностью убрана строка количества фото на экране проверки (зафиксировано в §4, проверено новым мобильным скриншотом и зелёным `offer-photos.spec.ts`).
+  - **Не проверялось вручную:** физический телефон, десктоп и казахский UI (вне gate §18.5; ключи `kk` проверены unit-тестом).
+
+### SQL-запросы метрики
+
+```sql
+-- 1. Доля активных карточек «только опт» среди всех активных карточек
+SELECT
+  count(DISTINCT card_id) FILTER (WHERE price_amount IS NULL AND wholesale_price_amount IS NOT NULL) AS wholesale_only_cards,
+  count(DISTINCT card_id) FILTER (WHERE price_amount IS NOT NULL AND wholesale_price_amount IS NOT NULL) AS mixed_wholesale_cards,
+  count(DISTINCT card_id) AS active_cards,
+  round(
+    100.0 * count(DISTINCT card_id) FILTER (WHERE price_amount IS NULL AND wholesale_price_amount IS NOT NULL)
+    / NULLIF(count(DISTINCT card_id), 0),
+    2
+  ) AS wholesale_only_share_pct
+FROM offers
+WHERE status = 'active';
+```
