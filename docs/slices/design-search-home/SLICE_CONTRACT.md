@@ -70,3 +70,19 @@
 Targeted: `search-home-last-state` (главная против восстановления), `search-by-product` (подсказки), D0-события, новый `design-search-home` spec со скриншотами трёх состояний на 360 px 2x. Затем полный unit/integration/E2E, lint/types/build, branch CI, diff audit.
 
 PO принимает сценарий: новая вкладка → главная (сравнить с B02) → ввести «мё» → подсказки → выбрать → выдача → «Поиск» в навигации возвращает выдачу, не главную → новая вкладка → пустой submit → ошибка → чип → выдача. Проверка агента не является manual acceptance PO. До приёмки и поручения PO нет merge/tag; следующий slice не начинается.
+
+## Закрытие и свидетельства (26.11.2026)
+
+- **Статус: CLOSED — PO, 26.11.2026** (checkpoint `v0.0.95-design-search-home`).
+- **PR / SHA / Tag:**
+  - Контракт: PR #215 (`docs/design-search-home-contract`, head `b791ace`) merged `54ddffe84af8a2d5134a82bfd53ee0b32b4e3fa0`.
+  - Реализация: PR #216 (`slice/design-search-home`, head `03ce7d7`) merged `4ae55430e7eb9fdc2734b521d8026973c027aab9`.
+  - Аннотированный checkpoint-тег: `v0.0.95-design-search-home` → `4ae55430e7eb9fdc2734b521d8026973c027aab9`.
+- **Automated CI:**
+  - Branch CI (`03ce7d7`): `KAIDA verify` push `45946714457` PASS, pull_request `45946720203` PASS, `CodeQL` `45946720187` PASS, `Dependency review` `45946720184` PASS.
+  - Merged-main CI (`4ae5543`): `KAIDA verify` `45947949585` PASS, `CodeQL` `45947949529` PASS.
+- **Приёмка (разделение ролей):**
+  - **Выполнено агентом:** локальная проверка `lint`, `typecheck`, `build` и 6 целевых E2E-наборов (35/35 PASS, включая `design-search-home`, `search-home-last-state`, `first-entry-correction`, `ux1a-app-shell`, `design-search-results`, `wholesale-price`); сняты реальные скриншоты `360×780` 2x (`B02-ST01`, `B02-ST02`, `B02-ST05`).
+  - **Принято PO (26.11.2026):** визуальная приёмка по реальным мобильным скриншотам `360×780` 2x («D6 принимаю»).
+  - **Не проверялось вручную:** физический телефон, десктоп и казахский UI (вне gate §18.5).
+
