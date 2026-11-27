@@ -8,7 +8,14 @@ import { ReportEvidence } from '../../_components/ReportEvidence';
 import { Bar, Phone, Radio, SkeletonRows } from '../../seller/_kaida/ui';
 import '../../_components/report.css';
 
-const REASONS:Record<ReportReason,string>={price_mismatch:'Цена не совпадает',photo_mismatch:'Фото не соответствует товару',description_wrong:'Неверное описание',other:'Другое'};
+const REASONS:Record<ReportReason,string>={
+  out_of_stock:'Товара не было',
+  price_mismatch:'Цена другая',
+  photo_mismatch:'Не как на фото',
+  point_closed:'Точка закрыта',
+  description_wrong:'Неверное описание',
+  other:'Другое',
+};
 const REMOVALS:Record<RemovalReason,string>={prohibited_item:'Товар нельзя размещать',photo_mismatch:'Фото не соответствует товару',contacts_or_ads:'Контакты или реклама',other:'Другое'};
 const OUTCOMES:Record<ResolveReport['disposition'],string>={removed:'Карточка снята',already_removed:'Карточка уже была снята',returned:'Карточка возвращена',no_action:'Без снятия карточки'};
 const time=(v:string)=>new Intl.DateTimeFormat('ru-KZ',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(v));
@@ -65,13 +72,16 @@ export function OperatorReports() {
         <div className="tabs"><button type="button" className="btn btn-g" aria-pressed={tab==='open'} onClick={()=>{setPage(null);setTab('open');}}>Открытые · {page?.openCount ?? '…'}</button><button type="button" className="btn btn-g" aria-pressed={tab==='closed'} onClick={()=>{setPage(null);setTab('closed');}}>Закрытые</button></div>
         <p className="c">Сначала самые ранние</p>
         {loading?<SkeletonRows/>:page?.rows.length===0?<p className="t">Жалоб нет</p>:page?.rows.map(row=><article key={row.id} className="report-panel">
-          <span className="c">{row.closedAt?'Закрыта':'Открыта'} · {time(row.at)}</span><ReportEvidence evidence={row.evidence} reportId={row.id} compact/>
+          <span className="c">{row.closedAt?'Закрыта':'Открыта'} · {time(row.at)}</span>
+          {!row.isVerified && <span className="report-unverified" data-testid="report-unverified-badge">Без входа · только на проверку</span>}
+          <ReportEvidence evidence={row.evidence} reportId={row.id} compact/>
           <b>{REASONS[row.reason]}</b>{row.disposition && <p>{OUTCOMES[row.disposition]}</p>}
           <button type="button" className="btn btn-o w" disabled={busy} onClick={()=>void open(row.id)}>Рассмотреть</button>
         </article>)}
         {page?.hasMore && <button type="button" className="btn btn-o w" disabled={busy} onClick={()=>void more()}>Показать ещё</button>}
       </>:<>
         <p className="c">{report.closedAt?'Закрыта':'Открыта'} · {REASONS[report.reason]} · {time(report.at)}</p>
+        {!report.isVerified && <span className="report-unverified" data-testid="report-unverified-badge">Без входа · только на проверку</span>}
         {report.closedAt && <section className="report-panel" aria-label="Исторический итог"><h2 className="h2">{OUTCOMES[report.disposition!]}</h2><p className="c">Итог рассмотрения на {time(report.closedAt)}</p>{report.rationale && <p className="t">{report.rationale}</p>}<p className="c">Возврат или повторная публикация не открывают жалобу заново.</p></section>}
         <div className="report-compare">
           <section className="report-panel" aria-label="При отправке"><b>При отправке · {time(report.at)}</b><ReportEvidence evidence={report.evidence} reportId={report.id}/></section>

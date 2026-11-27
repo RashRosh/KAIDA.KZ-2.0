@@ -54,7 +54,7 @@ export default defineConfig({
       IDENTITY_OTP_HMAC_SECRET_HEX: identityTestSecret,
       IDENTITY_COOKIE_SECURE: 'false',
       NEXT_TELEMETRY_DISABLED: '1',
-      OPERATOR_PHONES: '+77000038001,+77000039001,+77000991303',
+      OPERATOR_PHONES: '+77000038001,+77000039001,+77000991303,+77000991403',
       // S15C / D0: events written by E2E runs are test data, never organic demand.
       SEARCH_EVENTS_ORIGIN: 'test',
       BUYER_REPORTS_LOCAL_TESTING: '1',

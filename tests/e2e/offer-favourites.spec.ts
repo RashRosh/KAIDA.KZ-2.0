@@ -152,33 +152,40 @@ test('detail actions retain touch targets and wrap at narrow widths and enlarged
   test.skip(info.project.name !== 'mobile', 'Approved mobile RU boundary');
   await page.goto('/offers/' + seedIds.lambOffer);
   const heart = page.getByTestId('favourite-heart');
-  const report = page.getByRole('button', { name: 'Пожаловаться на карточку', exact: true });
+  const matched = page.getByRole('button', { name: 'Всё совпало', exact: true });
+  const problem = page.getByRole('button', { name: 'Есть проблема', exact: true });
   const tracking = page.getByRole('button', { name: 'Отслеживать товар', exact: true });
   await expect(heart).toHaveAccessibleName('Добавить в избранное');
   await expect(tracking).toBeEnabled();
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 844 });
-    for (const action of [heart, report, tracking]) {
+    for (const action of [heart, matched, problem, tracking]) {
       const box = await action.boundingBox();
       // Rounded to whole pixels: layout can land a fraction of a pixel off (43.99994), which is not a touch-target regression.
       expect(Math.round(box!.width)).toBeGreaterThanOrEqual(44);
       expect(Math.round(box!.height)).toBeGreaterThanOrEqual(44);
     }
-    const layout = await page.getByTestId('offer-links').evaluate(el => {
+    const layout = await page.getByTestId('visit-outcome-section').evaluate(el => {
       const boxes = [...el.querySelectorAll('button')].map(button => button.getBoundingClientRect());
-      return { overflow: el.scrollWidth > el.clientWidth, wraps: boxes[1]!.top > boxes[0]!.top };
+      return { overflow: el.scrollWidth > el.clientWidth, stacks: boxes[1]!.top >= boxes[0]!.bottom };
     });
     expect(layout.overflow).toBe(false);
-    if (width === 320) expect(layout.wraps).toBe(true);
+    if (width === 320) expect(layout.stacks).toBe(true);
   }
-  await page.addStyleTag({ content: '[data-testid="offer-links"] button{font-size:28px;line-height:40px}' });
-  const enlarged = await page.getByTestId('offer-links').evaluate(el => ({ overflow: el.scrollWidth > el.clientWidth, buttons: [...el.querySelectorAll('button')].map(button => ({height:button.getBoundingClientRect().height, font:parseFloat(getComputedStyle(button).fontSize)})) }));
+  await page.addStyleTag({ content: '[data-testid="visit-outcome-section"] button,[data-testid="offer-links"] button{font-size:28px;line-height:40px}' });
+  const enlarged = await page.evaluate(() => {
+    const sections = ['visit-outcome-section', 'offer-links'].map(id => document.querySelector(`[data-testid="${id}"]`)!);
+    return {
+      overflow: sections.some(el => el.scrollWidth > el.clientWidth),
+      buttons: sections.flatMap(el => [...el.querySelectorAll('button')].map(button => ({ height: button.getBoundingClientRect().height, font: parseFloat(getComputedStyle(button).fontSize) }))),
+    };
+  });
   expect(enlarged.overflow).toBe(false);
   for (const action of enlarged.buttons) { expect(Math.round(action.height)).toBeGreaterThanOrEqual(44); expect(action.font).toBe(28); }
-  await report.click();
-  await expect(page.getByRole('heading', { name: 'Пожаловаться на карточку', exact: true })).toBeVisible();
+  await problem.click();
+  await expect(page.getByRole('heading', { name: 'Есть проблема', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Назад', exact: true }).click();
-  await expect(report).toBeFocused();
+  await expect(problem).toBeFocused();
   await heart.click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: 'Закрыть', exact: true }).click();

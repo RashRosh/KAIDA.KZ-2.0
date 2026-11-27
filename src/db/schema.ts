@@ -28,6 +28,7 @@ export { addressDirectoryImports } from '../modules/address-directory/db/address
 export { addressDirectoryEntries } from '../modules/address-directory/db/address-directory-entries.table';
 export { searchEvents } from '../modules/search-events/db/search-events.table';
 export { offerReports, offerReportPhotos, offerReportReceipts } from '../modules/moderation/db/offer-reports.table';
+export { visitOutcomes, visitOutcomeReceipts } from '../modules/moderation/db/visit-outcomes.table';
 export { otpSourceEvents, otpSourceMaintenance } from '../modules/identity/db/otp-source.table';
 
 export { buyerOfferFavourites } from '../modules/favourites/db/favourites.table';

@@ -81,7 +81,8 @@ test('B08.ST01–ST03: top bar, gallery 1 / 3, price, freshness, point card, con
   await expect(page.locator('#offer-title')).toHaveText(TITLE);
   await expect(page.getByText('1 / 3')).toBeVisible();
   await expect(page.getByText('От продавца')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Пожаловаться на карточку' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Всё совпало' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Есть проблема' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Построить маршрут|Маршрут до/ })).toBeVisible();
   await expect(page.getByTestId('opening-hours').first()).toBeVisible();
   const m = await page.evaluate(() => {

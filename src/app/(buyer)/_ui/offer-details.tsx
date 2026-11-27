@@ -150,6 +150,14 @@ function contactName(label: 'Позвонить' | 'WhatsApp' | 'Telegram', t: R
   return label === 'Позвонить' ? t('offer.callSeller') : t('offer.writeWhatsApp');
 }
 
+export function markVisitSignal(offerId: string) {
+  try { window.sessionStorage.setItem(`kaida:visit-signal:${offerId}`, '1'); } catch {}
+}
+
+export function readVisitSignal(offerId: string): boolean {
+  try { return window.sessionStorage.getItem(`kaida:visit-signal:${offerId}`) === '1'; } catch { return false; }
+}
+
 // Only the point's verified contacts; none at all → no section.
 function Contacts({ offer }: { offer: BuyerOfferPage }) {
   const { t } = useI18n();
@@ -165,6 +173,7 @@ function Contacts({ offer }: { offer: BuyerOfferPage }) {
             className={styles.lineButton}
             href={action.href}
             aria-label={contactName(action.label, t)}
+            onClick={() => markVisitSignal(offer.id)}
             {...(action.label !== 'Позвонить' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
           >
             <SearchIcon name={action.label === 'Позвонить' ? 'phone' : action.label === 'WhatsApp' ? 'whatsapp' : 'telegram'} />
@@ -180,7 +189,7 @@ export function OfferRoute({ offer, className }: { offer: BuyerOfferPage; classN
   const { t } = useI18n();
   if (!offer.routeAvailable) return null;
   return (
-    <a className={`${styles.primary} ${className ?? ''}`} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" aria-label={t('offer.routeTo', { place: offer.location.name })}>
+    <a className={`${styles.primary} ${className ?? ''}`} href={`/api/offers/${offer.id}/route`} target="_blank" rel="noopener noreferrer" onClick={() => markVisitSignal(offer.id)} aria-label={t('offer.routeTo', { place: offer.location.name })}>
       <SearchIcon name="route" />{t('offer.buildRoute')}
     </a>
   );

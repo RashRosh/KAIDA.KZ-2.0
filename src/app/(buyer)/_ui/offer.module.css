@@ -91,6 +91,21 @@
 .link svg { width:20px; height:20px; }
 .alert { margin:0; font:400 0.875rem/1.25rem var(--sans); color:var(--danger); }
 
+/* CJM 24.11 #2: B08 visit-outcome two-button block; stacks cleanly at narrow width / 200% text (§18.4). */
+.outcomeWrap { container-type:inline-size; display:flex; flex-direction:column; gap:8px; }
+.outcomeButtons { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+.outcomeBtn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 12px; border:1px solid var(--line-control); border-radius:14px; background:var(--surface); color:var(--ink); font:500 0.875rem/1.25rem var(--sans); text-align:center; cursor:pointer; overflow-wrap:anywhere; }
+.outcomeBtn svg { flex:none; width:20px; height:20px; color:var(--ink2); }
+.outcomeBtn[data-kind='matched'] svg { color:var(--success); }
+.outcomeBtn[disabled] { opacity:.6; cursor:default; }
+.outcomeDone { display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--sunken); color:var(--ink); font:500 0.875rem/1.25rem var(--sans); }
+.outcomeDone svg { flex:none; width:20px; height:20px; margin-top:1px; color:var(--success); }
+.outcomeDone > div { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+@container (max-width: 19.5em) {
+  .outcomeButtons { grid-template-columns:1fr; }
+  .outcomeBtn { justify-content:flex-start; text-align:left; padding:10px 14px; }
+}
+
 /* sticky route */
 .sticky { flex:none; display:flex; gap:8px; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:var(--surface); }
 .primary { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:52px; padding:8px 18px; border:1px solid transparent; border-radius:14px; background:var(--primary); color:var(--on-primary); font:500 0.9375rem/1.25rem var(--sans); text-decoration:none; cursor:pointer; }
@@ -115,17 +130,17 @@
 .errorNotice .secondary { align-self:flex-start; margin-left:34px; }
 .skeleton { display:block; border-radius:14px; background:var(--sunken); }
 
-.screen :is(.iconButton,.photoNav,.secondary,.heart,.lineButton,.link,.primary,.inlineLink):focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+.screen :is(.iconButton,.photoNav,.secondary,.heart,.lineButton,.link,.primary,.inlineLink,.outcomeBtn):focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
 @media (hover:hover) and (pointer:fine) {
-  .iconButton:hover, .secondary:hover, .lineButton:hover { background:var(--sunken); }
+  .iconButton:hover, .secondary:hover, .lineButton:hover, .outcomeBtn:hover { background:var(--sunken); }
   .primary:hover { background:var(--primary-hover); }
 }
-.iconButton, .photoNav, .secondary, .heart, .lineButton, .primary { transition:background-color 100ms var(--ease-out),color 100ms var(--ease-out),transform 100ms var(--ease-out); }
+.iconButton, .photoNav, .secondary, .heart, .lineButton, .primary, .outcomeBtn { transition:background-color 100ms var(--ease-out),color 100ms var(--ease-out),transform 100ms var(--ease-out); }
 @media (prefers-reduced-motion:no-preference) {
-  :is(.iconButton,.photoNav,.secondary,.heart,.lineButton,.primary):not(:disabled):active { transform:scale(.97); }
+  :is(.iconButton,.photoNav,.secondary,.heart,.lineButton,.primary,.outcomeBtn):not(:disabled):active { transform:scale(.97); }
 }
 @media (prefers-reduced-motion:reduce) {
-  :is(.iconButton,.photoNav,.secondary,.heart,.lineButton,.primary) { transition:none; transform:none; }
+  :is(.iconButton,.photoNav,.secondary,.heart,.lineButton,.primary,.outcomeBtn) { transition:none; transform:none; }
   .heart[aria-busy='true']::after { animation:none; }
 }
 @keyframes spin { to { transform:rotate(360deg); } }

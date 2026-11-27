@@ -1,15 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BuyerReportFlow } from './BuyerReportFlow';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { safePreviewReturn } from '@/modules/offers/preview/preview-link';
 import type { BuyerOfferPage } from '@/modules/search/application/get-buyer-offer';
+import type { ReportEvidence as Evidence } from '@/modules/moderation/contracts/report.contract';
+import type { VisitOutcomeResult } from '@/modules/moderation/contracts/visit-outcome.contract';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { MessageKey } from '@/i18n/messages';
 import { Ic } from '../../../seller/_kaida/ui';
 import { BuyerScreen, cameFromList } from '../../_ui/buyer-ui';
-import { OfferDetails, OfferRoute } from '../../_ui/offer-details';
+import { OfferDetails, OfferRoute, readVisitSignal } from '../../_ui/offer-details';
 import { SearchIcon } from '../../_ui/SearchIcon';
 import styles from '../../_ui/offer.module.css';
 import { useFavourites } from '../../_ui/use-favourites';
@@ -82,7 +85,17 @@ function OfferTop({ returnTo }: { returnTo: string | null }) {
 
 export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOfferPage; reporting?: boolean }) {
   const [reportOpen, setReportOpen] = useState(false);
-  const { t } = useI18n();
+  const [outcomeBusy, setOutcomeBusy] = useState(false);
+  const [outcomeError, setOutcomeError] = useState<MessageKey | null>(null);
+  const [matchedResult, setMatchedResult] = useState<Pick<VisitOutcomeResult, 'duplicate' | 'isVerified'> | null>(null);
+  const matchedPending = useRef(false);
+  const matchedSubmissionId = useRef<string | null>(null);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; };
+  }, []);
+  const { t, locale } = useI18n();
   const previewReturn = usePreviewReturn();
   const params = useSearchParams();
   const returnTo = previewReturn ?? (params.get('preview') === '1' ? null : favouritesReturn(params.get('return')));
@@ -90,8 +103,54 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
   const preview = params.get('preview') === '1';
   const interest = useInterest(previewReturn === null ? offer.product.id : null);
   const fav = useFavourites({ offerId: offer.id, locationId: offer.location.id }, !preview);
+
+  async function submitMatched() {
+    if (matchedPending.current || matchedResult) return;
+    matchedPending.current = true;
+    setOutcomeBusy(true);
+    setOutcomeError(null);
+    const initialId = matchedSubmissionId.current ?? (matchedSubmissionId.current = crypto.randomUUID());
+    try {
+      const sendOnce = async (submissionId: string) => {
+        const ctxRes = await fetch(`/api/offers/${offer.id}/report-context?locale=${locale}`, { cache: 'no-store' });
+        if (!ctxRes.ok) throw new Error('context');
+        const { evidence } = (await ctxRes.json()) as { evidence: Evidence };
+        const res = await fetch(`/api/offers/${offer.id}/visit-outcome`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            outcome: 'matched',
+            submissionId,
+            version: evidence.version,
+            locale: evidence.locale,
+            hasVisitSignal: readVisitSignal(offer.id),
+          }),
+          cache: 'no-store',
+        });
+        const data = (await res.json()) as Partial<VisitOutcomeResult> & { error?: { code: string } };
+        return { res, data };
+      };
+      let { res, data } = await sendOnce(initialId);
+      if (alive.current && data.error?.code === 'STALE_CONTEXT') {
+        const retryId = (matchedSubmissionId.current = crypto.randomUUID());
+        ({ res, data } = await sendOnce(retryId));
+      }
+      if (!alive.current) return;
+      if (data.error?.code === 'STALE_CONTEXT') { setOutcomeError('report.stale'); return; }
+      if (data.error?.code === 'OUTCOME_QUOTA') { setOutcomeError('outcome.quota'); return; }
+      if (!res.ok || !data.id) throw new Error('outcome');
+      matchedSubmissionId.current = null;
+      setMatchedResult({ duplicate: data.duplicate === true, isVerified: data.isVerified === true });
+    } catch {
+      if (alive.current) setOutcomeError('outcome.problemError');
+    } finally {
+      matchedPending.current = false;
+      if (alive.current) setOutcomeBusy(false);
+    }
+  }
+
   if (fav.unavailable) return <OfferUnavailable failed={false} />;
-  if (reportOpen) return <BuyerReportFlow offerId={offer.id} onClose={() => { setReportOpen(false); requestAnimationFrame(() => document.getElementById('report-entry')?.focus()); }} />;
+  if (reportOpen) return <BuyerReportFlow offerId={offer.id} onClose={() => { setReportOpen(false); requestAnimationFrame(() => document.getElementById('outcome-problem')?.focus()); }} />;
   const showReport = reporting && previewReturn === null;
   return (
     <BuyerScreen section="search" className={styles.screen} nav={false} top={<OfferTop returnTo={returnTo} />} overlay={<>{interest.modal}{fav.modal}</>}>
@@ -103,14 +162,54 @@ export function BuyerOfferView({ offer, reporting = false }: { offer: BuyerOffer
           afterTitle={!preview && fav.active && <p className={styles.savedNote}>{t('offer.savedNote')}</p>}
           footer={(
             <>
-              {(showReport || interest.available) && <div className={styles.links} data-testid="offer-links">
-                {showReport && <button id="report-entry" type="button" className={styles.link} onClick={() => setReportOpen(true)}>{t('offer.reportCard')}</button>}
-                {interest.available && (
-                  <button type="button" className={styles.link} aria-pressed={interest.active} aria-busy={interest.pending} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
-                    <Ic name={interest.active ? 'starf' : 'star'} className="sm" />
-                    <span>{t('offer.trackProduct')}</span>
-                  </button>
-                )}
+              {showReport && (
+                <section className={styles.outcomeWrap} data-testid="visit-outcome-section" aria-labelledby="visit-outcome-title">
+                  <span id="visit-outcome-title" className={styles.overline}>{t('outcome.prompt')}</span>
+                  {matchedResult ? (
+                    <div className={styles.outcomeDone} role="status" data-testid="outcome-matched-done">
+                      <SearchIcon name="check" />
+                      <div>
+                        <span>{t(matchedResult.duplicate ? 'outcome.matchedDuplicate' : 'outcome.matchedThanks')}</span>
+                        {!matchedResult.isVerified && <span className={styles.caption} data-testid="outcome-guest-note">{t('outcome.guestNote')}</span>}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.outcomeButtons}>
+                      <button
+                        id="outcome-matched"
+                        data-testid="outcome-matched"
+                        data-kind="matched"
+                        type="button"
+                        className={styles.outcomeBtn}
+                        disabled={outcomeBusy}
+                        aria-busy={outcomeBusy}
+                        onClick={() => void submitMatched()}
+                      >
+                        <SearchIcon name="check" />
+                        <span>{t(outcomeBusy ? 'outcome.saving' : 'outcome.matched')}</span>
+                      </button>
+                      <button
+                        id="outcome-problem"
+                        data-testid="outcome-problem"
+                        data-kind="problem"
+                        type="button"
+                        className={styles.outcomeBtn}
+                        disabled={outcomeBusy}
+                        onClick={() => setReportOpen(true)}
+                      >
+                        <SearchIcon name="flag" />
+                        <span>{t('outcome.problem')}</span>
+                      </button>
+                    </div>
+                  )}
+                  {outcomeError && <p className={styles.alert} role="alert" data-testid="outcome-error">{t(outcomeError)}</p>}
+                </section>
+              )}
+              {interest.available && <div className={styles.links} data-testid="offer-links">
+                <button type="button" className={styles.link} aria-pressed={interest.active} aria-busy={interest.pending} disabled={interest.pending} onClick={(event) => void interest.toggle(event)}>
+                  <Ic name={interest.active ? 'starf' : 'star'} className="sm" />
+                  <span>{t('offer.trackProduct')}</span>
+                </button>
               </div>}
               {fav.error && <p className={styles.alert} role="alert">{t('fav.writeError')}</p>}
               {!preview && fav.state.kind === 'error' && <div role="alert" className={styles.section}><p className={styles.alert}>{t('fav.loadError')}</p><button type="button" className={styles.secondary} onClick={() => void fav.reload()}>{t('cabinet.retry')}</button></div>}
