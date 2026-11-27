@@ -19,8 +19,8 @@
 .row[data-today='true'] .off { color: var(--text); }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* B08 (Issue #226): aligned to the point-card icon/text grid using shared baseline tokens. */
-.offerLine { min-height: 1.5rem; align-items: center; font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; letter-spacing: 0.005em; color: var(--ink, var(--text)); }
+/* B08 (Issue #226): aligned to the point-card icon/text grid using shared baseline tokens (keeps 13px per B-READABILITY). */
+.offerLine { min-height: 1.5rem; align-items: center; font-size: 0.8125rem; font-weight: 600; line-height: 1.125rem; color: var(--ink, var(--text)); }
 .offerLine[data-state='open'] { color: var(--success, var(--fresh)); }
 .offerLine[data-state='closing'] { color: var(--warning, var(--stale)); }
 .offerLine[data-state='closed'] { color: var(--danger, var(--error)); }
