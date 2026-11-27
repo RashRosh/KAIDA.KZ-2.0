@@ -279,7 +279,7 @@ export function NearbyFeed() {
             <span className={styles.cap2} id="nearby-distance-note">{t('offer.distanceStraightLineNote')}</span>
             <ul className={styles.grid} aria-label={t('nearby.offersTitle')} aria-describedby="nearby-distance-note">
               {state.result.offers.map((offer) => {
-                const basis = priceBasisText(offer.price.unit, offer.pack);
+                const basis = offer.price ? priceBasisText(offer.price.unit, offer.pack) : null;
                 const active = favourites.state.kind === 'ready'
                   && favourites.state.favourites.some(f => f.offerId === offer.id && f.locationId === offer.location.id);
                 return (
@@ -313,9 +313,11 @@ export function NearbyFeed() {
                           <SearchIcon name="heart" filled={active} />
                         </button>
                       </div>
-                      <p className={styles.price}>
-                        {formatAmount(offer.price.amount)}&nbsp;₸{basis && <>{' '}<small>{basis}</small></>}
-                      </p>
+                      {offer.price && (
+                        <p className={styles.price}>
+                          {formatAmount(offer.price.amount)}&nbsp;₸{basis && <>{' '}<small>{basis}</small></>}
+                        </p>
+                      )}
                       <WholesaleLine offer={offer} />
                       <ConfirmationBadge offer={offer} className={styles.fresh} />
                       <span className={styles.cap2}>{formatDistance(offer.distanceMeters, t)}</span>

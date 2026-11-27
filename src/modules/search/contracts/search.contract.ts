@@ -80,12 +80,14 @@ export const searchOfferSchema = z.object({
     amount: z.string().regex(/^\d+(?:\.\d+)?$/),
     currency: z.literal('KZT'),
     unit: z.string().nullable(),
-  }),
-  // wholesale-price: present only when the card has a wholesale line; the price is in the retail price's basis, batch is
-  // the ready text of the minimum batch («от 1 ящика (≈ 10 кг)»).
+  }).nullable(),
+  // wholesale-price / wholesale-only: present when the card has a wholesale line; batch is the ready text of the
+  // minimum batch («от 1 ящика (≈ 10 кг)» or «от 1 мешка»). For wholesale-only offers (price === null), unit carries
+  // the localized price unit label.
   wholesale: z.object({
     amount: z.string().regex(/^\d+(?:\.\d+)?$/),
     currency: z.literal('KZT'),
+    unit: z.string().nullable().optional(),
     batch: z.string(),
   }).optional(),
   sellerComment: z.string().nullable(),
@@ -112,7 +114,7 @@ export const searchOfferSchema = z.object({
     }),
     z.object({ status: z.literal('unavailable') }),
   ]).optional(),
-});
+}).refine((offer) => offer.price !== null || offer.wholesale !== undefined, 'Offer must have retail or wholesale price');
 
 export const searchResponseSchema = z.object({
   query: z.string(),

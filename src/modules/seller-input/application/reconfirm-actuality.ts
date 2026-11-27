@@ -41,14 +41,15 @@ export async function reconfirmCards(
       const active = offers.filter((offer) => offer.status === 'active');
       if (active.length === 0) throw new OfferAlreadyInactiveError();
       for (const offer of active) {
-        if (offer.priceAmount === null || offer.priceCurrency !== 'KZT') throw new OfferPriceRequiredError();
+        const hasRetail = offer.priceAmount !== null && offer.priceCurrency === 'KZT';
+        if (!hasRetail && offer.wholesale === null) throw new OfferPriceRequiredError();
         await createOfferManagementChangeItem(tx, {
           changeSetId: changeSet.id,
           action: 'reconfirm_offer',
           card: currentCardFields(offer),
           locationId: offer.locationId,
           priceAmount: offer.priceAmount,
-          priceCurrency: 'KZT',
+          priceCurrency: offer.priceAmount === null ? null : 'KZT',
           priceUnit: offer.priceUnit,
           sellerComment: offer.sellerComment,
           targetOfferId: offer.id,
@@ -146,14 +147,15 @@ export async function undoReconfirmations(
           if (!offer || offer.sellerId !== seller.id) throw new OfferNotFoundError();
           // The reconfirmation produced revision expected + 1; anything later (edit, switch-off, another confirmation) blocks the undo.
           if (offer.revision !== item.expectedOfferRevision! + 1) throw new OfferChangedError();
-          if (offer.priceAmount === null || offer.priceCurrency !== 'KZT') throw new OfferPriceRequiredError();
+          const hasRetail = offer.priceAmount !== null && offer.priceCurrency === 'KZT';
+          if (!hasRetail && offer.wholesale === null) throw new OfferPriceRequiredError();
           await createOfferManagementChangeItem(tx, {
             changeSetId: undo.id,
             action: 'undo_reconfirm_offer',
             card: currentCardFields(offer),
             locationId: offer.locationId,
             priceAmount: offer.priceAmount,
-            priceCurrency: 'KZT',
+            priceCurrency: offer.priceAmount === null ? null : 'KZT',
             priceUnit: offer.priceUnit,
             sellerComment: offer.sellerComment,
             targetOfferId: offer.id,

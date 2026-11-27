@@ -55,7 +55,7 @@ describe('Offer favourites: real PostgreSQL ownership, transitions and concurren
     expect((await (await GET(req('GET',undefined,'fav-b'))).json()).count).toBe(0);
     await DELETE(req('DELETE',{id:data.favourites[0].id},'fav-b'));expect((await listFavourites(a,deps())).length).toBe(2);
     await connection.pool.query('UPDATE offers SET price_amount=1750 WHERE id=$1',[offer]);const row=(await listFavourites(a,deps())).find(f=>f.offerId===offer)!;
-    expect(row.state).toBe('available');if(row.state==='available')expect(row.offer.price.amount).toBe('1750');
+    expect(row.state).toBe('available');if(row.state==='available')expect(row.offer.price?.amount).toBe('1750');
     const unchanged=await connection.pool.query('SELECT * FROM buyer_interests WHERE user_id=$1',[a]);expect(unchanged.rows).toEqual([]);
   });
   it('expiry exposes only approved metadata/current authorized cover; switched-off strips media and restores',async()=>{

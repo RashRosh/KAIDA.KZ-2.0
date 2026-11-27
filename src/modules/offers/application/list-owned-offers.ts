@@ -56,6 +56,7 @@ export async function listOwnedOffers(
     const buyerVisible = row.status === 'active'
       && row.lastConfirmedAt > cutoff
       && !removal;
+    const unitLabel = formatPriceUnit(row.priceUnit, locale);
     return {
       id: row.id,
       product: { id: row.productId, name: row.title },
@@ -64,12 +65,16 @@ export async function listOwnedOffers(
       priceOwn: row.priceOwn,
       pack: row.pack,
       packLabel: formatPack(row.pack, locale),
-      wholesale: row.wholesale === null ? null : { ...row.wholesale, batch: formatWholesaleBatch(row.wholesale, formatPriceUnit(row.priceUnit, locale), locale) },
+      wholesale: row.wholesale === null ? null : {
+        ...row.wholesale,
+        batch: formatWholesaleBatch(row.wholesale, unitLabel, locale),
+        ...(row.priceAmount === null ? { unit: unitLabel, unitChoice: row.priceUnit } : {}),
+      },
       location: { id: row.locationId, name: row.locationName, addressText: row.locationAddressText },
       price: row.priceAmount === null ? null : {
         amount: row.priceAmount,
         currency: 'KZT' as const,
-        unit: formatPriceUnit(row.priceUnit, locale),
+        unit: unitLabel,
         unitChoice: row.priceUnit,
       },
       sellerComment: row.sellerComment,

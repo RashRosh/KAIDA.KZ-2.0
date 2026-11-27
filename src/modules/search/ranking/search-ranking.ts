@@ -69,9 +69,9 @@ export function compareActualityTier(a: { lastConfirmedAt: Date }, b: { lastConf
   return aAgeing === bAgeing ? 0 : aAgeing ? 1 : -1;
 }
 
-// Nominal price (MVP rule): the numeric KZT amount only — units and pack sizes are never normalized.
-function nominalPrice(candidate: SearchRankingCandidate): number {
-  return Number.parseFloat(candidate.offer.price.amount);
+// Nominal retail price (MVP rule): the numeric KZT amount only — units and pack sizes are never normalized.
+function nominalPrice(amount: string): number {
+  return Number.parseFloat(amount);
 }
 
 // `direction` flips only the primary criterion; every tie-breaker keeps its own fixed direction.
@@ -109,7 +109,13 @@ export function rankSearchOfferCandidates(
       return directed(byAge, options.direction) || compareId(a, b);
     }
     if (options.sort === 'price') {
-      return directed(nominalPrice(a) - nominalPrice(b), options.direction) || compareFreshnessThenId(a, b);
+      // wholesale-only (PO 2026-11-26): wholesale price is excluded from price sorting; retail offers always precede
+      // wholesale-only offers for both directions, and wholesale-only offers keep the order «fresher first → id».
+      if (a.offer.price === null && b.offer.price === null) return compareFreshnessThenId(a, b);
+      if (a.offer.price === null) return 1;
+      if (b.offer.price === null) return -1;
+      return directed(nominalPrice(a.offer.price.amount) - nominalPrice(b.offer.price.amount), options.direction)
+        || compareFreshnessThenId(a, b);
     }
     // distance: every geo-known Offer precedes every geo-less one for both directions; geo-less Offers never get a
     // distance and keep the order «fresher first → id».

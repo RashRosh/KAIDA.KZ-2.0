@@ -62,9 +62,16 @@ function normalizedCurrentPrice(offer: {
   priceAmount: string | null;
   priceCurrency: string | null;
   priceUnit: PriceUnit | null;
+  wholesale: unknown;
 }) {
   if (offer.priceAmount === null) {
-    if (offer.priceCurrency !== null || offer.priceUnit !== null) {
+    if (offer.priceCurrency !== null) {
+      throw new SellerInputInvariantError('Target Offer содержит некорректную форму цены.');
+    }
+    if (offer.wholesale !== null) {
+      return { amount: null, currency: null, unit: offer.priceUnit };
+    }
+    if (offer.priceUnit !== null) {
       throw new SellerInputInvariantError('Target Offer содержит некорректную форму цены.');
     }
     return null;
@@ -100,7 +107,8 @@ export async function createOfferManagementChangeSet(
       throw new SellerInputInvariantError('Target Offer содержит некорректную revision.');
     }
 
-    let priceAmount: string;
+    let priceAmount: string | null;
+    let priceCurrency: 'KZT' | null;
     let priceUnit: PriceUnit | null;
     let sellerComment: string | null;
     let photoIds: string[] | undefined;
@@ -110,6 +118,7 @@ export async function createOfferManagementChangeSet(
       photoIds = input.photoIds;
       if (photoIds) await assertPhotosOwnedBy(tx, photoIds, ownerUserId);
       priceAmount = input.price.amount;
+      priceCurrency = 'KZT';
       priceUnit = input.price.unit;
       sellerComment = input.sellerComment;
     } else {
@@ -123,6 +132,7 @@ export async function createOfferManagementChangeSet(
       const currentPrice = normalizedCurrentPrice(offer);
       if (!currentPrice) throw new OfferPriceRequiredError();
       priceAmount = currentPrice.amount;
+      priceCurrency = currentPrice.currency;
       priceUnit = currentPrice.unit;
       sellerComment = normalizeNullableText(offer.sellerComment);
     }
@@ -133,7 +143,7 @@ export async function createOfferManagementChangeSet(
       action: input.action,
       card: input.action === 'update_offer'
         ? await perOfferUpdateCardFields(tx, offer, {
-          price: priceAmount,
+          price: priceAmount!,
           unit: priceUnit,
           sellerComment,
           photosChanged: photoIds !== undefined && photoIds.join() !== (await findOfferPhotoIds(tx, offer.id)).join(),
@@ -141,7 +151,7 @@ export async function createOfferManagementChangeSet(
         : currentCardFields(offer),
       locationId: offer.locationId,
       priceAmount,
-      priceCurrency: 'KZT',
+      priceCurrency,
       priceUnit,
       sellerComment,
       targetOfferId: offer.id,

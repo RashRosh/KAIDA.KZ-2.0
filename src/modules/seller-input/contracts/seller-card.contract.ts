@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CANONICAL_PRICE_UNIT_CODES, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { packInputSchema } from '../../offers/pack/pack';
-import { wholesaleInputSchema } from '../../offers/wholesale/wholesale';
+import { wholesaleFlexibleInputSchema, wholesaleNeedsPerContainer } from '../../offers/wholesale/wholesale';
 import { normalizeOfferTitle, OFFER_TITLE_MAX_LENGTH, OFFER_TITLE_MIN_LENGTH } from '../../offers/title/offer-title';
 import { SELLER_INPUT_PRICE_AMOUNT_PATTERN } from './seller-change-set.contract';
 
@@ -32,16 +32,17 @@ const sharedFields = {
   title: cardTitleSchema,
   // The catalog product of a chosen suggestion; null = none chosen (the server may still link an exact match).
   productId: z.uuid().nullable(),
-  price: cardPriceAmountSchema,
+  // wholesale-only: null when the card is sold wholesale-only.
+  price: cardPriceAmountSchema.nullable(),
   unit: cardUnitSchema,
   pack: packInputSchema.nullable(),
   sellerComment: cardCommentSchema,
   photoIds: cardPhotoIdsSchema,
 };
 
-// wholesale-price: create — omitted or null = no wholesale; update — null removes it, omitted keeps the card's current
-// wholesale (refused when the unit or the pack changes, §3.4).
-const wholesaleField = wholesaleInputSchema.nullable().optional();
+// wholesale-price / wholesale-only: create — omitted or null = no wholesale; update — null removes it, omitted keeps the
+// card's current wholesale (refused when the unit or the pack changes, or when switching to retail without conversion).
+const wholesaleField = wholesaleFlexibleInputSchema.nullable().optional();
 
 function packFitsUnit(value: { unit: PriceUnit; pack: unknown }) {
   return value.pack === null || value.unit.code === 'package' || value.unit.code === 'piece';
@@ -58,7 +59,11 @@ export const cardCreateBodySchema = z.object({
   // The draft being published, if any: it is removed when this card is confirmed.
   draftId: z.uuid().optional(),
   wholesale: wholesaleField.transform((value) => value ?? null),
-}).strict().refine(packFitsUnit, 'Pack is only for packages and pieces');
+}).strict()
+  .refine(packFitsUnit, 'Pack is only for packages and pieces')
+  .refine((value) => value.price !== null || value.wholesale !== null, 'Retail or wholesale price is required')
+  .refine((value) => value.price === null || value.wholesale === null || !wholesaleNeedsPerContainer(value.wholesale), 'A container other than the unit needs its quantity')
+  .refine((value) => value.price !== null || value.points.every((point) => point.ownPrice === undefined), 'Point own price is not allowed for wholesale-only cards');
 
 export const cardUpdateBodySchema = z.object({
   ...sharedFields,
@@ -69,7 +74,10 @@ export const cardUpdateBodySchema = z.object({
   // Points the card is added to, each at the common price.
   addPoints: z.array(z.uuid()).max(CARD_POINT_LIMIT).refine(uniqueBy((id: string) => id), 'Points must be unique'),
   wholesale: wholesaleField,
-}).strict().refine(packFitsUnit, 'Pack is only for packages and pieces');
+}).strict()
+  .refine(packFitsUnit, 'Pack is only for packages and pieces')
+  .refine((value) => value.price !== null || value.wholesale !== null, 'Retail or wholesale price is required')
+  .refine((value) => value.price === null || value.wholesale == null || !wholesaleNeedsPerContainer(value.wholesale), 'A container other than the unit needs its quantity');
 
 export const pointPriceBodySchema = z.object({
   revision: z.number().int().min(1),

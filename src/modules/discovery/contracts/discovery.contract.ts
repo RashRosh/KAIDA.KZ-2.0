@@ -6,7 +6,7 @@ export const nearbyRequestSchema = z.strictObject({
   buyerLocation: buyerLocationSchema,
 });
 
-export const discoveryOfferSchema = searchOfferSchema.extend({
+export const discoveryOfferSchema = searchOfferSchema.safeExtend({
   distanceMeters: z.number().int().nonnegative(),
 });
 

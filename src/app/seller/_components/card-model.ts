@@ -90,7 +90,10 @@ export function pluralKey<K extends 'showcase.points' | 'points.cards' | 'card.w
 export function missingDraftFields(payload: OfferDraftPayload): MessageKey[] {
   const missing: MessageKey[] = [];
   if (payload.title.trim().length < 2) missing.push('showcase.fieldName');
-  if (!(Number(payload.price.replace(',', '.')) > 0)) missing.push('showcase.fieldPrice');
+  const hasPrice = payload.wholesaleOnly
+    ? Number((payload.wholesale?.amount ?? '').replace(',', '.')) > 0
+    : Number(payload.price.replace(',', '.')) > 0;
+  if (!hasPrice) missing.push('showcase.fieldPrice');
   if (!payload.unit || (payload.unit.code === 'other' && payload.unit.value.trim() === '')) missing.push('showcase.fieldUnit');
   if (payload.points.length === 0) missing.push('showcase.fieldPoint');
   return missing;

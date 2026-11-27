@@ -40,7 +40,7 @@ export function ConfirmationBadge({ offer, className = styles.confirmation }: { 
 export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: React.ReactNode }) {
   const { t } = useI18n();
   const contacts = offer.location.contacts ? buildContactActions(offer.location.contacts) : [];
-  const basis = priceBasisText(offer.price.unit, offer.pack);
+  const basis = offer.price ? priceBasisText(offer.price.unit, offer.pack) : null;
   return <article className={`linkcard ${styles.resultCard}`} aria-labelledby={`offer-${offer.id}`}>
     <div className={styles.cardMain}>
       <div className={styles.photo}>
@@ -52,7 +52,7 @@ export function SearchResultCard({ offer, heart }: { offer: SearchOffer; heart: 
       </div>
       <div className={styles.cardText}>
         <h3 id={`offer-${offer.id}`} lang={offer.product.nameLocale}><Link href={`/offers/${offer.id}`} className="stretch" onClick={markBuyerOfferOpened}>{offer.product.name}</Link></h3>
-        <div className={styles.price}><b className="pr">{formatAmount(offer.price.amount)} ₸</b>{basis && <> <span>{basis}</span></>}</div>
+        {offer.price && <div className={styles.price}><b className="pr">{formatAmount(offer.price.amount)} ₸</b>{basis && <> <span>{basis}</span></>}</div>}
         <WholesaleLine offer={offer} />
         <p className={styles.point} data-testid="card-point">{offer.location.name}</p>
         <p className={styles.address} data-testid="card-place" title={[offer.location.addressText, offer.seller.displayName].filter(Boolean).join(' · ')}>{offer.location.addressText}<span>{offer.location.addressText && offer.seller.displayName ? ' · ' : ''}{offer.seller.displayName}</span></p>

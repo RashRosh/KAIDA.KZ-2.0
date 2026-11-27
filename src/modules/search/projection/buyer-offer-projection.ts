@@ -26,7 +26,7 @@ export type BuyerOfferFields = {
   locationTelegramUsername?: string | null;
   // the verified phone numbers of the Seller: only a verified number becomes a public contact
   verifiedPhones: Set<string> | undefined;
-  priceAmount: string;
+  priceAmount: string | null;
   priceUnitCode: string | null;
   priceUnitValue: string | null;
   // wholesale-price: the card's wholesale line, if any
@@ -53,9 +53,14 @@ export function projectBuyerOffer(fields: BuyerOfferFields, locale: Locale): { o
       ...fields.location,
       ...projectPointPublicContacts({ phoneE164: fields.locationPhoneE164, whatsappPhoneE164: fields.locationWhatsappPhoneE164, telegramUsername: fields.locationTelegramUsername }, fields.verifiedPhones),
     },
-    price: { amount: fields.priceAmount, currency: 'KZT', unit },
+    price: fields.priceAmount === null ? null : { amount: fields.priceAmount, currency: 'KZT', unit },
     ...(fields.wholesale === null ? {} : {
-      wholesale: { amount: fields.wholesale.amount, currency: 'KZT' as const, batch: formatWholesaleBatch(fields.wholesale, unit, locale) },
+      wholesale: {
+        amount: fields.wholesale.amount,
+        currency: 'KZT' as const,
+        ...(fields.priceAmount === null ? { unit } : {}),
+        batch: formatWholesaleBatch(fields.wholesale, unit, locale),
+      },
     }),
     sellerComment: fields.sellerComment,
     // stage 5A: public route capability, derived from the existing route prerequisite (complete Location coordinates);

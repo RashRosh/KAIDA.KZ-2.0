@@ -59,8 +59,8 @@ export const offers = pgTable('offers', {
   check('offers_seller_comment_version_positive', sql`${table.sellerCommentVersion} >= 1`),
   check('offers_active_price_required', sql`${table.status} <> 'active' OR (
     ${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'
-  )`),
-  check('offers_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
+  ) OR ${table.wholesalePriceAmount} IS NOT NULL`),
+  check('offers_future_price_required', sql`(${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT') OR ${table.wholesalePriceAmount} IS NOT NULL`),
   check('offers_wholesale_valid', sql`(
     ${table.wholesalePriceAmount} IS NULL AND ${table.wholesaleBatchCount} IS NULL AND ${table.wholesaleContainer} IS NULL
     AND ${table.wholesaleContainerText} IS NULL AND ${table.wholesalePerContainer} IS NULL
@@ -71,8 +71,11 @@ export const offers = pgTable('offers', {
     AND ${table.wholesaleContainer} IN ('box', 'bag', 'carton', 'net', 'package', 'unit', 'other')
     AND (${table.wholesaleContainer} = 'other') = (${table.wholesaleContainerText} IS NOT NULL)
     AND (${table.wholesaleContainerText} IS NULL OR (${table.wholesaleContainerText} = btrim(${table.wholesaleContainerText}) AND char_length(${table.wholesaleContainerText}) BETWEEN 1 AND 20))
-    AND (${table.wholesaleContainer} = 'unit') = (${table.wholesalePerContainer} IS NULL)
-    AND (${table.wholesalePerContainer} IS NULL OR ${table.wholesalePerContainer} > 0)
+    AND (
+      (${table.wholesaleContainer} = 'unit' AND ${table.wholesalePerContainer} IS NULL)
+      OR (${table.wholesaleContainer} <> 'unit' AND (${table.wholesalePerContainer} IS NOT NULL OR ${table.priceAmount} IS NULL))
+    )
+    AND (${table.wholesalePerContainer} IS NULL OR (${table.wholesalePerContainer} > 0 AND ${table.wholesalePerContainer} NOT IN ('NaN'::numeric, 'Infinity'::numeric)))
     AND ${table.priceUnitCode} IS NOT NULL
   )`),
 ]);

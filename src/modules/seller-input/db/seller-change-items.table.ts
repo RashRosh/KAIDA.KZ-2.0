@@ -56,7 +56,7 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   check('seller_change_items_price_shape', sql`(
     ${table.priceAmount} IS NULL
     AND ${table.priceCurrency} IS NULL
-    AND ${table.priceUnitCode} IS NULL
+    AND (${table.priceUnitCode} IS NULL OR ${table.wholesalePriceAmount} IS NOT NULL)
   ) OR (
     ${table.priceAmount} IS NOT NULL
     AND ${table.priceCurrency} = 'KZT'
@@ -81,7 +81,7 @@ export const sellerChangeItems = pgTable('seller_change_items', {
   check('seller_change_items_photos_specified_scope', sql`${table.photosSpecified} = false OR ${table.action} = 'update_offer'`),
   check('seller_change_items_previous_confirmed_scope', sql`${table.previousConfirmedAt} IS NULL OR ${table.action} IN ('reconfirm_offer', 'undo_reconfirm_offer')`),
   check('seller_change_items_undo_restore_time_required', sql`${table.action} <> 'undo_reconfirm_offer' OR ${table.previousConfirmedAt} IS NOT NULL`),
-  check('seller_change_items_future_price_required', sql`${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT'`),
+  check('seller_change_items_future_price_required', sql`(${table.priceAmount} IS NOT NULL AND ${table.priceCurrency} = 'KZT') OR ${table.wholesalePriceAmount} IS NOT NULL`),
   check('seller_change_items_wholesale_valid', sql`(
     ${table.wholesalePriceAmount} IS NULL AND ${table.wholesaleBatchCount} IS NULL AND ${table.wholesaleContainer} IS NULL
     AND ${table.wholesaleContainerText} IS NULL AND ${table.wholesalePerContainer} IS NULL
@@ -92,8 +92,11 @@ export const sellerChangeItems = pgTable('seller_change_items', {
     AND ${table.wholesaleContainer} IN ('box', 'bag', 'carton', 'net', 'package', 'unit', 'other')
     AND (${table.wholesaleContainer} = 'other') = (${table.wholesaleContainerText} IS NOT NULL)
     AND (${table.wholesaleContainerText} IS NULL OR (${table.wholesaleContainerText} = btrim(${table.wholesaleContainerText}) AND char_length(${table.wholesaleContainerText}) BETWEEN 1 AND 20))
-    AND (${table.wholesaleContainer} = 'unit') = (${table.wholesalePerContainer} IS NULL)
-    AND (${table.wholesalePerContainer} IS NULL OR ${table.wholesalePerContainer} > 0)
+    AND (
+      (${table.wholesaleContainer} = 'unit' AND ${table.wholesalePerContainer} IS NULL)
+      OR (${table.wholesaleContainer} <> 'unit' AND (${table.wholesalePerContainer} IS NOT NULL OR ${table.priceAmount} IS NULL))
+    )
+    AND (${table.wholesalePerContainer} IS NULL OR (${table.wholesalePerContainer} > 0 AND ${table.wholesalePerContainer} NOT IN ('NaN'::numeric, 'Infinity'::numeric)))
     AND ${table.priceUnitCode} IS NOT NULL
   )`),
 ]);

@@ -150,7 +150,8 @@ async function findBuyerVisibleOffers(
     wholesalePerContainer,
     ...rest
   }) => {
-    if (priceAmount === null || priceCurrency !== 'KZT') {
+    const wholesale = wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer });
+    if (priceAmount !== null ? priceCurrency !== 'KZT' : (priceCurrency !== null || wholesale === null)) {
       throw new Error('Buyer-visible Offer has invalid price');
     }
 
@@ -170,7 +171,7 @@ async function findBuyerVisibleOffers(
       priceAmount,
       priceUnitCode,
       priceUnitValue,
-      wholesale: wholesaleFromColumns({ wholesalePriceAmount, wholesaleBatchCount, wholesaleContainer, wholesaleContainerText, wholesalePerContainer }),
+      wholesale,
       sellerComment: rest.sellerComment,
       coverPhotoId: coverPhotoId ?? null,
       locationLatitude,

@@ -82,8 +82,8 @@ export async function createOffer(database: OfferWriteDb, values: {
   card: OfferCardFields;
   sellerId: string;
   locationId: string;
-  priceAmount: string;
-  priceCurrency: 'KZT';
+  priceAmount: string | null;
+  priceCurrency: 'KZT' | null;
   priceUnit: PriceUnit | null;
   sellerComment: string | null;
   confirmedAt: Date;
@@ -170,8 +170,8 @@ export async function applyOfferUpdateSnapshot(database: OfferWriteDb, values: {
   offerId: string;
   card: Omit<OfferCardFields, 'cardId'>;
   expectedRevision: number;
-  priceAmount: string;
-  priceCurrency: 'KZT';
+  priceAmount: string | null;
+  priceCurrency: 'KZT' | null;
   priceUnit: PriceUnit | null;
   sellerComment: string | null;
   sellerCommentChanged: boolean;

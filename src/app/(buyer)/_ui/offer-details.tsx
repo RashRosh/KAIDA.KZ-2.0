@@ -196,15 +196,21 @@ export function OfferDetails({ offer, inert = false, titleAction, afterTitle, fo
   scheduleLabel?: string;
 }) {
   const { t } = useI18n();
-  const basis = priceBasisText(offer.price.unit, offer.pack);
+  const basis = offer.price ? priceBasisText(offer.price.unit, offer.pack) : null;
   return (
     <article className={`${styles.tokens} ${styles.details}`} aria-labelledby="offer-title">
       <Gallery offer={offer} />
       <div className={styles.heading}>
         <div>
           <h2 id="offer-title" lang={offer.product.nameLocale}>{offer.product.name}</h2>
-          <div className={styles.price} data-testid="offer-price"><b>{formatAmount(offer.price.amount)} ₸</b>{basis && <>{' '}<span>{basis}</span></>}</div>
-          <WholesaleLine offer={offer} size="lg" />
+          {offer.price ? (
+            <>
+              <div className={styles.price} data-testid="offer-price"><b>{formatAmount(offer.price.amount)} ₸</b>{basis && <>{' '}<span>{basis}</span></>}</div>
+              <WholesaleLine offer={offer} size="lg" />
+            </>
+          ) : (
+            <div data-testid="offer-price"><WholesaleLine offer={offer} size="lg" /></div>
+          )}
         </div>
         {titleAction}
       </div>

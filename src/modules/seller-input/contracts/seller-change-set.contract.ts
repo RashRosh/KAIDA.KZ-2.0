@@ -93,9 +93,10 @@ export type SellerChangeSetItemView = {
   priceOwn: boolean;
   pack: Pack | null;
   packLabel: string | null;
-  // wholesale-price: the card's wholesale line in this item (batch = the buyer's text), and before a proposed update.
-  wholesale: (Wholesale & { batch: string }) | null;
-  previousWholesale?: (Wholesale & { batch: string }) | null;
+  // wholesale-price / wholesale-only: the card's wholesale line in this item (batch = the buyer's text), and before a
+  // proposed update; unit/unitChoice present when retail price is null.
+  wholesale: (Wholesale & { batch: string; unit?: string | null; unitChoice?: PriceUnit | null }) | null;
+  previousWholesale?: (Wholesale & { batch: string; unit?: string | null }) | null;
   // Proposed updates only: the target Offer's price before this change.
   previousPriceAmount?: string;
   priceFromCard?: boolean;

@@ -3,7 +3,7 @@ import { lockCardOffers, type OfferWriteDb } from '../../offers/infrastructure/o
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { CardSharedFieldsError, WholesaleReviewRequiredError } from '../contracts/seller-card.contract';
 import type { Pack } from '../../offers/pack/pack';
-import type { Wholesale } from '../../offers/wholesale/wholesale';
+import { wholesaleNeedsPerContainer, type Wholesale } from '../../offers/wholesale/wholesale';
 import type { ChangeItemCardFields } from '../infrastructure/seller-change-sets.repository';
 
 // seller-showcase-editor: a catalog-only create (single S4 create, S12 batch) is a new one-point card titled with the
@@ -35,9 +35,11 @@ export async function perOfferUpdateCardFields(
   offer: { id: string; sellerId: string; title: string; productId: string | null; cardId: string; priceOwn: boolean; pack: Pack | null; wholesale: Wholesale | null; priceUnit: PriceUnit | null; sellerComment: string | null },
   next: { price: string; unit: PriceUnit | null; sellerComment: string | null; photosChanged: boolean },
 ): Promise<ChangeItemCardFields> {
-  // wholesale-price §3.4: the wholesale line is in the retail unit, so a per-Offer path that changes the unit of a card
-  // with wholesale is refused instead of keeping a wholesale price in the old unit.
-  if (offer.wholesale !== null && !samePriceUnit(offer.priceUnit, next.unit)) throw new WholesaleReviewRequiredError();
+  // wholesale-price §3.4 / wholesale-only: a per-Offer path cannot change the unit of a card with wholesale,
+  // nor add a retail price onto a wholesale-only card that has no container conversion.
+  if (offer.wholesale !== null && (!samePriceUnit(offer.priceUnit, next.unit) || wholesaleNeedsPerContainer(offer.wholesale))) {
+    throw new WholesaleReviewRequiredError();
+  }
   const card = await lockCardOffers(database, offer.cardId, offer.sellerId);
   if (card.length <= 1) return currentCardFields(offer);
   const sharedChanged = !samePriceUnit(offer.priceUnit, next.unit)

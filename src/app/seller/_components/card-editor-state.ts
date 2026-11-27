@@ -41,6 +41,8 @@ export type CardValues = {
   // Catalog link of a chosen suggestion and the name it was chosen with.
   productId: string | null;
   linkedName: string | null;
+  // wholesale-only: true = sold only wholesale (no retail price, optional perContainer, no per-point ownPrice).
+  wholesaleOnly: boolean;
   amount: string;
   unit: UnitDraft;
   packOpen: boolean;
@@ -62,7 +64,7 @@ export const emptyUnit: UnitDraft = { code: '', custom: '' };
 
 export function emptyCardValues(): CardValues {
   return {
-    title: '', productId: null, linkedName: null, amount: '', unit: emptyUnit, packOpen: false, packAmount: '', packUnit: 'g',
+    title: '', productId: null, linkedName: null, wholesaleOnly: false, amount: '', unit: emptyUnit, packOpen: false, packAmount: '', packUnit: 'g',
     comment: '', points: {}, applyPrice: {}, wholesale: null,
   };
 }
@@ -86,9 +88,13 @@ export function wholesaleDraftFrom(wholesale: Wholesale | null | undefined): Who
 export type WholesaleField = 'amount' | 'batch' | 'containerText' | 'perContainer';
 export type WholesaleErrors = Partial<Record<WholesaleField, MessageKey>>;
 
-// The sheet's own rules (§3.1): price > 0, an integer batch 1–9 999, the own container text 1–20 characters and the
-// quantity in one container unless the container is the retail unit. No comparison with the retail price.
-export function validateWholesale(draft: WholesaleDraft): { errors: WholesaleErrors; input: WholesaleInput | null } {
+// The sheet's own rules (§3.1 / wholesale-only §2.1): price > 0, an integer batch 1–9 999, own container text 1–20 chars,
+// and quantity in one container unless the container is the unit itself — optional when requirePerContainer is false (wholesale-only).
+export function validateWholesale(
+  draft: WholesaleDraft,
+  options: { requirePerContainer?: boolean } = {},
+): { errors: WholesaleErrors; input: WholesaleInput | null } {
+  const requirePerContainer = options.requirePerContainer ?? true;
   const errors: WholesaleErrors = {};
   const amountProblem = priceError(draft.amount);
   if (amountProblem) errors.amount = amountProblem;
@@ -100,9 +106,13 @@ export function validateWholesale(draft: WholesaleDraft): { errors: WholesaleErr
     errors.containerText = 'wholesale.containerTextRequired';
   }
   const perContainer = normalizeAmount(draft.perContainer);
-  const perNeeded = draft.container !== 'unit' && draft.container !== '';
-  if (perNeeded && !(WHOLESALE_PER_CONTAINER_PATTERN.test(perContainer) && Number(perContainer) > 0)) {
-    errors.perContainer = perContainer === '' ? 'wholesale.perContainerRequired' : 'card.packInvalid';
+  const supportsPerContainer = draft.container !== 'unit' && draft.container !== '';
+  if (supportsPerContainer) {
+    if (perContainer === '') {
+      if (requirePerContainer) errors.perContainer = 'wholesale.perContainerRequired';
+    } else if (!(WHOLESALE_PER_CONTAINER_PATTERN.test(perContainer) && Number(perContainer) > 0)) {
+      errors.perContainer = 'card.packInvalid';
+    }
   }
   if (Object.keys(errors).length > 0 || draft.container === '') return { errors, input: null };
   return {
@@ -112,7 +122,7 @@ export function validateWholesale(draft: WholesaleDraft): { errors: WholesaleErr
       batchCount,
       container: draft.container,
       ...(draft.container === 'other' ? { containerText } : {}),
-      ...(perNeeded ? { perContainer } : {}),
+      ...(supportsPerContainer && perContainer !== '' ? { perContainer } : {}),
     },
   };
 }
@@ -187,7 +197,7 @@ export type CardMode = 'create' | 'edit' | 'point';
 export type CardPayload = {
   title: string;
   productId: string | null;
-  price: string;
+  price: string | null;
   unit: PriceUnit;
   pack: { amount: string; unit: PackUnit } | null;
   sellerComment: string;
@@ -198,9 +208,12 @@ export function validateCard(values: CardValues, mode: CardMode, existingPoints:
   { errors: CardErrors; payload: CardPayload | null } {
   const errors: CardErrors = {};
   const title = normalizeOfferTitle(values.title);
-  const price = validPrice(values.amount);
-  const priceProblem = priceError(values.amount);
-  if (priceProblem) errors.price = priceProblem;
+  const wholesaleOnly = mode !== 'point' && values.wholesaleOnly;
+  const price = wholesaleOnly ? null : validPrice(values.amount);
+  if (!wholesaleOnly) {
+    const priceProblem = priceError(values.amount);
+    if (priceProblem) errors.price = priceProblem;
+  }
   if (mode === 'point') return { errors, payload: null };
 
   if (title === '') errors.title = 'card.nameRequired';
@@ -211,16 +224,20 @@ export function validateCard(values: CardValues, mode: CardMode, existingPoints:
   const packShown = values.packOpen && packAllowed(values.unit.code);
   const packAmount = normalizeAmount(values.packAmount);
   if (packShown && packAmount !== '' && !(PACK_AMOUNT_PATTERN.test(packAmount) && Number(packAmount) > 0)) errors.pack = 'card.packInvalid';
-  const wholesale = values.wholesale ? validateWholesale(values.wholesale).input : null;
-  if (values.wholesale && (values.wholesale.needsReview || !wholesale)) {
+  const wholesale = values.wholesale ? validateWholesale(values.wholesale, { requirePerContainer: !wholesaleOnly }).input : null;
+  if (wholesaleOnly && !values.wholesale) {
+    errors.wholesale = 'wholesale.required';
+  } else if (values.wholesale && (values.wholesale.needsReview || !wholesale)) {
     errors.wholesale = values.wholesale.needsReview ? 'wholesale.reviewRequired' : 'wholesale.incomplete';
   }
   if (mode === 'create') {
     const chosen = Object.values(values.points).filter((point) => point.selected);
     if (chosen.length === 0) errors.points = existingPoints === 0 ? 'card.pointRequired' : 'card.pointChoose';
-    if (chosen.some((point) => point.ownPrice !== null && validPrice(point.ownPrice) === null)) errors.ownPrice = 'card.priceRequired';
+    if (!wholesaleOnly && chosen.some((point) => point.ownPrice !== null && validPrice(point.ownPrice) === null)) errors.ownPrice = 'card.priceRequired';
   }
-  if (Object.keys(errors).length > 0 || !price || !unit) return { errors, payload: null };
+  if (Object.keys(errors).length > 0 || (!wholesaleOnly && !price) || (wholesaleOnly && !wholesale) || !unit) {
+    return { errors, payload: null };
+  }
   return {
     errors,
     payload: {
@@ -244,7 +261,7 @@ export function createBody(values: CardValues, payload: CardPayload, photoIds: s
     photoIds,
     points: Object.entries(values.points).filter(([, point]) => point.selected).map(([locationId, point]) => ({
       locationId,
-      ...(point.ownPrice !== null && validPrice(point.ownPrice) ? { ownPrice: validPrice(point.ownPrice)! } : {}),
+      ...(payload.price !== null && point.ownPrice !== null && validPrice(point.ownPrice) ? { ownPrice: validPrice(point.ownPrice)! } : {}),
     })),
     ...(draftId ? { draftId } : {}),
   };
@@ -254,7 +271,11 @@ export function updateBody(values: CardValues, payload: CardPayload, photoIds: s
   return {
     ...payload,
     photoIds,
-    offers: offers.map((offer) => ({ offerId: offer.id, revision: offer.revision, applyPrice: values.applyPrice[offer.id] ?? true })),
+    offers: offers.map((offer) => ({
+      offerId: offer.id,
+      revision: offer.revision,
+      applyPrice: payload.price === null ? true : (values.applyPrice[offer.id] ?? true),
+    })),
     addPoints: Object.entries(values.points).filter(([, point]) => point.selected).map(([locationId]) => locationId),
   };
 }
@@ -273,7 +294,8 @@ export function draftPayload(values: CardValues, photoIds: string[]): OfferDraft
     sellerComment: values.comment.slice(0, 500),
     photoIds,
     points: Object.entries(values.points).filter(([, point]) => point.selected)
-      .map(([locationId, point]) => ({ locationId, ownPrice: point.ownPrice })),
+      .map(([locationId, point]) => ({ locationId, ownPrice: values.wholesaleOnly ? null : point.ownPrice })),
+    ...(values.wholesaleOnly ? { wholesaleOnly: true } : {}),
     wholesale: values.wholesale ? {
       amount: values.wholesale.amount.slice(0, 40),
       batchCount: values.wholesale.batchCount.slice(0, 10),
@@ -291,6 +313,7 @@ export function valuesFromDraft(payload: OfferDraftPayload, knownLocations: Set<
     title: payload.title,
     productId: payload.productId,
     linkedName: payload.productId ? payload.title : null,
+    wholesaleOnly: Boolean(payload.wholesaleOnly),
     amount: payload.price,
     unit: unitDraftFrom(payload.unit ? (payload.unit.code === 'other' ? { code: 'other', value: payload.unit.value } : { code: payload.unit.code }) : null),
     packOpen: payload.pack !== null,
@@ -318,14 +341,15 @@ export function valuesFromChangeSet(
     pack: { amount: string; unit: PackUnit } | null;
     sellerComment: string | null;
     photos?: { id: string }[];
-    wholesale?: Wholesale | null;
+    wholesale?: (Wholesale & { unitChoice?: PriceUnit | null }) | null;
   }[] },
   offerIdByLocation: Map<string, string>,
 ): { values: Partial<CardValues>; photoIds?: string[] } | null {
   const items = changeSet.items.filter((item) => item.action === 'create_offer' || item.action === 'update_offer');
   const first = items[0];
-  if (!first?.price) return null;
-  const common = items.find((item) => !item.priceOwn)?.price?.amount ?? first.price.amount;
+  if (!first || (!first.price && !first.wholesale)) return null;
+  const wholesaleOnly = first.price === null && Boolean(first.wholesale);
+  const common = wholesaleOnly ? '' : (items.find((item) => !item.priceOwn)?.price?.amount ?? first.price?.amount ?? '');
   const creates = items.filter((item) => item.action === 'create_offer');
   const updates = items.filter((item) => item.action === 'update_offer');
   const isCardCreate = updates.length === 0;
@@ -334,8 +358,9 @@ export function valuesFromChangeSet(
       title: first.product.name,
       productId: first.product.id,
       linkedName: first.product.id ? first.product.name : null,
+      wholesaleOnly,
       amount: common,
-      unit: unitDraftFrom(first.price.unitChoice),
+      unit: unitDraftFrom(first.price?.unitChoice ?? first.wholesale?.unitChoice),
       packOpen: first.pack !== null,
       packAmount: first.pack?.amount ?? '',
       packUnit: first.pack?.unit ?? 'g',
@@ -343,11 +368,11 @@ export function valuesFromChangeSet(
       wholesale: wholesaleDraftFrom(first.wholesale),
       points: Object.fromEntries(creates.map((item) => [item.location.id, {
         selected: true,
-        ownPrice: isCardCreate && item.priceOwn ? item.price?.amount ?? null : null,
+        ownPrice: !wholesaleOnly && isCardCreate && item.priceOwn ? item.price?.amount ?? null : null,
       }])),
       applyPrice: Object.fromEntries(updates.flatMap((item) => {
         const offerId = offerIdByLocation.get(item.location.id);
-        return offerId ? [[offerId, !item.priceOwn]] : [];
+        return offerId ? [[offerId, wholesaleOnly ? true : !item.priceOwn]] : [];
       })),
     },
     ...(first.photos ? { photoIds: first.photos.map((photo) => photo.id) } : {}),
@@ -355,8 +380,8 @@ export function valuesFromChangeSet(
 }
 
 // pre-publication-buyer-preview (docs/slices/pre-publication-buyer-preview §3.2): the minimum that makes a card worth showing as a
-// buyer would see it — a valid title, a valid price, at least one point on the showcase and no photo still uploading. Everything
-// else (unit, pack, comment, photos) may be empty, as for buyers. Pure; the reasons are shown under the button.
+// buyer would see it — a valid title, a valid retail or wholesale price, at least one point on the showcase and no photo still
+// uploading. Pure; the reasons are shown under the button.
 export type PreviewReason = 'titlePrice' | 'point' | 'upload';
 
 export function previewAvailability(
@@ -367,7 +392,13 @@ export function previewAvailability(
   const reasons: PreviewReason[] = [];
   const title = normalizeOfferTitle(values.title);
   const titleOk = title.length >= OFFER_TITLE_MIN_LENGTH && title.length <= OFFER_TITLE_MAX_LENGTH;
-  if (!titleOk || priceError(values.amount) !== null) reasons.push('titlePrice');
+  const priceOk = values.wholesaleOnly
+    ? unitValue(values.unit) !== null
+      && values.wholesale !== null
+      && !values.wholesale.needsReview
+      && validateWholesale(values.wholesale, { requirePerContainer: false }).input !== null
+    : priceError(values.amount) === null;
+  if (!titleOk || !priceOk) reasons.push('titlePrice');
   const chosen = Object.values(values.points).filter((point) => point.selected).length;
   if (mode === 'create' ? chosen === 0 : context.activePoints + chosen === 0) reasons.push('point');
   if (context.uploading) reasons.push('upload');
@@ -381,7 +412,8 @@ export function previewBody(
   mode: { kind: 'create' } | { kind: 'edit'; offerIds: string[] },
   photoIds: string[],
 ) {
-  const price = validPrice(values.amount);
+  const wholesaleOnly = values.wholesaleOnly;
+  const price = wholesaleOnly ? null : validPrice(values.amount);
   const unit = unitValue(values.unit);
   const packAmount = normalizeAmount(values.packAmount);
   const packOk = values.packOpen && unit !== null && (unit.code === 'package' || unit.code === 'piece')
@@ -393,8 +425,9 @@ export function previewBody(
     pack: packOk ? { amount: packAmount, unit: values.packUnit } : null,
     sellerComment: values.comment,
     photoIds,
-    // wholesale-price: shown only as it would be published (a valid, reviewed line on a card with a unit)
-    wholesale: unit !== null && values.wholesale && !values.wholesale.needsReview ? validateWholesale(values.wholesale).input : null,
+    // wholesale-price / wholesale-only: shown only as it would be published (a valid, reviewed line on a card with a unit)
+    wholesale: unit !== null && values.wholesale && !values.wholesale.needsReview
+      ? validateWholesale(values.wholesale, { requirePerContainer: !wholesaleOnly }).input : null,
   };
   const chosen = Object.entries(values.points).filter(([, point]) => point.selected);
   if (mode.kind === 'create') {
@@ -403,14 +436,14 @@ export function previewBody(
       ...shared,
       points: chosen.map(([locationId, point]) => ({
         locationId,
-        ...(point.ownPrice !== null && validPrice(point.ownPrice) ? { ownPrice: validPrice(point.ownPrice)! } : {}),
+        ...(!wholesaleOnly && point.ownPrice !== null && validPrice(point.ownPrice) ? { ownPrice: validPrice(point.ownPrice)! } : {}),
       })),
     };
   }
   return {
     kind: 'update' as const,
     ...shared,
-    offers: mode.offerIds.map((offerId) => ({ offerId, applyPrice: values.applyPrice[offerId] ?? true })),
+    offers: mode.offerIds.map((offerId) => ({ offerId, applyPrice: wholesaleOnly ? true : (values.applyPrice[offerId] ?? true) })),
     addPoints: chosen.map(([locationId]) => locationId),
   };
 }

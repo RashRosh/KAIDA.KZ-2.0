@@ -1,4 +1,4 @@
-/* wholesale-price §3.2: smaller and calmer than the retail price; the label is text, not only colour. */
+/* wholesale-price §3.2 / wholesale-only §2.2: secondary line under retail, or primary price when price === null. */
 .line { display:flex; align-items:baseline; flex-wrap:wrap; gap:0 6px; margin:0 0 4px; font:400 13px/18px var(--sans); color:var(--ink2); }
 .line b { font:600 15px/18px var(--display); color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .line span { overflow-wrap:anywhere; }
@@ -8,3 +8,11 @@
 .lg { margin:6px 0 0; font-size:0.9375rem; line-height:1.375rem; }
 .lg b { font-size:1.1875rem; line-height:1.5rem; }
 .lg .tag { height:22px; font-size:12px; line-height:22px; }
+.primary { margin:2px 0 4px; }
+.primary b { font:800 17px/22px var(--display); color:var(--ink); }
+.primary.md b { font-size:18px; line-height:22px; }
+.primary.lg { margin:6px 0 0; }
+.primary.lg b { font:800 1.5rem/1.875rem var(--display); }
+.primary.lg .tag { height:24px; padding:0 8px; font-size:12px; line-height:24px; }
+.primary .batch { margin-top:2px; }
+.primary.lg .batch { margin-top:4px; }

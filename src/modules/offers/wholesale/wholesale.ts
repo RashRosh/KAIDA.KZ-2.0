@@ -25,7 +25,7 @@ export type Wholesale = {
   perContainer: string | null;
 };
 
-export const wholesaleInputSchema = z.object({
+const wholesaleBaseSchema = z.object({
   amount: z.string().trim().regex(AMOUNT_PATTERN).refine((value) => Number(value) > 0, 'Wholesale price must be greater than 0'),
   batchCount: z.number().int().min(1).max(WHOLESALE_BATCH_MAX),
   container: z.enum(WHOLESALE_CONTAINERS),
@@ -33,14 +33,26 @@ export const wholesaleInputSchema = z.object({
   perContainer: z.string().trim().regex(WHOLESALE_PER_CONTAINER_PATTERN).refine((value) => Number(value) > 0, 'Must be positive').optional(),
 }).strict()
   .refine((value) => (value.container === 'other') === (value.containerText !== undefined), 'Own container text goes with «Другое» only')
-  .refine((value) => (value.container === 'unit') === (value.perContainer === undefined), 'A container other than the unit needs its quantity')
-  .transform((value): Wholesale => ({
-    amount: canonicalDecimal(value.amount),
-    batchCount: value.batchCount,
-    container: value.container,
-    containerText: value.containerText ?? null,
-    perContainer: value.perContainer === undefined ? null : canonicalDecimal(value.perContainer),
-  }));
+  .refine((value) => value.container !== 'unit' || value.perContainer === undefined, 'Unit container does not take per-container quantity');
+
+const toWholesale = (value: z.infer<typeof wholesaleBaseSchema>): Wholesale => ({
+  amount: canonicalDecimal(value.amount),
+  batchCount: value.batchCount,
+  container: value.container,
+  containerText: value.containerText ?? null,
+  perContainer: value.perContainer === undefined ? null : canonicalDecimal(value.perContainer),
+});
+
+export const wholesaleInputSchema = wholesaleBaseSchema
+  .refine((value) => value.container === 'unit' || value.perContainer !== undefined, 'A container other than the unit needs its quantity')
+  .transform(toWholesale);
+
+// wholesale-only: when there is no retail price, perContainer is optional for containers other than the unit itself.
+export const wholesaleFlexibleInputSchema = wholesaleBaseSchema.transform(toWholesale);
+
+export function wholesaleNeedsPerContainer(wholesale: Wholesale): boolean {
+  return wholesale.container !== 'unit' && wholesale.perContainer === null;
+}
 
 export function canonicalDecimal(value: string): string {
   const [rawWhole = '0', rawFraction = ''] = value.split('.');

@@ -105,8 +105,9 @@ function startValues(mode: CardEditorMode, seller: SellerView | null, initial?: 
       title: lead.product.name,
       productId: lead.product.id,
       linkedName: lead.product.id ? lead.product.name : null,
+      wholesaleOnly: mode.kind !== 'point' && lead.price === null && lead.wholesale !== null,
       amount: formatInput(mode.kind === 'point' ? mode.offer.price?.amount : mode.card.commonPrice ?? lead.price?.amount),
-      unit: unitDraftFrom(lead.price?.unitChoice),
+      unit: unitDraftFrom(lead.price?.unitChoice ?? lead.wholesale?.unitChoice),
       packOpen: lead.pack !== null,
       packAmount: lead.pack?.amount ?? '',
       packUnit: lead.pack?.unit ?? 'g',
@@ -290,6 +291,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       // A change of the retail unit or pack sends the wholesale line back for review (wholesale-price §3.1).
       if (next.wholesale && !('wholesale' in patch) && wholesaleBasisKey(next) !== wholesaleBasisKey(current)) {
         next = { ...next, wholesale: markWholesaleReview(next.wholesale) };
+        setRetailReview(false);
       }
       if (attempted) setErrors(validateCard(next, mode.kind, locations.length).errors);
       return next;
@@ -490,12 +492,13 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
     }
   }
 
-  // The wholesale line as the buyer will read it: the retail unit label and basis, the batch with its forms.
+  // The wholesale line as the buyer will read it: the unit label and basis, the batch with its forms.
   const wholesaleUnit = values.unit.code === '' ? '' : values.unit.code === 'other' ? values.unit.custom.trim() : PRICE_UNIT_LABELS[locale][values.unit.code];
   const packAmountNow = normalizeAmount(values.packAmount);
   const packText = packAllowed(values.unit.code) && values.packOpen && packAmountNow !== '' && Number(packAmountNow) > 0
     ? formatPack({ amount: packAmountNow, unit: values.packUnit }, locale) : null;
   const wholesaleBasis = priceBasisText(wholesaleUnit || null, packText);
+  const requireWholesalePer = !values.wholesaleOnly;
   function wholesaleBatchText(draft: WholesaleDraft): string {
     if (draft.container === '') return '…';
     const per = normalizeAmount(draft.perContainer);
@@ -508,11 +511,16 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       containerText: draft.containerText.trim() || '…',
       perContainer: draft.container !== 'unit' && perOk ? canonicalDecimal(per) : null,
     }, wholesaleUnit, locale);
-    return draft.container === 'unit' || perOk ? text : `${text} (≈\u00a0?\u00a0${wholesaleUnit})`;
+    return draft.container === 'unit' || perOk || !requireWholesalePer ? text : `${text} (≈\u00a0?\u00a0${wholesaleUnit})`;
   }
   const wholesaleShown = (draft: WholesaleDraft) => ({
-    wholesale: { amount: validPrice(draft.amount) ?? (normalizeAmount(draft.amount) || '0'), currency: 'KZT' as const, batch: wholesaleBatchText(draft) },
-    price: { amount: '0', currency: 'KZT' as const, unit: wholesaleUnit || null },
+    wholesale: {
+      amount: validPrice(draft.amount) ?? (normalizeAmount(draft.amount) || '0'),
+      currency: 'KZT' as const,
+      ...(values.wholesaleOnly ? { unit: wholesaleUnit || null } : {}),
+      batch: wholesaleBatchText(draft),
+    },
+    price: values.wholesaleOnly ? null : { amount: '0', currency: 'KZT' as const, unit: wholesaleUnit || null },
     ...(packText ? { pack: packText } : {}),
   });
   const containerLabel = (container: WholesaleContainer) => container === 'unit' ? wholesaleUnit
@@ -520,18 +528,46 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const perContainerLabel = (draft: WholesaleDraft) => draft.container === 'other'
     ? t('wholesale.perContainerOther', { unit: wholesaleUnit, text: draft.containerText.trim() || '…' })
     : isListedContainer(draft.container) ? t('wholesale.perContainer', { unit: wholesaleUnit, inOne: wholesaleInOne(draft.container, locale) }) : '';
-  const wholesaleReviewText = (draft: WholesaleDraft) => isListedContainer(draft.container)
-    ? t('wholesale.reviewPer', { unit: wholesaleUnit, inOne: wholesaleInOne(draft.container, locale) })
-    : t('wholesale.reviewRequired');
+  const [retailReview, setRetailReview] = useState(false);
+  const wholesaleReviewText = (draft: WholesaleDraft) => {
+    if (retailReview && !values.wholesaleOnly) {
+      return isListedContainer(draft.container)
+        ? t('wholesale.reviewRetail', { unit: wholesaleUnit, inOne: wholesaleInOne(draft.container, locale) })
+        : t('wholesale.reviewRetailGeneric');
+    }
+    return isListedContainer(draft.container)
+      ? t('wholesale.reviewPer', { unit: wholesaleUnit, inOne: wholesaleInOne(draft.container, locale) })
+      : t('wholesale.reviewRequired');
+  };
+
+  function toggleWholesaleOnly() {
+    const nextOnly = !values.wholesaleOnly;
+    let nextWholesale = values.wholesale;
+    if (!nextOnly && nextWholesale && nextWholesale.container !== 'unit' && nextWholesale.perContainer.trim() === '') {
+      // wholesale-only §2.1: switching back to retail requires perContainer conversion for non-unit containers.
+      nextWholesale = { ...nextWholesale, needsReview: true };
+      setRetailReview(true);
+    } else if (nextOnly && nextWholesale?.needsReview && validateWholesale(nextWholesale, { requirePerContainer: false }).input !== null) {
+      nextWholesale = { ...nextWholesale, needsReview: false };
+      setRetailReview(false);
+    }
+    update({ wholesaleOnly: nextOnly, wholesale: nextWholesale });
+  }
 
   function openWholesale() {
+    if (values.unit.code === '') {
+      setAttempted(true);
+      setErrors((current) => ({ ...current, unit: 'card.unitRequired' }));
+      setOverlay('unit');
+      return;
+    }
     setWholesaleForm(values.wholesale ? { ...values.wholesale } : emptyWholesaleDraft());
     setWholesaleErrors({});
     setWholesaleAttempted(false);
     setOverlay('wholesale');
   }
   function saveWholesale() {
-    const checked = validateWholesale(wholesaleForm);
+    const checked = validateWholesale(wholesaleForm, { requirePerContainer: requireWholesalePer });
     setWholesaleErrors(checked.errors);
     setWholesaleAttempted(true);
     if (!checked.input) {
@@ -540,11 +576,14 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
       if (first) document.getElementById(`${ids}-ws-${first}`)?.focus();
       return;
     }
+    setRetailReview(false);
     update({ wholesale: { ...wholesaleForm, needsReview: false } });
     setOverlay(null);
     focusField(`${ids}-wholesale`);
   }
   function removeWholesale() {
+    if (values.wholesaleOnly) return;
+    setRetailReview(false);
     update({ wholesale: null });
     setOverlay(null);
     focusField(`${ids}-wholesale-add`);
@@ -553,7 +592,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
   const setWholesaleField = (patch: Partial<WholesaleDraft>) => {
     const next = { ...wholesaleForm, ...patch };
     setWholesaleForm(next);
-    if (wholesaleAttempted) setWholesaleErrors(validateWholesale(next).errors);
+    if (wholesaleAttempted) setWholesaleErrors(validateWholesale(next, { requirePerContainer: requireWholesalePer }).errors);
   };
   const wsErr = (field: keyof WholesaleErrors) => wholesaleErrors[field] ? `${ids}-ws-${field}-error` : undefined;
 
@@ -834,18 +873,37 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               {errors.title && <ErrorLine id={err('title')}>{t(errors.title)}</ErrorLine>}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, alignItems: 'start' }}>
-              <div className="fld">
-                <label htmlFor={`${ids}-price`}>{t('card.price')}</label>
-                <div className={`inp num${errors.price ? ' er' : ''}`}>
-                  <input id={`${ids}-price`} value={values.amount} onChange={(event) => update({ amount: acceptAmountInput(values.amount, event.target.value) })} inputMode="decimal" autoComplete="off"
-                    placeholder={t('card.pricePlaceholder')} aria-invalid={errors.price ? true : undefined}
-                    aria-describedby={[err('price'), mode.kind === 'edit' ? `${ids}-price-previous` : ''].filter(Boolean).join(' ') || undefined} disabled={disabled} />
-                  <span className="c2">₸</span>
-                </div>
-                {mode.kind === 'edit' && mode.card.commonPrice && <span className="hint" id={`${ids}-price-previous`}>{t('card.pricePrevious', { price: price(mode.card.commonPrice) })}</span>}
-                {errors.price && <ErrorLine id={err('price')}>{t(errors.price)}</ErrorLine>}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={values.wholesaleOnly}
+              className="card"
+              data-testid="wholesale-only-switch"
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48, padding: '10px 14px', textAlign: 'left', cursor: 'pointer' }}
+              onClick={toggleWholesaleOnly}
+              disabled={disabled}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="ts">{t('wholesale.only')}</div>
+                <p className="c">{t('wholesale.onlyHint')}</p>
               </div>
+              <span className={`sw${values.wholesaleOnly ? ' on' : ''}`} aria-hidden="true" />
+            </button>
+
+            <div style={{ display: 'grid', gridTemplateColumns: values.wholesaleOnly ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))', gap: 12, alignItems: 'start' }}>
+              {!values.wholesaleOnly && (
+                <div className="fld">
+                  <label htmlFor={`${ids}-price`}>{t('card.price')}</label>
+                  <div className={`inp num${errors.price ? ' er' : ''}`}>
+                    <input id={`${ids}-price`} value={values.amount} onChange={(event) => update({ amount: acceptAmountInput(values.amount, event.target.value) })} inputMode="decimal" autoComplete="off"
+                      placeholder={t('card.pricePlaceholder')} aria-invalid={errors.price ? true : undefined}
+                      aria-describedby={[err('price'), mode.kind === 'edit' ? `${ids}-price-previous` : ''].filter(Boolean).join(' ') || undefined} disabled={disabled} />
+                    <span className="c2">₸</span>
+                  </div>
+                  {mode.kind === 'edit' && mode.card.commonPrice && <span className="hint" id={`${ids}-price-previous`}>{t('card.pricePrevious', { price: price(mode.card.commonPrice) })}</span>}
+                  {errors.price && <ErrorLine id={err('price')}>{t(errors.price)}</ErrorLine>}
+                </div>
+              )}
               <div className="fld">
                 <label htmlFor={`${ids}-unit`}>{t('card.unit')}</label>
                 <button id={`${ids}-unit`} type="button" className={`inp${errors.unit && values.unit.code === '' ? ' er' : ''}${overlay === 'unit' ? ' foc' : ''}`}
@@ -879,7 +937,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                   </select>
                 </div>
                 {values.packAmount.trim() && (
-                  <span className="hint">{t('card.packPreview', { name: `${values.title.trim() || '…'} · ${values.packAmount.trim()} ${PACK_UNIT_LABELS[locale][values.packUnit]}`, price: `${commonPriceText} / ${values.unit.code === 'package' ? 'упаковка' : 'шт.'}` })}</span>
+                  <span className="hint">{t('card.packPreview', { name: `${values.title.trim() || '…'} · ${values.packAmount.trim()} ${PACK_UNIT_LABELS[locale][values.packUnit]}`, price: `${values.wholesaleOnly ? (price(normalizeAmount(values.wholesale?.amount ?? '')) || '—') : commonPriceText} / ${values.unit.code === 'package' ? 'упаковка' : 'шт.'}` })}</span>
                 )}
                 {errors.pack && <ErrorLine id={err('pack')}>{t(errors.pack)}</ErrorLine>}
               </div>
@@ -902,6 +960,16 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                 {values.wholesale.needsReview
                   ? <ErrorLine id={`${ids}-wholesale-error`}>{wholesaleReviewText(values.wholesale)}</ErrorLine>
                   : errors.wholesale && <ErrorLine id={err('wholesale')}>{t(errors.wholesale)}</ErrorLine>}
+              </div>
+            ) : values.wholesaleOnly ? (
+              <div className="fld" data-testid="wholesale-row">
+                <div className="fl" id={`${ids}-wholesale-label`}>{t('wholesale.title')}</div>
+                <button id={`${ids}-wholesale`} type="button" className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48, border: errors.wholesale ? '2px solid var(--danger)' : undefined }}
+                  onClick={openWholesale} disabled={disabled} aria-haspopup="dialog" aria-describedby={err('wholesale')}>
+                  <Ic name="plus" className="pt" />
+                  <div style={{ flex: 1, textAlign: 'left' }}><div className="ts pt">{t('wholesale.set')}</div></div>
+                </button>
+                {errors.wholesale && <ErrorLine id={err('wholesale')}>{t(errors.wholesale)}</ErrorLine>}
               </div>
             ) : values.unit.code !== '' && (
               <button id={`${ids}-wholesale-add`} type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0, minHeight: 44 }} onClick={openWholesale} disabled={disabled} aria-haspopup="dialog">
@@ -955,7 +1023,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                 {selectedPoints.length > 0 && (
                   <p className="c c2"><Ic name="layers" className="xs" style={{ verticalAlign: -3 }} /> {t(pluralKey('card.willCreate', selectedPoints.length), { count: selectedPoints.length })}</p>
                 )}
-                {selectedPoints.length > 1 && (
+                {selectedPoints.length > 1 && !values.wholesaleOnly && (
                   <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => setView('prices')} disabled={disabled}>
                     {hasOwnPrice ? 'Цены по точкам · есть своя цена' : t('card.setPrices')}
                   </button>
@@ -966,19 +1034,24 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
 
             {mode.kind === 'edit' && (
               <section className="card p16" style={{ gap: 6 }} id={`${ids}-points`} tabIndex={-1}>
-                <div className="ts">{cardOffers.length > 1 ? t('card.alsoChange') : t('card.points')}</div>
+                <div className="ts">{cardOffers.length > 1 && !values.wholesaleOnly ? t('card.alsoChange') : t('card.points')}</div>
                 {cardOffers.map((offer) => {
-                  const checked = values.applyPrice[offer.id] ?? true;
+                  const checked = values.wholesaleOnly ? true : (values.applyPrice[offer.id] ?? true);
                   const now = offer.price?.amount ?? null;
-                  const changing = checked && now && commonAmount && Number(now) !== Number(commonAmount);
+                  const changing = !values.wholesaleOnly && checked && now && commonAmount && Number(now) !== Number(commonAmount);
+                  const wsAmount = values.wholesale ? normalizeAmount(values.wholesale.amount) : offer.wholesale?.amount ?? '';
                   return (
-                    <label key={offer.id} className="li" style={{ minHeight: 48, cursor: cardOffers.length > 1 ? 'pointer' : 'default' }}>
-                      <Check checked={checked} onChange={(next) => update({ applyPrice: { ...values.applyPrice, [offer.id]: next } })} label={pointName(offer.location.id, offer.location.name)} disabled={disabled || cardOffers.length === 1} />
+                    <label key={offer.id} className="li" style={{ minHeight: 48, cursor: cardOffers.length > 1 && !values.wholesaleOnly ? 'pointer' : 'default' }}>
+                      <Check checked={checked} onChange={(next) => update({ applyPrice: { ...values.applyPrice, [offer.id]: next } })} label={pointName(offer.location.id, offer.location.name)} disabled={disabled || cardOffers.length === 1 || values.wholesaleOnly} />
                       <div className="mid">
                         <div className="ts">{pointName(offer.location.id, offer.location.name)}</div>
-                        {!checked && offer.priceOwn
-                          ? <p className="c num"><span className="bd bd-p" style={{ height: 20 }}>{t('card.ownPriceKept', { price: price(now) })}</span> не меняется</p>
-                          : <p className="c num">{changing ? `${formatAmount(now!)} → ${price(commonAmount)}` : price(now)}</p>}
+                        {values.wholesaleOnly ? (
+                          <p className="c num">{wsAmount ? `${price(wsAmount)} · ${t('offer.wholesaleTag')}` : t('wholesale.only')}</p>
+                        ) : !checked && offer.priceOwn ? (
+                          <p className="c num"><span className="bd bd-p" style={{ height: 20 }}>{t('card.ownPriceKept', { price: price(now) })}</span> не меняется</p>
+                        ) : (
+                          <p className="c num">{changing ? `${formatAmount(now!)} → ${price(commonAmount)}` : now ? price(now) : (commonAmount ? price(commonAmount) : t('wholesale.only'))}</p>
+                        )}
                       </div>
                       <PointEditLabel label={editLabel(offer.location.id, offer.location.name)} focusKey={`offer:${offer.id}`} onClick={() => editPoint(offer.location.id, `offer:${offer.id}`)} disabled={disabled} />
                     </label>
@@ -1031,7 +1104,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                 </button>
                 {!previewCheck.ok && (
                   <p className="c c2" style={{ margin: 0 }} data-testid="preview-reason">
-                    {previewCheck.reasons.map((reason) => t(reason === 'titlePrice' ? 'preview.needTitlePrice' : reason === 'point' ? 'preview.needPoint' : 'photos.waitUpload')).join('. ')}
+                    {previewCheck.reasons.map((reason) => t(reason === 'titlePrice' ? (values.wholesaleOnly ? 'preview.needTitleWholesale' : 'preview.needTitlePrice') : reason === 'point' ? 'preview.needPoint' : 'photos.waitUpload')).join('. ')}
                   </p>
                 )}
               </>
@@ -1070,7 +1143,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
                 aria-invalid={wholesaleErrors.amount ? true : undefined} aria-describedby={[wsErr('amount'), `${ids}-ws-amount-hint`].filter(Boolean).join(' ')} />
               <span className="c2" style={{ whiteSpace: 'nowrap' }}>₸{wholesaleBasis ? ` ${wholesaleBasis}` : ''}</span>
             </div>
-            <span className="hint" id={`${ids}-ws-amount-hint`}>{t('wholesale.priceHint')}</span>
+            <span className="hint" id={`${ids}-ws-amount-hint`}>{t(values.wholesaleOnly ? 'wholesale.onlyPriceHint' : 'wholesale.priceHint')}</span>
             {wholesaleErrors.amount && <ErrorLine id={wsErr('amount')}>{t(wholesaleErrors.amount)}</ErrorLine>}
           </div>
           <div className="fld">
@@ -1100,7 +1173,10 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
           )}
           {wholesaleForm.container !== 'unit' && wholesaleForm.container !== '' && (
             <div className="fld">
-              <label htmlFor={`${ids}-ws-perContainer`}>{perContainerLabel(wholesaleForm)}</label>
+              <label htmlFor={`${ids}-ws-perContainer`}>
+                {perContainerLabel(wholesaleForm)}
+                {values.wholesaleOnly && <> <span className="req">· {t('wholesale.optional')}</span></>}
+              </label>
               <div className={`inp num${wholesaleErrors.perContainer ? ' er' : ''}`}>
                 <input id={`${ids}-ws-perContainer`} value={wholesaleForm.perContainer} inputMode="decimal" autoComplete="off"
                   onChange={(event) => setWholesaleField({ perContainer: acceptAmountInput(wholesaleForm.perContainer, event.target.value) })}
@@ -1110,11 +1186,11 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
               {wholesaleErrors.perContainer && <ErrorLine id={wsErr('perContainer')}>{t(wholesaleErrors.perContainer)}</ErrorLine>}
             </div>
           )}
-          {validateWholesale(wholesaleForm).input && (
+          {validateWholesale(wholesaleForm, { requirePerContainer: requireWholesalePer }).input && (
             <p className="c c2" data-testid="wholesale-buyer-sees">{t('wholesale.buyerSees', { text: wholesaleBatchText(wholesaleForm) })}</p>
           )}
           <button type="button" className="btn btn-p lg w" onClick={saveWholesale}>{t('wholesale.save')}</button>
-          {values.wholesale && (
+          {values.wholesale && !values.wholesaleOnly && (
             <button type="button" className="btn btn-g w" style={{ color: 'var(--danger)' }} onClick={removeWholesale}>{t('wholesale.remove')}</button>
           )}
         </Sheet>
@@ -1156,7 +1232,7 @@ export function CardEditor({ mode, seller: initialSeller, initial, initialFocus,
           ) : selectedPoints.length === 1 ? (
             <p className="t" style={{ fontWeight: 500 }}><Ic name="layers" className="sm" style={{ verticalAlign: -4 }} /> {t(pluralKey('card.willCreate', 1), { count: 1 })}</p>
           ) : null}
-          {selectedPoints.length > 1 && (
+          {selectedPoints.length > 1 && !values.wholesaleOnly && (
             <button type="button" className="btn btn-g sm" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => { setOverlay(null); setView('prices'); }}>{t('card.setPrices')}</button>
           )}
           <button type="button" className={`btn btn-p lg w${selectedPoints.length === 0 ? ' dis' : ''}`} disabled={selectedPoints.length === 0} aria-describedby={selectedPoints.length === 0 ? `${ids}-why` : undefined} onClick={() => setOverlay(null)}>Готово</button>

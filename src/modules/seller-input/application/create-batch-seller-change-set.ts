@@ -41,9 +41,16 @@ function normalizedCurrentPrice(offer: {
   priceAmount: string | null;
   priceCurrency: string | null;
   priceUnit: PriceUnit | null;
+  wholesale: unknown;
 }) {
   if (offer.priceAmount === null) {
-    if (offer.priceCurrency !== null || offer.priceUnit !== null) {
+    if (offer.priceCurrency !== null) {
+      throw new SellerInputInvariantError('Target Offer содержит некорректную форму цены.');
+    }
+    if (offer.wholesale !== null) {
+      return { amount: null, currency: null, unit: offer.priceUnit };
+    }
+    if (offer.priceUnit !== null) {
       throw new SellerInputInvariantError('Target Offer содержит некорректную форму цены.');
     }
     return null;
@@ -81,8 +88,8 @@ type PreparedManagementItem = {
   action: 'update_offer' | 'deactivate_offer' | 'activate_offer';
   card: ChangeItemCardFields;
   locationId: string;
-  priceAmount: string;
-  priceCurrency: 'KZT';
+  priceAmount: string | null;
+  priceCurrency: 'KZT' | null;
   priceUnit: PriceUnit | null;
   sellerComment: string | null;
   targetOfferId: string;
@@ -153,7 +160,7 @@ async function prepareItem(
     card: currentCardFields(offer),
     locationId: offer.locationId,
     priceAmount: currentPrice.amount,
-    priceCurrency: 'KZT',
+    priceCurrency: currentPrice.currency,
     priceUnit: currentPrice.unit,
     sellerComment: normalizeNullableText(offer.sellerComment),
     targetOfferId: offer.id,
@@ -216,12 +223,12 @@ export async function createPriceUpdateChangeSet(
   for (const target of targets) {
     const offer = await findOwnedOfferForManagement(tx, target.offerId, sellerId);
     const action = target.action ?? 'update_offer';
-    if (!offer || offer.status !== (action === 'activate_offer' ? 'inactive' : 'active') || offer.revision !== target.expectedRevision) throw new OfferChangedError();
+    if (!offer || offer.priceAmount === null || offer.status !== (action === 'activate_offer' ? 'inactive' : 'active') || offer.revision !== target.expectedRevision) throw new OfferChangedError();
     let next: PreparedItem;
     try {
       if (action === 'activate_offer') {
         next = await prepareItem(tx, sellerId, { action, offerId: offer.id });
-        next = { ...next, priceAmount: target.price, card: Number(target.price) === Number(offer.priceAmount)
+        next = { ...next, priceAmount: target.price, priceCurrency: 'KZT', card: Number(target.price) === Number(offer.priceAmount)
           ? currentCardFields(offer)
           : await perOfferUpdateCardFields(tx, offer, { price: target.price, unit: offer.priceUnit, sellerComment: offer.sellerComment, photosChanged: false }) };
       } else next = await prepareItem(tx, sellerId, {

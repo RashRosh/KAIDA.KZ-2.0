@@ -5,7 +5,7 @@ import { resolveProduct } from '../../catalog/application/resolve-product';
 import { findCatalogProductById } from '../../catalog/infrastructure/products.repository';
 import { findOfferPhotoIdsByOffer, findOwnedOfferForManagement, lockCardOffers } from '../../offers/infrastructure/offers.repository';
 import { samePack, type Pack } from '../../offers/pack/pack';
-import { sameWholesale, type Wholesale } from '../../offers/wholesale/wholesale';
+import { sameWholesale, wholesaleNeedsPerContainer, type Wholesale } from '../../offers/wholesale/wholesale';
 import { DraftNotFoundError, findOwnedDraft } from '../../offers/drafts/offer-drafts';
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { findSellerByOwner } from '../../sellers/infrastructure/sellers.repository';
@@ -23,6 +23,7 @@ import {
   LocationNotFoundError,
   OfferChangedError,
   OfferNotFoundError,
+  OfferPriceRequiredError,
   OfferUpdateNoChangesError,
   ProductNotFoundError,
   SellerInputInvariantError,
@@ -53,6 +54,9 @@ export function canonicalAmount(value: string): string {
 
 const sameAmount = (left: string | null, right: string | null) =>
   left !== null && right !== null && canonicalAmount(left) === canonicalAmount(right);
+
+const sameNullableAmount = (left: string | null, right: string | null) =>
+  (left === null && right === null) || sameAmount(left, right);
 
 // A chosen suggestion links to that product; otherwise an exact whole-name catalog match links silently (decision e).
 async function catalogLink(tx: Tx, title: string, productId: string | null): Promise<string | null> {
@@ -97,13 +101,14 @@ export async function createCardChangeSet(
 
     const changeSet = await createChangeSet(tx, seller.id, input.draftId ?? null);
     for (const point of input.points) {
-      const own = point.ownPrice !== undefined && !sameAmount(point.ownPrice, input.price);
+      const own = input.price !== null && point.ownPrice !== undefined && !sameAmount(point.ownPrice, input.price);
+      const priceAmount = input.price === null ? null : (own ? point.ownPrice! : input.price);
       const item = await createChangeItem(tx, {
         changeSetId: changeSet.id,
         card: { title: input.title, productId, cardId, priceOwn: own, pack: input.pack, wholesale: input.wholesale },
         locationId: point.locationId,
-        priceAmount: own ? point.ownPrice! : input.price,
-        priceCurrency: 'KZT',
+        priceAmount,
+        priceCurrency: priceAmount === null ? null : 'KZT',
         priceUnit: input.unit,
         sellerComment: input.sellerComment,
       });
@@ -154,20 +159,34 @@ export async function updateCardChangeSet(
     }
     await assertPhotosOwnedBy(tx, input.photoIds, ownerUserId);
     const productId = await catalogLink(tx, input.title, input.productId);
-    // wholesale-price §3.4: omitted keeps the card's wholesale, but not across a change of the unit or the pack.
+    // wholesale-price §3.4 / wholesale-only: omitted keeps the card's wholesale, but not across a change of the unit or
+    // the pack, and never when switching from wholesale-only back to retail without a container conversion.
     const current = cardOffers[0]!;
     const unitOrPackChanged = !samePriceUnit(current.priceUnit, input.unit) || !samePack(current.pack, input.pack);
     if (input.wholesale === undefined && current.wholesale !== null && unitOrPackChanged) throw new WholesaleReviewRequiredError();
     const wholesale = input.wholesale === undefined ? current.wholesale : input.wholesale;
+    if (input.price === null && wholesale === null) throw new OfferPriceRequiredError();
+    if (input.price !== null && wholesale !== null && wholesaleNeedsPerContainer(wholesale)) throw new WholesaleReviewRequiredError();
     const next = { ...input, productId, wholesale };
 
     const photosByOffer = await findOfferPhotoIdsByOffer(tx, cardOffers.map((offer) => offer.id));
     const planned = cardOffers.map((offer) => {
-      if (offer.priceAmount === null) throw new SellerInputInvariantError('Offer карточки без цены.');
-      const priceAmount = seen.get(offer.id)!.applyPrice ? input.price : offer.priceAmount;
-      const priceOwn = !sameAmount(priceAmount, input.price);
+      if (offer.priceAmount === null && offer.wholesale === null) throw new SellerInputInvariantError('Offer карточки без цены.');
+      let priceAmount: string | null;
+      let priceOwn: boolean;
+      if (input.price === null) {
+        priceAmount = null;
+        priceOwn = false;
+      } else if (offer.priceAmount === null) {
+        // Switching from wholesale-only to retail sets the common retail price on every point.
+        priceAmount = input.price;
+        priceOwn = false;
+      } else {
+        priceAmount = seen.get(offer.id)!.applyPrice ? input.price : offer.priceAmount;
+        priceOwn = !sameAmount(priceAmount, input.price);
+      }
       const unchanged = sharedFieldsUnchanged(offer, photosByOffer.get(offer.id) ?? [], next)
-        && sameAmount(offer.priceAmount, priceAmount)
+        && sameNullableAmount(offer.priceAmount, priceAmount)
         && offer.priceOwn === priceOwn;
       return { offer, priceAmount, priceOwn, unchanged };
     });
@@ -182,7 +201,7 @@ export async function updateCardChangeSet(
         card: { ...shared, priceOwn },
         locationId: offer.locationId,
         priceAmount,
-        priceCurrency: 'KZT',
+        priceCurrency: priceAmount === null ? null : 'KZT',
         priceUnit: input.unit,
         sellerComment: input.sellerComment,
         targetOfferId: offer.id,
@@ -197,7 +216,7 @@ export async function updateCardChangeSet(
         card: { ...shared, priceOwn: false },
         locationId,
         priceAmount: input.price,
-        priceCurrency: 'KZT',
+        priceCurrency: input.price === null ? null : 'KZT',
         priceUnit: input.unit,
         sellerComment: input.sellerComment,
       });
@@ -224,7 +243,7 @@ export async function pointPriceChangeSet(
     const offer = cardOffers.find((candidate) => candidate.id === offerId);
     if (!offer) throw new OfferNotFoundError();
     if (offer.revision !== input.revision) throw new OfferChangedError();
-    if (offer.priceAmount === null) throw new SellerInputInvariantError('Offer карточки без цены.');
+    if (offer.priceAmount === null) throw new CommonPriceMissingError();
 
     const common = cardOffers.find((candidate) => candidate.id !== offer.id && !candidate.priceOwn)?.priceAmount
       ?? (offer.priceOwn ? null : offer.priceAmount);

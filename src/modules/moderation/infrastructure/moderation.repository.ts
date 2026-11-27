@@ -136,6 +136,7 @@ export async function moveFeedMark(database: Db, userId: string, until: Date): P
 export type OperatorOfferRow = {
   id: string; card_id: string; title: string; pack_amount: string | null; pack_unit: string | null;
   price_amount: string | null; price_unit_code: string | null; price_unit_value: string | null;
+  wholesale_price_amount: string | null;
   seller_comment: string | null; status: 'active' | 'inactive'; location_name: string; location_address: string;
   seller_phone: string | null;
 };
@@ -144,7 +145,7 @@ export async function listCardOffers(database: Db, cardIds: string[]): Promise<O
   if (cardIds.length === 0) return [];
   const result = await database.execute<OperatorOfferRow>(sql`
     select o.id, o.card_id, o.title, o.pack_amount::text, o.pack_unit, o.price_amount::text, o.price_unit_code,
-      o.price_unit_value, o.seller_comment, o.status, l.name as location_name, l.address_text as location_address,
+      o.price_unit_value, o.wholesale_price_amount::text, o.seller_comment, o.status, l.name as location_name, l.address_text as location_address,
       coalesce(u.phone_e164, s.contact_phone_e164) as seller_phone
     from offers o
     join locations l on l.id = o.location_id

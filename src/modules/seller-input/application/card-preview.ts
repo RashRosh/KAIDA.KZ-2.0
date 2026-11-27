@@ -43,10 +43,14 @@ export async function buildCardPreview(
   await assertPhotosOwnedBy(db, input.photoIds, ownerUserId);
 
   // one row per point that would be on the showcase: where, at what price, since when confirmed
-  type Row = { locationId: string; priceAmount: string; confirmedAt: Date };
+  type Row = { locationId: string; priceAmount: string | null; confirmedAt: Date };
   let rows: Row[];
   if (input.kind === 'create') {
-    rows = input.points.map((point) => ({ locationId: point.locationId, priceAmount: twoDecimals(point.ownPrice ?? input.price), confirmedAt: now }));
+    rows = input.points.map((point) => ({
+      locationId: point.locationId,
+      priceAmount: input.price === null ? null : twoDecimals(point.ownPrice ?? input.price),
+      confirmedAt: now,
+    }));
   } else {
     const ids = input.offers.map((offer) => offer.offerId);
     const owned = await db.select({
@@ -54,6 +58,7 @@ export async function buildCardPreview(
       locationId: offers.locationId,
       status: offers.status,
       priceAmount: offers.priceAmount,
+      wholesalePriceAmount: offers.wholesalePriceAmount,
       lastConfirmedAt: offers.lastConfirmedAt,
     }).from(offers).where(and(inArray(offers.id, ids), eq(offers.sellerId, seller.id)));
     if (owned.length !== ids.length) throw new OfferNotFoundError();
@@ -62,10 +67,17 @@ export async function buildCardPreview(
       // the card's Offers that are on the showcase: the common price where the Seller applies it, their own price otherwise
       ...input.offers.flatMap((offer) => {
         const row = byId.get(offer.offerId)!;
-        if (row.status !== 'active' || row.priceAmount === null) return [];
-        return [{ locationId: row.locationId, priceAmount: offer.applyPrice ? twoDecimals(input.price) : row.priceAmount, confirmedAt: row.lastConfirmedAt }];
+        if (row.status !== 'active' || (row.priceAmount === null && row.wholesalePriceAmount === null)) return [];
+        const priceAmount = input.price === null
+          ? null
+          : (offer.applyPrice || row.priceAmount === null ? twoDecimals(input.price) : row.priceAmount);
+        return [{ locationId: row.locationId, priceAmount, confirmedAt: row.lastConfirmedAt }];
       }),
-      ...input.addPoints.map((locationId) => ({ locationId, priceAmount: twoDecimals(input.price), confirmedAt: now })),
+      ...input.addPoints.map((locationId) => ({
+        locationId,
+        priceAmount: input.price === null ? null : twoDecimals(input.price),
+        confirmedAt: now,
+      })),
     ];
   }
 
