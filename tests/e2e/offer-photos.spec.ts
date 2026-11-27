@@ -101,7 +101,8 @@ test('Seller adds photos, makes the second the cover and publishes; Buyer opens 
 
     await fillOfferFields(page, { product: 'Баранина', price: '5100', unit: 'kg' });
     await toConfirm(page);
-    await expect(page.locator('.kv').filter({ has: page.getByText('Фото', { exact: true }) })).toHaveText(/Фото\s*3$/);
+    await expect(page.locator('img[src*="/media/photos/"]').first()).toBeVisible();
+    await expect(page.locator('.kv').filter({ has: page.getByText('Фото', { exact: true }) })).toHaveCount(0);
     await expect(page.getByText('Карточки с фото выбирают чаще')).toHaveCount(0);
     await page.getByRole('button', { name: /^(Подтвердить и опубликовать|Опубликовать)$/ }).click();
     await expect(page.getByRole('status').filter({ hasText: /Опубликовано|Предложение создано|Жарияланды/ })).toBeVisible();
@@ -149,8 +150,9 @@ test('a card without photos is published after the reminder; in Kazakh the remin
     await toConfirm(page);
 
     await expect(page.getByText('Карточки с фото выбирают чаще')).toBeVisible();
-    await expect(page.getByText('Без фото', { exact: true })).toBeVisible();
+    await expect(page.locator('.kv').filter({ has: page.getByText('Фото', { exact: true }) })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Добавить фото' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Опубликовать без фото' })).toBeVisible();
 
     await setLocaleCookie(page.context(), 'kk');
     await page.reload();

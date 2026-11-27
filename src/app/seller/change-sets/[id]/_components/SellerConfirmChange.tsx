@@ -266,7 +266,6 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
 
   function describe(item: SellerChangeSetItemView, withOld: boolean) {
     const old = withOld && current && item.action === 'update_offer' ? current : undefined;
-    const photoIds = resultingPhotoIds(item);
     // A price change from a text review keeps the comment and photos; only the price rows are shown (text-price-update §3.6).
     const editsCard = (item.action === 'create_offer' || item.action === 'update_offer') && !fromTextReview;
     return (
@@ -299,7 +298,6 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
             old={item.previousWholesale !== undefined ? wholesaleText(item.previousWholesale, item) ?? t('wholesale.none') : null} />
         )}
         {editsCard && <Kv label={t('confirm.comment')} value={item.sellerComment ?? t('confirm.noComment')} old={old ? old.sellerComment ?? t('confirm.noComment') : null} />}
-        {editsCard && <Kv label={t('confirm.photos')} value={photoIds.length > 0 ? String(photoIds.length) : t('confirm.noPhotos')} />}
       </div>
     );
   }
@@ -399,7 +397,6 @@ export function SellerConfirmChange({ changeSetId }: { changeSetId: string }) {
                 <Kv label={t('wholesale.title')} value={wholesaleText(first.wholesale, first) ?? t('wholesale.none')}
                   old={first.previousWholesale !== undefined ? wholesaleText(first.previousWholesale, first) ?? t('wholesale.none') : null} />
               )}
-              {cardPhotoIds !== undefined && <Kv label={t('confirm.photos')} value={cardPhotoIds.length > 0 ? String(cardPhotoIds.length) : t('confirm.noPhotos')} />}
               {cardPhotoIds !== undefined && first.sellerComment && <Kv label={t('confirm.comment')} value={first.sellerComment} />}
             </>
           )}

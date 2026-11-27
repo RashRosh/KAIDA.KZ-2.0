@@ -54,6 +54,7 @@
 | [mandatory-offer-price](../mandatory-offer-price/SLICE_CONTRACT.md) | У publishable Offer всегда `price_amount IS NOT NULL` (`KZT`), `SearchOffer.price` non-null. | У publishable Offer обязательна **хотя бы одна цена** — розничная ИЛИ оптовая; `SearchOffer.price` может быть `null` при заполненном `wholesale`. |
 | [search-sort-rev3](../search-sort-rev3/SLICE_CONTRACT.md) | `price asc/desc` сравнивает `price.amount` у всех выданных Offer. | При `sort=price` (`asc` и `desc`) розничные Offer всегда выше «только опт»; «только опт» между собой — по свежести → `Offer.id` (опт в сортировке не участвует). |
 | [seller-showcase-editor](../seller-showcase-editor/SLICE_CONTRACT.md), [wholesale-price](../wholesale-price/SLICE_CONTRACT.md) | Розничная цена обязательна; пересчёт опта обязателен для любой тары ≠ единице. | В режиме «Только оптом» розничная цена отсутствует, единица свободная, пересчёт необязателен. |
+| [offer-photos](../offer-photos/SLICE_CONTRACT.md) | Экран проверки перед публикацией показывал обложку и строку с количеством фото / «Без фото». | По решению PO на визуальной приёмке (27.11.2026) строка количества фото на экране проверки убрана; обложка, баннер-напоминание и кнопка «Опубликовать без фото» сохранены. |
 
 ## 5. Ожидаемые модули
 
