@@ -1,6 +1,6 @@
 # B08 Opening Hours Sub-Block (Issue #226) — Slice Contract
 
-**Статус: APPROVED — PO (Issue #226 от 13.11.2026; запуск в очереди — PO 27.11.2026).** Основание: [Issue #226](https://github.com/RashRosh/KAIDA.KZ-2.0/issues/226), [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) (D3 · B08), [design-offer](../design-offer/SLICE_CONTRACT.md) и [card-opening-hours](../card-opening-hours/SLICE_CONTRACT.md).
+**Статус: CLOSED — PO, 27.11.2026** (`v0.0.97-b08-opening-hours`, merge `7ec8086`, Issue #226 закрыт). Основание: [Issue #226](https://github.com/RashRosh/KAIDA.KZ-2.0/issues/226), [DESIGN_BASELINE.md](../../product/DESIGN_BASELINE.md) (D3 · B08), [design-offer](../design-offer/SLICE_CONTRACT.md) и [card-opening-hours](../card-opening-hours/SLICE_CONTRACT.md).
 
 ## 1. Пользовательская задача
 
@@ -57,3 +57,17 @@
 1. Открыть карточку точки с графиком 24/7 на 360 px: в карточке точки иконки адреса, продавца, часов (`Открыто круглосуточно`) и календаря (`ПН–ВС · Круглосуточно`) выровнены по одной вертикальной линии, без лишнего разделителя.
 2. Открыть карточку точки со смешанным графиком (перерыв / разные дни / выходные): все строки недели читаемы целиком, сегодняшний день выделен жирным.
 3. Проверить 320 px и увеличенный шрифт (200%): нет горизонтального скролла и наложений.
+
+## 9. Закрытие и свидетельства (27.11.2026)
+
+- **PR / SHA / Tag:**
+  - Реализация и контракт: PR #239 (`slice/b08-opening-hours-block`, final head `a785529`), merged в `main` `7ec8086f804315582870fa3f3352820b36c74de2`; Issue #226 закрыт автоматически.
+  - Аннотированный checkpoint-тег: `v0.0.97-b08-opening-hours` → `7ec8086f804315582870fa3f3352820b36c74de2`.
+- **Automated CI:**
+  - Branch CI (`a785529`): `KAIDA verify` PR `46059193418` PASS, push `46059186987` PASS, `CodeQL / Analyze JavaScript / TypeScript` `46059193503` PASS, `CodeQL` `140709608317` PASS, `Dependency review` `46059193511` PASS.
+  - Merged-main CI (`7ec8086`): `KAIDA verify` `46061590703` PASS, `CodeQL` `46061590662` PASS.
+- **KAIDA Controller:** `PASS` по всем 4 секциям (`Diff vs Slice Contract`, `Closed contracts`, `Risk proof`, `Gate verdict: CHECKPOINT APPROVED` на `7ec8086` / `v0.0.97-b08-opening-hours`).
+- **Приёмка (разделение ролей):**
+  - **Выполнено агентом:** живой прогон production-сборки на 360 px (24/7 и смешанный график с перерывом) и стресс-тест 320 px + 200% шрифт с фиксацией 3 скриншотов; E2E `card-opening-hours.spec.ts` (геометрия 4 иконок, отсутствие клиппинга шапки, ровный левый стек на 320 px + 200%), `design-offer.spec.ts`, `buyer-readability.spec.ts`, `pre-publication-buyer-preview.spec.ts`, `s10-contact-actions.spec.ts`.
+  - **Принято PO (27.11.2026):** после первого замечания PO по 320 px + 200% (обрезанная шапка и «зигзаг» расписания) внесена правка вёрстки, добавлено постоянное правило контроля вёрстки в `docs/PROJECT_RULES.md` §18.4, и PO принял все 3 обновлённых скриншота («всё ок. принимаю»).
+  - **Не проверялось вручную:** физический телефон, десктоп и казахский UI (вне gate §18.5).
