@@ -6,7 +6,8 @@ import { offerCardRemovals } from './offer-card-removals.table';
 import type { ReportEvidence, ReportReason, ResolveReport } from '../contracts/report.contract';
 
 export const offerReports = pgTable('offer_reports', {
-  id:uuid('id').defaultRandom().primaryKey(),reporterUserId:uuid('reporter_user_id').notNull().references(()=>users.id),
+  id:uuid('id').defaultRandom().primaryKey(),reporterUserId:uuid('reporter_user_id').references(()=>users.id),
+  anonymousKeyHash:text('anonymous_key_hash'),
   offerId:uuid('offer_id').notNull().references(()=>offers.id),cardId:uuid('card_id').notNull(),cardVersion:text('card_version').notNull(),
   reason:text('reason').$type<ReportReason>().notNull(),buyerText:text('buyer_text').notNull().default(''),
   selectedPhotoId:uuid('selected_photo_id').references(()=>photos.id),evidence:jsonb('evidence').$type<ReportEvidence>().notNull(),

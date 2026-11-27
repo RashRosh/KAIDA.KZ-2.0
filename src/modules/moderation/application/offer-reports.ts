@@ -23,19 +23,23 @@ type CardRow = {
   location_id: string; location_name: string; address_text: string; photo_ids: string[];
 };
 type ReportRow = {
-  id: string; offer_id: string; card_id: string; created_at: Date; reason: OperatorReport['reason']; buyer_text: string;
+  id: string; reporter_user_id: string | null; offer_id: string; card_id: string; created_at: Date; reason: OperatorReport['reason']; buyer_text: string;
   selected_photo_id: string | null; evidence: ReportEvidence; closed_at: Date | null; disposition: OperatorReport['disposition'];
   rationale: string | null; moderation_id: string | null; decision_digest: string | null;
 };
 
-async function cardOf(db: Db, offerId: string) {
-  const result = await db.execute<{ card_id: string }>(sql`select card_id from offers where id=${offerId}`);
+export async function cardOfOffer(db: Db, offerId: string) {
+  const result = await db.execute<{ card_id: string; location_id: string; seller_id: string }>(sql`select card_id, location_id, seller_id from offers where id=${offerId}`);
   if (!result.rows[0]) throw new ReportError('NOT_FOUND', 404);
-  return result.rows[0].card_id;
+  return result.rows[0];
+}
+
+async function cardOf(db: Db, offerId: string) {
+  return (await cardOfOffer(db, offerId)).card_id;
 }
 
 // Caller holds the shared card lock. Lock Offers and Location identities too: location edits do not use card locks.
-async function contextOf(db: Db, offerId: string, locale: 'ru' | 'kk', now: Date): Promise<ReportContext> {
+export async function contextOf(db: Db, offerId: string, locale: 'ru' | 'kk', now: Date): Promise<ReportContext> {
   const cardId = await cardOf(db, offerId);
   await db.execute(sql`select id from offers where card_id=${cardId} order by id for update`);
   await db.execute(sql`select id from locations where id in (select location_id from offers where card_id=${cardId}) order by id for share`);
@@ -106,7 +110,8 @@ export async function submitReport(userId: string, input: SubmitReport, deps: De
     if(!reportId) {
       const context=await contextOf(tx,input.offerId,input.locale,now);
       if(!context.available || context.evidence.version!==input.version) throw new ReportError('STALE_CONTEXT',409);
-      if(input.reason==='photo_mismatch' && (!input.photoId || !context.evidence.photoIds.includes(input.photoId))) throw new ReportError('INVALID_PHOTO',400);
+      if(input.reason==='photo_mismatch' && input.photoId !== null && !context.evidence.photoIds.includes(input.photoId)) throw new ReportError('INVALID_PHOTO',400);
+      if(input.reason==='photo_mismatch' && input.photoId === null && context.evidence.photoIds.length > 0) throw new ReportError('INVALID_PHOTO',400);
       const quota=await tx.execute<{ n:number }>(sql`select count(*)::int as n from offer_reports where reporter_user_id=${userId} and created_at > ${new Date(now.getTime()-86400000)}`);
       if(quota.rows[0]!.n>=5) throw new ReportError('REPORT_QUOTA',429);
       const inserted=await tx.execute<{ id:string }>(sql`insert into offer_reports(reporter_user_id,offer_id,card_id,card_version,reason,buyer_text,selected_photo_id,evidence,created_at)
@@ -126,8 +131,9 @@ async function findReport(db: Db,id:string,lock=false) {
   return result.rows[0];
 }
 function view(row:ReportRow,current:ReportContext|null,laterCardEvent:OperatorReport['laterCardEvent']):OperatorReport {
-  // Explicit privacy projection: no reporter User ID, phone or receipt input digest.
-  return {id:row.id,at:new Date(row.created_at).toISOString(),reason:row.reason,text:row.buyer_text,photoId:row.selected_photo_id,evidence:row.evidence,current,
+  // Explicit privacy projection: no reporter User ID, phone, anonymous key hash or receipt input digest.
+  return {id:row.id,at:new Date(row.created_at).toISOString(),reason:row.reason,text:row.buyer_text,photoId:row.selected_photo_id,
+    isVerified:row.reporter_user_id !== null,evidence:row.evidence,current,
     closedAt:row.closed_at ? new Date(row.closed_at).toISOString():null,disposition:row.disposition,rationale:row.rationale,moderationId:row.moderation_id,laterCardEvent};
 }
 export async function loadReport(id:string,deps:Dependencies={}) {
@@ -148,10 +154,10 @@ export async function loadReport(id:string,deps:Dependencies={}) {
 }
 export async function listReports(state:'open'|'closed',offset:number,deps:Dependencies={}):Promise<ReportPage> {
   const db=deps.database ?? getDatabase();
-  const result=await db.execute<ReportRow>(sql`select id,created_at,reason,evidence,closed_at,disposition from offer_reports
+  const result=await db.execute<ReportRow>(sql`select id,reporter_user_id,created_at,reason,evidence,closed_at,disposition from offer_reports
     where ${state==='open'?sql`closed_at is null`:sql`closed_at is not null`} order by created_at,id limit 31 offset ${offset}`);
   const count=await db.execute<{ n:number }>(sql`select count(*)::int as n from offer_reports where closed_at is null`);
-  return {rows:result.rows.slice(0,30).map(r=>({id:r.id,at:new Date(r.created_at).toISOString(),reason:r.reason,evidence:r.evidence,
+  return {rows:result.rows.slice(0,30).map(r=>({id:r.id,at:new Date(r.created_at).toISOString(),reason:r.reason,isVerified:r.reporter_user_id !== null,evidence:r.evidence,
     closedAt:r.closed_at?new Date(r.closed_at).toISOString():null,disposition:r.disposition})),hasMore:result.rows.length>30,openCount:count.rows[0]!.n};
 }
 export async function resolveReport(operatorId:string,id:string,input:ResolveReport,deps:Dependencies={}) {
