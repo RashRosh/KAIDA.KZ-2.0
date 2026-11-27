@@ -59,7 +59,8 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     const search = async (query: string) => { const input = page.getByRole('search').locator('input[type="search"]').first(); await input.fill(query); await input.press('Enter'); };
     const statusOf = async (key: string) => { await page.goto(`/offers/${ids.get(key)!.offerId}`); return page.getByTestId('opening-hours'); };
     const noOverflow = () => page.evaluate(() => {
-      const wide = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-hours"], [data-testid="opening-schedule"]')].filter((element) => element.scrollWidth > element.clientWidth + 1);
+      const wide = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-hours"], [data-testid="opening-schedule"], header h1')]
+        .filter((element) => element.scrollWidth > element.clientWidth + 1 || element.getBoundingClientRect().right > window.innerWidth + 1);
       return { page: document.documentElement.scrollWidth <= window.innerWidth, wide: wide.length };
     });
 
@@ -82,10 +83,20 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     // the card carries no schedule, button or expansion
     await expect(page.getByRole('button', { name: /Расписание|Кесте/ })).toHaveCount(0);
 
-    // narrow screen and enlarged text: nothing clipped, no sideways scroll
+    // narrow screen and enlarged text: nothing clipped (including header h1), no sideways scroll, and stacked schedule stays left-aligned (no zig-zag)
+    await page.goto(`/offers/${ids.get('lunch')!.offerId}`);
     await page.setViewportSize({ width: 320, height: 800 });
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
     expect(await noOverflow()).toEqual({ page: true, wide: 0 });
+    const stackedLeftAligned = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-schedule"] li')];
+      return rows.length > 1 && rows.every((li) => {
+        const day = li.querySelector<HTMLElement>(':scope > span:first-child')!.getBoundingClientRect();
+        const times = li.querySelector<HTMLElement>(':scope > span:last-child')!.getBoundingClientRect();
+        return Math.abs(times.left - day.left) <= 1;
+      });
+    });
+    expect(stackedLeftAligned).toBe(true);
     await page.setViewportSize({ width: 390, height: 844 });
 
     // ---- Kazakh (cookie) ----
