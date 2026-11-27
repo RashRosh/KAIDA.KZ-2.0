@@ -35,6 +35,8 @@ confirmation), not on recognition alone. A later voice → photo → video seque
 
 ## 0. Как читать
 
+При проектировании любого следующего Slice Contract используй [карту пути KAIDA](CUSTOMER_JOURNEY_MAP.md) и [правило сверки с CJM](../PROJECT_RULES.md#31-сверка-с-cjm). Карта помогает связать изменение с результатом для П1 и П2. Очерёдность и зависимости остаются в этом плане.
+
 В плане три **независимые** величины. Ни одна из них не разрешает старт работы.
 
 **1. Состояние в порядке работ** (одно значение):
@@ -97,6 +99,8 @@ confirmation), not on recognition alone. A later voice → photo → video seque
 12. **S-TEXT-AVAILABILITY — CLOSED (PO 2026-10-27):** PO accepted («принято»); PR #196 merged `04fcf9395b6012460c12c3c9b3deb387af94f582`, merged-main KAIDA verify 40499935657 and CodeQL 40499935654 GREEN; annotated checkpoint `v0.0.83-text-availability`. [Closed contract](../slices/text-availability/SLICE_CONTRACT.md) §13 and [ACCEPTANCE.md](../slices/text-availability/ACCEPTANCE.md) keep PO / agent / automated / not verified apart. Production text input stays `off`. No further work in this slice.
 13. **S-TEXT-DUPLICATES — CLOSED (PO 2026-10-27):** PO accepted («я принял»); PR #198 merged; annotated checkpoint `v0.0.84-text-duplicates` (merge SHA and merged-main CI in `CURRENT_STATE.md`). [Closed contract](../slices/text-duplicates/SLICE_CONTRACT.md) §13 and [ACCEPTANCE.md](../slices/text-duplicates/ACCEPTANCE.md) keep PO / ChatGPT / agent / automated / not verified apart. Production text input stays `off`. No further work in this slice.
 14. **S-TEXT-PRICE-UPDATE — CLOSED (PO 2026-10-28):** PO accepted on the basis of the ChatGPT browser check («я тебе верю»); PR #199 merged; annotated checkpoint `v0.0.85-text-price-update` (merge SHA and merged-main CI in `CURRENT_STATE.md`). [Closed contract](../slices/text-price-update/SLICE_CONTRACT.md) §12 and [ACCEPTANCE.md](../slices/text-price-update/ACCEPTANCE.md) keep PO / ChatGPT / agent / automated / not verified apart. Production text input stays `off`. No further work in this slice.
+
+15. **S-WHOLESALE (опт рядом с розницей) — CLOSED (PO 2026-11-26).** [Closed contract](../slices/wholesale-price/SLICE_CONTRACT.md) §14: PO visual acceptance PASS on 390×844 mobile browser walkthrough run by agent; KAIDA Controller PASS WITH NOTE; PR #231 merged `003359b`, PR #233 merged `6d121b4222ff3b9ade19eef951fcc124c0750de2`; merged-main `KAIDA verify` `45884779691` and `CodeQL` `45884779613` GREEN; annotated checkpoint `v0.0.94-wholesale-price`. Вторая строка «ОПТ» с минимальной партией и пересчётом, окно «Оптовая цена» у продавца, отказ смены единицы без проверки опта (`WHOLESALE_REVIEW_REQUIRED`), одно подтверждение актуальности на обе цены; сортировка и обязательность розничной цены не меняются. Отмеченные при приёмке старая заглушка без фото у продавца (`kaida.css`) и нестилизованный блок ошибки избранного в `SearchScreen.tsx` решением PO 2026-11-26 отложены до дизайн-миграции. Следующий slice не выбран (кандидаты: «Только опт» slice 2, сведение D6 PR #215/#216, OSRM PR #230 и др.).
 
 **Closed bounded scopes (delivered; the contracts own the exact behaviour):**
 - [buyer-readability](../slices/buyer-readability/SLICE_CONTRACT.md) — CLOSED at `v0.0.82`: point, address · distance and seller lines on the result card, offer page and Favourites unavailable card at 14/20 px `--ink2` in `rem`; approved deviation from B01/B02; seller screens and `kaida.css` unchanged.

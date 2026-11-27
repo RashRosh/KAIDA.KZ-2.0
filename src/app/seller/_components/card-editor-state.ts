@@ -1,6 +1,13 @@
 import { PACK_AMOUNT_PATTERN, type PackUnit } from '../../../modules/offers/pack/pack';
 import type { CanonicalPriceUnitCode, PriceUnit } from '../../../modules/offers/price-unit/price-unit';
 import type { OfferDraftPayload } from '../../../modules/offers/drafts/offer-draft.contract';
+import {
+  WHOLESALE_BATCH_MAX,
+  WHOLESALE_CONTAINER_TEXT_MAX_LENGTH,
+  WHOLESALE_PER_CONTAINER_PATTERN,
+  type Wholesale,
+  type WholesaleContainer,
+} from '../../../modules/offers/wholesale/wholesale';
 import { normalizeOfferTitle, OFFER_TITLE_MAX_LENGTH, OFFER_TITLE_MIN_LENGTH } from '../../../modules/offers/title/offer-title';
 import { SELLER_INPUT_PRICE_AMOUNT_PATTERN } from '../../../modules/seller-input/contracts/seller-change-set.contract';
 import type { MessageKey } from '../../../i18n/messages';
@@ -10,6 +17,24 @@ import type { MessageKey } from '../../../i18n/messages';
 export type UnitCode = CanonicalPriceUnitCode | 'other';
 export type UnitDraft = { code: UnitCode | ''; custom: string };
 export type PointChoice = { selected: boolean; ownPrice: string | null };
+
+// wholesale-price §3.1: the wholesale line as typed in its sheet. The container is empty after a change of the retail unit
+// reset a container that was the unit itself; needsReview marks a change of the retail unit or pack since it was saved.
+export type WholesaleDraft = {
+  amount: string;
+  batchCount: string;
+  container: WholesaleContainer | '';
+  containerText: string;
+  perContainer: string;
+  needsReview: boolean;
+};
+export type WholesaleInput = {
+  amount: string;
+  batchCount: number;
+  container: WholesaleContainer;
+  containerText?: string;
+  perContainer?: string;
+};
 
 export type CardValues = {
   title: string;
@@ -26,18 +51,87 @@ export type CardValues = {
   points: Record<string, PointChoice>;
   // Edit: Offers of the card that take the common price.
   applyPrice: Record<string, boolean>;
+  wholesale: WholesaleDraft | null;
 };
 
-export type CardField = 'title' | 'price' | 'unit' | 'pack' | 'points' | 'ownPrice';
+export type CardField = 'title' | 'price' | 'unit' | 'pack' | 'wholesale' | 'points' | 'ownPrice';
 export type CardErrors = Partial<Record<CardField, MessageKey>>;
-export const FIELD_ORDER: CardField[] = ['title', 'price', 'unit', 'pack', 'ownPrice', 'points'];
+export const FIELD_ORDER: CardField[] = ['title', 'price', 'unit', 'pack', 'wholesale', 'ownPrice', 'points'];
 
 export const emptyUnit: UnitDraft = { code: '', custom: '' };
 
 export function emptyCardValues(): CardValues {
   return {
     title: '', productId: null, linkedName: null, amount: '', unit: emptyUnit, packOpen: false, packAmount: '', packUnit: 'g',
-    comment: '', points: {}, applyPrice: {},
+    comment: '', points: {}, applyPrice: {}, wholesale: null,
+  };
+}
+
+export function emptyWholesaleDraft(): WholesaleDraft {
+  return { amount: '', batchCount: '1', container: 'box', containerText: '', perContainer: '', needsReview: false };
+}
+
+export function wholesaleDraftFrom(wholesale: Wholesale | null | undefined): WholesaleDraft | null {
+  if (!wholesale) return null;
+  return {
+    amount: wholesale.amount,
+    batchCount: String(wholesale.batchCount),
+    container: wholesale.container,
+    containerText: wholesale.containerText ?? '',
+    perContainer: wholesale.perContainer ?? '',
+    needsReview: false,
+  };
+}
+
+export type WholesaleField = 'amount' | 'batch' | 'containerText' | 'perContainer';
+export type WholesaleErrors = Partial<Record<WholesaleField, MessageKey>>;
+
+// The sheet's own rules (§3.1): price > 0, an integer batch 1–9 999, the own container text 1–20 characters and the
+// quantity in one container unless the container is the retail unit. No comparison with the retail price.
+export function validateWholesale(draft: WholesaleDraft): { errors: WholesaleErrors; input: WholesaleInput | null } {
+  const errors: WholesaleErrors = {};
+  const amountProblem = priceError(draft.amount);
+  if (amountProblem) errors.amount = amountProblem;
+  const batchText = draft.batchCount.replace(/[\s\u00a0\u202f]/g, '');
+  const batchCount = /^\d{1,4}$/.test(batchText) ? Number(batchText) : NaN;
+  if (draft.container === '' || !(batchCount >= 1 && batchCount <= WHOLESALE_BATCH_MAX)) errors.batch = 'wholesale.batchInvalid';
+  const containerText = draft.containerText.trim();
+  if (draft.container === 'other' && (containerText.length < 1 || containerText.length > WHOLESALE_CONTAINER_TEXT_MAX_LENGTH)) {
+    errors.containerText = 'wholesale.containerTextRequired';
+  }
+  const perContainer = normalizeAmount(draft.perContainer);
+  const perNeeded = draft.container !== 'unit' && draft.container !== '';
+  if (perNeeded && !(WHOLESALE_PER_CONTAINER_PATTERN.test(perContainer) && Number(perContainer) > 0)) {
+    errors.perContainer = perContainer === '' ? 'wholesale.perContainerRequired' : 'card.packInvalid';
+  }
+  if (Object.keys(errors).length > 0 || draft.container === '') return { errors, input: null };
+  return {
+    errors,
+    input: {
+      amount: validPrice(draft.amount)!,
+      batchCount,
+      container: draft.container,
+      ...(draft.container === 'other' ? { containerText } : {}),
+      ...(perNeeded ? { perContainer } : {}),
+    },
+  };
+}
+
+// The basis of the retail price as far as the wholesale depends on it: the unit and the pack (§3.1).
+export function wholesaleBasisKey(values: Pick<CardValues, 'unit' | 'packOpen' | 'packAmount' | 'packUnit'>): string {
+  const amount = normalizeAmount(values.packAmount);
+  const pack = values.packOpen && packAllowed(values.unit.code) && amount !== '' ? `${amount} ${values.packUnit}` : '';
+  return `${values.unit.code}|${values.unit.code === 'other' ? values.unit.custom.trim() : ''}|${pack}`;
+}
+
+// A change of the retail unit or pack clears the quantity in one container (and a container that was the unit itself)
+// and keeps the card from being saved until the Seller reviews the wholesale line or removes it.
+export function markWholesaleReview(wholesale: WholesaleDraft): WholesaleDraft {
+  return {
+    ...wholesale,
+    perContainer: '',
+    container: wholesale.container === 'unit' ? '' : wholesale.container,
+    needsReview: true,
   };
 }
 
@@ -70,7 +164,7 @@ export function keepsLink(title: string, linkedName: string | null): boolean {
   return typed.startsWith(normalizeOfferTitle(linkedName).toLocaleLowerCase('ru'));
 }
 
-function validPrice(value: string): string | null {
+export function validPrice(value: string): string | null {
   const amount = normalizeAmount(value);
   return SELLER_INPUT_PRICE_AMOUNT_PATTERN.test(amount) && Number(amount) > 0 ? amount : null;
 }
@@ -97,6 +191,7 @@ export type CardPayload = {
   unit: PriceUnit;
   pack: { amount: string; unit: PackUnit } | null;
   sellerComment: string;
+  wholesale: WholesaleInput | null;
 };
 
 export function validateCard(values: CardValues, mode: CardMode, existingPoints: number):
@@ -116,6 +211,10 @@ export function validateCard(values: CardValues, mode: CardMode, existingPoints:
   const packShown = values.packOpen && packAllowed(values.unit.code);
   const packAmount = normalizeAmount(values.packAmount);
   if (packShown && packAmount !== '' && !(PACK_AMOUNT_PATTERN.test(packAmount) && Number(packAmount) > 0)) errors.pack = 'card.packInvalid';
+  const wholesale = values.wholesale ? validateWholesale(values.wholesale).input : null;
+  if (values.wholesale && (values.wholesale.needsReview || !wholesale)) {
+    errors.wholesale = values.wholesale.needsReview ? 'wholesale.reviewRequired' : 'wholesale.incomplete';
+  }
   if (mode === 'create') {
     const chosen = Object.values(values.points).filter((point) => point.selected);
     if (chosen.length === 0) errors.points = existingPoints === 0 ? 'card.pointRequired' : 'card.pointChoose';
@@ -131,13 +230,17 @@ export function validateCard(values: CardValues, mode: CardMode, existingPoints:
       unit,
       pack: packShown && packAmount !== '' ? { amount: packAmount, unit: values.packUnit } : null,
       sellerComment: values.comment,
+      wholesale,
     },
   };
 }
 
 export function createBody(values: CardValues, payload: CardPayload, photoIds: string[], draftId: string | null) {
+  // A new card without wholesale sends the same body as before the wholesale price (omitted = none).
+  const { wholesale, ...fields } = payload;
   return {
-    ...payload,
+    ...fields,
+    ...(wholesale ? { wholesale } : {}),
     photoIds,
     points: Object.entries(values.points).filter(([, point]) => point.selected).map(([locationId, point]) => ({
       locationId,
@@ -171,6 +274,14 @@ export function draftPayload(values: CardValues, photoIds: string[]): OfferDraft
     photoIds,
     points: Object.entries(values.points).filter(([, point]) => point.selected)
       .map(([locationId, point]) => ({ locationId, ownPrice: point.ownPrice })),
+    wholesale: values.wholesale ? {
+      amount: values.wholesale.amount.slice(0, 40),
+      batchCount: values.wholesale.batchCount.slice(0, 10),
+      container: values.wholesale.container,
+      containerText: values.wholesale.containerText.slice(0, 40),
+      perContainer: values.wholesale.perContainer.slice(0, 20),
+      needsReview: values.wholesale.needsReview,
+    } : null,
   };
 }
 
@@ -188,6 +299,7 @@ export function valuesFromDraft(payload: OfferDraftPayload, knownLocations: Set<
     comment: payload.sellerComment,
     points: Object.fromEntries(payload.points.filter((point) => knownLocations.has(point.locationId))
       .map((point) => [point.locationId, { selected: true, ownPrice: point.ownPrice }])),
+    wholesale: payload.wholesale ? { ...payload.wholesale } : null,
   };
 }
 
@@ -206,6 +318,7 @@ export function valuesFromChangeSet(
     pack: { amount: string; unit: PackUnit } | null;
     sellerComment: string | null;
     photos?: { id: string }[];
+    wholesale?: Wholesale | null;
   }[] },
   offerIdByLocation: Map<string, string>,
 ): { values: Partial<CardValues>; photoIds?: string[] } | null {
@@ -227,6 +340,7 @@ export function valuesFromChangeSet(
       packAmount: first.pack?.amount ?? '',
       packUnit: first.pack?.unit ?? 'g',
       comment: first.sellerComment ?? '',
+      wholesale: wholesaleDraftFrom(first.wholesale),
       points: Object.fromEntries(creates.map((item) => [item.location.id, {
         selected: true,
         ownPrice: isCardCreate && item.priceOwn ? item.price?.amount ?? null : null,
@@ -279,6 +393,8 @@ export function previewBody(
     pack: packOk ? { amount: packAmount, unit: values.packUnit } : null,
     sellerComment: values.comment,
     photoIds,
+    // wholesale-price: shown only as it would be published (a valid, reviewed line on a card with a unit)
+    wholesale: unit !== null && values.wholesale && !values.wholesale.needsReview ? validateWholesale(values.wholesale).input : null,
   };
   const chosen = Object.entries(values.points).filter(([, point]) => point.selected);
   if (mode.kind === 'create') {

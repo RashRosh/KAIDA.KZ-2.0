@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveCurrentUser } from '@/modules/identity/application/resolve-current-user';
 import { SESSION_COOKIE_NAME } from '@/modules/identity/session/session-cookie';
-import { CardNotFoundError, CardPointAlreadyAddedError, CommonPriceMissingError } from '@/modules/seller-input/contracts/seller-card.contract';
+import { CardNotFoundError, CardPointAlreadyAddedError, CommonPriceMissingError, WholesaleReviewRequiredError } from '@/modules/seller-input/contracts/seller-card.contract';
 import {
   LocationNotFoundError,
   OfferChangedError,
@@ -44,6 +44,7 @@ const statusByError: [new (...args: never[]) => Error & { code: string }, number
   [OfferUpdateNoChangesError, 409],
   [CardPointAlreadyAddedError, 409],
   [CommonPriceMissingError, 409],
+  [WholesaleReviewRequiredError, 409],
 ];
 
 export function mapCardError(error: unknown, logLabel: string) {

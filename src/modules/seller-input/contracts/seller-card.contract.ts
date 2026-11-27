@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CANONICAL_PRICE_UNIT_CODES, type PriceUnit } from '../../offers/price-unit/price-unit';
 import { packInputSchema } from '../../offers/pack/pack';
+import { wholesaleInputSchema } from '../../offers/wholesale/wholesale';
 import { normalizeOfferTitle, OFFER_TITLE_MAX_LENGTH, OFFER_TITLE_MIN_LENGTH } from '../../offers/title/offer-title';
 import { SELLER_INPUT_PRICE_AMOUNT_PATTERN } from './seller-change-set.contract';
 
@@ -38,6 +39,10 @@ const sharedFields = {
   photoIds: cardPhotoIdsSchema,
 };
 
+// wholesale-price: create — omitted or null = no wholesale; update — null removes it, omitted keeps the card's current
+// wholesale (refused when the unit or the pack changes, §3.4).
+const wholesaleField = wholesaleInputSchema.nullable().optional();
+
 function packFitsUnit(value: { unit: PriceUnit; pack: unknown }) {
   return value.pack === null || value.unit.code === 'package' || value.unit.code === 'piece';
 }
@@ -52,6 +57,7 @@ export const cardCreateBodySchema = z.object({
     .refine(uniqueBy((point: { locationId: string }) => point.locationId), 'Points must be unique'),
   // The draft being published, if any: it is removed when this card is confirmed.
   draftId: z.uuid().optional(),
+  wholesale: wholesaleField.transform((value) => value ?? null),
 }).strict().refine(packFitsUnit, 'Pack is only for packages and pieces');
 
 export const cardUpdateBodySchema = z.object({
@@ -62,6 +68,7 @@ export const cardUpdateBodySchema = z.object({
     .refine(uniqueBy((offer: { offerId: string }) => offer.offerId), 'Offers must be unique'),
   // Points the card is added to, each at the common price.
   addPoints: z.array(z.uuid()).max(CARD_POINT_LIMIT).refine(uniqueBy((id: string) => id), 'Points must be unique'),
+  wholesale: wholesaleField,
 }).strict().refine(packFitsUnit, 'Pack is only for packages and pieces');
 
 export const pointPriceBodySchema = z.object({
@@ -103,5 +110,13 @@ export class CardSharedFieldsError extends Error {
   constructor() {
     super('Этот товар продаётся в нескольких точках — «Цену за», фото и комментарий меняйте на «Моей витрине».');
     this.name = 'CardSharedFieldsError';
+  }
+}
+
+export class WholesaleReviewRequiredError extends Error {
+  readonly code = 'WHOLESALE_REVIEW_REQUIRED' as const;
+  constructor() {
+    super('Изменилась единица цены. Проверьте оптовую цену в редакторе карточки.');
+    this.name = 'WholesaleReviewRequiredError';
   }
 }

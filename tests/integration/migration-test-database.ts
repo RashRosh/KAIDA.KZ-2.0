@@ -117,6 +117,15 @@ export function withStructuredPriceUnit<T extends Record<string, unknown>>(legac
   return { ...rest, price_unit_code: code, price_unit_value: value };
 }
 
+// wholesale-price (0032): an upgraded row has no wholesale line.
+export const NO_WHOLESALE_COLUMNS = {
+  wholesale_price_amount: null,
+  wholesale_batch_count: null,
+  wholesale_container: null,
+  wholesale_container_text: null,
+  wholesale_per_container: null,
+};
+
 // seller-showcase-editor (0016): an upgraded Offer takes its catalog name as the title and becomes its own card.
 export function withShowcaseCardOffer<T extends Record<string, unknown>>(row: T, title: string) {
   return {
@@ -127,10 +136,11 @@ export function withShowcaseCardOffer<T extends Record<string, unknown>>(row: T,
     price_own: false,
     pack_amount: null,
     pack_unit: null,
+    ...NO_WHOLESALE_COLUMNS,
   };
 }
 
 // An upgraded ChangeSet item takes the catalog name and the card of the Offer it created or targets.
 export function withShowcaseCardItem<T extends Record<string, unknown>>(row: T, title: string, cardId: string) {
-  return { ...row, title, card_id: cardId, price_own: false, pack_amount: null, pack_unit: null };
+  return { ...row, title, card_id: cardId, price_own: false, pack_amount: null, pack_unit: null, ...NO_WHOLESALE_COLUMNS };
 }

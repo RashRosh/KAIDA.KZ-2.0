@@ -9,6 +9,7 @@ import { formatAmount } from '../../_components/format-amount';
 import { priceBasisText } from '../../../modules/offers/price-unit/price-basis';
 import { BuyerScreen, NEARBY_NAV_INTENT_KEY, formatDistance, markBuyerOfferOpened } from '../_ui/buyer-ui';
 import { ConfirmationBadge } from '../_ui/SearchResultCard';
+import { WholesaleLine } from '../_ui/WholesaleLine';
 import { KaidaMark } from '../_ui/offer-details';
 import { SearchIcon } from '../_ui/SearchIcon';
 import { useFavourites } from '../_ui/use-favourites';
@@ -275,7 +276,8 @@ export function NearbyFeed() {
             <p className="vh" role="status" aria-live="polite" aria-atomic="true">
               {t('nearby.found', { count: state.result.offers.length })}
             </p>
-            <ul className={styles.grid} aria-label={t('nearby.offersTitle')}>
+            <span className={styles.cap2} id="nearby-distance-note">{t('offer.distanceStraightLineNote')}</span>
+            <ul className={styles.grid} aria-label={t('nearby.offersTitle')} aria-describedby="nearby-distance-note">
               {state.result.offers.map((offer) => {
                 const basis = priceBasisText(offer.price.unit, offer.pack);
                 const active = favourites.state.kind === 'ready'
@@ -314,6 +316,7 @@ export function NearbyFeed() {
                       <p className={styles.price}>
                         {formatAmount(offer.price.amount)}&nbsp;₸{basis && <>{' '}<small>{basis}</small></>}
                       </p>
+                      <WholesaleLine offer={offer} />
                       <ConfirmationBadge offer={offer} className={styles.fresh} />
                       <span className={styles.cap2}>{formatDistance(offer.distanceMeters, t)}</span>
                     </article>

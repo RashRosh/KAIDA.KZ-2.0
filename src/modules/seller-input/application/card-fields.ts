@@ -1,14 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { lockCardOffers, type OfferWriteDb } from '../../offers/infrastructure/offers.repository';
 import { samePriceUnit, type PriceUnit } from '../../offers/price-unit/price-unit';
-import { CardSharedFieldsError } from '../contracts/seller-card.contract';
+import { CardSharedFieldsError, WholesaleReviewRequiredError } from '../contracts/seller-card.contract';
 import type { Pack } from '../../offers/pack/pack';
+import type { Wholesale } from '../../offers/wholesale/wholesale';
 import type { ChangeItemCardFields } from '../infrastructure/seller-change-sets.repository';
 
 // seller-showcase-editor: a catalog-only create (single S4 create, S12 batch) is a new one-point card titled with the
 // catalog's Russian name.
 export function newCatalogCard(product: { id: string; name: string }): ChangeItemCardFields {
-  return { title: product.name, productId: product.id, cardId: randomUUID(), priceOwn: false, pack: null };
+  return { title: product.name, productId: product.id, cardId: randomUUID(), priceOwn: false, pack: null, wholesale: null };
 }
 
 // A per-Offer change (S5, S12) keeps the Offer's card fields as they are.
@@ -18,8 +19,9 @@ export function currentCardFields(offer: {
   cardId: string;
   priceOwn: boolean;
   pack: Pack | null;
+  wholesale: Wholesale | null;
 }): ChangeItemCardFields {
-  return { title: offer.title, productId: offer.productId, cardId: offer.cardId, priceOwn: offer.priceOwn, pack: offer.pack };
+  return { title: offer.title, productId: offer.productId, cardId: offer.cardId, priceOwn: offer.priceOwn, pack: offer.pack, wholesale: offer.wholesale };
 }
 
 function amount(value: string) {
@@ -30,9 +32,12 @@ function amount(value: string) {
 // so only the price may change here; a price different from the card's common price becomes this point's own price.
 export async function perOfferUpdateCardFields(
   database: OfferWriteDb,
-  offer: { id: string; sellerId: string; title: string; productId: string | null; cardId: string; priceOwn: boolean; pack: Pack | null; priceUnit: PriceUnit | null; sellerComment: string | null },
+  offer: { id: string; sellerId: string; title: string; productId: string | null; cardId: string; priceOwn: boolean; pack: Pack | null; wholesale: Wholesale | null; priceUnit: PriceUnit | null; sellerComment: string | null },
   next: { price: string; unit: PriceUnit | null; sellerComment: string | null; photosChanged: boolean },
 ): Promise<ChangeItemCardFields> {
+  // wholesale-price §3.4: the wholesale line is in the retail unit, so a per-Offer path that changes the unit of a card
+  // with wholesale is refused instead of keeping a wholesale price in the old unit.
+  if (offer.wholesale !== null && !samePriceUnit(offer.priceUnit, next.unit)) throw new WholesaleReviewRequiredError();
   const card = await lockCardOffers(database, offer.cardId, offer.sellerId);
   if (card.length <= 1) return currentCardFields(offer);
   const sharedChanged = !samePriceUnit(offer.priceUnit, next.unit)

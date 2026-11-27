@@ -77,7 +77,7 @@ describe('S3 migration upgrade path on PostgreSQL 18', () => {
         .rejects.toMatchObject({ code: '23514' });
 
       const offerColumns = (await pool.query("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='offers' ORDER BY ordinal_position")).rows.map((row) => row.column_name);
-      expect(offerColumns).toEqual(['id', 'product_id', 'seller_id', 'location_id', 'price_amount', 'price_currency', 'seller_comment', 'created_at', 'updated_at', 'status', 'last_confirmed_at', 'revision', 'seller_comment_version', 'price_unit_code', 'price_unit_value', 'title', 'title_search', 'card_id', 'price_own', 'pack_amount', 'pack_unit']);
+      expect(offerColumns).toEqual(['id', 'product_id', 'seller_id', 'location_id', 'price_amount', 'price_currency', 'seller_comment', 'created_at', 'updated_at', 'status', 'last_confirmed_at', 'revision', 'seller_comment_version', 'price_unit_code', 'price_unit_value', 'title', 'title_search', 'card_id', 'price_own', 'pack_amount', 'pack_unit', 'wholesale_price_amount', 'wholesale_batch_count', 'wholesale_container', 'wholesale_container_text', 'wholesale_per_container']);
     });
   });
 

@@ -5,6 +5,7 @@ import { photoUrl } from '@/modules/media/contracts/photo.contract';
 import type { BuyerOfferPage } from '@/modules/search/application/get-buyer-offer';
 import { buildContactActions } from '@/modules/sellers/contact/build-contact-actions';
 import { priceBasisText } from '@/modules/offers/price-unit/price-basis';
+import { WholesaleLine } from './WholesaleLine';
 import { useI18n } from '@/i18n/I18nProvider';
 import { OpeningSchedule, OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { formatAmount } from '../../_components/format-amount';
@@ -203,6 +204,7 @@ export function OfferDetails({ offer, inert = false, titleAction, afterTitle, fo
         <div>
           <h2 id="offer-title" lang={offer.product.nameLocale}>{offer.product.name}</h2>
           <div className={styles.price} data-testid="offer-price"><b>{formatAmount(offer.price.amount)} ₸</b>{basis && <>{' '}<span>{basis}</span></>}</div>
+          <WholesaleLine offer={offer} size="lg" />
         </div>
         {titleAction}
       </div>

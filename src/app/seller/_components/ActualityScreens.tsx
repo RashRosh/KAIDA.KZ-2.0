@@ -6,6 +6,7 @@ import { photoUrl } from '../../../modules/media/contracts/photo.contract';
 import { actualityText } from '../../_components/actuality-text';
 import { formatAmount } from '../../_components/format-amount';
 import { Bar, Ic, Phone, Thumb, Toast, TOAST_MS } from '../_kaida/ui';
+import { WholesaleLine } from '../../(buyer)/_ui/WholesaleLine';
 import { pluralKey, type SellerCard } from './card-model';
 import { PushToggle } from './PushToggle';
 
@@ -140,8 +141,11 @@ export function ActualityScreen({ due, oneTap, bulk, onClose, onConfirmAll, onRe
               <div className="mid">
                 <div className="ts">{name}</div>
                 <p className="c num" style={hidden ? { color: 'var(--warning)' } : undefined}>{priceText(card)} · {age}</p>
+                {card.lead.wholesale && card.lead.price && (
+                  <WholesaleLine offer={{ wholesale: { amount: card.lead.wholesale.amount, currency: 'KZT', batch: card.lead.wholesale.batch }, price: card.lead.price, ...(card.lead.packLabel ? { pack: card.lead.packLabel } : {}) }} />
+                )}
               </div>
-              <button type="button" className="ib" disabled={busy} aria-label={t('actuality.confirmItem', { name })} data-testid={`actuality-confirm-${card.cardId}`}
+              <button type="button" className="ib" disabled={busy} aria-label={t(card.lead.wholesale ? 'actuality.confirmItemBoth' : 'actuality.confirmItem', { name })} data-testid={`actuality-confirm-${card.cardId}`}
                 onClick={async () => { if (await confirm([card.cardId])) { setRowDone(true); onRefresh(); } }}>
                 <Ic name="check" className="sm" style={{ color: 'var(--primary-text)' }} />
               </button>
