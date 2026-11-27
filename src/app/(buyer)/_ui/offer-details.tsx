@@ -7,6 +7,7 @@ import { buildContactActions } from '@/modules/sellers/contact/build-contact-act
 import { priceBasisText } from '@/modules/offers/price-unit/price-basis';
 import { WholesaleLine } from './WholesaleLine';
 import { useI18n } from '@/i18n/I18nProvider';
+import { hasAnyKnownDay } from '@/modules/locations/hours/opening-hours';
 import { OpeningSchedule, OpeningStatusLine } from '../../_components/OpeningHoursLine';
 import { formatAmount } from '../../_components/format-amount';
 import { ConfirmationBadge } from './SearchResultCard';
@@ -197,6 +198,7 @@ export function OfferDetails({ offer, inert = false, titleAction, afterTitle, fo
 }) {
   const { t } = useI18n();
   const basis = offer.price ? priceBasisText(offer.price.unit, offer.pack) : null;
+  const hasHours = Boolean(offer.location.openingHours?.days && hasAnyKnownDay(offer.location.openingHours));
   return (
     <article className={`${styles.tokens} ${styles.details}`} aria-labelledby="offer-title">
       <Gallery offer={offer} />
@@ -231,14 +233,26 @@ export function OfferDetails({ offer, inert = false, titleAction, afterTitle, fo
             <p className={styles.caption}>{t('offer.sellerRole')}</p>
           </div>
         </div>
-        <div>
-          <OpeningStatusLine hours={offer.location.openingHours} />
-          {scheduleLabel ? (
-            <details data-testid="preview-schedule">
-              <summary className="act" style={{ minHeight: 44 }}>{scheduleLabel}</summary>
-              <OpeningSchedule hours={offer.location.openingHours} />
-            </details>
-          ) : <OpeningSchedule hours={offer.location.openingHours} />}
+        <div className={styles.hoursGroup} data-testid="offer-hours-group">
+          <div className={styles.kv} data-testid="offer-hours-status-row">
+            <SearchIcon name="clock" />
+            <div>
+              <OpeningStatusLine hours={offer.location.openingHours} variant="offer" />
+            </div>
+          </div>
+          {hasHours && (
+            <div className={styles.kv} data-testid="offer-hours-schedule-row">
+              <SearchIcon name="calendar" />
+              <div>
+                {scheduleLabel ? (
+                  <details className={styles.scheduleDisclosure} data-testid="preview-schedule">
+                    <summary className={`act ${styles.scheduleSummary}`}>{scheduleLabel}</summary>
+                    <OpeningSchedule hours={offer.location.openingHours} variant="offer" />
+                  </details>
+                ) : <OpeningSchedule hours={offer.location.openingHours} variant="offer" />}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <div style={{ display: 'contents', ...(inert ? { opacity: 0.55 } : {}) }} inert={inert || undefined} aria-disabled={inert || undefined} data-testid={inert ? 'offer-actions-inert' : undefined}>

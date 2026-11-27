@@ -59,7 +59,8 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     const search = async (query: string) => { const input = page.getByRole('search').locator('input[type="search"]').first(); await input.fill(query); await input.press('Enter'); };
     const statusOf = async (key: string) => { await page.goto(`/offers/${ids.get(key)!.offerId}`); return page.getByTestId('opening-hours'); };
     const noOverflow = () => page.evaluate(() => {
-      const wide = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-hours"], [data-testid="opening-schedule"]')].filter((element) => element.scrollWidth > element.clientWidth + 1);
+      const wide = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-hours"], [data-testid="opening-schedule"], header h1')]
+        .filter((element) => element.scrollWidth > element.clientWidth + 1 || element.getBoundingClientRect().right > window.innerWidth + 1);
       return { page: document.documentElement.scrollWidth <= window.innerWidth, wide: wide.length };
     });
 
@@ -82,10 +83,20 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     // the card carries no schedule, button or expansion
     await expect(page.getByRole('button', { name: /Расписание|Кесте/ })).toHaveCount(0);
 
-    // narrow screen and enlarged text: nothing clipped, no sideways scroll
+    // narrow screen and enlarged text: nothing clipped (including header h1), no sideways scroll, and stacked schedule stays left-aligned (no zig-zag)
+    await page.goto(`/offers/${ids.get('lunch')!.offerId}`);
     await page.setViewportSize({ width: 320, height: 800 });
     await page.addStyleTag({ content: 'html{font-size:200% !important}' });
     expect(await noOverflow()).toEqual({ page: true, wide: 0 });
+    const stackedLeftAligned = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll<HTMLElement>('[data-testid="opening-schedule"] li')];
+      return rows.length > 1 && rows.every((li) => {
+        const day = li.querySelector<HTMLElement>(':scope > span:first-child')!.getBoundingClientRect();
+        const times = li.querySelector<HTMLElement>(':scope > span:last-child')!.getBoundingClientRect();
+        return Math.abs(times.left - day.left) <= 1;
+      });
+    });
+    expect(stackedLeftAligned).toBe(true);
     await page.setViewportSize({ width: 390, height: 844 });
 
     // ---- Kazakh (cookie) ----
@@ -117,9 +128,25 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     await page.goto(`/offers/${ids.get('lunch')!.offerId}`);
     await expect(page.getByTestId('opening-schedule').getByRole('listitem').first()).toContainText('9:00–10:30, 14:00–18:00');
     await page.goto(`/offers/${ids.get('around')!.offerId}`);
+    await expect(page.getByTestId('offer-hours-group')).toBeVisible();
+    await expect(page.getByTestId('offer-hours-status-row').locator('svg').first()).toBeVisible();
+    await expect(page.getByTestId('offer-hours-schedule-row').locator('svg').first()).toBeVisible();
     await expect(page.getByTestId('opening-schedule').getByRole('listitem')).toHaveCount(1);
     await expect(page.getByTestId('opening-schedule')).toContainText('ПН–ВС');
+    await expect(page.getByTestId('opening-schedule')).toContainText('·');
     await expect(page.getByTestId('opening-schedule')).toContainText('Круглосуточно');
+    // Issue #226: pin, user, clock and calendar icons share the same left rail and 24 px box; no detached border above schedule.
+    const rail = await page.evaluate(() => {
+      const card = document.querySelector('[data-testid="offer-hours-group"]')?.parentElement;
+      const icons = [...(card?.querySelectorAll(':scope > div > svg, [data-testid="offer-hours-group"] > div > svg') ?? [])]
+        .map((svg) => { const r = svg.getBoundingClientRect(); return { left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) }; });
+      const firstRow = document.querySelector('[data-testid="opening-schedule"] li');
+      return { icons, borderTop: firstRow ? getComputedStyle(firstRow).borderTopWidth : null };
+    });
+    expect(rail.icons).toHaveLength(4);
+    expect(new Set(rail.icons.map((i) => i.left)).size).toBe(1);
+    expect(rail.icons.every((i) => i.w === 24 && i.h === 24)).toBe(true);
+    expect(rail.borderTop).toBe('0px');
     await page.goto(`/offers/${ids.get('never')!.offerId}`);
     await expect(page.getByTestId('opening-schedule').getByRole('listitem')).toHaveCount(1);
     await expect(page.getByTestId('opening-schedule')).toContainText('выходной');

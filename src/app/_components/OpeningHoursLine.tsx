@@ -58,19 +58,22 @@ function useDayName() {
 
 // B01 / B02: one line — «Открыто до 18:00», «Закрыто, откроется в 9:00 ПН». A closed point always says when it opens.
 // Not interactive; the room for the line is reserved before the device clock is read.
-export function OpeningStatusLine({ hours }: { hours: OpeningHours | null | undefined }) {
+// In `variant="offer"` (B08 / Issue #226), the parent `.kv` supplies the 24px clock icon on the point-card rail.
+export function OpeningStatusLine({ hours, variant = 'default' }: { hours: OpeningHours | null | undefined; variant?: 'default' | 'offer' }) {
   const { t } = useI18n();
   const dayName = useDayName();
   const now = useNow();
+  const isOffer = variant === 'offer';
+  const lineClass = isOffer ? `${styles.line} ${styles.offerLine}` : styles.line;
   if (!hours?.days || !hasAnyKnownDay(hours)) {
-    return <p className={styles.line} data-testid="opening-hours"><span className={styles.text} data-muted="true">{t('hours.notSet')}</span></p>;
+    return <p className={lineClass} data-testid="opening-hours"><span className={styles.text} data-muted="true">{t('hours.notSet')}</span></p>;
   }
   const status = now ? openingStatus(hours, now) : null;
   return (
-    <p className={styles.line} data-state={status?.state} data-testid="opening-hours">
+    <p className={lineClass} data-state={status?.state} data-testid="opening-hours">
       {status && (
         <>
-          <span className={styles.icon}><StateIcon state={status.state} /></span>
+          {!isOffer && <span className={styles.icon}><StateIcon state={status.state} /></span>}
           <span className={styles.text}>{statusText(status)}</span>
         </>
       )}
@@ -88,25 +91,30 @@ function groupLabel(group: ScheduleGroup, dayName: (weekday: Weekday) => string)
   return group.from === group.to ? first : `${first}–${dayName(WEEKDAYS[group.to]!)}`;
 }
 
-// B02: the whole week, always visible. Consecutive days with an identical schedule are one row; the row that holds
+// B02 / B08: the whole week, always visible. Consecutive days with an identical schedule are one row; the row that holds
 // today is bold (and named for a screen reader), never marked by color alone.
-export function OpeningSchedule({ hours }: { hours: OpeningHours | null | undefined }) {
+export function OpeningSchedule({ hours, variant = 'default' }: { hours: OpeningHours | null | undefined; variant?: 'default' | 'offer' }) {
   const { t } = useI18n();
   const dayName = useDayName();
   const now = useNow();
   if (!hours?.days || !hasAnyKnownDay(hours)) return null;
   const today = now ? localWeekday(hours, now) : null;
+  const groups = groupSchedule(hours);
+  const isOffer = variant === 'offer';
+  const single = isOffer && groups.length === 1;
   return (
-    <ul className={styles.schedule} aria-label={t('hours.label')} data-testid="opening-schedule">
-      {groupSchedule(hours).map((group) => {
+    <ul className={isOffer ? `${styles.schedule} ${styles.offerSchedule}` : styles.schedule} aria-label={t('hours.label')} data-testid="opening-schedule">
+      {groups.map((group) => {
         const isToday = today !== null && groupContains(group, today);
         const { schedule } = group;
+        const rowClass = single ? `${styles.row} ${styles.offerRow} ${styles.offerSingle}` : isOffer ? `${styles.row} ${styles.offerRow}` : styles.row;
         return (
-          <li key={group.from} className={styles.row} data-today={isToday ? 'true' : undefined} aria-current={isToday ? 'date' : undefined}>
+          <li key={group.from} className={rowClass} data-today={isToday ? 'true' : undefined} aria-current={isToday ? 'date' : undefined}>
             <span className={styles.day}>
               {groupLabel(group, dayName)}
               {isToday && <span className={styles.srOnly}>, {t('hours.today')}</span>}
             </span>
+            {single && <span className={styles.dot} aria-hidden="true">·</span>}
             <span className={styles.times}>
               {schedule.kind === 'closed' && <span className={styles.off}>{t('hours.dayOff')}</span>}
               {schedule.kind === 'unset' && <span className={styles.off}>{t('hours.notSpecified')}</span>}

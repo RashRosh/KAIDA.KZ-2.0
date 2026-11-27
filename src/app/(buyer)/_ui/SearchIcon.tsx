@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import home from './search-home.module.css';
 
-export type SearchIconName = 'search' | 'pin' | 'heart' | 'more' | 'phone' | 'whatsapp' | 'telegram' | 'route' | 'leaf' | 'alert' | 'close' | 'left' | 'right' | 'user' | 'refresh' | 'blocked' | 'aim' | 'arrow';
+export type SearchIconName = 'search' | 'pin' | 'heart' | 'more' | 'phone' | 'whatsapp' | 'telegram' | 'route' | 'leaf' | 'alert' | 'close' | 'left' | 'right' | 'user' | 'refresh' | 'blocked' | 'aim' | 'arrow' | 'clock' | 'calendar';
 export function SearchIcon({ name, filled = false }: { name: SearchIconName; filled?: boolean }) {
   const paths: Record<SearchIconName, React.ReactNode> = {
     search: <><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.5-4.5" /></>,
@@ -23,6 +23,8 @@ export function SearchIcon({ name, filled = false }: { name: SearchIconName; fil
     right: <path d="M9 5l7 7-7 7" />,
     arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
     user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>,
     refresh: <path d="M20.736 12.5C20.4768 17.0998 16.6647 20.75 12 20.75C7.16751 20.75 3.25 16.8325 3.25 12C3.25 7.16751 7.16751 3.25 12 3.25C15.5881 3.25 18.6717 5.40967 20.0219 8.5M20.5 4.5V8.5H16.5" />,
     aim: <path d="M12 2V5M12 19V22M5 12H2M22 12H19M20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C7.30558 20.5 3.5 16.6944 3.5 12C3.5 7.30558 7.30558 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12ZM15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" />,
   };
