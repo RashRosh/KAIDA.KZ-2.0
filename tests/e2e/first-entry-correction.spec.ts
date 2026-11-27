@@ -35,7 +35,8 @@ test('after First Entry the generic / is the Search, and «Поиск» never re
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('searchbox', { name: 'Какой товар ищете?' })).toBeVisible();
   await expect(page.getByText('Пример · так выглядит результат')).toHaveCount(0);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(0);
+  // D6 / B02: the Search Home title is «Что ищете?»; First Entry's own headline is never shown.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Что ищете?');
   await expect(page.getByRole('button', { name: 'Баранина', exact: true })).toBeVisible();
 
   // And from another buyer screen, and by a direct generic entry.

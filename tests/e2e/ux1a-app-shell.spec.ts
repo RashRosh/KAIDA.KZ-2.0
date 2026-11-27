@@ -32,7 +32,9 @@ async function expectBuyerShell(page: Page, navItems: string[] = ['Поиск', 
 test('buyer routes share the mockup phone column and bottom navigation without horizontal overflow', async ({ page }) => {
   for (const path of ['/', '/nearby', '/more', '/login']) {
     await page.goto(path);
-    await expectBuyerShell(page, path === '/nearby' ? ['Поиск', 'Рядом', 'Избранное', 'Ещё'] : undefined, path === '/nearby' ? 720 : undefined);
+    // design-search-home (D6) and design-nearby (D5) are migrated: four-item navigation, 720 px column.
+    const migrated = path === '/' || path === '/nearby';
+    await expectBuyerShell(page, migrated ? ['Поиск', 'Рядом', 'Избранное', 'Ещё'] : undefined, migrated ? 720 : undefined);
     if (path === '/login') await expect(page.getByRole('dialog', { name: 'Вход в KAIDA.KZ' })).toBeVisible();
   }
 

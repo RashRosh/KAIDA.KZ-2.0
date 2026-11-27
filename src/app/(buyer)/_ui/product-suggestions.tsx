@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Ic } from '../../seller/_kaida/ui';
+import { SearchIcon } from './SearchIcon';
+import home from './search-home.module.css';
 
 // S15B-3: buyer-side catalog suggestions. The data is the existing `GET /api/catalog/suggestions` (the ranking and the
 // limit of five live there, S15B-1); the list uses the same look and listbox semantics as the seller card editor.
@@ -28,13 +30,36 @@ export function useProductSuggestions(query: string, locale: 'ru' | 'kk', active
   return suggestions;
 }
 
-export function ProductSuggestionList({ id, label, suggestions, activeIndex, onChoose }: {
+// D6 / B02.ST02: the typed part of a suggested name in bold (first case-insensitive occurrence); otherwise the plain name.
+function MarkedName({ name, query }: { name: string; query: string }) {
+  const typed = query.trim();
+  const at = typed ? name.toLocaleLowerCase().indexOf(typed.toLocaleLowerCase()) : -1;
+  if (at < 0) return <>{name}</>;
+  return <>{name.slice(0, at)}<b>{name.slice(at, at + typed.length)}</b>{name.slice(at + typed.length)}</>;
+}
+
+export function ProductSuggestionList({ id, label, suggestions, activeIndex, onChoose, variant = 'menu', query = '' }: {
   id: string;
   label: string;
   suggestions: SuggestedProduct[];
   activeIndex: number;
   onChoose: (suggestion: SuggestedProduct) => void;
+  // D6: `rows` — the Search Home list under the field (B02.ST02); `menu` — the floating list of the started Search.
+  variant?: 'menu' | 'rows';
+  query?: string;
 }) {
+  if (variant === 'rows') {
+    return (
+      <ul id={id} role="listbox" aria-label={label} className={home.rows}>
+        {suggestions.map((suggestion, index) => (
+          <li key={suggestion.id} id={`${id}-option-${index}`} role="option" aria-selected={index === activeIndex} className={home.row}
+            onMouseDown={(event) => { event.preventDefault(); onChoose(suggestion); }}>
+            <SearchIcon name="search" /><span><MarkedName name={suggestion.name} query={query} /></span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
   return (
     <ul id={id} role="listbox" aria-label={label} className="card"
       style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 3, margin: 0, padding: '4px 0', listStyle: 'none', gap: 0, boxShadow: 'var(--shadow-md)' }}>

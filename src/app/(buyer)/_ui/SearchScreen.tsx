@@ -24,8 +24,9 @@ import { ProductSuggestionList, useProductSuggestions, type SuggestedProduct } f
 import { SortControl } from './SortPopover';
 import { IntentSuppression, consumeFirstEntryHandoff, intentKey } from './search-intent';
 import design from './search-results.module.css';
+import home from './search-home.module.css';
 import { SearchResultCard, SearchResultSkeletons } from './SearchResultCard';
-import { SearchIcon } from './SearchIcon';
+import { KaidaWordmark, SearchIcon } from './SearchIcon';
 import { useFavourites } from './use-favourites';
 
 // buyer-screens-mockup · the ordinary Search `/` (interim start: field + popular queries) and results (B01). The search behavior is the one of
@@ -441,27 +442,69 @@ export function SearchScreen() {
 
   const validation = state.kind === 'validation' && <div className="fld"><p id="search-validation" className="emsg" role="alert"><Ic name="alert" />{t('search.validation')}</p></div>;
 
-  const chips = (
-    <div className="chips" aria-label={t('search.popularQueries')} role="group">
-      {popularSearches.map((term) => (
-        <button key={term} type="button" className="chip" disabled={loading} onClick={() => quickSearch(term)}>{term}</button>
-      ))}
-    </div>
-  );
-
   // Stage 6C: while a plain `/` decides, nothing flashes; then either the Search Home or the results view follows.
   if (!ready) {
     return <BuyerScreen section="search"><main className="body" aria-busy="true" /></BuyerScreen>;
   }
 
-  // Stage 6C Search Home: the field centered with the curated chips; no feed, no caption, no First Entry.
+  // Stage 6C Search Home in the D6 / B02 presentation: logo, «Что ищете?», the field and the curated chips; no feed,
+  // no caption, no First Entry, no «Продолжить» (a past Search reopens itself, 6C §3.3).
   if (!started) {
+    const invalid = state.kind === 'validation';
     return (
-      <BuyerScreen section="search">
-        <main className="body" style={{ justifyContent: 'center', gap: 16, padding: '0 16px 48px' }}>
-          {form(false)}
-          {validation}
-          {chips}
+      <BuyerScreen section="search" className={design.screen}>
+        <header className={home.top}><KaidaWordmark /></header>
+        <main className={`body ${home.body}`}>
+          <form role="search" aria-label={t('search.area')} onSubmit={submit} noValidate className={home.form}>
+            <h1 className={home.title}>{t('search.homeTitle')}</h1>
+            <div ref={fieldRef} className={home.field} data-invalid={invalid || undefined}>
+              <SearchIcon name="search" />
+              <input
+                ref={input}
+                id="product-query"
+                name="q"
+                type="search"
+                aria-label={t('search.question')}
+                placeholder={t('search.homePlaceholder')}
+                value={query}
+                readOnly={loading}
+                onChange={(event) => changeQuery(event.target.value)}
+                onKeyDown={onQueryKey}
+                onFocus={() => setSuggestFocused(true)}
+                onBlur={() => { setSuggestFocused(false); touchSessionRef.current = false; }}
+                onPointerDown={(event) => { touchSessionRef.current = event.pointerType === 'touch'; }}
+                aria-autocomplete="list"
+                aria-controls={suggestOpen ? 'product-suggestions' : undefined}
+                aria-activedescendant={activeSuggestion >= 0 && suggestOpen ? `product-suggestions-option-${activeSuggestion}` : undefined}
+                aria-invalid={invalid}
+                aria-describedby={invalid ? 'search-validation' : undefined}
+                autoComplete="off"
+                enterKeyHint="search"
+              />
+              {query && !loading && (
+                <button type="button" className={home.clear} aria-label={t('search.clear')}
+                  onClick={() => { setQuery(''); setSelected(null); input.current?.focus(); }}><SearchIcon name="close" /></button>
+              )}
+              {query.trim() !== '' && (
+                <button type="submit" className={home.go} aria-label={t('search.submit')} disabled={loading}><SearchIcon name="arrow" /></button>
+              )}
+            </div>
+            {invalid && <p id="search-validation" className={home.error} role="alert"><SearchIcon name="alert" />{t('search.validation')}</p>}
+            {suggestOpen && (
+              <div className={home.suggestions}>
+                <span className={home.label} aria-hidden="true">{t('search.catalogProducts')}</span>
+                <ProductSuggestionList id="product-suggestions" label={t('card.suggestions')} suggestions={suggestions} activeIndex={activeSuggestion} onChoose={chooseSuggestion} variant="rows" query={query} />
+              </div>
+            )}
+          </form>
+          <div className={home.popular}>
+            <span className={home.label} id="popular-queries-label">{t('search.popularQueries')}</span>
+            <div className="chips" aria-labelledby="popular-queries-label" role="group">
+              {popularSearches.map((term) => (
+                <button key={term} type="button" className={`chip ${home.chip}`} disabled={loading} onClick={() => quickSearch(term)}>{term}</button>
+              ))}
+            </div>
+          </div>
         </main>
       </BuyerScreen>
     );

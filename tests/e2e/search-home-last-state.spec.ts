@@ -34,7 +34,7 @@ async function mockGeolocation(page: Page) {
 }
 const geoCalls = (page: Page) => page.evaluate(() => (window as unknown as { __geoCalls: number }).__geoCalls);
 
-test('the Search Home shows the centered field and at most five chips, with no feed and no request', async ({ page }) => {
+test('the Search Home shows the B02 title, the field at the top and at most five chips, with no feed and no request', async ({ page }) => {
   let searchRequests = 0;
   page.on('request', (request) => { if (new URL(request.url()).pathname === '/api/search') searchRequests += 1; });
   await page.goto('/');
@@ -43,11 +43,12 @@ test('the Search Home shows the centered field and at most five chips, with no f
   await expect(chips(page)).toHaveText(['Баранина', 'Говядина', 'Мёд', 'Картофель', 'Кумыс']);
   await expect(page.getByRole('article')).toHaveCount(0);
   await expect(page.getByText(/^Порядок:/)).toHaveCount(0);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Что ищете?');
   await expect(page.getByText('Пример · так выглядит результат')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^Порядок результатов: / })).toHaveCount(0);
+  // D6: the field sits under the B02 title near the top, not centred (search-home-last-state §3.1 revised).
   const box = await field(page).boundingBox();
-  expect(box?.y ?? 0).toBeGreaterThan(250);
+  expect(box?.y ?? 999).toBeLessThan(250);
   expect(searchRequests).toBe(0);
   expect(await storedState(page)).toBeNull();
 });
@@ -74,7 +75,7 @@ test('an empty query creates no Search state and the Home layout stays', async (
   await field(page).press('Enter');
   await expect(page.locator('#search-validation')).toBeVisible();
   await expect(page.getByRole('article')).toHaveCount(0);
-  expect((await field(page).boundingBox())?.y ?? 0).toBeGreaterThan(250);
+  expect((await field(page).boundingBox())?.y ?? 999).toBeLessThan(250);
   expect(await storedState(page)).toBeNull();
 });
 
