@@ -1,29 +1,31 @@
-# Current state — buyer design migration and maintenance (2026-11-13)
+# Current state — post S-WHOLESALE slice 1 closure (2026-11-26)
 
-This file is a concise handoff, not the canonical queue. Queue and decisions: `docs/product/EXECUTION_PLAN.md`; approved visual authority: `docs/product/DESIGN_BASELINE.md`. Check GitHub SHA and CI again before acting.
+This file is a concise handoff, not the canonical queue. Queue and decisions: `docs/product/EXECUTION_PLAN.md`; approved visual authority: `docs/product/DESIGN_BASELINE.md`. Check GitHub SHA and CI directly before acting.
 
 ## Verified main checkpoint
 
-- `main` at `2ccaacc1abcc974049c4bfb5df75e42b4b57826f` before Issue #221 merge; annotated checkpoint `v0.0.91-windows-e2e-219`.
-- Windows E2E maintenance Issue #219 / PR #220 **merged and closed**, merged-main verification 43243565884 PASS; CodeQL and Scorecard PASS. See `docs/reviews/windows-e2e-219.md` for test evidence. The original nondeterministic network symptom was not proven permanently eliminated.
-- Visual migration checkpoints: D2 Search results `v0.0.87-design-search` (closed); D3 Offer page `v0.0.88-design-offer` (closed); D4 Favourites `v0.0.89-design-favourites` (closed); D5 Nearby `v0.0.90-design-nearby` (closed).
+- **Latest verified checkpoint:** annotated tag `v0.0.94-wholesale-price` at `6d121b4222ff3b9ade19eef951fcc124c0750de2` (`Merge pull request #233 from RashRosh/slice/wholesale-price`).
+- **Merged-main CI on `6d121b4`:** `KAIDA verify` `45884779691` PASS, `CodeQL` `45884779613` PASS.
+- **Recently closed work:**
+  - `S-WHOLESALE` slice 1 («Оптовая цена рядом с розницей», item 15) — CLOSED at `v0.0.94-wholesale-price` (PR #231 contract + PR #233 implementation; Controller PASS WITH NOTE; PO visual acceptance 2026-11-26 on 390×844 mobile screenshots).
+  - Test-only E2E maintenance PR #234 (`b98ab4b`, merged-main CI `45878614280` / `45878614302` PASS) — closed Issue #224 (`seller-text-switch-on.spec.ts` alert locator) and fixed sub-pixel touch-target flake (`offer-favourites.spec.ts`).
+  - Maintenance PR #232 (`25f2a46`) — rounded search card photo geometry check.
+  - CJM contract-review process PR #229 (`26981b6`) — recorded 24.11 PO decisions and §3.1 CJM review rule.
+  - `v0.0.93-route-https-223` (PR #225, Issue #223), `v0.0.92-otp-session-221` (PR #222, Issue #221), `v0.0.91-windows-e2e-219` (PR #220), `v0.0.90-design-nearby` (D5), `v0.0.89-design-favourites` (D4), `v0.0.88-design-offer` (D3), `v0.0.87-design-search` (D2).
 
-## Independent active workstreams
+## Current task & next action
 
-1. **Issue #221 / draft PR #222**, repeated OTP when a signed-in buyer tracks a product after entering through Favourites. Branch `maintenance/issue-221-otp-session`, original implementation `b723eea0403754e6454e927b39c337fa98a7d403`. `useInterest` now consumes the existing session-change signal and invalidates stale in-flight reads on logout. Red E2E reproduced original symptom twice; post-fix targeted E2E 4/4 mobile/desktop. Exact `/favourites → OTP → existing Offer → tracking` targeted E2E 2/2 PASS. User manually reported the flow working during 2026-11-12 acceptance. Local lint/typecheck/build, unit 731, integration 435 PASS. Final-head (before this handoff edit) `fdfed590ceac1d7b8c4d27110a42a34740a93b6e`: push/PR verify, CodeQL, Dependency Review all PASS. **Merge, merged-main CI and checkpoint/tag are still release gates**; don't represent the feature as closed before they pass.
-2. **Issue #223**, buyer 2GIS route opens an unusable `dgis://` custom-protocol deep link on desktop; PO approved documented HTTPS web/app fallback and a visible straight-line distance label in Search and Nearby. Requires a *narrow, explicit revision* of the closed UX1D route target contract, including RU/KZ copy, accessibility, eligible-only route checks, targeted tests and desktop manual acceptance. No code implementation yet; separate maintenance branch, do not bundle with #221 or D6.
-3. **D6 Search Home (B02)**, contract PR #215 at `99bb0f65`, implementation PR #216 at `632e6fd8`; neither merged. D6 visuals reviewed positively by PO on 2026-11-12; independent OTP defect uncovered during acceptance and handled as #221. Before D6 closure re-evaluate/rebase over verified main and complete exact-head branch CI, PO manual acceptance, merged-main CI and annotated checkpoint. Do not treat #221 as a D6 code change.
-5. **S-WHOLESALE «Опт рядом с розницей»** (EXECUTION_PLAN item 15). Contract approved by PO 24.11.2026, docs PR #231 (`docs/wholesale-price-contract`). Implementation on `slice/wholesale-price`, stacked on #231: migration 0032 (wholesale columns + CHECK), card API/ChangeSet, buyer line «650 ₸ / кг ОПТ · от 1 ящика (≈ 10 кг)», editor sheet with unit-change review, confirmation and actuality rows. Local: unit 781, integration 441, targeted E2E mobile PASS. Next: full regression in GitHub CI, PO manual acceptance (contract §10), Controller verdict, merge #231 then implementation. Known unrelated CI failure on main: design-search-results sub-pixel photo size, fix in PR #232.
-4. **D1 First Entry `/welcome`** intentionally deferred by PO; buyer More/auth UI and later seller/operator design migration not yet sliced or scheduled as approved contracts.
-
-## Next actions
-
-- Complete #221 independent release workflow: verify latest PR head and required checks, obtain/record PO acceptance, merge, run CI on merged main, annotate checkpoint, close Issue #221.
-- Then implement and close #223 in a new slice/branch, with documented UX1D revision and manual 2GIS fallback check.
-- Then reconcile D6 PRs with verified main, close D6, and plan remaining buyer redesign before seller/operator UI, one vertical slice at a time.
+- **Current task:** none (no next product slice is scheduled or authorized).
+- **Next action:** await PO choice of the next slice before preparing a Slice Contract or touching product code.
+- **Main open candidate PRs / directions:**
+  - **D6 Search Home (B02):** contract PR #215 and implementation PR #216 (both `CONFLICTING` with `main`, need rebase/reconciliation before closure).
+  - **S-WHOLESALE slice 2 («Только опт» + sorting):** next step of 24.11 wholesale decision (requires `mandatory-offer-price` and `search-sort-rev3` contract revision).
+  - **OSRM road distance pilot:** draft PR #230 (`slice/road-distance-osrm`), pending browser acceptance on live stand and graph-build peak memory measurement.
+  - **Deferred UI polish (PO 2026-11-26):** old seller no-photo placeholder logo (`kaida.css`) and unstyled favourites error rows in `SearchScreen.tsx` (lines 553–555) — deferred to design migration.
+  - **Other open docs PRs / issues:** CJM 24.11 follow-ups (visit outcome, unified saved list, minimal seller return signal), B08 polish Issues #226 / #227, stale docs PRs (#186, #187, #203–#206, #218).
 
 ## Local constraints
 
-- Windows PowerShell uses `pnpm.cmd`. Prepare test DB and run integration before E2E to avoid shared-DB ordering conflicts. Do not parallelize DB-sharing tests.
-- Never stage personal/untracked `tmp/`, `scripts/`, `.vscode/`, screenshot traces or private browser data.
-- No merge/tag/checkpoint without PO approval and required verification. Preserve all closed contracts not explicitly revised.
+- Cloud container: start `docker compose up -d --wait`, then `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:test:prepare`; E2E runs on production build (`pnpm build`, then `pnpm test:e2e`).
+- Never commit personal/untracked `tmp/`, `scripts/`, `.vscode/`, `docs/reviews/localization-foundation-kk-review.docx`, or model identifiers.
+- No product implementation, commit, push, PR, or tag without PO instruction; preserve all closed contracts unless explicitly revised (§4).

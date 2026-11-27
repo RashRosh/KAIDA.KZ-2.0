@@ -1,6 +1,6 @@
 # Оптовая цена рядом с розничной — Slice Contract
 
-**Статус: APPROVED — PO, 24.11.2026** (деление на два slice и ответы на вопросы §11; превью `visuals/` одобрено с меткой «ОПТ» после цены). Реализации нет. Основание: решение PO от 24.11.2026 ([карта пути](../../product/CUSTOMER_JOURNEY_MAP.md#решения-от-24112026), [реестр влияния §1](../../reviews/CJM_DECISIONS_2026-11-24_CONTRACT_IMPACT.md#1-опт--вторая-строка-той-же-карточки)). Вопросы, которые решение 24.11 не закрывало, PO решил в тот же день (§11).
+**Статус: CLOSED — PO, 26.11.2026** (checkpoint `v0.0.94-wholesale-price`, PR #231 + PR #233, merge `6d121b4222ff3b9ade19eef951fcc124c0750de2`, см. §14). Контракт утверждён PO 24.11.2026 (деление на два slice и ответы на вопросы §11; превью `visuals/` одобрено с меткой «ОПТ» после цены). Основание: решение PO от 24.11.2026 ([карта пути](../../product/CUSTOMER_JOURNEY_MAP.md#решения-от-24112026), [реестр влияния §1](../../reviews/CJM_DECISIONS_2026-11-24_CONTRACT_IMPACT.md#1-опт--вторая-строка-той-же-карточки)). Вопросы, которые решение 24.11 не закрывало, PO решил в тот же день (§11).
 
 **Деление решения 24.11 на два slice** (утверждено PO 24.11, §11 вопрос 1):
 
@@ -162,3 +162,41 @@
 - Текстовый или пакетный поток на практике меняет единицу существующих карточек, и отказ по §3.4 ломает закрытый сценарий: остановиться и вынести вопрос PO.
 - Превью §10 не одобрено: production-код UI не подключается.
 - Требуется изменить сортировку или обязательность розничной цены: это scope следующего slice.
+
+## 14. Закрытие и свидетельства (26.11.2026)
+
+- **PR / SHA / Tag:**
+  - Контракт и превью: PR #231 merged `003359bb9e961810c9643b84714955635ceb056b`.
+  - Реализация: PR #233 (`slice/wholesale-price`, final head `0b48f57c6efed2802366f580f37d386204958ba3`), merged в `main` `6d121b4222ff3b9ade19eef951fcc124c0750de2`.
+  - Аннотированный checkpoint-тег: `v0.0.94-wholesale-price` → `6d121b4222ff3b9ade19eef951fcc124c0750de2`.
+- **Automated CI:**
+  - Branch CI (`0b48f57`): `KAIDA verify` push `45880371884` PASS, pull_request `45880378425` PASS, `CodeQL` `45880378420` PASS, `Dependency review` `45880378415` PASS.
+  - Merged-main CI (`6d121b4`): `KAIDA verify` `45884779691` PASS, `CodeQL` `45884779613` PASS.
+- **KAIDA Controller:** `PASS WITH NOTE` → `IMPLEMENTATION APPROVED FOR MANUAL ACCEPTANCE` (47 файлов, 2 553 строки diff). Неблокирующие заметки: на экране подтверждения (`SellerConfirmChange.tsx`) при одновременной смене единицы/упаковки и опта старая половина `было → стало` показывает основу цены от новой единицы (на сохранённые данные и покупателя не влияет); в `CHECK` у `wholesale_per_container` нет явного `NOT IN ('NaN', 'Infinity')`, закрыто Zod-регуляркой на входе.
+- **Приёмка (разделение ролей):**
+  - **Выполнено агентом:** живой прогон всех 5 шагов §10 на production-сборке `0b48f57` с PostgreSQL 18 в мобильном Chromium `390×844` (RU) с фиксацией 7 скриншотов; подтверждено `wholesaleCountAfterRemove = 0`.
+  - **Принято PO (26.11.2026):** визуальная приёмка всех 5 шагов по реальным мобильным скриншотам («Принимаем PR #233»). Отмеченная старая заглушка без фото у продавца (`kaida.css`) и обнаруженный отдельно нестилизованный блок ошибки избранного в `SearchScreen.tsx` решением PO отложены до дизайн-миграции.
+  - **Не проверялось вручную:** физический телефон, десктоп и казахский UI (вне gate §18.5; ключи `kk` проверены unit-тестом).
+
+### SQL-запросы метрики (§3.5)
+
+```sql
+-- 1. Доля активных карточек с оптовой ценой
+SELECT
+  count(DISTINCT card_id) FILTER (WHERE wholesale_price_amount IS NOT NULL) AS wholesale_cards,
+  count(DISTINCT card_id) AS active_cards,
+  round(
+    100.0 * count(DISTINCT card_id) FILTER (WHERE wholesale_price_amount IS NOT NULL)
+    / NULLIF(count(DISTINCT card_id), 0),
+    2
+  ) AS share_pct
+FROM offers
+WHERE status = 'active';
+
+-- 2. Число жалоб «Цена другая», где упомянут опт
+SELECT count(*) AS wholesale_price_mismatch_reports
+FROM offer_reports
+WHERE reason = 'price_mismatch'
+  AND buyer_text ~* '(опт|розниц|парти|ящик|мешк|короб|көтерме)';
+```
+
