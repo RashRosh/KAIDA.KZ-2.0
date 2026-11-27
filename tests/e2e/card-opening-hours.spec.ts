@@ -117,9 +117,25 @@ test('the card says open / closing / when it opens in words, the Offer page grou
     await page.goto(`/offers/${ids.get('lunch')!.offerId}`);
     await expect(page.getByTestId('opening-schedule').getByRole('listitem').first()).toContainText('9:00–10:30, 14:00–18:00');
     await page.goto(`/offers/${ids.get('around')!.offerId}`);
+    await expect(page.getByTestId('offer-hours-group')).toBeVisible();
+    await expect(page.getByTestId('offer-hours-status-row').locator('svg').first()).toBeVisible();
+    await expect(page.getByTestId('offer-hours-schedule-row').locator('svg').first()).toBeVisible();
     await expect(page.getByTestId('opening-schedule').getByRole('listitem')).toHaveCount(1);
     await expect(page.getByTestId('opening-schedule')).toContainText('ПН–ВС');
+    await expect(page.getByTestId('opening-schedule')).toContainText('·');
     await expect(page.getByTestId('opening-schedule')).toContainText('Круглосуточно');
+    // Issue #226: pin, user, clock and calendar icons share the same left rail and 24 px box; no detached border above schedule.
+    const rail = await page.evaluate(() => {
+      const card = document.querySelector('[data-testid="offer-hours-group"]')?.parentElement;
+      const icons = [...(card?.querySelectorAll(':scope > div > svg, [data-testid="offer-hours-group"] > div > svg') ?? [])]
+        .map((svg) => { const r = svg.getBoundingClientRect(); return { left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) }; });
+      const firstRow = document.querySelector('[data-testid="opening-schedule"] li');
+      return { icons, borderTop: firstRow ? getComputedStyle(firstRow).borderTopWidth : null };
+    });
+    expect(rail.icons).toHaveLength(4);
+    expect(new Set(rail.icons.map((i) => i.left)).size).toBe(1);
+    expect(rail.icons.every((i) => i.w === 24 && i.h === 24)).toBe(true);
+    expect(rail.borderTop).toBe('0px');
     await page.goto(`/offers/${ids.get('never')!.offerId}`);
     await expect(page.getByTestId('opening-schedule').getByRole('listitem')).toHaveCount(1);
     await expect(page.getByTestId('opening-schedule')).toContainText('выходной');

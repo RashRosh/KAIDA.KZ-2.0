@@ -18,3 +18,20 @@
 .off { color: var(--muted); }
 .row[data-today='true'] .off { color: var(--text); }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* B08 (Issue #226): aligned to the point-card icon/text grid using shared baseline tokens. */
+.offerLine { min-height: 1.5rem; align-items: center; font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; letter-spacing: 0.005em; color: var(--ink, var(--text)); }
+.offerLine[data-state='open'] { color: var(--success, var(--fresh)); }
+.offerLine[data-state='closing'] { color: var(--warning, var(--stale)); }
+.offerLine[data-state='closed'] { color: var(--danger, var(--error)); }
+.offerLine .text[data-muted='true'] { color: var(--ink2, var(--muted)); font-weight: 400; }
+
+.offerSchedule { margin: 0; padding: 2px 0 0; display: flex; flex-direction: column; gap: 4px; font-size: 0.8125rem; line-height: 1.125rem; }
+.offerRow { padding: 0; border-top: 0; gap: 2px 10px; }
+.offerRow .day { color: var(--ink2, var(--muted)); }
+.offerRow .times { color: var(--ink, var(--text)); overflow-wrap: anywhere; }
+.offerRow .off { color: var(--ink2, var(--muted)); }
+.offerRow[data-today='true'] .day, .offerRow[data-today='true'] .times, .offerRow[data-today='true'] .off { font-weight: 700; color: var(--ink, var(--text)); }
+.offerSingle { justify-content: flex-start; gap: 0 6px; }
+.offerSingle .times { margin-left: 0; text-align: left; }
+.dot { color: var(--ink2, var(--muted)); }

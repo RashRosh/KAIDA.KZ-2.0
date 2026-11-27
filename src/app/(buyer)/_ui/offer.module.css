@@ -3,7 +3,7 @@
   --bg:#faf3fe; --surface:#fdfbff; --raised:#fdfbff; --sunken:#f4e9fb;
   --line:#e9d9f2; --line-control:#9073a0; --ink:#1f1026; --ink2:#5b406a; --ink3:#745784;
   --primary:#9900cc; --primary-hover:#7a06a3; --primary-soft:#f8e5ff; --on-primary:#fff;
-  --danger:#b21f41; --danger-soft:#ffeced; --success:#007950;
+  --danger:#b21f41; --danger-soft:#ffeced; --success:#007950; --warning:#9c5a00;
   --ease-out:cubic-bezier(.33,1,.68,1);
 }
 .tokens {
@@ -68,10 +68,13 @@
 .fresh[data-tier='5'] { background:#2a0640; }
 
 /* point card */
-.card { display:flex; flex-direction:column; gap:10px; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+.card { display:flex; flex-direction:column; gap:12px; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
 .kv { display:flex; gap:10px; align-items:flex-start; font:400 0.9375rem/1.375rem var(--sans); }
 .kv > svg { flex:none; width:24px; height:24px; margin-top:1px; color:var(--ink2); }
 .kv > div { flex:1; min-width:0; }
+.hoursGroup { display:flex; flex-direction:column; gap:6px; }
+.scheduleDisclosure { margin:0; }
+.scheduleSummary { min-height:44px; display:flex; align-items:center; cursor:pointer; }
 .label { margin:0; font:500 0.875rem/1.25rem var(--sans); letter-spacing:.005em; color:var(--ink); overflow-wrap:anywhere; }
 .caption { margin:0; font:400 0.8125rem/1.125rem var(--sans); color:var(--ink2); overflow-wrap:anywhere; }
 
